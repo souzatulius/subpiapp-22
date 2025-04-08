@@ -5,7 +5,7 @@ import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { PlusCircle, FileText, ChevronRight, Trash2, Edit } from 'lucide-react';
+import { FileText, ChevronRight, Trash2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { toast } from '@/components/ui/use-toast';
 import {
@@ -16,11 +16,11 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { ESICProcesso } from '@/types/esic';
 import ConfirmDialog from '@/components/ui/confirm-dialog';
 import NovoProcessoButton from './NovoProcessoButton';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
+import { ESICProcesso, statusLabels } from '@/types/esic';
 
 interface ProcessoListProps {
   viewMode: 'list' | 'cards';
@@ -29,13 +29,21 @@ interface ProcessoListProps {
   setFilterOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
+// Extended type to handle response from Supabase
+interface ESICProcessoWithJustificativas extends ESICProcesso {
+  justificativas_count?: number;
+  autor?: {
+    nome_completo: string;
+  } | null;
+}
+
 const ProcessoList: React.FC<ProcessoListProps> = ({
   viewMode,
   searchTerm,
   filterOpen,
   setFilterOpen
 }) => {
-  const [processos, setProcessos] = useState<ESICProcesso[]>([]);
+  const [processos, setProcessos] = useState<ESICProcessoWithJustificativas[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedProcessoId, setSelectedProcessoId] = useState<string | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -51,7 +59,8 @@ const ProcessoList: React.FC<ProcessoListProps> = ({
         .from('esic_processos')
         .select(`
           *,
-          autor:autor_id(nome_completo)
+          autor:autor_id(nome_completo),
+          justificativas_count:esic_justificativas(count)
         `)
         .order('data_processo', { ascending: false });
 
@@ -62,8 +71,9 @@ const ProcessoList: React.FC<ProcessoListProps> = ({
         ...item,
         situacao: item.situacao as ESICProcesso['situacao'],
         status: item.status as ESICProcesso['status'],
-        autor: item.autor as ESICProcesso['autor']
-      })) as ESICProcesso[];
+        autor: item.autor || null, // Handle null explicitly
+        justificativas_count: item.justificativas_count || 0
+      })) as ESICProcessoWithJustificativas[];
 
       setProcessos(typedData);
     } catch (error) {
@@ -114,16 +124,16 @@ const ProcessoList: React.FC<ProcessoListProps> = ({
 
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case 'pendente':
-        return <Badge variant="outline" className="bg-yellow-50 border-yellow-200 text-yellow-600">Pendente</Badge>;
-      case 'em_andamento':
-        return <Badge variant="outline" className="bg-blue-50 border-blue-200 text-blue-600">Em andamento</Badge>;
-      case 'respondido':
-        return <Badge variant="outline" className="bg-green-50 border-green-200 text-green-600">Respondido</Badge>;
-      case 'arquivado':
-        return <Badge variant="outline" className="bg-gray-50 border-gray-200 text-gray-600">Arquivado</Badge>;
+      case 'novo_processo':
+        return <Badge variant="outline" className="bg-yellow-50 border-yellow-200 text-yellow-600">Novo Processo</Badge>;
+      case 'aguardando_justificativa':
+        return <Badge variant="outline" className="bg-blue-50 border-blue-200 text-blue-600">Aguardando Justificativa</Badge>;
+      case 'aguardando_aprovacao':
+        return <Badge variant="outline" className="bg-green-50 border-green-200 text-green-600">Aguardando Aprovação</Badge>;
+      case 'concluido':
+        return <Badge variant="outline" className="bg-gray-50 border-gray-200 text-gray-600">Concluído</Badge>;
       default:
-        return <Badge variant="outline">{status}</Badge>;
+        return <Badge variant="outline">{statusLabels[status] || status}</Badge>;
     }
   };
 

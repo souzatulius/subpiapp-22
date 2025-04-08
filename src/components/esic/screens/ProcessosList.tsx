@@ -49,7 +49,6 @@ const ProcessosList: React.FC<ProcessosListProps> = ({
         </Button>
       </div>
       
-      {/* Pass all required props to ProcessoList */}
       <ProcessoList
         viewMode={viewMode}
         searchTerm={searchTerm}

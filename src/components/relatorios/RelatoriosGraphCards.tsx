@@ -1,462 +1,196 @@
-import React, { useState, useEffect } from 'react';
-import { SortableContext, arrayMove, rectSortingStrategy } from '@dnd-kit/sortable';
-import { DndContext, closestCenter, DragEndEvent, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
-import { AlertCircle, BarChart3, PieChartIcon, LineChartIcon, TrendingUp, Clock, Users, MessageSquare, ThumbsUp } from 'lucide-react';
-import { useLocalStorage } from '@/hooks/use-local-storage';
-import { supabase } from '@/integrations/supabase/client';
-import { BarChart } from './charts/BarChart';
-import { LineChart as LineChartComponent } from './charts/LineChart';
-import { PieChart } from './charts/PieChart';
-import { AreaChart } from './charts/AreaChart';
-import { useChartConfigs } from './hooks/charts/useChartConfigs';
-import SortableGraphCard from './components/SortableGraphCard';
 
-interface GraphCardItem {
-  id: string;
-  title: string;
-  description?: string;
-  visible: boolean;
-  showAnalysis: boolean;
-  analysis?: string;
-}
+import React from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { BarChart } from '@/components/relatorios/charts/BarChart';
+import { PieChart } from '@/components/relatorios/charts/PieChart';
+import { LineChart } from '@/components/relatorios/charts/LineChart';
 
 interface RelatoriosGraphCardsProps {
-  isEditMode?: boolean;
   chartVisibility?: Record<string, boolean>;
 }
 
-export const RelatoriosGraphCards: React.FC<RelatoriosGraphCardsProps> = ({ 
-  isEditMode = false,
-  chartVisibility
+const RelatoriosGraphCards: React.FC<RelatoriosGraphCardsProps> = ({
+  chartVisibility = {
+    origemDemandas: true,
+    distribuicaoPorTemas: true,
+    tempoMedioResposta: true,
+    performanceArea: true,
+    notasEmitidas: true,
+    noticiasVsReleases: true,
+    problemasComuns: true
+  }
 }) => {
-  const { chartColors } = useChartConfigs();
-  const [isLoading, setIsLoading] = useState(true);
-  const [chartData, setChartData] = useState({
-    problemas: [],
-    origens: [],
-    responseTimes: [],
-    coordinations: [],
-    mediaTypes: [],
-    noticiasVsReleases: []
-  });
-  
-  const [visibleCards, setVisibleCards] = useLocalStorage<string[]>('relatorios-graph-visible', [
-    'distribuicaoPorTemas', 'origemDemandas', 'tempoMedioResposta', 'performanceArea',
-    'notasEmitidas', 'noticiasVsReleases', 'problemasComuns'
-  ]);
-  
-  const [cardsOrder, setCardsOrder] = useLocalStorage<string[]>('relatorios-graph-order', [
-    'distribuicaoPorTemas', 'origemDemandas', 'tempoMedioResposta', 'performanceArea',
-    'notasEmitidas', 'noticiasVsReleases', 'problemasComuns'
-  ]);
-  
-  const [analysisCards, setAnalysisCards] = useLocalStorage<string[]>('relatorios-graph-analysis', []);
-
-  useEffect(() => {
-    if (chartVisibility) {
-      const newVisibleCards = cardsOrder.filter(cardId => chartVisibility[cardId]);
-      setVisibleCards(newVisibleCards);
-    }
-  }, [chartVisibility, cardsOrder, setVisibleCards]);
-
-  useEffect(() => {
-    const fetchChartData = async () => {
-      setIsLoading(true);
-      try {
-        const { data: problemasData, error: problemasError } = await supabase
-          .from('problemas')
-          .select('id, descricao')
-          .limit(5);
-
-        if (problemasError) throw problemasError;
-
-        const { data: origensData, error: origensError } = await supabase
-          .from('origens_demandas')
-          .select('id, descricao')
-          .limit(5);
-
-        if (origensError) throw origensError;
-
-        const { data: coordenacoesData, error: coordenacoesError } = await supabase
-          .from('coordenacoes')
-          .select('id, descricao, sigla')
-          .limit(5);
-
-        if (coordenacoesError) throw coordenacoesError;
-
-        const problemasChart = problemasData.map(problem => ({
-          name: problem.descricao,
-          Quantidade: Math.floor(Math.random() * 50) + 10
-        }));
-
-        const origensChart = origensData.map(origem => ({
-          name: origem.descricao,
-          value: Math.floor(Math.random() * 50) + 10
-        }));
-
-        const coordenacoesChart = coordenacoesData.map(coord => ({
-          name: coord.sigla || coord.descricao.substring(0, 3).toUpperCase(),
-          fullName: coord.descricao,
-          Quantidade: Math.floor(Math.random() * 100) + 50
-        }));
-
-        const responseTimesChart = [
-          { name: '1', Demandas: 48, Aprovacao: 72 },
-          { name: '5', Demandas: 42, Aprovacao: 65 },
-          { name: '10', Demandas: 36, Aprovacao: 58 },
-          { name: '15', Demandas: 30, Aprovacao: 52 },
-          { name: '20', Demandas: 24, Aprovacao: 45 },
-          { name: '25', Demandas: 28, Aprovacao: 42 },
-          { name: '30', Demandas: 32, Aprovacao: 48 },
-        ];
-
-        const mediaTypesChart = [
-          { name: '1', Quantidade: 10, Meta: 12 },
-          { name: '5', Quantidade: 15, Meta: 12 },
-          { name: '10', Quantidade: 12, Meta: 12 },
-          { name: '15', Quantidade: 18, Meta: 15 },
-          { name: '20', Quantidade: 22, Meta: 15 },
-          { name: '25', Quantidade: 20, Meta: 18 },
-          { name: '30', Quantidade: 25, Meta: 18 },
-        ];
-
-        const noticiasVsReleasesChart = [
-          { name: 'Jan', Noticias: 34, Releases: 18 },
-          { name: 'Fev', Noticias: 42, Releases: 22 },
-          { name: 'Mar', Noticias: 38, Releases: 24 },
-          { name: 'Abr', Noticias: 45, Releases: 26 },
-          { name: 'Mai', Noticias: 52, Releases: 30 },
-          { name: 'Jun', Noticias: 48, Releases: 28 },
-        ];
-
-        setChartData({
-          problemas: problemasChart,
-          origens: origensChart,
-          responseTimes: responseTimesChart,
-          coordinations: coordenacoesChart,
-          mediaTypes: mediaTypesChart,
-          noticiasVsReleases: noticiasVsReleasesChart
-        });
-
-        console.log('Chart data loaded successfully:', { problemasChart, origensChart, coordenacoesChart });
-      } catch (error) {
-        console.error('Error fetching chart data:', error);
-        setChartData({
-          problemas: mockBarData,
-          origens: mockPieData,
-          responseTimes: mockLineData,
-          coordinations: mockAreasData,
-          mediaTypes: mockAreaData,
-          noticiasVsReleases: mockNoticiasVsReleasesData
-        });
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchChartData();
-  }, []);
-
-  const cardsData: Record<string, GraphCardItem> = {
-    distribuicaoPorTemas: {
-      id: 'distribuicaoPorTemas',
-      title: 'Problemas mais frequentes',
-      description: 'Temas das solicitações no mês atual',
-      visible: chartVisibility?.distribuicaoPorTemas !== false,
-      showAnalysis: analysisCards.includes('distribuicaoPorTemas'),
-      analysis: 'Os temas com maior volume de demandas são Serviços Urbanos e Meio Ambiente. Houve um aumento de 15% nas demandas de Serviços Urbanos em comparação com o mês anterior.'
-    },
-    origemDemandas: {
-      id: 'origemDemandas',
-      title: 'Origem das Demandas',
-      description: 'De onde vêm as solicitações',
-      visible: chartVisibility?.origemDemandas !== false,
-      showAnalysis: analysisCards.includes('origemDemandas'),
-      analysis: 'A maioria das demandas vem diretamente das coordenações (45%), seguidas de imprensa (35%) e redes sociais (12%). As origens internas representam 8% do total de demandas recebidas.'
-    },
-    tempoMedioResposta: {
-      id: 'tempoMedioResposta',
-      title: 'Tempo Médio de Resposta',
-      description: 'Evolução de agilidade de retorno para a imprensa',
-      visible: chartVisibility?.tempoMedioResposta !== false,
-      showAnalysis: analysisCards.includes('tempoMedioResposta'),
-      analysis: 'O tempo médio de resposta tem diminuído nos últimos meses, indicando melhoria na eficiência dos processos internos. O pico às terças-feiras deve-se ao volume maior de demandas recebidas às segundas.'
-    },
-    performanceArea: {
-      id: 'performanceArea',
-      title: 'Áreas mais acionadas',
-      description: 'Coordenações mais envolvidas nas solicitações',
-      visible: chartVisibility?.performanceArea !== false,
-      showAnalysis: analysisCards.includes('performanceArea'),
-      analysis: 'As áreas de Comunicação e Planejamento têm os melhores índices de resposta. A CPO recebe o maior volume de demandas, seguida pela CPDU, refletindo o foco atual em projetos de infraestrutura.'
-    },
-    notasEmitidas: {
-      id: 'notasEmitidas',
-      title: 'Notas de Imprensa',
-      description: 'Evolução de posicionamentos no mês',
-      visible: chartVisibility?.notasEmitidas !== false,
-      showAnalysis: analysisCards.includes('notasEmitidas'),
-      analysis: 'Houve um aumento de 15% na emissão de notas oficiais no último trimestre, com picos nos meses de abril e maio devido a eventos especiais e campanhas sazonais.'
-    },
-    problemasComuns: {
-      id: 'problemasComuns',
-      title: 'Problemas mais comuns',
-      description: 'Categorias de problemas na última semana',
-      visible: chartVisibility?.problemasComuns !== false,
-      showAnalysis: analysisCards.includes('problemasComuns'),
-      analysis: 'As categorias "Limpeza Urbana" e "Iluminação Pública" representam mais de 50% dos problemas reportados. Problemas com áreas verdes aumentaram 12% no último mês, possivelmente devido à estação de chuvas.'
-    },
-    noticiasVsReleases: {
-      id: 'noticiasVsReleases',
-      title: 'Notícias vs. Releases',
-      description: 'Comparação entre notícias e releases oficiais',
-      visible: chartVisibility?.noticiasVsReleases !== false,
-      showAnalysis: analysisCards.includes('noticiasVsReleases'),
-      analysis: 'Observa-se uma correlação direta entre o número de releases emitidos e o aumento de notícias sobre os temas, com uma taxa de conversão média de 1:1.7 (cada release gera aproximadamente 1.7 notícias relacionadas).'
-    }
-  };
-
-  const sensors = useSensors(
-    useSensor(PointerSensor, {
-      activationConstraint: { distance: 8 },
-    })
-  );
-
-  const handleDragEnd = (event: DragEndEvent) => {
-    const { active, over } = event;
-    
-    if (over && active.id !== over.id) {
-      const oldIndex = cardsOrder.indexOf(active.id.toString());
-      const newIndex = cardsOrder.indexOf(over.id.toString());
-      
-      setCardsOrder(arrayMove(cardsOrder, oldIndex, newIndex));
-    }
-  };
-
-  const handleToggleVisibility = (cardId: string) => {
-    setVisibleCards(prev => 
-      prev.includes(cardId) 
-        ? prev.filter(id => id !== cardId) 
-        : [...prev, cardId]
-    );
-  };
-
-  const handleToggleAnalysis = (cardId: string) => {
-    setAnalysisCards(prev => 
-      prev.includes(cardId) 
-        ? prev.filter(id => id !== cardId) 
-        : [...prev, cardId]
-    );
-  };
-
-  const mockBarData = [
-    { name: 'Poda de Árvores', Quantidade: 45 },
-    { name: 'Bueiros', Quantidade: 32 },
-    { name: 'Remoção de galhos', Quantidade: 18 },
-    { name: 'Lixo', Quantidade: 25 },
-    { name: 'Parques e praças', Quantidade: 15 },
+  // Dados para o gráfico de problemas mais frequentes
+  const problemasMaisFrequentes = [
+    { name: 'Iluminação', value: 128 },
+    { name: 'Buracos', value: 92 },
+    { name: 'Poda', value: 78 },
+    { name: 'Limpeza', value: 64 }
   ];
 
-  const mockLineData = [
-    { name: '1', Demandas: 12, Respostas: 10 },
-    { name: '5', Demandas: 15, Respostas: 14 },
-    { name: '10', Demandas: 18, Respostas: 16 },
-    { name: '15', Demandas: 22, Respostas: 19 },
-    { name: '20', Demandas: 18, Respostas: 16 },
-    { name: '25', Demandas: 20, Respostas: 18 },
-    { name: '30', Demandas: 24, Respostas: 22 }
+  // Dados para o gráfico de origem das demandas
+  const origemDemandas = [
+    { name: 'Cidadão', value: 42 },
+    { name: 'Gabinete', value: 28 },
+    { name: 'Mídia', value: 16 },
+    { name: 'Outras', value: 14 }
   ];
 
-  const mockPieData = [
-    { name: 'Imprensa', value: 35 },
-    { name: 'SMSUB', value: 45 },
-    { name: 'Secom', value: 12 },
-    { name: 'Internas', value: 8 },
+  // Dados para o gráfico de áreas mais acionadas
+  const areasMaisAcionadas = [
+    { nome: 'CPO', valor: 38 },
+    { nome: 'STLP', valor: 27 },
+    { nome: 'Gabinete', valor: 22 },
+    { nome: 'STM', valor: 13 }
   ];
 
-  const mockProblemasData = [
-    { name: 'Limpeza Urbana', value: 42 },
-    { name: 'Iluminação Pública', value: 28 },
-    { name: 'Vias Públicas', value: 18 },
-    { name: 'Áreas Verdes', value: 12 },
-    { name: 'Outros', value: 10 },
+  // Dados para o gráfico de notas de imprensa por dia do mês
+  const notasImprensaPorDia = Array.from({ length: 30 }, (_, i) => ({
+    dia: i + 1,
+    quantidade: Math.floor(Math.random() * 5) + 1
+  }));
+
+  // Dados para o gráfico comparativo de notícias vs releases
+  const noticiasVsReleases = [
+    { mes: 'Jan', noticias: 42, releases: 32 },
+    { mes: 'Fev', noticias: 38, releases: 30 },
+    { mes: 'Mar', noticias: 45, releases: 25 },
+    { mes: 'Abr', noticias: 40, releases: 28 },
+    { mes: 'Mai', noticias: 35, releases: 22 }
   ];
 
-  const mockAreasData = [
-    { name: 'CPO', fullName: 'Coordenadoria de Planejamento e Obras', Quantidade: 92 },
-    { name: 'CPDU', fullName: 'Coordenadoria de Projetos e Desenvolvimento Urbano', Quantidade: 87 },
-    { name: 'GOV', fullName: 'Governo Local', Quantidade: 82 },
-    { name: 'JUR', fullName: 'Assessoria Jurídica', Quantidade: 75 },
-    { name: 'FIN', fullName: 'Finanças', Quantidade: 68 },
+  // Dados para o gráfico de problemas mais comuns
+  const problemasComuns = [
+    { name: 'Iluminação', value: 35 },
+    { name: 'Buracos', value: 25 },
+    { name: 'Mato Alto', value: 20 },
+    { name: 'Entulho', value: 12 },
+    { name: 'Árvores', value: 8 }
   ];
-
-  const mockAreaData = [
-    { name: '1', Quantidade: 10, Meta: 12 },
-    { name: '5', Quantidade: 15, Meta: 12 },
-    { name: '10', Quantidade: 12, Meta: 12 },
-    { name: '15', Quantidade: 18, Meta: 15 },
-    { name: '20', Quantidade: 22, Meta: 15 },
-    { name: '25', Quantidade: 20, Meta: 18 },
-    { name: '30', Quantidade: 25, Meta: 18 },
-  ];
-
-  const mockNoticiasVsReleasesData = [
-    { name: 'Jan', Noticias: 34, Releases: 18 },
-    { name: 'Fev', Noticias: 42, Releases: 22 },
-    { name: 'Mar', Noticias: 38, Releases: 24 },
-    { name: 'Abr', Noticias: 45, Releases: 26 },
-    { name: 'Mai', Noticias: 52, Releases: 30 },
-    { name: 'Jun', Noticias: 48, Releases: 28 },
-  ];
-
-  const localChartComponents: Record<string, React.ReactNode> = {
-    distribuicaoPorTemas: (
-      <BarChart 
-        data={chartData.problemas.length ? chartData.problemas : mockBarData} 
-        xAxisDataKey="name" 
-        bars={[{ dataKey: 'Quantidade', name: 'Quantidade', color: chartColors[0] }]} 
-        showLegend={false}
-        multiColorBars={true}
-        barColors={[chartColors[0], chartColors[3], chartColors[2], chartColors[1]]}
-      />
-    ),
-    origemDemandas: (
-      <div className="pt-0">
-        <PieChart 
-          data={chartData.origens.length ? chartData.origens : mockPieData} 
-          colorSet="orange" 
-          showOnlyPercentage={true} 
-          showLabels={false} 
-          legendPosition="none"
-          largePercentage={true}
-        />
-      </div>
-    ),
-    tempoMedioResposta: (
-      <LineChartComponent 
-        data={chartData.responseTimes.length ? chartData.responseTimes : mockLineData} 
-        xAxisDataKey="name" 
-        yAxisTicks={[10, 20, 50, 60, 90]} 
-        lines={[
-          { dataKey: 'Demandas', name: 'Respostas da coordenação', color: chartColors[0] }, 
-          { dataKey: 'Aprovacao', name: 'Aprovação da nota', color: chartColors[1] }
-        ]} 
-      />
-    ),
-    performanceArea: (
-      <BarChart 
-        data={chartData.coordinations.length ? chartData.coordinations : mockAreasData} 
-        xAxisDataKey="name" 
-        bars={[{ dataKey: 'Quantidade', name: 'Demandas no mês', color: chartColors[1] }]} 
-        tooltipFormatter={(value, name, item) => [value, item.payload.fullName || name]}
-        multiColorBars={true}
-        barColors={[chartColors[0], chartColors[3], chartColors[2], chartColors[1], chartColors[4]]}
-      />
-    ),
-    notasEmitidas: (
-      <LineChartComponent 
-        data={chartData.mediaTypes.length ? chartData.mediaTypes : mockAreaData} 
-        xAxisDataKey="name" 
-        lines={[{ dataKey: 'Quantidade', name: 'Quantidade', color: chartColors[0] }]}
-        showLegend={false} 
-      />
-    ),
-    problemasComuns: (
-      <div className="pt-0">
-        <PieChart 
-          data={mockProblemasData} 
-          colorSet="mixed" 
-          showOnlyPercentage={true} 
-          showLabels={false}
-          legendPosition="none"
-          largePercentage={true}
-        />
-      </div>
-    ),
-    noticiasVsReleases: (
-      <BarChart 
-        data={chartData.noticiasVsReleases.length ? chartData.noticiasVsReleases : mockNoticiasVsReleasesData} 
-        xAxisDataKey="name" 
-        bars={[
-          { dataKey: 'Noticias', name: 'Notícias', color: chartColors[0] },
-          { dataKey: 'Releases', name: 'Releases', color: chartColors[1] }
-        ]} 
-      />
-    ),
-  };
-
-  const cardIcons: Record<string, React.ReactNode> = {
-    distribuicaoPorTemas: <BarChart3 className="h-5 w-5 text-gray-500" />,
-    origemDemandas: <PieChartIcon className="h-5 w-5 text-gray-500" />,
-    tempoMedioResposta: <Clock className="h-5 w-5 text-gray-500" />,
-    performanceArea: <TrendingUp className="h-5 w-5 text-gray-500" />,
-    notasEmitidas: <LineChartIcon className="h-5 w-5 text-gray-500" />,
-    notasPorTema: <MessageSquare className="h-5 w-5 text-gray-500" />,
-    evolucaoMensal: <TrendingUp className="h-5 w-5 text-gray-500" />,
-    indiceSatisfacao: <ThumbsUp className="h-5 w-5 text-gray-500" />,
-    problemasComuns: <PieChartIcon className="h-5 w-5 text-gray-500" />,
-    noticiasVsReleases: <BarChart3 className="h-5 w-5 text-gray-500" />,
-  };
-
-  const renderEmptyDataMessage = (cardId: string) => (
-    <div className="h-[250px] flex flex-col items-center justify-center text-slate-400 p-4 text-center">
-      <AlertCircle className="h-10 w-10 mb-3 text-gray-300" />
-      <h4 className="font-medium text-slate-500 mb-1">Dados insuficientes</h4>
-      <p className="text-sm">
-        Não há dados suficientes para gerar este gráfico. Por favor, verifique os filtros aplicados ou tente novamente mais tarde.
-      </p>
-    </div>
-  );
 
   return (
-    <DndContext 
-      sensors={sensors}
-      collisionDetection={closestCenter}
-      onDragEnd={handleDragEnd}
-    >
-      <SortableContext 
-        items={cardsOrder}
-        strategy={rectSortingStrategy}
-      >
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {cardsOrder
-            .filter(cardId => {
-              return visibleCards.includes(cardId) && 
-                    (chartVisibility ? chartVisibility[cardId] !== false : true);
-            })
-            .map((cardId) => {
-              const card = cardsData[cardId];
-              
-              return (
-                <SortableGraphCard
-                  key={card.id}
-                  id={card.id}
-                  title={card.title}
-                  description={card.description}
-                  isVisible={card.visible}
-                  showAnalysis={card.showAnalysis}
-                  analysis={card.analysis}
-                  isLoading={isLoading}
-                  onToggleVisibility={() => handleToggleVisibility(card.id)}
-                  onToggleAnalysis={() => handleToggleAnalysis(card.id)}
-                  hideMenuIcon={!isEditMode}
-                >
-                  {isLoading ? (
-                    <div className="h-[220px] flex items-center justify-center">
-                      <div className="h-8 w-8 border-4 border-t-gray-500 border-r-transparent border-b-gray-300 border-l-transparent rounded-full animate-spin"></div>
-                    </div>
-                  ) : localChartComponents[cardId] ? (
-                    <div className="h-[220px] p-2">
-                      {localChartComponents[cardId]}
-                    </div>
-                  ) : (
-                    renderEmptyDataMessage(card.id)
-                  )}
-                </SortableGraphCard>
-              );
-            })}
-        </div>
-      </SortableContext>
-    </DndContext>
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      {/* Problemas Mais Frequentes */}
+      {chartVisibility.distribuicaoPorTemas && (
+        <Card className="shadow-sm">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-lg font-semibold">Problemas Mais Frequentes</CardTitle>
+          </CardHeader>
+          <CardContent className="h-[300px]">
+            <BarChart
+              data={problemasMaisFrequentes}
+              xAxisDataKey="name"
+              bars={[
+                { dataKey: 'value', name: 'Quantidade', color: '#0066FF' }
+              ]}
+              multiColorBars={true}
+              barColors={['#0066FF', '#0C4A6E', '#64748B', '#F97316']}
+              showLegend={false}
+            />
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Origem das Demandas */}
+      {chartVisibility.origemDemandas && (
+        <Card className="shadow-sm">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-lg font-semibold">Origem das Demandas</CardTitle>
+          </CardHeader>
+          <CardContent className="h-[300px] pt-0">
+            <PieChart
+              data={origemDemandas}
+              colorSet="blues"
+              showOnlyPercentage={true}
+              showLabels={false}
+              legendPosition="right"
+              largePercentage={true}
+            />
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Áreas Mais Acionadas */}
+      {chartVisibility.performanceArea && (
+        <Card className="shadow-sm">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-lg font-semibold">Áreas Mais Acionadas</CardTitle>
+          </CardHeader>
+          <CardContent className="h-[300px]">
+            <BarChart
+              data={areasMaisAcionadas}
+              xAxisDataKey="nome"
+              bars={[
+                { dataKey: 'valor', name: 'Quantidade', color: '#0066FF' }
+              ]}
+              multiColorBars={true}
+              barColors={['#0066FF', '#0C4A6E', '#64748B', '#F97316']}
+              showLegend={false}
+            />
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Notas de Imprensa */}
+      {chartVisibility.notasEmitidas && (
+        <Card className="shadow-sm">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-lg font-semibold">Notas de Imprensa</CardTitle>
+          </CardHeader>
+          <CardContent className="h-[300px]">
+            <LineChart
+              data={notasImprensaPorDia}
+              xAxisDataKey="dia"
+              yAxisTicks={[0, 1, 2, 3, 4, 5]}
+              lines={[
+                { dataKey: 'quantidade', name: 'Notas Emitidas', color: '#0066FF' }
+              ]}
+              showLegend={false}
+            />
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Notícias vs Releases */}
+      {chartVisibility.noticiasVsReleases && (
+        <Card className="shadow-sm">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-lg font-semibold">Notícias vs Releases</CardTitle>
+          </CardHeader>
+          <CardContent className="h-[300px]">
+            <LineChart
+              data={noticiasVsReleases}
+              xAxisDataKey="mes"
+              lines={[
+                { dataKey: 'noticias', name: 'Notícias', color: '#0066FF' },
+                { dataKey: 'releases', name: 'Releases', color: '#F97316' }
+              ]}
+              showLegend={true}
+            />
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Problemas Mais Comuns */}
+      {chartVisibility.problemasComuns && (
+        <Card className="shadow-sm">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-lg font-semibold">Problemas Mais Comuns</CardTitle>
+          </CardHeader>
+          <CardContent className="h-[300px] pt-0">
+            <PieChart
+              data={problemasComuns}
+              colorSet="mixed"
+              showOnlyPercentage={true}
+              showLabels={false}
+              legendPosition="none"
+              largePercentage={true}
+            />
+          </CardContent>
+        </Card>
+      )}
+    </div>
   );
 };
+
+export default RelatoriosGraphCards;

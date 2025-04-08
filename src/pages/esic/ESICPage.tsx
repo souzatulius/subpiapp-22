@@ -1,82 +1,128 @@
 
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React from 'react';
 import Header from '@/components/layouts/Header';
 import DashboardSidebar from '@/components/dashboard/DashboardSidebar';
-import ESICWelcomeCard from '@/components/esic/ESICWelcomeCard';
-import ProcessoList from '@/components/esic/ProcessoList';
+import { useESICPageState } from '@/hooks/esic/useESICPageState';
+import ProcessosList from '@/components/esic/screens/ProcessosList';
+import ProcessoCreate from '@/components/esic/screens/ProcessoCreate';
+import ProcessoEdit from '@/components/esic/screens/ProcessoEdit';
+import ProcessoView from '@/components/esic/screens/ProcessoView';
+import JustificativaCreate from '@/components/esic/screens/JustificativaCreate';
+import ConfirmDialog from '@/components/ui/confirm-dialog';
 import { useIsMobile } from '@/hooks/use-mobile';
 import MobileBottomNav from '@/components/layouts/MobileBottomNav';
-import BreadcrumbBar from '@/components/layouts/BreadcrumbBar';
-import ESICSearchHeader from '@/components/esic/ESICSearchHeader';
 
 const ESICPage = () => {
-  const navigate = useNavigate();
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [viewMode, setViewMode] = useState<'list' | 'cards'>('list');
-  const [filterOpen, setFilterOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = React.useState(false);
   const isMobile = useIsMobile();
+  const {
+    screen,
+    deleteConfirmOpen,
+    processos,
+    isLoading,
+    selectedProcesso,
+    justificativas,
+    isJustificativasLoading,
+    isCreating,
+    isUpdating,
+    isDeleting,
+    isJustificativaCreating,
+    isGenerating,
+    resetDeleteDialogState,
+    handleCreateProcesso,
+    handleUpdateProcesso,
+    handleDeleteProcesso,
+    confirmDeleteProcesso,
+    handleViewProcesso,
+    handleEditProcesso,
+    handleAddJustificativa,
+    handleCreateJustificativa,
+    handleGenerateJustificativa,
+    handleUpdateStatus,
+    handleUpdateSituacao,
+    setScreen
+  } = useESICPageState();
+
+  // For ProcessoList filtering
+  const [searchTerm, setSearchTerm] = React.useState('');
+  const [filterOpen, setFilterOpen] = React.useState(false);
+  const [viewMode, setViewMode] = React.useState<'list' | 'cards'>('list');
 
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
-  };
-
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchTerm(e.target.value);
-  };
-
-  const handleNewProcessClick = () => {
-    navigate('/esic/create');
-  };
-
-  const handleFilterClick = () => {
-    setFilterOpen(true);
   };
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       <Header showControls={true} toggleSidebar={toggleSidebar} />
       
-      {isMobile && (
-        <div className="bg-white">
-          <BreadcrumbBar />
-        </div>
-      )}
-      
-      <div className="flex flex-1 relative">
+      <div className="flex flex-1">
         {!isMobile && <DashboardSidebar isOpen={sidebarOpen} />}
         
-        <main className="flex-1 w-full">
-          {!isMobile && <BreadcrumbBar />}
+        <main className="flex-1 p-4 md:p-8 pb-24 sm:pb-8">
+          {screen === 'list' && (
+            <ProcessosList 
+              processos={processos}
+              isLoading={isLoading}
+              onCreateProcesso={() => setScreen('create')}
+              onViewProcesso={handleViewProcesso}
+              onEditProcesso={handleEditProcesso}
+              onDeleteProcesso={handleDeleteProcesso}
+            />
+          )}
           
-          <div className="max-w-7xl mx-auto">
-            <div className={`p-4 ${isMobile ? 'pb-32' : ''}`}>
-              <ESICWelcomeCard />
-              
-              <div className="mt-6">
-                <ESICSearchHeader 
-                  searchTerm={searchTerm}
-                  onSearchChange={handleSearchChange}
-                  viewMode={viewMode}
-                  onViewModeChange={setViewMode}
-                  onFilterClick={handleFilterClick}
-                  onNewProcessClick={handleNewProcessClick}
-                />
-                
-                <div className="mt-4">
-                  <ProcessoList 
-                    viewMode={viewMode}
-                    searchTerm={searchTerm}
-                    filterOpen={filterOpen}
-                    setFilterOpen={setFilterOpen}
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
+          {screen === 'create' && (
+            <ProcessoCreate 
+              onSubmit={handleCreateProcesso}
+              onCancel={() => setScreen('list')}
+              isSubmitting={isCreating}
+            />
+          )}
+          
+          {screen === 'edit' && selectedProcesso && (
+            <ProcessoEdit 
+              processo={selectedProcesso}
+              onSubmit={handleUpdateProcesso}
+              onCancel={() => setScreen('view')}
+              isSubmitting={isUpdating}
+            />
+          )}
+          
+          {screen === 'view' && selectedProcesso && (
+            <ProcessoView 
+              processo={selectedProcesso}
+              justificativas={justificativas}
+              isJustificativasLoading={isJustificativasLoading}
+              onEdit={() => handleEditProcesso(selectedProcesso)}
+              onAddJustificativa={handleAddJustificativa}
+              onBack={() => setScreen('list')}
+              onDelete={() => handleDeleteProcesso(selectedProcesso.id)}
+              onUpdateStatus={handleUpdateStatus}
+              onUpdateSituacao={handleUpdateSituacao}
+            />
+          )}
+          
+          {screen === 'justify' && selectedProcesso && (
+            <JustificativaCreate 
+              processo={selectedProcesso}
+              onSubmit={handleCreateJustificativa}
+              onGenerate={handleGenerateJustificativa}
+              onCancel={() => setScreen('view')}
+              isSubmitting={isJustificativaCreating}
+              isGenerating={isGenerating}
+            />
+          )}
         </main>
       </div>
+      
+      <ConfirmDialog
+        open={deleteConfirmOpen}
+        onOpenChange={(open) => !open && resetDeleteDialogState()}
+        title="Excluir processo"
+        description="Tem certeza que deseja excluir este processo? Esta ação não pode ser desfeita."
+        onConfirm={confirmDeleteProcesso}
+        isLoading={isDeleting}
+      />
       
       {isMobile && <MobileBottomNav />}
     </div>
