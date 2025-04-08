@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Home, RotateCcw } from 'lucide-react';
 import { useDashboardCards } from '@/hooks/dashboard/useDashboardCards';
@@ -18,6 +17,7 @@ import { toast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { useScrollFade } from '@/hooks/useScrollFade';
+import { motion } from 'framer-motion';
 
 const DashboardPage: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -100,7 +100,12 @@ const DashboardPage: React.FC = () => {
         <main className={`flex-1 overflow-auto ${isMobile ? 'pt-10' : ''}`}>
           {!isMobile && <BreadcrumbBar />}
           
-          <div className="max-w-7xl mx-auto p-4">
+          <motion.div 
+            className="max-w-7xl mx-auto p-4"
+            initial={{ opacity: 0, y: 20 }} 
+            animate={{ opacity: 1, y: 0 }} 
+            transition={{ duration: 0.5 }}
+          >
             <div className="space-y-6">
               <div 
                 className="w-full"
@@ -108,7 +113,7 @@ const DashboardPage: React.FC = () => {
               >
                 <WelcomeCard 
                   title="Dashboard" 
-                  description="Mova e edite os cards para personalizar a sua tela!" 
+                  description="Arraste e edite os cards para personalizar a sua tela" 
                   icon={<Home className="h-6 w-6 mr-2" />} 
                   color="bg-gradient-to-r from-blue-800 to-blue-950"
                   userName={firstName}
@@ -153,7 +158,7 @@ const DashboardPage: React.FC = () => {
                 )}
               </div>
             </div>
-          </div>
+          </motion.div>
         </main>
       </div>
       
