@@ -16,7 +16,7 @@ export const useDemandasData = () => {
       try {
         setIsLoading(true);
         
-        // Buscar todas as demandas pendentes, em andamento ou respondidas (incluir respondidas)
+        // Buscar demandas que estão respondidas ou aguardando nota
         const { data: allDemandas, error: demandasError } = await supabase
           .from('demandas')
           .select(`
@@ -31,7 +31,7 @@ export const useDemandasData = () => {
             arquivo_url,
             anexos
           `)
-          .in('status', ['pendente', 'em_andamento', 'respondida'])
+          .in('status', ['respondida', 'aguardando_nota'])
           .order('horario_publicacao', { ascending: false });
         
         if (demandasError) throw demandasError;
@@ -49,9 +49,9 @@ export const useDemandasData = () => {
         // Filtrar para incluir apenas demandas que não possuem notas associadas
         const demandasSemNotas = allDemandas.filter(demanda => !demandasComNotas.has(demanda.id));
         
-        console.log('Total de demandas:', allDemandas.length);
+        console.log('Total de demandas respondidas:', allDemandas.length);
         console.log('Demandas com notas:', demandasComNotas.size);
-        console.log('Demandas sem notas:', demandasSemNotas.length);
+        console.log('Demandas disponíveis para criar nota:', demandasSemNotas.length);
         
         // Buscar informações do problema para cada demanda
         const demandasProcessadas = await Promise.all(
@@ -66,6 +66,7 @@ export const useDemandasData = () => {
               // Criar objeto completo da demanda com todas as propriedades necessárias
               return {
                 ...demanda,
+                supervisao_tecnica: null, // Mantemos esse campo para compatibilidade, mas como null
                 area_coordenacao: problemaData ? { descricao: problemaData.descricao } : null,
                 prioridade: "",
                 horario_publicacao: "",
@@ -89,8 +90,8 @@ export const useDemandasData = () => {
             // Se não tiver problema, criar objeto com valores padrão
             return {
               ...demanda,
-              area_coordenacao: null,
               supervisao_tecnica: null,
+              area_coordenacao: null,
               prioridade: "",
               horario_publicacao: "",
               prazo_resposta: "",

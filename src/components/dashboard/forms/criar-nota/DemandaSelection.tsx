@@ -21,10 +21,6 @@ const DemandaSelection: React.FC<DemandaSelectionProps> = ({
   onDemandaSelect,
   isLoading
 }) => {
-  // Filter demandas to only show those that have been responded to
-  const respondedasDemandas = filteredDemandas.filter(demanda => 
-    demanda.status === 'respondida' || demanda.status === 'aguardando_nota');
-
   return (
     <Card className="border border-gray-200 rounded-lg shadow-sm">
       <CardContent className="p-6">
@@ -44,8 +40,8 @@ const DemandaSelection: React.FC<DemandaSelectionProps> = ({
             </div>
           ) : (
             <div className="space-y-3 max-h-96 overflow-y-auto">
-              {respondedasDemandas.length > 0 ? (
-                respondedasDemandas.map((demanda) => (
+              {filteredDemandas.length > 0 ? (
+                filteredDemandas.map((demanda) => (
                   <div 
                     key={demanda.id}
                     className="p-3 border rounded-md hover:bg-gray-50 cursor-pointer"
@@ -53,7 +49,10 @@ const DemandaSelection: React.FC<DemandaSelectionProps> = ({
                   >
                     <div className="font-medium">{demanda.titulo}</div>
                     <div className="text-sm text-gray-500 mt-1">
-                      {demanda.supervisao_tecnica?.descricao || demanda.area_coordenacao?.descricao || 'Área não informada'}
+                      {demanda.area_coordenacao?.descricao || 'Área não informada'}
+                    </div>
+                    <div className="text-xs text-gray-400 mt-1">
+                      Status: {demanda.status === 'respondida' ? 'Respondida' : 'Aguardando nota'}
                     </div>
                   </div>
                 ))

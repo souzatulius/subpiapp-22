@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
 import { useAuth } from '@/hooks/useSupabaseAuth';
-import { Demand, ResponseQA } from './types';
+import { Demand, ResponseQA } from '@/types/demand';
 import { useNavigate } from 'react-router-dom';
 
 export const useNotaForm = (onClose: () => void) => {
@@ -51,6 +51,9 @@ export const useNotaForm = (onClose: () => void) => {
       setSelectedDemanda(selected);
       // Fetch responses for this demand
       fetchDemandResponse(demandaId);
+
+      // Set a default title based on the demand title
+      setTitulo(selected.titulo || '');
     }
     
     setStep('create-note');
@@ -60,6 +63,8 @@ export const useNotaForm = (onClose: () => void) => {
     setStep('select-demand');
     setSelectedDemanda(null);
     setDemandaResponse(null);
+    setTitulo('');
+    setTexto('');
   };
 
   const handleSubmit = async () => {
@@ -106,7 +111,7 @@ export const useNotaForm = (onClose: () => void) => {
       }
       
       let problemaId = selectedDemanda.problema_id;
-      let coordenacaoId = problemaData?.coordenacao_id || null;
+      let coordenacaoId = problemaData?.coordenacao_id || selectedDemanda.coordenacao_id || null;
       
       if (!problemaId) {
         // If no problema_id found on demand, create a default one
@@ -156,7 +161,7 @@ export const useNotaForm = (onClose: () => void) => {
       });
       
       // Redirect to dashboard
-      navigate('/dashboard');
+      navigate('/dashboard/comunicacao');
     } catch (error: any) {
       console.error('Erro ao criar nota oficial:', error);
       toast({
@@ -169,6 +174,7 @@ export const useNotaForm = (onClose: () => void) => {
     }
   };
   
+  // Helper function to format the responses text
   const formatResponses = (responseText: string | null): ResponseQA[] => {
     if (!responseText) return [];
     
