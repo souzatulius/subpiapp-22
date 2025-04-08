@@ -64,7 +64,7 @@ export const getDefaultCards = (): ActionCardItem[] => {
       path: '/demandas',
       color: 'bg-blue-500',
       width: '25',
-      height: '1',
+      height: '2', // Changed from '1' to '2' to double the height
       type: 'standard',
       displayMobile: true,
       mobileOrder: 2
@@ -77,7 +77,7 @@ export const getDefaultCards = (): ActionCardItem[] => {
       path: '/dashboard/comunicacao',
       color: 'bg-green-500',
       width: '25',
-      height: '1',
+      height: '2', // Changed from '1' to '2' to double the height
       type: 'standard',
       displayMobile: true,
       mobileOrder: 3
@@ -90,7 +90,7 @@ export const getDefaultCards = (): ActionCardItem[] => {
       path: '/aprovar',
       color: 'bg-red-500',
       width: '25',
-      height: '1',
+      height: '2', // Changed from '1' to '2' to double the height
       type: 'standard',
       displayMobile: true,
       mobileOrder: 4
@@ -103,7 +103,7 @@ export const getDefaultCards = (): ActionCardItem[] => {
       path: '/ranking-subs',
       color: 'bg-purple-500',
       width: '25',
-      height: '1',
+      height: '2', // Changed from '1' to '2' to double the height
       type: 'standard',
       displayMobile: true,
       mobileOrder: 5
@@ -115,7 +115,7 @@ export const getDefaultCards = (): ActionCardItem[] => {
       path: '/cadastrar-demanda',
       color: 'bg-pink-500',
       width: '25',
-      height: '1',
+      height: '2', // Changed from '1' to '2' to double the height
       type: 'standard',
       displayMobile: true,
       mobileOrder: 6
@@ -127,7 +127,7 @@ export const getDefaultCards = (): ActionCardItem[] => {
       path: '/relatorios',
       color: 'bg-indigo-500',
       width: '50',
-      height: '1',
+      height: '1', // Keep this one at height '1'
       type: 'standard',
       displayMobile: true,
       mobileOrder: 7
@@ -139,7 +139,7 @@ export const getDefaultCards = (): ActionCardItem[] => {
       path: '/demandas',
       color: 'orange-700',
       width: '50',
-      height: '1',
+      height: '1', // Keep this one at height '1'
       type: 'data_dynamic',
       dataSourceKey: 'pendencias_por_coordenacao',
       displayMobile: true,
