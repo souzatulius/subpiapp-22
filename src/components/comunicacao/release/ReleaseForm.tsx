@@ -22,10 +22,10 @@ const ReleaseForm: React.FC<ReleaseFormProps> = ({
   isGenerating
 }) => {
   return (
-    <div className="max-w-4xl mx-auto p-6 bg-white rounded-xl shadow-sm">
-      <h2 className="text-xl font-semibold mb-4">Novo Release</h2>
+    <div className="max-w-4xl mx-auto bg-white rounded-xl shadow-sm">
+      <h2 className="text-xl font-semibold mb-4 px-6 pt-6">Novo Release</h2>
       
-      <div className="mb-6">
+      <div className="mb-6 px-6">
         <Textarea 
           value={releaseContent}
           onChange={(e) => onReleaseContentChange(e.target.value)}
@@ -34,7 +34,7 @@ const ReleaseForm: React.FC<ReleaseFormProps> = ({
         />
       </div>
       
-      <div className="flex flex-wrap gap-3 justify-end">
+      <div className="flex flex-wrap gap-3 justify-end px-6 pb-6">
         <Button 
           variant="default" 
           onClick={onSave}

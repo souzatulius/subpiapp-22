@@ -27,6 +27,17 @@ interface Processo {
   solicitante: string;
 }
 
+interface ProcessoData {
+  atualizado_em: string;
+  autor_id: string;
+  criado_em: string;
+  data_processo: string;
+  id: string;
+  situacao: string;
+  status: string;
+  texto: string;
+}
+
 const ProcessoList: React.FC<ProcessoListProps> = ({ 
   viewMode,
   searchTerm,
@@ -72,10 +83,10 @@ const ProcessoList: React.FC<ProcessoListProps> = ({
       
       // Apply date filter
       if (filters.dateRange.from) {
-        query = query.gte('created_at', filters.dateRange.from.toISOString());
+        query = query.gte('criado_em', filters.dateRange.from.toISOString());
       }
       if (filters.dateRange.to) {
-        query = query.lte('created_at', filters.dateRange.to.toISOString());
+        query = query.lte('criado_em', filters.dateRange.to.toISOString());
       }
       
       const { data, error } = await query.order('criado_em', { ascending: false });
@@ -85,7 +96,7 @@ const ProcessoList: React.FC<ProcessoListProps> = ({
       // Transform the data to match our Processo interface
       if (data) {
         // Map the database records to match the Processo interface
-        const processedData: Processo[] = data.map(item => ({
+        const processedData: Processo[] = data.map((item: ProcessoData) => ({
           id: item.id,
           numero_processo: `ESIC-${new Date(item.criado_em).getFullYear()}-${String(item.id).substring(0, 4)}`,
           titulo: item.texto.substring(0, 50) + (item.texto.length > 50 ? '...' : ''),
