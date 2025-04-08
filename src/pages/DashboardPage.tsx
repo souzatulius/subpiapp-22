@@ -31,7 +31,7 @@ const DashboardPage: React.FC = () => {
   const {
     firstName,
     userCoordenaticaoId
-  } = useUserData(user?.id);
+  } = useUserData();
   const {
     cards,
     isLoading,
