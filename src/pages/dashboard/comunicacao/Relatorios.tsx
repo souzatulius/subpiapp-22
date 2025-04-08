@@ -5,7 +5,7 @@ import WelcomeCard from '@/components/shared/WelcomeCard';
 import { Button } from "@/components/ui/button";
 import { DndContext, DragOverlay, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
 import { RelatoriosKPICards } from '@/components/relatorios/RelatoriosKPICards';
-import { RelatoriosGraphCards } from '@/components/relatorios/RelatoriosGraphCards';
+import RelatoriosGraphCards from '@/components/relatorios/RelatoriosGraphCards';
 import FilterDialog from '@/components/relatorios/filters/FilterDialog';
 import { exportToPDF, printWithStyles } from '@/utils/pdfExport';
 import { motion } from 'framer-motion';

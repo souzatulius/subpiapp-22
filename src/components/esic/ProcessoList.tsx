@@ -8,42 +8,21 @@ import { Separator } from "@/components/ui/separator";
 import { FileText, ChevronRight, Trash2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { toast } from '@/components/ui/use-toast';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import ConfirmDialog from '@/components/ui/confirm-dialog';
 import NovoProcessoButton from './NovoProcessoButton';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ESICProcesso, statusLabels } from '@/types/esic';
+import { ESICProcesso } from '@/types/esic';
 
-interface ProcessoListProps {
-  viewMode: 'list' | 'cards';
-  searchTerm: string;
-  filterOpen: boolean;
-  setFilterOpen: React.Dispatch<React.SetStateAction<boolean>>;
-}
-
-// Extended type to handle response from Supabase
-interface ESICProcessoWithJustificativas extends ESICProcesso {
-  justificativas_count?: number;
-  autor?: {
+interface ProcessoWithAutor extends Omit<ESICProcesso, 'autor'> {
+  autor: {
     nome_completo: string;
   } | null;
 }
 
-const ProcessoList: React.FC<ProcessoListProps> = ({
-  viewMode,
-  searchTerm,
-  filterOpen,
-  setFilterOpen
-}) => {
-  const [processos, setProcessos] = useState<ESICProcessoWithJustificativas[]>([]);
+const ProcessoList = () => {
+  const [processos, setProcessos] = useState<ProcessoWithAutor[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedProcessoId, setSelectedProcessoId] = useState<string | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -59,21 +38,19 @@ const ProcessoList: React.FC<ProcessoListProps> = ({
         .from('esic_processos')
         .select(`
           *,
-          autor:autor_id(nome_completo),
-          justificativas_count:esic_justificativas(count)
+          autor:autor_id(nome_completo)
         `)
         .order('data_processo', { ascending: false });
 
       if (error) throw error;
 
-      // Safely cast the data to ensure proper type handling
+      // Safely cast the data to the appropriate type
       const typedData = (data || []).map(item => ({
         ...item,
         situacao: item.situacao as ESICProcesso['situacao'],
         status: item.status as ESICProcesso['status'],
-        autor: item.autor || null, // Handle null explicitly
-        justificativas_count: item.justificativas_count || 0
-      })) as ESICProcessoWithJustificativas[];
+        autor: item.autor as ProcessoWithAutor['autor']
+      }));
 
       setProcessos(typedData);
     } catch (error) {
@@ -81,7 +58,7 @@ const ProcessoList: React.FC<ProcessoListProps> = ({
       toast({
         title: 'Erro ao carregar processos',
         description: 'Não foi possível carregar a lista de processos. Tente novamente mais tarde.',
-        variant: 'destructive',
+        variant: 'destructive'
       });
     } finally {
       setIsLoading(false);
@@ -107,14 +84,14 @@ const ProcessoList: React.FC<ProcessoListProps> = ({
       setProcessos(processos.filter(p => p.id !== selectedProcessoId));
       toast({
         title: 'Processo excluído',
-        description: 'O processo foi excluído com sucesso.',
+        description: 'O processo foi excluído com sucesso.'
       });
     } catch (error) {
       console.error('Erro ao excluir processo:', error);
       toast({
         title: 'Erro ao excluir processo',
         description: 'Não foi possível excluir o processo. Tente novamente mais tarde.',
-        variant: 'destructive',
+        variant: 'destructive'
       });
     } finally {
       setIsDeleteDialogOpen(false);
@@ -122,27 +99,20 @@ const ProcessoList: React.FC<ProcessoListProps> = ({
     }
   };
 
-  const getStatusBadge = (status: string) => {
+  const getStatusBadge = (status: ESICProcesso['status']) => {
     switch (status) {
       case 'novo_processo':
         return <Badge variant="outline" className="bg-yellow-50 border-yellow-200 text-yellow-600">Novo Processo</Badge>;
       case 'aguardando_justificativa':
         return <Badge variant="outline" className="bg-blue-50 border-blue-200 text-blue-600">Aguardando Justificativa</Badge>;
       case 'aguardando_aprovacao':
-        return <Badge variant="outline" className="bg-green-50 border-green-200 text-green-600">Aguardando Aprovação</Badge>;
+        return <Badge variant="outline" className="bg-orange-50 border-orange-200 text-orange-600">Aguardando Aprovação</Badge>;
       case 'concluido':
-        return <Badge variant="outline" className="bg-gray-50 border-gray-200 text-gray-600">Concluído</Badge>;
+        return <Badge variant="outline" className="bg-green-50 border-green-200 text-green-600">Concluído</Badge>;
       default:
-        return <Badge variant="outline">{statusLabels[status] || status}</Badge>;
+        return <Badge variant="outline">{status}</Badge>;
     }
   };
-
-  // Filter processos based on search term if provided
-  const filteredProcessos = processos.filter(processo => {
-    if (!searchTerm) return true;
-    return processo.texto?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-           processo.autor?.nome_completo?.toLowerCase().includes(searchTerm.toLowerCase());
-  });
 
   return (
     <div className="w-full">
@@ -167,14 +137,17 @@ const ProcessoList: React.FC<ProcessoListProps> = ({
           <Skeleton className="h-20 w-full" />
           <Skeleton className="h-20 w-full" />
         </div>
-      ) : filteredProcessos.length === 0 ? (
+      ) : processos.length === 0 ? (
         <div className="text-center py-12 bg-gray-50 rounded-lg">
           <FileText className="h-12 w-12 text-gray-300 mx-auto mb-4" />
           <h3 className="text-lg font-medium text-gray-700">Nenhum processo cadastrado</h3>
-          <p className="text-sm text-gray-500 mb-6">
-            Comece cadastrando um novo processo e-SIC
-          </p>
-          <NovoProcessoButton buttonText="Cadastrar primeiro processo" variant="default" onSuccess={fetchProcessos} />
+          <p className="text-sm text-gray-500 mb-6">Comece cadastrando um novo processo e-SIC</p>
+          
+          <NovoProcessoButton 
+            buttonText="Cadastrar primeiro processo" 
+            variant="default" 
+            onSuccess={fetchProcessos} 
+          />
         </div>
       ) : (
         <Table>
@@ -188,18 +161,26 @@ const ProcessoList: React.FC<ProcessoListProps> = ({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filteredProcessos.map((processo) => (
+            {processos.map((processo) => (
               <TableRow key={processo.id}>
                 <TableCell className="font-medium">
                   {processo.data_processo ? format(new Date(processo.data_processo), 'dd/MM/yyyy', { locale: ptBR }) : '-'}
                 </TableCell>
                 <TableCell>
                   <div className="max-w-md">
-                    <div className="font-medium line-clamp-1">{processo.texto?.substring(0, 100)}</div>
-                    <div className="text-sm text-gray-500">{processo.autor?.nome_completo || 'Usuário'}</div>
+                    <div className="font-medium line-clamp-1">
+                      {processo.texto?.substring(0, 100)}
+                    </div>
+                    <div className="text-sm text-gray-500">
+                      {processo.solicitante ? `Solicitante: ${processo.solicitante}` : ''}
+                      {processo.solicitante && processo.autor?.nome_completo ? ' | ' : ''}
+                      {processo.autor?.nome_completo ? `Criado por: ${processo.autor.nome_completo}` : ''}
+                    </div>
                   </div>
                 </TableCell>
-                <TableCell>{getStatusBadge(processo.status)}</TableCell>
+                <TableCell>
+                  {getStatusBadge(processo.status)}
+                </TableCell>
                 <TableCell>
                   {processo.justificativas_count ? (
                     <Badge variant="outline" className="bg-blue-50 text-blue-600">
@@ -217,9 +198,9 @@ const ProcessoList: React.FC<ProcessoListProps> = ({
                         Detalhes
                       </Button>
                     </Link>
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
+                    <Button
+                      variant="ghost"
+                      size="sm"
                       className="h-8 text-red-600 hover:text-red-700 hover:bg-red-50"
                       onClick={() => handleDeleteClick(processo.id)}
                     >

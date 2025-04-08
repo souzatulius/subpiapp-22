@@ -75,7 +75,7 @@ const ESICPage = () => {
             <ProcessoCreate 
               onSubmit={handleCreateProcesso}
               onCancel={() => setScreen('list')}
-              isSubmitting={isCreating}
+              isLoading={isCreating}
             />
           )}
           
@@ -84,7 +84,7 @@ const ESICPage = () => {
               processo={selectedProcesso}
               onSubmit={handleUpdateProcesso}
               onCancel={() => setScreen('view')}
-              isSubmitting={isUpdating}
+              isLoading={isUpdating}
             />
           )}
           
@@ -96,7 +96,6 @@ const ESICPage = () => {
               onEdit={() => handleEditProcesso(selectedProcesso)}
               onAddJustificativa={handleAddJustificativa}
               onBack={() => setScreen('list')}
-              onDelete={() => handleDeleteProcesso(selectedProcesso.id)}
               onUpdateStatus={handleUpdateStatus}
               onUpdateSituacao={handleUpdateSituacao}
             />
@@ -104,11 +103,11 @@ const ESICPage = () => {
           
           {screen === 'justify' && selectedProcesso && (
             <JustificativaCreate 
-              processo={selectedProcesso}
+              processoTexto={selectedProcesso.texto}
               onSubmit={handleCreateJustificativa}
               onGenerate={handleGenerateJustificativa}
-              onCancel={() => setScreen('view')}
-              isSubmitting={isJustificativaCreating}
+              onBack={() => setScreen('view')}
+              isLoading={isJustificativaCreating}
               isGenerating={isGenerating}
             />
           )}

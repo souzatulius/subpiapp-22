@@ -1,103 +1,90 @@
 
 import React from 'react';
-import { Bar, BarChart as RechartsBarChart, CartesianGrid, Cell, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+import {
+  BarChart as RechartsBarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+  Cell
+} from 'recharts';
 
-export interface BarChartProps {
+interface BarData {
+  dataKey: string;
+  name: string;
+  color: string;
+}
+
+interface BarChartProps {
   data: any[];
   xAxisDataKey: string;
-  bars: {
-    dataKey: string;
-    name: string;
-    color: string;
-    stackId?: string;
-  }[];
-  yAxisTicks?: number[];
-  horizontal?: boolean;
-  tooltipFormatter?: (value: any, name: any, item: any) => any[];
+  bars: BarData[];
   showLegend?: boolean;
   multiColorBars?: boolean;
   barColors?: string[];
 }
 
-export const BarChart: React.FC<BarChartProps> = ({ 
-  data, 
-  xAxisDataKey, 
+export const BarChart: React.FC<BarChartProps> = ({
+  data,
+  xAxisDataKey,
   bars,
-  yAxisTicks,
-  horizontal = false,
-  tooltipFormatter,
   showLegend = true,
   multiColorBars = false,
-  barColors = ['#0066FF', '#0C4A6E', '#64748B', '#F97316', '#C2410C']
+  barColors = ['#0066FF', '#0C4A6E', '#64748B', '#F97316']
 }) => {
-  // Format the number with dot as thousand separator and comma for decimal
-  const formatNumber = (value: number) => {
-    if (typeof value !== 'number') return value;
-    return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-  };
-
-  // Ensure default font color for better printing
-  const tickStyle = { fill: '#64748b' };
-
-  if (!data || data.length === 0) {
-    return (
-      <div className="flex items-center justify-center h-full w-full">
-        <p className="text-gray-400">Sem dados disponíveis</p>
-      </div>
-    );
-  }
-
   return (
     <ResponsiveContainer width="100%" height="100%">
       <RechartsBarChart
         data={data}
-        margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-        layout={horizontal ? 'vertical' : 'horizontal'}
+        margin={{
+          top: 20,
+          right: 30,
+          left: 20,
+          bottom: 30
+        }}
       >
-        <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-        
-        {horizontal ? (
-          <>
-            <XAxis type="number" tickFormatter={formatNumber} style={tickStyle} />
-            <YAxis dataKey={xAxisDataKey} type="category" style={tickStyle} />
-          </>
-        ) : (
-          <>
-            <XAxis dataKey={xAxisDataKey} style={tickStyle} />
-            <YAxis ticks={yAxisTicks} tickFormatter={formatNumber} style={tickStyle} />
-          </>
-        )}
-        
-        <Tooltip 
-          formatter={tooltipFormatter || ((value) => [formatNumber(value as number), ''])}
+        <CartesianGrid strokeDasharray="3 3" vertical={false} />
+        <XAxis 
+          dataKey={xAxisDataKey} 
+          tick={{ fontSize: 12 }}
+          axisLine={{ stroke: '#E2E8F0' }}
+          tickLine={false}
         />
+        <YAxis 
+          tick={{ fontSize: 12 }}
+          axisLine={{ stroke: '#E2E8F0' }}
+          tickLine={false}
+        />
+        <Tooltip 
+          contentStyle={{ 
+            borderRadius: '8px',
+            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+            border: 'none',
+            padding: '10px'
+          }}
+          labelStyle={{ fontWeight: 'bold' }}
+        />
+        {showLegend && <Legend />}
         
-        {showLegend && !multiColorBars && <Legend />}
-        
-        {multiColorBars ? (
-          // Render a single bar series with each bar having its own color
-          <Bar
-            dataKey={bars[0].dataKey}
-            name={bars[0].name}
+        {bars.map((bar, index) => (
+          <Bar 
+            key={bar.dataKey} 
+            dataKey={bar.dataKey}
+            name={bar.name} 
+            fill={bar.color}
             radius={[4, 4, 0, 0]}
           >
-            {data.map((entry, index) => (
-              <Cell key={`cell-${index}`} fill={barColors[index % barColors.length]} />
+            {multiColorBars && data.map((_, dataIndex) => (
+              <Cell 
+                key={`cell-${dataIndex}`} 
+                fill={barColors[dataIndex % barColors.length]} 
+              />
             ))}
           </Bar>
-        ) : (
-          // Render multiple bar series as defined in props
-          bars.map((bar, index) => (
-            <Bar
-              key={index}
-              dataKey={bar.dataKey}
-              name={bar.name}
-              fill={bar.color}
-              stackId={bar.stackId}
-              radius={[4, 4, 0, 0]}
-            />
-          ))
-        )}
+        ))}
       </RechartsBarChart>
     </ResponsiveContainer>
   );

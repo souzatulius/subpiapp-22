@@ -11,6 +11,7 @@ export interface ESICProcesso {
   coordenacao_id?: string;
   prazo_resposta?: string;
   justificativas_count?: number;
+  solicitante?: string;
   autor?: {
     nome_completo: string;
   };
@@ -35,6 +36,7 @@ export type ESICProcessoFormValues = {
   texto: string;
   coordenacao_id?: string;
   prazo_resposta?: Date;
+  solicitante?: string;
 };
 
 export type ESICJustificativaFormValues = {

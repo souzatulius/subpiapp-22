@@ -42,6 +42,7 @@ const processoSchema = z.object({
   texto: z.string().min(10, "O texto deve ter no mínimo 10 caracteres"),
   coordenacao_id: z.string().optional(),
   prazo_resposta: z.date().optional(),
+  solicitante: z.string().optional(),
 });
 
 interface ProcessoFormProps {
@@ -70,6 +71,7 @@ const ProcessoForm: React.FC<ProcessoFormProps> = ({
           texto: initialValues.texto,
           coordenacao_id: initialValues.coordenacao_id,
           prazo_resposta: initialValues.prazo_resposta ? new Date(initialValues.prazo_resposta) : undefined,
+          solicitante: initialValues.solicitante,
         }
       : {
           data_processo: new Date(),
@@ -77,6 +79,7 @@ const ProcessoForm: React.FC<ProcessoFormProps> = ({
           texto: '',
           coordenacao_id: undefined,
           prazo_resposta: undefined,
+          solicitante: '',
         },
   });
 
@@ -128,6 +131,24 @@ const ProcessoForm: React.FC<ProcessoFormProps> = ({
                       />
                     </PopoverContent>
                   </Popover>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <FormField
+              control={form.control}
+              name="solicitante"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Solicitante</FormLabel>
+                  <FormControl>
+                    <Input 
+                      placeholder="Nome do solicitante" 
+                      {...field} 
+                      value={field.value || ''}
+                    />
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}

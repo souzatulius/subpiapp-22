@@ -9,7 +9,9 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+} from '@/components/ui/alert-dialog';
+import { Button } from '@/components/ui/button';
+import { Loader2 } from 'lucide-react';
 
 interface ConfirmDialogProps {
   open: boolean;
@@ -17,9 +19,10 @@ interface ConfirmDialogProps {
   title: string;
   description: string;
   onConfirm: () => void;
+  isLoading?: boolean;
   confirmText?: string;
   cancelText?: string;
-  isLoading?: boolean;
+  destructive?: boolean;
 }
 
 const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
@@ -28,25 +31,38 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   title,
   description,
   onConfirm,
-  confirmText = "Confirmar",
-  cancelText = "Cancelar",
   isLoading = false,
+  confirmText = 'Confirmar',
+  cancelText = 'Cancelar',
+  destructive = true
 }) => {
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>{title}</AlertDialogTitle>
-          <AlertDialogDescription>{description}</AlertDialogDescription>
+          <AlertDialogDescription>
+            {description}
+          </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={isLoading}>{cancelText}</AlertDialogCancel>
-          <AlertDialogAction 
-            onClick={onConfirm} 
-            disabled={isLoading}
-            className={isLoading ? "opacity-70 cursor-not-allowed" : ""}
+          <AlertDialogCancel disabled={isLoading}>
+            {cancelText}
+          </AlertDialogCancel>
+          <AlertDialogAction
+            asChild
+            onClick={(e) => {
+              e.preventDefault();
+              onConfirm();
+            }}
           >
-            {isLoading ? "Processando..." : confirmText}
+            <Button 
+              variant={destructive ? "destructive" : "default"}
+              disabled={isLoading}
+            >
+              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {confirmText}
+            </Button>
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

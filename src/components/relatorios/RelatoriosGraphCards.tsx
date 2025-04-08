@@ -100,7 +100,7 @@ const RelatoriosGraphCards: React.FC<RelatoriosGraphCardsProps> = ({
           <CardContent className="h-[300px] pt-0">
             <PieChart
               data={origemDemandas}
-              colorSet="blues"
+              colorSet="blue"
               showOnlyPercentage={true}
               showLabels={false}
               legendPosition="right"
