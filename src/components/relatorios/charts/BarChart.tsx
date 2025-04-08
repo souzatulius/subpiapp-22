@@ -13,6 +13,7 @@ export interface BarChartProps {
   }[];
   yAxisTicks?: number[];
   horizontal?: boolean;
+  tooltipFormatter?: (value: any, name: any, item: any) => any[];
 }
 
 export const BarChart: React.FC<BarChartProps> = ({ 
@@ -20,7 +21,8 @@ export const BarChart: React.FC<BarChartProps> = ({
   xAxisDataKey, 
   bars,
   yAxisTicks,
-  horizontal = false
+  horizontal = false,
+  tooltipFormatter
 }) => {
   // Format the number with dot as thousand separator and comma for decimal
   const formatNumber = (value: number) => {
@@ -61,7 +63,7 @@ export const BarChart: React.FC<BarChartProps> = ({
         )}
         
         <Tooltip 
-          formatter={(value) => [formatNumber(value as number), '']}
+          formatter={tooltipFormatter || ((value) => [formatNumber(value as number), ''])}
         />
         
         <Legend />

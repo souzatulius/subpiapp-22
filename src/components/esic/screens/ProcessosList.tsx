@@ -22,6 +22,11 @@ const ProcessosList: React.FC<ProcessosListProps> = ({
   onEditProcesso,
   onDeleteProcesso
 }) => {
+  // Mock for viewMode, searchTerm, filterOpen and setFilterOpen that ProcessoList needs
+  const [viewMode, setViewMode] = React.useState<'list' | 'cards'>('list');
+  const [searchTerm, setSearchTerm] = React.useState('');
+  const [filterOpen, setFilterOpen] = React.useState(false);
+  
   return (
     <div className="space-y-4">
       <div className="flex justify-end mb-4">
@@ -44,12 +49,12 @@ const ProcessosList: React.FC<ProcessosListProps> = ({
         </Button>
       </div>
       
+      {/* Passing the required props to ProcessoList */}
       <ProcessoList
-        processos={processos}
-        isLoading={isLoading}
-        onSelectProcesso={onViewProcesso}
-        onEditProcesso={onEditProcesso}
-        onDeleteProcesso={onDeleteProcesso}
+        viewMode={viewMode}
+        searchTerm={searchTerm}
+        filterOpen={filterOpen}
+        setFilterOpen={setFilterOpen}
       />
     </div>
   );

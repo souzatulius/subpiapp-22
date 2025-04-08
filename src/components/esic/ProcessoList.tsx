@@ -17,7 +17,7 @@ interface ProcessoListProps {
 }
 
 interface Processo {
-  id: number | string;
+  id: string;
   numero_processo: string;
   titulo: string;
   categoria?: string;
@@ -82,13 +82,31 @@ const ProcessoList: React.FC<ProcessoListProps> = ({
       
       if (error) throw error;
       
-      setProcessos(data || []);
+      // Transform the data to match our Processo interface
+      if (data) {
+        // Map the database records to match the Processo interface
+        const processedData: Processo[] = data.map(item => ({
+          id: item.id,
+          numero_processo: `ESIC-${new Date(item.criado_em).getFullYear()}-${String(item.id).slice(0, 4)}`,
+          titulo: item.texto.substring(0, 50) + (item.texto.length > 50 ? '...' : ''),
+          categoria: item.situacao === 'em_tramitacao' ? 'Em tramitação' : 
+                    item.situacao === 'prazo_prorrogado' ? 'Prazo prorrogado' : 'Concluído',
+          status: item.status === 'novo_processo' ? 'Em análise' : 
+                 item.status === 'aguardando_justificativa' ? 'Aguardando complemento' : 
+                 item.status === 'aguardando_aprovacao' ? 'Em análise' : 'Concluído',
+          created_at: item.criado_em,
+          prazo: new Date(new Date(item.data_processo).getTime() + 20 * 24 * 60 * 60 * 1000).toISOString(),
+          solicitante: 'Solicitante', // Default value as we don't have this in our data
+        }));
+        
+        setProcessos(processedData);
+      }
     } catch (error) {
       console.error('Error fetching processos:', error);
       // Fallback to mock data
       setProcessos([
         {
-          id: 1,
+          id: "1",
           numero_processo: 'ESIC-2023-001',
           titulo: 'Solicitação de informações sobre licitações',
           categoria: 'Financeiro',
@@ -98,7 +116,7 @@ const ProcessoList: React.FC<ProcessoListProps> = ({
           solicitante: 'João Silva',
         },
         {
-          id: 2,
+          id: "2",
           numero_processo: 'ESIC-2023-002',
           titulo: 'Dados sobre obras públicas',
           categoria: 'Obras',

@@ -1,3 +1,4 @@
+
 import { ReactNode } from 'react';
 
 export type CardColor =
@@ -11,7 +12,8 @@ export type CardColor =
   | 'orange-dark' // #F25C05 - Laranja Escuro
   | 'orange-light' // #F89E66 - Laranja Claro
   | 'deep-blue' // #051A2C - Azul Profundo
-  | 'neutral-800'; // #262626 - Cinza Escuro
+  | 'neutral-800' // #262626 - Cinza Escuro
+  | 'orange-700'; // Laranja Escuro
 
 export type CardWidth = '25' | '33' | '50' | '75' | '100';
 export type CardHeight = '1' | '2';
