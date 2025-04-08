@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { SortableContext, arrayMove, rectSortingStrategy } from '@dnd-kit/sortable';
 import { DndContext, closestCenter, DragEndEvent, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
-import { AlertCircle, BarChart3, PieChart, LineChart, TrendingUp, Clock, Users, MessageSquare, ThumbsUp } from 'lucide-react';
+import { AlertCircle, BarChart3, PieChartIcon, LineChartIcon, TrendingUp, Clock, Users, MessageSquare, ThumbsUp } from 'lucide-react';
 import { useLocalStorage } from '@/hooks/use-local-storage';
 import { supabase } from '@/integrations/supabase/client';
 import { BarChart } from './charts/BarChart';
 import { LineChart as LineChartComponent } from './charts/LineChart';
-import { PieChart as PieChartComponent } from './charts/PieChart';
+import { PieChart } from './charts/PieChart';
 import { AreaChart } from './charts/AreaChart';
 import { useChartConfigs } from './hooks/charts/useChartConfigs';
 import SortableGraphCard from './components/SortableGraphCard';
@@ -101,20 +101,23 @@ export const RelatoriosGraphCards: React.FC<RelatoriosGraphCardsProps> = ({
         }));
 
         const responseTimesChart = [
-          { name: 'Seg', Demandas: 48, Aprovacao: 72 },
-          { name: 'Ter', Demandas: 42, Aprovacao: 65 },
-          { name: 'Qua', Demandas: 36, Aprovacao: 58 },
-          { name: 'Qui', Demandas: 30, Aprovacao: 52 },
-          { name: 'Sex', Demandas: 24, Aprovacao: 45 },
+          { name: '1', Demandas: 48, Aprovacao: 72 },
+          { name: '5', Demandas: 42, Aprovacao: 65 },
+          { name: '10', Demandas: 36, Aprovacao: 58 },
+          { name: '15', Demandas: 30, Aprovacao: 52 },
+          { name: '20', Demandas: 24, Aprovacao: 45 },
+          { name: '25', Demandas: 28, Aprovacao: 42 },
+          { name: '30', Demandas: 32, Aprovacao: 48 },
         ];
 
         const mediaTypesChart = [
-          { name: 'Jan', Quantidade: 10, Meta: 12 },
-          { name: 'Fev', Quantidade: 15, Meta: 12 },
-          { name: 'Mar', Quantidade: 12, Meta: 12 },
-          { name: 'Abr', Quantidade: 18, Meta: 15 },
-          { name: 'Mai', Quantidade: 22, Meta: 15 },
-          { name: 'Jun', Quantidade: 20, Meta: 18 },
+          { name: '1', Quantidade: 10, Meta: 12 },
+          { name: '5', Quantidade: 15, Meta: 12 },
+          { name: '10', Quantidade: 12, Meta: 12 },
+          { name: '15', Quantidade: 18, Meta: 15 },
+          { name: '20', Quantidade: 22, Meta: 15 },
+          { name: '25', Quantidade: 20, Meta: 18 },
+          { name: '30', Quantidade: 25, Meta: 18 },
         ];
 
         const noticiasVsReleasesChart = [
@@ -255,10 +258,13 @@ export const RelatoriosGraphCards: React.FC<RelatoriosGraphCardsProps> = ({
   ];
 
   const mockLineData = [
-    { name: 'Jan', Demandas: 12, Respostas: 10 },
-    { name: 'Fev', Demandas: 15, Respostas: 14 },
-    { name: 'Mar', Demandas: 18, Respostas: 16 },
-    { name: 'Abr', Demandas: 22, Respostas: 19 }
+    { name: '1', Demandas: 12, Respostas: 10 },
+    { name: '5', Demandas: 15, Respostas: 14 },
+    { name: '10', Demandas: 18, Respostas: 16 },
+    { name: '15', Demandas: 22, Respostas: 19 },
+    { name: '20', Demandas: 18, Respostas: 16 },
+    { name: '25', Demandas: 20, Respostas: 18 },
+    { name: '30', Demandas: 24, Respostas: 22 }
   ];
 
   const mockPieData = [
@@ -285,12 +291,13 @@ export const RelatoriosGraphCards: React.FC<RelatoriosGraphCardsProps> = ({
   ];
 
   const mockAreaData = [
-    { name: 'Jan', Quantidade: 10, Meta: 12 },
-    { name: 'Fev', Quantidade: 15, Meta: 12 },
-    { name: 'Mar', Quantidade: 12, Meta: 12 },
-    { name: 'Abr', Quantidade: 18, Meta: 15 },
-    { name: 'Mai', Quantidade: 22, Meta: 15 },
-    { name: 'Jun', Quantidade: 20, Meta: 18 },
+    { name: '1', Quantidade: 10, Meta: 12 },
+    { name: '5', Quantidade: 15, Meta: 12 },
+    { name: '10', Quantidade: 12, Meta: 12 },
+    { name: '15', Quantidade: 18, Meta: 15 },
+    { name: '20', Quantidade: 22, Meta: 15 },
+    { name: '25', Quantidade: 20, Meta: 18 },
+    { name: '30', Quantidade: 25, Meta: 18 },
   ];
 
   const mockNoticiasVsReleasesData = [
@@ -314,17 +321,19 @@ export const RelatoriosGraphCards: React.FC<RelatoriosGraphCardsProps> = ({
       />
     ),
     origemDemandas: (
-      <PieChart 
-        data={chartData.origens.length ? chartData.origens : mockPieData} 
-        colorSet="orange" 
-        showOnlyPercentage={true} 
-        showLabels={false} 
-        legendPosition="none"
-        largePercentage={true}
-      />
+      <div className="pt-0">
+        <PieChart 
+          data={chartData.origens.length ? chartData.origens : mockPieData} 
+          colorSet="orange" 
+          showOnlyPercentage={true} 
+          showLabels={false} 
+          legendPosition="none"
+          largePercentage={true}
+        />
+      </div>
     ),
     tempoMedioResposta: (
-      <LineChart 
+      <LineChartComponent 
         data={chartData.responseTimes.length ? chartData.responseTimes : mockLineData} 
         xAxisDataKey="name" 
         yAxisTicks={[10, 20, 50, 60, 90]} 
@@ -345,7 +354,7 @@ export const RelatoriosGraphCards: React.FC<RelatoriosGraphCardsProps> = ({
       />
     ),
     notasEmitidas: (
-      <LineChart 
+      <LineChartComponent 
         data={chartData.mediaTypes.length ? chartData.mediaTypes : mockAreaData} 
         xAxisDataKey="name" 
         lines={[{ dataKey: 'Quantidade', name: 'Quantidade', color: chartColors[0] }]}
@@ -353,14 +362,16 @@ export const RelatoriosGraphCards: React.FC<RelatoriosGraphCardsProps> = ({
       />
     ),
     problemasComuns: (
-      <PieChart 
-        data={mockProblemasData} 
-        colorSet="mixed" 
-        showOnlyPercentage={true} 
-        showLabels={false}
-        legendPosition="none"
-        largePercentage={true}
-      />
+      <div className="pt-0">
+        <PieChart 
+          data={mockProblemasData} 
+          colorSet="mixed" 
+          showOnlyPercentage={true} 
+          showLabels={false}
+          legendPosition="none"
+          largePercentage={true}
+        />
+      </div>
     ),
     noticiasVsReleases: (
       <BarChart 
@@ -376,14 +387,14 @@ export const RelatoriosGraphCards: React.FC<RelatoriosGraphCardsProps> = ({
 
   const cardIcons: Record<string, React.ReactNode> = {
     distribuicaoPorTemas: <BarChart3 className="h-5 w-5 text-gray-500" />,
-    origemDemandas: <PieChart className="h-5 w-5 text-gray-500" />,
+    origemDemandas: <PieChartIcon className="h-5 w-5 text-gray-500" />,
     tempoMedioResposta: <Clock className="h-5 w-5 text-gray-500" />,
     performanceArea: <TrendingUp className="h-5 w-5 text-gray-500" />,
-    notasEmitidas: <LineChart className="h-5 w-5 text-gray-500" />,
+    notasEmitidas: <LineChartIcon className="h-5 w-5 text-gray-500" />,
     notasPorTema: <MessageSquare className="h-5 w-5 text-gray-500" />,
     evolucaoMensal: <TrendingUp className="h-5 w-5 text-gray-500" />,
     indiceSatisfacao: <ThumbsUp className="h-5 w-5 text-gray-500" />,
-    problemasComuns: <PieChart className="h-5 w-5 text-gray-500" />,
+    problemasComuns: <PieChartIcon className="h-5 w-5 text-gray-500" />,
     noticiasVsReleases: <BarChart3 className="h-5 w-5 text-gray-500" />,
   };
 

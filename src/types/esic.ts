@@ -1,4 +1,3 @@
-
 export interface ESICProcesso {
   id: string;
   data_processo: string;
@@ -10,6 +9,7 @@ export interface ESICProcesso {
   atualizado_em: string;
   coordenacao_id?: string;
   prazo_resposta?: string;
+  justificativas_count?: number;
   autor?: {
     nome_completo: string;
   };

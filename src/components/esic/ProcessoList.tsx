@@ -22,7 +22,19 @@ import NovoProcessoButton from './NovoProcessoButton';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 
-const ProcessoList: React.FC = () => {
+interface ProcessoListProps {
+  viewMode: 'list' | 'cards';
+  searchTerm: string;
+  filterOpen: boolean;
+  setFilterOpen: React.Dispatch<React.SetStateAction<boolean>>;
+}
+
+const ProcessoList: React.FC<ProcessoListProps> = ({
+  viewMode,
+  searchTerm,
+  filterOpen,
+  setFilterOpen
+}) => {
   const [processos, setProcessos] = useState<ESICProcesso[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedProcessoId, setSelectedProcessoId] = useState<string | null>(null);
@@ -45,7 +57,15 @@ const ProcessoList: React.FC = () => {
 
       if (error) throw error;
 
-      setProcessos(data || []);
+      // Safely cast the data to ensure proper type handling
+      const typedData = (data || []).map(item => ({
+        ...item,
+        situacao: item.situacao as ESICProcesso['situacao'],
+        status: item.status as ESICProcesso['status'],
+        autor: item.autor as ESICProcesso['autor']
+      })) as ESICProcesso[];
+
+      setProcessos(typedData);
     } catch (error) {
       console.error('Erro ao buscar processos:', error);
       toast({
@@ -107,6 +127,13 @@ const ProcessoList: React.FC = () => {
     }
   };
 
+  // Filter processos based on search term if provided
+  const filteredProcessos = processos.filter(processo => {
+    if (!searchTerm) return true;
+    return processo.texto?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+           processo.autor?.nome_completo?.toLowerCase().includes(searchTerm.toLowerCase());
+  });
+
   return (
     <div className="w-full">
       <div className="flex justify-between items-center mb-6">
@@ -130,7 +157,7 @@ const ProcessoList: React.FC = () => {
           <Skeleton className="h-20 w-full" />
           <Skeleton className="h-20 w-full" />
         </div>
-      ) : processos.length === 0 ? (
+      ) : filteredProcessos.length === 0 ? (
         <div className="text-center py-12 bg-gray-50 rounded-lg">
           <FileText className="h-12 w-12 text-gray-300 mx-auto mb-4" />
           <h3 className="text-lg font-medium text-gray-700">Nenhum processo cadastrado</h3>
@@ -151,7 +178,7 @@ const ProcessoList: React.FC = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {processos.map((processo) => (
+            {filteredProcessos.map((processo) => (
               <TableRow key={processo.id}>
                 <TableCell className="font-medium">
                   {processo.data_processo ? format(new Date(processo.data_processo), 'dd/MM/yyyy', { locale: ptBR }) : '-'}

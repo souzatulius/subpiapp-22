@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Bar, BarChart as RechartsBarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+import { Bar, BarChart as RechartsBarChart, CartesianGrid, Cell, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 
 export interface BarChartProps {
   data: any[];
@@ -72,7 +72,7 @@ export const BarChart: React.FC<BarChartProps> = ({
           formatter={tooltipFormatter || ((value) => [formatNumber(value as number), ''])}
         />
         
-        {showLegend && <Legend />}
+        {showLegend && !multiColorBars && <Legend />}
         
         {multiColorBars ? (
           // Render a single bar series with each bar having its own color
