@@ -102,12 +102,12 @@ const SortableGraphCard: React.FC<SortableGraphCardProps> = ({
       
       <CardContent className="p-3">
         {showAnalysis ? (
-          <div className="bg-gray-50 rounded-lg p-4 h-[220px] overflow-auto">
+          <div className="bg-gray-50 rounded-lg p-4 h-[280px] overflow-auto">
             <h4 className="font-medium text-gray-700 mb-2">Análise de dados</h4>
             <p className="text-gray-600 text-sm">{analysis}</p>
           </div>
         ) : (
-          <div className="h-[220px]">
+          <div className="h-auto">
             {children}
           </div>
         )}

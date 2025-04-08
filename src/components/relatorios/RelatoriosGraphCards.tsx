@@ -57,7 +57,7 @@ export const RelatoriosGraphCards: React.FC<RelatoriosGraphCardsProps> = ({
       const newVisibleCards = cardsOrder.filter(cardId => chartVisibility[cardId]);
       setVisibleCards(newVisibleCards);
     }
-  }, [chartVisibility, cardsOrder, setVisibleCards]);
+  }, [chartVisibility, cardsOrder]);
 
   useEffect(() => {
     const fetchChartData = async () => {
@@ -380,7 +380,7 @@ export const RelatoriosGraphCards: React.FC<RelatoriosGraphCardsProps> = ({
                       <div className="h-8 w-8 border-4 border-t-gray-500 border-r-transparent border-b-gray-300 border-l-transparent rounded-full animate-spin"></div>
                     </div>
                   ) : localChartComponents[cardId] ? (
-                    <div className="h-[220px] p-2">
+                    <div className="h-[280px] p-2">
                       {localChartComponents[cardId]}
                     </div>
                   ) : (
