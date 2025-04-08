@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Home, RotateCcw } from 'lucide-react';
 import { useDashboardCards } from '@/hooks/dashboard/useDashboardCards';
@@ -44,7 +43,6 @@ const DashboardPage: React.FC = () => {
     resetDashboard
   } = useDashboardCards();
 
-  // Use the card storage hook
   const { saveCardConfig, isSaving } = useCardStorage(user, userCoordenaticaoId);
 
   const scrollFadeStyles = useScrollFade();
@@ -63,11 +61,9 @@ const DashboardPage: React.FC = () => {
   };
 
   const handleSaveCard = async (updatedCard: Partial<ActionCardItem>) => {
-    // First update local state
     saveCardEdit(updatedCard as ActionCardItem);
     setIsEditCardModalOpen(false);
     
-    // Then save to database
     if (user && cards) {
       const updatedCards = cards.map(card => 
         card.id === updatedCard.id ? { ...card, ...updatedCard } : card
@@ -92,10 +88,8 @@ const DashboardPage: React.FC = () => {
   };
 
   const handleCardsChange = async (updatedCards: ActionCardItem[]) => {
-    // First update the local state
     handleCardsReorder(updatedCards);
     
-    // Then save to database using the useCardStorage hook
     if (user) {
       const saved = await saveCardConfig(updatedCards);
       if (!saved) {
@@ -109,10 +103,8 @@ const DashboardPage: React.FC = () => {
   };
 
   const handleHideCard = async (cardId: string) => {
-    // First update local state
     handleCardHide(cardId);
     
-    // Then save to database
     if (user && cards) {
       const updatedCards = cards.map(card => 
         card.id === cardId ? { ...card, isHidden: true } : card
@@ -137,10 +129,8 @@ const DashboardPage: React.FC = () => {
   };
 
   const handleResetDashboard = async () => {
-    // First update local state
     resetDashboard();
     
-    // Then save to database if user is logged in
     if (user) {
       const defaultCards = resetDashboard();
       const success = await saveCardConfig(defaultCards);
@@ -167,8 +157,6 @@ const DashboardPage: React.FC = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
-      {/* Remove the fixed positioned breadcrumb for mobile */}
-      
       <div className={`${isMobile ? 'transition-all duration-300' : ''}`}>
         <Header showControls={true} toggleSidebar={toggleSidebar} />
       </div>
@@ -186,15 +174,13 @@ const DashboardPage: React.FC = () => {
             transition={{ duration: 0.5 }}
           >
             <div className="space-y-6">
-              {/* Mobile breadcrumb now placed BEFORE WelcomeCard */}
               {isMobile && (
-                <div className="w-full bg-white rounded-md shadow-sm">
+                <div className="mb-0">
                   <BreadcrumbBar />
                 </div>
               )}
               
               <div className="w-full">
-                {/* WelcomeCard component */}
                 <WelcomeCard 
                   title="Dashboard" 
                   description="Arraste e edite os cards para personalizar a sua tela" 

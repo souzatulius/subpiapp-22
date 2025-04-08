@@ -39,7 +39,7 @@ const UserProfile: React.FC = () => {
             
             <div className="container max-w-7xl mx-auto">
               <div className={`p-4 ${isMobile ? 'pb-16' : 'pb-4'}`}>
-                {isMobile && <BreadcrumbBar className="mb-4" />}
+                {isMobile && <BreadcrumbBar />}
                 <UserProfileView />
               </div>
             </div>

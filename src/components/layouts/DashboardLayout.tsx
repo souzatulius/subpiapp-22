@@ -35,15 +35,13 @@ const DashboardLayout: React.FC = () => {
     <div className="flex flex-col bg-gray-50 min-h-screen">
       <div className="transition-all duration-300 min-h-[64px]">
         <Header showControls={true} toggleSidebar={toggleSidebar} />
-        
-        {/* Moved breadcrumb to be part of the main content on mobile */}
       </div>
       
       <div className="flex flex-1 relative">
         {!isMobile && <DashboardSidebar isOpen={sidebarOpen} />}
         
         <main className="flex-1 w-full transition-all duration-300">
-          {/* Breadcrumb on desktop goes here, but we'll render breadcrumb directly in main dashboard content for mobile */}
+          {/* Breadcrumb on desktop */}
           {!isMobile && <BreadcrumbBar />}
           
           <div className="max-w-7xl mx-auto w-full flex-1">

@@ -9,7 +9,13 @@ import { format } from 'date-fns';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { UserProfile } from '@/types/common';
 
-interface ExtendedUserProfile extends Omit<UserProfile, 'cargo' | 'coordenacao'> {
+interface ExtendedUserProfile {
+  id: string;
+  nome_completo: string;
+  email: string;
+  whatsapp?: string;
+  aniversario?: string;
+  foto_perfil_url?: string;
   cargo_descricao?: string;
   coordenacao_descricao?: string;
   supervisao_tecnica_descricao?: string;

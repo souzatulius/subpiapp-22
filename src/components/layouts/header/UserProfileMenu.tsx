@@ -115,9 +115,9 @@ const UserProfileMenu: React.FC = () => {
                 <div className="p-3 border-b">
                   <p className="font-semibold text-blue-900">{getFirstTwoNames()}</p>
                   <p className="text-gray-500 text-xs">{userProfile.email}</p>
-                  {userProfile.coordenacao_id && (
+                  {userProfile.coordenacao && (
                     <p className="text-gray-500 text-xs mt-1">
-                      {userProfile.coordenacao ? userProfile.coordenacao.descricao : 'Coordenação não atribuída'}
+                      {userProfile.coordenacao.descricao || 'Coordenação não atribuída'}
                     </p>
                   )}
                 </div>

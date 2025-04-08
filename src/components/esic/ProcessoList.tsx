@@ -71,10 +71,10 @@ const ProcessoList: React.FC<ProcessoListProps> = ({
           return {
             ...processo,
             autor_nome: autorNome,
-            // Ensure status is one of the allowed values
-            status: ['aberto', 'em_andamento', 'concluido', 'cancelado'].includes(processo.status) 
-              ? processo.status 
-              : 'aberto'
+            // Map the database status to our ESICProcesso type allowed values
+            status: processo.status === 'aberto' ? 'aberto' : 
+                   processo.status === 'em_andamento' ? 'em_andamento' : 
+                   processo.status === 'cancelado' ? 'cancelado' : 'concluido'
           } as ESICProcesso;
         });
         

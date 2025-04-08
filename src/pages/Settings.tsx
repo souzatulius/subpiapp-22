@@ -60,10 +60,10 @@ const Settings = () => {
         </div>
         
         <div className="flex flex-1">
-          {/* Somente mostrar sidebar no desktop */}
+          {/* Only show sidebar on desktop */}
           {!isMobile && <DashboardSidebar isOpen={sidebarOpen} />}
           
-          <main className={`flex-1 ${isMobile ? 'pt-10' : ''}`}>
+          <main className={`flex-1 ${isMobile ? 'pt-0' : ''}`}>
             {/* Desktop breadcrumb - only show on desktop before content */}
             {!isMobile && <BreadcrumbBar onSettingsClick={handleBackClick} />}
             
@@ -74,7 +74,7 @@ const Settings = () => {
                     style={isMobile ? scrollFadeStyles : undefined}
                     className={`${isMobile ? 'transition-all duration-300' : ''}`}
                   >
-                    {/* Mobile breadcrumb - directly above WelcomeCard with no margin  */}
+                    {/* Mobile breadcrumb - directly above WelcomeCard with no margin */}
                     {isMobile && <div className="mb-0"><BreadcrumbBar onSettingsClick={handleBackClick} /></div>}
                     
                     <SettingsDashboard searchQuery={searchQuery} />
