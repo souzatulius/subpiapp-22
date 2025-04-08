@@ -17,6 +17,7 @@ interface CardGroupProps {
   onQuickDemandSubmit?: () => void;
   onSearchSubmit?: (query: string) => void;
   isMobileView?: boolean;
+  isPendingTasksCard?: boolean;
 }
 
 const CardGroup: React.FC<CardGroupProps> = ({
@@ -29,15 +30,19 @@ const CardGroup: React.FC<CardGroupProps> = ({
   onQuickDemandTitleChange = () => {},
   onQuickDemandSubmit = () => {},
   onSearchSubmit = () => {},
-  isMobileView = false
+  isMobileView = false,
+  isPendingTasksCard = false
 }) => {
   const isDynamicDataCard = card.type === 'data_dynamic' && card.dataSourceKey;
   const IconComponent = getIconComponentFromId(card.iconId);
 
+  // Apply special height class for pending tasks card
+  const heightClass = isPendingTasksCard ? 'row-span-2' : getHeightClass(card.height);
+
   return (
     <div 
       key={card.id}
-      className={`${getWidthClass(card.width, isMobileView)} ${getHeightClass(card.height)}`}
+      className={`${getWidthClass(card.width, isMobileView)} ${heightClass}`}
     >
       {isDynamicDataCard ? (
         <DynamicDataCard

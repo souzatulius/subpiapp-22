@@ -30,6 +30,7 @@ export interface UnifiedCardGridProps {
   onQuickDemandSubmit?: () => void;
   onSearchSubmit?: (query: string) => void;
   specialCardsData?: any;
+  pendingTasksCardId?: string;
 }
 
 const UnifiedCardGrid: React.FC<UnifiedCardGridProps> = ({
@@ -46,7 +47,8 @@ const UnifiedCardGrid: React.FC<UnifiedCardGridProps> = ({
   onQuickDemandTitleChange,
   onQuickDemandSubmit,
   onSearchSubmit,
-  specialCardsData
+  specialCardsData,
+  pendingTasksCardId
 }) => {
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
@@ -85,11 +87,18 @@ const UnifiedCardGrid: React.FC<UnifiedCardGridProps> = ({
         .sort((a, b) => (a.mobileOrder ?? 999) - (b.mobileOrder ?? 999))
     : visibleCards;
 
+  // Find the pending tasks card specifically
+  const pendingCard = displayedCards.find(card => card.id === pendingTasksCardId);
+  
+  // Handle other cards
+  const otherCards = displayedCards.filter(card => card.id !== pendingTasksCardId);
+
+  // Use the grid occupancy system to track the positioning
   const { occupiedSlots } = useGridOccupancy(
     displayedCards.map(card => ({
       id: card.id,
       width: card.width || '25',
-      height: card.height || '1',
+      height: card.id === pendingTasksCardId ? '2' : (card.height || '1'),
       type: card.type
     })),
     isMobileView
@@ -114,7 +123,9 @@ const UnifiedCardGrid: React.FC<UnifiedCardGridProps> = ({
           {displayedCards.map(card => (
             <div
               key={card.id}
-              className={`${getWidthClass(card.width, isMobileView)} ${getHeightClass(card.height)}`}
+              className={`${getWidthClass(card.width, isMobileView)} ${
+                card.id === pendingTasksCardId ? 'row-span-2' : getHeightClass(card.height)
+              }`}
             >
               <SortableUnifiedActionCard
                 id={card.id}
@@ -124,7 +135,7 @@ const UnifiedCardGrid: React.FC<UnifiedCardGridProps> = ({
                 path={card.path}
                 color={card.color}
                 width={card.width}
-                height={card.height}
+                height={card.id === pendingTasksCardId ? '2' : card.height}
                 isDraggable={true}
                 isEditing={isEditMode}
                 onEdit={onEditCard ? (id) => {

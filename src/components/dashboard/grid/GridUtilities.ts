@@ -42,7 +42,7 @@ export const getHeightClass = (height?: string): string => {
     case '1':
       return 'h-20'; // 5rem or 80px
     case '2':
-      return 'h-40'; // 10rem or 160px
+      return 'h-40 row-span-2'; // 10rem or 160px and span 2 rows in the grid
     default:
       return 'h-20'; // Default height
   }
