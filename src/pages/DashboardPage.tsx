@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Home, RotateCcw } from 'lucide-react';
 import { useDashboardCards } from '@/hooks/dashboard/useDashboardCards';
@@ -178,12 +179,15 @@ const DashboardPage: React.FC = () => {
                 />
               </div>
               
-              <div className="flex justify-end">
+              <div className="flex items-center space-x-4 justify-between">
+                <div className="flex-1">
+                  <DashboardSearchCard />
+                </div>
                 <Button 
                   variant="outline" 
-                  size="sm" 
+                  size="lg" 
                   onClick={handleResetDashboard}
-                  className="text-blue-600 border-blue-300 hover:bg-blue-50"
+                  className="text-blue-600 border-blue-300 hover:bg-blue-50 py-8"
                   disabled={isSaving}
                 >
                   <RotateCcw className="h-4 w-4 mr-2" />

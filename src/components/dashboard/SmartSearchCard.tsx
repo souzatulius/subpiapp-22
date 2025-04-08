@@ -59,19 +59,13 @@ const SmartSearchCard: React.FC<SmartSearchCardProps> = ({
         <Input
           ref={inputRef}
           type="text" 
-          className="pl-14 pr-4 py-5 rounded-xl border border-gray-300 w-full bg-white text-2xl font-bold text-gray-800 placeholder:text-gray-600 placeholder:font-bold"
+          className="pl-14 pr-4 py-8 rounded-xl border border-gray-300 w-full bg-white text-2xl text-gray-800 placeholder:text-gray-600"
           placeholder={placeholder}
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           onFocus={() => setShowSuggestions(true)}
           onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
         />
-        <button 
-          type="submit"
-          className="absolute right-3 top-1/2 transform -translate-y-1/2 rounded-xl bg-blue-600 hover:bg-blue-700 px-4 py-2"
-        >
-          <Search className="h-10 w-10 text-white" />
-        </button>
       </div>
       
       <AnimatePresence>
