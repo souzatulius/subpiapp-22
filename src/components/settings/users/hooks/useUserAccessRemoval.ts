@@ -23,7 +23,7 @@ export const useUserAccessRemoval = (refreshUsers: () => Promise<void>) => {
       
       if (deletePermissionsError) throw deletePermissionsError;
       
-      // Atualizar status do usuário na tabela 'usuarios' (não 'users')
+      // Update user status in the correct 'usuarios' table
       const { error: updateError } = await supabase
         .from('usuarios')
         .update({ status: 'pendente' })

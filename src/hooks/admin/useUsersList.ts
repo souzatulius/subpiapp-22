@@ -24,7 +24,7 @@ export function useUsersList() {
       setError(null);
       
       try {
-        // Fetch users with their basic info
+        // Fetch users with their basic info from the correct 'usuarios' table
         const { data: usersData, error: usersError } = await supabase
           .from('usuarios')
           .select(`

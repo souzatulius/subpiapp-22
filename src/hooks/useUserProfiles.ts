@@ -19,6 +19,7 @@ export const useUserProfiles = () => {
     async function fetchProfiles() {
       try {
         setLoading(true);
+        // Fetch from the correct 'usuarios' table
         const { data, error } = await supabase
           .from('usuarios')
           .select(`

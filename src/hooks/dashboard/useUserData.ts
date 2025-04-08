@@ -23,6 +23,7 @@ export const useUserData = (userId?: string): UserDataResult => {
       
       setIsLoadingUser(true);
       try {
+        // Fetch from the correct 'usuarios' table
         const { data, error } = await supabase
           .from('usuarios')
           .select('nome_completo, coordenacao_id')

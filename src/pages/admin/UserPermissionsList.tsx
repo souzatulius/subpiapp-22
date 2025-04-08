@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useUsersList } from '@/hooks/admin/useUsersList';
 import { 
@@ -22,7 +21,7 @@ const UserPermissionsList = () => {
     const fetchAllUsers = async () => {
       setFetchingAllUsers(true);
       try {
-        // Fetch all users with their permissions
+        // Fetch all users with their permissions from the correct 'usuarios' table
         const { data, error } = await supabase
           .from('usuarios')
           .select(`

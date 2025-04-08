@@ -25,7 +25,7 @@ export const useUserInvite = (refreshUsers: () => Promise<void>) => {
       
       console.log('Convidando usuário com os dados:', userData);
       
-      // Usar o método correto para convites - inviteUserByEmail em vez de referenciar tabela 'users'
+      // Use the correct method for invites
       const { data: inviteData, error: inviteError } = await supabase.auth.admin.inviteUserByEmail(
         completeEmail,
         {

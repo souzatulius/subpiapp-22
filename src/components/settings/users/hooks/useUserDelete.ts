@@ -15,7 +15,7 @@ export const useUserDelete = (fetchData: () => Promise<void>) => {
     setIsDeleting(true);
     
     try {
-      // Update user status to 'excluido' instead of deleting
+      // Update user status to 'excluido' in the correct table 'usuarios'
       const { error } = await supabase
         .from('usuarios')
         .update({ status: 'excluido' })

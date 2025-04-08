@@ -15,7 +15,7 @@ export const useUsersData = () => {
     try {
       setIsLoading(true);
       
-      // Fetch users with basic columns
+      // Fetch users with basic columns from the correct 'usuarios' table
       const { data: usersData, error: usersError } = await supabase
         .from('usuarios')
         .select(`

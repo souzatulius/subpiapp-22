@@ -54,7 +54,7 @@ export const useUserEdit = (fetchData: () => Promise<void>) => {
       
       console.log('Updating user with data:', cleanData);
       
-      // Update user in 'usuarios' table
+      // Update user in 'usuarios' table - correct table reference
       const { error } = await supabase
         .from('usuarios')
         .update(cleanData)
