@@ -9,13 +9,12 @@ import { ChartComponentsCollection } from './types';
 
 export const useRankingChartComponents = () => {
   const { 
-    serviceDiversityData,
-    servicesByDistrictData,
-    serviceTypesData,
-    statusDistributionData,
-    timeComparisonData,
-    topCompaniesData,
-    statusTransitionData
+    problemas,
+    origens, 
+    responseTimes, 
+    coordinations, 
+    mediaTypes,
+    isLoading 
   } = useChartData();
   
   const { chartColors } = useChartConfigs();
@@ -24,77 +23,75 @@ export const useRankingChartComponents = () => {
   const rankingChartComponents = useMemo<ChartComponentsCollection>(() => ({
     'serviceDiversity': (
       <BarChart 
-        data={serviceDiversityData}
+        data={problemas || []}
         xAxisDataKey="name"
         bars={[
-          { dataKey: 'Quantidade', name: 'Quantidade', color: chartColors[0] }
+          { dataKey: 'value', name: 'Quantidade', color: chartColors[0] }
         ]}
       />
     ),
     'servicesByDistrict': (
       <BarChart 
-        data={servicesByDistrictData}
+        data={coordinations || []}
         xAxisDataKey="name"
         bars={[
-          { dataKey: 'Quantidade', name: 'Quantidade', color: chartColors[1] }
+          { dataKey: 'Demandas', name: 'Quantidade', color: chartColors[1] }
         ]}
       />
     ),
     'serviceTypes': (
       <BarChart 
-        data={serviceTypesData}
+        data={problemas || []}
         xAxisDataKey="name"
         bars={[
-          { dataKey: 'Quantidade', name: 'Quantidade', color: chartColors[2] }
+          { dataKey: 'value', name: 'Quantidade', color: chartColors[2] }
         ]}
       />
     ),
     'statusDistribution': (
       <BarChart 
-        data={statusDistributionData}
+        data={origens || []}
         xAxisDataKey="name"
         bars={[
-          { dataKey: 'Quantidade', name: 'Quantidade', color: chartColors[3] }
+          { dataKey: 'value', name: 'Quantidade', color: chartColors[3] }
         ]}
       />
     ),
     'timeComparison': (
       <BarChart 
-        data={timeComparisonData}
+        data={responseTimes || []}
         xAxisDataKey="name"
         bars={[
-          { dataKey: 'Dias', name: 'Dias', color: chartColors[0] }
+          { dataKey: 'Demandas', name: 'Dias', color: chartColors[0] }
         ]}
       />
     ),
     'topCompanies': (
       <BarChart 
-        data={topCompaniesData}
+        data={coordinations || []}
         xAxisDataKey="name"
         bars={[
-          { dataKey: 'Concluídas', name: 'Concluídas', color: chartColors[1] }
+          { dataKey: 'Demandas', name: 'Concluídas', color: chartColors[1] }
         ]}
       />
     ),
     'statusTransition': (
       <LineChart 
-        data={statusTransitionData}
+        data={mediaTypes || []}
         xAxisDataKey="name"
         lines={[
-          { dataKey: 'Aberto', name: 'Aberto', color: chartColors[2] },
-          { dataKey: 'EmAndamento', name: 'Em Andamento', color: chartColors[1] },
-          { dataKey: 'Concluído', name: 'Concluído', color: chartColors[0] }
+          { dataKey: 'Quantidade', name: 'Aberto', color: chartColors[2] },
+          { dataKey: 'Quantidade', name: 'Em Andamento', color: chartColors[1] },
+          { dataKey: 'Quantidade', name: 'Concluído', color: chartColors[0] }
         ]}
       />
     ),
   }), [
-    serviceDiversityData,
-    servicesByDistrictData,
-    serviceTypesData,
-    statusDistributionData,
-    timeComparisonData,
-    topCompaniesData,
-    statusTransitionData,
+    problemas,
+    origens,
+    responseTimes,
+    coordinations,
+    mediaTypes,
     chartColors
   ]);
 
