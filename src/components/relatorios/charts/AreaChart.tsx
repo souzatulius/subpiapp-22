@@ -1,79 +1,87 @@
 
 import React from 'react';
-import { AreaChart as RechartsAreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { 
+  ResponsiveContainer, 
+  AreaChart as RechartsAreaChart, 
+  Area, 
+  XAxis, 
+  YAxis, 
+  CartesianGrid, 
+  Tooltip,
+  Legend 
+} from 'recharts';
+
+interface AreaProps {
+  dataKey: string;
+  name: string;
+  color: string;
+  fillOpacity?: number;
+}
 
 interface AreaChartProps {
-  data: Array<Record<string, any>>;
-  title?: string;
+  data: any[];
   xAxisDataKey: string;
-  areas: Array<{
-    dataKey: string;
-    name: string;
-    color: string;
-    fillOpacity?: number;
-  }>;
-  className?: string;
-  insight?: string;
-  stacked?: boolean;
+  areas: AreaProps[];
+  yAxisTicks?: number[];
 }
 
 export const AreaChart: React.FC<AreaChartProps> = ({ 
   data, 
   xAxisDataKey, 
-  areas, 
-  className,
-  stacked = false
+  areas,
+  yAxisTicks
 }) => {
-  // Validate input data
-  const isDataValid = Array.isArray(data) && data.length > 0;
-  const areAreasValid = Array.isArray(areas) && areas.length > 0;
-
-  // If data or areas are invalid, render placeholder
-  if (!isDataValid || !areAreasValid) {
+  if (!data || data.length === 0) {
     return (
-      <div className={`h-full flex items-center justify-center ${className}`}>
-        <p className="text-orange-200">Dados não disponíveis</p>
+      <div className="flex items-center justify-center h-full w-full">
+        <p className="text-gray-400">Sem dados disponíveis</p>
       </div>
     );
   }
-  
-  // Default colors if not provided
-  const defaultColors = ['#f97316', '#0ea5e9', '#1e40af', '#71717a', '#27272a'];
-  
+
   return (
-    <div className={`h-full w-full ${className}`}>
-      <ResponsiveContainer width="100%" height="100%">
-        <RechartsAreaChart
-          data={data}
-          margin={{
-            top: 5,
-            right: 10,
-            left: 0,
-            bottom: 5,
-          }}
-        >
-          <CartesianGrid strokeDasharray="3 3" stroke="#71717a" />
-          <XAxis dataKey={xAxisDataKey} stroke="#71717a" />
-          <YAxis stroke="#71717a" />
-          <Tooltip 
-            contentStyle={{ backgroundColor: '#1e40af', borderColor: '#0ea5e9', color: '#ffffff' }} 
-            labelStyle={{ color: '#ffffff' }}
+    <ResponsiveContainer width="100%" height="100%">
+      <RechartsAreaChart
+        data={data}
+        margin={{
+          top: 5,
+          right: 30,
+          left: 20,
+          bottom: 5,
+        }}
+      >
+        <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
+        <XAxis 
+          dataKey={xAxisDataKey} 
+          tick={{ fontSize: 12 }} 
+          axisLine={false} 
+          tickLine={false} 
+        />
+        <YAxis 
+          tick={{ fontSize: 12 }} 
+          axisLine={false} 
+          tickLine={false}
+          ticks={yAxisTicks}
+        />
+        <Tooltip 
+          contentStyle={{ fontSize: '12px', borderRadius: '6px' }}
+          formatter={(value: number, name: string) => [value, name]}
+        />
+        <Legend wrapperStyle={{ fontSize: '12px', paddingTop: '10px' }} />
+        
+        {areas.map((area, index) => (
+          <Area
+            key={`area-${index}`}
+            type="monotone"
+            dataKey={area.dataKey}
+            name={area.name}
+            stroke={area.color}
+            fill={area.color}
+            fillOpacity={area.fillOpacity || 0.3}
+            activeDot={{ r: 6 }}
           />
-          <Legend wrapperStyle={{ color: '#71717a' }} />
-          {areas.map((area, index) => (
-            <Area
-              key={index}
-              type="monotone"
-              dataKey={area.dataKey}
-              name={area.name}
-              stroke={area.color || defaultColors[index % defaultColors.length]}
-              fill={area.color || defaultColors[index % defaultColors.length]}
-              fillOpacity={area.fillOpacity || 0.3}
-              stackId={stacked ? "stack" : undefined}
-            />
-          ))}
-        </RechartsAreaChart>
-      </ResponsiveContainer>
-    </div>
+        ))}
+      </RechartsAreaChart>
+    </ResponsiveContainer>
   );
 };

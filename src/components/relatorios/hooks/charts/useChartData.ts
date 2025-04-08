@@ -1,151 +1,216 @@
 
-import { useMemo } from 'react';
-
+import { useState, useEffect } from 'react';
+import { startOfWeek, endOfWeek, format, subDays } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
+import { supabase } from '@/integrations/supabase/client';
 import { ChartData } from './types';
 
 export const useChartData = () => {
-  // Basic chart data
-  const pieChartData = useMemo<ChartData[]>(() => [
-    { name: 'Pendentes', value: 30 },
-    { name: 'Em Andamento', value: 50 },
-    { name: 'Concluídas', value: 100 },
-    { name: 'Canceladas', value: 20 },
-  ], []);
-  
-  const lineChartData = useMemo<ChartData[]>(() => [
-    { name: 'Jan', Demandas: 12 },
-    { name: 'Fev', Demandas: 19 },
-    { name: 'Mar', Demandas: 3 },
-    { name: 'Abr', Demandas: 5 },
-    { name: 'Mai', Demandas: 2 },
-    { name: 'Jun', Demandas: 3 },
-  ], []);
-  
-  const barChartData = useMemo<ChartData[]>(() => [
-    { name: 'Tema 1', Quantidade: 12 },
-    { name: 'Tema 2', Quantidade: 19 },
-    { name: 'Tema 3', Quantidade: 3 },
-    { name: 'Tema 4', Quantidade: 5 },
-    { name: 'Tema 5', Quantidade: 2 },
-  ], []);
-  
-  const areaChartData = useMemo<ChartData[]>(() => [
-    { name: 'Jan', Notas: 12 },
-    { name: 'Fev', Notas: 19 },
-    { name: 'Mar', Notas: 3 },
-    { name: 'Abr', Notas: 5 },
-    { name: 'Mai', Notas: 2 },
-    { name: 'Jun', Notas: 3 },
-  ], []);
+  const [isLoading, setIsLoading] = useState(true);
+  const [data, setData] = useState<{
+    problemas: ChartData[];
+    origens: ChartData[];
+    responseTimes: ChartData[];
+    coordinations: ChartData[];
+    mediaTypes: ChartData[];
+  }>({
+    problemas: [],
+    origens: [],
+    responseTimes: [],
+    coordinations: [],
+    mediaTypes: []
+  });
 
-  // Additional chart data
-  const timelineChartData = useMemo<ChartData[]>(() => [
-    { name: 'Jan', Respostas: 8 },
-    { name: 'Fev', Respostas: 12 },
-    { name: 'Mar', Respostas: 15 },
-    { name: 'Abr', Respostas: 10 },
-    { name: 'Mai', Respostas: 16 },
-    { name: 'Jun', Respostas: 18 },
-  ], []);
+  useEffect(() => {
+    const fetchData = async () => {
+      setIsLoading(true);
+      
+      const currentDate = new Date();
+      const weekStart = startOfWeek(currentDate, { weekStartsOn: 1 }); // Starting Monday
+      const weekEnd = endOfWeek(currentDate, { weekStartsOn: 1 }); // Ending Sunday
+      
+      try {
+        // Fetch problems (temas) distribution
+        const { data: problemasData, error: problemasError } = await supabase
+          .from('demandas')
+          .select('problema_id, problemas:problema_id(descricao)')
+          .gte('horario_publicacao', weekStart.toISOString())
+          .lte('horario_publicacao', weekEnd.toISOString());
 
-  const impactChartData = useMemo<ChartData[]>(() => [
-    { name: 'Baixo', value: 45 },
-    { name: 'Médio', value: 35 },
-    { name: 'Alto', value: 20 },
-  ], []);
+        if (problemasError) throw problemasError;
+        
+        // Fetch origins distribution
+        const { data: origensData, error: origensError } = await supabase
+          .from('demandas')
+          .select('origem_id, origens:origem_id(descricao)')
+          .gte('horario_publicacao', weekStart.toISOString())
+          .lte('horario_publicacao', weekEnd.toISOString());
 
-  const originChartData = useMemo<ChartData[]>(() => [
-    { name: 'Imprensa', Solicitações: 25 },
-    { name: 'Órgãos', Solicitações: 18 },
-    { name: 'Cidadãos', Solicitações: 32 },
-    { name: 'Interno', Solicitações: 15 },
-  ], []);
+        if (origensError) throw origensError;
+        
+        // Fetch response times (time between demand creation and note approval)
+        const { data: responseTimes, error: responseTimesError } = await supabase
+          .from('demandas')
+          .select(`
+            id, 
+            horario_publicacao, 
+            notas_oficiais:notas_oficiais(id, criado_em, status)
+          `)
+          .gte('horario_publicacao', subDays(weekStart, 30).toISOString()) // Get more historical data for trends
+          .lte('horario_publicacao', weekEnd.toISOString())
+          .eq('notas_oficiais.status', 'aprovada');
 
-  const satisfactionChartData = useMemo<ChartData[]>(() => [
-    { name: 'Jan', Satisfação: 7.5 },
-    { name: 'Fev', Satisfação: 7.8 },
-    { name: 'Mar', Satisfação: 8.2 },
-    { name: 'Abr', Satisfação: 8.0 },
-    { name: 'Mai', Satisfação: 8.5 },
-    { name: 'Jun', Satisfação: 8.7 },
-  ], []);
+        if (responseTimesError) throw responseTimesError;
+        
+        // Fetch coordinations (áreas) distribution
+        const { data: coordinationsData, error: coordinationsError } = await supabase
+          .from('demandas')
+          .select(`
+            problema_id,
+            problemas:problema_id(
+              supervisao_tecnica_id, 
+              coordenacao_id,
+              supervisoes:supervisao_tecnica_id(descricao),
+              coordenacoes:coordenacao_id(descricao)
+            )
+          `)
+          .gte('horario_publicacao', weekStart.toISOString())
+          .lte('horario_publicacao', weekEnd.toISOString());
 
-  // Ranking chart data
-  const serviceDiversityData = useMemo<ChartData[]>(() => [
-    { name: 'PAVIMENTAÇÃO', Quantidade: 12 },
-    { name: 'ÁREAS VERDES', Quantidade: 8 },
-    { name: 'ILUMINAÇÃO', Quantidade: 15 },
-    { name: 'ZELADORIA', Quantidade: 10 },
-    { name: 'LIMPEZA', Quantidade: 7 },
-  ], []);
-  
-  const servicesByDistrictData = useMemo<ChartData[]>(() => [
-    { name: 'ALTO DE PINHEIROS', Quantidade: 18 },
-    { name: 'JARDIM PAULISTA', Quantidade: 12 },
-    { name: 'ITAIM BIBI', Quantidade: 15 },
-    { name: 'PINHEIROS', Quantidade: 22 },
-    { name: 'PERDIZES', Quantidade: 14 },
-  ], []);
-  
-  const serviceTypesData = useMemo<ChartData[]>(() => [
-    { name: 'TAPA-BURACO', Quantidade: 35 },
-    { name: 'PODA DE ÁRVORE', Quantidade: 28 },
-    { name: 'LIMPEZA', Quantidade: 22 },
-    { name: 'MANUTENÇÃO', Quantidade: 18 },
-    { name: 'INSTALAÇÃO', Quantidade: 12 },
-  ], []);
-  
-  const statusDistributionData = useMemo<ChartData[]>(() => [
-    { name: 'ABERTO', Quantidade: 45 },
-    { name: 'EM ANDAMENTO', Quantidade: 30 },
-    { name: 'CONCLUÍDO', Quantidade: 65 },
-    { name: 'CANCELADO', Quantidade: 12 },
-  ], []);
-  
-  const timeComparisonData = useMemo<ChartData[]>(() => [
-    { name: 'Média Geral', Dias: 18 },
-    { name: 'Tapa-buraco', Dias: 12 },
-    { name: 'Poda de Árvore', Dias: 25 },
-    { name: 'Limpeza', Dias: 14 },
-  ], []);
-  
-  const topCompaniesData = useMemo<ChartData[]>(() => [
-    { name: 'Empresa A', Concluídas: 48 },
-    { name: 'Empresa B', Concluídas: 42 },
-    { name: 'Empresa C', Concluídas: 38 },
-    { name: 'Empresa D', Concluídas: 32 },
-    { name: 'Empresa E', Concluídas: 28 },
-  ], []);
-  
-  const statusTransitionData = useMemo<ChartData[]>(() => [
-    { name: 'Janeiro', Aberto: 45, EmAndamento: 30, Concluído: 25 },
-    { name: 'Fevereiro', Aberto: 39, EmAndamento: 38, Concluído: 32 },
-    { name: 'Março', Aberto: 28, EmAndamento: 42, Concluído: 38 },
-    { name: 'Abril', Aberto: 35, EmAndamento: 32, Concluído: 42 },
-    { name: 'Maio', Aberto: 42, EmAndamento: 28, Concluído: 48 },
-    { name: 'Junho', Aberto: 38, EmAndamento: 35, Concluído: 55 },
-  ], []);
+        if (coordinationsError) throw coordinationsError;
+        
+        // Fetch notes by day
+        const { data: notesData, error: notesError } = await supabase
+          .from('notas_oficiais')
+          .select('id, criado_em')
+          .gte('criado_em', weekStart.toISOString())
+          .lte('criado_em', weekEnd.toISOString())
+          .order('criado_em', { ascending: true });
+
+        if (notesError) throw notesError;
+
+        // Process problemas data
+        const problemasCount: Record<string, number> = {};
+        problemasData?.forEach(item => {
+          if (item.problemas) {
+            const desc = item.problemas.descricao || 'Sem categoria';
+            problemasCount[desc] = (problemasCount[desc] || 0) + 1;
+          }
+        });
+        
+        const problemas = Object.entries(problemasCount).map(([name, value]) => ({
+          name,
+          value
+        })).sort((a, b) => b.value - a.value).slice(0, 5); // Top 5
+        
+        // Process origens data
+        const origensCount: Record<string, number> = {};
+        origensData?.forEach(item => {
+          if (item.origens) {
+            const desc = item.origens.descricao || 'Sem origem';
+            origensCount[desc] = (origensCount[desc] || 0) + 1;
+          }
+        });
+        
+        const origens = Object.entries(origensCount).map(([name, value]) => ({
+          name,
+          value
+        }));
+        
+        // Process response times
+        const dayResponseTimes: Record<string, number[]> = {};
+        responseTimes?.forEach(item => {
+          if (item.notas_oficiais && item.notas_oficiais.length > 0) {
+            const demandaDate = new Date(item.horario_publicacao);
+            const notaDate = new Date(item.notas_oficiais[0].criado_em);
+            
+            const diffTime = Math.abs(notaDate.getTime() - demandaDate.getTime());
+            const diffMinutes = Math.ceil(diffTime / (1000 * 60));
+            
+            const day = format(demandaDate, 'EEE', { locale: ptBR });
+            if (!dayResponseTimes[day]) {
+              dayResponseTimes[day] = [];
+            }
+            dayResponseTimes[day].push(diffMinutes);
+          }
+        });
+        
+        const responseTimesData = Object.entries(dayResponseTimes).map(([name, times]) => {
+          const average = times.length > 0 
+            ? Math.round(times.reduce((acc, val) => acc + val, 0) / times.length) 
+            : 0;
+          return {
+            name,
+            Demandas: average
+          };
+        });
+        
+        // Process coordinations data
+        const coordinationsCount: Record<string, number> = {};
+        coordinationsData?.forEach(item => {
+          if (item.problemas) {
+            let desc;
+            if (item.problemas.coordenacoes && item.problemas.coordenacoes.descricao) {
+              desc = item.problemas.coordenacoes.descricao;
+            } else if (item.problemas.supervisoes && item.problemas.supervisoes.descricao) {
+              desc = item.problemas.supervisoes.descricao;
+            } else {
+              desc = 'Sem área';
+            }
+            coordinationsCount[desc] = (coordinationsCount[desc] || 0) + 1;
+          }
+        });
+        
+        const coordinations = Object.entries(coordinationsCount)
+          .map(([name, value]) => ({ name, Demandas: value }))
+          .sort((a, b) => b.Demandas - a.Demandas)
+          .slice(0, 5); // Top 5
+        
+        // Process notes by day
+        const notesByDay: Record<string, number> = {};
+        const days = [];
+        
+        // Initialize all days of the week
+        for (let i = 0; i < 7; i++) {
+          const day = new Date(weekStart);
+          day.setDate(weekStart.getDate() + i);
+          const dayStr = format(day, 'EEE', { locale: ptBR });
+          days.push(dayStr);
+          notesByDay[dayStr] = 0;
+        }
+        
+        notesData?.forEach(note => {
+          const noteDate = new Date(note.criado_em);
+          const day = format(noteDate, 'EEE', { locale: ptBR });
+          notesByDay[day] = (notesByDay[day] || 0) + 1;
+        });
+        
+        const mediaTypes = days.map(day => ({
+          name: day,
+          Quantidade: notesByDay[day] || 0
+        }));
+        
+        setData({
+          problemas,
+          origens,
+          responseTimes: responseTimesData,
+          coordinations,
+          mediaTypes
+        });
+      } catch (error) {
+        console.error('Error fetching chart data:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   return {
-    // Basic chart data
-    pieChartData,
-    lineChartData,
-    barChartData,
-    areaChartData,
-    
-    // Additional chart data
-    timelineChartData,
-    impactChartData,
-    originChartData,
-    satisfactionChartData,
-    
-    // Ranking chart data
-    serviceDiversityData,
-    servicesByDistrictData,
-    serviceTypesData,
-    statusDistributionData,
-    timeComparisonData,
-    topCompaniesData,
-    statusTransitionData
+    ...data,
+    isLoading
   };
 };
+
+export default useChartData;

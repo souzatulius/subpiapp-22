@@ -52,7 +52,7 @@ const RelatoriosPage = () => {
           variant="outline" 
           size="icon"
           onClick={handlePrint}
-          className="h-9 w-9 bg-white hover:bg-gray-100 border-gray-200 shadow-sm hover:shadow transition-all"
+          className="h-9 w-9 bg-white hover:bg-gray-100 border-gray-200 shadow-sm hover:shadow transition-all rounded-xl"
           title="Imprimir"
         >
           <Printer className="h-4 w-4 text-gray-600" />
@@ -62,7 +62,7 @@ const RelatoriosPage = () => {
           variant="outline"
           size="icon"
           onClick={handleExportPDF}
-          className="h-9 w-9 bg-white hover:bg-gray-100 border-gray-200 shadow-sm hover:shadow transition-all"
+          className="h-9 w-9 bg-white hover:bg-gray-100 border-gray-200 shadow-sm hover:shadow transition-all rounded-xl"
           title="Exportar PDF"
         >
           <FileDown className="h-4 w-4 text-gray-600" />
@@ -72,7 +72,7 @@ const RelatoriosPage = () => {
           variant="default" 
           size="icon"
           onClick={() => setIsFilterOpen(true)}
-          className="h-9 w-9 bg-gray-600 hover:bg-gray-700 shadow-sm hover:shadow transition-all"
+          className="h-9 w-9 bg-gray-600 hover:bg-gray-700 shadow-sm hover:shadow transition-all rounded-xl"
           title="Filtros"
         >
           <SlidersHorizontal className="h-4 w-4" />

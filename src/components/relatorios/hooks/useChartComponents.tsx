@@ -1,160 +1,107 @@
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { BarChart } from '../charts/BarChart';
 import { LineChart } from '../charts/LineChart';
 import { PieChart } from '../charts/PieChart';
 import { AreaChart } from '../charts/AreaChart';
-import { useReportsData } from './useReportsData';
+import { useChartData } from './charts/useChartData';
+import { useChartConfigs } from './charts/useChartConfigs';
 
 export const useChartComponents = () => {
-  const { reportsData, isLoading } = useReportsData();
+  const { 
+    problemas, 
+    origens, 
+    responseTimes, 
+    coordinations, 
+    mediaTypes, 
+    isLoading 
+  } = useChartData();
+  
+  const { chartColors } = useChartConfigs();
 
   // Prepare chart components based on the available data
-  const chartComponents = React.useMemo(() => {
+  const chartComponents = useMemo(() => {
     // Return empty/placeholder charts if data is loading or not available
-    if (isLoading || !reportsData) {
+    if (isLoading) {
       return {
         distribuicaoPorTemas: (
-          <BarChart 
-            data={[]}
-            xAxisDataKey="name"
-            bars={[
-              { dataKey: 'value', name: 'Quantidade', color: '#f97316' }
-            ]}
-          />
+          <div className="h-full w-full flex items-center justify-center">
+            <div className="h-8 w-8 border-4 border-t-orange-500 border-r-transparent border-b-orange-200 border-l-transparent rounded-full animate-spin"></div>
+          </div>
         ),
         origemDemandas: (
-          <PieChart 
-            data={[]}
-            colors={['#f97316', '#fb923c', '#fdba74', '#fed7aa', '#ffedd5']}
-            showOnlyPercentage={true}
-            showLabels={true}
-          />
+          <div className="h-full w-full flex items-center justify-center">
+            <div className="h-8 w-8 border-4 border-t-orange-500 border-r-transparent border-b-orange-200 border-l-transparent rounded-full animate-spin"></div>
+          </div>
         ),
         tempoMedioResposta: (
-          <LineChart 
-            data={[]}
-            xAxisDataKey="name"
-            yAxisTicks={[10, 20, 50, 60, 90]}
-            lines={[
-              { dataKey: 'value', name: 'Respostas da coordenação', color: '#f97316' },
-              { dataKey: 'aprovacao', name: 'Aprovação da nota', color: '#0ea5e9' }
-            ]}
-          />
+          <div className="h-full w-full flex items-center justify-center">
+            <div className="h-8 w-8 border-4 border-t-blue-500 border-r-transparent border-b-blue-200 border-l-transparent rounded-full animate-spin"></div>
+          </div>
         ),
         performanceArea: (
-          <BarChart 
-            data={[]}
-            xAxisDataKey="name"
-            bars={[
-              { dataKey: 'value', name: 'Demandas no mês', color: '#0ea5e9' }
-            ]}
-            horizontal={true}
-          />
+          <div className="h-full w-full flex items-center justify-center">
+            <div className="h-8 w-8 border-4 border-t-blue-500 border-r-transparent border-b-blue-200 border-l-transparent rounded-full animate-spin"></div>
+          </div>
         ),
         notasEmitidas: (
-          <AreaChart 
-            data={[]}
-            xAxisDataKey="name"
-            areas={[
-              { dataKey: 'value', name: 'Quantidade', color: '#0ea5e9' }
-            ]}
-          />
+          <div className="h-full w-full flex items-center justify-center">
+            <div className="h-8 w-8 border-4 border-t-blue-500 border-r-transparent border-b-blue-200 border-l-transparent rounded-full animate-spin"></div>
+          </div>
         )
       };
     }
 
-    // Sample data for the charts when real data isn't available
-    const sampleData = {
-      problemas: [
-        { name: 'Poda', value: 85 },
-        { name: 'Limpeza', value: 65 },
-        { name: 'Iluminação', value: 42 },
-        { name: 'Segurança', value: 38 },
-        { name: 'Urbanismo', value: 25 },
-        { name: 'Outros', value: 15 }
-      ],
-      origens: [
-        { name: 'Imprensa', value: 120 },
-        { name: 'SMSUB', value: 80 },
-        { name: 'Internas', value: 60 },
-        { name: 'Outros', value: 40 }
-      ],
-      tempoResposta: [
-        { name: 'Jan', value: 45, aprovacao: 60 },
-        { name: 'Fev', value: 38, aprovacao: 55 },
-        { name: 'Mar', value: 30, aprovacao: 40 },
-        { name: 'Abr', value: 25, aprovacao: 35 }
-      ],
-      coordenacoes: [
-        { name: 'STLP', value: 92 },
-        { name: 'STM', value: 87 },
-        { name: 'GAB', value: 82 },
-        { name: 'CAF', value: 75 },
-        { name: 'PR', value: 68 }
-      ],
-      notasEmitidas: [
-        { name: 'Jan', value: 12 },
-        { name: 'Fev', value: 15 },
-        { name: 'Mar', value: 18 },
-        { name: 'Abr', value: 22 }
-      ]
-    };
-
-    // Prefer real data when available, otherwise use sample data
     return {
       distribuicaoPorTemas: (
-        <BarChart 
-          data={reportsData?.problemas?.length ? reportsData.problemas : sampleData.problemas}
-          xAxisDataKey="name"
-          bars={[
-            { dataKey: 'value', name: 'Quantidade', color: '#f97316' }
-          ]}
-        />
-      ),
-      origemDemandas: (
         <PieChart 
-          data={reportsData?.origins?.length ? reportsData.origins : sampleData.origens}
+          data={problemas && problemas.length > 0 ? problemas : [{ name: 'Sem dados', value: 1 }]}
           colorSet="orange"
           showLabels={true}
           showOnlyPercentage={true}
         />
       ),
+      origemDemandas: (
+        <BarChart 
+          data={origens && origens.length > 0 ? origens : [{ name: 'Sem dados', value: 0 }]}
+          xAxisDataKey="name"
+          bars={[
+            { dataKey: 'value', name: 'Solicitações', color: '#f97316' }
+          ]}
+        />
+      ),
       tempoMedioResposta: (
         <LineChart 
-          data={reportsData?.responseTimes?.length ? reportsData.responseTimes.map(item => ({
-            ...item,
-            aprovacao: Math.round(item.value * 1.2) // Example calculation for approval time
-          })) : sampleData.tempoResposta}
+          data={responseTimes && responseTimes.length > 0 ? responseTimes : [{ name: 'Sem dados', Demandas: 0, Aprovacao: 0 }]}
           xAxisDataKey="name"
-          yAxisTicks={[10, 20, 50, 60, 90]}
+          yAxisTicks={[10, 20, 50, 60, 90]} // Setting y-axis ticks as requested
           lines={[
-            { dataKey: 'value', name: 'Respostas da coordenação', color: '#f97316' },
-            { dataKey: 'aprovacao', name: 'Aprovação da nota', color: '#0ea5e9' }
+            { dataKey: 'Demandas', name: 'Respostas da coordenação', color: '#f97316' },
+            { dataKey: 'Aprovacao', name: 'Aprovação da nota', color: '#0ea5e9' }
           ]}
         />
       ),
       performanceArea: (
         <BarChart 
-          data={reportsData?.coordinations?.length ? reportsData.coordinations : sampleData.coordenacoes}
+          data={coordinations && coordinations.length > 0 ? coordinations : [{ name: 'Sem dados', Demandas: 0 }]}
           xAxisDataKey="name"
           bars={[
-            { dataKey: 'value', name: 'Demandas no mês', color: '#0ea5e9' }
+            { dataKey: 'Demandas', name: 'Demandas no mês', color: '#0ea5e9' }
           ]}
           horizontal={true}
         />
       ),
       notasEmitidas: (
         <AreaChart 
-          data={reportsData?.mediaTypes?.length ? reportsData.mediaTypes : sampleData.notasEmitidas}
+          data={mediaTypes && mediaTypes.length > 0 ? mediaTypes : [{ name: 'Sem dados', Quantidade: 0 }]}
           xAxisDataKey="name"
           areas={[
-            { dataKey: 'value', name: 'Quantidade', color: '#0ea5e9', fillOpacity: 0.6 }
+            { dataKey: 'Quantidade', name: 'Quantidade', color: '#0ea5e9', fillOpacity: 0.6 }
           ]}
         />
       )
     };
-  }, [reportsData, isLoading]);
+  }, [problemas, origens, responseTimes, coordinations, mediaTypes, isLoading, chartColors]);
 
   return { chartComponents };
 };
