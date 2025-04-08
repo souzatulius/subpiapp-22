@@ -22,35 +22,38 @@ import {
   FilePlus
 } from 'lucide-react';
 
-interface UseOriginIconProps {
+interface OriginWithIcon {
   icone?: string | null;
 }
 
-export const useOriginIcon = ({ icone }: UseOriginIconProps) => {
-  // Map icon names to components
+export const useOriginIcon = (origin: OriginWithIcon | { icone?: string | null }, size?: string) => {
+  // Extract icone from origin object
+  const icone = origin?.icone;
+  
+  // Map icon names to components with dynamic size
   const iconMap: Record<string, React.ReactNode> = {
-    'phone': <Phone className="h-6 w-6" />,
-    'mail': <Mail className="h-6 w-6" />,
-    'web': <Globe className="h-6 w-6" />,
-    'github': <Github className="h-6 w-6" />,
-    'twitter': <Twitter className="h-6 w-6" />,
-    'facebook': <Facebook className="h-6 w-6" />,
-    'instagram': <Instagram className="h-6 w-6" />,
-    'pen': <PenTool className="h-6 w-6" />,
-    'building': <Building className="h-6 w-6" />,
-    'award': <Award className="h-6 w-6" />,
-    'radio': <Radio className="h-6 w-6" />,
-    'tv': <Tv className="h-6 w-6" />,
-    'news': <Newspaper className="h-6 w-6" />,
-    'flag': <Flag className="h-6 w-6" />,
-    'users': <Users className="h-6 w-6" />,
-    'user': <UserCheck className="h-6 w-6" />,
-    'message': <MessageCircle className="h-6 w-6" />,
-    'file': <FilePlus className="h-6 w-6" />
+    'phone': <Phone className={size || "h-6 w-6"} />,
+    'mail': <Mail className={size || "h-6 w-6"} />,
+    'web': <Globe className={size || "h-6 w-6"} />,
+    'github': <Github className={size || "h-6 w-6"} />,
+    'twitter': <Twitter className={size || "h-6 w-6"} />,
+    'facebook': <Facebook className={size || "h-6 w-6"} />,
+    'instagram': <Instagram className={size || "h-6 w-6"} />,
+    'pen': <PenTool className={size || "h-6 w-6"} />,
+    'building': <Building className={size || "h-6 w-6"} />,
+    'award': <Award className={size || "h-6 w-6"} />,
+    'radio': <Radio className={size || "h-6 w-6"} />,
+    'tv': <Tv className={size || "h-6 w-6"} />,
+    'news': <Newspaper className={size || "h-6 w-6"} />,
+    'flag': <Flag className={size || "h-6 w-6"} />,
+    'users': <Users className={size || "h-6 w-6"} />,
+    'user': <UserCheck className={size || "h-6 w-6"} />,
+    'message': <MessageCircle className={size || "h-6 w-6"} />,
+    'file': <FilePlus className={size || "h-6 w-6"} />
   };
 
   if (!icone || !(icone in iconMap)) {
-    return <BadgePlus className="h-6 w-6" />;
+    return <BadgePlus className={size || "h-6 w-6"} />;
   }
 
   return iconMap[icone];

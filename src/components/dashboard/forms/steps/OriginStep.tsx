@@ -62,7 +62,7 @@ const OriginStep: React.FC<OriginStepProps> = ({
               }`} 
               onClick={() => handleOriginClick(origem.id)}
             >
-              {useOriginIcon(origem, "h-8 w-8")}
+              {useOriginIcon(origem)}
               <span className="text-sm font-semibold">{origem.descricao}</span>
             </Button>
           ))}

@@ -45,7 +45,7 @@ interface SortableUnifiedActionCardProps {
   specialContent?: React.ReactNode;
 }
 
-export const SortableUnifiedActionCard: React.FC<SortableUnifiedActionCardProps> = ({
+export const UnifiedActionCard: React.FC<SortableUnifiedActionCardProps> = ({
   id,
   title,
   subtitle,
@@ -113,7 +113,8 @@ export const SortableUnifiedActionCard: React.FC<SortableUnifiedActionCardProps>
     
     // Search card
     if (isSearch || type === 'smart_search') {
-      return <DashboardSearchCard onSearch={onSearchSubmit} isEditMode={isEditing} />;
+      // Fixed the props passed to DashboardSearchCard
+      return <DashboardSearchCard placeholder="O que deseja fazer?" onSearchSubmit={onSearchSubmit} isEditMode={isEditing} />;
     }
     
     // Pending Actions card
@@ -161,3 +162,7 @@ export const SortableUnifiedActionCard: React.FC<SortableUnifiedActionCardProps>
     </div>
   );
 };
+
+// Export SortableUnifiedActionCard as well for backward compatibility
+export const SortableUnifiedActionCard = UnifiedActionCard;
+
