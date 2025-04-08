@@ -8,12 +8,16 @@ export const normalizeQuestions = (perguntas: any): string[] => {
   if (!perguntas) return [];
   
   if (Array.isArray(perguntas)) {
-    return perguntas.filter(item => typeof item === 'string' && item.trim() !== '');
+    return perguntas.filter((item): item is string => 
+      typeof item === 'string' && item.trim() !== ''
+    );
   }
   
   if (typeof perguntas === 'object') {
     return Object.values(perguntas)
-      .filter(item => typeof item === 'string' && item.trim() !== '');
+      .filter((item): item is string => 
+        typeof item === 'string' && item.trim() !== ''
+      );
   }
   
   return [];

@@ -5,8 +5,8 @@ import { Demanda } from '../types';
 export const useDemandasFilters = (demandas: Demanda[]) => {
   const [filteredDemandas, setFilteredDemandas] = useState<Demanda[]>([]);
   const [searchTerm, setSearchTerm] = useState<string>('');
-  const [areaFilter, setAreaFilter] = useState<string>("all");
-  const [prioridadeFilter, setPrioridadeFilter] = useState<string>("all");
+  const [areaFilter, setAreaFilter] = useState<string>("todos");
+  const [prioridadeFilter, setPrioridadeFilter] = useState<string>("todos");
 
   // Filter demandas based on search, area, and prioridade
   useEffect(() => {
@@ -24,14 +24,14 @@ export const useDemandasFilters = (demandas: Demanda[]) => {
     }
     
     // Apply area filter
-    if (areaFilter && areaFilter !== "all") {
+    if (areaFilter && areaFilter !== "todos") {
       filtered = filtered.filter(demanda => 
-        demanda.areas_coordenacao && demanda.areas_coordenacao.id === areaFilter
+        demanda.supervisao_tecnica_id === areaFilter
       );
     }
     
     // Apply prioridade filter
-    if (prioridadeFilter && prioridadeFilter !== "all") {
+    if (prioridadeFilter && prioridadeFilter !== "todos") {
       filtered = filtered.filter(demanda => 
         demanda.prioridade === prioridadeFilter
       );

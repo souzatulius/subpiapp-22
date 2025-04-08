@@ -51,7 +51,7 @@ const QuestionsAnswersSection: React.FC<QuestionsAnswersSectionProps> = ({
                 <Textarea
                   id={`resposta-${index}`}
                   placeholder="Digite sua resposta"
-                  className="min-h-[120px] w-full border border-gray-300 focus:border-blue-400 focus:ring-blue-300 rounded-lg"
+                  className="min-h-[120px] w-full border border-gray-300 focus:border-blue-400 focus:ring-blue-300 rounded-xl"
                   value={resposta[index.toString()] ?? ''}
                   onChange={(e) => onRespostaChange(index.toString(), e.target.value)}
                 />

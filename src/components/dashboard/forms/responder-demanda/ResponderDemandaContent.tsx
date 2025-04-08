@@ -72,7 +72,7 @@ const ResponderDemandaContent: React.FC = () => {
           setViewMode={setViewMode} 
           areas={formattedAreas}
           onBack={handleBack}
-          showBackButton={!!selectedDemanda}
+          showBackButton={false} // Hide the back button as requested
         />
       </div>
 

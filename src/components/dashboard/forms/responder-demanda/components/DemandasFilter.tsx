@@ -32,7 +32,7 @@ const DemandasFilter: React.FC<DemandasFilterProps> = ({
   setViewMode,
   areas,
   onBack,
-  showBackButton
+  showBackButton = false // Default to false to hide the button
 }) => {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const isMobile = useIsMobile();
@@ -61,6 +61,7 @@ const DemandasFilter: React.FC<DemandasFilterProps> = ({
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-2">
+        {/* Only show back button if explicitly requested */}
         {showBackButton && onBack && (
           <Button 
             variant="outline" 
@@ -79,7 +80,7 @@ const DemandasFilter: React.FC<DemandasFilterProps> = ({
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder="Buscar demanda..."
-            className="pl-9 pr-4 py-2"
+            className="pl-9 pr-4 py-2 rounded-xl"
           />
         </div>
 
@@ -87,17 +88,37 @@ const DemandasFilter: React.FC<DemandasFilterProps> = ({
           variant="outline"
           size="icon"
           onClick={toggleFilter}
-          className={isFilterOpen ? 'bg-blue-50' : ''}
+          className={`rounded-xl ${isFilterOpen ? 'bg-blue-50' : ''}`}
         >
           <Filter className="h-4 w-4" />
         </Button>
+
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => setViewMode('list')}
+            className={`rounded-xl ${viewMode === 'list' ? 'bg-blue-50' : ''}`}
+          >
+            <List className="h-4 w-4" />
+          </Button>
+          
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => setViewMode('cards')}
+            className={`rounded-xl ${viewMode === 'cards' ? 'bg-blue-50' : ''}`}
+          >
+            <Grid className="h-4 w-4" />
+          </Button>
+        </div>
       </div>
 
       {isFilterOpen && (
         <div className="flex flex-wrap gap-4 animate-fadeInUp">
           <div className="w-full sm:w-auto flex-1">
             <Select value={areaFilter} onValueChange={setAreaFilter} defaultValue="todos">
-              <SelectTrigger>
+              <SelectTrigger className="rounded-xl">
                 <SelectValue placeholder="Coordenação" />
               </SelectTrigger>
               <SelectContent>
@@ -113,7 +134,7 @@ const DemandasFilter: React.FC<DemandasFilterProps> = ({
 
           <div className="w-full sm:w-auto flex-1">
             <Select value={prioridadeFilter} onValueChange={setPrioridadeFilter} defaultValue="todos">
-              <SelectTrigger>
+              <SelectTrigger className="rounded-xl">
                 <SelectValue placeholder="Prioridade" />
               </SelectTrigger>
               <SelectContent>
