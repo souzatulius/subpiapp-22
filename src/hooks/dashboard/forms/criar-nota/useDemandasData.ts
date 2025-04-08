@@ -16,7 +16,7 @@ export const useDemandasData = () => {
       try {
         setIsLoading(true);
         
-        // Primeiro buscamos as demandas que estão pendentes ou em andamento
+        // Buscar todas as demandas pendentes, em andamento ou respondidas (incluir respondidas)
         const { data: allDemandas, error: demandasError } = await supabase
           .from('demandas')
           .select(`
@@ -27,7 +27,9 @@ export const useDemandasData = () => {
             perguntas,
             problema_id,
             coordenacao_id,
-            servico_id
+            servico_id,
+            arquivo_url,
+            anexos
           `)
           .in('status', ['pendente', 'em_andamento', 'respondida'])
           .order('horario_publicacao', { ascending: false });
@@ -47,9 +49,9 @@ export const useDemandasData = () => {
         // Filtrar para incluir apenas demandas que não possuem notas associadas
         const demandasSemNotas = allDemandas.filter(demanda => !demandasComNotas.has(demanda.id));
         
-        console.log('All demandas:', allDemandas.length);
-        console.log('Demandas with notas:', demandasComNotas.size);
-        console.log('Demandas without notas:', demandasSemNotas.length);
+        console.log('Total de demandas:', allDemandas.length);
+        console.log('Demandas com notas:', demandasComNotas.size);
+        console.log('Demandas sem notas:', demandasSemNotas.length);
         
         // Buscar informações do problema para cada demanda
         const demandasProcessadas = await Promise.all(
@@ -78,8 +80,9 @@ export const useDemandasData = () => {
                 bairro: null,
                 autor: null,
                 servico: null,
-                arquivo_url: null,
-                anexos: []
+                // Garantir que esses campos existam
+                arquivo_url: demanda.arquivo_url || null,
+                anexos: demanda.anexos || []
               } as Demand;
             }
             
@@ -87,6 +90,7 @@ export const useDemandasData = () => {
             return {
               ...demanda,
               area_coordenacao: null,
+              supervisao_tecnica: null,
               prioridade: "",
               horario_publicacao: "",
               prazo_resposta: "",
@@ -100,8 +104,8 @@ export const useDemandasData = () => {
               bairro: null,
               autor: null,
               servico: null,
-              arquivo_url: null,
-              anexos: []
+              arquivo_url: demanda.arquivo_url || null,
+              anexos: demanda.anexos || []
             } as Demand;
           })
         );
@@ -132,7 +136,7 @@ export const useDemandasData = () => {
     
     const lowercaseSearchTerm = searchTerm.toLowerCase();
     const filtered = demandas.filter(demanda => 
-      demanda.titulo.toLowerCase().includes(lowercaseSearchTerm) ||
+      demanda.titulo?.toLowerCase().includes(lowercaseSearchTerm) ||
       demanda.area_coordenacao?.descricao?.toLowerCase().includes(lowercaseSearchTerm)
     );
     

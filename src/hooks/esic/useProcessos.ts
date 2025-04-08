@@ -1,196 +1,183 @@
-import { useState, useEffect } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from '@/components/ui/use-toast';
 import { ESICProcesso, ESICProcessoFormValues } from '@/types/esic';
-import { useAuthState } from '@/hooks/auth/useAuthState';
+import { useAuth } from '@/hooks/useSupabaseAuth';
+import { useToast } from '@/components/ui/use-toast';
+
+type UpdateProcessoParams = {
+  id: string;
+  data: Partial<ESICProcesso>;
+};
+
+type UseProcessosOptions = {
+  onSuccess?: () => void;
+  onError?: (error: any) => void;
+};
 
 export const useProcessos = () => {
-  const queryClient = useQueryClient();
-  const { user } = useAuthState();
+  const [processos, setProcessos] = useState<ESICProcesso[]>([]);
   const [selectedProcesso, setSelectedProcesso] = useState<ESICProcesso | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isCreating, setIsCreating] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const { user } = useAuth();
+  const { toast } = useToast();
 
-  // Fetch all processes
-  const { data: processos, isLoading, error, refetch } = useQuery({
-    queryKey: ['esic-processos'],
-    queryFn: async () => {
-      console.log('Fetching esic processes...');
-      const { data, error } = await supabase
-        .from('esic_processos')
-        .select(`
-          *,
-          autor:usuarios(nome_completo)
-        `)
-        .order('criado_em', { ascending: false });
-
-      if (error) {
-        console.error('Error fetching processos:', error);
-        toast({
-          title: 'Erro ao carregar processos',
-          description: error.message,
-          variant: 'destructive',
-        });
-        throw error;
-      }
-
-      console.log('Fetched esic processes:', data);
+  // Função para buscar todos os processos
+  const fetchProcessos = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      console.log('Buscando processos e-SIC...');
       
-      // Transform the data to match the ESICProcesso interface
-      // This will handle potential errors with the join
-      const processedData = data.map((item: any) => ({
-        id: item.id,
-        data_processo: item.data_processo,
-        situacao: item.situacao,
-        status: item.status,
-        texto: item.texto,
-        autor_id: item.autor_id,
-        criado_em: item.criado_em,
-        atualizado_em: item.atualizado_em,
-        autor: item.autor?.nome_completo ? { nome_completo: item.autor.nome_completo } : { nome_completo: 'Usuário' }
-      }));
+      // Remova qualquer filtro de usuário para ver todos os processos
+      const { data, error } = await supabase
+        .from('esic_processos')
+        .select('*')
+        .order('criado_em', { ascending: false });
+      
+      if (error) throw error;
+      
+      console.log(`Processos encontrados: ${data.length}`);
+      setProcessos(data || []);
+    } catch (error) {
+      console.error('Erro ao buscar processos:', error);
+      toast({
+        title: 'Erro ao carregar processos',
+        description: 'Não foi possível buscar os processos. Tente novamente mais tarde.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  }, [toast]);
 
-      return processedData as ESICProcesso[];
-    },
-    refetchOnWindowFocus: false,
-    retry: 2,
-  });
-
-  // Setup real-time subscription to process changes
+  // Carregar processos ao montar o componente
   useEffect(() => {
-    const channel = supabase
-      .channel('esic-processos-changes')
-      .on(
-        'postgres_changes',
-        {
-          event: '*', // Listen for all events (INSERT, UPDATE, DELETE)
-          schema: 'public',
-          table: 'esic_processos'
-        },
-        (payload) => {
-          console.log('Real-time update received:', payload);
-          // Invalidate the query to refetch processes
-          queryClient.invalidateQueries({ queryKey: ['esic-processos'] });
-        }
-      )
-      .subscribe();
+    fetchProcessos();
+  }, [fetchProcessos]);
 
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [queryClient]);
-
-  // Create new process
-  const createProcessoMutation = useMutation({
-    mutationFn: async (values: ESICProcessoFormValues) => {
-      if (!user) throw new Error('Usuário não autenticado');
-
+  // Criar novo processo
+  const createProcesso = async (values: ESICProcessoFormValues, options?: UseProcessosOptions) => {
+    if (!user) return;
+    
+    try {
+      setIsCreating(true);
+      
+      const novoProcesso = {
+        data_processo: values.data_processo.toISOString(),
+        texto: values.texto,
+        situacao: values.situacao,
+        status: 'novo_processo',
+        usuario_id: user.id
+      };
+      
       const { data, error } = await supabase
         .from('esic_processos')
-        .insert({
-          data_processo: values.data_processo.toISOString(),
-          situacao: values.situacao,
-          status: 'novo_processo',
-          texto: values.texto,
-          autor_id: user.id,
-        })
-        .select();
-
-      if (error) {
-        toast({
-          title: 'Erro ao criar processo',
-          description: error.message,
-          variant: 'destructive',
-        });
-        throw error;
-      }
-
+        .insert(novoProcesso)
+        .select()
+        .single();
+      
+      if (error) throw error;
+      
+      // Atualizar a lista de processos
+      setProcessos(prev => [data, ...prev]);
+      options?.onSuccess?.();
+    } catch (error) {
+      console.error('Erro ao criar processo:', error);
       toast({
-        title: 'Processo criado com sucesso',
-        variant: 'default',
+        title: 'Erro ao criar processo',
+        description: 'Não foi possível criar o processo. Tente novamente mais tarde.',
+        variant: 'destructive',
       });
+      options?.onError?.(error);
+    } finally {
+      setIsCreating(false);
+    }
+  };
 
-      return data[0] as ESICProcesso;
-    },
-    onSuccess: () => {
-      // We're now using the real-time subscription, but we'll keep this for belt-and-suspenders
-      queryClient.invalidateQueries({ queryKey: ['esic-processos'] });
-    },
-  });
-
-  // Update process
-  const updateProcessoMutation = useMutation({
-    mutationFn: async (values: { id: string; data: Partial<ESICProcesso> }) => {
+  // Atualizar processo existente
+  const updateProcesso = async (params: UpdateProcessoParams, options?: UseProcessosOptions) => {
+    try {
+      setIsUpdating(true);
+      
       const { data, error } = await supabase
         .from('esic_processos')
-        .update(values.data)
-        .eq('id', values.id)
-        .select();
-
-      if (error) {
-        toast({
-          title: 'Erro ao atualizar processo',
-          description: error.message,
-          variant: 'destructive',
-        });
-        throw error;
+        .update(params.data)
+        .eq('id', params.id)
+        .select()
+        .single();
+      
+      if (error) throw error;
+      
+      // Atualizar a lista de processos
+      setProcessos(prev => prev.map(p => p.id === params.id ? data : p));
+      
+      // Atualizar o processo selecionado, se for o mesmo
+      if (selectedProcesso && selectedProcesso.id === params.id) {
+        setSelectedProcesso(data);
       }
-
+      
+      options?.onSuccess?.();
+    } catch (error) {
+      console.error('Erro ao atualizar processo:', error);
       toast({
-        title: 'Processo atualizado com sucesso',
-        variant: 'default',
+        title: 'Erro ao atualizar processo',
+        description: 'Não foi possível atualizar o processo. Tente novamente mais tarde.',
+        variant: 'destructive',
       });
+      options?.onError?.(error);
+    } finally {
+      setIsUpdating(false);
+    }
+  };
 
-      return data[0] as ESICProcesso;
-    },
-    onSuccess: () => {
-      // We're now using the real-time subscription, but we'll keep this for belt-and-suspenders
-      queryClient.invalidateQueries({ queryKey: ['esic-processos'] });
-    },
-  });
-
-  // Delete process
-  const deleteProcessoMutation = useMutation({
-    mutationFn: async (id: string) => {
+  // Excluir processo
+  const deleteProcesso = async (id: string, options?: UseProcessosOptions) => {
+    try {
+      setIsDeleting(true);
+      
       const { error } = await supabase
         .from('esic_processos')
         .delete()
         .eq('id', id);
-
-      if (error) {
-        toast({
-          title: 'Erro ao excluir processo',
-          description: error.message,
-          variant: 'destructive',
-        });
-        throw error;
+      
+      if (error) throw error;
+      
+      // Atualizar a lista de processos
+      setProcessos(prev => prev.filter(p => p.id !== id));
+      
+      // Limpar o processo selecionado, se for o mesmo
+      if (selectedProcesso && selectedProcesso.id === id) {
+        setSelectedProcesso(null);
       }
-
+      
+      options?.onSuccess?.();
+    } catch (error) {
+      console.error('Erro ao excluir processo:', error);
       toast({
-        title: 'Processo excluído com sucesso',
-        variant: 'default',
+        title: 'Erro ao excluir processo',
+        description: 'Não foi possível excluir o processo. Tente novamente mais tarde.',
+        variant: 'destructive',
       });
-
-      return id;
-    },
-    onSuccess: () => {
-      // We're now using the real-time subscription, but we'll keep this for belt-and-suspenders
-      queryClient.invalidateQueries({ queryKey: ['esic-processos'] });
-      setSelectedProcesso(null);
-    },
-  });
+      options?.onError?.(error);
+    } finally {
+      setIsDeleting(false);
+    }
+  };
 
   return {
     processos,
     isLoading,
-    error,
-    refetch,
     selectedProcesso,
     setSelectedProcesso,
-    createProcesso: createProcessoMutation.mutate,
-    updateProcesso: updateProcessoMutation.mutate,
-    deleteProcesso: deleteProcessoMutation.mutate,
-    isCreating: createProcessoMutation.isPending,
-    isUpdating: updateProcessoMutation.isPending,
-    isDeleting: deleteProcessoMutation.isPending,
+    createProcesso,
+    updateProcesso,
+    deleteProcesso,
+    isCreating,
+    isUpdating,
+    isDeleting,
+    refreshProcessos: fetchProcessos
   };
 };

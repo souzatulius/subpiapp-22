@@ -109,22 +109,28 @@ export const useRegisterForm = () => {
     try {
       const completeEmail = completeEmailWithDomain(formData.email);
       
-      // Ensure we're passing UUIDs, not strings for ID fields
-      const { error, data } = await signUp(completeEmail, password, {
+      // Corrigido: Assegurar que os dados estão corretos e completos
+      const userData = {
         nome_completo: formData.name,
         aniversario: formData.birthday,
         whatsapp: formData.whatsapp,
-        cargo_id: formData.role, // The handle_new_user function will properly cast this
+        cargo_id: formData.role,
         supervisao_tecnica_id: formData.area || null,
         coordenacao_id: formData.coordenacao,
-        status: 'pendente' // Explicitly set status as 'pendente'
-      });
+        status: 'pendente'
+      };
+      
+      console.log('Registrando usuário com os dados:', userData);
+      
+      const { error, data } = await signUp(completeEmail, password, userData);
 
       if (error) {
+        console.error('Erro ao registrar:', error);
         showAuthError(error);
       } else {
         // Create notification for admins about the new user registration
         if (data?.user) {
+          console.log('Usuário criado com sucesso:', data.user);
           try {
             await createAdminNotification(
               data.user.id, 
@@ -140,13 +146,14 @@ export const useRegisterForm = () => {
             navigate('/email-verified');
           }
         } else {
+          console.log('Usuário criado, mas sem dados retornados');
           toast.success("Cadastro realizado com sucesso! Verifique seu email para validar o cadastro.");
           navigate('/email-verified');
         }
       }
     } catch (error: any) {
-      console.error('Erro ao registrar:', error);
-      showAuthError(error);
+      console.error('Erro não tratado ao registrar:', error);
+      toast.error("Erro ao cadastrar usuário. Tente novamente mais tarde.");
     } finally {
       setLoading(false);
     }
