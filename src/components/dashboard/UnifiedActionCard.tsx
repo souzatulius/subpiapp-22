@@ -11,7 +11,7 @@ import SmartSearchCard from './SmartSearchCard';
 import SearchCard from './grid/card-types/SearchCard';
 import CardControls from './card-parts/CardControls';
 import { useNavigate } from 'react-router-dom';
-import { getColorClasses, getHoverColorClasses } from './utils/cardColorUtils';
+import { getColorClasses, getHoverColorClasses, getTextColorClass } from './utils/cardColorUtils';
 
 export interface Controls {
   cardId: string;
@@ -265,7 +265,7 @@ export function UnifiedActionCard({
     }
     
     return (
-      <div className={`h-full rounded-lg ${getColorClasses(color)} ${getHoverColorClasses(color)} transition-colors duration-200 shadow-md`} onClick={handleCardClick}>
+      <div className="h-full" onClick={handleCardClick}>
         <ActionCard
           id={id}
           title={title}
