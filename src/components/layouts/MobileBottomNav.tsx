@@ -94,7 +94,7 @@ const MobileBottomNav: React.FC<MobileBottomNavProps> = ({ className }) => {
 
   return (
     <nav className={`md:hidden fixed bottom-0 left-0 right-0 bg-[#051b2c] shadow-lg z-50 ${className}`}>
-      <div className="flex justify-around items-center h-16">
+      <div className="flex justify-around items-center h-20">
         {navItems.map((item) => {
           const isActive = isNavItemActive(item.path);
           return (

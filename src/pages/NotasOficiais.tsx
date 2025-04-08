@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import Header from '@/components/layouts/Header';
 import DashboardSidebar from '@/components/dashboard/DashboardSidebar';
@@ -162,19 +161,14 @@ const NotasOficiais = () => {
   return (
     <AdminProtectedRoute>
       <div className="min-h-screen flex flex-col bg-gray-50">
-        {/* Fixed breadcrumb for mobile */}
-        {isMobile && (
-          <div className="fixed top-0 left-0 right-0 z-40 bg-white">
-            <BreadcrumbBar />
-          </div>
-        )}
-        
-        {/* Header with fade effect on mobile */}
-        <div 
-          style={isMobile ? scrollFadeStyles : undefined}
-          className={`${isMobile ? 'transition-all duration-300' : ''}`}
-        >
+        <div className="transition-all duration-300">
           <Header showControls={true} toggleSidebar={toggleSidebar} />
+          
+          {isMobile && (
+            <div className="bg-white">
+              <BreadcrumbBar />
+            </div>
+          )}
         </div>
         
         <div className="flex flex-1 relative">

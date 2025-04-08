@@ -31,26 +31,25 @@ const DashboardLayout: React.FC = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
-      {/* Fixed breadcrumb for mobile */}
-      {isMobile && (
-        <div className="fixed top-0 left-0 right-0 z-40 bg-white">
-          <BreadcrumbBar />
-        </div>
-      )}
-      
-      {/* Header with fade effect on mobile */}
+      {/* Header */}
       <div 
-        style={isMobile ? scrollFadeStyles : undefined}
-        className={`${isMobile ? 'transition-all duration-300' : ''}`}
+        className="transition-all duration-300"
       >
         <Header showControls={true} toggleSidebar={toggleSidebar} />
+        
+        {/* Mobile breadcrumb directly below header */}
+        {isMobile && (
+          <div className="bg-white">
+            <BreadcrumbBar />
+          </div>
+        )}
       </div>
       
       <div className="flex flex-1 relative">
         {/* Only show sidebar on desktop */}
         {!isMobile && <DashboardSidebar isOpen={sidebarOpen} />}
         
-        <main className={`flex-1 w-full ${isMobile ? 'pt-10' : ''} transition-all duration-300`}>
+        <main className={`flex-1 w-full transition-all duration-300`}>
           {/* Desktop breadcrumb */}
           {!isMobile && <BreadcrumbBar />}
           

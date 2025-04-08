@@ -20,19 +20,16 @@ const Demandas = () => {
   
   return (
     <div className="min-h-screen flex flex-col bg-[#F9FAFB]">
-      {/* Fixed breadcrumb for mobile */}
-      {isMobile && (
-        <div className="fixed top-0 left-0 right-0 z-40 bg-white">
-          <BreadcrumbBar />
-        </div>
-      )}
-      
-      {/* Header with fade effect on mobile */}
-      <div 
-        style={isMobile ? scrollFadeStyles : undefined}
-        className={`${isMobile ? 'transition-all duration-300' : ''}`}
-      >
+      {/* Header */}
+      <div className="transition-all duration-300">
         <Header showControls={true} toggleSidebar={toggleSidebar} />
+        
+        {/* Mobile breadcrumb directly below header */}
+        {isMobile && (
+          <div className="bg-white">
+            <BreadcrumbBar />
+          </div>
+        )}
       </div>
 
       <div className="flex flex-1 relative">
