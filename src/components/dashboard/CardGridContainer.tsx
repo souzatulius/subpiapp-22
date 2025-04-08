@@ -31,6 +31,20 @@ const CardGridContainer: React.FC<CardGridContainerProps> = ({
   // Filter out special cards that will be rendered separately
   const regularCards = cards.filter(card => card.id !== 'pending-tasks');
   
+  // Special rendering for the pending tasks card
+  const renderPendingTasksCard = () => {
+    if (!pendingTasksCard) return null;
+    
+    // Use the width class based on mobile view, but force height to row-span-2
+    return (
+      <div 
+        className={`${getWidthClass(pendingTasksCard.width, isMobileView)} row-span-2`}
+      >
+        <PendingTasksCard />
+      </div>
+    );
+  };
+  
   // Helper functions to determine CSS classes for card dimensions
   const getWidthClass = (width: string = '25', isMobile: boolean = false) => {
     if (isMobile) {
@@ -56,18 +70,21 @@ const CardGridContainer: React.FC<CardGridContainerProps> = ({
   
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 grid-flow-row-dense">
-      {/* Instead of rendering the pending tasks card separately, pass it as a specialCard to UnifiedCardGrid */}
-      {/* This allows for better positioning with other cards */}
-      <UnifiedCardGrid
-        cards={pendingTasksCard ? [...regularCards, pendingTasksCard] : regularCards}
-        onCardsChange={onCardsChange}
-        onEditCard={onEditCard}
-        onHideCard={onHideCard}
-        isMobileView={isMobileView}
-        isEditMode={isEditMode}
-        specialCardsData={specialCardsData}
-        pendingTasksCardId={pendingTasksCard?.id}
-      />
+      {/* Render special cards */}
+      {pendingTasksCard && renderPendingTasksCard()}
+      
+      {/* Render regular cards with the unified grid */}
+      <div className={isMobileView ? 'col-span-2' : 'col-span-4'}>
+        <UnifiedCardGrid
+          cards={regularCards}
+          onCardsChange={onCardsChange}
+          onEditCard={onEditCard}
+          onHideCard={onHideCard}
+          isMobileView={isMobileView}
+          isEditMode={isEditMode}
+          specialCardsData={specialCardsData}
+        />
+      </div>
     </div>
   );
 };
