@@ -9,7 +9,11 @@ import { Task } from '@/types/dashboard';
 import { supabase } from '@/integrations/supabase/client';
 import { ClipboardList, AlertTriangle, Clock } from 'lucide-react';
 
-const PendingTasksCard: React.FC = () => {
+interface PendingTasksCardProps {
+  className?: string;
+}
+
+const PendingTasksCard: React.FC<PendingTasksCardProps> = ({ className }) => {
   const [activeTab, setActiveTab] = useState('all');
   const [overdueCount, setOverdueCount] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
@@ -29,17 +33,17 @@ const PendingTasksCard: React.FC = () => {
           
         if (demandsError) throw demandsError;
         
-        // Fetch pending notes
+        // Fetch pending notes - using notas_oficiais instead of notas
         const { data: notes, error: notesError } = await supabase
-          .from('notas')
-          .select('id, titulo, prazo, status')
+          .from('notas_oficiais')
+          .select('id, titulo, criado_em, status')
           .in('status', ['pendente', 'em_revisao', 'aprovacao_pendente'])
-          .order('prazo', { ascending: true });
+          .order('criado_em', { ascending: true });
           
         if (notesError) throw notesError;
         
         // Process demands data
-        const demandTasks: Task[] = demands?.map((demand) => {
+        const demandTasks: Task[] = demands?.map((demand: any) => {
           const dueDate = new Date(demand.prazo_resposta);
           const today = new Date();
           const diffDays = Math.floor((dueDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
@@ -61,9 +65,12 @@ const PendingTasksCard: React.FC = () => {
           };
         }) || [];
         
-        // Process notes data
-        const noteTasks: Task[] = notes?.map((note) => {
-          const dueDate = new Date(note.prazo);
+        // Process notes data (with default dueDate of 3 days from creation)
+        const noteTasks: Task[] = notes?.map((note: any) => {
+          const creationDate = new Date(note.criado_em);
+          const dueDate = new Date(creationDate);
+          dueDate.setDate(dueDate.getDate() + 3); // Default 3 day deadline
+          
           const today = new Date();
           const diffDays = Math.floor((dueDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
           
@@ -129,7 +136,7 @@ const PendingTasksCard: React.FC = () => {
   };
   
   return (
-    <Card className="h-full shadow-md border border-gray-200">
+    <Card className={`h-full shadow-md border border-gray-200 ${className}`}>
       <CardHeader className="pb-2">
         <CardTitle className="text-lg flex items-center justify-between">
           <span>Pendências e Prazos</span>

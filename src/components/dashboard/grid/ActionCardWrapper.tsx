@@ -125,7 +125,6 @@ const ActionCardWrapper: React.FC<ActionCardWrapperProps> = ({
     if (card.isPendingActions) {
       return (
         <PendingActionsCardWrapper
-          card={card}
           notesToApprove={specialCardsData.notesToApprove}
           responsesToDo={specialCardsData.responsesToDo}
           isComunicacao={isComunicacao}

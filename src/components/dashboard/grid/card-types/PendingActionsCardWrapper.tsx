@@ -9,11 +9,21 @@ import { Task } from '@/types/dashboard';
 import { supabase } from '@/integrations/supabase/client';
 import { ClipboardList, AlertTriangle, Clock } from 'lucide-react';
 
-interface PendingActionsCardWrapperProps {
+export interface PendingActionsCardWrapperProps {
   className?: string;
+  notesToApprove?: number;
+  responsesToDo?: number;
+  isComunicacao?: boolean;
+  userDepartmentId?: string;
 }
 
-const PendingActionsCardWrapper: React.FC<PendingActionsCardWrapperProps> = ({ className }) => {
+const PendingActionsCardWrapper: React.FC<PendingActionsCardWrapperProps> = ({ 
+  className,
+  notesToApprove = 0,
+  responsesToDo = 0,
+  isComunicacao = false,
+  userDepartmentId = ''
+}) => {
   const [activeTab, setActiveTab] = useState('all');
   const [overdueCount, setOverdueCount] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
@@ -33,17 +43,17 @@ const PendingActionsCardWrapper: React.FC<PendingActionsCardWrapperProps> = ({ c
           
         if (demandsError) throw demandsError;
         
-        // Fetch pending notes
+        // Fetch pending notes - using the correct table: notas_oficiais
         const { data: notes, error: notesError } = await supabase
-          .from('notas')
-          .select('id, titulo, prazo, status')
+          .from('notas_oficiais')
+          .select('id, titulo, criado_em, status')
           .in('status', ['pendente', 'em_revisao', 'aprovacao_pendente'])
-          .order('prazo', { ascending: true });
+          .order('criado_em', { ascending: true });
           
         if (notesError) throw notesError;
         
         // Process demands data
-        const demandTasks: Task[] = demands?.map((demand) => {
+        const demandTasks: Task[] = demands?.map((demand: any) => {
           const dueDate = new Date(demand.prazo_resposta);
           const today = new Date();
           const diffDays = Math.floor((dueDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
@@ -65,9 +75,12 @@ const PendingActionsCardWrapper: React.FC<PendingActionsCardWrapperProps> = ({ c
           };
         }) || [];
         
-        // Process notes data
-        const noteTasks: Task[] = notes?.map((note) => {
-          const dueDate = new Date(note.prazo);
+        // Process notes data - using default 3-day deadline
+        const noteTasks: Task[] = notes?.map((note: any) => {
+          const creationDate = new Date(note.criado_em);
+          const dueDate = new Date(creationDate);
+          dueDate.setDate(dueDate.getDate() + 3); // Default 3-day deadline
+          
           const today = new Date();
           const diffDays = Math.floor((dueDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
           

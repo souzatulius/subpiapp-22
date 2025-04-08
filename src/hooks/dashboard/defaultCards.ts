@@ -155,3 +155,11 @@ export const getDefaultCards = (): ActionCardItem[] => {
     }
   ];
 };
+
+// Add the missing function that returns the communication-specific cards
+export const getCommunicationActionCards = (): ActionCardItem[] => {
+  return getDefaultCards().filter(card => 
+    // Include cards that are relevant for communication department
+    card.id !== 'hidden-card-for-other-departments'
+  );
+};

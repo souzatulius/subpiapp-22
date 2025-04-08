@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { ActionCardItem } from '@/types/dashboard';
-import { getCommunicationActionCards } from './defaultCards';
+import { getDefaultCards, getCommunicationActionCards } from './defaultCards';
 
 export interface UseDefaultDashboardConfigResult {
   config: ActionCardItem[];
