@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { ActionCardItem } from '@/types/dashboard';
 import { 
@@ -139,4 +140,9 @@ export const getDefaultCards = (): ActionCardItem[] => {
       mobileOrder: 7,
     }
   ];
+};
+
+// Add the missing function that's referenced in useDefaultDashboardConfig.ts
+export const getCommunicationActionCards = (): ActionCardItem[] => {
+  return getDefaultCards(); // For now, we'll just reuse the default cards
 };
