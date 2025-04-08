@@ -104,7 +104,7 @@ const ActionCard = ({
         </div>
       )}
 
-      <div className="relative h-full flex flex-col items-center justify-center text-center py-5 px-2">
+      <div className="relative h-full flex flex-col items-center justify-center text-center py-2.5 px-2">
         {children ? (
           <>{children}</>
         ) : chartId ? (
@@ -113,7 +113,7 @@ const ActionCard = ({
           </div>
         ) : (
           <>
-            <div className={`mb-4 ${textColorClass}`}>
+            <div className={`mb-2.5 ${textColorClass}`}>
               {renderIcon()}
             </div>
             <div className="line-clamp-2 max-w-[90%]">
@@ -121,7 +121,7 @@ const ActionCard = ({
                 {title}
               </h3>
               {subtitle && (
-                <p className={`text-sm ${textColorClass} opacity-80 mt-2 line-clamp-2`}>
+                <p className={`text-sm ${textColorClass} opacity-80 mt-1 line-clamp-2`}>
                   {subtitle}
                 </p>
               )}
