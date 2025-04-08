@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import Header from '@/components/layouts/Header';
@@ -51,7 +50,7 @@ const Settings = () => {
   return (
     <AdminProtectedRoute>
       <div className="flex flex-col bg-gray-50">
-        {/* Header with fade effect on mobile */}
+        {/* Header */}
         <div 
           style={isMobile ? scrollFadeStyles : undefined}
           className={`${isMobile ? 'transition-all duration-300' : ''}`}
@@ -63,12 +62,12 @@ const Settings = () => {
           {/* Somente mostrar sidebar no desktop */}
           {!isMobile && <DashboardSidebar isOpen={sidebarOpen} />}
           
-          <main className={`flex-1 flex flex-col ${isMobile ? 'pt-10' : ''} overflow-y-auto`}>
+          <main className={`flex-1 ${isMobile ? 'pt-10' : ''}`}>
             {/* Desktop breadcrumb - only show on desktop before content */}
             {!isMobile && <BreadcrumbBar onSettingsClick={handleBackClick} />}
             
-            <div className="max-w-full mx-auto flex-1">
-              <div className={`p-4 h-full ${isMobile ? 'pb-20' : 'pb-4'}`}>
+            <div className="max-w-full mx-auto">
+              <div className={`p-4 ${isMobile ? 'pb-16' : 'pb-4'}`}>
                 {activeSection === 'dashboard' ? (
                   <div
                     style={isMobile ? scrollFadeStyles : undefined}
@@ -100,7 +99,7 @@ const Settings = () => {
         </div>
         
         {/* Bottom Navigation for Mobile */}
-        <MobileSettingsNav />
+        {isMobile && <MobileSettingsNav />}
       </div>
     </AdminProtectedRoute>
   );

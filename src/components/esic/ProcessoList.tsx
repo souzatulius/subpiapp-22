@@ -46,23 +46,23 @@ const ProcessoList: React.FC<ProcessoListProps> = ({
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-col sm:flex-row gap-4">
+      <div className="flex flex-col sm:flex-row gap-3">
         <div className="flex-1 relative">
-          <Search className="absolute left-3 top-3 h-4 w-4 text-gray-500" />
+          <Search className="absolute left-2 top-2.5 h-4 w-4 text-gray-500" />
           <Input
             placeholder="Buscar nos processos..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-9"
+            className="pl-8 h-9"
           />
         </div>
         
         <div className="flex flex-wrap gap-2 items-center">
           <ToggleGroup type="single" value={viewMode} onValueChange={(value) => value && setViewMode(value as 'list' | 'grid')}>
-            <ToggleGroupItem value="list" aria-label="Visualizar em lista">
+            <ToggleGroupItem value="list" aria-label="Visualizar em lista" className="h-9 w-9 p-0">
               <LayoutList className="h-4 w-4" />
             </ToggleGroupItem>
-            <ToggleGroupItem value="grid" aria-label="Visualizar em cards">
+            <ToggleGroupItem value="grid" aria-label="Visualizar em cards" className="h-9 w-9 p-0">
               <LayoutGrid className="h-4 w-4" />
             </ToggleGroupItem>
           </ToggleGroup>
@@ -71,7 +71,7 @@ const ProcessoList: React.FC<ProcessoListProps> = ({
             value={statusFilter} 
             onValueChange={setStatusFilter}
           >
-            <SelectTrigger className="w-[180px] min-w-[120px]">
+            <SelectTrigger className="h-9 w-[160px] min-w-[120px]">
               <SelectValue placeholder="Status" />
             </SelectTrigger>
             <SelectContent>
@@ -88,7 +88,7 @@ const ProcessoList: React.FC<ProcessoListProps> = ({
             value={situacaoFilter} 
             onValueChange={setSituacaoFilter}
           >
-            <SelectTrigger className="w-[180px] min-w-[120px]">
+            <SelectTrigger className="h-9 w-[160px] min-w-[120px]">
               <SelectValue placeholder="Situação" />
             </SelectTrigger>
             <SelectContent>
@@ -104,11 +104,13 @@ const ProcessoList: React.FC<ProcessoListProps> = ({
           {(searchTerm || statusFilter !== 'todos' || situacaoFilter !== 'todos') && (
             <Button 
               variant="outline" 
+              size="sm"
               onClick={() => {
                 setSearchTerm('');
                 setStatusFilter('todos');
                 setSituacaoFilter('todos');
               }}
+              className="h-9"
             >
               Limpar filtros
             </Button>
@@ -117,12 +119,12 @@ const ProcessoList: React.FC<ProcessoListProps> = ({
       </div>
       
       {isLoading ? (
-        <div className="flex justify-center items-center py-12">
+        <div className="flex justify-center items-center py-8">
           <div className="animate-spin h-8 w-8 border-4 border-blue-600 border-t-transparent rounded-full" />
         </div>
       ) : filteredProcessos && filteredProcessos.length > 0 ? (
         viewMode === 'list' ? (
-          <div className="space-y-4">
+          <div className="space-y-3">
             {filteredProcessos.map((processo) => (
               <ProcessoItem
                 key={processo.id}
@@ -134,7 +136,7 @@ const ProcessoList: React.FC<ProcessoListProps> = ({
             ))}
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
             {filteredProcessos.map((processo) => (
               <ProcessoCard
                 key={processo.id}
@@ -147,7 +149,7 @@ const ProcessoList: React.FC<ProcessoListProps> = ({
           </div>
         )
       ) : (
-        <Card className="p-12 text-center bg-gray-50">
+        <Card className="p-8 text-center bg-gray-50">
           <FileText className="h-12 w-12 mx-auto text-gray-400 mb-4" />
           <h3 className="text-lg font-medium text-gray-700">
             {searchTerm || statusFilter !== 'todos' || situacaoFilter !== 'todos' 

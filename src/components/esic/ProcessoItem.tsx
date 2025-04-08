@@ -87,26 +87,28 @@ const ProcessoItem: React.FC<ProcessoItemProps> = ({
           variant="outline" 
           size="sm" 
           onClick={() => onSelect(processo)}
+          className="sm:flex"
         >
-          <FileText className="h-4 w-4 mr-2" />
-          Detalhes
+          <FileText className="h-4 w-4 sm:mr-2" />
+          <span className="hidden sm:inline">Detalhes</span>
         </Button>
         <Button 
           variant="outline" 
           size="sm"
           onClick={() => onEdit(processo)}
+          className="sm:flex"
         >
-          <Pencil className="h-4 w-4 mr-2" />
-          Editar
+          <Pencil className="h-4 w-4 sm:mr-2" />
+          <span className="hidden sm:inline">Editar</span>
         </Button>
         <Button 
           variant="outline" 
           size="sm" 
-          className="text-red-600 hover:bg-red-50"
+          className="text-red-600 hover:bg-red-50 sm:flex"
           onClick={() => onDelete(processo.id)}
         >
-          <Trash2 className="h-4 w-4 mr-2" />
-          Excluir
+          <Trash2 className="h-4 w-4 sm:mr-2" />
+          <span className="hidden sm:inline">Excluir</span>
         </Button>
       </CardFooter>
     </Card>

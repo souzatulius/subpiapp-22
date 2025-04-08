@@ -46,12 +46,12 @@ const DashboardLayout: React.FC = () => {
       <div className="flex flex-1 relative">
         {!isMobile && <DashboardSidebar isOpen={sidebarOpen} />}
         
-        <main className={`flex-1 w-full transition-all duration-300 flex flex-col overflow-y-auto`}>
+        <main className="flex-1 w-full transition-all duration-300">
           {!isMobile && <BreadcrumbBar />}
           
           <div className="max-w-7xl mx-auto w-full flex-1">
             <motion.div 
-              className={`p-4 ${isMobile ? 'pb-28' : 'pb-20'} h-full`}
+              className={`p-2 sm:p-4 ${isMobile ? 'pb-20' : 'pb-8'} h-full`}
               initial={{ opacity: 0, y: 20 }} 
               animate={{ opacity: 1, y: 0 }} 
               transition={{ duration: 0.5 }}
