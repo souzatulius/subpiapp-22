@@ -28,11 +28,11 @@ export const getHeightClass = (height: CardHeight = '1'): string => {
     case '3':
       return 'h-[24rem] row-span-3'; // 384px
     case '2':
-      return 'h-[20rem] row-span-2'; // 320px (increased from 16rem)
+      return 'h-[16rem] row-span-2'; // 256px (adjusted from 20rem)
     case '1':
-      return 'h-[10rem] row-span-1'; // 160px (increased from 8rem)
+      return 'h-[10rem] row-span-1'; // 160px
     case '0.5':
-      return 'h-[4rem] row-span-1';  // 64px
+      return 'h-[5rem] row-span-1';  // 80px (adjusted from 4rem)
     default:
       return 'h-[10rem] row-span-1'; // 160px default
   }

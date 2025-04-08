@@ -49,9 +49,9 @@ const getIconSize = (size?: 'sm' | 'md' | 'lg' | 'xl'): string => {
 const getMinHeight = (type?: CardType, height?: CardHeight): string => {
   if (height) {
     switch (height) {
-      case '0.5': return 'min-h-[4rem]';
+      case '0.5': return 'min-h-[5rem]';
       case '1': return 'min-h-[10rem]';
-      case '2': return 'min-h-[20rem]';
+      case '2': return 'min-h-[16rem]';
       case '3': return 'min-h-[24rem]';
       case '4': return 'min-h-[32rem]';
       default: return 'min-h-[10rem]';
@@ -59,11 +59,11 @@ const getMinHeight = (type?: CardType, height?: CardHeight): string => {
   }
   
   if (type === 'data_dynamic' || type === 'in_progress_demands') {
-    return 'min-h-[20rem]';
+    return 'min-h-[16rem]';
   }
 
   if (type === 'smart_search') {
-    return 'min-h-[4rem]';
+    return 'min-h-[5rem]';
   }
   
   return 'min-h-[10rem]';
@@ -137,18 +137,18 @@ const ActionCard = ({
         </div>
       )}
 
-      <div className="relative h-full flex flex-col items-center justify-center text-center py-4 px-3">
+      <div className="relative h-full flex flex-col items-center justify-center text-center py-6 px-4">
         {specialContent ? (
-          <>{specialContent}</>
+          <div className="w-full h-full">{specialContent}</div>
         ) : children ? (
-          <>{children}</>
+          <div className="w-full h-full">{children}</div>
         ) : chartId ? (
           <div className="w-full h-full flex flex-col">
             <ChartPreview chartId={chartId} />
           </div>
         ) : (
           <>
-            <div className={`mb-2.5 ${textColorClass}`}>
+            <div className={`mb-3 ${textColorClass}`}>
               {renderIcon()}
             </div>
             <div className="line-clamp-2 max-w-[90%]">
@@ -156,7 +156,7 @@ const ActionCard = ({
                 {title}
               </h3>
               {subtitle && (
-                <p className={`text-sm ${textColorClass} opacity-80 mt-1 line-clamp-2`}>
+                <p className={`text-sm ${textColorClass} opacity-80 mt-2 line-clamp-2`}>
                   {subtitle}
                 </p>
               )}

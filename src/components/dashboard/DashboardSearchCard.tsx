@@ -27,7 +27,7 @@ const DashboardSearchCard: React.FC<DashboardSearchCardProps> = ({
   return (
     <form 
       onSubmit={handleSubmit} 
-      className="w-full flex items-center space-x-2 p-2"
+      className="w-full h-full flex items-center space-x-2 p-2"
       onClick={(e) => isEditMode && e.stopPropagation()}
     >
       <Input
