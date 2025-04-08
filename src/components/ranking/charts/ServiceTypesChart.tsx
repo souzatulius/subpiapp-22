@@ -26,7 +26,7 @@ const ServiceTypesChart: React.FC<ServiceTypesChartProps> = ({
       'Coleta de Lixo'
     ];
     
-    // Generate random values
+    // Generate values
     let values = [35, 22, 18, 15, 10];
     
     // Apply simulation effects if active
@@ -42,10 +42,10 @@ const ServiceTypesChart: React.FC<ServiceTypesChartProps> = ({
           data: values,
           backgroundColor: [
             '#F97316', // Orange
+            '#EA580C', // Dark Orange
             '#0066FF', // Blue
             '#1E40AF', // Dark Blue
-            '#64748B', // Gray
-            '#94A3B8'  // Light Gray
+            '#64748B'  // Gray
           ],
           borderColor: [
             '#FFFFFF',
@@ -82,6 +82,29 @@ const ServiceTypesChart: React.FC<ServiceTypesChartProps> = ({
                   font: {
                     size: 11
                   }
+                }
+              },
+              tooltip: {
+                callbacks: {
+                  label: function(context) {
+                    const label = context.label || '';
+                    const value = context.parsed;
+                    const total = context.dataset.data.reduce((a: number, b: number) => a + b, 0);
+                    const percentage = Math.round((value * 100) / total);
+                    return `${label}: ${percentage}%`;
+                  }
+                }
+              },
+              datalabels: {
+                formatter: (value: number, ctx: any) => {
+                  const total = ctx.dataset.data.reduce((a: number, b: number) => a + b, 0);
+                  const percentage = Math.round((value * 100) / total);
+                  return percentage + '%';
+                },
+                color: '#fff',
+                font: {
+                  weight: 'bold',
+                  size: 11
                 }
               }
             }

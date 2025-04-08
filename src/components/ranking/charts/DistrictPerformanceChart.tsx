@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Pie } from 'react-chartjs-2';
+import { Bar } from 'react-chartjs-2';
 import ChartCard from './ChartCard';
 
 interface DistrictPerformanceChartProps {
@@ -18,45 +18,43 @@ const DistrictPerformanceChart: React.FC<DistrictPerformanceChartProps> = ({
 }) => {
   // Generate district performance chart data
   const generateDistrictPerformanceData = React.useMemo(() => {
+    // Use the new district names as requested
     const districts = [
-      'Nossa Sub', 
-      'Sub Vizinha', 
-      'Sub Interior', 
-      'Sub Litoral',
+      'Nossa Sub - Pinheiros',
+      'Sub Vizinha - Lapa',
+      'Sub Interior - Sé',
+      'Sub Litoral - Butantã',
       'Outras'
     ];
     
-    // Generate percentages for districts
-    let percentages = [97.7, 0.8, 0.6, 0.4, 0.5];
+    // Generate percentage values for each district
+    let percentages = [0.8, 0.7, 0.5, 0.3, 0.2];
     
     // Apply simulation effects if active
     if (isSimulationActive) {
-      // Even higher percentage for correct sub in simulation
-      percentages = [99.2, 0.3, 0.2, 0.2, 0.1];
+      // Improved efficiency in simulation
+      percentages = percentages.map(p => Math.min(p + 0.15, 1));
     }
+    
+    // Format for display
+    const values = percentages.map(p => (p * 100).toFixed(1));
     
     return {
       labels: districts,
       datasets: [
         {
-          data: percentages,
+          label: 'Impacto %',
+          data: values,
           backgroundColor: [
-            '#0066FF', // Blue (for "Nossa Sub")
-            '#F97316', // Orange
-            '#EA580C', // Dark Orange
-            '#64748B', // Gray
-            '#94A3B8'  // Light Gray
+            '#0066FF', // Nossa Sub (Pinheiros)
+            '#1E40AF', // Sub Vizinha (Lapa)
+            '#F97316', // Sub Interior (Sé)
+            '#EA580C', // Sub Litoral (Butantã)
+            '#64748B'  // Outras
           ],
-          borderColor: [
-            '#FFFFFF',
-            '#FFFFFF',
-            '#FFFFFF',
-            '#FFFFFF',
-            '#FFFFFF'
-          ],
-          borderWidth: 1,
-        },
-      ],
+          barPercentage: 0.6,
+        }
+      ]
     };
   }, [isSimulationActive]);
   
@@ -64,30 +62,35 @@ const DistrictPerformanceChart: React.FC<DistrictPerformanceChartProps> = ({
     <ChartCard
       title="Distritos incluídos indevidamente"
       subtitle="Outras subs na planilha"
-      value="Impactam - 2,3%"
+      value="Estão impactando negativamente 2,3%"
       isLoading={isLoading}
     >
       {!isLoading && (
-        <Pie 
-          data={generateDistrictPerformanceData} 
+        <Bar
+          data={generateDistrictPerformanceData}
           options={{
+            indexAxis: 'y' as const,
             responsive: true,
             maintainAspectRatio: false,
             plugins: {
               legend: {
-                position: 'right' as const,
-                labels: {
-                  boxWidth: 12,
-                  boxHeight: 12,
-                  font: {
-                    size: 11
-                  }
-                }
+                display: false
               },
               tooltip: {
                 callbacks: {
                   label: function(context) {
-                    return `${context.label}: ${context.parsed}%`;
+                    return `Impacto: ${context.parsed.x}%`;
+                  }
+                }
+              }
+            },
+            scales: {
+              x: {
+                beginAtZero: true,
+                max: 100,
+                ticks: {
+                  callback: function(value) {
+                    return value + '%';
                   }
                 }
               }

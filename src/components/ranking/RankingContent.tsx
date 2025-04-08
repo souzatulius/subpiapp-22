@@ -92,8 +92,8 @@ const RankingContent: React.FC<RankingContentProps> = ({
       <Card className="p-4 bg-white border-blue-200 shadow-sm overflow-hidden hover:shadow-md transition-all upload-section">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4">
           <div>
-            <h2 className="text-lg font-semibold text-blue-800 flex items-center">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-blue-800" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <h2 className="text-lg font-semibold text-orange-600 flex items-center">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-orange-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
               </svg>
               Importação de Dados

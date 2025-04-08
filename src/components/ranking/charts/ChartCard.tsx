@@ -14,6 +14,7 @@ interface ChartCardProps {
   onToggleAnalysis?: () => void;
   className?: string;
   isDraggable?: boolean;
+  trendIndicator?: ReactNode;
 }
 
 const ChartCard: React.FC<ChartCardProps> = ({ 
@@ -25,7 +26,8 @@ const ChartCard: React.FC<ChartCardProps> = ({
   onToggleVisibility,
   onToggleAnalysis,
   className = '',
-  isDraggable = true
+  isDraggable = true,
+  trendIndicator
 }) => {
   const [isHovering, setIsHovering] = useState(false);
 
@@ -51,9 +53,12 @@ const ChartCard: React.FC<ChartCardProps> = ({
             {isLoading ? (
               <Skeleton className="h-6 w-28 mt-1 bg-blue-100" />
             ) : (
-              <p className="text-lg sm:text-xl font-semibold text-blue-700">
-                {formatDisplayValue(value)}
-              </p>
+              <div className="flex items-center gap-2">
+                <p className="text-lg sm:text-xl font-semibold text-blue-700">
+                  {formatDisplayValue(value)}
+                </p>
+                {trendIndicator && trendIndicator}
+              </div>
             )}
           </div>
           

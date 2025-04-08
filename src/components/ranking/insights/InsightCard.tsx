@@ -52,7 +52,7 @@ const InsightCard: React.FC<InsightCardProps> = ({
       ) : (
         <>
           <div className="flex items-center">
-            <p className="text-2xl font-bold text-blue-800 mb-1">{formatValue(value)}</p>
+            <p className="text-2xl font-bold text-[#0C4A6E] mb-1">{formatValue(value)}</p>
             {trendIcon && <span className="ml-2 mt-[-5px]">{trendIcon}</span>}
           </div>
           <p className="text-xs text-gray-600 line-clamp-2" title={comment}>

@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Bar } from 'react-chartjs-2';
+import { Line } from 'react-chartjs-2';
 import ChartCard from './ChartCard';
 
 interface EvolutionChartProps {
@@ -16,45 +16,59 @@ const EvolutionChart: React.FC<EvolutionChartProps> = ({
   sgzData, 
   painelData, 
   isLoading,
-  isSimulationActive
+  isSimulationActive 
 }) => {
-  // Mock data generation for evolution chart
+  // Generate evolution chart data
   const generateEvolutionData = React.useMemo(() => {
-    const days = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'];
+    // Generate 7 days of data for the past week
+    const days = [];
+    for (let i = 6; i >= 0; i--) {
+      const date = new Date();
+      date.setDate(date.getDate() - i);
+      days.push(date.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }));
+    }
     
-    // Basic data
-    const pendingData = days.map(() => Math.floor(Math.random() * 15) + 10);
-    let completedData = days.map(() => Math.floor(Math.random() * 40) + 30);
-    let canceledData = days.map(() => Math.floor(Math.random() * 10) + 5);
+    // Base values for evolution over time
+    let fechadas = [68, 66, 72, 70, 75, 78, 82];
+    let pendentes = [22, 24, 18, 20, 15, 14, 12];
+    let canceladas = [10, 10, 10, 10, 10, 8, 6];
     
     // Apply simulation effects if active
     if (isSimulationActive) {
-      // Increase completed percentage in simulation
-      completedData = completedData.map(value => Math.min(value + 10, 70));
-      // Decrease canceled percentage
-      canceledData = canceledData.map(value => Math.max(value - 3, 2));
+      // Improved closed rates in simulation
+      fechadas = fechadas.map(val => Math.min(val + 10, 100));
+      // Reduced pending in simulation
+      pendentes = pendentes.map(val => Math.max(val - 6, 0));
+      // Reduced canceled in simulation
+      canceladas = canceladas.map(val => Math.max(val - 3, 0));
     }
     
     return {
       labels: days,
       datasets: [
         {
-          label: 'Concluídas',
-          data: completedData,
-          backgroundColor: '#0066FF',
-          barPercentage: 0.7,
+          label: 'Fechadas',
+          data: fechadas,
+          borderColor: '#0066FF',
+          backgroundColor: 'rgba(0, 102, 255, 0.1)',
+          tension: 0.4,
+          fill: true
         },
         {
           label: 'Pendentes',
-          data: pendingData,
-          backgroundColor: '#F97316',
-          barPercentage: 0.7,
+          data: pendentes,
+          borderColor: '#F97316',
+          backgroundColor: 'rgba(249, 115, 22, 0.1)',
+          tension: 0.4,
+          fill: true
         },
         {
           label: 'Canceladas',
-          data: canceledData,
-          backgroundColor: '#64748B',
-          barPercentage: 0.7,
+          data: canceladas,
+          borderColor: '#64748B',
+          backgroundColor: 'rgba(100, 116, 139, 0.1)',
+          tension: 0.4,
+          fill: true
         }
       ]
     };
@@ -64,44 +78,31 @@ const EvolutionChart: React.FC<EvolutionChartProps> = ({
     <ChartCard
       title="Serviços em Andamento"
       subtitle="Evolução dos status de serviços na semana"
-      value="25,0%"
+      value="25,0% mais eficiente nesta semana"
       isLoading={isLoading}
     >
       {!isLoading && (
-        <Bar
-          data={generateEvolutionData}
+        <Line 
+          data={generateEvolutionData} 
           options={{
             responsive: true,
             maintainAspectRatio: false,
             plugins: {
               legend: {
                 position: 'top' as const,
-                labels: {
-                  boxWidth: 12,
-                  boxHeight: 12,
-                  font: {
-                    size: 11
-                  }
-                }
-              },
-              tooltip: {
-                callbacks: {
-                  label: function(context) {
-                    return `${context.dataset.label}: ${context.parsed.y}%`;
-                  }
-                }
               }
             },
             scales: {
               y: {
                 beginAtZero: true,
+                max: 100,
                 ticks: {
                   callback: function(value) {
                     return value + '%';
                   }
                 }
-              },
-            },
+              }
+            }
           }}
         />
       )}

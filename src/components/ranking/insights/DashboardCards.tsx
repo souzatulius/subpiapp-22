@@ -81,12 +81,12 @@ const DashboardCards: React.FC<DashboardCardsProps> = ({
   return (
     <div className="mb-6">
       <div className="flex items-center gap-2 mb-4">
-        <BarChart3 className="h-5 w-5 text-blue-800" />
-        <h2 className="text-lg font-semibold text-blue-800">
+        <BarChart3 className="h-5 w-5 text-orange-600" />
+        <h2 className="text-lg font-semibold text-orange-600">
           {isSimulationActive ? 'Indicadores Simulados (Cenário Ideal)' : 'Indicadores Inteligentes'}
         </h2>
         {isSimulationActive && (
-          <span className="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full">
+          <span className="text-xs bg-orange-100 text-orange-800 px-2 py-0.5 rounded-full">
             Simulação
           </span>
         )}

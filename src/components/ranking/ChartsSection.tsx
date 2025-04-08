@@ -15,6 +15,9 @@ import DistrictPerformanceChart from './charts/DistrictPerformanceChart';
 import DepartmentComparisonChart from './charts/DepartmentComparisonChart';
 import OldestPendingList from './charts/OldestPendingList';
 import ResponsibilityChart from './charts/ResponsibilityChart';
+import RankingSimulationChart from './charts/RankingSimulationChart';
+import SgzRankingComparisonChart from './charts/SgzRankingComparisonChart';
+import AttentionPointsChart from './charts/AttentionPointsChart';
 
 // Import chart registration
 import './charts/ChartRegistration';
@@ -113,7 +116,7 @@ const ChartsSection: React.FC<ChartsSectionProps> = ({
         },
         {
           id: 'department-comparison-chart',
-          title: 'Comparação por Departamento',
+          title: 'Comparação por Áreas Técnicas',
           component: <DepartmentComparisonChart data={chartData.departmentComparison || {}} sgzData={sgzData} isLoading={isLoading} isSimulationActive={isSimulationActive} />,
           isVisible: true,
           analysis: 'Comparação entre os departamentos técnicos: STLP, STM e STPO.',
@@ -131,10 +134,38 @@ const ChartsSection: React.FC<ChartsSectionProps> = ({
         },
         {
           id: 'responsibility-chart',
-          title: 'Responsabilidade Real (Sub vs Externo)',
+          title: 'Gargalos e Problemas',
           component: <ResponsibilityChart data={chartData.responsibility || {}} sgzData={sgzData} painelData={painelData} isLoading={isLoading} isSimulationActive={isSimulationActive} />,
           isVisible: true,
           analysis: 'Distribuição das ordens de serviço entre responsabilidade da Subprefeitura e entidades externas.',
+          isAnalysisExpanded: false,
+          showAnalysisOnly: false
+        },
+        // Adding the new charts
+        {
+          id: 'ranking-simulation-chart',
+          title: 'Como estaria nosso ranking',
+          component: <RankingSimulationChart data={{}} sgzData={sgzData} isLoading={isLoading} isSimulationActive={isSimulationActive} />,
+          isVisible: true,
+          analysis: 'Simulação do ranking da subprefeitura sem interferências externas e com OS corretamente fechadas.',
+          isAnalysisExpanded: false,
+          showAnalysisOnly: false
+        },
+        {
+          id: 'sgz-ranking-comparison-chart',
+          title: 'SGZ x Ranking das Subs',
+          component: <SgzRankingComparisonChart data={{}} sgzData={sgzData} isLoading={isLoading} isSimulationActive={isSimulationActive} />,
+          isVisible: true,
+          analysis: 'Avaliação de detalhes das OS e o que não é levado em consideração no ranking oficial.',
+          isAnalysisExpanded: false,
+          showAnalysisOnly: false
+        },
+        {
+          id: 'attention-points-chart',
+          title: 'Pontos de Atenção',
+          component: <AttentionPointsChart data={{}} sgzData={sgzData} isLoading={isLoading} isSimulationActive={isSimulationActive} />,
+          isVisible: true,
+          analysis: 'Avaliação de problemas com registro no Portal 156 e ordens de serviço paradas.',
           isAnalysisExpanded: false,
           showAnalysisOnly: false
         }

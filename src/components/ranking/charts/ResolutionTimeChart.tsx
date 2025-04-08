@@ -2,6 +2,7 @@
 import React from 'react';
 import { Bar } from 'react-chartjs-2';
 import ChartCard from './ChartCard';
+import { TrendingDown } from 'lucide-react';
 
 interface ResolutionTimeChartProps {
   data: any;
@@ -48,12 +49,20 @@ const ResolutionTimeChart: React.FC<ResolutionTimeChartProps> = ({
     };
   }, [isSimulationActive]);
   
+  const trendIndicator = (
+    <div className="flex items-center gap-1 text-xs text-red-500">
+      <span className="font-medium">pior 3%</span>
+      <TrendingDown className="h-3 w-3" />
+    </div>
+  );
+  
   return (
     <ChartCard
       title="Prazo de Execução"
       subtitle="Tempo médio até fechamento das OS"
       value="13,9 dias"
       isLoading={isLoading}
+      trendIndicator={trendIndicator}
     >
       {!isLoading && (
         <Bar
