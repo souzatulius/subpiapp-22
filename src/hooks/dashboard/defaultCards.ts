@@ -65,9 +65,9 @@ export const getDefaultCards = (): ActionCardItem[] => {
     {
       id: uuidv4(),
       title: 'Demandas',
-      iconId: 'FileText', // Updated icon: paper/document
-      path: '/demandas',
-      color: 'deep-blue', // Updated color: bg azul escuro
+      iconId: 'FileText',
+      path: '/dashboard/comunicacao/demandas',
+      color: 'deep-blue',
       width: '25',
       height: '2',
       type: 'standard',
@@ -78,9 +78,9 @@ export const getDefaultCards = (): ActionCardItem[] => {
       id: uuidv4(),
       title: 'Avisos',
       subtitle: 'Notas da coordenação',
-      iconId: 'Bell', // Updated icon: sino/bell
+      iconId: 'Bell',
       path: '/dashboard/comunicacao',
-      color: 'deep-blue', // Updated color: Bg Azul profundo
+      color: 'deep-blue',
       width: '25',
       height: '2',
       type: 'standard',
@@ -91,9 +91,9 @@ export const getDefaultCards = (): ActionCardItem[] => {
       id: uuidv4(),
       title: 'Responder Demandas',
       subtitle: 'Pendências',
-      iconId: 'MessageSquare', // Updated icon: balão de diálogo
-      path: '/dashboard/comunicacao/responder', // Updated path: comunicacao/responder
-      color: 'gray-medium', // Updated color: Bg cinza médio
+      iconId: 'MessageSquare',
+      path: '/dashboard/comunicacao/responder',
+      color: 'gray-medium',
       width: '25',
       height: '2',
       type: 'standard',
@@ -104,9 +104,9 @@ export const getDefaultCards = (): ActionCardItem[] => {
       id: uuidv4(),
       title: 'Ranking',
       subtitle: 'Produtividade das Subsecretarias',
-      iconId: 'TrendingUp', // Updated icon: gráfico subindo
-      path: '/ranking-subs',
-      color: 'bg-orange-500', // Updated color: Bg orange-500
+      iconId: 'TrendingUp',
+      path: '/dashboard/zeladoria/ranking-subs',
+      color: 'bg-orange-500',
       width: '25',
       height: '2',
       type: 'standard',
@@ -116,9 +116,9 @@ export const getDefaultCards = (): ActionCardItem[] => {
     {
       id: uuidv4(),
       title: 'Nova Solicitação',
-      iconId: 'Pencil', // Updated icon: lápis
-      path: '/dashboard/comunicacao/cadastrar', // Updated path: /comunicação/cadastrar
-      color: 'gray-medium', // Updated color: Bg cinza Médio
+      iconId: 'Pencil',
+      path: '/dashboard/comunicacao/cadastrar',
+      color: 'gray-medium',
       width: '25',
       height: '2',
       type: 'standard',
@@ -129,26 +129,26 @@ export const getDefaultCards = (): ActionCardItem[] => {
       id: uuidv4(),
       title: 'Relatórios da Comunicação',
       subtitle: 'Estatísticas e análises',
-      iconId: 'PieChart', // Updated icon: gráfico pizza
-      path: '/relatorios',
-      color: 'orange-light', // Updated color: Bg laranja claro
+      iconId: 'PieChart',
+      path: '/dashboard/comunicacao/relatorios',
+      color: 'orange-light',
       width: '50',
       height: '1',
       type: 'standard',
-      chartId: 'origemDemandas', // Add the chart ID
+      chartId: 'origemDemandas',
       displayMobile: true,
       mobileOrder: 7
     },
     {
       id: uuidv4(),
       title: 'Ações Pendentes',
-      iconId: 'AlertTriangle', // Updated icon: ícone Alerta
-      path: '/demandas',
-      color: 'bg-orange-500', // Updated color: Bg Orange-500
+      iconId: 'AlertTriangle',
+      path: '/dashboard/comunicacao/responder',
+      color: 'bg-orange-500',
       width: '50',
       height: '1',
-      type: 'data_dynamic',
-      dataSourceKey: 'pendencias_por_coordenacao',
+      type: 'in_progress_demands',
+      isPendingActions: true,
       displayMobile: true,
       mobileOrder: 8
     }

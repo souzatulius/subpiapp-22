@@ -36,31 +36,52 @@ const PendingActionsCard: React.FC<PendingActionsProps> = ({
       setIsLoading(true);
       try {
         if (isComunicacao) {
-          // For communication team: find demands that need a note creation
+          // For communication team: find all demands that need attention
           const { data, error } = await supabase
             .from('demandas')
-            .select('id, titulo')
+            .select('id, titulo, prazo_resposta')
+            .in('status', ['em_analise', 'aberta'])
+            .order('prazo_resposta', { ascending: true })
+            .limit(5);
+          
+          if (error) throw error;
+          
+          // Format demands with readable dates
+          const formattedDemands = (data || []).map(demand => ({
+            id: demand.id,
+            titulo: demand.titulo,
+            prazo: new Date(demand.prazo_resposta).toLocaleDateString('pt-BR')
+          }));
+          
+          setPendingDemands(formattedDemands);
+          
+          // Also get demands that need a note to be created
+          const { data: notaData, error: notaError } = await supabase
+            .from('demandas')
+            .select('id')
             .eq('status', 'respondida')
             .is('nota_oficial_id', null);
           
-          if (error) throw error;
-          setDemandsNeedingNota(data?.length || 0);
+          if (notaError) throw notaError;
+          setDemandsNeedingNota(notaData?.length || 0);
         } else if (userDepartmentId) {
-          // For other departments: find demands needing a response
+          // For other departments: find demands assigned to this department
           const { data, error } = await supabase
             .from('demandas')
             .select('id, titulo, prazo_resposta')
             .eq('coordenacao_id', userDepartmentId)
-            .eq('status', 'em_analise');
+            .eq('status', 'em_analise')
+            .order('prazo_resposta', { ascending: true })
+            .limit(5);
           
           if (error) throw error;
           
-          // Format the demands with readable dates
-          const formattedDemands = data?.map(demand => ({
+          // Format demands with readable dates
+          const formattedDemands = (data || []).map(demand => ({
             id: demand.id,
             titulo: demand.titulo,
             prazo: new Date(demand.prazo_resposta).toLocaleDateString('pt-BR')
-          })) || [];
+          }));
           
           setPendingDemands(formattedDemands);
         }
@@ -76,14 +97,16 @@ const PendingActionsCard: React.FC<PendingActionsProps> = ({
   
   // Calculate pending items based on user role
   const totalPending = isComunicacao 
-    ? demandsNeedingNota 
+    ? pendingDemands.length + demandsNeedingNota
     : pendingDemands.length + notesToApprove;
     
   const hasPendingItems = totalPending > 0;
   
   const handleViewAll = () => {
     if (isComunicacao) {
-      if (demandsNeedingNota > 0) {
+      if (pendingDemands.length > 0) {
+        navigate('/dashboard/comunicacao/responder');
+      } else if (demandsNeedingNota > 0) {
         navigate('/dashboard/comunicacao/criar-nota');
       }
     } else {
@@ -123,10 +146,36 @@ const PendingActionsCard: React.FC<PendingActionsProps> = ({
           ) : hasPendingItems ? (
             <div className="space-y-2">
               {isComunicacao ? (
-                <p className="text-sm">
-                  {demandsNeedingNota > 0 && 
-                    `${demandsNeedingNota} demanda${demandsNeedingNota !== 1 ? 's' : ''} aguardando criação de nota oficial`}
-                </p>
+                <>
+                  {pendingDemands.length > 0 && (
+                    <div className="space-y-1">
+                      <p className="text-sm font-medium">Demandas pendentes:</p>
+                      <ul className="text-xs space-y-1 max-h-24 overflow-y-auto">
+                        {pendingDemands.slice(0, 3).map(demand => (
+                          <li 
+                            key={demand.id} 
+                            className="p-1 hover:bg-yellow-100 rounded cursor-pointer flex justify-between"
+                            onClick={() => handleItemClick(demand.id)}
+                          >
+                            <span className="truncate flex-1">{demand.titulo}</span>
+                            <span className="whitespace-nowrap text-yellow-600 ml-2">{demand.prazo}</span>
+                          </li>
+                        ))}
+                        {pendingDemands.length > 3 && (
+                          <li className="text-xs italic">
+                            + {pendingDemands.length - 3} outras demandas
+                          </li>
+                        )}
+                      </ul>
+                    </div>
+                  )}
+                  
+                  {demandsNeedingNota > 0 && (
+                    <p className="text-sm mt-2">
+                      {`${demandsNeedingNota} demanda${demandsNeedingNota !== 1 ? 's' : ''} aguardando criação de nota oficial`}
+                    </p>
+                  )}
+                </>
               ) : (
                 <>
                   {pendingDemands.length > 0 && (

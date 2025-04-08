@@ -1,3 +1,4 @@
+
 export type CardWidth = '25' | '50' | '75' | '100';
 export type CardHeight = '1' | '2' | '3' | '4';
 export type CardColor = 
@@ -16,6 +17,13 @@ export type CardColor =
   | 'orange-light'
   | 'blue-light';
 export type CardType = 'standard' | 'data_dynamic' | 'in_progress_demands' | 'recent_notes' | 'origin_selection' | 'smart_search';
+export type DataSourceKey = 
+  | 'pendencias_por_coordenacao' 
+  | 'notas_aguardando_aprovacao' 
+  | 'respostas_atrasadas' 
+  | 'demandas_aguardando_nota' 
+  | 'ultimas_acoes_coordenacao'
+  | 'comunicados_por_cargo';
 
 export interface ActionCardItem {
   id: string;
@@ -28,7 +36,7 @@ export interface ActionCardItem {
   type?: CardType;
   isHidden?: boolean;
   isCustom?: boolean;
-  dataSourceKey?: string;
+  dataSourceKey?: DataSourceKey;
   displayMobile?: boolean;
   mobileOrder?: number;
   isQuickDemand?: boolean;
@@ -41,5 +49,5 @@ export interface ActionCardItem {
   hasBadge?: boolean;
   badgeValue?: number;
   subtitle?: string;
-  chartId?: string; // Add this new property
+  chartId?: string;
 }

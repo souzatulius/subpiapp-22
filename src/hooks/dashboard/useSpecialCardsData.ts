@@ -39,7 +39,10 @@ export const useSpecialCardsData = () => {
         
         if (data) {
           setUserCoordenaticaoId(data.coordenacao_id);
-          setIsComunicacao(data.coordenacao_id === 'comunicacao');
+          
+          // Check if user is from communication or cabinet departments
+          const isComm = data.coordenacao_id === 'comunicacao' || data.coordenacao_id === 'gabinete';
+          setIsComunicacao(isComm);
         }
       } catch (error) {
         console.error('Failed to fetch user coordination:', error);
@@ -59,27 +62,38 @@ export const useSpecialCardsData = () => {
         
         // Different data gathering based on user department
         if (isComunicacao) {
-          // 1. For communication team:
+          // 1. For communication/cabinet team: fetch all demands and notes across departments
           
-          // Fetch demands in progress (for overdue demands card)
-          const { data: inProgressData, error: inProgressError } = await supabase
+          // Fetch all pending demands (not filtered by department)
+          const { data: pendingDemandsData, error: pendingError } = await supabase
             .from('demandas')
             .select('id, titulo, prazo_resposta')
-            .in('status', ['pendente', 'em_analise', 'respondida'])
-            .order('criado_em', { ascending: false })
-            .limit(5);
+            .in('status', ['em_analise', 'aberta'])
+            .order('prazo_resposta', { ascending: true })
+            .limit(10);
             
-          if (!inProgressError) {
-            setOverdueCount(inProgressData.length);
+          if (!pendingError) {
+            setResponsesToDo(pendingDemandsData?.length || 0);
             setOverdueItems(
-              inProgressData.map(item => ({ 
+              (pendingDemandsData || []).map(item => ({ 
                 title: item.titulo, 
                 id: item.id 
               }))
             );
+            setOverdueCount(pendingDemandsData?.length || 0);
           }
           
-          // Fetch demands that need notes (for pending actions)
+          // Fetch all notes pending approval (not filtered by department)
+          const { data: notesData, error: notesError } = await supabase
+            .from('notas_oficiais')
+            .select('id')
+            .eq('status', 'pendente');
+            
+          if (!notesError) {
+            setNotesToApprove(notesData?.length || 0);
+          }
+          
+          // Fetch demands that need notes
           const { data: needsNotaData, error: needsNotaError } = await supabase
             .from('demandas')
             .select('id')
@@ -87,10 +101,10 @@ export const useSpecialCardsData = () => {
             .is('nota_oficial_id', null);
             
           if (!needsNotaError) {
-            setDemandsNeedingNota(needsNotaData.length);
+            setDemandsNeedingNota(needsNotaData?.length || 0);
           }
         } else {
-          // 2. For other departments:
+          // 2. For other departments: only show their own demands/notes
           
           // Fetch demands assigned to this department
           const { data: departmentDemands, error: departmentError } = await supabase
@@ -101,9 +115,9 @@ export const useSpecialCardsData = () => {
             .limit(5);
             
           if (!departmentError) {
-            setOverdueCount(departmentDemands.length);
+            setOverdueCount(departmentDemands?.length || 0);
             setOverdueItems(
-              departmentDemands.map(item => ({ 
+              (departmentDemands || []).map(item => ({ 
                 title: item.titulo, 
                 id: item.id 
               }))
@@ -119,10 +133,10 @@ export const useSpecialCardsData = () => {
             .limit(10);
             
           if (!responsesError) {
-            setResponsesToDo(responsesData.length);
+            setResponsesToDo(responsesData?.length || 0);
           }
           
-          // Fetch notes waiting for approval
+          // Fetch notes waiting for approval by this department
           const { data: notesData, error: notesError } = await supabase
             .from('notas_oficiais')
             .select('id')
@@ -131,7 +145,7 @@ export const useSpecialCardsData = () => {
             .limit(10);
             
           if (!notesError) {
-            setNotesToApprove(notesData.length);
+            setNotesToApprove(notesData?.length || 0);
           }
         }
       } catch (error) {
