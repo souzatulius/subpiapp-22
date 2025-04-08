@@ -64,9 +64,12 @@ const ProcessosList: React.FC<ProcessosListProps> = ({
       
       <ProcessoList 
         searchTerm={filterTerm}
+        processos={processos}
+        isLoading={isLoading}
         onViewClick={onViewProcesso}
         onEditClick={onEditProcesso}
-        onDeleteClick={onDeleteProcesso}
+        onDeleteClick={(processo) => onDeleteProcesso(processo.id)}
+        showEmptyState={true}
       />
     </div>
   );

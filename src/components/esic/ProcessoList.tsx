@@ -11,13 +11,13 @@ import ProcessoListSkeleton from './ProcessoListSkeleton';
 
 interface ProcessoListProps {
   searchTerm?: string;
+  processos?: ESICProcesso[];
+  isLoading?: boolean;
   onAddJustificativa?: (processoId: string, processoTexto: string) => void;
   onViewClick?: (processo: ESICProcesso) => void;
   onEditClick?: (processo: ESICProcesso) => void;
   onDeleteClick?: (processo: ESICProcesso) => void;
   showEmptyState?: boolean;
-  processos?: ESICProcesso[];
-  isLoading?: boolean;
 }
 
 const ProcessoList: React.FC<ProcessoListProps> = ({
