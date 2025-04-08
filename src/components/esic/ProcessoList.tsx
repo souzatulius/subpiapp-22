@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import ProcessoItem from './ProcessoItem';
 import ProcessoCard from './ProcessoCard';
@@ -26,6 +27,7 @@ interface Processo {
   solicitante: string;
 }
 
+// Define a separate interface for the database response to avoid type recursion issues
 interface ProcessoData {
   atualizado_em: string;
   autor_id: string;
