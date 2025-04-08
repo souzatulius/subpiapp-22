@@ -100,52 +100,43 @@ const DashboardPage: React.FC = () => {
         <main className={`flex-1 overflow-auto ${isMobile ? 'pt-10' : ''}`}>
           {!isMobile && <BreadcrumbBar />}
           
-          <div className="max-w-full mx-auto p-4 pb-16 md:pb-4">
-            <div 
-              className="w-full mb-2"
-              style={isMobile ? scrollFadeStyles : undefined}
-            >
-              <WelcomeCard 
-                title="Dashboard" 
-                description="Mova e edite os cards para personalizar a sua tela!" 
-                icon={<Home className="h-6 w-6 mr-2" />} 
-                color="bg-gradient-to-r from-blue-800 to-blue-950"
-                userName={firstName}
-                greeting={true}
-              />
-            </div>
-            
-            <div 
-              className="flex justify-end mb-4"
-              style={isMobile ? scrollFadeStyles : undefined}
-            >
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={handleResetDashboard}
-                className="text-blue-600 border-blue-300 hover:bg-blue-50"
+          <div className="max-w-7xl mx-auto p-4">
+            <div className="space-y-6">
+              <div 
+                className="w-full"
+                style={isMobile ? scrollFadeStyles : undefined}
               >
-                <RotateCcw className="h-4 w-4 mr-2" />
-                Resetar
-              </Button>
-            </div>
-            
-            <div 
-              className={`relative ${isMobile ? 'pb-32' : ''}`} 
-              style={{
-                height: isMobile ? "auto" : "calc(100vh - 300px)",
-                minHeight: isMobile ? "auto" : "500px"
-              }}
-            >
-              {isLoading ? (
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                  {Array.from({ length: 8 }).map((_, index) => (
-                    <Skeleton key={index} className="h-32 w-full rounded-lg" />
-                  ))}
-                </div>
-              ) : cards && cards.length > 0 ? (
-                <div className="h-full w-full pr-2">
-                  <div className="pb-4 px-2 py-2">
+                <WelcomeCard 
+                  title="Dashboard" 
+                  description="Mova e edite os cards para personalizar a sua tela!" 
+                  icon={<Home className="h-6 w-6 mr-2" />} 
+                  color="bg-gradient-to-r from-blue-800 to-blue-950"
+                  userName={firstName}
+                  greeting={true}
+                />
+              </div>
+              
+              <div style={isMobile ? scrollFadeStyles : undefined}>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={handleResetDashboard}
+                  className="text-blue-600 border-blue-300 hover:bg-blue-50"
+                >
+                  <RotateCcw className="h-4 w-4 mr-2" />
+                  Resetar
+                </Button>
+              </div>
+              
+              <div className={`relative ${isMobile ? 'pb-32' : ''}`}>
+                {isLoading ? (
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    {Array.from({ length: 8 }).map((_, index) => (
+                      <Skeleton key={index} className="h-32 w-full rounded-lg" />
+                    ))}
+                  </div>
+                ) : cards && cards.length > 0 ? (
+                  <div className="px-2 py-2">
                     <CardGridContainer 
                       cards={cards.filter(card => !card.isHidden)} 
                       onCardsChange={handleCardsReorder}
@@ -155,12 +146,12 @@ const DashboardPage: React.FC = () => {
                       isEditMode={isEditMode}
                     />
                   </div>
-                </div>
-              ) : (
-                <div className="p-4 text-center text-gray-500">
-                  Nenhum card disponível.
-                </div>
-              )}
+                ) : (
+                  <div className="p-4 text-center text-gray-500">
+                    Nenhum card disponível.
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </main>
