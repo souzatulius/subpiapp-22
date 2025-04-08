@@ -40,7 +40,14 @@ export const useProcessos = () => {
       if (error) throw error;
       
       console.log(`Processos encontrados: ${data.length}`);
-      setProcessos(data || []);
+      
+      // Cast the data to the expected type, ensuring we convert string situacao to the expected union type
+      const typedData = data.map(item => ({
+        ...item,
+        situacao: item.situacao as ESICProcesso['situacao'] // Type assertion
+      }));
+      
+      setProcessos(typedData);
     } catch (error) {
       console.error('Erro ao buscar processos:', error);
       toast({
@@ -70,7 +77,7 @@ export const useProcessos = () => {
         texto: values.texto,
         situacao: values.situacao,
         status: 'novo_processo',
-        usuario_id: user.id
+        autor_id: user.id // Use autor_id instead of usuario_id
       };
       
       const { data, error } = await supabase
@@ -82,7 +89,12 @@ export const useProcessos = () => {
       if (error) throw error;
       
       // Atualizar a lista de processos
-      setProcessos(prev => [data, ...prev]);
+      const typedData = {
+        ...data,
+        situacao: data.situacao as ESICProcesso['situacao'] // Type assertion
+      };
+      
+      setProcessos(prev => [typedData, ...prev]);
       options?.onSuccess?.();
     } catch (error) {
       console.error('Erro ao criar processo:', error);
@@ -112,11 +124,16 @@ export const useProcessos = () => {
       if (error) throw error;
       
       // Atualizar a lista de processos
-      setProcessos(prev => prev.map(p => p.id === params.id ? data : p));
+      const typedData = {
+        ...data,
+        situacao: data.situacao as ESICProcesso['situacao'] // Type assertion
+      };
+      
+      setProcessos(prev => prev.map(p => p.id === params.id ? typedData : p));
       
       // Atualizar o processo selecionado, se for o mesmo
       if (selectedProcesso && selectedProcesso.id === params.id) {
-        setSelectedProcesso(data);
+        setSelectedProcesso(typedData);
       }
       
       options?.onSuccess?.();
