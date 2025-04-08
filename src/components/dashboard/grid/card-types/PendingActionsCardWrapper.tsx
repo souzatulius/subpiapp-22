@@ -86,7 +86,9 @@ const PendingActionsCardWrapper: React.FC<PendingActionsCardWrapperProps> = ({
               id: demand.id,
               title: demand.titulo,
               dueDate: demand.prazo_resposta ? new Date(demand.prazo_resposta) : null,
-              status: demand.prazo_resposta && isBefore(new Date(demand.prazo_resposta), new Date()) ? 'overdue' : 'warning',
+              status: demand.prazo_resposta && isBefore(new Date(demand.prazo_resposta), new Date()) 
+                ? 'overdue' as const 
+                : 'warning' as const,
               type: 'demand' as const,
               url: `/dashboard/comunicacao/demandas/${demand.id}`
             }));
@@ -108,7 +110,9 @@ const PendingActionsCardWrapper: React.FC<PendingActionsCardWrapperProps> = ({
               id: demand.id,
               title: `${demand.titulo} (${(demand.coordenacoes as any)?.descricao || 'Sem coordenação'})`,
               dueDate: demand.prazo_resposta ? new Date(demand.prazo_resposta) : null,
-              status: demand.prazo_resposta && isBefore(new Date(demand.prazo_resposta), new Date()) ? 'overdue' : 'warning',
+              status: demand.prazo_resposta && isBefore(new Date(demand.prazo_resposta), new Date()) 
+                ? 'overdue' as const 
+                : 'warning' as const,
               type: 'demand' as const,
               url: `/dashboard/comunicacao/demandas/${demand.id}`
             }));
@@ -149,7 +153,9 @@ const PendingActionsCardWrapper: React.FC<PendingActionsCardWrapperProps> = ({
               id: demand.id,
               title: demand.titulo,
               dueDate: demand.prazo_resposta ? new Date(demand.prazo_resposta) : null,
-              status: demand.prazo_resposta && isBefore(new Date(demand.prazo_resposta), new Date()) ? 'overdue' : 'warning',
+              status: demand.prazo_resposta && isBefore(new Date(demand.prazo_resposta), new Date())
+                ? 'overdue' as const 
+                : 'warning' as const,
               type: 'demand' as const,
               url: `/dashboard/comunicacao/responder-demanda/${demand.id}`
             }));

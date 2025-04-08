@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import ProcessoItem from './ProcessoItem';
 import ProcessoCard from './ProcessoCard';
@@ -88,7 +89,8 @@ const ProcessoList: React.FC<ProcessoListProps> = ({
       if (error) throw error;
       
       if (data) {
-        const processedData: Processo[] = data.map((item: any) => ({
+        // Type assertion to help with type inference
+        const processedData = data.map((item: any) => ({
           id: item.id,
           numero_processo: `ESIC-${new Date(item.criado_em).getFullYear()}-${String(item.id).substring(0, 4)}`,
           titulo: item.texto.substring(0, 50) + (item.texto.length > 50 ? '...' : ''),
@@ -100,7 +102,7 @@ const ProcessoList: React.FC<ProcessoListProps> = ({
           created_at: item.criado_em,
           prazo: new Date(new Date(item.data_processo).getTime() + 20 * 24 * 60 * 60 * 1000).toISOString(),
           solicitante: 'Solicitante',
-        }));
+        })) as Processo[];
         
         setProcessos(processedData);
       }

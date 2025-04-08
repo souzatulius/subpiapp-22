@@ -35,9 +35,10 @@ const CardGridContainer: React.FC<CardGridContainerProps> = ({
   const renderPendingTasksCard = () => {
     if (!pendingTasksCard) return null;
     
+    // Use the width class based on mobile view, but force height to row-span-2
     return (
       <div 
-        className={`${getWidthClass(pendingTasksCard.width, isMobileView)} ${getHeightClass(pendingTasksCard.height)}`}
+        className={`${getWidthClass(pendingTasksCard.width, isMobileView)} row-span-2`}
       >
         <PendingTasksCard />
       </div>
@@ -67,17 +68,8 @@ const CardGridContainer: React.FC<CardGridContainerProps> = ({
     }
   };
   
-  const getHeightClass = (height: string = '1') => {
-    switch (height) {
-      case '2':
-        return 'row-span-2';
-      default:
-        return 'row-span-1';
-    }
-  };
-  
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 grid-flow-row-dense">
       {/* Render special cards */}
       {pendingTasksCard && renderPendingTasksCard()}
       
