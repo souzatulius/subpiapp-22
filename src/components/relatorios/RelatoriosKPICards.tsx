@@ -18,8 +18,8 @@ export const RelatoriosKPICards: React.FC = () => {
       
       <StatsCard
         title="Respostas enviadas"
-        value={stats?.totalRespostas || 0}
-        comparison={`${stats?.percentualResposta || 0}% respondidas`}
+        value={stats?.notasAprovadas || 0}
+        comparison={`${stats?.taxaAprovacao || 0}% respondidas`}
         isLoading={isLoadingStats}
       />
       
@@ -30,7 +30,7 @@ export const RelatoriosKPICards: React.FC = () => {
         isLoading={isLoadingStats}
       />
 
-      {/* Novo KPI de Processos e-SIC */}
+      {/* KPI de Processos e-SIC */}
       <ESICProcessesCard loading={isLoadingStats} />
     </div>
   );
