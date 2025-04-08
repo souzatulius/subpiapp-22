@@ -20,7 +20,8 @@ export type CardColor =
   | 'orange-light'
   | 'deep-blue'
   | 'neutral-800'
-  | 'orange-700';
+  | 'orange-700'
+  | string;  // Added string to make it more flexible with user input
 
 // Additional type definitions needed
 export interface ActionCardItem {
@@ -29,7 +30,7 @@ export interface ActionCardItem {
   subtitle?: string;
   iconId: string;
   path: string;
-  color: CardColor | string;
+  color: CardColor;
   width: CardWidth;
   height: CardHeight;
   type: CardType;
@@ -60,7 +61,8 @@ export type CardType =
   | 'in_progress_demands'
   | 'recent_notes'
   | 'origin_selection'
-  | 'smart_search';
+  | 'smart_search'
+  | string; // Added string to make it more flexible with user input
 
 export type DataSourceKey = 
   | 'pendingDemands' 
@@ -72,4 +74,5 @@ export type DataSourceKey =
   | 'respostas_atrasadas'
   | 'demandas_aguardando_nota'
   | 'ultimas_acoes_coordenacao'
-  | 'comunicados_por_cargo';
+  | 'comunicados_por_cargo'
+  | string; // Added string to make it more flexible with user input

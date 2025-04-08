@@ -1,3 +1,4 @@
+
 import { RelatorioItem } from '../hooks/useRelatorioItemsState';
 import { nanoid } from 'nanoid';
 
@@ -36,7 +37,7 @@ export const createRelatorioItems = ({
     },
     isHidden: hiddenItems.includes('distribuicaoPorTemas'),
     isAnalysisExpanded: expandedAnalyses.includes('distribuicaoPorTemas'),
-    analysisText: 'Análise detalhada dos temas mais frequentes nas demandas. A categoria de Obras Públicas lidera com 45% do total, seguida por questões relacionadas a contratos e licitações.',
+    analysis: 'Análise detalhada dos temas mais frequentes nas demandas. A categoria de Obras Públicas lidera com 45% do total, seguida por questões relacionadas a contratos e licitações.',
     isAnalysisOnly: analysisOnlyItems.includes('distribuicaoPorTemas'),
     order: 1
   });
@@ -57,7 +58,7 @@ export const createRelatorioItems = ({
     },
     isHidden: hiddenItems.includes('origemDemandas'),
     isAnalysisExpanded: expandedAnalyses.includes('origemDemandas'),
-    analysisText: 'Análise da origem das demandas, com a Imprensa representando 60% do total, seguida por SMSUB com 25%.',
+    analysis: 'Análise da origem das demandas, com a Imprensa representando 60% do total, seguida por SMSUB com 25%.',
     isAnalysisOnly: analysisOnlyItems.includes('origemDemandas'),
     order: 2
   });
@@ -78,7 +79,7 @@ export const createRelatorioItems = ({
     },
     isHidden: hiddenItems.includes('tempoMedioResposta'),
     isAnalysisExpanded: expandedAnalyses.includes('tempoMedioResposta'),
-    analysisText: 'Análise do tempo médio de resposta por dia da semana, com o melhor tempo sendo registrado na Quarta-feira.',
+    analysis: 'Análise do tempo médio de resposta por dia da semana, com o melhor tempo sendo registrado na Quarta-feira.',
     isAnalysisOnly: analysisOnlyItems.includes('tempoMedioResposta'),
     order: 3
   });
@@ -99,7 +100,7 @@ export const createRelatorioItems = ({
     },
     isHidden: hiddenItems.includes('performanceArea'),
     isAnalysisExpanded: expandedAnalyses.includes('performanceArea'),
-    analysisText: 'Análise da performance por área, com CPO liderando com 92% de performance em relação às demandas.',
+    analysis: 'Análise da performance por área, com CPO liderando com 92% de performance em relação às demandas.',
     isAnalysisOnly: analysisOnlyItems.includes('performanceArea'),
     order: 4
   });
@@ -120,7 +121,7 @@ export const createRelatorioItems = ({
     },
     isHidden: hiddenItems.includes('notasEmitidas'),
     isAnalysisExpanded: expandedAnalyses.includes('notasEmitidas'),
-    analysisText: 'Análise do número de notas emitidas por status, com 75% das notas sendo aprovadas.',
+    analysis: 'Análise do número de notas emitidas por status, com 75% das notas sendo aprovadas.',
     isAnalysisOnly: analysisOnlyItems.includes('notasEmitidas'),
     order: 5
   });
@@ -142,7 +143,7 @@ export const createRelatorioItems = ({
     },
     isHidden: hiddenItems.includes('temasESIC'),
     isAnalysisExpanded: expandedAnalyses.includes('temasESIC'),
-    analysisText: 'Análise detalhada dos temas mais frequentes nas solicitações de acesso à informação. A categoria de Obras Públicas lidera com 32% do total, seguida por questões relacionadas a contratos e licitações.',
+    analysis: 'Análise detalhada dos temas mais frequentes nas solicitações de acesso à informação. A categoria de Obras Públicas lidera com 32% do total, seguida por questões relacionadas a contratos e licitações.',
     isAnalysisOnly: analysisOnlyItems.includes('temasESIC'),
     order: 7
   });
@@ -165,7 +166,7 @@ export const createRelatorioItems = ({
     },
     isHidden: hiddenItems.includes('resolucaoESIC'),
     isAnalysisExpanded: expandedAnalyses.includes('resolucaoESIC'),
-    analysisText: 'Análise da resolução das solicitações e-SIC. 76% das demandas são respondidas dentro do prazo, enquanto 15% são justificadas com base legal e 9% ainda estão em processamento. A taxa de resolução está acima da média das subprefeituras.',
+    analysis: 'Análise da resolução das solicitações e-SIC. 76% das demandas são respondidas dentro do prazo, enquanto 15% são justificadas com base legal e 9% ainda estão em processamento. A taxa de resolução está acima da média das subprefeituras.',
     isAnalysisOnly: analysisOnlyItems.includes('resolucaoESIC'),
     order: 8
   });

@@ -53,7 +53,9 @@ export const updateProfile = async (profileData: Partial<ProfileData>, userId: s
       .update({
         nome_completo: profileData.nome_completo,
         whatsapp: profileData.whatsapp || null,
-        aniversario: profileData.aniversario || null
+        aniversario: profileData.aniversario instanceof Date ? 
+          profileData.aniversario.toISOString().split('T')[0] : 
+          profileData.aniversario || null
       })
       .eq('id', userId);
 
@@ -64,4 +66,32 @@ export const updateProfile = async (profileData: Partial<ProfileData>, userId: s
     console.error('Error updating profile:', error);
     return { data: null, error };
   }
+};
+
+// Auth functions needed by AuthProvider
+export const setupAuthListener = (callback: (user: any) => void) => {
+  const { data: { subscription } } = supabase.auth.onAuthStateChange(
+    (_event, session) => {
+      callback(session?.user || null);
+    }
+  );
+  return subscription;
+};
+
+export const signIn = async (email: string, password: string) => {
+  return supabase.auth.signInWithPassword({ email, password });
+};
+
+export const signUp = async (data: RegisterUserData) => {
+  return registerUser(data);
+};
+
+export const signInWithGoogle = async () => {
+  return supabase.auth.signInWithOAuth({
+    provider: 'google',
+  });
+};
+
+export const signOut = async () => {
+  return supabase.auth.signOut();
 };

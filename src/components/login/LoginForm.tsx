@@ -1,3 +1,4 @@
+
 import React, { useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { LogIn } from 'lucide-react';
@@ -6,8 +7,8 @@ import { toast } from '@/components/ui/use-toast';
 import { useLoginForm } from '@/components/login/useLoginForm';
 import LoginFormFields from '@/components/login/LoginFormFields';
 import GoogleLoginButton from '@/components/login/GoogleLoginButton';
-import Button from '@/components/ui/Button';
-import Loader2 from '@/components/ui/Loader2';
+import { Button } from '@/components/ui/button';
+import { Loader2 } from 'lucide-react';
 
 const LoginForm = () => {
   const navigate = useNavigate();
@@ -24,7 +25,7 @@ const LoginForm = () => {
     handlePasswordChange,
     handleLogin,
     handleGoogleLogin,
-    isSubmitting
+    isSubmitting = false
   } = useLoginForm(navigate);
 
   if (loading || authLoading) {

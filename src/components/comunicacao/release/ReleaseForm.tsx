@@ -22,7 +22,7 @@ const ReleaseForm: React.FC<ReleaseFormProps> = ({
   isGenerating
 }) => {
   return (
-    <div className="max-w-4xl mx-auto bg-white rounded-xl shadow-sm">
+    <div className="w-full bg-white rounded-xl shadow-sm">
       <h2 className="text-xl font-semibold mb-4 px-6 pt-6">Cadastrar Release</h2>
       
       <div className="mb-6 px-6">
@@ -30,7 +30,7 @@ const ReleaseForm: React.FC<ReleaseFormProps> = ({
           value={releaseContent}
           onChange={(e) => onReleaseContentChange(e.target.value)}
           placeholder="Cole aqui o texto do release recebido por e-mail"
-          className="min-h-[400px]"
+          className="min-h-[400px] w-full"
         />
       </div>
       

@@ -7,7 +7,7 @@ import { useLocalStorage } from '@/hooks/useLocalStorage';
 export interface RelatorioItem {
   id: string;
   title: string;
-  subtitle?: string; // Add subtitle property
+  subtitle?: string;
   component: React.ReactNode;
   isVisible: boolean;
   isHidden?: boolean;
@@ -19,7 +19,7 @@ export interface RelatorioItem {
   badge?: string;
   props?: Record<string, any>;
   highlight?: string;
-  order?: number; // Add order property
+  order?: number;
 }
 
 export const useRelatorioItemsState = (initialItems: RelatorioItem[]) => {
