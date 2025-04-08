@@ -23,7 +23,7 @@ const ReleaseForm: React.FC<ReleaseFormProps> = ({
 }) => {
   return (
     <div className="max-w-4xl mx-auto bg-white rounded-xl shadow-sm">
-      <h2 className="text-xl font-semibold mb-4 px-6 pt-6">Novo Release</h2>
+      <h2 className="text-xl font-semibold mb-4 px-6 pt-6">Cadastrar Release</h2>
       
       <div className="mb-6 px-6">
         <Textarea 
