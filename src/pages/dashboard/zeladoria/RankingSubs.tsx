@@ -10,9 +10,11 @@ import '@/components/ranking/charts/ChartRegistration';
 // Import the demo data provider
 import DemoDataProvider from '@/components/ranking/DemoDataProvider';
 import { exportToPDF, printWithStyles } from '@/utils/pdfExport';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const RankingSubs = () => {
   const [filterDialogOpen, setFilterDialogOpen] = useState(false);
+  const isMobile = useIsMobile();
   
   const handlePrint = () => {
     printWithStyles();
@@ -70,10 +72,22 @@ const RankingSubs = () => {
           <RankingContent 
             filterDialogOpen={filterDialogOpen} 
             setFilterDialogOpen={setFilterDialogOpen} 
-            disableCardContainers={true} 
+            disableCardContainers={true}
+            className={isMobile ? "mobile-kpi-grid" : ""} 
           />
         </DemoDataProvider>
       </div>
+
+      {/* Adiciona CSS global para os KPIs em mobile view */}
+      <style jsx global>{`
+        @media (max-width: 767px) {
+          .mobile-kpi-grid .kpi-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+          }
+        }
+      `}</style>
     </motion.div>
   );
 };

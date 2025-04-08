@@ -104,7 +104,7 @@ const UserProfileMenu = () => {
                 alt={userProfile.nome_completo || 'User avatar'} 
               />
             ) : (
-              <AvatarFallback>{getInitials()}</AvatarFallback>
+              <AvatarFallback className="bg-blue-500 text-white">{getInitials()}</AvatarFallback>
             )}
           </Avatar>
         </Button>

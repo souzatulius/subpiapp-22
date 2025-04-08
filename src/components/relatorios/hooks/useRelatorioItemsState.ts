@@ -14,7 +14,7 @@ export interface RelatorioItem {
   description?: string;
   badge?: string;
   order: number;
-  highlight?: string;  // Added to match usage in relatorioItemsFactory.ts
+  highlight?: string;  // Adicionado conforme usado em relatorioItemsFactory
   props?: any;  // Support props passed to components
 }
 

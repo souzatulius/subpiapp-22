@@ -24,6 +24,7 @@ const BreadcrumbBar: React.FC<BreadcrumbBarProps> = ({
       'settings': 'Configurações',
       'users': 'Usuários',
       'ranking': 'Ranking',
+      'ranking-subs': 'Ranking',
       'relatorios': 'Relatórios',
       'demandas': 'Demandas',
       'notas': 'Notas',
@@ -31,9 +32,15 @@ const BreadcrumbBar: React.FC<BreadcrumbBarProps> = ({
       'edit': 'Editar',
       'view': 'Visualizar',
       'create': 'Novo',
+      'zeladoria': 'Zeladoria',
     };
     
     return pathMap[path] || path.charAt(0).toUpperCase() + path.slice(1);
+  };
+  
+  // Check if path is non-clickable (like 'zeladoria')
+  const isNonClickable = (path: string) => {
+    return ['zeladoria'].includes(path);
   };
 
   return (
@@ -50,9 +57,9 @@ const BreadcrumbBar: React.FC<BreadcrumbBarProps> = ({
         {paths.map((path, i) => (
           <React.Fragment key={i}>
             <ChevronRight className="h-4 w-4 mx-1" />
-            {i === paths.length - 1 || (onSettingsClick && path === 'settings') ? (
+            {i === paths.length - 1 || (onSettingsClick && path === 'settings') || isNonClickable(path) ? (
               <span 
-                className={`${onSettingsClick && path === 'settings' ? 'cursor-pointer hover:text-primary' : ''}`}
+                className={`${(onSettingsClick && path === 'settings') ? 'cursor-pointer hover:text-primary' : ''}`}
                 onClick={onSettingsClick && path === 'settings' ? onSettingsClick : undefined}
               >
                 {getLabel(path)}

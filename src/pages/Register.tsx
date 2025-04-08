@@ -29,12 +29,14 @@ const Register = () => {
   
   return (
     <AuthLayout>
-      <RegisterForm 
-        roles={roles} 
-        areas={areas}
-        coordenacoes={coordenacoes}
-        loadingOptions={loadingOptions} 
-      />
+      <div className="flex items-center justify-center w-full h-full">
+        <RegisterForm 
+          roles={roles} 
+          areas={areas}
+          coordenacoes={coordenacoes}
+          loadingOptions={loadingOptions} 
+        />
+      </div>
     </AuthLayout>
   );
 };
