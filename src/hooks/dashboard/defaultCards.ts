@@ -5,7 +5,8 @@ import {
   ClipboardList, MessageSquareReply, FileCheck, 
   BarChart2, PlusCircle, Search, Clock, 
   AlertTriangle, CheckCircle, FileText, ListFilter,
-  ListTodo, FilePlus
+  ListTodo, FilePlus, UserCircle, Building,
+  Trophy, MessageCircle
 } from 'lucide-react';
 
 // Helper function to get the Icon component from ID
@@ -24,6 +25,10 @@ export const getIconComponentFromId = (iconId: string) => {
     'list-filter': ListFilter,
     'list-todo': ListTodo,
     'file-plus': FilePlus,
+    'user-circle': UserCircle,
+    'building': Building,
+    'trophy': Trophy,
+    'message-circle': MessageCircle,
   };
   
   return iconMap[iconId] || ClipboardList;
@@ -32,6 +37,19 @@ export const getIconComponentFromId = (iconId: string) => {
 // Generate default cards for the dashboard
 export const getDefaultCards = (): ActionCardItem[] => {
   return [
+    {
+      id: 'smart-search',
+      title: 'O que vamos fazer?',
+      subtitle: 'Faça uma busca rápida',
+      iconId: 'search',
+      path: '',
+      color: 'blue-light',
+      width: '100',
+      height: '1',
+      type: 'smart_search',
+      displayMobile: true,
+      mobileOrder: 0,
+    },
     {
       id: 'pending-tasks',
       title: 'Pendências e Prazos',
@@ -44,7 +62,7 @@ export const getDefaultCards = (): ActionCardItem[] => {
       type: 'special',
       isPendingActions: true,
       displayMobile: true,
-      mobileOrder: 0,
+      mobileOrder: 1,
     },
     {
       id: 'demandas',
@@ -57,7 +75,7 @@ export const getDefaultCards = (): ActionCardItem[] => {
       height: '1',
       type: 'standard',
       displayMobile: true,
-      mobileOrder: 1,
+      mobileOrder: 2,
     },
     {
       id: 'respostas',
@@ -70,7 +88,7 @@ export const getDefaultCards = (): ActionCardItem[] => {
       height: '1',
       type: 'standard',
       displayMobile: true,
-      mobileOrder: 2,
+      mobileOrder: 3,
     },
     {
       id: 'notas',
@@ -83,7 +101,7 @@ export const getDefaultCards = (): ActionCardItem[] => {
       height: '1',
       type: 'standard',
       displayMobile: true,
-      mobileOrder: 3,
+      mobileOrder: 4,
     },
     {
       id: 'relatorios',
@@ -96,33 +114,18 @@ export const getDefaultCards = (): ActionCardItem[] => {
       height: '1',
       type: 'standard',
       displayMobile: true,
-      mobileOrder: 4,
+      mobileOrder: 5,
     },
     {
       id: 'quick-demand',
       title: 'Nova Demanda',
       subtitle: 'Criar demanda rápida',
       iconId: 'plus-circle',
-      path: '',
+      path: '/dashboard/comunicacao/cadastrar-demanda',
       color: 'green-neon',
       width: '25',
       height: '1',
-      type: 'special',
-      isQuickDemand: true,
-      displayMobile: true,
-      mobileOrder: 5,
-    },
-    {
-      id: 'search',
-      title: 'Busca Avançada',
-      subtitle: 'Encontre informações',
-      iconId: 'search',
-      path: '',
-      color: 'gray-light',
-      width: '25',
-      height: '1',
-      type: 'special',
-      isSearch: true,
+      type: 'standard',
       displayMobile: true,
       mobileOrder: 6,
     },
@@ -141,6 +144,58 @@ export const getDefaultCards = (): ActionCardItem[] => {
       mobileOrder: 7,
     },
     {
+      id: 'criar-nota',
+      title: 'Criar Nota',
+      subtitle: 'Elabore notas oficiais',
+      iconId: 'file-text',
+      path: '/dashboard/comunicacao/criar-nota',
+      color: 'blue-vivid',
+      width: '25',
+      height: '1',
+      type: 'standard',
+      displayMobile: true,
+      mobileOrder: 8,
+    },
+    {
+      id: 'aprovar-notas',
+      title: 'Aprovar Notas',
+      subtitle: 'Revise e aprove notas',
+      iconId: 'check-circle',
+      path: '/dashboard/comunicacao/aprovar-nota',
+      color: 'neutral-800',
+      width: '25',
+      height: '1',
+      type: 'standard',
+      displayMobile: true,
+      mobileOrder: 9,
+    },
+    {
+      id: 'ranking',
+      title: 'Ranking da Zeladoria',
+      subtitle: 'Desempenho por região',
+      iconId: 'trophy',
+      path: '/dashboard/zeladoria/ranking-subs',
+      color: 'green-dark',
+      width: '25',
+      height: '1',
+      type: 'standard',
+      displayMobile: true,
+      mobileOrder: 10,
+    },
+    {
+      id: 'esic',
+      title: 'e-SIC',
+      subtitle: 'Acesso à informação',
+      iconId: 'file-text',
+      path: '/dashboard/esic',
+      color: 'blue-light',
+      width: '25',
+      height: '1',
+      type: 'standard',
+      displayMobile: true,
+      mobileOrder: 11,
+    },
+    {
       id: 'origin-selection',
       title: 'Cadastro de Demandas',
       subtitle: 'De onde vem a solicitação?',
@@ -151,7 +206,7 @@ export const getDefaultCards = (): ActionCardItem[] => {
       height: '2',
       type: 'origin_selection',
       displayMobile: true,
-      mobileOrder: 8,
+      mobileOrder: 12,
     }
   ];
 };
@@ -159,7 +214,8 @@ export const getDefaultCards = (): ActionCardItem[] => {
 // Add the missing function that returns the communication-specific cards
 export const getCommunicationActionCards = (): ActionCardItem[] => {
   return getDefaultCards().filter(card => 
-    // Include cards that are relevant for communication department
-    card.id !== 'hidden-card-for-other-departments'
+    // Include all cards for communication department
+    // We can exclude cards by ID if needed in the future
+    !['hidden-card-for-other-departments'].includes(card.id)
   );
 };

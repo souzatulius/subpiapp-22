@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
@@ -179,7 +180,7 @@ export function UnifiedActionCard({
       return children;
     }
     
-    if (isSearch) {
+    if (isSearch || type === 'smart_search') {
       return (
         <SearchCard 
           card={{ id, title, iconId, path, color, type, isSearch }}

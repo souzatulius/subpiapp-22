@@ -30,8 +30,30 @@ const CardGridContainer: React.FC<CardGridContainerProps> = ({
   // Get user department info to determine if origin selection card should be shown
   const { isComunicacao } = useDepartmentData();
   
-  // Add the origin selection card for comunicacao users
+  // Start with existing cards
   let displayCards = [...cards];
+  
+  // Ensure we have a search card if not present
+  const hasSearchCard = displayCards.some(card => 
+    card.type === 'smart_search' || card.isSearch === true
+  );
+  
+  if (!hasSearchCard) {
+    // Add search card at the beginning
+    displayCards.unshift({
+      id: 'search-card',
+      title: 'O que vamos fazer?',
+      subtitle: 'Faça uma busca rápida',
+      iconId: 'search',
+      path: '',
+      color: 'blue-light',
+      width: '100',
+      height: '1',
+      type: 'smart_search',
+      displayMobile: true,
+      mobileOrder: 0,
+    });
+  }
   
   // If user is from comunicacao department, add origin selection card if not already present
   if (isComunicacao && !displayCards.some(card => card.type === 'origin_selection')) {
@@ -49,6 +71,7 @@ const CardGridContainer: React.FC<CardGridContainerProps> = ({
         height: '2',
         type: 'origin_selection',
         displayMobile: true,
+        mobileOrder: displayCards.length,
       });
     }
   }

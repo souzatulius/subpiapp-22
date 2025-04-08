@@ -12,7 +12,9 @@ export const getWidthClass = (width?: string, isMobileView: boolean = false): st
       case '25':
         return 'col-span-1';
       case '50':
+        return 'col-span-2';
       case '75':
+        return 'col-span-2';
       case '100':
         return 'col-span-2';
       default:

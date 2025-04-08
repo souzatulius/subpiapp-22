@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+
+import React, { useState } from 'react';
 import { Home, RotateCcw } from 'lucide-react';
 import { useDashboardCards } from '@/hooks/dashboard/useDashboardCards';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -19,7 +20,6 @@ import { Button } from '@/components/ui/button';
 import { useScrollFade } from '@/hooks/useScrollFade';
 import { motion } from 'framer-motion';
 import { useCardStorage } from '@/hooks/dashboard/useCardStorage';
-import { v4 as uuidv4 } from 'uuid';
 
 const DashboardPage: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -58,32 +58,6 @@ const DashboardPage: React.FC = () => {
   const toggleEditMode = () => {
     setIsEditMode(!isEditMode);
   };
-
-  // Add search card if it doesn't exist
-  useEffect(() => {
-    if (!isLoading && cards && !cards.some(card => card.isSearch)) {
-      const updatedCards = [...cards];
-      
-      // Create search card
-      const searchCard: ActionCardItem = {
-        id: `search-${uuidv4()}`,
-        title: "O que vamos fazer?",
-        iconId: "search",
-        path: "",
-        color: "blue-light",
-        width: "100",
-        height: "1",
-        type: "smart_search",
-        isSearch: true,
-        displayMobile: true,
-        mobileOrder: 0,
-      };
-      
-      // Add to beginning
-      updatedCards.unshift(searchCard);
-      handleCardsReorder(updatedCards);
-    }
-  }, [isLoading, cards]);
 
   const handleCardEdit = (card: ActionCardItem) => {
     setSelectedCard(card);
@@ -173,7 +147,16 @@ const DashboardPage: React.FC = () => {
                 />
               </div>
               
-              <div className="flex justify-end">
+              <div className="flex items-center justify-between">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={toggleEditMode}
+                  className={`${isEditMode ? 'bg-blue-100 text-blue-800' : 'text-blue-600'} border-blue-300 hover:bg-blue-50`}
+                >
+                  {isEditMode ? 'Finalizar Edição' : 'Editar Cards'}
+                </Button>
+                
                 <Button 
                   variant="outline" 
                   size="sm" 
