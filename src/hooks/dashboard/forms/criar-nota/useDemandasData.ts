@@ -26,7 +26,6 @@ export const useDemandasData = () => {
             problema:problemas (
               descricao
             ),
-            supervisao_tecnica_id,
             origem_id,
             origem:origens_demandas (
               descricao
@@ -93,7 +92,7 @@ export const useDemandasData = () => {
         );
 
         setDemandas(demandasWithNotas);
-      } catch (err) {
+      } catch (err: any) {
         console.error('Error fetching demandas:', err);
         setError('Erro ao buscar demandas');
       } finally {
