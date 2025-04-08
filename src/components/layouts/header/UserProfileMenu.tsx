@@ -65,6 +65,21 @@ const UserProfileMenu: React.FC = () => {
     return `${nameParts[0]} ${nameParts[1]}`;
   };
 
+  // Handle profile navigation without preventing default event
+  const handleProfileClick = () => {
+    navigate('/profile');
+  };
+
+  // Handle notifications navigation without preventing default event
+  const handleNotificationsClick = () => {
+    navigate('/settings/notifications');
+  };
+
+  // Handle settings navigation without preventing default event
+  const handleSettingsClick = () => {
+    navigate('/settings');
+  };
+
   return (
     <div className="flex items-center">
       {/* User info - visible only on desktop */}
@@ -90,11 +105,11 @@ const UserProfileMenu: React.FC = () => {
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-56">
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => navigate('/profile')}>
+            <DropdownMenuItem onClick={handleProfileClick}>
               <User className="mr-2 h-4 w-4" />
               <span>Perfil</span>
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => navigate('/settings/notifications')}>
+            <DropdownMenuItem onClick={handleNotificationsClick}>
               <Bell className="mr-2 h-4 w-4" />
               <span>Gerenciar Notificações</span>
               {unreadCount > 0 && (
@@ -103,7 +118,7 @@ const UserProfileMenu: React.FC = () => {
                 </span>
               )}
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => navigate('/settings')}>
+            <DropdownMenuItem onClick={handleSettingsClick}>
               <Settings className="mr-2 h-4 w-4" />
               <span>Configurações</span>
             </DropdownMenuItem>

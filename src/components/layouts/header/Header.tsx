@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -21,9 +22,9 @@ const Header: React.FC<HeaderProps> = ({
   const isMobile = useIsMobile();
   return <header className="sticky top-0 z-50 bg-white shadow-sm">
       <div className="w-full flex h-16 items-center justify-between">
-        {/* Left side - Toggle button */}
+        {/* Left side - Toggle button (hidden on mobile) */}
         <div className="w-1/4 flex items-center gap-4 relative">
-          {toggleSidebar && <Button variant="ghost" size="icon" onClick={toggleSidebar} aria-label={isMobile ? "Abrir menu" : "Alternar visibilidade do menu"} className="ml-4 mx-[29px]">
+          {toggleSidebar && !isMobile && <Button variant="ghost" size="icon" onClick={toggleSidebar} aria-label={isMobile ? "Abrir menu" : "Alternar visibilidade do menu"} className="ml-4 mx-[29px]">
               <Menu className="w-10 h-10 text-gray-500" />
             </Button>}
         </div>
