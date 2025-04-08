@@ -94,15 +94,21 @@ const ActionCard = ({
   };
   
   const getTextColor = (bgColor: string): string => {
-    if (color === 'gray-light' || color === 'gray-lighter' || color === 'gray-medium' || 
-        color === 'green-neon' || color === 'green-dark') {
+    // Force white text on green-neon and green-dark backgrounds
+    if (color === 'green-neon' || color === 'green-dark') {
+      return 'text-gray-900'; // Dark text for better contrast on bright green
+    }
+    
+    // For light backgrounds (gray tones)
+    if (color === 'gray-light' || color === 'gray-lighter' || color === 'gray-medium') {
       // Special case for Ranking Zeladoria card - always gray-950 text
       if (id === 'ranking-zeladoria') {
         return 'text-gray-950';
       }
       return 'text-gray-800'; // Dark text for light backgrounds
     }
-    return 'text-white'; // White text for dark backgrounds
+    
+    return 'text-white'; // White text for all other dark backgrounds
   };
   
   const textColor = getTextColor(bgColor);

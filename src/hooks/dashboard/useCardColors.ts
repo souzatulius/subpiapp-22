@@ -10,15 +10,14 @@ export const getBgColor = (color: string): CardColor => {
     case 'orange': return 'orange-dark' as CardColor;
     case 'orange-light': return 'orange-light' as CardColor;
     case 'gray-light': return 'gray-light' as CardColor;
-    case 'gray-lighter': return 'gray-lighter' as CardColor;
     case 'gray-medium': return 'gray-medium' as CardColor;
     case 'deep-blue': return 'deep-blue' as CardColor;
-    case 'gray-950': return 'deep-blue' as CardColor; // Map gray-950 to deep-blue
+    case 'neutral-800': return 'neutral-800' as CardColor; // Added dark gray
     // map legacy colors to new palette
     case 'grey-400': 
     case 'gray-400': 
     case 'gray-800': 
-    case 'gray-950': return 'deep-blue' as CardColor; // Updated to map to deep-blue instead of gray-light
+    case 'gray-950': return 'deep-blue' as CardColor;
     case 'blue-700': 
     case 'blue-960': 
     case 'blue-900': return 'blue-dark' as CardColor;

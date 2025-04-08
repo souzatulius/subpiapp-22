@@ -7,11 +7,11 @@ export type CardColor =
   | 'green-neon' // #66FF66 - Verde Neon
   | 'green-dark' // #00CC00 - Verde Escuro
   | 'gray-light' // #F5F5F5 - Cinza Claro
-  | 'gray-lighter' // #FAFAFA - Cinza Mais Claro
   | 'gray-medium' // #D4D4D4 - Cinza Médio
   | 'orange-dark' // #F25C05 - Laranja Escuro
   | 'orange-light' // #F89E66 - Laranja Claro
-  | 'deep-blue'; // #051A2C - Azul Profundo
+  | 'deep-blue' // #051A2C - Azul Profundo
+  | 'neutral-800'; // #262626 - Cinza Escuro
 
 export type CardWidth = '25' | '33' | '50' | '75' | '100';
 export type CardHeight = '1' | '2';
