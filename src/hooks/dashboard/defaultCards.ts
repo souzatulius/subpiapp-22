@@ -52,7 +52,7 @@ export const getDefaultCards = (): ActionCardItem[] => {
     {
       id: 'dashboard-search-card',
       title: 'Busca Rápida',
-      iconId: 'search',
+      iconId: 'Search',
       path: '',
       color: 'bg-white',
       width: '100', // Full width
@@ -65,7 +65,7 @@ export const getDefaultCards = (): ActionCardItem[] => {
     {
       id: uuidv4(),
       title: 'Demandas',
-      iconId: 'file-text', // Updated icon: paper/document
+      iconId: 'FileText', // Updated icon: paper/document
       path: '/demandas',
       color: 'deep-blue', // Updated color: bg azul escuro
       width: '25',
@@ -78,7 +78,7 @@ export const getDefaultCards = (): ActionCardItem[] => {
       id: uuidv4(),
       title: 'Avisos',
       subtitle: 'Notas da coordenação',
-      iconId: 'bell', // Updated icon: sino/bell
+      iconId: 'Bell', // Updated icon: sino/bell
       path: '/dashboard/comunicacao',
       color: 'deep-blue', // Updated color: Bg Azul profundo
       width: '25',
@@ -91,7 +91,7 @@ export const getDefaultCards = (): ActionCardItem[] => {
       id: uuidv4(),
       title: 'Responder Demandas',
       subtitle: 'Pendências',
-      iconId: 'message-square', // Updated icon: balão de diálogo
+      iconId: 'MessageSquare', // Updated icon: balão de diálogo
       path: '/dashboard/comunicacao/responder', // Updated path: comunicacao/responder
       color: 'gray-medium', // Updated color: Bg cinza médio
       width: '25',
@@ -104,7 +104,7 @@ export const getDefaultCards = (): ActionCardItem[] => {
       id: uuidv4(),
       title: 'Ranking',
       subtitle: 'Produtividade das Subsecretarias',
-      iconId: 'trending-up', // Updated icon: gráfico subindo
+      iconId: 'TrendingUp', // Updated icon: gráfico subindo
       path: '/ranking-subs',
       color: 'bg-orange-500', // Updated color: Bg orange-500
       width: '25',
@@ -116,7 +116,7 @@ export const getDefaultCards = (): ActionCardItem[] => {
     {
       id: uuidv4(),
       title: 'Nova Solicitação',
-      iconId: 'pencil', // Updated icon: lápis
+      iconId: 'Pencil', // Updated icon: lápis
       path: '/dashboard/comunicacao/cadastrar', // Updated path: /comunicação/cadastrar
       color: 'gray-medium', // Updated color: Bg cinza Médio
       width: '25',
@@ -128,7 +128,7 @@ export const getDefaultCards = (): ActionCardItem[] => {
     {
       id: uuidv4(),
       title: 'Relatórios da Comunicação',
-      iconId: 'pie-chart', // Updated icon: gráfico pizza
+      iconId: 'PieChart', // Updated icon: gráfico pizza
       path: '/relatorios',
       color: 'orange-light', // Updated color: Bg laranja claro
       width: '50',
@@ -140,7 +140,7 @@ export const getDefaultCards = (): ActionCardItem[] => {
     {
       id: uuidv4(),
       title: 'Ações Pendentes',
-      iconId: 'alert-triangle', // Updated icon: ícone Alerta
+      iconId: 'AlertTriangle', // Updated icon: ícone Alerta
       path: '/demandas',
       color: 'bg-orange-500', // Updated color: Bg Orange-500
       width: '50',
@@ -160,7 +160,7 @@ export const getCommunicationActionCards = (): ActionCardItem[] => {
     {
       id: 'dashboard-search-card',
       title: 'Busca Rápida',
-      iconId: 'search',
+      iconId: 'Search',
       path: '',
       color: 'bg-white',
       width: '100', // Full width
@@ -173,7 +173,7 @@ export const getCommunicationActionCards = (): ActionCardItem[] => {
     {
       id: uuidv4(),
       title: 'Nova Demanda',
-      iconId: 'pencil', // Updated to match the new icon scheme
+      iconId: 'Pencil', // Updated to match the new icon scheme
       path: '/dashboard/comunicacao/nova-demanda',
       color: 'gray-medium', // Updated to match the new color scheme
       width: '25',
@@ -185,7 +185,7 @@ export const getCommunicationActionCards = (): ActionCardItem[] => {
     {
       id: uuidv4(),
       title: 'Demandas em Andamento',
-      iconId: 'file-text', // Updated to match the new icon scheme
+      iconId: 'FileText', // Updated to match the new icon scheme
       path: '/dashboard/comunicacao/demandas',
       color: 'deep-blue', // Updated to match the new color scheme
       width: '25',
@@ -197,7 +197,7 @@ export const getCommunicationActionCards = (): ActionCardItem[] => {
     {
       id: uuidv4(),
       title: 'Aprovar Notas',
-      iconId: 'check-circle',
+      iconId: 'CheckCircle',
       path: '/dashboard/comunicacao/aprovar',
       color: 'bg-orange-500', // Updated to match the new color scheme
       width: '25',
@@ -209,7 +209,7 @@ export const getCommunicationActionCards = (): ActionCardItem[] => {
     {
       id: uuidv4(),
       title: 'Criar Nota',
-      iconId: 'file-text',
+      iconId: 'FileText',
       path: '/dashboard/comunicacao/criar-nota',
       color: 'orange-light', // Updated to match the new color scheme
       width: '25',

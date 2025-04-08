@@ -36,7 +36,7 @@ const getIconSize = (size?: 'sm' | 'md' | 'lg' | 'xl'): string => {
     case 'lg': return 'w-12 h-12';
     case 'xl': return 'w-16 h-16';
     case 'md':
-    default: return 'w-10 h-10';  // Increased from 'w-6 h-6' to 'w-10 h-10' for better visibility
+    default: return 'w-10 h-10';
   }
 };
 
@@ -63,11 +63,13 @@ const ActionCard = ({
   const renderIcon = () => {
     if (!iconId) return null;
     
+    // Direct check for Lucide icon by name
     const LucideIcon = (LucideIcons as any)[iconId];
     if (LucideIcon) {
       return <LucideIcon className={getIconSize(iconSize)} />;
     }
     
+    // Fallback to our custom icon loader
     const FallbackIcon = getIconComponentFromId(iconId);
     return FallbackIcon ? <FallbackIcon className={getIconSize(iconSize)} /> : null;
   };

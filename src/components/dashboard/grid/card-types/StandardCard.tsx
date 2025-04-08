@@ -2,7 +2,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ActionCardItem } from '@/types/dashboard';
-import { getIconComponentFromId } from '@/hooks/dashboard/defaultCards';
 import * as LucideIcons from 'lucide-react';
 
 interface StandardCardProps {
@@ -28,9 +27,12 @@ const StandardCard: React.FC<StandardCardProps> = ({ card, isMobileView }) => {
       return <LucideIcon className="w-8 h-8 text-white" />;
     }
     
-    // Fallback to our custom icon loader
-    const IconComponent = getIconComponentFromId(card.iconId);
-    return IconComponent ? <IconComponent className="w-8 h-8 text-white" /> : null;
+    // Fallback for icon not found
+    return (
+      <div className="w-8 h-8 flex items-center justify-center bg-white bg-opacity-20 rounded-full">
+        <span className="text-white text-xs">{card.iconId.charAt(0)}</span>
+      </div>
+    );
   };
 
   return (

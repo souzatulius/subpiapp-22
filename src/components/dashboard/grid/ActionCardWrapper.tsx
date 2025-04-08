@@ -11,6 +11,7 @@ import QuickDemandCardWrapper from './card-types/QuickDemandCardWrapper';
 import NewCardButtonWrapper from './card-types/NewCardButtonWrapper';
 import DynamicDataCard from '../DynamicDataCard';
 import DashboardSearchCard from '../DashboardSearchCard';
+import * as LucideIcons from 'lucide-react';
 
 interface ActionCardWrapperProps {
   card: ActionCardItem;
@@ -44,7 +45,12 @@ const ActionCardWrapper: React.FC<ActionCardWrapperProps> = ({
   specialCardsData
 }) => {
   const { userDepartment, isComunicacao } = useDepartmentData();
-  const IconComponent = card.iconId ? getIconComponentFromId(card.iconId) : null;
+  
+  // Check for direct Lucide icon first
+  const LucideIcon = card.iconId ? (LucideIcons as any)[card.iconId] : null;
+  
+  // If not a direct Lucide icon, try fallback method
+  const FallbackIcon = !LucideIcon && card.iconId ? getIconComponentFromId(card.iconId) : null;
 
   // Get icon component from ID
   function getIconComponentFromId(iconId: string) {
@@ -83,10 +89,11 @@ const ActionCardWrapper: React.FC<ActionCardWrapperProps> = ({
     
     // Check if it's a dynamic data card
     if (card.type === 'data_dynamic' && card.dataSourceKey) {
+      const IconComp = LucideIcon || FallbackIcon;
       return (
         <DynamicDataCard 
           title={card.title}
-          icon={IconComponent && <IconComponent className="h-8 w-8" />}
+          icon={IconComp && <IconComp className="h-8 w-8" />}
           color={card.color}
           dataSourceKey={card.dataSourceKey}
           coordenacaoId={userDepartment || 'default'}
