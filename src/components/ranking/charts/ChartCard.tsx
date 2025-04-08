@@ -37,21 +37,21 @@ const ChartCard: React.FC<ChartCardProps> = ({
 
   return (
     <Card 
-      className={`overflow-hidden border border-orange-200 hover:shadow-md transition-all bg-white ${className} ${isDraggable ? 'cursor-grab active:cursor-grabbing' : ''}`}
+      className={`overflow-hidden border border-blue-200 hover:shadow-md transition-all bg-white ${className} ${isDraggable ? 'cursor-grab active:cursor-grabbing' : ''}`}
       onMouseEnter={() => setIsHovering(true)}
       onMouseLeave={() => setIsHovering(false)}
     >
       <CardContent className="p-0">
-        <div className="p-4 border-b border-orange-100 bg-gradient-to-r from-orange-50 to-white flex justify-between items-center">
+        <div className="p-4 border-b border-blue-100 bg-gradient-to-r from-blue-50 to-white flex justify-between items-center">
           <div>
-            <h3 className="text-sm sm:text-base font-medium text-orange-700">{title}</h3>
+            <h3 className="text-sm sm:text-base font-medium text-gray-800">{title}</h3>
             {subtitle && (
               <p className="text-xs text-gray-500 mt-0.5">{subtitle}</p>
             )}
             {isLoading ? (
-              <Skeleton className="h-6 w-28 mt-1 bg-orange-100" />
+              <Skeleton className="h-6 w-28 mt-1 bg-blue-100" />
             ) : (
-              <p className="text-lg sm:text-xl font-semibold text-orange-600">
+              <p className="text-lg sm:text-xl font-semibold text-blue-700">
                 {formatDisplayValue(value)}
               </p>
             )}
@@ -65,7 +65,7 @@ const ChartCard: React.FC<ChartCardProps> = ({
                   e.stopPropagation();
                   onToggleAnalysis();
                 }}
-                className="p-1.5 rounded-full bg-orange-50 hover:bg-orange-100 text-orange-600 transition-colors"
+                className="p-1.5 rounded-full bg-blue-50 hover:bg-blue-100 text-blue-600 transition-colors"
                 title="Mostrar análise"
               >
                 <Search size={16} />
@@ -77,7 +77,7 @@ const ChartCard: React.FC<ChartCardProps> = ({
                   e.stopPropagation();
                   onToggleVisibility();
                 }}
-                className="p-1.5 rounded-full bg-orange-50 hover:bg-orange-100 text-orange-600 transition-colors"
+                className="p-1.5 rounded-full bg-blue-50 hover:bg-blue-100 text-blue-600 transition-colors"
                 title="Ocultar card"
               >
                 <EyeOff size={16} />
@@ -88,8 +88,8 @@ const ChartCard: React.FC<ChartCardProps> = ({
         <div className="p-4 h-[250px] flex items-center justify-center">
           {isLoading ? (
             <div className="flex flex-col items-center">
-              <Skeleton className="h-[200px] w-full rounded-md bg-orange-50" />
-              <div className="mt-2 text-orange-400 text-sm animate-pulse">
+              <Skeleton className="h-[200px] w-full rounded-md bg-blue-50" />
+              <div className="mt-2 text-blue-400 text-sm animate-pulse">
                 Carregando dados...
               </div>
             </div>

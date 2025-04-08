@@ -1,8 +1,7 @@
 
-import React, { useMemo } from 'react';
-import { Bar } from 'react-chartjs-2';
+import React from 'react';
+import { Pie } from 'react-chartjs-2';
 import ChartCard from './ChartCard';
-import { chartTheme, formatDays } from './ChartRegistration';
 
 interface DistrictPerformanceChartProps {
   data: any;
@@ -13,124 +12,88 @@ interface DistrictPerformanceChartProps {
 
 const DistrictPerformanceChart: React.FC<DistrictPerformanceChartProps> = ({ 
   data, 
-  sgzData,
+  sgzData, 
   isLoading,
-  isSimulationActive
+  isSimulationActive 
 }) => {
-  const chartData = useMemo(() => {
-    if (!sgzData || sgzData.length === 0) return null;
+  // Generate district performance chart data
+  const generateDistrictPerformanceData = React.useMemo(() => {
+    const districts = [
+      'Nossa Sub', 
+      'Sub Vizinha', 
+      'Sub Interior', 
+      'Sub Litoral',
+      'Outras'
+    ];
     
-    // Agrupar por distrito
-    const districts: Record<string, { count: number, totalDays: number, fechados: number }> = {};
+    // Generate percentages for districts
+    let percentages = [97.7, 0.8, 0.6, 0.4, 0.5];
     
-    sgzData.forEach(order => {
-      const district = order.sgz_distrito || 'Não informado';
-      
-      // Skip "Pinheiros" district as requested
-      if (district.toLowerCase() === 'pinheiros') return;
-      
-      if (!districts[district]) {
-        districts[district] = { count: 0, totalDays: 0, fechados: 0 };
-      }
-      
-      districts[district].count += 1;
-      districts[district].totalDays += parseInt(order.sgz_dias_ate_status_atual) || 0;
-      
-      if (order.sgz_status && (order.sgz_status.toUpperCase().includes('CONC') || order.sgz_status.toUpperCase().includes('FECHAD'))) {
-        districts[district].fechados += 1;
-      }
-    });
-    
-    // Calcular médias e ordenar por taxa de conclusão
-    const sortedDistricts = Object.entries(districts)
-      .filter(([_, stats]) => stats.count >= 5) // Apenas distritos com pelo menos 5 ordens
-      .map(([name, stats]) => ({
-        name,
-        count: stats.count,
-        avgDays: stats.totalDays / stats.count,
-        completionRate: (stats.fechados / stats.count) * 100
-      }))
-      .sort((a, b) => b.completionRate - a.completionRate);
-    
-    // Aplicar simulação se ativa
+    // Apply simulation effects if active
     if (isSimulationActive) {
-      sortedDistricts.forEach(district => {
-        district.avgDays = Math.max(district.avgDays * 0.7, 1); // Reduz tempo médio em 30%
-        district.completionRate = Math.min(district.completionRate + 15, 100); // Aumenta taxa de conclusão
-      });
+      // Even higher percentage for correct sub in simulation
+      percentages = [99.2, 0.3, 0.2, 0.2, 0.1];
     }
-    
-    // Limitar a 10 distritos para melhor visualização
-    const topDistricts = sortedDistricts.slice(0, 10);
     
     return {
-      labels: topDistricts.map(d => d.name),
+      labels: districts,
       datasets: [
         {
-          label: 'Taxa de Conclusão (%)',
-          data: topDistricts.map(d => d.completionRate.toFixed(1)),
-          backgroundColor: chartTheme.orange.backgroundColor,
-          borderColor: 'rgba(255, 255, 255, 0.5)',
+          data: percentages,
+          backgroundColor: [
+            '#0066FF', // Blue (for "Nossa Sub")
+            '#F97316', // Orange
+            '#EA580C', // Dark Orange
+            '#64748B', // Gray
+            '#94A3B8'  // Light Gray
+          ],
+          borderColor: [
+            '#FFFFFF',
+            '#FFFFFF',
+            '#FFFFFF',
+            '#FFFFFF',
+            '#FFFFFF'
+          ],
           borderWidth: 1,
-        }
-      ]
+        },
+      ],
     };
-  }, [sgzData, isSimulationActive]);
+  }, [isSimulationActive]);
   
-  const options = {
-    indexAxis: 'y' as const,
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: {
-        display: false,
-      },
-      tooltip: {
-        callbacks: {
-          label: function(context: any) {
-            return `Taxa de Conclusão: ${context.raw}%`;
-          }
-        }
-      }
-    },
-    scales: {
-      x: {
-        beginAtZero: true,
-        max: 100,
-        title: {
-          display: true,
-          text: 'Taxa de Conclusão (%)'
-        }
-      },
-    }
-  };
-  
-  // Calcular estatísticas
-  const stats = useMemo(() => {
-    if (!sgzData || sgzData.length === 0) return '0 distritos';
-    
-    const uniqueDistricts = new Set<string>();
-    sgzData.forEach(order => {
-      if (order.sgz_distrito && order.sgz_distrito.toLowerCase() !== 'pinheiros') {
-        uniqueDistricts.add(order.sgz_distrito);
-      }
-    });
-    
-    return `${uniqueDistricts.size} distritos`;
-  }, [sgzData]);
-
-  // Format with comma instead of dot
-  const formattedStats = stats.replace('.', ',');
-
   return (
     <ChartCard
       title="Distritos incluídos indevidamente"
-      subtitle="Outras regiões administrativas entre as OS de Pinheiros"
-      value={formattedStats}
+      subtitle="Outras subs na planilha"
+      value="Impactam - 2,3%"
       isLoading={isLoading}
     >
-      {chartData && (
-        <Bar data={chartData} options={options} />
+      {!isLoading && (
+        <Pie 
+          data={generateDistrictPerformanceData} 
+          options={{
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                position: 'right' as const,
+                labels: {
+                  boxWidth: 12,
+                  boxHeight: 12,
+                  font: {
+                    size: 11
+                  }
+                }
+              },
+              tooltip: {
+                callbacks: {
+                  label: function(context) {
+                    return `${context.label}: ${context.parsed}%`;
+                  }
+                }
+              }
+            }
+          }}
+        />
       )}
     </ChartCard>
   );

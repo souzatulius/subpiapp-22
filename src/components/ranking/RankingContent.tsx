@@ -89,7 +89,7 @@ const RankingContent: React.FC<RankingContentProps> = ({
       )}
       
       {/* Seção de Upload Unificada - marked with upload-section class for hiding during PDF export */}
-      <Card className="p-4 bg-white border-orange-200 shadow-sm overflow-hidden hover:shadow-md transition-all upload-section">
+      <Card className="p-4 bg-white border-blue-200 shadow-sm overflow-hidden hover:shadow-md transition-all upload-section">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4">
           <div>
             <h2 className="text-lg font-semibold text-blue-800 flex items-center">
@@ -123,18 +123,20 @@ const RankingContent: React.FC<RankingContentProps> = ({
           </div>
         </div>
         
-        <UploadSection 
-          onUploadStart={handleUploadStart}
-          onUploadComplete={handleUploadComplete}
-          onPainelUploadComplete={handlePainelUploadComplete}
-          isUploading={isUploading}
-          user={user}
-        />
+        <div className="border border-dashed border-blue-300 rounded-lg p-4">
+          <UploadSection 
+            onUploadStart={handleUploadStart}
+            onUploadComplete={handleUploadComplete}
+            onPainelUploadComplete={handlePainelUploadComplete}
+            isUploading={isUploading}
+            user={user}
+          />
+        </div>
       </Card>
       
       {/* AI Insights Cards Section */}
       {hasData && (
-        <Card className="p-4 bg-white border-orange-200 shadow-sm overflow-hidden hover:shadow-md transition-all">
+        <Card className="p-4 bg-white border-blue-200 shadow-sm overflow-hidden hover:shadow-md transition-all">
           <DashboardCards 
             dadosPlanilha={sgzData || []} 
             dadosPainel={painelData || []}

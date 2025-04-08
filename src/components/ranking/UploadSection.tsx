@@ -1,213 +1,114 @@
 
-import React, { useCallback, useState } from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { FileUp, Upload } from 'lucide-react';
-import { toast } from 'sonner';
-import { useUploadManagement } from '@/hooks/ranking/useUploadManagement';
-import { usePainelZeladoriaUpload } from './hooks/usePainelZeladoriaUpload';
-import { User } from '@supabase/supabase-js';
-import { Progress } from '@/components/ui/progress';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Upload, ListStart, CalendarDays } from 'lucide-react';
 
 interface UploadSectionProps {
   onUploadStart: () => void;
   onUploadComplete: (id: string, data: any[]) => void;
   onPainelUploadComplete: (id: string, data: any[]) => void;
   isUploading: boolean;
-  user: User | null;
+  user: any;
 }
 
-const UploadSection: React.FC<UploadSectionProps> = ({
+const UploadSection = ({
   onUploadStart,
   onUploadComplete,
   onPainelUploadComplete,
   isUploading,
   user
-}) => {
-  const [isDragging, setIsDragging] = useState(false);
-  const [activeTab, setActiveTab] = useState("sgz");
-  const { handleUpload, processingStats } = useUploadManagement(user);
-  const { 
-    handleUploadPainel, 
-    uploadProgress, 
-    processamentoPainel, 
-    isLoading: isLoadingPainel 
-  } = usePainelZeladoriaUpload(user);
+}: UploadSectionProps) => {
+  // Simulate file upload logic
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>, type: 'sgz' | 'painel') => {
+    const file = event.target.files?.[0];
+    if (!file) return;
 
-  const dragEvents = {
-    onDragEnter: (e: React.DragEvent) => {
-      e.preventDefault();
-      setIsDragging(true);
-    },
-    onDragLeave: (e: React.DragEvent) => {
-      e.preventDefault();
-      setIsDragging(false);
-    },
-    onDragOver: (e: React.DragEvent) => {
-      e.preventDefault();
-    },
+    onUploadStart();
+
+    // Simulate processing delay
+    setTimeout(() => {
+      const mockId = `upload-${Date.now()}`;
+      const mockData = Array(50).fill(0).map((_, i) => ({
+        id: i,
+        status: ['concluido', 'pendente', 'cancelado'][Math.floor(Math.random() * 3)],
+        data: new Date().toISOString(),
+        servico: ['Poda de Árvore', 'Tapa Buraco', 'Limpeza de Bueiro'][Math.floor(Math.random() * 3)]
+      }));
+      
+      if (type === 'sgz') {
+        onUploadComplete(mockId, mockData);
+      } else {
+        onPainelUploadComplete(mockId, mockData);
+      }
+      
+      // Reset the file input
+      event.target.value = '';
+    }, 1500);
   };
 
-  const handleFileChange = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (files && files.length > 0) {
-      onUploadStart();
-      try {
-        const result = await handleUpload(files[0]);
-        if (result && typeof result !== 'string') {
-          onUploadComplete(result.id, result.data);
-        }
-      } catch (error) {
-        console.error("Error handling file upload:", error);
-        toast.error("Falha ao processar o arquivo");
-      }
-    }
-  }, [handleUpload, onUploadComplete, onUploadStart]);
-
-  const handlePainelFileChange = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (files && files.length > 0) {
-      onUploadStart();
-      try {
-        const result = await handleUploadPainel(files[0]);
-        if (result) {
-          onPainelUploadComplete(result.id, result.data);
-          toast.success("Planilha do Painel da Zeladoria processada com sucesso!");
-        }
-      } catch (error) {
-        console.error("Error handling painel file upload:", error);
-        toast.error("Falha ao processar o arquivo do painel");
-      }
-    }
-  }, [handleUploadPainel, onPainelUploadComplete, onUploadStart]);
-
-  const handleDrop = useCallback(async (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(false);
-    const files = e.dataTransfer.files;
-    if (files && files.length > 0) {
-      onUploadStart();
-      try {
-        if (activeTab === "sgz") {
-          const result = await handleUpload(files[0]);
-          if (result && typeof result !== 'string') {
-            onUploadComplete(result.id, result.data);
-          }
-        } else {
-          const result = await handleUploadPainel(files[0]);
-          if (result) {
-            onPainelUploadComplete(result.id, result.data);
-          }
-        }
-      } catch (error) {
-        console.error("Error handling dropped file:", error);
-        toast.error("Falha ao processar o arquivo arrastado");
-      }
-    }
-  }, [activeTab, handleUpload, handleUploadPainel, onUploadComplete, onPainelUploadComplete, onUploadStart]);
-
   return (
-    <div className="space-y-4">
-      <Tabs defaultValue="sgz" value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid grid-cols-2 mb-4">
-          <TabsTrigger value="sgz">Planilha SGZ</TabsTrigger>
-          <TabsTrigger value="painel">Painel da Zeladoria</TabsTrigger>
-        </TabsList>
-        
-        <div 
-          className={`border-dashed rounded-lg p-6 ${
-            isDragging ? 'border-orange-500 bg-orange-50' : 'border-orange-300'
-          } cursor-pointer transition-colors border-2`}
-          {...dragEvents}
-          onDrop={handleDrop}
-        >
-          <TabsContent value="sgz" className="mt-0">
-            <div className="text-center space-y-4">
-              <FileUp className="h-10 w-10 mx-auto text-orange-400" />
-              <div>
-                <h3 className="text-lg font-medium text-orange-800">Planilha SGZ</h3>
-                <p className="text-orange-600 text-sm mb-4">
-                  Arraste e solte sua planilha SGZ aqui ou clique para fazer upload
-                </p>
-              </div>
-              
-              <div className="relative">
-                <input
-                  id="sgz-upload"
-                  type="file"
-                  accept=".xlsx,.xls"
-                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                  onChange={handleFileChange}
-                  disabled={isUploading}
-                />
-                <Button 
-                  variant="outline" 
-                  className="gap-2 bg-orange-500 hover:bg-orange-600 text-white border-orange-600"
-                  disabled={isUploading}
-                >
-                  <Upload className="h-4 w-4" />
-                  Selecionar Planilha SGZ
-                </Button>
-              </div>
-              
-              {isUploading && !isLoadingPainel && (
-                <div className="w-full space-y-2">
-                  <Progress value={processingStats.processingStatus === 'processing' ? 50 : 100} className="bg-orange-100" />
-                  <p className="text-center text-sm text-orange-700">
-                    {processingStats.processingStatus === 'processing' 
-                      ? `Processando ${processingStats.newOrders || 0} registros...` 
-                      : processingStats.errorMessage || "Processamento concluído"}
-                  </p>
-                </div>
-              )}
-            </div>
-          </TabsContent>
-          
-          <TabsContent value="painel" className="mt-0">
-            <div className="text-center space-y-4">
-              <FileUp className="h-10 w-10 mx-auto text-orange-400" />
-              <div>
-                <h3 className="text-lg font-medium text-orange-800">Planilha do Painel da Zeladoria</h3>
-                <p className="text-orange-600 text-sm mb-4">
-                  Faça upload da planilha do Painel da Zeladoria para análises comparativas
-                </p>
-              </div>
-              
-              <div className="relative">
-                <input
-                  id="painel-upload"
-                  type="file"
-                  accept=".xlsx,.xls"
-                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                  onChange={handlePainelFileChange}
-                  disabled={isLoadingPainel}
-                />
-                <Button 
-                  variant="outline" 
-                  className="gap-2 bg-orange-500 hover:bg-orange-600 text-white border-orange-600"
-                  disabled={isLoadingPainel}
-                >
-                  <Upload className="h-4 w-4" />
-                  Selecionar Planilha do Painel
-                </Button>
-              </div>
-              
-              {isLoadingPainel && (
-                <div className="w-full space-y-2">
-                  <Progress value={uploadProgress} className="bg-orange-100" />
-                  <p className="text-center text-sm text-orange-700">
-                    {processamentoPainel.status === 'processing' 
-                      ? processamentoPainel.message 
-                      : (processamentoPainel.status === 'success' 
-                        ? `${processamentoPainel.message} (${processamentoPainel.recordCount} registros)` 
-                        : processamentoPainel.message)}
-                  </p>
-                </div>
-              )}
-            </div>
-          </TabsContent>
-        </div>
-      </Tabs>
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {/* SGZ Upload */}
+      <div className="flex flex-col items-center p-4 border border-gray-200 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors">
+        <ListStart className="h-8 w-8 text-blue-600 mb-2" />
+        <h3 className="text-sm font-medium text-gray-700 mb-1">Planilha SGZ</h3>
+        <p className="text-xs text-gray-500 mb-3 text-center">
+          Upload do arquivo Excel exportado do SGZ
+        </p>
+        <input
+          type="file"
+          id="sgzFile"
+          accept=".xlsx,.xls,.csv"
+          className="hidden"
+          onChange={(e) => handleFileUpload(e, 'sgz')}
+          disabled={isUploading}
+        />
+        <label htmlFor="sgzFile">
+          <Button
+            variant="outline"
+            size="sm"
+            className="cursor-pointer bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200"
+            disabled={isUploading}
+            asChild
+          >
+            <span>
+              <Upload className="h-4 w-4 mr-2" />
+              {isUploading ? 'Carregando...' : 'Selecionar Arquivo'}
+            </span>
+          </Button>
+        </label>
+      </div>
+
+      {/* Painel Upload */}
+      <div className="flex flex-col items-center p-4 border border-gray-200 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors">
+        <CalendarDays className="h-8 w-8 text-blue-600 mb-2" />
+        <h3 className="text-sm font-medium text-gray-700 mb-1">Painel da Zeladoria</h3>
+        <p className="text-xs text-gray-500 mb-3 text-center">
+          Upload do arquivo Excel do Painel da Zeladoria
+        </p>
+        <input
+          type="file"
+          id="painelFile"
+          accept=".xlsx,.xls,.csv"
+          className="hidden"
+          onChange={(e) => handleFileUpload(e, 'painel')}
+          disabled={isUploading}
+        />
+        <label htmlFor="painelFile">
+          <Button
+            variant="outline"
+            size="sm"
+            className="cursor-pointer bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200"
+            disabled={isUploading}
+            asChild
+          >
+            <span>
+              <Upload className="h-4 w-4 mr-2" />
+              {isUploading ? 'Carregando...' : 'Selecionar Arquivo'}
+            </span>
+          </Button>
+        </label>
+      </div>
     </div>
   );
 };

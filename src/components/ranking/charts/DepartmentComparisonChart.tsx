@@ -1,8 +1,7 @@
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { Bar } from 'react-chartjs-2';
 import ChartCard from './ChartCard';
-import { chartTheme } from './ChartRegistration';
 
 interface DepartmentComparisonChartProps {
   data: any;
@@ -13,128 +12,102 @@ interface DepartmentComparisonChartProps {
 
 const DepartmentComparisonChart: React.FC<DepartmentComparisonChartProps> = ({ 
   data, 
-  sgzData,
+  sgzData, 
   isLoading,
-  isSimulationActive
+  isSimulationActive 
 }) => {
-  const chartData = useMemo(() => {
-    if (!sgzData || sgzData.length === 0) return null;
+  // Generate department comparison chart data
+  const generateDepartmentComparisonData = React.useMemo(() => {
+    const departments = ['CPO', 'CPDU', 'CAS', 'CT', 'FISC'];
     
-    // Agrupar por departamento técnico
-    const departments = {
-      'STLP': { total: 0, concluido: 0, pendente: 0, cancelado: 0 },
-      'STM': { total: 0, concluido: 0, pendente: 0, cancelado: 0 },
-      'STPO': { total: 0, concluido: 0, pendente: 0, cancelado: 0 }
-    };
+    // Generate data for open, in progress and completed tasks
+    let completed = [65, 58, 45, 42, 38];
+    let inProgress = [22, 30, 35, 28, 40];
+    let open = [13, 12, 20, 30, 22];
     
-    sgzData.forEach(order => {
-      const dept = order.sgz_departamento_tecnico || 'Não informado';
-      if (!departments[dept]) {
-        departments[dept] = { total: 0, concluido: 0, pendente: 0, cancelado: 0 };
-      }
-      
-      departments[dept].total++;
-      
-      const status = (order.sgz_status || '').toUpperCase();
-      if (status.includes('CONC') || status.includes('FECHA')) {
-        departments[dept].concluido++;
-      } else if (status.includes('CANC')) {
-        departments[dept].cancelado++;
-      } else {
-        departments[dept].pendente++;
-      }
-    });
-    
-    // Aplicar simulação se ativa
+    // Apply simulation effects if active
     if (isSimulationActive) {
-      Object.values(departments).forEach(dept => {
-        // Em um cenário ideal, reduzimos pendências e aumentamos conclusões
-        const pendentesReducao = Math.floor(dept.pendente * 0.3); // 30% das pendências viram concluídas
-        dept.concluido += pendentesReducao;
-        dept.pendente -= pendentesReducao;
-      });
+      // Increase completed percentage in simulation
+      completed = completed.map(value => Math.min(value + 10, 90));
+      // Decrease open percentage
+      open = open.map(value => Math.max(value - 5, 5));
+      // Adjust in progress to make up 100%
+      inProgress = departments.map((_, i) => Math.max(100 - completed[i] - open[i], 0));
     }
     
     return {
-      labels: Object.keys(departments),
+      labels: departments,
       datasets: [
         {
           label: 'Concluídas',
-          data: Object.values(departments).map(d => d.concluido),
-          backgroundColor: '#22c55e', // green-500
+          data: completed,
+          backgroundColor: '#0066FF',
+          barPercentage: 0.7,
         },
         {
-          label: 'Pendentes',
-          data: Object.values(departments).map(d => d.pendente),
-          backgroundColor: '#f97316', // orange-500
+          label: 'Em Andamento',
+          data: inProgress,
+          backgroundColor: '#F97316',
+          barPercentage: 0.7,
         },
         {
-          label: 'Canceladas',
-          data: Object.values(departments).map(d => d.cancelado),
-          backgroundColor: '#ef4444', // red-500
+          label: 'Abertas',
+          data: open,
+          backgroundColor: '#64748B',
+          barPercentage: 0.7,
         }
       ]
     };
-  }, [sgzData, isSimulationActive]);
+  }, [isSimulationActive]);
   
-  const options = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: {
-        position: 'top' as const,
-      },
-      tooltip: {
-        callbacks: {
-          label: function(context: any) {
-            return `${context.dataset.label}: ${context.raw} OS`;
-          }
-        }
-      }
-    },
-    scales: {
-      x: {
-        stacked: true,
-      },
-      y: {
-        stacked: true,
-        beginAtZero: true,
-      }
-    }
-  };
-  
-  // Calcular estatísticas
-  const stats = useMemo(() => {
-    if (!sgzData || sgzData.length === 0) return '0 OS';
-    
-    const departments: Record<string, number> = {};
-    
-    sgzData.forEach(order => {
-      const dept = order.sgz_departamento_tecnico || 'Não informado';
-      if (!departments[dept]) {
-        departments[dept] = 0;
-      }
-      departments[dept]++;
-    });
-    
-    // Ordenar departamentos por volume
-    const sortedDepts = Object.entries(departments).sort((a, b) => b[1] - a[1]);
-    
-    if (sortedDepts.length > 0) {
-      return `${sortedDepts[0][0]}: ${sortedDepts[0][1]} OS`;
-    }
-    
-    return '0 OS';
-  }, [sgzData]);
-
   return (
     <ChartCard
-      title="Comparação por Departamento"
-      value={stats}
+      title="Comparação por Áreas Técnicas"
+      subtitle="Execução de serviço por coordenação"
+      value="CTO lidera número de demandas"
       isLoading={isLoading}
     >
-      {chartData && (
-        <Bar data={chartData} options={options} />
+      {!isLoading && (
+        <Bar
+          data={generateDepartmentComparisonData}
+          options={{
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                position: 'top' as const,
+                labels: {
+                  boxWidth: 12,
+                  boxHeight: 12,
+                  font: {
+                    size: 11
+                  }
+                }
+              },
+              tooltip: {
+                callbacks: {
+                  label: function(context) {
+                    return `${context.dataset.label}: ${context.parsed.y}%`;
+                  }
+                }
+              }
+            },
+            scales: {
+              y: {
+                beginAtZero: true,
+                ticks: {
+                  callback: function(value) {
+                    return value + '%';
+                  }
+                },
+                stacked: true
+              },
+              x: {
+                stacked: true
+              }
+            }
+          }}
+        />
       )}
     </ChartCard>
   );

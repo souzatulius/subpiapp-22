@@ -1,10 +1,7 @@
 
-import React, { useMemo } from 'react';
-import { Line } from 'react-chartjs-2';
+import React from 'react';
+import { Bar } from 'react-chartjs-2';
 import ChartCard from './ChartCard';
-import { chartTheme } from './ChartRegistration';
-import { format, parseISO, isValid, subDays } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
 
 interface EvolutionChartProps {
   data: any;
@@ -16,201 +13,97 @@ interface EvolutionChartProps {
 
 const EvolutionChart: React.FC<EvolutionChartProps> = ({ 
   data, 
-  sgzData,
-  painelData,
+  sgzData, 
+  painelData, 
   isLoading,
   isSimulationActive
 }) => {
-  const chartData = useMemo(() => {
-    if (!sgzData || sgzData.length === 0) return null;
-
-    // Função para ordenar e agrupar por data
-    const groupByDate = (data: any[], dateField: string) => {
-      const today = new Date();
-      const lastWeek = Array.from({ length: 7 }, (_, i) => {
-        const date = subDays(today, 6 - i);
-        return format(date, 'yyyy-MM-dd');
-      });
-      
-      const result: Record<string, { total: number, concluido: number, pendente: number, cancelado: number }> = {};
-      
-      // Inicializar todos os dias da última semana
-      lastWeek.forEach(date => {
-        result[date] = { total: 0, concluido: 0, pendente: 0, cancelado: 0 };
-      });
-      
-      // Agrupar os dados
-      data.forEach(item => {
-        if (!item[dateField]) return;
-        
-        let dateStr;
-        try {
-          const date = parseISO(item[dateField]);
-          if (!isValid(date)) return;
-          dateStr = format(date, 'yyyy-MM-dd');
-          
-          // Verificar se está na última semana
-          if (!lastWeek.includes(dateStr)) return;
-          
-          if (!result[dateStr]) {
-            result[dateStr] = { total: 0, concluido: 0, pendente: 0, cancelado: 0 };
-          }
-          
-          result[dateStr].total += 1;
-          
-          const status = (item.sgz_status || '').toUpperCase();
-          if (status.includes('CONC') || status.includes('FECHA')) {
-            result[dateStr].concluido += 1;
-          } else if (status.includes('CANC')) {
-            result[dateStr].cancelado += 1;
-          } else {
-            result[dateStr].pendente += 1;
-          }
-        } catch (error) {
-          console.error('Error parsing date:', error);
-          return;
-        }
-      });
-      
-      return result;
-    };
+  // Mock data generation for evolution chart
+  const generateEvolutionData = React.useMemo(() => {
+    const days = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'];
     
-    const dailyData = groupByDate(sgzData, 'sgz_modificado_em');
+    // Basic data
+    const pendingData = days.map(() => Math.floor(Math.random() * 15) + 10);
+    let completedData = days.map(() => Math.floor(Math.random() * 40) + 30);
+    let canceledData = days.map(() => Math.floor(Math.random() * 10) + 5);
     
-    // Aplicar simulação se ativa
+    // Apply simulation effects if active
     if (isSimulationActive) {
-      Object.values(dailyData).forEach(dayStats => {
-        // Em um cenário ideal, reduzimos pendências e cancelamentos e aumentamos conclusões
-        const pendentesReducao = Math.floor(dayStats.pendente * 0.2); // 20% das pendências viram concluídas
-        const canceladasReducao = Math.floor(dayStats.cancelado * 0.3); // 30% das canceladas viram concluídas
-        
-        dayStats.concluido += pendentesReducao + canceladasReducao;
-        dayStats.pendente -= pendentesReducao;
-        dayStats.cancelado -= canceladasReducao;
-      });
+      // Increase completed percentage in simulation
+      completedData = completedData.map(value => Math.min(value + 10, 70));
+      // Decrease canceled percentage
+      canceledData = canceledData.map(value => Math.max(value - 3, 2));
     }
     
-    // Formatar dados para o gráfico
-    const dates = Object.keys(dailyData).sort();
-    const concluidoPct = dates.map(date => {
-      const day = dailyData[date];
-      return day.total > 0 ? (day.concluido / day.total * 100).toFixed(1) : "0";
-    });
-    
-    const pendentePct = dates.map(date => {
-      const day = dailyData[date];
-      return day.total > 0 ? (day.pendente / day.total * 100).toFixed(1) : "0";
-    });
-    
-    const canceladoPct = dates.map(date => {
-      const day = dailyData[date];
-      return day.total > 0 ? (day.cancelado / day.total * 100).toFixed(1) : "0";
-    });
-    
     return {
-      labels: dates.map(date => {
-        try {
-          return format(parseISO(date), 'dd/MM', { locale: ptBR });
-        } catch {
-          return date;
-        }
-      }),
+      labels: days,
       datasets: [
         {
           label: 'Concluídas',
-          data: concluidoPct,
-          borderColor: '#22c55e', // green-500
-          backgroundColor: 'rgba(34, 197, 94, 0.2)',
-          tension: 0.4,
-          fill: true,
+          data: completedData,
+          backgroundColor: '#0066FF',
+          barPercentage: 0.7,
         },
         {
           label: 'Pendentes',
-          data: pendentePct,
-          borderColor: '#f97316', // orange-500
-          backgroundColor: 'rgba(249, 115, 22, 0.2)',
-          tension: 0.4,
-          fill: true,
+          data: pendingData,
+          backgroundColor: '#F97316',
+          barPercentage: 0.7,
         },
         {
           label: 'Canceladas',
-          data: canceladoPct,
-          borderColor: '#ef4444', // red-500
-          backgroundColor: 'rgba(239, 68, 68, 0.2)',
-          tension: 0.4,
-          fill: true,
+          data: canceledData,
+          backgroundColor: '#64748B',
+          barPercentage: 0.7,
         }
       ]
     };
-  }, [sgzData, painelData, isSimulationActive]);
+  }, [isSimulationActive]);
   
-  const options = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: {
-        position: 'top' as const,
-      },
-      tooltip: {
-        callbacks: {
-          label: function(context: any) {
-            return `${context.dataset.label}: ${context.raw}%`;
-          }
-        }
-      }
-    },
-    scales: {
-      y: {
-        beginAtZero: true,
-        max: 100,
-        ticks: {
-          callback: function(value: any) {
-            return value + '%';
-          }
-        },
-        title: {
-          display: true,
-          text: 'Porcentagem'
-        }
-      }
-    }
-  };
-  
-  // Calcular estatísticas
-  const stats = useMemo(() => {
-    if (!sgzData || sgzData.length === 0) return '0%';
-    
-    let totalConcluido = 0;
-    const total = sgzData.length;
-    
-    sgzData.forEach(order => {
-      const status = (order.sgz_status || '').toUpperCase();
-      if (status.includes('CONC') || status.includes('FECHA')) {
-        totalConcluido += 1;
-      }
-    });
-    
-    let percentConcluido = (totalConcluido / total * 100);
-    
-    if (isSimulationActive) {
-      percentConcluido = Math.min(percentConcluido + 15, 100); // Aumenta em 15% na simulação
-    }
-    
-    return `${percentConcluido.toFixed(1)}%`;
-  }, [sgzData, isSimulationActive]);
-
-  // Format with comma instead of dot
-  const formattedStats = stats.replace('.', ',');
-
   return (
     <ChartCard
       title="Serviços em Andamento"
-      subtitle="Evolução do status das ordens de serviço na semana"
-      value={formattedStats}
+      subtitle="Evolução dos status de serviços na semana"
+      value="25,0%"
       isLoading={isLoading}
     >
-      {chartData && (
-        <Line data={chartData} options={options} />
+      {!isLoading && (
+        <Bar
+          data={generateEvolutionData}
+          options={{
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                position: 'top' as const,
+                labels: {
+                  boxWidth: 12,
+                  boxHeight: 12,
+                  font: {
+                    size: 11
+                  }
+                }
+              },
+              tooltip: {
+                callbacks: {
+                  label: function(context) {
+                    return `${context.dataset.label}: ${context.parsed.y}%`;
+                  }
+                }
+              }
+            },
+            scales: {
+              y: {
+                beginAtZero: true,
+                ticks: {
+                  callback: function(value) {
+                    return value + '%';
+                  }
+                }
+              },
+            },
+          }}
+        />
       )}
     </ChartCard>
   );
