@@ -98,6 +98,8 @@ const NotificationUserPreferences: React.FC<NotificationUserPreferencesProps> = 
         return 'A cada 6 horas';
       case 'diario':
         return 'Diário';
+      case 'nunca':
+        return 'Não receber';
       default:
         return 'Diário';
     }
@@ -242,6 +244,7 @@ const NotificationUserPreferences: React.FC<NotificationUserPreferencesProps> = 
                 <SelectItem value="imediata">Imediata</SelectItem>
                 <SelectItem value="seis_horas">A cada 6 horas</SelectItem>
                 <SelectItem value="diario">Diário</SelectItem>
+                <SelectItem value="nunca">Não receber</SelectItem>
               </SelectContent>
             </Select>
           </div>

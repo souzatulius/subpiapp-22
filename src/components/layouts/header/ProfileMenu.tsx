@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { LogOut, Settings, User, Bell } from 'lucide-react';
@@ -31,11 +30,9 @@ const ProfileMenu: React.FC = () => {
     try {
       setIsSigningOut(true);
       await supabase.auth.signOut();
-      // Garantir redirecionamento para login após logout
       navigate('/login', { replace: true });
     } catch (error) {
       console.error('Error signing out:', error);
-      // Mesmo em caso de erro, redirecionar para login
       navigate('/login', { replace: true });
     } finally {
       setIsSigningOut(false);
@@ -45,10 +42,9 @@ const ProfileMenu: React.FC = () => {
   const goToProfile = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    navigate('/settings');
+    navigate('/profile');
   };
 
-  // Convert userProfile to ProfileData format
   const profileData: ProfileData | null = userProfile ? {
     nome_completo: userProfile.nome_completo || '',
     whatsapp: userProfile.whatsapp || '',

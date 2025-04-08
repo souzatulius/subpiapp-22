@@ -20,13 +20,14 @@ import { useToast } from '@/components/ui/use-toast';
 import { Separator } from '@/components/ui/separator';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { useNotifications } from '@/hooks/notifications';
+import { TooltipProvider } from '@/components/ui/tooltip';
 
 interface NotificationPreferencesModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
-type FrequencyType = 'imediata' | 'periodica' | 'diaria';
+type FrequencyType = 'imediata' | 'periodica' | 'diaria' | 'nunca';
 type ChannelType = 'app' | 'email' | 'whatsapp';
 
 interface NotificationPreferences {
@@ -182,133 +183,139 @@ const NotificationPreferencesModal: React.FC<NotificationPreferencesModalProps> 
             <RadioGroupItem value="diaria" id={`${channel}-daily`} />
             <Label htmlFor={`${channel}-daily`}>Resumo diário (receba um resumo ao final do dia)</Label>
           </div>
+          <div className="flex items-center space-x-2">
+            <RadioGroupItem value="nunca" id={`${channel}-never`} />
+            <Label htmlFor={`${channel}-never`}>Não receber notificações</Label>
+          </div>
         </RadioGroup>
       </div>
     );
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>Preferências de Notificações</DialogTitle>
-          <DialogDescription>
-            Configure como deseja receber notificações e alertas do sistema
-          </DialogDescription>
-        </DialogHeader>
-        
-        <Separator className="my-2" />
-        
-        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as ChannelType)} className="w-full">
-          <TabsList className="grid grid-cols-3 mb-4">
-            <TabsTrigger value="app" className="flex items-center gap-2">
-              <Bell className="h-4 w-4" />
-              App
-            </TabsTrigger>
-            <TabsTrigger value="email" className="flex items-center gap-2">
-              <Mail className="h-4 w-4" />
-              Email
-            </TabsTrigger>
-            <TabsTrigger value="whatsapp" className="flex items-center gap-2">
-              <Phone className="h-4 w-4" />
-              WhatsApp
-            </TabsTrigger>
-          </TabsList>
+    <TooltipProvider>
+      <Dialog open={isOpen} onOpenChange={onClose}>
+        <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Preferências de Notificações</DialogTitle>
+            <DialogDescription>
+              Configure como deseja receber notificações e alertas do sistema
+            </DialogDescription>
+          </DialogHeader>
           
-          <TabsContent value="app" className="space-y-4">
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle>Notificações no Navegador</CardTitle>
-                <CardDescription>
-                  Receba notificações diretamente no seu navegador, mesmo quando estiver em outras abas.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-center space-x-2">
-                  <Switch 
-                    id="app-notifications" 
-                    checked={preferences.app}
-                    onCheckedChange={(checked) => handleToggleChannel('app', checked)}
-                  />
-                  <Label htmlFor="app-notifications">Ativar notificações no navegador</Label>
-                </div>
-                
-                {!isNotificationsSupported && (
-                  <div className="mt-3 flex items-start space-x-2 text-sm text-amber-600 bg-amber-50 p-3 rounded-md">
-                    <Info className="h-4 w-4 mt-0.5" />
-                    <span>Seu navegador não suporta notificações ou você ainda não concedeu permissão.</span>
+          <Separator className="my-2" />
+          
+          <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as ChannelType)} className="w-full">
+            <TabsList className="grid grid-cols-3 mb-4">
+              <TabsTrigger value="app" className="flex items-center gap-2">
+                <Bell className="h-4 w-4" />
+                App
+              </TabsTrigger>
+              <TabsTrigger value="email" className="flex items-center gap-2">
+                <Mail className="h-4 w-4" />
+                Email
+              </TabsTrigger>
+              <TabsTrigger value="whatsapp" className="flex items-center gap-2">
+                <Phone className="h-4 w-4" />
+                WhatsApp
+              </TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="app" className="space-y-4">
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle>Notificações no Navegador</CardTitle>
+                  <CardDescription>
+                    Receba notificações diretamente no seu navegador, mesmo quando estiver em outras abas.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center space-x-2">
+                    <Switch 
+                      id="app-notifications" 
+                      checked={preferences.app}
+                      onCheckedChange={(checked) => handleToggleChannel('app', checked)}
+                    />
+                    <Label htmlFor="app-notifications">Ativar notificações no navegador</Label>
                   </div>
-                )}
+                  
+                  {!isNotificationsSupported && (
+                    <div className="mt-3 flex items-start space-x-2 text-sm text-amber-600 bg-amber-50 p-3 rounded-md">
+                      <Info className="h-4 w-4 mt-0.5" />
+                      <span>Seu navegador não suporta notificações ou você ainda não concedeu permissão.</span>
+                    </div>
+                  )}
 
-                {renderFrequencyOptions('app')}
-              </CardContent>
-            </Card>
-          </TabsContent>
+                  {renderFrequencyOptions('app')}
+                </CardContent>
+              </Card>
+            </TabsContent>
+            
+            <TabsContent value="email" className="space-y-4">
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle>Notificações por Email</CardTitle>
+                  <CardDescription>
+                    Receba alertas e atualizações importantes por email.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center space-x-2">
+                    <Switch 
+                      id="email-notifications" 
+                      checked={preferences.email}
+                      onCheckedChange={(checked) => handleToggleChannel('email', checked)}
+                    />
+                    <Label htmlFor="email-notifications">Ativar notificações por email</Label>
+                  </div>
+                  
+                  {renderFrequencyOptions('email')}
+                </CardContent>
+              </Card>
+            </TabsContent>
+            
+            <TabsContent value="whatsapp" className="space-y-4">
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle>Notificações por WhatsApp</CardTitle>
+                  <CardDescription>
+                    Receba alertas e atualizações importantes por WhatsApp.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center space-x-2">
+                    <Switch 
+                      id="whatsapp-notifications" 
+                      checked={preferences.whatsapp}
+                      onCheckedChange={(checked) => handleToggleChannel('whatsapp', checked)}
+                    />
+                    <Label htmlFor="whatsapp-notifications">Ativar notificações por WhatsApp</Label>
+                  </div>
+                  
+                  {renderFrequencyOptions('whatsapp')}
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
           
-          <TabsContent value="email" className="space-y-4">
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle>Notificações por Email</CardTitle>
-                <CardDescription>
-                  Receba alertas e atualizações importantes por email.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-center space-x-2">
-                  <Switch 
-                    id="email-notifications" 
-                    checked={preferences.email}
-                    onCheckedChange={(checked) => handleToggleChannel('email', checked)}
-                  />
-                  <Label htmlFor="email-notifications">Ativar notificações por email</Label>
-                </div>
-                
-                {renderFrequencyOptions('email')}
-              </CardContent>
-            </Card>
-          </TabsContent>
-          
-          <TabsContent value="whatsapp" className="space-y-4">
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle>Notificações por WhatsApp</CardTitle>
-                <CardDescription>
-                  Receba alertas e atualizações importantes por WhatsApp.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-center space-x-2">
-                  <Switch 
-                    id="whatsapp-notifications" 
-                    checked={preferences.whatsapp}
-                    onCheckedChange={(checked) => handleToggleChannel('whatsapp', checked)}
-                  />
-                  <Label htmlFor="whatsapp-notifications">Ativar notificações por WhatsApp</Label>
-                </div>
-                
-                {renderFrequencyOptions('whatsapp')}
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
-        
-        <DialogFooter className="mt-4">
-          <Button 
-            variant="outline" 
-            onClick={onClose}
-            disabled={isLoading}
-          >
-            Cancelar
-          </Button>
-          <Button 
-            onClick={savePreferences}
-            disabled={isLoading}
-          >
-            {isLoading ? 'Salvando...' : 'Salvar Preferências'}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+          <DialogFooter className="mt-4">
+            <Button 
+              variant="outline" 
+              onClick={onClose}
+              disabled={isLoading}
+            >
+              Cancelar
+            </Button>
+            <Button 
+              onClick={savePreferences}
+              disabled={isLoading}
+            >
+              {isLoading ? 'Salvando...' : 'Salvar Preferências'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </TooltipProvider>
   );
 };
 

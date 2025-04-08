@@ -81,10 +81,10 @@ export const useNotifications = () => {
             .from('usuarios')
             .update({
               configuracoes_notificacao: {
-                navegador_ativo: true,
-                email_ativo: false,
-                whatsapp_ativo: false,
-                frequencia: 'imediato'
+                app: true,
+                email: true,
+                whatsapp: false,
+                frequencia: 'imediata'
               }
             })
             .eq('id', user.id);

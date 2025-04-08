@@ -18,6 +18,7 @@ import Settings from "./pages/Settings";
 import AuthCallback from "./components/AuthCallback";
 import ProtectedRoute from "./components/layouts/ProtectedRoute";
 import DashboardLayout from "./components/layouts/DashboardLayout";
+import UserProfile from "./pages/UserProfile";
 
 // Dashboard Pages
 import CadastrarDemanda from './pages/dashboard/comunicacao/CadastrarDemanda';
@@ -92,6 +93,9 @@ function App() {
                 {/* Zeladoria routes */}
                 <Route path="zeladoria/ranking-subs" element={<RankingSubs />} />
               </Route>
+
+              {/* Profile route */}
+              <Route path="/profile" element={<UserProfile />} />
 
               {/* 404 route */}
               <Route path="*" element={<NotFound />} />

@@ -52,7 +52,7 @@ const ProcessoList: React.FC<ProcessoListProps> = ({
           .from('esic_processos')
           .select(`
             *,
-            autor:autor_id (nome_completo)
+            autor:usuarios(nome_completo)
           `)
           .order('created_at', { ascending: false });
         
@@ -64,12 +64,18 @@ const ProcessoList: React.FC<ProcessoListProps> = ({
         console.log('ESIC processos fetched:', data);
         
         // Cast the data to the correct type, handling the autor relationship
-        const formattedProcessos = data.map(processo => {
+        const formattedProcessos = data.map((processo: any) => {
+          // Handle the case where autor is null or not properly fetched
           const autorNome = processo.autor?.nome_completo || 'Usuário';
+          
           return {
             ...processo,
-            autor_nome: autorNome
-          } as unknown as ESICProcesso;
+            autor_nome: autorNome,
+            // Ensure status is one of the allowed values
+            status: ['aberto', 'em_andamento', 'concluido', 'cancelado'].includes(processo.status) 
+              ? processo.status 
+              : 'aberto'
+          } as ESICProcesso;
         });
         
         setProcessos(formattedProcessos);
@@ -92,7 +98,7 @@ const ProcessoList: React.FC<ProcessoListProps> = ({
   const filteredProcessos = processos.filter(processo => {
     return processo.assunto.toLowerCase().includes(searchTerm.toLowerCase()) ||
            processo.protocolo.toString().includes(searchTerm.toLowerCase()) ||
-           processo.solicitante?.toLowerCase().includes(searchTerm.toLowerCase());
+           (processo.solicitante?.toLowerCase() || '').includes(searchTerm.toLowerCase());
   });
 
   const handleAddJustificativa = (processo: ESICProcesso) => {
@@ -160,7 +166,7 @@ const ProcessoList: React.FC<ProcessoListProps> = ({
           
           <div className="flex flex-col sm:flex-row mt-2 space-y-2 sm:space-y-0 sm:space-x-2 justify-between items-start sm:items-center">
             <div className="text-gray-500 text-sm">
-              Criado em {format(new Date(processo.created_at), 'dd/MM/yyyy')}
+              Criado em {format(new Date(processo.criado_em), 'dd/MM/yyyy')}
               {processo.autor_nome && <span> por {processo.autor_nome}</span>}
             </div>
             
