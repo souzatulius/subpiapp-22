@@ -1,57 +1,22 @@
-import React, { useEffect, useRef } from 'react';
+import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import FeatureCard from '@/components/FeatureCard';
 import { useAuth } from '@/hooks/useSupabaseAuth';
-import fitty from 'fitty';
 const LeftContentSection: React.FC = () => {
   const {
     user
   } = useAuth();
   const location = useLocation();
-  const titleLine1Ref = useRef<HTMLDivElement>(null);
-  const titleLine2Ref = useRef<HTMLDivElement>(null);
-  const titleLine3Ref = useRef<HTMLDivElement>(null);
 
   // Check if the current page is login or register
   const isLoginPage = location.pathname === '/login';
   const isRegisterPage = location.pathname === '/register';
-  useEffect(() => {
-    // Initialize fitty on all three title lines
-    if (titleLine1Ref.current && titleLine2Ref.current && titleLine3Ref.current) {
-      const fittyInstance1 = fitty(titleLine1Ref.current, {
-        minSize: 24,
-        maxSize: 100,
-        // Increased max size to allow for larger text
-        multiLine: false
-      });
-      const fittyInstance2 = fitty(titleLine2Ref.current, {
-        minSize: 24,
-        maxSize: 100,
-        // Increased max size to allow for larger text
-        multiLine: false
-      });
-      const fittyInstance3 = fitty(titleLine3Ref.current, {
-        minSize: 24,
-        maxSize: 100,
-        // Increased max size to allow for larger text
-        multiLine: false
-      });
-
-      // Clean up on unmount
-      return () => {
-        fittyInstance1.unsubscribe();
-        fittyInstance2.unsubscribe();
-        fittyInstance3.unsubscribe();
-      };
-    }
-  }, []);
-  return <div className="max-w-2xl mx-auto md:mx-0 text-9xl">
-      <h1 className="font-bold mb-6 overflow-hidden text-9xl">
-        <div ref={titleLine1Ref} className="text-orange-500 bg-transparent whitespace-nowrap w-full text-9xl">Demandas</div>
-        <div ref={titleLine2Ref} className="text-[#002855] bg-transparent whitespace-nowrap w-full text-8xl">com mais</div>
-        <div ref={titleLine3Ref} className="text-[#f57c35] whitespace-nowrap w-full text-8xl">eficiência</div>
+  return <div className="max-w-2xl mx-auto md:mx-0">
+      <h1 className="text-6xl md:text-7xl lg:text-8xl font-bold leading-[1.1] md:leading-[1.1] mb-6">
+        <div className="text-[#002855] bg-transparent">Demandas com mais</div>
+        <div className="text-[#f57c35]">eficiência</div>
       </h1>
       
       <p className="text-gray-600 text-lg mb-8 max-w-xl">
