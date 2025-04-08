@@ -113,7 +113,7 @@ export const UnifiedActionCard: React.FC<SortableUnifiedActionCardProps> = ({
     
     // Search card
     if (isSearch || type === 'smart_search') {
-      // Ensure we're not passing any invalid props
+      // Pass onSearchSubmit to DashboardSearchCard
       return <DashboardSearchCard onSearchSubmit={onSearchSubmit} isEditMode={isEditing} />;
     }
     

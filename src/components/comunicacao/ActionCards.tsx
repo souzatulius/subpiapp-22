@@ -4,7 +4,7 @@ import { PlusCircle, MessageSquare, FileText, CheckCircle } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Link } from 'react-router-dom';
 import { UnifiedActionCard } from '@/components/dashboard/UnifiedActionCard';
-import { ActionCardItem, CardColor } from '@/types/dashboard';
+import { ActionCardItem, CardColor, CardHeight } from '@/types/dashboard';
 import { useDefaultDashboardConfig } from '@/hooks/dashboard/useDefaultDashboardConfig';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -37,7 +37,7 @@ const ActionCards: React.FC<ActionCardsProps> = ({
       path: `${baseUrl ? `/${baseUrl}` : ''}/cadastrar`,
       color: 'blue-vivid' as CardColor,
       width: '25',
-      height: '2',
+      height: '2' as CardHeight,
       type: 'standard',
       displayMobile: true,
       mobileOrder: 1
@@ -50,7 +50,7 @@ const ActionCards: React.FC<ActionCardsProps> = ({
       path: `${baseUrl ? `/${baseUrl}` : ''}/responder`,
       color: 'green-neon' as CardColor,
       width: '25',
-      height: '2',
+      height: '2' as CardHeight,
       type: 'standard',
       displayMobile: true,
       mobileOrder: 2
@@ -63,7 +63,7 @@ const ActionCards: React.FC<ActionCardsProps> = ({
       path: `${baseUrl ? `/${baseUrl}` : ''}/criar-nota`,
       color: 'orange-dark' as CardColor,
       width: '25',
-      height: '2',
+      height: '2' as CardHeight,
       type: 'standard',
       displayMobile: true,
       mobileOrder: 3
@@ -76,7 +76,7 @@ const ActionCards: React.FC<ActionCardsProps> = ({
       path: `${baseUrl ? `/${baseUrl}` : ''}/aprovar-nota`,
       color: 'blue-dark' as CardColor,
       width: '25',
-      height: '2',
+      height: '2' as CardHeight,
       type: 'standard',
       displayMobile: true,
       mobileOrder: 4
@@ -189,9 +189,12 @@ const ActionCards: React.FC<ActionCardsProps> = ({
               path={card.path}
               color={card.color}
               width={card.width || '25'}
-              height={'2'} 
+              height={'2' as CardHeight}
               type={card.type || 'standard'} 
-              onEdit={handleCardEdit}
+              onEdit={onEdit ? (id) => {
+                const cardToEdit = cards.find(c => c.id === id);
+                if (cardToEdit && onEdit) onEdit(cardToEdit);
+              } : undefined}
               onHide={handleCardHide}
               isEditing={isEditMode}
               hasSubtitle={!!card.subtitle}
@@ -207,10 +210,8 @@ const ActionCards: React.FC<ActionCardsProps> = ({
                 path={card.path}
                 color={card.color}
                 width={card.width || '25'}
-                height={'2'} 
+                height={'2' as CardHeight}
                 type={card.type || 'standard'} 
-                onEdit={handleCardEdit}
-                onHide={handleCardHide}
                 hasSubtitle={!!card.subtitle}
                 iconSize="md"
               />

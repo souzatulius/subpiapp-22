@@ -5,8 +5,8 @@ import { CardType } from '@/types/dashboard';
 // Type for card dimensions
 export interface CardDimensions {
   width: string; // '25', '50', '75', '100'
-  height: string; // '1', '2'
-  type?: string; // Changed from 'standard' | 'data_dynamic' to string to accept all CardType values
+  height: string; // '0.5', '1', '2', '3', '4'
+  type?: string; // Any CardType values
   id: string;
 }
 
@@ -31,15 +31,15 @@ const widthToSlots = (width: string, isMobileView: boolean): number => {
   }
 };
 
-// Convert height string to number of slots
+// Convert height string to number of rows
 const heightToSlots = (height: string): number => {
   switch (height) {
     case '0.5': return 1;  // Half height row
-    case '1': return 2;    // Standard row (doubled from 1)
-    case '2': return 4;    // Double height row (doubled from 2)
-    case '3': return 6;    // Triple height row
-    case '4': return 8;    // Quadruple height row
-    default: return 2;     // Default to standard row
+    case '1': return 1;    // Standard row (1 row unit)
+    case '2': return 2;    // Double height (2 row units)
+    case '3': return 3;    // Triple height (3 row units)
+    case '4': return 4;    // Quadruple height (4 row units)
+    default: return 1;     // Default to standard row
   }
 };
 
@@ -75,8 +75,9 @@ export const getMinimumHeight = (type?: string): string => {
   return '1'; // Default height (1 row)
 };
 
+// Custom hook for grid occupancy
 export const useGridOccupancy = (cards: CardDimensions[], isMobileView: boolean) => {
-  // Initialize state with empty array - this will always be called
+  // Initialize state with empty array
   const [occupiedSlots, setOccupiedSlots] = useState<boolean[][]>([]);
   
   // Total columns for the grid

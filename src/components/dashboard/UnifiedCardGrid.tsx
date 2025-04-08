@@ -85,16 +85,6 @@ const UnifiedCardGrid: React.FC<UnifiedCardGridProps> = ({
         .sort((a, b) => (a.mobileOrder ?? 999) - (b.mobileOrder ?? 999))
     : visibleCards;
 
-  const { occupiedSlots } = useGridOccupancy(
-    displayedCards.map(card => ({
-      id: card.id,
-      width: card.width || '25',
-      height: card.height || '1',
-      type: card.type
-    })),
-    isMobileView
-  );
-
   if (!displayedCards || displayedCards.length === 0) {
     return (
       <div className="p-4 text-center text-gray-500">
@@ -117,7 +107,7 @@ const UnifiedCardGrid: React.FC<UnifiedCardGridProps> = ({
       collisionDetection={closestCenter}
       onDragEnd={handleDragEnd}
     >
-      <div className={`w-full grid gap-y-3 gap-x-3 ${isMobileView ? 'grid-cols-2' : 'grid-cols-4'}`}>
+      <div className={`w-full grid gap-y-3 gap-x-3 auto-rows-[80px] ${isMobileView ? 'grid-cols-2' : 'grid-cols-4'}`}>
         <SortableContext items={displayedCards.map(card => card.id)}>
           {displayedCards.map(card => (
             <div
