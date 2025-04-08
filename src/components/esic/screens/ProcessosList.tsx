@@ -26,6 +26,7 @@ const ProcessosList: React.FC<ProcessosListProps> = ({
   const [viewMode, setViewMode] = React.useState<'list' | 'cards'>('list');
   const [searchTerm, setSearchTerm] = React.useState('');
   const [filterOpen, setFilterOpen] = React.useState(false);
+  const [filterStatus, setFilterStatus] = React.useState('todos');
   
   return (
     <div className="space-y-4">
@@ -54,7 +55,7 @@ const ProcessosList: React.FC<ProcessosListProps> = ({
         user={null}
         showAll={true}
         searchTerm={searchTerm}
-        filterStatus="todos"
+        filterStatus={filterStatus}
         viewMode={viewMode}
         filterOpen={filterOpen}
         setFilterOpen={setFilterOpen}

@@ -45,10 +45,22 @@ const OriginSelectionCardWrapper: React.FC<OriginSelectionCardWrapperProps> = ({
     fetchOrigins();
   }, []);
 
+  // Transform the data to match the format expected by OriginSelectionCard
+  const originOptions = origins.map(origin => ({
+    id: origin.id,
+    title: origin.descricao,
+    icon: origin.icone ? (
+      <img src={origin.icone} alt={origin.descricao} className="w-6 h-6" />
+    ) : (
+      <div className="w-6 h-6 bg-gray-200 rounded-full"></div>
+    ),
+    path: `/dashboard/comunicacao/cadastrar-demanda`
+  }));
+
   return (
     <OriginSelectionCard 
       title={card.title || "De onde vem a solicitação?"}
-      options={origins}
+      options={originOptions}
     />
   );
 };

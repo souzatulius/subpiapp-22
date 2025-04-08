@@ -17,6 +17,7 @@ const ESICPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [viewMode, setViewMode] = useState<'list' | 'cards'>('list');
   const [filterOpen, setFilterOpen] = useState(false);
+  const [filterStatus, setFilterStatus] = useState('todos');
   const isMobile = useIsMobile();
   const { user } = useAuth();
 
@@ -71,6 +72,7 @@ const ESICPage = () => {
                     user={user}
                     viewMode={viewMode}
                     searchTerm={searchTerm}
+                    filterStatus={filterStatus}
                     filterOpen={filterOpen}
                     setFilterOpen={setFilterOpen}
                   />

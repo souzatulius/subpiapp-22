@@ -16,6 +16,17 @@ interface ProcessoListProps {
   setFilterOpen?: (open: boolean) => void;
 }
 
+interface Processo {
+  id: string;
+  texto: string;
+  status: string;
+  autor_id: string;
+  criado_em: string;
+  autor: {
+    nome_completo: string;
+  };
+}
+
 const ProcessoList: React.FC<ProcessoListProps> = ({ 
   user, 
   showAll = false,
@@ -29,26 +40,25 @@ const ProcessoList: React.FC<ProcessoListProps> = ({
     try {
       let query = supabase.from('esic_processos');
       
-      // Type the select result
-      let selectQuery = query.select('*, autor:usuarios(nome_completo)');
-
       // Apply filters
       if (!showAll && user) {
-        selectQuery = selectQuery.eq('autor_id', user.id);
+        query = query.eq('autor_id', user.id);
       }
 
       if (filterStatus && filterStatus !== 'todos') {
-        selectQuery = selectQuery.eq('status', filterStatus);
+        query = query.eq('status', filterStatus);
       }
 
       if (searchTerm) {
-        selectQuery = selectQuery.ilike('texto', `%${searchTerm}%`);
+        query = query.ilike('texto', `%${searchTerm}%`);
       }
 
-      const { data, error } = await selectQuery.order('criado_em', { ascending: false });
+      const { data, error } = await query
+        .select('*, autor:usuarios(nome_completo)')
+        .order('criado_em', { ascending: false });
 
       if (error) throw error;
-      return data;
+      return data as Processo[];
     } catch (error) {
       console.error("Error fetching processos:", error);
       throw error;
@@ -106,7 +116,7 @@ const ProcessoList: React.FC<ProcessoListProps> = ({
       {processos.map((processo) => (
         <ProcessoItem 
           key={processo.id} 
-          processo={processo as any} 
+          processo={processo} 
           onDeleteClick={() => handleDeleteClick(processo.id)} 
         />
       ))}
