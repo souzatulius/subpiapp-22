@@ -36,8 +36,9 @@ const DashboardLayout: React.FC = () => {
       <div className="transition-all duration-300 min-h-[64px]">
         <Header showControls={true} toggleSidebar={toggleSidebar} />
         
+        {/* Breadcrumb fica junto ao header no mobile para economizar espaço */}
         {isMobile && (
-          <div className="bg-white">
+          <div className="bg-white sticky top-0 z-10">
             <BreadcrumbBar />
           </div>
         )}
@@ -47,6 +48,7 @@ const DashboardLayout: React.FC = () => {
         {!isMobile && <DashboardSidebar isOpen={sidebarOpen} />}
         
         <main className="flex-1 w-full transition-all duration-300">
+          {/* Breadcrumb apenas no desktop permanece aqui */}
           {!isMobile && <BreadcrumbBar />}
           
           <div className="max-w-7xl mx-auto w-full flex-1">

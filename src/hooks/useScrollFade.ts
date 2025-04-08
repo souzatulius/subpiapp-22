@@ -21,19 +21,31 @@ export const useScrollFade = ({
       setScrollY(window.scrollY);
     };
 
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+    // Só adicionar o listener de scroll se não for mobile ou se o transform não estiver desabilitado
+    if (!isMobile || !disableTransformOnMobile) {
+      window.addEventListener('scroll', handleScroll);
+      return () => window.removeEventListener('scroll', handleScroll);
+    }
+    
+    return undefined;
+  }, [isMobile, disableTransformOnMobile]);
 
-  // Calculate opacity based on scroll position
+  // No mobile, se o transform estiver desabilitado, retorna valores padrão sem efeito
+  if (isMobile && disableTransformOnMobile) {
+    return {
+      opacity: 1,
+      transform: 'none'
+    };
+  }
+
+  // Calcula a opacidade baseada na posição do scroll apenas para desktop
   const opacity = scrollY <= threshold 
     ? 1 
     : Math.max(0, 1 - (scrollY - threshold) / fadeDistance);
   
-  // Return style object with transform disabled on mobile if specified
   return {
     opacity,
-    transform: (scrollY <= threshold || (isMobile && disableTransformOnMobile)) 
+    transform: scrollY <= threshold
       ? 'none' 
       : `translateY(${Math.min((scrollY - threshold) / 2, fadeDistance/2)}px)`
   };

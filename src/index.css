@@ -49,10 +49,10 @@
     }
   }
   
-  /* Adiciona espaço para o breadcrumb fixo no mobile */
+  /* Removendo o padding-top excessivo no mobile que estava causando espaço em branco */
   @media (max-width: 767px) {
     body {
-      padding-top: 40px; /* Altura aproximada do breadcrumb */
+      padding-top: 0; /* Era 40px antes, removido para corrigir o espaço em branco */
     }
   }
 }

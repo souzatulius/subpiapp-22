@@ -182,7 +182,7 @@ const BreadcrumbBar: React.FC<BreadcrumbBarProps> = ({ onSettingsClick }) => {
   };
   
   return (
-    <div className={`px-6 py-2 text-xs text-gray-500 ${isMobile ? 'bg-white z-40' : ''}`}>
+    <div className={`px-4 py-1.5 text-xs text-gray-500 ${isMobile ? 'bg-white shadow-sm' : ''}`}>
       <Breadcrumb>
         <BreadcrumbList>
           <BreadcrumbItem>
