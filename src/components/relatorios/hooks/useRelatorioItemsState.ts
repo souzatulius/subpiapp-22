@@ -15,7 +15,7 @@ export interface RelatorioItem {
   badge?: string;
   order: number;
   highlight?: string;  // Added to match usage in relatorioItemsFactory.ts
-  props?: any;  // Added to support props passed to components
+  props?: any;  // Support props passed to components
 }
 
 export const useRelatorioItemsState = (initialItems: RelatorioItem[] = []) => {

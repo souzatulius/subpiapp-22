@@ -66,6 +66,7 @@ export const useLoginForm = (navigate: NavigateFunction) => {
   };
 
   const handleGoogleLogin = async () => {
+    setIsSubmitting(true);
     try {
       await signInWithGoogle();
     } catch (error) {
@@ -75,6 +76,7 @@ export const useLoginForm = (navigate: NavigateFunction) => {
         description: "Ocorreu um erro durante o login com Google. Tente novamente mais tarde.",
         variant: "destructive",
       });
+      setIsSubmitting(false);
     }
   };
 

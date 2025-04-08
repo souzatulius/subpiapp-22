@@ -65,9 +65,10 @@ const PositionFields: React.FC<PositionFieldsProps> = ({
           if (error) throw error;
           
           if (data && data.length > 0) {
-            const formattedAreas = data.map(area => ({
+            const formattedAreas: SelectOption[] = data.map(area => ({
               id: area.id,
               value: area.descricao,
+              label: area.descricao,
               sigla: area.sigla
             }));
             console.log(`Found ${formattedAreas.length} supervisions for coordination ${coordenacao}`);
@@ -156,8 +157,8 @@ const PositionFields: React.FC<PositionFieldsProps> = ({
                 <>
                   <SelectItem value="select-cargo" disabled>Selecione um cargo</SelectItem>
                   {roles.map(role => (
-                    <SelectItem key={role.id} value={role.id}>
-                      {role.value}
+                    <SelectItem key={role.id} value={role.id || role.value}>
+                      {role.label || role.value}
                     </SelectItem>
                   ))}
                 </>
@@ -201,7 +202,7 @@ const PositionFields: React.FC<PositionFieldsProps> = ({
                 <>
                   <SelectItem value="select-coordenacao" disabled>Selecione uma coordenação</SelectItem>
                   {coordenacoes.map(coord => (
-                    <SelectItem key={coord.id} value={coord.id}>
+                    <SelectItem key={coord.id} value={coord.id || coord.value}>
                       {getCoordinationDisplayText(coord)}
                     </SelectItem>
                   ))}
@@ -252,7 +253,7 @@ const PositionFields: React.FC<PositionFieldsProps> = ({
                   <>
                     <SelectItem value="select-area" disabled>Selecione uma supervisão técnica</SelectItem>
                     {filteredAreas.map(area => (
-                      <SelectItem key={area.id} value={area.id}>
+                      <SelectItem key={area.id} value={area.id || area.value}>
                         {getAreaDisplayText(area)}
                       </SelectItem>
                     ))}

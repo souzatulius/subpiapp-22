@@ -15,7 +15,7 @@ import AvatarDisplay from './photo/AvatarDisplay';
 const UserProfileView: React.FC = () => {
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
-  const [userData, setUserData] = useState<UserProfile | null>(null);
+  const [userData, setUserData] = useState<ProfileData | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false); // State to control modal visibility
 
   // Fetch user data
@@ -82,6 +82,19 @@ const UserProfileView: React.FC = () => {
     ? format(new Date(userData.aniversario), 'dd/MM', { locale: ptBR })
     : 'Não informado';
 
+  // Access userData safely
+  const userCargo = typeof userData.cargo === 'string' ? userData.cargo : 
+                    userData.cargo?.descricao || '';
+                    
+  const userCoordenacao = typeof userData.coordenacao === 'string' ? userData.coordenacao : 
+                          userData.coordenacao?.descricao || '';
+                          
+  const userSupervisao = 'supervisao_tecnica' in userData ? 
+                         userData.supervisao_tecnica as string : '';
+                         
+  const userEmail = userData.email || '';
+  const userId = 'id' in userData ? userData.id : '';
+
   return (
     <div className="max-w-3xl mx-auto">
       <Card className="shadow-md">
@@ -101,7 +114,7 @@ const UserProfileView: React.FC = () => {
               />
               <div>
                 <h2 className="text-xl font-semibold">{userData.nome_completo}</h2>
-                <p className="text-gray-500">{userData.cargo}</p>
+                <p className="text-gray-500">{userCargo}</p>
               </div>
             </div>
             <Button 
@@ -128,7 +141,7 @@ const UserProfileView: React.FC = () => {
                 <div className="flex items-center space-x-2 text-sm">
                   <Mail className="h-4 w-4 text-gray-500" />
                   <span className="text-gray-700">Email:</span>
-                  <span className="font-medium">{userData.email || '-'}</span>
+                  <span className="font-medium">{userEmail}</span>
                 </div>
                 <div className="flex items-center space-x-2 text-sm">
                   <Calendar className="h-4 w-4 text-gray-500" />
@@ -150,38 +163,35 @@ const UserProfileView: React.FC = () => {
                 <div className="flex items-center space-x-2 text-sm">
                   <Shield className="h-4 w-4 text-gray-500" />
                   <span className="text-gray-700">Cargo:</span>
-                  <span className="font-medium">{userData.cargo || '-'}</span>
+                  <span className="font-medium">{userCargo || '-'}</span>
                 </div>
                 <div className="flex items-center space-x-2 text-sm">
                   <Building className="h-4 w-4 text-gray-500" />
                   <span className="text-gray-700">Coordenação:</span>
-                  <span className="font-medium">{userData.coordenacao || '-'}</span>
+                  <span className="font-medium">{userCoordenacao || '-'}</span>
                 </div>
                 <div className="flex items-center space-x-2 text-sm">
                   <Users className="h-4 w-4 text-gray-500" />
                   <span className="text-gray-700">Supervisão Técnica:</span>
-                  <span className="font-medium">{userData.supervisao_tecnica || '-'}</span>
+                  <span className="font-medium">{userSupervisao || '-'}</span>
                 </div>
               </div>
             </div>
           </div>
         </CardContent>
 
-        <CardFooter className="text-xs text-gray-500 border-t pt-4">
-          <p>ID de usuário: {userData.id}</p>
-        </CardFooter>
+        {userId && (
+          <CardFooter className="text-xs text-gray-500 border-t pt-4">
+            <p>ID de usuário: {userId}</p>
+          </CardFooter>
+        )}
       </Card>
 
       {/* Edit Profile Modal */}
       <EditProfileModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        userData={{
-          nome_completo: userData.nome_completo,
-          whatsapp: userData.whatsapp,
-          aniversario: userData.aniversario,
-          foto_perfil_url: userData.foto_perfil_url
-        }}
+        userData={userData}
         refreshUserData={refreshUserData}
       />
     </div>

@@ -6,11 +6,11 @@ export interface ProfileData {
   cargo?: {
     id: string;
     descricao: string;
-  };
+  } | string;
   coordenacao?: {
     id: string;
     descricao: string;
-  };
+  } | string;
   email?: string;
   foto_perfil_url?: string;
 }

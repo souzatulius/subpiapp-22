@@ -1,8 +1,8 @@
 
 export interface SelectOption {
+  id?: string;  // Making it optional for backward compatibility
   value: string;
   label: string;
-  id?: string;  // Added to support PositionFields.tsx
   sigla?: string; // Added to support coordination display in PositionFields.tsx
 }
 

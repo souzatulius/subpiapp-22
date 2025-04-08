@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { toast } from '@/components/ui/use-toast';
 import { format, parse } from 'date-fns';
 import { Loader2, Camera } from 'lucide-react';
-import { ProfileData, UserProfile } from './types';
+import { ProfileData } from './types';
 import { updateProfile } from '@/services/authService';
 import { useAuth } from '@/hooks/useSupabaseAuth';
 import AvatarDisplay from './photo/AvatarDisplay';
@@ -206,11 +206,17 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
     setIsPhotoModalOpen(true);
   };
 
-  // Use safe typing when accessing userProfile data
-  const userCargo = userData && 'cargo_id' in userData ? userData.cargo : undefined;
-  const userCoordenacao = userData && 'coordenacao_id' in userData ? userData.coordenacao : undefined;
-  const userSupervisao = userData && 'supervisao_tecnica' in userData ? userData.supervisao_tecnica : undefined;
-  const userEmail = userData && 'email' in userData ? userData.email : '';
+  // Access userData safely
+  const userCargo = typeof userData?.cargo === 'string' ? userData?.cargo : 
+                    userData?.cargo?.descricao || '';
+                    
+  const userCoordenacao = typeof userData?.coordenacao === 'string' ? userData?.coordenacao : 
+                          userData?.coordenacao?.descricao || '';
+                          
+  const userSupervisao = userData && 'supervisao_tecnica' in userData ? 
+                         userData.supervisao_tecnica as string : '';
+                         
+  const userEmail = userData?.email || '';
 
   return (
     <>
@@ -245,7 +251,7 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
               <Input
                 id="nome_completo"
                 name="nome_completo"
-                value={formData.nome_completo}
+                value={formData.nome_completo || ''}
                 onChange={handleChange}
                 className={formErrors.nome_completo ? "border-red-500" : ""}
               />
@@ -276,7 +282,7 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
               <Input
                 id="cargo"
                 name="cargo"
-                value={typeof userCargo === 'string' ? userCargo : userCargo?.descricao || ''}
+                value={userCargo}
                 disabled
                 className="bg-gray-100"
               />
@@ -290,7 +296,7 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
               <Input
                 id="coordenacao"
                 name="coordenacao"
-                value={typeof userCoordenacao === 'string' ? userCoordenacao : userCoordenacao?.descricao || ''}
+                value={userCoordenacao}
                 disabled
                 className="bg-gray-100"
               />
@@ -304,7 +310,7 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
               <Input
                 id="supervisao_tecnica"
                 name="supervisao_tecnica"
-                value={userSupervisao || ''}
+                value={userSupervisao}
                 disabled
                 className="bg-gray-100"
               />
@@ -317,7 +323,7 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
               <Input
                 id="whatsapp"
                 name="whatsapp"
-                value={formData.whatsapp}
+                value={formData.whatsapp || ''}
                 onChange={handleWhatsappChange}
                 placeholder="(XX) XXXXX-XXXX"
                 className={formErrors.whatsapp ? "border-red-500" : ""}
