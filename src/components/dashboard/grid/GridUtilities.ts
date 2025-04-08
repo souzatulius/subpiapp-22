@@ -42,10 +42,11 @@ export const getWidthClass = (width?: string, isMobileView: boolean = false): st
 export const getHeightClass = (height?: string): string => {
   switch (height) {
     case '1':
-      return 'row-span-1';
+      return 'row-span-1 h-32'; // Fixed height for consistency
     case '2':
-      return 'row-span-2';
+      return 'row-span-2 h-64'; // Fixed height for consistency
     default:
-      return 'row-span-1';
+      return 'row-span-1 h-32'; // Default fixed height
   }
 };
+

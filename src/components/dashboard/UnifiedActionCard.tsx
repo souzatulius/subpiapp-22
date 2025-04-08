@@ -12,6 +12,7 @@ import SmartSearchCard from './SmartSearchCard';
 import SearchCard from './grid/card-types/SearchCard';
 import CardControls from './card-parts/CardControls';
 import { useNavigate } from 'react-router-dom';
+import { getColorClasses, getHoverColorClasses } from './utils/cardColorUtils';
 
 export interface Controls {
   cardId: string;
@@ -180,7 +181,7 @@ export function UnifiedActionCard({
       return children;
     }
     
-    // Fix for the type error: Check both isSearch and type for smart_search
+    // Check both isSearch and type for smart_search to handle both cases
     if (isSearch || type === 'smart_search') {
       return (
         <SearchCard 
@@ -265,18 +266,8 @@ export function UnifiedActionCard({
       );
     }
     
-    if (type === 'smart_search') {
-      return (
-        <SmartSearchCard 
-          placeholder={title || "O que vamos fazer?"} 
-          onSearch={onSearchSubmit}
-          isEditMode={isEditing}
-        />
-      );
-    }
-    
     return (
-      <div className="h-full" onClick={handleCardClick}>
+      <div className={`h-full rounded-lg ${getColorClasses(color)} ${getHoverColorClasses(color)} transition-colors duration-200 shadow-md`} onClick={handleCardClick}>
         <ActionCard
           id={id}
           title={title}

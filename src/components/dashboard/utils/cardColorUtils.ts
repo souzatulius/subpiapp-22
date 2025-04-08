@@ -6,7 +6,7 @@ export const getColorClasses = (color: CardColor): string => {
     case 'blue-vivid': return 'bg-[#0066FF] text-white'; // Azul Vivo
     case 'blue-light': return 'bg-[#66B2FF] text-gray-900'; // Azul Claro - changed to dark text
     case 'blue-dark': return 'bg-[#1D4ED8] text-white'; // Azul Escuro
-    case 'green-neon': return 'bg-[#66FF66] text-white'; // Verde Neon
+    case 'green-neon': return 'bg-[#66FF66] text-gray-900'; // Verde Neon
     case 'green-dark': return 'bg-[#00CC00] text-white'; // Verde Escuro
     case 'gray-light': return 'bg-[#F5F5F5] text-gray-800'; // Cinza Claro - dark text
     case 'gray-medium': return 'bg-[#D4D4D4] text-gray-800'; // Cinza Médio - dark text
@@ -48,8 +48,8 @@ export const getTextColorClass = (color: CardColor, cardId?: string): string => 
     case 'gray-medium':
       return 'text-gray-800'; // Dark text on light backgrounds
     case 'blue-light':
-      return 'text-gray-900'; // Dark text on light blue background
     case 'green-neon':
+      return 'text-gray-900'; // Dark text on light blue background
     case 'green-dark':
       return 'text-white'; // White text for green backgrounds
     default:
