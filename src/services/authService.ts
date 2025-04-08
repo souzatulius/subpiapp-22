@@ -22,7 +22,7 @@ export const updateProfile = async (userData: ProfileData, userId: string) => {
     // Handle birthday field - ensure proper date format (YYYY-MM-DD)
     if (userData.aniversario) {
       // Convert DD/MM/YYYY to YYYY-MM-DD
-      if (userData.aniversario.includes('/')) {
+      if (typeof userData.aniversario === 'string' && userData.aniversario.includes('/')) {
         const [day, month, year] = userData.aniversario.split('/');
         updatedData.aniversario = `${year}-${month}-${day}`;
       } else {

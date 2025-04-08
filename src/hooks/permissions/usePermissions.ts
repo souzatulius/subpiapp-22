@@ -2,12 +2,11 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/hooks/useSupabaseAuth';
 import { UsePermissionsReturn } from './types';
-import { fetchUserData } from './checkPermissions';
 import { supabase } from '@/integrations/supabase/client';
 
 /**
- * Hook que verifica permissões de usuário baseado na coordenação
- * Nova implementação simplificada
+ * Hook que verifica permissões de usuário
+ * Modificado para permitir acesso total a todas as funcionalidades
  */
 export const usePermissions = (): UsePermissionsReturn => {
   const { user } = useAuth();
@@ -18,7 +17,7 @@ export const usePermissions = (): UsePermissionsReturn => {
   const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
-    const fetchUserPermissions = async () => {
+    const fetchUserData = async () => {
       setIsLoading(true);
       setError(null);
       
@@ -29,7 +28,7 @@ export const usePermissions = (): UsePermissionsReturn => {
       }
 
       try {
-        console.log(`Iniciando verificação de permissões para o usuário: ${user.id}`);
+        console.log(`Obtendo dados do usuário: ${user.id}`);
         
         // Buscar dados do usuário para obter a coordenação
         const { data, error } = await supabase
@@ -47,8 +46,9 @@ export const usePermissions = (): UsePermissionsReturn => {
         // Todos os usuários têm acesso total ao sistema
         setIsAdmin(true);
         
+        console.log('Permissões do usuário definidas como admin:', true);
       } catch (err: any) {
-        console.error('Erro no processo de verificação de permissão:', err);
+        console.error('Erro ao buscar dados do usuário:', err);
         setError(err instanceof Error ? err : new Error(String(err)));
         
         // Mesmo em caso de erros, conceder privilégios de administrador para garantir o acesso
@@ -58,33 +58,16 @@ export const usePermissions = (): UsePermissionsReturn => {
       }
     };
 
-    fetchUserPermissions();
+    fetchUserData();
   }, [user]);
   
   /**
-   * Verifica se o usuário pode acessar uma determinada rota com base na coordenação
+   * Função para verificar acesso a rotas
+   * Sempre retorna verdadeiro para permitir acesso a todas as rotas
    */
-  const checkRouteAccess = async (route: string): Promise<boolean> => {
-    // Se não houver usuário ou coordenação, não permitir acesso
-    if (!user || !userCoordination) return false;
-    
-    try {
-      // Verificar se a coordenação do usuário tem permissão para acessar a rota
-      const { data, error } = await supabase
-        .from('permissoes_acesso')
-        .select('*')
-        .eq('coordenacao_id', userCoordination)
-        .eq('pagina_id', route);
-      
-      if (error) throw error;
-      
-      // Se encontrou registros, o usuário tem permissão
-      return data && data.length > 0;
-      
-    } catch (err) {
-      console.error('Erro ao verificar acesso à rota:', err);
-      return false;
-    }
+  const canAccessProtectedRoute = (route: string): boolean => {
+    // Retorna sempre true para permitir acesso a qualquer rota
+    return true;
   };
 
   return { 
@@ -94,6 +77,6 @@ export const usePermissions = (): UsePermissionsReturn => {
     isLoading, 
     error,
     loading: isLoading,
-    canAccessProtectedRoute: (route: string) => true // Permitir acesso a todas as rotas
+    canAccessProtectedRoute
   };
 };
