@@ -75,7 +75,13 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" style={{
+      backgroundImage: 'url("/lovable-uploads/c20c039e-c465-4258-90c1-fdcf2625b808.png")',
+      backgroundSize: 'cover',
+      backgroundPosition: 'center',
+      backgroundRepeat: 'no-repeat',
+      opacity: '0.8'
+    }}>
       <div className="w-full mb-2">
         <WelcomeCard
           title="Comunicação"

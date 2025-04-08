@@ -47,7 +47,8 @@ const DashboardLayout: React.FC = () => {
             backgroundImage: 'url("/lovable-uploads/c20c039e-c465-4258-90c1-fdcf2625b808.png")',
             backgroundSize: 'cover',
             backgroundPosition: 'center',
-            backgroundRepeat: 'no-repeat'
+            backgroundRepeat: 'no-repeat',
+            opacity: '0.8'
           }}
         >
           <div className="max-w-7xl mx-auto w-full flex-1">

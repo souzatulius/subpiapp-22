@@ -43,7 +43,8 @@ const Demandas = () => {
             backgroundImage: 'url("/lovable-uploads/c20c039e-c465-4258-90c1-fdcf2625b808.png")',
             backgroundSize: 'cover',
             backgroundPosition: 'center',
-            backgroundRepeat: 'no-repeat'
+            backgroundRepeat: 'no-repeat',
+            opacity: '0.8'
           }}
         >
           {/* Desktop breadcrumb */}
