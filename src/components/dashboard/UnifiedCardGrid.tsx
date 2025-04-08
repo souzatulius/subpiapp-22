@@ -11,7 +11,7 @@ import {
 } from '@dnd-kit/core';
 import { SortableContext, arrayMove } from '@dnd-kit/sortable';
 import { SortableUnifiedActionCard } from './UnifiedActionCard';
-import { getWidthClass, getHeightClass } from './CardGrid';
+import { getWidthClass, getHeightClass, getMobileSpecificDimensions } from './grid/GridUtilities';
 import { ActionCardItem } from '@/types/dashboard';
 import { useGridOccupancy } from '@/hooks/dashboard/useGridOccupancy';
 
@@ -85,8 +85,39 @@ const UnifiedCardGrid: React.FC<UnifiedCardGridProps> = ({
         .sort((a, b) => (a.mobileOrder ?? 999) - (b.mobileOrder ?? 999))
     : visibleCards;
 
+  // Apply specific dimensions for certain cards
+  const processedCards = displayedCards.map(card => {
+    if (isMobileView) {
+      // Apply special dimensions for specific cards on mobile
+      if (card.title === "Relatórios da Comunicação" || card.title === "Ações Pendentes") {
+        const mobileSpecific = getMobileSpecificDimensions(card.title);
+        return {
+          ...card,
+          width: mobileSpecific.width,
+          height: mobileSpecific.height
+        };
+      }
+    } else {
+      // Desktop-specific adjustments
+      if (card.title === "Relatórios da Comunicação") {
+        return {
+          ...card,
+          width: '50', // 2 columns
+          height: '1'  // 1 row
+        };
+      } else if (card.title === "Ações Pendentes") {
+        return {
+          ...card,
+          width: '25', // 1 column
+          height: '2'  // 2 rows
+        };
+      }
+    }
+    return card;
+  });
+
   const { occupiedSlots } = useGridOccupancy(
-    displayedCards.map(card => ({
+    processedCards.map(card => ({
       id: card.id,
       width: card.width || '25',
       height: card.height || '1',
@@ -110,11 +141,11 @@ const UnifiedCardGrid: React.FC<UnifiedCardGridProps> = ({
       onDragEnd={handleDragEnd}
     >
       <div className={`w-full grid gap-y-3 gap-x-3 ${isMobileView ? 'grid-cols-2' : 'grid-cols-4'}`}>
-        <SortableContext items={displayedCards.map(card => card.id)}>
-          {displayedCards.map(card => (
+        <SortableContext items={processedCards.map(card => card.id)}>
+          {processedCards.map(card => (
             <div
               key={card.id}
-              className={`${getWidthClass(card.width, isMobileView)} ${getHeightClass(card.height)}`}
+              className={`${getWidthClass(card.width, isMobileView)} ${getHeightClass(card.height, isMobileView)}`}
             >
               <SortableUnifiedActionCard
                 id={card.id}
@@ -149,6 +180,7 @@ const UnifiedCardGrid: React.FC<UnifiedCardGridProps> = ({
                 badgeValue={card.badgeValue}
                 hasSubtitle={!!card.subtitle}
                 isMobileView={isMobileView}
+                isPendingActions={card.isPendingActions}
               />
             </div>
           ))}

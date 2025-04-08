@@ -1,4 +1,3 @@
-
 import { v4 as uuidv4 } from 'uuid';
 import { ActionCardItem } from '@/types/dashboard';
 import React from 'react';
@@ -132,8 +131,8 @@ export const getDefaultCards = (): ActionCardItem[] => {
       iconId: 'PieChart',
       path: '/dashboard/comunicacao/relatorios',
       color: 'orange-light',
-      width: '50',
-      height: '1',
+      width: '50', // 2 columns on desktop
+      height: '1',  // 1 row on desktop
       type: 'standard',
       chartId: 'origemDemandas',
       displayMobile: true,
@@ -145,8 +144,8 @@ export const getDefaultCards = (): ActionCardItem[] => {
       iconId: 'AlertTriangle',
       path: '/dashboard/comunicacao/responder',
       color: 'bg-orange-500',
-      width: '50',
-      height: '1',
+      width: '25', // 1 column on desktop
+      height: '2',  // 2 rows on desktop
       type: 'in_progress_demands',
       isPendingActions: true,
       displayMobile: true,

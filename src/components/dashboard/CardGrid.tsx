@@ -2,7 +2,7 @@
 import React from 'react';
 import { ActionCardItem } from '@/types/dashboard';
 import SortableActionCard from './SortableActionCard';
-import { getWidthClass, getHeightClass } from './grid/GridUtilities';
+import { getWidthClass, getHeightClass, getMobileSpecificDimensions } from './grid/GridUtilities';
 
 interface CardGridProps {
   cards: ActionCardItem[];
@@ -26,21 +26,39 @@ const CardGrid: React.FC<CardGridProps> = ({
 
   return (
     <div className={`grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4`}>
-      {visibleCards.map((card) => (
-        <div 
-          key={card.id}
-          className={`${getWidthClass(card.width, isMobileView)} ${getHeightClass(card.height)}`}
-        >
-          <SortableActionCard
-            card={card}
-            onEdit={() => onEditCard(card)}
-            onDelete={onHideCard}
-            isDraggable={isEditMode}
-            isMobileView={isMobileView}
-            specialContent={renderSpecialCardContent && renderSpecialCardContent(card.id)}
-          />
-        </div>
-      ))}
+      {visibleCards.map((card) => {
+        // For mobile view, adjust specific card dimensions
+        let cardWidth = card.width;
+        let cardHeight = card.height;
+        
+        if (isMobileView) {
+          const mobileSpecific = getMobileSpecificDimensions(card.title);
+          if (card.title === "Relatórios da Comunicação" || card.title === "Ações Pendentes") {
+            cardWidth = mobileSpecific.width;
+            cardHeight = mobileSpecific.height;
+          }
+        }
+        
+        return (
+          <div 
+            key={card.id}
+            className={`${getWidthClass(cardWidth, isMobileView)} ${getHeightClass(cardHeight, isMobileView)}`}
+          >
+            <SortableActionCard
+              card={{
+                ...card,
+                width: cardWidth,
+                height: cardHeight
+              }}
+              onEdit={() => onEditCard(card)}
+              onDelete={onHideCard}
+              isDraggable={isEditMode}
+              isMobileView={isMobileView}
+              specialContent={renderSpecialCardContent && renderSpecialCardContent(card.id)}
+            />
+          </div>
+        );
+      })}
     </div>
   );
 };

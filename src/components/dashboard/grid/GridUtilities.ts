@@ -20,7 +20,25 @@ export const getWidthClass = (width?: CardWidth, isMobileView: boolean = false):
   }
 };
 
-export const getHeightClass = (height?: CardHeight): string => {
+export const getHeightClass = (height?: CardHeight, isMobileView: boolean = false): string => {
+  // For specific cards on mobile, we might want different heights
+  if (isMobileView) {
+    switch (height) {
+      case '0.5':
+        return 'h-20'; // Half height on mobile
+      case '2':
+        return 'h-80'; // Double height on mobile
+      case '3':
+        return 'h-96'; // Triple height on mobile
+      case '4':
+        return 'h-120'; // Quadruple height on mobile
+      case '1':
+      default:
+        return 'h-40'; // Default height on mobile
+    }
+  }
+
+  // Regular desktop heights
   switch (height) {
     case '0.5':
       return 'h-20'; // Half height
@@ -35,3 +53,16 @@ export const getHeightClass = (height?: CardHeight): string => {
       return 'h-40';
   }
 };
+
+// Get mobile-specific dimensions for specific cards
+export const getMobileSpecificDimensions = (cardTitle: string): { width: CardWidth, height: CardHeight } => {
+  switch (cardTitle) {
+    case "Relatórios da Comunicação":
+      return { width: '50', height: '2' }; // 2 columns, 2 rows on mobile
+    case "Ações Pendentes":
+      return { width: '25', height: '2' }; // 1 column, 2 rows on mobile (same as desktop)
+    default:
+      return { width: '25', height: '1' }; // Default size
+  }
+};
+
