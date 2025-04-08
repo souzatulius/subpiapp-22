@@ -1,52 +1,65 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/hooks/useSupabaseAuth';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { LogOut, User, Settings, Bell } from 'lucide-react';
-import { useUserProfile } from './useUserProfile';
+import { Button } from '@/components/ui/button';
+import { ChevronDown, LogOut, User, Settings, Bell } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from '@/components/ui/use-toast';
-import { useNotifications } from './useNotifications';
+import { useToast } from '@/components/ui/use-toast';
 import { useIsMobile } from '@/hooks/use-mobile';
-import NotificationPreferencesModal from '@/components/profile/NotificationPreferencesModal';
 
-const UserProfileMenu: React.FC = () => {
-  const { userProfile, isLoading } = useUserProfile();
-  const { unreadCount, fetchNotifications } = useNotifications();
+const UserProfileMenu = () => {
+  const { user, signOut } = useAuth();
+  const { toast } = useToast();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
-  const [isNotificationPreferencesOpen, setIsNotificationPreferencesOpen] = useState(false);
+  const [userProfile, setUserProfile] = useState<{
+    nome_completo?: string;
+    email?: string;
+    foto_perfil_url?: string;
+    coordenacao?: { descricao: string };
+  } | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  // Fetch notifications when component mounts
-  React.useEffect(() => {
-    fetchNotifications();
-  }, [fetchNotifications]);
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      if (!user) return;
 
-  const handleLogout = async () => {
-    try {
-      const { error } = await supabase.auth.signOut();
-      if (error) throw error;
-      
-      toast({
-        title: "Logout realizado com sucesso",
-        description: "Você foi desconectado do sistema."
-      });
-      
-      // Garantir que o usuário sempre seja redirecionado para a página de login
-      navigate('/login', { replace: true });
-    } catch (error) {
-      console.error('Erro ao fazer logout:', error);
-      // Mesmo em caso de erro, tentar redirecionar para a página de login
-      navigate('/login', { replace: true });
-    }
-  };
+      try {
+        setLoading(true);
+        
+        const { data, error } = await supabase
+          .from('usuarios')
+          .select(`
+            nome_completo,
+            email,
+            foto_perfil_url,
+            coordenacao:coordenacoes(descricao)
+          `)
+          .eq('id', user.id)
+          .single();
+
+        if (error) throw error;
+        
+        setUserProfile(data);
+      } catch (error) {
+        console.error('Error fetching user profile:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUserProfile();
+  }, [user]);
 
   const getInitials = () => {
     if (!userProfile?.nome_completo) return 'U';
@@ -57,110 +70,77 @@ const UserProfileMenu: React.FC = () => {
     return `${nameParts[0].charAt(0)}${nameParts[nameParts.length - 1].charAt(0)}`;
   };
 
-  // Extract first two names from user's full name
-  const getFirstTwoNames = () => {
+  const getFirstAndLastName = () => {
     if (!userProfile?.nome_completo) return 'Usuário';
     
     const nameParts = userProfile.nome_completo.split(' ');
     if (nameParts.length === 1) return nameParts[0];
     
-    return `${nameParts[0]} ${nameParts[1]}`;
+    return `${nameParts[0]} ${nameParts[nameParts.length - 1]}`;
   };
 
-  // Handle profile navigation - now correctly going to /settings
-  const handleProfileClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    navigate('/profile');
-  };
-
-  // Handle notifications navigation
-  const handleNotificationsClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    setIsNotificationPreferencesOpen(true);
-  };
-
-  // Handle settings navigation
-  const handleSettingsClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    navigate('/settings');
+  const handleLogout = async () => {
+    try {
+      await signOut();
+      navigate('/login');
+    } catch (error) {
+      console.error('Error signing out:', error);
+      toast({
+        title: 'Erro ao sair',
+        description: 'Não foi possível encerrar sua sessão corretamente.',
+        variant: 'destructive',
+      });
+    }
   };
 
   return (
-    <div className="flex items-center">
-      {/* User info - visible only on desktop */}
-      {!isMobile && userProfile && (
-        <div className="mr-3 text-right hidden md:block">
-          <p className="text-blue-900 font-semibold">{getFirstTwoNames()}</p>
-          <p className="text-gray-500 text-sm">{userProfile.email}</p>
-        </div>
-      )}
-      
-      <div className="relative">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Avatar className="h-9 w-9 cursor-pointer border border-white/20 bg-blue-900 hover:bg-orange-500 transition-colors">
-              {userProfile?.foto_perfil_url ? (
-                <img src={userProfile.foto_perfil_url} alt="Foto de perfil" className="object-cover" />
-              ) : (
-                <AvatarFallback className="bg-blue-900 hover:bg-orange-500 transition-colors text-white text-base font-semibold">
-                  {getInitials()}
-                </AvatarFallback>
-              )}
-            </Avatar>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-56 absolute right-0">
-            {/* User info section - only on mobile */}
-            {isMobile && userProfile && (
-              <>
-                <div className="p-3 border-b">
-                  <p className="font-semibold text-blue-900">{getFirstTwoNames()}</p>
-                  <p className="text-gray-500 text-xs">{userProfile.email}</p>
-                  {userProfile.coordenacao && (
-                    <p className="text-gray-500 text-xs mt-1">
-                      {userProfile.coordenacao.descricao || 'Coordenação não atribuída'}
-                    </p>
-                  )}
-                </div>
-              </>
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+          <Avatar className="h-8 w-8">
+            {userProfile?.foto_perfil_url ? (
+              <AvatarImage 
+                src={userProfile.foto_perfil_url} 
+                alt={userProfile.nome_completo || 'User avatar'} 
+              />
+            ) : (
+              <AvatarFallback>{getInitials()}</AvatarFallback>
             )}
+          </Avatar>
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        {isMobile && (
+          <>
+            <DropdownMenuLabel className="font-normal">
+              <div className="flex flex-col space-y-1">
+                <p className="font-bold text-sm">{getFirstAndLastName()}</p>
+                <p className="text-xs text-muted-foreground truncate">{userProfile?.email}</p>
+                {userProfile?.coordenacao && (
+                  <p className="text-xs text-muted-foreground">
+                    {userProfile.coordenacao.descricao}
+                  </p>
+                )}
+              </div>
+            </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={handleProfileClick}>
-              <User className="mr-2 h-4 w-4" />
-              <span>Perfil</span>
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={handleNotificationsClick}>
-              <Bell className="mr-2 h-4 w-4" />
-              <span>Gerenciar Notificações</span>
-              {unreadCount > 0 && (
-                <span className="ml-auto bg-orange-500 text-white text-xs rounded-full px-1.5 py-0.5">
-                  {unreadCount > 99 ? '99+' : unreadCount}
-                </span>
-              )}
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={handleSettingsClick}>
-              <Settings className="mr-2 h-4 w-4" />
-              <span>Configurações</span>
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={handleLogout}>
-              <LogOut className="mr-2 h-4 w-4" />
-              <span>Sair</span>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-        
-        {unreadCount > 0 && (
-          <span className="absolute -top-1 -right-1 h-4 w-4 bg-orange-500 rounded-full flex items-center justify-center text-white text-xs">
-            {unreadCount > 9 ? '9+' : unreadCount}
-          </span>
+          </>
         )}
-      </div>
-
-      <NotificationPreferencesModal 
-        isOpen={isNotificationPreferencesOpen}
-        onClose={() => setIsNotificationPreferencesOpen(false)}
-      />
-    </div>
+        <DropdownMenuItem onClick={() => navigate('/profile')}>
+          <User className="mr-2 h-4 w-4" />
+          <span>Perfil</span>
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => navigate('/settings')}>
+          <Settings className="mr-2 h-4 w-4" />
+          <span>Configurações</span>
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem onClick={handleLogout}>
+          <LogOut className="mr-2 h-4 w-4" />
+          <span>Sair</span>
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 };
 

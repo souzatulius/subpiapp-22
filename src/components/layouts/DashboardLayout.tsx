@@ -51,8 +51,8 @@ const DashboardLayout: React.FC = () => {
               animate={{ opacity: 1, y: 0 }} 
               transition={{ duration: 0.5 }}
             >
-              {/* Only on mobile, render BreadcrumbBar right BEFORE the main content */}
-              {isMobile && <BreadcrumbBar className="mb-0" />}
+              {/* Only on mobile, render BreadcrumbBar right BEFORE the main content, now sticky */}
+              {isMobile && <BreadcrumbBar className="mb-0 sticky top-0 z-10 bg-white" />}
               
               <Outlet />
             </motion.div>

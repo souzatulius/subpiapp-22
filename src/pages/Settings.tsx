@@ -74,8 +74,8 @@ const Settings = () => {
                     style={isMobile ? scrollFadeStyles : undefined}
                     className={`${isMobile ? 'transition-all duration-300' : ''}`}
                   >
-                    {/* Mobile breadcrumb - directly above WelcomeCard with no margin */}
-                    {isMobile && <div className="mb-0"><BreadcrumbBar onSettingsClick={handleBackClick} /></div>}
+                    {/* Mobile breadcrumb - directly attached to the top of WelcomeCard with no margin */}
+                    {isMobile && <div className="mb-0 sticky top-0 z-10"><BreadcrumbBar onSettingsClick={handleBackClick} /></div>}
                     
                     <SettingsDashboard searchQuery={searchQuery} />
                   </div>
@@ -89,7 +89,7 @@ const Settings = () => {
                     </h1>
                     
                     {/* Mobile breadcrumb for non-dashboard sections */}
-                    {isMobile && <div className="mb-4"><BreadcrumbBar onSettingsClick={handleBackClick} /></div>}
+                    {isMobile && <div className="mb-4 sticky top-0 z-10"><BreadcrumbBar onSettingsClick={handleBackClick} /></div>}
                     
                     <SettingsContent activeSection={activeSection} />
                   </div>

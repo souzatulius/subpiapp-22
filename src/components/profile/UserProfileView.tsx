@@ -7,7 +7,21 @@ import { useEffect, useState } from 'react';
 import { Loader2, Mail, Briefcase, Building2, CalendarDays, Building } from 'lucide-react';
 import { format } from 'date-fns';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { UserProfile } from '@/types/common';
+
+interface Cargo {
+  id: string;
+  descricao: string;
+}
+
+interface Coordenacao {
+  id: string;
+  descricao: string;
+}
+
+interface SupervisaoTecnica {
+  id: string;
+  descricao: string;
+}
 
 interface ExtendedUserProfile {
   id: string;
@@ -19,18 +33,9 @@ interface ExtendedUserProfile {
   cargo_descricao?: string;
   coordenacao_descricao?: string;
   supervisao_tecnica_descricao?: string;
-  cargo?: {
-    id: string;
-    descricao: string;
-  };
-  coordenacao?: {
-    id: string;
-    descricao: string;
-  };
-  supervisao_tecnica?: {
-    id: string;
-    descricao: string;
-  };
+  cargo?: Cargo;
+  coordenacao?: Coordenacao;
+  supervisao_tecnica?: SupervisaoTecnica;
 }
 
 const UserProfileView: React.FC = () => {
@@ -67,7 +72,10 @@ const UserProfileView: React.FC = () => {
           ...data,
           cargo_descricao: data.cargo?.descricao,
           coordenacao_descricao: data.coordenacao?.descricao,
-          supervisao_tecnica_descricao: data.supervisao_tecnica?.descricao
+          supervisao_tecnica_descricao: data.supervisao_tecnica?.descricao,
+          cargo: data.cargo,
+          coordenacao: data.coordenacao,
+          supervisao_tecnica: data.supervisao_tecnica
         };
         
         setProfile(profileData);
