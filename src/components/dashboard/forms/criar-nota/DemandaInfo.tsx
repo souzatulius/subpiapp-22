@@ -4,7 +4,7 @@ import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { Demand, ResponseQA } from '@/types/demand';
+import { Demand, ResponseQA } from './types';
 import { DemandaStatusBadge } from '@/components/ui/status-badge';
 import { formatPriority } from '@/utils/priorityUtils';
 import { 

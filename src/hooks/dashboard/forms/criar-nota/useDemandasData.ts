@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
-import { Demand } from './types';
+import { Demand } from '@/components/dashboard/forms/criar-nota/types';
 
 export const useDemandasData = () => {
   const [demandas, setDemandas] = useState<Demand[]>([]);
