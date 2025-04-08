@@ -13,7 +13,7 @@ export const useUserApproval = (refreshUsers: () => Promise<void>) => {
     try {
       console.log(`Aprovando usuário: ${userName}, ID: ${userId}`);
       
-      // Update user status in the 'usuarios' table (not 'users')
+      // Atualizar status do usuário na tabela 'usuarios' (não 'users')
       const { error: updateError } = await supabase
         .from('usuarios')
         .update({ status: 'ativo' })

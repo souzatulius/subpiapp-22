@@ -20,6 +20,7 @@ export const usePasswordReset = () => {
     setIsResetting(true);
     
     try {
+      // Não estamos mais acessando a tabela "users", apenas usando o método de redefinição de senha
       const { error } = await supabase.auth.resetPasswordForEmail(user.email, {
         redirectTo: `${window.location.origin}/reset-password`,
       });
