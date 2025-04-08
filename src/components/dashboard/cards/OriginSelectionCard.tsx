@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { supabase } from '@/integrations/supabase/client';
@@ -14,14 +13,21 @@ interface OriginOption {
 
 interface OriginSelectionCardProps {
   title: string;
+  options?: OriginOption[];
 }
 
-const OriginSelectionCard: React.FC<OriginSelectionCardProps> = ({ title }) => {
+const OriginSelectionCard: React.FC<OriginSelectionCardProps> = ({ title, options: passedOptions }) => {
   const [origins, setOrigins] = useState<OriginOption[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
   
   useEffect(() => {
+    if (passedOptions && passedOptions.length > 0) {
+      setOrigins(passedOptions);
+      setIsLoading(false);
+      return;
+    }
+    
     const fetchOrigins = async () => {
       try {
         setIsLoading(true);
@@ -44,27 +50,23 @@ const OriginSelectionCard: React.FC<OriginSelectionCardProps> = ({ title }) => {
     };
     
     fetchOrigins();
-  }, []);
+  }, [passedOptions]);
 
-  const handleOriginSelect = (originId: string) => {
+  const handleOriginClick = (originId: string) => {
     navigate(`/dashboard/comunicacao/cadastrar?origem_id=${originId}`);
   };
   
-  // Function to get the correct icon component
   const getIconComponent = (iconName: string | null | undefined): React.ReactNode => {
     if (!iconName) return <LucideIcons.FileText className="h-5 w-5" />;
     
-    // Convert string to Lucide icon format (first letter uppercase, rest lowercase)
     const formattedIconName = iconName.charAt(0).toUpperCase() + iconName.slice(1).toLowerCase();
     
-    // Check if icon exists in Lucide library
     const LucideIcon = (LucideIcons as any)[formattedIconName];
     
     if (LucideIcon && typeof LucideIcon === 'function') {
       return <LucideIcon className="h-5 w-5" />;
     }
     
-    // Default icon if not found
     return <LucideIcons.FileText className="h-5 w-5" />;
   };
 
@@ -84,7 +86,7 @@ const OriginSelectionCard: React.FC<OriginSelectionCardProps> = ({ title }) => {
             {origins.map((origin) => (
               <button
                 key={origin.id}
-                onClick={() => handleOriginSelect(origin.id)}
+                onClick={() => handleOriginClick(origin.id)}
                 className="p-3 bg-white hover:bg-blue-50 border border-gray-200 rounded-md text-center transition-colors flex flex-col items-center justify-center h-24"
               >
                 <div className="text-2xl mb-2 text-blue-600">

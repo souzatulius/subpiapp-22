@@ -11,36 +11,48 @@ interface ProcessoListProps {
   showAll?: boolean;
   filterStatus?: string;
   searchTerm?: string;
+  viewMode?: 'list' | 'cards';
+  filterOpen?: boolean;
+  setFilterOpen?: (open: boolean) => void;
 }
 
 const ProcessoList: React.FC<ProcessoListProps> = ({ 
   user, 
   showAll = false,
   filterStatus,
-  searchTerm = ''
+  searchTerm = '',
+  viewMode = 'list',
+  filterOpen,
+  setFilterOpen
 }) => {
   const fetchProcessos = async () => {
-    let query = supabase
-      .from('e_sic_processos')
-      .select('*, e_sic_andamentos(*)');
+    try {
+      let query = supabase.from('esic_processos');
+      
+      // Type the select result
+      let selectQuery = query.select('*, autor:usuarios(nome_completo)');
 
-    // Apply filters
-    if (!showAll && user) {
-      query = query.eq('solicitante_id', user.id);
+      // Apply filters
+      if (!showAll && user) {
+        selectQuery = selectQuery.eq('autor_id', user.id);
+      }
+
+      if (filterStatus && filterStatus !== 'todos') {
+        selectQuery = selectQuery.eq('status', filterStatus);
+      }
+
+      if (searchTerm) {
+        selectQuery = selectQuery.ilike('texto', `%${searchTerm}%`);
+      }
+
+      const { data, error } = await selectQuery.order('criado_em', { ascending: false });
+
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      console.error("Error fetching processos:", error);
+      throw error;
     }
-
-    if (filterStatus && filterStatus !== 'todos') {
-      query = query.eq('status', filterStatus);
-    }
-
-    if (searchTerm) {
-      query = query.ilike('assunto', `%${searchTerm}%`);
-    }
-
-    const { data, error } = await query.order('created_at', { ascending: false });
-
-    if (error) throw error;
-    return data;
   };
 
   const { 
@@ -49,9 +61,15 @@ const ProcessoList: React.FC<ProcessoListProps> = ({
     isError,
     error
   } = useQuery({
-    queryKey: ['processos', showAll, filterStatus, searchTerm], 
+    queryKey: ['esic-processos', showAll, filterStatus, searchTerm], 
     queryFn: fetchProcessos
   });
+
+  const handleDeleteClick = (id: string) => {
+    console.log('Delete clicked for processo:', id);
+    // In a real implementation, this would show a confirmation dialog 
+    // and then delete the processo if confirmed
+  };
 
   if (isLoading) {
     return (
@@ -86,7 +104,11 @@ const ProcessoList: React.FC<ProcessoListProps> = ({
   return (
     <div className="space-y-3">
       {processos.map((processo) => (
-        <ProcessoItem key={processo.id} processo={processo as any} />
+        <ProcessoItem 
+          key={processo.id} 
+          processo={processo as any} 
+          onDeleteClick={() => handleDeleteClick(processo.id)} 
+        />
       ))}
     </div>
   );

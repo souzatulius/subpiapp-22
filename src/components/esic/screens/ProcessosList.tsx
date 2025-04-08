@@ -51,8 +51,11 @@ const ProcessosList: React.FC<ProcessosListProps> = ({
       
       {/* Passing the required props to ProcessoList */}
       <ProcessoList
-        viewMode={viewMode}
+        user={null}
+        showAll={true}
         searchTerm={searchTerm}
+        filterStatus="todos"
+        viewMode={viewMode}
         filterOpen={filterOpen}
         setFilterOpen={setFilterOpen}
       />
