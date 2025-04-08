@@ -45,9 +45,9 @@ export interface Demand {
   anexos: string[] | null;
   servico_id?: string;
   problema?: {
-    descricao: string;
+    descricao: string | null;
   } | null;
-  protocolo?: string;
+  protocolo?: string | null;
 }
 
 export interface ResponseQA {

@@ -16,7 +16,9 @@ import {
   Newspaper, 
   FileText, 
   Tag,
-  MessageSquare
+  MessageSquare,
+  AlertCircle,
+  Calendar
 } from 'lucide-react';
 
 interface DemandaInfoProps {
@@ -56,6 +58,7 @@ const DemandaInfo: React.FC<DemandaInfoProps> = ({ selectedDemanda, formattedRes
         </div>
       </div>
 
+      {/* Informações Gerais */}
       <Card className="p-4 bg-blue-50 border border-blue-100 rounded-xl">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Tema/Problema e Serviço */}
@@ -101,6 +104,55 @@ const DemandaInfo: React.FC<DemandaInfoProps> = ({ selectedDemanda, formattedRes
           </div>
         </div>
       </Card>
+      
+      {/* Tipo de Mídia e Veículo */}
+      {(selectedDemanda.tipo_midia || selectedDemanda.veiculo_imprensa) && (
+        <Card className="p-4 bg-amber-50 border border-amber-100 rounded-xl">
+          <h4 className="font-medium mb-2 flex items-center gap-2">
+            <Newspaper className="h-4 w-4 text-amber-600" /> Informações de Mídia
+          </h4>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {selectedDemanda.tipo_midia && (
+              <div className="flex items-start gap-2">
+                <Tag className="h-4 w-4 text-amber-600 mt-0.5" />
+                <div>
+                  <h4 className="font-medium text-gray-700">Tipo de Mídia</h4>
+                  <p className="text-sm text-gray-600">{selectedDemanda.tipo_midia.descricao}</p>
+                </div>
+              </div>
+            )}
+            {selectedDemanda.veiculo_imprensa && (
+              <div className="flex items-start gap-2">
+                <Newspaper className="h-4 w-4 text-amber-600 mt-0.5" />
+                <div>
+                  <h4 className="font-medium text-gray-700">Veículo de Imprensa</h4>
+                  <p className="text-sm text-gray-600">{selectedDemanda.veiculo_imprensa}</p>
+                </div>
+              </div>
+            )}
+            {selectedDemanda.origem && (
+              <div className="flex items-start gap-2">
+                <AlertCircle className="h-4 w-4 text-amber-600 mt-0.5" />
+                <div>
+                  <h4 className="font-medium text-gray-700">Origem</h4>
+                  <p className="text-sm text-gray-600">{selectedDemanda.origem.descricao}</p>
+                </div>
+              </div>
+            )}
+            <div className="flex items-start gap-2">
+              <Calendar className="h-4 w-4 text-amber-600 mt-0.5" />
+              <div>
+                <h4 className="font-medium text-gray-700">Status</h4>
+                <p className="text-sm text-gray-600">
+                  {selectedDemanda.status === 'respondida' ? 'Respondida' : 
+                   selectedDemanda.status === 'aguardando_nota' ? 'Aguardando Nota' : 
+                   selectedDemanda.status}
+                </p>
+              </div>
+            </div>
+          </div>
+        </Card>
+      )}
       
       {/* Localização */}
       {(selectedDemanda.endereco || selectedDemanda.bairro) && (
@@ -151,24 +203,6 @@ const DemandaInfo: React.FC<DemandaInfoProps> = ({ selectedDemanda, formattedRes
               <div className="flex items-start gap-2">
                 <Phone className="h-4 w-4 text-gray-500 mt-0.5" />
                 <p className="text-sm text-gray-600">{selectedDemanda.telefone_solicitante}</p>
-              </div>
-            )}
-            {selectedDemanda.veiculo_imprensa && (
-              <div className="flex items-start gap-2">
-                <Newspaper className="h-4 w-4 text-gray-500 mt-0.5" />
-                <p className="text-sm text-gray-600">{selectedDemanda.veiculo_imprensa}</p>
-              </div>
-            )}
-            {selectedDemanda.origem && (
-              <div className="flex items-start gap-2">
-                <Tag className="h-4 w-4 text-gray-500 mt-0.5" />
-                <p className="text-sm text-gray-600">Origem: {selectedDemanda.origem.descricao}</p>
-              </div>
-            )}
-            {selectedDemanda.tipo_midia && (
-              <div className="flex items-start gap-2">
-                <FileText className="h-4 w-4 text-gray-500 mt-0.5" />
-                <p className="text-sm text-gray-600">Tipo de Mídia: {selectedDemanda.tipo_midia.descricao}</p>
               </div>
             )}
           </div>

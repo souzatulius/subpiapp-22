@@ -87,11 +87,13 @@ export const useDemandasData = () => {
             bairro: demanda.bairros,
             autor: null,
             servico: demanda.servicos,
-            problema: demanda.problemas,
-            // Add horario_publicacao with a default value since it's not coming from the database query
-            horario_publicacao: "", 
+            problema: {
+              descricao: demanda.problemas?.descricao || null
+            },
+            horario_publicacao: "", // Add default value
             arquivo_url: demanda.arquivo_url || null,
-            anexos: demanda.anexos || []
+            anexos: demanda.anexos || [],
+            protocolo: demanda.protocolo || null
           } as Demand;
         });
         
