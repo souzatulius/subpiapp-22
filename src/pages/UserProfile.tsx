@@ -70,7 +70,15 @@ const UserProfile: React.FC = () => {
         <div className="flex flex-1">
           {!isMobile && <DashboardSidebar isOpen={sidebarOpen} />}
           
-          <main className="flex-1">
+          <main 
+            className="flex-1"
+            style={{
+              backgroundImage: 'url("/lovable-uploads/d623f576-9d17-4166-83a8-824bc438a8bf.png")',
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              backgroundRepeat: 'no-repeat'
+            }}
+          >
             {!isMobile && <BreadcrumbBar />}
             
             <div className="container max-w-7xl mx-auto">

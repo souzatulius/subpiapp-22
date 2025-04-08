@@ -63,7 +63,15 @@ const Settings = () => {
           {/* Only show sidebar on desktop */}
           {!isMobile && <DashboardSidebar isOpen={sidebarOpen} />}
           
-          <main className={`flex-1 ${isMobile ? 'pt-0' : ''}`}>
+          <main 
+            className={`flex-1 ${isMobile ? 'pt-0' : ''}`}
+            style={{
+              backgroundImage: 'url("/lovable-uploads/d623f576-9d17-4166-83a8-824bc438a8bf.png")',
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              backgroundRepeat: 'no-repeat'
+            }}
+          >
             {/* Desktop breadcrumb - only show on desktop before content */}
             {!isMobile && <BreadcrumbBar onSettingsClick={handleBackClick} />}
             

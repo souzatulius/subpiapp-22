@@ -42,7 +42,14 @@ const DashboardLayout: React.FC = () => {
       <div className="flex flex-1 relative">
         {!isMobile && <DashboardSidebar isOpen={sidebarOpen} />}
         
-        <main className="flex-1 w-full transition-all duration-300">
+        <main className="flex-1 w-full transition-all duration-300" 
+          style={{
+            backgroundImage: 'url("/lovable-uploads/d623f576-9d17-4166-83a8-824bc438a8bf.png")',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat'
+          }}
+        >
           <div className="max-w-7xl mx-auto w-full flex-1">
             <motion.div 
               className={`p-2 sm:p-4 ${isMobile ? 'pb-16 pt-0' : 'pb-6'} h-full`}

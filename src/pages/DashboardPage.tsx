@@ -119,7 +119,15 @@ const DashboardPage: React.FC = () => {
       <div className="flex flex-1 overflow-hidden">
         {!isMobile && <DashboardSidebar isOpen={sidebarOpen} />}
         
-        <main className={`flex-1 overflow-auto`}>
+        <main 
+          className={`flex-1 overflow-auto`}
+          style={{
+            backgroundImage: 'url("/lovable-uploads/d623f576-9d17-4166-83a8-824bc438a8bf.png")',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat'
+          }}
+        >
           {!isMobile && <BreadcrumbBar />}
           
           <motion.div 

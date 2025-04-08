@@ -47,7 +47,15 @@ const Relatorios = () => {
       <div className="flex flex-1 relative">
         {!isMobile && <DashboardSidebar isOpen={sidebarOpen} />}
         
-        <main className="flex-1 w-full">
+        <main 
+          className="flex-1 w-full"
+          style={{
+            backgroundImage: 'url("/lovable-uploads/d623f576-9d17-4166-83a8-824bc438a8bf.png")',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat'
+          }}
+        >
           {/* Desktop breadcrumb */}
           {!isMobile && <BreadcrumbBar />}
           
