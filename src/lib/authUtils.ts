@@ -27,6 +27,8 @@ export const showAuthError = (error: any) => {
       errorMessage = 'Muitas tentativas. Por favor, aguarde alguns minutos antes de tentar novamente.';
     } else if (error.message.includes('Database error')) {
       errorMessage = 'Erro de banco de dados. Por favor, tente novamente ou contate o suporte.';
+    } else if (error.message.includes('User already registered')) {
+      errorMessage = 'Email já registrado. Utilize outro email ou recupere sua senha.';
     } else {
       errorMessage = error.message;
     }
@@ -42,6 +44,7 @@ export const showAuthError = (error: any) => {
 // Check if a user is approved to access the system
 export const isUserApproved = async (userId: string): Promise<boolean> => {
   try {
+    console.log('Verificando aprovação do usuário:', userId);
     // Check if the user has permissions, which indicates approval
     const { data: permissionsData, error: permissionsError } = await supabase
       .from('usuario_permissoes')
@@ -54,7 +57,9 @@ export const isUserApproved = async (userId: string): Promise<boolean> => {
     }
     
     // If the user has any permissions assigned, consider them approved
-    return permissionsData !== null && permissionsData.length > 0;
+    const isApproved = permissionsData !== null && permissionsData.length > 0;
+    console.log('Usuário aprovado?', isApproved, 'Permissões:', permissionsData);
+    return isApproved;
   } catch (error) {
     console.error('Erro ao verificar aprovação do usuário:', error);
     return false;
@@ -68,6 +73,8 @@ export const createAdminNotification = async (
   email: string
 ): Promise<void> => {
   try {
+    console.log('Criando notificação para administradores sobre novo usuário:', { userId, userName, email });
+    
     // Create a notification in the notifications table
     const { error } = await supabase.from('notificacoes').insert({
       mensagem: `${userName} (${email}) solicitou acesso ao sistema.`,
@@ -125,6 +132,7 @@ export const updateUserProfile = async (userId: string, userData: any): Promise<
       return { error };
     }
     
+    console.log('Perfil do usuário atualizado com sucesso');
     return { error: null };
   } catch (error) {
     console.error('Erro ao atualizar perfil do usuário:', error);

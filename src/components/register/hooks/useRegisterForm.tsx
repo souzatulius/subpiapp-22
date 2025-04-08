@@ -109,7 +109,7 @@ export const useRegisterForm = () => {
     try {
       const completeEmail = completeEmailWithDomain(formData.email);
       
-      // Corrigido: Assegurar que os dados estão corretos e completos
+      // Improved: Ensure that the user data is correctly structured
       const userData = {
         nome_completo: formData.name,
         aniversario: formData.birthday,
@@ -127,34 +127,36 @@ export const useRegisterForm = () => {
       if (error) {
         console.error('Erro ao registrar:', error);
         showAuthError(error);
-      } else {
-        // Create notification for admins about the new user registration
-        if (data?.user) {
-          console.log('Usuário criado com sucesso:', data.user);
-          try {
-            await createAdminNotification(
-              data.user.id, 
-              formData.name,
-              completeEmail
-            );
-            
-            toast.success("Cadastro realizado com sucesso! Verifique seu email para validar o cadastro.");
-            navigate('/email-verified');
-          } catch (notificationError) {
-            console.error("Erro ao criar notificação, mas usuário foi cadastrado:", notificationError);
-            toast.success("Cadastro realizado com sucesso! Verifique seu email para validar o cadastro.");
-            navigate('/email-verified');
-          }
-        } else {
-          console.log('Usuário criado, mas sem dados retornados');
+        setLoading(false);
+        return;
+      }
+      
+      // Create notification for admins about the new user registration
+      if (data?.user) {
+        console.log('Usuário criado com sucesso:', data.user);
+        try {
+          await createAdminNotification(
+            data.user.id, 
+            formData.name,
+            completeEmail
+          );
+          
+          toast.success("Cadastro realizado com sucesso! Verifique seu email para validar o cadastro.");
+          navigate('/email-verified');
+        } catch (notificationError) {
+          console.error("Erro ao criar notificação, mas usuário foi cadastrado:", notificationError);
+          // Even if notification fails, still consider registration successful
           toast.success("Cadastro realizado com sucesso! Verifique seu email para validar o cadastro.");
           navigate('/email-verified');
         }
+      } else {
+        console.log('Usuário criado, mas sem dados retornados');
+        toast.success("Cadastro realizado com sucesso! Verifique seu email para validar o cadastro.");
+        navigate('/email-verified');
       }
     } catch (error: any) {
       console.error('Erro não tratado ao registrar:', error);
       toast.error("Erro ao cadastrar usuário. Tente novamente mais tarde.");
-    } finally {
       setLoading(false);
     }
   };

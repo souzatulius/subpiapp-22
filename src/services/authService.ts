@@ -33,7 +33,7 @@ export const updateProfile = async (userData: ProfileData, userId: string) => {
 
     console.log('Atualizando perfil do usuário:', userId, 'com dados:', updatedData);
 
-    // CORREÇÃO: Usar corretamente a tabela 'usuarios' e não tentar acessar 'auth.users'
+    // Use the 'usuarios' table correctly
     const { error } = await supabase
       .from('usuarios')
       .update(updatedData)
@@ -44,6 +44,7 @@ export const updateProfile = async (userData: ProfileData, userId: string) => {
       throw error;
     }
     
+    console.log('Perfil atualizado com sucesso');
     return { error: null };
   } catch (error) {
     console.error('Error updating profile:', error);
@@ -91,11 +92,13 @@ export const signUp = async (email: string, password: string, userData: any) => 
     
     if (error) {
       console.error('Supabase signup error:', error);
-    } else {
-      console.log('User signed up successfully:', data);
+      return { error };
     }
     
-    return { data, error };
+    console.log('User signed up successfully:', data);
+    
+    // If we got this far, the signup was successful
+    return { data, error: null };
   } catch (error) {
     console.error('Error during signup:', error);
     return { error };
@@ -107,12 +110,20 @@ export const signUp = async (email: string, password: string, userData: any) => 
  */
 export const signIn = async (email: string, password: string) => {
   try {
+    console.log('Attempting signin for:', email);
+    
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password
     });
     
-    return { data, error };
+    if (error) {
+      console.error('Signin error:', error);
+      return { error };
+    }
+    
+    console.log('User signed in successfully');
+    return { data, error: null };
   } catch (error) {
     console.error('Error during signin:', error);
     return { error };
@@ -143,8 +154,16 @@ export const signInWithGoogle = async () => {
  */
 export const signOut = async () => {
   try {
+    console.log('Attempting to sign out user');
     const { error } = await supabase.auth.signOut();
-    return { error };
+    
+    if (error) {
+      console.error('Error signing out:', error);
+      return { error };
+    }
+    
+    console.log('User signed out successfully');
+    return { error: null };
   } catch (error) {
     console.error('Error during signout:', error);
     return { error };

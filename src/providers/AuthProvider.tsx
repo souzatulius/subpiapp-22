@@ -24,28 +24,37 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     const initialize = async () => {
       setLoading(true);
       try {
+        console.log('Inicializando autenticação...');
         const { data } = await supabase.auth.getSession();
         setSession(data.session);
         setUser(data.session?.user || null);
 
         if (data.session?.user) {
+          console.log('Sessão encontrada para usuário:', data.session.user.id);
           const approved = await isUserApproved(data.session.user.id);
           setIsApproved(approved);
           
           if (approved && location.pathname === '/login') {
+            console.log('Usuário aprovado, redirecionando para dashboard');
             navigate('/dashboard');
           } else if (!approved && data.session && location.pathname !== '/email-verified') {
             // Redirect to email-verified page if user is not approved
+            console.log('Usuário não aprovado, redirecionando para página de verificação');
             toast.info("Seu acesso ainda não foi aprovado por um administrador.");
             navigate('/email-verified');
           }
+        } else {
+          console.log('Nenhuma sessão de usuário encontrada');
         }
 
+        console.log('Configurando listener de autenticação...');
         const subscription = await authService.setupAuthListener(async (newSession) => {
+          console.log('Estado de autenticação alterado:', newSession ? 'logado' : 'deslogado');
           setSession(newSession);
           setUser(newSession?.user || null);
           
           if (newSession?.user) {
+            console.log('Verificando aprovação para:', newSession.user.id);
             const approved = await isUserApproved(newSession.user.id);
             setIsApproved(approved);
             
@@ -62,6 +71,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         });
 
         return () => {
+          console.log('Removendo listener de autenticação');
           subscription.unsubscribe();
         };
       } catch (error) {
@@ -75,39 +85,47 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   }, [navigate, location.pathname]);
 
   const handleUpdateUserProfile = async (userId: string, userData: any) => {
+    console.log('Atualizando perfil de usuário:', userId);
     return updateUserProfile(userId, userData);
   };
 
   const signUp = async (email: string, password: string, userData: any) => {
+    console.log('Iniciando processo de registro para:', email);
     const result = await authService.signUp(email, password, userData);
     
     if (!result.error) {
       if (result.data?.user) {
+        console.log('Atualizando perfil para usuário recém-registrado:', result.data.user.id);
         await handleUpdateUserProfile(
           result.data.user.id,
           userData
         );
         
+        console.log('Criando notificação para administradores');
         await createAdminNotification(
           result.data.user.id, 
           userData.nome_completo,
           email
         );
       }
+    } else {
+      console.error('Erro durante o registro:', result.error);
     }
     
     return result;
   };
 
   const signIn = async (email: string, password: string) => {
+    console.log('Tentando login para:', email);
     const result = await authService.signIn(email, password);
     
     if (!result.error && result.data?.user) {
+      console.log('Login bem-sucedido, verificando aprovação');
       const approved = await isUserApproved(result.data.user.id);
       setIsApproved(approved);
       
       if (!approved) {
-        // Redirect to email-verified page if user is not approved
+        console.log('Usuário não aprovado, redirecionando');
         navigate('/email-verified');
         return { 
           error: { 
@@ -116,6 +134,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         };
       }
       
+      console.log('Usuário aprovado, redirecionando para dashboard');
       navigate('/dashboard');
     }
     
@@ -123,10 +142,12 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   };
 
   const signInWithGoogle = async () => {
+    console.log('Iniciando login com Google');
     await authService.signInWithGoogle();
   };
 
   const signOut = async () => {
+    console.log('Iniciando logout');
     await authService.signOut();
     setIsApproved(null);
     navigate('/login', { replace: true });
@@ -134,9 +155,11 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   const updateProfile = async (data: any) => {
     if (!user) {
+      console.error('Tentativa de atualizar perfil sem usuário autenticado');
       return { error: new Error('Usuário não autenticado') };
     }
     
+    console.log('Atualizando perfil para usuário:', user.id);
     return authService.updateProfile(data, user.id);
   };
 
