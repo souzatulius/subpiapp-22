@@ -1,208 +1,44 @@
-import React, { useState } from 'react';
-import { useProcessos } from '@/hooks/esic/useProcessos';
-import { useJustificativas } from '@/hooks/esic/useJustificativas';
-import { ESICProcesso, ESICProcessoFormValues, ESICJustificativaFormValues } from '@/types/esic';
-import WelcomeCard from '@/components/shared/WelcomeCard';
+
+import React from 'react';
 import { FileText } from 'lucide-react';
-import { useToast } from '@/components/ui/use-toast';
-import { useProcessoDialog } from '@/hooks/esic/useProcessoDialog';
+import WelcomeCard from '@/components/shared/WelcomeCard';
 import DeleteProcessoDialog from '@/components/esic/dialogs/DeleteProcessoDialog';
 import ProcessosList from '@/components/esic/screens/ProcessosList';
 import ProcessoCreate from '@/components/esic/screens/ProcessoCreate';
 import ProcessoEdit from '@/components/esic/screens/ProcessoEdit';
 import ProcessoView from '@/components/esic/screens/ProcessoView';
 import JustificativaCreate from '@/components/esic/screens/JustificativaCreate';
-
-type ScreenState = 'list' | 'create' | 'edit' | 'view' | 'justify';
+import { useESICPageState } from '@/hooks/esic/useESICPageState';
 
 const ESICPage: React.FC = () => {
-  const [screen, setScreen] = useState<ScreenState>('list');
-  const { toast } = useToast();
-  
-  const { 
-    deleteConfirmOpen, 
-    processoToDelete, 
-    openDeleteDialog, 
-    resetDeleteDialogState 
-  } = useProcessoDialog();
-  
-  const { 
-    processos, 
-    isLoading, 
-    selectedProcesso, 
-    setSelectedProcesso,
-    createProcesso,
-    updateProcesso,
-    deleteProcesso,
+  const {
+    screen,
+    setScreen,
+    deleteConfirmOpen,
+    processoToDelete,
+    processos,
+    isLoading,
+    selectedProcesso,
+    justificativas,
+    isJustificativasLoading,
     isCreating,
     isUpdating,
-    isDeleting
-  } = useProcessos();
-  
-  const {
-    justificativas,
-    isLoading: isJustificativasLoading,
-    createJustificativa,
-    generateJustificativa,
-    isCreating: isJustificativaCreating,
+    isDeleting,
+    isJustificativaCreating,
     isGenerating,
-  } = useJustificativas(selectedProcesso?.id);
-  
-  const handleCreateProcesso = (values: ESICProcessoFormValues) => {
-    createProcesso(values, {
-      onSuccess: () => {
-        setScreen('list');
-        toast({
-          title: 'Processo criado com sucesso',
-          description: 'O novo processo foi adicionado ao sistema.',
-        });
-      },
-    });
-  };
-  
-  const handleUpdateProcesso = (values: ESICProcessoFormValues) => {
-    if (!selectedProcesso) return;
-    
-    updateProcesso(
-      { 
-        id: selectedProcesso.id, 
-        data: {
-          data_processo: values.data_processo.toISOString(),
-          situacao: values.situacao,
-          texto: values.texto,
-        } 
-      },
-      {
-        onSuccess: () => {
-          setScreen('view');
-          toast({
-            title: 'Processo atualizado com sucesso',
-            description: 'As alterações foram salvas no sistema.',
-          });
-        },
-      }
-    );
-  };
-  
-  const handleDeleteProcesso = (id: string) => {
-    openDeleteDialog(id);
-  };
-  
-  const confirmDeleteProcesso = () => {
-    if (!processoToDelete) return;
-    
-    deleteProcesso(processoToDelete, {
-      onSuccess: () => {
-        resetDeleteDialogState();
-        toast({
-          title: 'Processo excluído com sucesso',
-          description: 'O processo foi removido do sistema.',
-        });
-      },
-    });
-  };
-  
-  const handleViewProcesso = (processo: ESICProcesso) => {
-    setSelectedProcesso(processo);
-    setScreen('view');
-  };
-  
-  const handleEditProcesso = (processo: ESICProcesso) => {
-    setSelectedProcesso(processo);
-    setScreen('edit');
-  };
-  
-  const handleAddJustificativa = () => {
-    if (selectedProcesso && selectedProcesso.status !== 'concluido') {
-      if (selectedProcesso.status === 'novo_processo') {
-        updateProcesso({
-          id: selectedProcesso.id,
-          data: { status: 'aguardando_justificativa' }
-        });
-      }
-      setScreen('justify');
-    }
-  };
-  
-  const handleCreateJustificativa = (values: ESICJustificativaFormValues) => {
-    if (!selectedProcesso) return;
-    
-    createJustificativa(
-      {
-        values,
-        processoId: selectedProcesso.id
-      },
-      {
-        onSuccess: () => {
-          setScreen('view');
-          toast({
-            title: 'Justificativa adicionada com sucesso',
-            description: 'A justificativa foi registrada para este processo.',
-          });
-        },
-      }
-    );
-  };
-  
-  const handleGenerateJustificativa = () => {
-    if (!selectedProcesso) return;
-    
-    generateJustificativa(
-      {
-        processoId: selectedProcesso.id,
-        processoTexto: selectedProcesso.texto
-      },
-      {
-        onSuccess: () => {
-          setScreen('view');
-          toast({
-            title: 'Justificativa gerada com sucesso',
-            description: 'A IA gerou uma justificativa para este processo.',
-          });
-        },
-      }
-    );
-  };
-  
-  const handleUpdateStatus = (status: 'novo_processo' | 'aguardando_justificativa' | 'aguardando_aprovacao' | 'concluido') => {
-    if (!selectedProcesso) return;
-    
-    updateProcesso(
-      {
-        id: selectedProcesso.id,
-        data: { status }
-      },
-      {
-        onSuccess: () => {
-          toast({
-            title: 'Status atualizado',
-            description: `O status do processo foi alterado.`,
-          });
-          setSelectedProcesso(prev => prev ? { ...prev, status } : null);
-        },
-      }
-    );
-  };
-  
-  const handleUpdateSituacao = (situacao: 'em_tramitacao' | 'prazo_prorrogado' | 'concluido') => {
-    if (!selectedProcesso) return;
-    
-    updateProcesso(
-      {
-        id: selectedProcesso.id,
-        data: { situacao }
-      },
-      {
-        onSuccess: () => {
-          toast({
-            title: 'Situação atualizada',
-            description: `A situação do processo foi alterada.`,
-          });
-          setSelectedProcesso(prev => prev ? { ...prev, situacao } : null);
-        },
-      }
-    );
-  };
+    resetDeleteDialogState,
+    handleCreateProcesso,
+    handleUpdateProcesso,
+    handleDeleteProcesso,
+    confirmDeleteProcesso,
+    handleViewProcesso,
+    handleEditProcesso,
+    handleAddJustificativa,
+    handleCreateJustificativa,
+    handleGenerateJustificativa,
+    handleUpdateStatus,
+    handleUpdateSituacao
+  } = useESICPageState();
   
   return (
     <div className="py-6 space-y-6 px-4 md:container md:px-6">
