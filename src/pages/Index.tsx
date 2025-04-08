@@ -1,3 +1,4 @@
+
 import React from 'react';
 import PWAButton from '@/components/PWAButton';
 import Header from '@/components/layouts/Header';
@@ -18,7 +19,7 @@ const Index = () => {
         
         {/* Right side with blue background and background image (only on desktop) */}
         <div className="hidden md:flex md:w-1/2 bg-subpi-blue flex-col items-center justify-center p-8 pl-[50px] relative animate-fade-right" style={!isMobile ? {
-        backgroundImage: 'url("/lovable-uploads/93093cf9-6088-4d69-b6fa-f2aef9d9dddc.png")',
+        backgroundImage: 'url("/lovable-uploads/48164a02-35dc-47df-94a6-e5d6cfb0a7da.png")',
         backgroundSize: 'cover',
         backgroundPosition: 'left center',
         backgroundRepeat: 'no-repeat'
