@@ -16,12 +16,14 @@ interface RankingContentProps {
   filterDialogOpen: boolean;
   setFilterDialogOpen: (open: boolean) => void;
   disableCardContainers?: boolean;
+  className?: string; // Add className prop
 }
 
 const RankingContent: React.FC<RankingContentProps> = ({
   filterDialogOpen,
   setFilterDialogOpen,
-  disableCardContainers = false
+  disableCardContainers = false,
+  className = '' // Default to empty string
 }) => {
   const { user } = useAuth();
   const [uploadId, setUploadId] = useState<string | null>(null);
@@ -79,7 +81,7 @@ const RankingContent: React.FC<RankingContentProps> = ({
   };
 
   return (
-    <div className="space-y-6">
+    <div className={`space-y-6 ${className}`}>
       {/* Mostra um loader enquanto carrega os dados demo */}
       {isDemoLoading && (
         <div className="flex justify-center items-center py-12">

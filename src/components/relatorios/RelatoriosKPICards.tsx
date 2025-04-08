@@ -1,11 +1,11 @@
 
 import React from 'react';
 import { StatsCard } from './components/StatsCard';
-import { useReportsStatsData } from './hooks/useReportsData';
+import { useReportsData } from './hooks/useReportsData';
 import ESICProcessesCard from './ESICProcessesCard';
 
 export const RelatoriosKPICards: React.FC = () => {
-  const { stats, isLoadingStats } = useReportsStatsData();
+  const { cardStats: stats, isLoading: isLoadingStats } = useReportsData();
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">

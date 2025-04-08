@@ -78,16 +78,18 @@ const RankingSubs = () => {
         </DemoDataProvider>
       </div>
 
-      {/* Adiciona CSS global para os KPIs em mobile view */}
-      <style jsx global>{`
-        @media (max-width: 767px) {
-          .mobile-kpi-grid .kpi-container {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 8px;
+      {/* Add CSS for mobile KPI grid */}
+      <style>
+        {`
+          @media (max-width: 767px) {
+            .mobile-kpi-grid .kpi-container {
+              display: grid;
+              grid-template-columns: repeat(2, 1fr);
+              gap: 8px;
+            }
           }
-        }
-      `}</style>
+        `}
+      </style>
     </motion.div>
   );
 };
