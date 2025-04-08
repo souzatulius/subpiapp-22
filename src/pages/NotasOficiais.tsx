@@ -177,10 +177,10 @@ const NotasOficiais = () => {
           <Header showControls={true} toggleSidebar={toggleSidebar} />
         </div>
         
-        <div className="flex flex-1 overflow-hidden">
+        <div className="flex flex-1 relative">
           {!isMobile && <DashboardSidebar isOpen={sidebarOpen} />}
           
-          <div className={`flex-1 overflow-auto ${isMobile ? 'pt-10' : ''}`}>
+          <div className="flex-1 w-full">
             {!isMobile && <BreadcrumbBar />}
             
             <Layout>

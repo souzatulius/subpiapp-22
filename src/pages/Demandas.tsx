@@ -35,12 +35,12 @@ const Demandas = () => {
         <Header showControls={true} toggleSidebar={toggleSidebar} />
       </div>
 
-      <div className="flex flex-1 overflow-hidden px-0">
+      <div className="flex flex-1 relative">
         {/* Sidebar - desktop only */}
         {!isMobile && <DashboardSidebar isOpen={sidebarOpen} />}
 
         {/* Main content */}
-        <div className={`flex-1 overflow-auto ${isMobile ? 'pt-10' : ''}`}>
+        <div className="flex-1 w-full">
           {/* Desktop breadcrumb */}
           {!isMobile && <BreadcrumbBar />}
           

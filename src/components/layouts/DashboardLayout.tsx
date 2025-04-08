@@ -46,11 +46,11 @@ const DashboardLayout: React.FC = () => {
         <Header showControls={true} toggleSidebar={toggleSidebar} />
       </div>
       
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex flex-1 relative">
         {/* Only show sidebar on desktop */}
         {!isMobile && <DashboardSidebar isOpen={sidebarOpen} />}
         
-        <main className={`flex-1 overflow-auto w-full ${isMobile ? 'pt-10' : ''} transition-all duration-300`}>
+        <main className={`flex-1 w-full ${isMobile ? 'pt-10' : ''} transition-all duration-300`}>
           {/* Desktop breadcrumb */}
           {!isMobile && <BreadcrumbBar />}
           

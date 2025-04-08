@@ -47,10 +47,10 @@ const Relatorios = () => {
         <Header showControls={true} toggleSidebar={toggleSidebar} />
       </div>
       
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex flex-1 relative">
         {!isMobile && <DashboardSidebar isOpen={sidebarOpen} />}
         
-        <main className={`flex-1 overflow-auto ${isMobile ? 'pt-10' : ''}`}>
+        <main className="flex-1 w-full">
           {/* Desktop breadcrumb */}
           {!isMobile && <BreadcrumbBar />}
           
