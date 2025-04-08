@@ -23,31 +23,29 @@ const ESICSearchHeader: React.FC<ESICSearchHeaderProps> = ({
 }) => {
   return (
     <div className="w-full space-y-4">
-      <div className="flex flex-col sm:flex-row gap-3">
-        {/* Search and New Process button row */}
-        <div className="flex-1 flex items-center gap-2">
-          <div className="relative flex-1">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
-            <Input
-              type="search"
-              placeholder="Buscar processos..."
-              className="pl-9 pr-4 py-2 h-10 bg-white border-gray-300"
-              value={searchTerm}
-              onChange={onSearchChange}
-            />
-          </div>
-          
-          <Button 
-            onClick={() => onNewProcessClick()}
-            className="bg-blue-600 hover:bg-blue-700 text-white h-10 px-4 whitespace-nowrap"
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            <span>Novo Processo</span>
-          </Button>
+      <div className="flex gap-3">
+        {/* Search and New Process button in the same row */}
+        <div className="relative flex-1">
+          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
+          <Input
+            type="search"
+            placeholder="Buscar processos..."
+            className="pl-9 pr-4 py-2 h-10 bg-white border-gray-300"
+            value={searchTerm}
+            onChange={onSearchChange}
+          />
         </div>
+        
+        <Button 
+          onClick={onNewProcessClick}
+          className="bg-blue-600 hover:bg-blue-700 text-white h-10 px-4 whitespace-nowrap"
+        >
+          <Plus className="h-4 w-4 mr-2" />
+          <span>Novo Processo</span>
+        </Button>
       </div>
       
-      {/* View toggle buttons row */}
+      {/* View toggle buttons in a separate row below */}
       <div className="flex justify-end gap-2">
         <Button
           variant="outline"

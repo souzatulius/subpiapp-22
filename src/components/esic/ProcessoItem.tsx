@@ -1,117 +1,115 @@
 
 import React from 'react';
-import { format } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
-import { 
-  Card, 
-  CardContent, 
-  CardDescription, 
-  CardFooter, 
-  CardHeader, 
-  CardTitle 
-} from '@/components/ui/card';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { ESICProcesso, statusLabels, situacaoLabels } from '@/types/esic';
-import { FileText, Pencil, Trash2 } from 'lucide-react';
+import { Eye, Pencil, Trash2, AlertCircle } from 'lucide-react';
+import { format, isPast } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
 
-interface ProcessoItemProps {
-  processo: ESICProcesso;
-  onSelect: (processo: ESICProcesso) => void;
-  onEdit: (processo: ESICProcesso) => void;
-  onDelete: (id: string) => void;
+interface Processo {
+  id: number | string;
+  numero_processo: string;
+  titulo: string;
+  categoria?: string;
+  status: string;
+  created_at: string;
+  prazo?: string;
+  solicitante: string;
 }
 
-const getStatusColor = (status: string) => {
-  switch (status) {
-    case 'novo_processo':
-      return 'bg-blue-100 text-blue-800';
-    case 'aguardando_justificativa':
-      return 'bg-yellow-100 text-yellow-800';
-    case 'aguardando_aprovacao':
-      return 'bg-purple-100 text-purple-800';
-    case 'concluido':
-      return 'bg-green-100 text-green-800';
-    default:
-      return 'bg-gray-100 text-gray-800';
-  }
-};
+export interface ProcessoItemProps {
+  processo: Processo;
+  onDeleteClick: () => void;
+}
 
-const getSituacaoColor = (situacao: string) => {
-  switch (situacao) {
-    case 'em_tramitacao':
-      return 'bg-orange-100 text-orange-800';
-    case 'prazo_prorrogado':
-      return 'bg-red-100 text-red-800';
-    case 'concluido':
-      return 'bg-green-100 text-green-800';
-    default:
-      return 'bg-gray-100 text-gray-800';
-  }
-};
-
-const ProcessoItem: React.FC<ProcessoItemProps> = ({ 
-  processo, 
-  onSelect, 
-  onEdit, 
-  onDelete 
-}) => {
+const ProcessoItem: React.FC<ProcessoItemProps> = ({ processo, onDeleteClick }) => {
+  const navigate = useNavigate();
+  
+  const handleViewClick = () => {
+    navigate(`/esic/view/${processo.id}`);
+  };
+  
+  const handleEditClick = () => {
+    navigate(`/esic/edit/${processo.id}`);
+  };
+  
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'Em análise':
+        return 'bg-blue-100 text-blue-800';
+      case 'Concluído':
+        return 'bg-green-100 text-green-800';
+      case 'Aguardando complemento':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'Negado':
+        return 'bg-red-100 text-red-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
+  };
+  
+  const isPrazoExpired = processo.prazo ? isPast(new Date(processo.prazo)) : false;
+  
   return (
-    <Card className="hover:shadow-md transition-shadow">
-      <CardHeader className="pb-2">
-        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2">
-          <div>
-            <CardTitle className="text-lg">
-              Processo de {format(new Date(processo.data_processo), "dd/MM/yyyy", { locale: ptBR })}
-            </CardTitle>
-            <CardDescription>
-              Criado por: {processo.autor?.nome_completo || 'Usuário'} em {' '}
-              {format(new Date(processo.criado_em), "dd/MM/yyyy", { locale: ptBR })}
-            </CardDescription>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            <Badge className={getStatusColor(processo.status)}>
-              {statusLabels[processo.status]}
-            </Badge>
-            <Badge className={getSituacaoColor(processo.situacao)}>
-              {situacaoLabels[processo.situacao]}
-            </Badge>
+    <tr className="hover:bg-gray-50">
+      <td className="px-6 py-4 whitespace-nowrap">
+        <div className="flex flex-col">
+          <div className="font-medium text-gray-900">{processo.titulo}</div>
+          <div className="text-sm text-gray-500">
+            {processo.numero_processo}
+            {processo.categoria && (
+              <span className="ml-2 text-gray-400">• {processo.categoria}</span>
+            )}
           </div>
         </div>
-      </CardHeader>
-      <CardContent>
-        <p className="text-gray-700 line-clamp-3">{processo.texto}</p>
-      </CardContent>
-      <CardFooter className="pt-0 flex flex-wrap justify-end gap-2">
-        <Button 
-          variant="outline" 
-          size="sm" 
-          onClick={() => onSelect(processo)}
-          className="sm:flex"
-        >
-          <FileText className="h-4 w-4 sm:mr-2" />
-          <span className="hidden sm:inline">Detalhes</span>
-        </Button>
-        <Button 
-          variant="outline" 
-          size="sm"
-          onClick={() => onEdit(processo)}
-          className="sm:flex"
-        >
-          <Pencil className="h-4 w-4 sm:mr-2" />
-          <span className="hidden sm:inline">Editar</span>
-        </Button>
-        <Button 
-          variant="outline" 
-          size="sm" 
-          className="text-red-600 hover:bg-red-50 sm:flex"
-          onClick={() => onDelete(processo.id)}
-        >
-          <Trash2 className="h-4 w-4 sm:mr-2" />
-          <span className="hidden sm:inline">Excluir</span>
-        </Button>
-      </CardFooter>
-    </Card>
+      </td>
+      <td className="px-6 py-4 whitespace-nowrap">
+        <div className="text-sm text-gray-900">{processo.solicitante}</div>
+      </td>
+      <td className="px-6 py-4 whitespace-nowrap">
+        <span className={`px-2 py-1 text-xs font-medium rounded-full inline-flex items-center ${getStatusColor(processo.status)}`}>
+          {processo.status}
+        </span>
+      </td>
+      <td className="px-6 py-4 whitespace-nowrap text-sm">
+        <div className="flex items-center">
+          {isPrazoExpired && processo.status !== 'Concluído' && (
+            <AlertCircle className="h-4 w-4 text-red-500 mr-1" />
+          )}
+          {processo.prazo 
+            ? format(new Date(processo.prazo), 'dd/MM/yyyy', { locale: ptBR })
+            : 'Não definido'}
+        </div>
+      </td>
+      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+        <div className="flex justify-end space-x-1">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 text-gray-500 hover:text-blue-600 hover:bg-blue-50"
+            onClick={handleViewClick}
+          >
+            <Eye className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 text-gray-500 hover:text-orange-600 hover:bg-orange-50"
+            onClick={handleEditClick}
+          >
+            <Pencil className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 text-gray-500 hover:text-red-600 hover:bg-red-50"
+            onClick={onDeleteClick}
+          >
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        </div>
+      </td>
+    </tr>
   );
 };
 

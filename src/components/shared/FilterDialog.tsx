@@ -32,8 +32,11 @@ interface FilterDialogProps {
   onOpenChange: (open: boolean) => void;
   filters: any;
   onFiltersChange: (filters: any) => void;
-  options: FilterOptions;
+  options?: FilterOptions;
   showDateFilter?: boolean;
+  chartVisibility?: Record<string, boolean>;
+  onChartVisibilityChange?: (chartId: string, visible: boolean) => void;
+  onResetFilters?: () => void;
 }
 
 const FilterDialog: React.FC<FilterDialogProps> = ({
@@ -41,14 +44,24 @@ const FilterDialog: React.FC<FilterDialogProps> = ({
   onOpenChange,
   filters,
   onFiltersChange,
-  options,
-  showDateFilter = false
+  options = {},
+  showDateFilter = false,
+  chartVisibility,
+  onChartVisibilityChange,
+  onResetFilters
 }) => {
   const [localFilters, setLocalFilters] = useState<any>(filters);
+  const [localChartVisibility, setLocalChartVisibility] = useState<Record<string, boolean>>(chartVisibility || {});
 
   useEffect(() => {
     setLocalFilters(filters);
   }, [filters, open]);
+  
+  useEffect(() => {
+    if (chartVisibility) {
+      setLocalChartVisibility(chartVisibility);
+    }
+  }, [chartVisibility, open]);
 
   const handleCheckboxChange = (filterType: string, value: string) => {
     setLocalFilters(prev => {
@@ -71,8 +84,27 @@ const FilterDialog: React.FC<FilterDialogProps> = ({
     }));
   };
 
+  const handleChartVisibilityChange = (chartId: string) => {
+    if (onChartVisibilityChange) {
+      const newVisibility = {
+        ...localChartVisibility,
+        [chartId]: !localChartVisibility[chartId]
+      };
+      setLocalChartVisibility(newVisibility);
+    }
+  };
+
   const handleApplyFilters = () => {
     onFiltersChange(localFilters);
+    
+    if (onChartVisibilityChange && chartVisibility) {
+      Object.entries(localChartVisibility).forEach(([chartId, isVisible]) => {
+        if (chartVisibility[chartId] !== isVisible) {
+          onChartVisibilityChange(chartId, isVisible);
+        }
+      });
+    }
+    
     onOpenChange(false);
   };
 
@@ -89,7 +121,23 @@ const FilterDialog: React.FC<FilterDialogProps> = ({
     }, {});
     
     setLocalFilters(resetFilters);
-    onFiltersChange(resetFilters);
+    
+    // Reset chart visibility to all visible
+    if (chartVisibility && onChartVisibilityChange) {
+      const resetVisibility = Object.keys(chartVisibility).reduce((acc, key) => {
+        acc[key] = true;
+        return acc;
+      }, {} as Record<string, boolean>);
+      
+      setLocalChartVisibility(resetVisibility);
+    }
+    
+    if (onResetFilters) {
+      onResetFilters();
+    } else {
+      onFiltersChange(resetFilters);
+    }
+    
     onOpenChange(false);
   };
 
@@ -99,10 +147,15 @@ const FilterDialog: React.FC<FilterDialogProps> = ({
         return value.length > 0;
       }
       if (key === 'dateRange') {
-        return value.from || value.to;
+        const dateRange = value as DateRange;
+        return dateRange.from || dateRange.to;
       }
       return !!value;
     });
+  };
+
+  const hasHiddenCharts = () => {
+    return chartVisibility && Object.values(localChartVisibility).some(isVisible => !isVisible);
   };
 
   return (
@@ -190,6 +243,39 @@ const FilterDialog: React.FC<FilterDialogProps> = ({
               </div>
             </div>
           )}
+          
+          {/* Chart Visibility Section */}
+          {chartVisibility && onChartVisibilityChange && (
+            <div className="space-y-2">
+              <h3 className="text-sm font-medium">Visibilidade dos Gráficos</h3>
+              <div className="space-y-2">
+                {Object.entries(localChartVisibility).map(([chartId, isVisible]) => {
+                  // Map chart IDs to readable names
+                  const chartNames: Record<string, string> = {
+                    'origemDemandas': 'Origem das Demandas',
+                    'distribuicaoPorTemas': 'Problemas mais frequentes',
+                    'tempoMedioResposta': 'Tempo Médio de Resposta',
+                    'performanceArea': 'Áreas mais acionadas',
+                    'notasEmitidas': 'Notas de Imprensa',
+                    // Add more chart names as needed
+                  };
+                  
+                  return (
+                    <div key={chartId} className="flex items-center justify-between">
+                      <Label htmlFor={`chart-${chartId}`} className="text-sm">
+                        {chartNames[chartId] || chartId}
+                      </Label>
+                      <Checkbox
+                        id={`chart-${chartId}`}
+                        checked={isVisible}
+                        onCheckedChange={() => handleChartVisibilityChange(chartId)}
+                      />
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
         </div>
         
         <DialogFooter className="flex flex-col sm:flex-row gap-2">
@@ -197,9 +283,9 @@ const FilterDialog: React.FC<FilterDialogProps> = ({
             variant="outline"
             onClick={handleResetFilters}
             className="w-full sm:w-auto"
-            disabled={!hasActiveFilters()}
+            disabled={!hasActiveFilters() && !hasHiddenCharts()}
           >
-            Limpar filtros
+            {hasHiddenCharts() ? "Restaurar Gráficos" : "Limpar filtros"}
           </Button>
           <Button
             onClick={handleApplyFilters}

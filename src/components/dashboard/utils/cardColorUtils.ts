@@ -4,16 +4,17 @@ import { CardColor } from '@/types/dashboard';
 export const getColorClasses = (color: CardColor): string => {
   switch (color) {
     case 'blue-vivid': return 'bg-[#0066FF] text-white'; // Azul Vivo
-    case 'blue-light': return 'bg-[#66B2FF] text-gray-800'; // Azul Claro - changed to dark text
+    case 'blue-light': return 'bg-[#66B2FF] text-gray-900'; // Azul Claro - changed to dark text
     case 'blue-dark': return 'bg-[#1D4ED8] text-white'; // Azul Escuro
-    case 'green-neon': return 'bg-[#66FF66] text-white'; // Verde Neon - updated to white text
-    case 'green-dark': return 'bg-[#00CC00] text-white'; // Verde Escuro - updated to white text
+    case 'green-neon': return 'bg-[#66FF66] text-white'; // Verde Neon
+    case 'green-dark': return 'bg-[#00CC00] text-white'; // Verde Escuro
     case 'gray-light': return 'bg-[#F5F5F5] text-gray-800'; // Cinza Claro - dark text
     case 'gray-medium': return 'bg-[#D4D4D4] text-gray-800'; // Cinza Médio - dark text
     case 'orange-dark': return 'bg-[#F25C05] text-white'; // Laranja Escuro
     case 'orange-light': return 'bg-[#F89E66] text-white'; // Laranja Claro
     case 'deep-blue': return 'bg-[#051A2C] text-white'; // Azul Profundo
     case 'neutral-800': return 'bg-neutral-800 text-white'; // Cinza Escuro
+    case 'orange-700': return 'bg-orange-700 text-white'; // Nova cor laranja escuro
     default: return 'bg-[#0066FF] text-white'; // Default to Azul Vivo
   }
 };
@@ -31,6 +32,7 @@ export const getHoverColorClasses = (color: CardColor): string => {
     case 'orange-light': return 'hover:bg-[#F67A33]'; // Darker Laranja Claro
     case 'deep-blue': return 'hover:bg-[#03111D]'; // Darker Azul Profundo
     case 'neutral-800': return 'hover:bg-neutral-900'; // Darker Cinza Escuro
+    case 'orange-700': return 'hover:bg-orange-800'; // Darker Orange-700
     default: return 'hover:bg-[#0055D4]'; // Default to darker Azul Vivo
   }
 };
@@ -45,10 +47,11 @@ export const getTextColorClass = (color: CardColor, cardId?: string): string => 
     case 'gray-light':
     case 'gray-medium':
       return 'text-gray-800'; // Dark text on light backgrounds
+    case 'blue-light':
+      return 'text-gray-900'; // Dark text on light blue background
     case 'green-neon':
     case 'green-dark':
-    case 'blue-light': // Added blue-light to get dark text
-      return 'text-white'; // Changed to white text for green backgrounds
+      return 'text-white'; // White text for green backgrounds
     default:
       return 'text-white'; // White text on dark backgrounds
   }

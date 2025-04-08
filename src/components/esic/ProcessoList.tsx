@@ -16,6 +16,17 @@ interface ProcessoListProps {
   setFilterOpen: (open: boolean) => void;
 }
 
+interface Processo {
+  id: number | string;
+  numero_processo: string;
+  titulo: string;
+  categoria?: string;
+  status: string;
+  created_at: string;
+  prazo?: string;
+  solicitante: string;
+}
+
 const ProcessoList: React.FC<ProcessoListProps> = ({ 
   viewMode,
   searchTerm,
@@ -23,14 +34,14 @@ const ProcessoList: React.FC<ProcessoListProps> = ({
   setFilterOpen
 }) => {
   const { user } = useAuth();
-  const [processos, setProcessos] = useState([]);
+  const [processos, setProcessos] = useState<Processo[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [processoToDelete, setProcessoToDelete] = useState(null);
+  const [processoToDelete, setProcessoToDelete] = useState<Processo | null>(null);
   const [filters, setFilters] = useState({
-    status: [],
-    category: [],
-    dateRange: { from: null, to: null }
+    status: [] as string[],
+    category: [] as string[],
+    dateRange: { from: undefined as Date | undefined, to: undefined as Date | undefined }
   });
 
   useEffect(() => {
@@ -102,12 +113,12 @@ const ProcessoList: React.FC<ProcessoListProps> = ({
     }
   };
 
-  const handleDeleteClick = (processo) => {
+  const handleDeleteClick = (processo: Processo) => {
     setProcessoToDelete(processo);
     setDeleteDialogOpen(true);
   };
 
-  const handleFiltersChange = (newFilters) => {
+  const handleFiltersChange = (newFilters: any) => {
     setFilters(newFilters);
   };
 
@@ -210,7 +221,6 @@ const ProcessoList: React.FC<ProcessoListProps> = ({
         open={deleteDialogOpen}
         onOpenChange={setDeleteDialogOpen}
         onConfirm={handleDeleteConfirm}
-        processo={processoToDelete}
       />
       
       <FilterDialog
