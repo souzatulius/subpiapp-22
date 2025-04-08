@@ -121,7 +121,7 @@ const SidebarSection: React.FC<SidebarSectionProps> = ({
         title={!isOpen ? label : undefined}
       >
         <div className="flex-shrink-0 w-7 h-7 text-[#f57737]">{icon}</div>
-        <span className={`ml-3 text-lg ${isOpen ? 'block' : 'hidden'}`}>{label}</span>
+        <span className={`ml-3 text-lg ${isOpen ? 'block' : 'hidden'} min-w-[80px]`}>{label}</span>
       </NavLink>
     );
   }
@@ -135,7 +135,7 @@ const SidebarSection: React.FC<SidebarSectionProps> = ({
       >
         <div className="flex-shrink-0 w-7 h-7 text-[#f57737]">{icon}</div>
         {isOpen && (
-          <span className="ml-3 text-lg">{label}</span>
+          <span className="ml-3 text-lg min-w-[80px]">{label}</span>
         )}
       </button>
       
@@ -147,7 +147,7 @@ const SidebarSection: React.FC<SidebarSectionProps> = ({
                 onClick={() => toggleSection(subSection.id)}
                 className="flex items-center px-3 py-3 text-gray-300 hover:bg-[#0c2d45] transition-colors w-full text-left text-lg rounded-xl"
               >
-                <span>{subSection.label}</span>
+                <span className="min-w-[80px]">{subSection.label}</span>
               </button>
               
               {expandedSections[subSection.id] && (
@@ -163,7 +163,7 @@ const SidebarSection: React.FC<SidebarSectionProps> = ({
                         }}
                       >
                         <div className="flex-shrink-0 w-7 h-7 mr-3 text-[#f57737]">{item.icon}</div>
-                        <span>{item.label}</span>
+                        <span className="min-w-[80px]">{item.label}</span>
                       </NavLink>
                     </li>
                   ))}
@@ -187,7 +187,7 @@ const SidebarSection: React.FC<SidebarSectionProps> = ({
                 }}
               >
                 <div className="flex-shrink-0 w-7 h-7 mr-3 text-[#f57737]">{item.icon}</div>
-                <span>{item.label}</span>
+                <span className="min-w-[80px]">{item.label}</span>
               </NavLink>
             </li>
           ))}

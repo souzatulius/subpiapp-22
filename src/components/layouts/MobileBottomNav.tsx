@@ -4,6 +4,7 @@ import { NavLink, useLocation } from 'react-router-dom';
 import { getNavigationSections } from '@/components/dashboard/sidebar/navigationConfig';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useSupabaseAuth';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface MobileBottomNavProps {
   className?: string;
@@ -95,24 +96,40 @@ const MobileBottomNav: React.FC<MobileBottomNavProps> = ({ className }) => {
   return (
     <nav className={`md:hidden fixed bottom-0 left-0 right-0 bg-[#051b2c] shadow-lg z-50 ${className}`}>
       <div className="flex justify-between items-stretch h-20">
-        {navItems.map((item) => {
-          const isActive = isNavItemActive(item.path);
-          return (
-            <NavLink
-              key={item.id}
-              to={item.path}
-              className={() => {
-                return `flex flex-col items-center justify-center flex-1 py-2 px-1 
-                  ${isActive ? 'bg-white text-[#051b2c]' : 'text-gray-400'}`
-              }}
-            >
-              <div className="text-[#f57737] w-6 h-6 flex items-center justify-center">
-                {item.icon}
+        {isLoading ? (
+          // Show loading skeletons while data is loading
+          <>
+            {[...Array(5)].map((_, index) => (
+              <div 
+                key={`skeleton-${index}`} 
+                className="flex flex-col items-center justify-center flex-1 py-2 px-1"
+              >
+                <Skeleton className="w-6 h-6 rounded-full mb-1" />
+                <Skeleton className="w-16 h-4 rounded" />
               </div>
-              <span className="text-xs mt-1 truncate font-medium max-w-[90%] text-center">{item.label}</span>
-            </NavLink>
-          );
-        })}
+            ))}
+          </>
+        ) : (
+          // Show actual navigation items once loaded
+          navItems.map((item) => {
+            const isActive = isNavItemActive(item.path);
+            return (
+              <NavLink
+                key={item.id}
+                to={item.path}
+                className={() => {
+                  return `flex flex-col items-center justify-center flex-1 py-2 px-1 min-w-[72px]
+                    ${isActive ? 'bg-white text-[#051b2c]' : 'text-gray-400'}`
+                }}
+              >
+                <div className="text-[#f57737] w-6 h-6 flex items-center justify-center">
+                  {item.icon}
+                </div>
+                <span className="text-xs mt-1 truncate font-medium w-16 text-center">{item.label}</span>
+              </NavLink>
+            );
+          })
+        )}
       </div>
     </nav>
   );

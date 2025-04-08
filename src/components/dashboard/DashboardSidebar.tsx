@@ -6,6 +6,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/utils/cn';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useSupabaseAuth';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface DashboardSidebarProps {
   isOpen: boolean;
@@ -54,8 +55,23 @@ const SidebarItem: React.FC<SidebarItemProps> = ({ to, icon, label, isCollapsed 
       title={isCollapsed ? label : undefined}
     >
       <div className="flex-shrink-0 w-7 h-7">{icon}</div>
-      {!isCollapsed && <span className="text-lg">{label}</span>}
+      {!isCollapsed && <span className="text-lg min-w-[80px]">{label}</span>}
     </NavLink>
+  );
+};
+
+// Loading skeleton for sidebar items
+const SidebarItemSkeleton = ({ isCollapsed }: { isCollapsed: boolean }) => {
+  return (
+    <div className={cn(
+      "flex rounded-xl px-3 py-4",
+      isCollapsed 
+        ? "justify-center items-center" 
+        : "items-center justify-start gap-4"
+    )}>
+      <Skeleton className="w-7 h-7 rounded-full" />
+      {!isCollapsed && <Skeleton className="h-5 w-24" />}
+    </div>
   );
 };
 
@@ -120,15 +136,23 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ isOpen }) => {
     >
       <nav className="flex-1 flex flex-col">
         <div className="space-y-4 flex-1">
-          {navigationItems.map((item) => (
-            <SidebarItem
-              key={item.id}
-              to={item.path}
-              icon={item.icon}
-              label={item.label}
-              isCollapsed={!isOpen}
-            />
-          ))}
+          {isLoading ? (
+            // Show loading skeletons while fetching data
+            Array.from({ length: 5 }).map((_, index) => (
+              <SidebarItemSkeleton key={index} isCollapsed={!isOpen} />
+            ))
+          ) : (
+            // Show actual navigation items once loaded
+            navigationItems.map((item) => (
+              <SidebarItem
+                key={item.id}
+                to={item.path}
+                icon={item.icon}
+                label={item.label}
+                isCollapsed={!isOpen}
+              />
+            ))
+          )}
         </div>
       </nav>
     </aside>

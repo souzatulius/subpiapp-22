@@ -3,6 +3,7 @@ import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { getNavigationSections } from '@/components/dashboard/sidebar/navigationConfig';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const MobileSettingsNav = () => {
   const navigate = useNavigate();
@@ -56,14 +57,14 @@ const MobileSettingsNav = () => {
           <button
             key={item.id}
             onClick={() => navigate(item.path)}
-            className={`flex flex-col items-center justify-center py-2 px-1 flex-1 h-16 ${
+            className={`flex flex-col items-center justify-center py-2 px-1 flex-1 h-16 min-w-[72px] ${
               isLinkActive(item.path) ? 'bg-white text-gray-600' : 'text-gray-400'
             }`}
           >
             <div className="text-[#f57737] w-6 h-6 flex items-center justify-center">
               {item.icon}
             </div>
-            <span className="text-xs mt-1 truncate max-w-[90%] text-center">{item.label}</span>
+            <span className="text-xs mt-1 truncate w-16 text-center">{item.label}</span>
           </button>
         ))}
       </div>
