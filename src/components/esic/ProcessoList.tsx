@@ -16,6 +16,7 @@ interface ProcessoListProps {
   setFilterOpen: (open: boolean) => void;
 }
 
+// Define the Processo type explicitly to avoid excessive deep type instantiation
 interface Processo {
   id: string;
   numero_processo: string;
@@ -27,16 +28,16 @@ interface Processo {
   solicitante: string;
 }
 
-// Define a separate interface for the database response to avoid type recursion issues
+// Define ProcessoData interface separately to avoid infinite type instantiation
 interface ProcessoData {
-  atualizado_em: string;
-  autor_id: string;
+  id: string;
+  texto: string;
+  status: string;
+  situacao: string;
   criado_em: string;
   data_processo: string;
-  id: string;
-  situacao: string;
-  status: string;
-  texto: string;
+  atualizado_em: string;
+  autor_id: string;
 }
 
 const ProcessoList: React.FC<ProcessoListProps> = ({ 

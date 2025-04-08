@@ -37,7 +37,7 @@ const ActionCards: React.FC<ActionCardsProps> = ({
       path: `${baseUrl ? `/${baseUrl}` : ''}/cadastrar`,
       color: 'blue-vivid' as CardColor,
       width: '25',
-      height: '1',
+      height: '2', // Changed from '1' to '2' to double the height
       type: 'standard',
       displayMobile: true,
       mobileOrder: 1
@@ -50,7 +50,7 @@ const ActionCards: React.FC<ActionCardsProps> = ({
       path: `${baseUrl ? `/${baseUrl}` : ''}/responder`,
       color: 'green-neon' as CardColor,
       width: '25',
-      height: '1',
+      height: '2', // Changed from '1' to '2' to double the height
       type: 'standard',
       displayMobile: true,
       mobileOrder: 2
@@ -63,7 +63,7 @@ const ActionCards: React.FC<ActionCardsProps> = ({
       path: `${baseUrl ? `/${baseUrl}` : ''}/criar-nota`,
       color: 'orange-dark' as CardColor,
       width: '25',
-      height: '1',
+      height: '2', // Changed from '1' to '2' to double the height
       type: 'standard',
       displayMobile: true,
       mobileOrder: 3
@@ -76,7 +76,7 @@ const ActionCards: React.FC<ActionCardsProps> = ({
       path: `${baseUrl ? `/${baseUrl}` : ''}/aprovar-nota`,
       color: 'blue-dark' as CardColor,
       width: '25',
-      height: '1',
+      height: '2', // Changed from '1' to '2' to double the height
       type: 'standard',
       displayMobile: true,
       mobileOrder: 4
@@ -166,7 +166,7 @@ const ActionCards: React.FC<ActionCardsProps> = ({
     return (
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         {Array.from({ length: 4 }).map((_, index) => (
-          <Card key={index} className="h-[160px] animate-pulse bg-gray-100">
+          <Card key={index} className="h-[320px] animate-pulse bg-gray-100"> {/* Changed from h-[160px] to h-[320px] */}
             <CardContent className="p-4 flex items-center justify-center">
               <div className="text-gray-400">Carregando...</div>
             </CardContent>
@@ -179,7 +179,7 @@ const ActionCards: React.FC<ActionCardsProps> = ({
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
       {cards.filter(card => !card.isHidden).map((card, index) => (
-        <div key={card.id || index} className="h-[160px]">
+        <div key={card.id || index} className="h-[320px]"> {/* Changed from h-[160px] to h-[320px] */}
           {isEditMode ? (
             <UnifiedActionCard
               id={card.id}
@@ -189,7 +189,7 @@ const ActionCards: React.FC<ActionCardsProps> = ({
               path={card.path}
               color={card.color}
               width={card.width || '25'}
-              height={'1'}
+              height={'2'} /* Changed from '1' to '2' to double the height */
               type={card.type || 'standard'} 
               onEdit={handleCardEdit}
               onHide={handleCardHide}
@@ -207,7 +207,7 @@ const ActionCards: React.FC<ActionCardsProps> = ({
                 path={card.path}
                 color={card.color}
                 width={card.width || '25'}
-                height={'1'}
+                height={'2'} /* Changed from '1' to '2' to double the height */
                 type={card.type || 'standard'} 
                 onEdit={handleCardEdit}
                 onHide={handleCardHide}
