@@ -30,7 +30,7 @@ export const StatsCard: React.FC<StatsCardProps> = ({
   };
   
   return (
-    <Card className="p-2.5 border border-blue-200 hover:shadow-md transition-all rounded-xl">
+    <Card className="p-3 border border-blue-200 hover:shadow-md transition-all">
       <div className="flex items-center justify-between mb-1">
         <h3 className="text-sm font-medium text-zinc-500">{title}</h3>
       </div>

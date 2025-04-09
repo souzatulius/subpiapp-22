@@ -10,7 +10,7 @@ const ResponderDemandas = () => {
   const { firstName } = useDashboardState();
   
   return (
-    <div className="max-w-7xl mx-auto p-4">
+    <div className="max-w-7xl mx-auto">
       <WelcomeCard
         title="Responder Demandas"
         description={`Olá ${firstName}, atenda às solicitações pendentes de comunicação`}

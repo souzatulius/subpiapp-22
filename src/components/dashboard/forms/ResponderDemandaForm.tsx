@@ -26,7 +26,7 @@ const ResponderDemandaForm: React.FC<ResponderDemandaFormProps> = ({ onClose }) 
   }, [demandaId, demandas, setSelectedDemanda]);
   
   return (
-    <div className="w-full rounded-xl overflow-hidden">
+    <div className="w-full">
       <ResponderDemandaContent />
     </div>
   );

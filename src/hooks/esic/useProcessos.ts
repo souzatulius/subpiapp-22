@@ -38,6 +38,7 @@ export const useProcessos = () => {
     setError(null);
 
     try {
+      // Use 'esic_processos' instead of 'processos'
       const { data, error, count } = await supabase
         .from('esic_processos')
         .select(`
@@ -52,13 +53,7 @@ export const useProcessos = () => {
       }
 
       if (data) {
-        // Cast the data to ESICProcesso[] type
-        const processedData = data.map(item => ({
-          ...item,
-          created_at: item.criado_em, // Ensure created_at is present as it's required by ESICProcesso type
-        })) as unknown as ESICProcesso[];
-        
-        setProcessos(processedData);
+        setProcessos(data as ESICProcesso[]);
         setTotal(count || 0);
       } else {
         setProcessos([]);
@@ -76,7 +71,7 @@ export const useProcessos = () => {
     }
   };
 
-  const createProcesso = async (data: any) => {
+  const createProcesso = async (data: any, options?: { onSuccess?: () => void; onError?: (error: any) => void }) => {
     setIsCreating(true);
     setError(null);
 
@@ -92,29 +87,32 @@ export const useProcessos = () => {
 
       // Refresh process list
       fetchProcessos();
-      return { success: true };
+      options?.onSuccess?.();
     } catch (err: any) {
       setError(err.message);
+      options?.onError?.(err);
       toast({
         title: 'Erro ao criar processo',
         description: err.message,
         variant: 'destructive',
       });
-      return { success: false, error: err };
     } finally {
       setIsCreating(false);
     }
   };
 
-  const updateProcesso = async (id: string, updates: Partial<ESICProcesso>) => {
+  const updateProcesso = async (
+    params: { id: string; data: any }, 
+    options?: { onSuccess?: () => void; onError?: (error: any) => void }
+  ) => {
     setIsUpdating(true);
     setError(null);
 
     try {
       const result = await supabase
         .from('esic_processos')
-        .update(updates)
-        .eq('id', id)
+        .update(params.data)
+        .eq('id', params.id)
         .select();
 
       if (result.error) {
@@ -123,36 +121,34 @@ export const useProcessos = () => {
 
       // Update local state
       if (result.data && result.data.length > 0) {
-        const processedData = result.data.map(item => ({
-          ...item,
-          created_at: item.criado_em, // Ensure created_at is present
-        })) as unknown as ESICProcesso[];
-        
         setProcessos(prev => 
-          prev.map(p => p.id === id ? { ...p, ...processedData[0] } : p)
+          prev.map(p => p.id === params.id ? { ...p, ...params.data } : p)
         );
         
         // Update selected processo if it's the one being edited
-        if (selectedProcesso && selectedProcesso.id === id) {
-          setSelectedProcesso({ ...selectedProcesso, ...processedData[0] });
+        if (selectedProcesso && selectedProcesso.id === params.id) {
+          setSelectedProcesso({ ...selectedProcesso, ...params.data });
         }
       }
       
-      return { success: true };
+      options?.onSuccess?.();
     } catch (err: any) {
       setError(err.message);
+      options?.onError?.(err);
       toast({
         title: 'Erro ao atualizar processo',
         description: err.message,
         variant: 'destructive',
       });
-      return { success: false, error: err };
     } finally {
       setIsUpdating(false);
     }
   };
 
-  const deleteProcesso = async (id: string) => {
+  const deleteProcesso = async (
+    id: string,
+    options?: { onSuccess?: () => void; onError?: (error: any) => void }
+  ) => {
     setIsDeleting(true);
     setError(null);
 
@@ -174,15 +170,15 @@ export const useProcessos = () => {
         setSelectedProcesso(null);
       }
       
-      return { success: true };
+      options?.onSuccess?.();
     } catch (err: any) {
       setError(err.message);
+      options?.onError?.(err);
       toast({
         title: 'Erro ao excluir processo',
         description: err.message,
         variant: 'destructive',
       });
-      return { success: false, error: err };
     } finally {
       setIsDeleting(false);
     }
