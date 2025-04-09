@@ -14,6 +14,7 @@ import { SortableUnifiedActionCard } from './UnifiedActionCard';
 import { getWidthClass, getHeightClass, getMobileSpecificDimensions } from './grid/GridUtilities';
 import { ActionCardItem, CardWidth, CardHeight } from '@/types/dashboard';
 import { useGridOccupancy } from '@/hooks/dashboard/useGridOccupancy';
+import AbsoluteGrid from './AbsoluteGrid';
 
 export interface UnifiedCardGridProps {
   cards: ActionCardItem[];
@@ -30,6 +31,7 @@ export interface UnifiedCardGridProps {
   onQuickDemandSubmit?: () => void;
   onSearchSubmit?: (query: string) => void;
   specialCardsData?: any;
+  useAbsolutePositioning?: boolean; // New prop to toggle between positioning systems
 }
 
 const UnifiedCardGrid: React.FC<UnifiedCardGridProps> = ({
@@ -46,7 +48,8 @@ const UnifiedCardGrid: React.FC<UnifiedCardGridProps> = ({
   onQuickDemandTitleChange,
   onQuickDemandSubmit,
   onSearchSubmit,
-  specialCardsData
+  specialCardsData,
+  useAbsolutePositioning = true // Default to using the new absolute positioning
 }) => {
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
@@ -174,6 +177,25 @@ const UnifiedCardGrid: React.FC<UnifiedCardGridProps> = ({
     );
   }
 
+  // Use the new AbsoluteGrid component if useAbsolutePositioning is true
+  if (useAbsolutePositioning) {
+    return (
+      <AbsoluteGrid
+        cards={processedCards}
+        onCardsChange={onCardsChange}
+        onEditCard={onEditCard}
+        onDeleteCard={onDeleteCard}
+        onHideCard={onHideCard}
+        isMobileView={isMobileView}
+        isEditMode={isEditMode}
+        disableWiggleEffect={disableWiggleEffect}
+        showSpecialFeatures={showSpecialFeatures}
+        specialCardsData={specialCardsData}
+        onSearchSubmit={onSearchSubmit}
+      />
+    );
+  }
+
   // Helper function to get card-specific styling
   const getCardContentStyle = (cardTitle: string, cardType?: string) => {
     if (cardTitle === "Origem das Demandas" || cardType === 'origin_selection') {
@@ -182,6 +204,7 @@ const UnifiedCardGrid: React.FC<UnifiedCardGridProps> = ({
     return "";
   };
 
+  // Fall back to the original grid implementation if not using absolute positioning
   return (
     <DndContext
       sensors={sensors}

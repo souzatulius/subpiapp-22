@@ -1,65 +1,95 @@
 
 import { useState } from 'react';
-import { supabase } from '@/integrations/supabase/client';
 import { ActionCardItem } from '@/types/dashboard';
-import { toast } from '@/components/ui/use-toast';
+import { supabase } from '@/integrations/supabase/client';
+import { User } from '@supabase/supabase-js';
+import { toast } from '@/hooks/use-toast';
 
-export const useCardStorage = (user: any | null, userDepartment: string | null) => {
+export const useCardStorage = (user: User | null, coordenacaoId: string | null) => {
   const [isSaving, setIsSaving] = useState(false);
 
-  const saveCardConfig = async (updatedCards: ActionCardItem[]) => {
-    if (!user) return false;
+  const saveCardConfig = async (cards: ActionCardItem[]): Promise<boolean> => {
+    if (!user) {
+      console.error('No user provided to saveCardConfig');
+      return false;
+    }
+
+    setIsSaving(true);
     
     try {
-      setIsSaving(true);
-      console.log('Saving card configuration for user:', user.id);
-      
-      const { data, error } = await supabase
+      // Check if record exists
+      const { data: existingData } = await supabase
         .from('user_dashboard')
-        .select('cards_config')
+        .select('id')
         .eq('user_id', user.id)
-        .single();
+        .maybeSingle();
       
-      if (error && error.code !== 'PGRST116') throw error;
-      
-      if (data) {
-        console.log('Updating existing card configuration');
-        const { error: updateError } = await supabase
+      if (existingData) {
+        // Update existing record
+        const { error } = await supabase
           .from('user_dashboard')
-          .update({ 
-            cards_config: JSON.stringify(updatedCards),
+          .update({
+            cards_config: cards,
+            coordenacao_id: coordenacaoId || null,
             updated_at: new Date().toISOString()
           })
           .eq('user_id', user.id);
           
-        if (updateError) throw updateError;
+        if (error) {
+          console.error('Error updating dashboard config:', error);
+          toast({
+            title: 'Erro ao salvar configuração',
+            description: 'Não foi possível salvar suas alterações',
+            variant: 'destructive'
+          });
+          return false;
+        }
       } else {
-        console.log('Creating new card configuration');
-        const { error: insertError } = await supabase
+        // Create new record
+        const { error } = await supabase
           .from('user_dashboard')
-          .insert({ 
+          .insert({
             user_id: user.id,
-            cards_config: JSON.stringify(updatedCards),
-            department_id: userDepartment || null
+            cards_config: cards,
+            coordenacao_id: coordenacaoId || null,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
           });
           
-        if (insertError) throw insertError;
+        if (error) {
+          console.error('Error creating dashboard config:', error);
+          toast({
+            title: 'Erro ao criar configuração',
+            description: 'Não foi possível salvar suas alterações',
+            variant: 'destructive'
+          });
+          return false;
+        }
       }
       
-      console.log('Card configuration saved successfully');
+      // toast({
+      //   title: 'Dashboard atualizado',
+      //   description: 'Suas configurações foram salvas com sucesso'
+      // });
+      
       return true;
-    } catch (error) {
-      console.error('Error in saveCardConfig:', error);
+    } catch (err) {
+      console.error('Error saving card config:', err);
       toast({
-        title: "Erro ao salvar configurações",
-        description: "Não foi possível salvar suas personalizações do dashboard.",
-        variant: "destructive"
+        title: 'Erro ao salvar',
+        description: 'Ocorreu um erro ao salvar suas alterações',
+        variant: 'destructive'
       });
       return false;
     } finally {
       setIsSaving(false);
     }
   };
-
-  return { saveCardConfig, isSaving };
+  
+  return {
+    saveCardConfig,
+    isSaving
+  };
 };
+
+export default useCardStorage;

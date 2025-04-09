@@ -32,6 +32,7 @@ interface CardGridContainerProps {
   specialCardsData?: any;
   disableWiggleEffect?: boolean;
   showSpecialFeatures?: boolean;
+  useAbsolutePositioning?: boolean; // New prop
 }
 
 const CardGridContainer: React.FC<CardGridContainerProps> = ({
@@ -45,7 +46,8 @@ const CardGridContainer: React.FC<CardGridContainerProps> = ({
   onSearchSubmit,
   specialCardsData,
   disableWiggleEffect,
-  showSpecialFeatures
+  showSpecialFeatures,
+  useAbsolutePositioning = true // Default to using the new absolute positioning
 }) => {
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -95,6 +97,7 @@ const CardGridContainer: React.FC<CardGridContainerProps> = ({
           specialCardsData={specialCardsData}
           disableWiggleEffect={disableWiggleEffect}
           showSpecialFeatures={showSpecialFeatures}
+          useAbsolutePositioning={useAbsolutePositioning}
         />
       </SortableContext>
     </DndContext>

@@ -66,4 +66,9 @@ export interface ActionCardItem {
   badgeValue?: number;
   subtitle?: string;
   chartId?: string;
+  // New grid position properties
+  gridRow?: number;
+  gridColumn?: number;
+  // Flag to determine if this card has fixed position or should be auto-placed
+  isPositionFixed?: boolean;
 }
