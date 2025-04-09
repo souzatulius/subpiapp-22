@@ -1,3 +1,4 @@
+
 import React, { useRef, useState } from 'react';
 import { Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -107,6 +108,7 @@ const SmartSearchCard: React.FC<SmartSearchCardProps> = ({
           onChange={(e) => setQuery(e.target.value)}
           onFocus={() => setShowSuggestions(true)}
           onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+          style={{width: '100%'}}
         />
       </div>
       

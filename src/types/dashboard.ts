@@ -20,6 +20,7 @@ export type CardColor =
   | 'blue-dark'
   | 'green-neon'
   | 'green-dark'
+  | 'green-teal'
   | 'orange-dark'
   | 'neutral-800'
   | 'orange-700';

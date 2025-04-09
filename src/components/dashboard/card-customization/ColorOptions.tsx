@@ -17,12 +17,13 @@ const ColorOptions: React.FC<ColorOptionsProps> = ({ selectedColor, onSelectColo
     { value: 'blue-dark', display: 'Azul Escuro', className: 'bg-[#1D4ED8] border-blue-900 text-white' },
     { value: 'green-neon', display: 'Verde Neon', className: 'bg-[#66FF66] border-green-600 text-gray-800' },
     { value: 'green-dark', display: 'Verde Escuro', className: 'bg-[#00CC00] border-green-800 text-gray-800' },
+    { value: 'green-teal', display: 'Verde Teal', className: 'bg-[#029e65] border-green-700 text-white' },  // Nova cor adicionada
     { value: 'gray-light', display: 'Cinza Claro', className: 'bg-[#F5F5F5] border-gray-300 text-gray-800' },
     { value: 'gray-medium', display: 'Cinza Médio', className: 'bg-[#D4D4D4] border-gray-400 text-gray-800' },
     { value: 'orange-dark', display: 'Laranja Escuro', className: 'bg-[#F25C05] border-orange-600 text-white' },
     { value: 'orange-light', display: 'Laranja Claro', className: 'bg-[#F89E66] border-orange-400 text-white' },
     { value: 'deep-blue', display: 'Azul Profundo', className: 'bg-[#051A2C] border-blue-950 text-white' },
-    { value: 'neutral-800', display: 'Cinza Escuro', className: 'bg-neutral-800 border-neutral-700 text-white' }, // Added dark gray
+    { value: 'neutral-800', display: 'Cinza Escuro', className: 'bg-neutral-800 border-neutral-700 text-white' }, 
   ];
 
   return (

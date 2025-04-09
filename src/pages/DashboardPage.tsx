@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Home, RotateCcw } from 'lucide-react';
 import { useDashboardCards } from '@/hooks/dashboard/useDashboardCards';
@@ -138,14 +139,14 @@ const DashboardPage: React.FC = () => {
     <div className="min-h-screen flex flex-col bg-[#FFFAFA]">
       <div className={`${isMobile ? 'transition-all duration-300' : ''}`}>
         <Header showControls={true} toggleSidebar={toggleSidebar} />
+        {/* Breadcrumb colocado aqui diretamente após o header, como nas outras páginas */}
+        <BreadcrumbBar className="mt-0 border-t-0" />
       </div>
       
       <div className="flex flex-1 overflow-hidden">
         {!isMobile && <DashboardSidebar isOpen={sidebarOpen} />}
         
         <main className="flex-1 overflow-auto bg-[#FFFAFA]">
-          {!isMobile && <BreadcrumbBar />}
-          
           <motion.div 
             className="max-w-7xl mx-auto p-4"
             initial={{ opacity: 0, y: 20 }} 
