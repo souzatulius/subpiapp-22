@@ -13,6 +13,7 @@ import DynamicDataCard from '../DynamicDataCard';
 import DashboardSearchCard from '../DashboardSearchCard';
 import CommunicationsCard from '../cards/CommunicationsCard';
 import OriginSelectionCard from '../cards/OriginSelectionCard';
+import OriginsDemandCardWrapper from '../cards/OriginsDemandCardWrapper';
 import * as LucideIcons from 'lucide-react';
 
 interface ActionCardWrapperProps {
@@ -92,12 +93,17 @@ const ActionCardWrapper: React.FC<ActionCardWrapperProps> = ({
     
     // Check if it's a communications card
     if (card.type === 'communications') {
-      return <CommunicationsCard id={card.id} title={card.title} />;
+      return <CommunicationsCard />;
     }
 
     // Check if it's an origin selection card
     if (card.type === 'origin_selection') {
       return <OriginSelectionCard options={specialCardsData.originOptions} />;
+    }
+    
+    // Check if it's an origin demand chart card
+    if (card.type === 'origin_demand_chart') {
+      return <OriginsDemandCardWrapper />;
     }
     
     // Check if it's a dynamic data card
@@ -181,7 +187,7 @@ const ActionCardWrapper: React.FC<ActionCardWrapperProps> = ({
   return (
     <SortableActionCard 
       key={card.id} 
-      card={card.isSearch || card.isStandard || card.type === 'data_dynamic' || card.type === 'smart_search' || card.type === 'communications' || card.type === 'origin_selection' ? {
+      card={card.isSearch || card.isStandard || card.type === 'data_dynamic' || card.type === 'smart_search' || card.type === 'communications' || card.type === 'origin_selection' || card.type === 'origin_demand_chart' ? {
         ...card,
         path: '' // Remove path to prevent default click behavior for special cards
       } : card} 

@@ -12,14 +12,12 @@ import WelcomeCard from '@/components/shared/WelcomeCard';
 import LoadingIndicator from '@/components/shared/LoadingIndicator';
 import CardGridContainer from '@/components/dashboard/CardGridContainer';
 import EditCardModal from '@/components/dashboard/card-customization/EditCardModal';
-import DashboardSearchCard from '@/components/dashboard/DashboardSearchCard';
 import { ActionCardItem } from '@/types/dashboard';
 import { toast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
 import { motion } from 'framer-motion';
 import { useCardStorage } from '@/hooks/dashboard/useCardStorage';
-import OriginsDemandChart from '@/components/dashboard/OriginsDemandChart';
-import OriginsDemandChartCompact from '@/components/dashboard/cards/OriginsDemandChartCompact';
+import { v4 as uuidv4 } from 'uuid';
 
 const DashboardPage: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -110,10 +108,11 @@ const DashboardPage: React.FC = () => {
   };
 
   useEffect(() => {
-    if (cards && cards.length > 0 && (!searchCardAdded || !communicationsCardAdded)) {
+    if (cards && cards.length > 0) {
       const searchCardExists = cards.some(card => card.id === 'dashboard-search-card');
-      const originDemandCardExists = cards.some(card => card.id === 'origem-demandas-card');
+      const originDemandCardExists = cards.some(card => card.id === 'origem-demandas-card' || card.type === 'origin_demand_chart');
       const communicationsCardExists = cards.some(card => card.id === 'communications-card');
+      const pendingActivitiesCardExists = cards.some(card => card.id === 'pending-activities-card');
       
       let updatedCards = [...cards];
       let needsUpdate = false;
@@ -140,15 +139,15 @@ const DashboardPage: React.FC = () => {
       if (!originDemandCardExists) {
         const originDemandCard: ActionCardItem = {
           id: 'origem-demandas-card',
-          title: 'Origem das Demandas',
+          title: 'Ações em Andamento',
           iconId: 'BarChart2',
           path: '',
-          color: 'bg-white',
+          color: 'orange-light',
           width: isMobile ? '100' : '50',
           height: '2',
           type: 'origin_demand_chart',
           displayMobile: true,
-          mobileOrder: 2
+          mobileOrder: 5
         };
         
         updatedCards = [...updatedCards, originDemandCard];
@@ -158,35 +157,44 @@ const DashboardPage: React.FC = () => {
       if (!communicationsCardExists) {
         const communicationsCard: ActionCardItem = {
           id: 'communications-card',
-          title: 'Avisos',
+          title: 'Comunicados',
           iconId: 'Megaphone',
           path: '',
-          color: 'bg-white',
-          width: isMobile ? '100' : '50',
+          color: 'deep-blue',
+          width: '25',
           height: '2',
           type: 'communications',
           displayMobile: true,
-          mobileOrder: 3
+          mobileOrder: 6
         };
         
         updatedCards = [...updatedCards, communicationsCard];
         needsUpdate = true;
       }
       
+      if (!pendingActivitiesCardExists) {
+        const pendingActivitiesCard: ActionCardItem = {
+          id: 'pending-activities-card',
+          title: 'Atividades Pendentes',
+          iconId: 'Clock',
+          path: '',
+          color: 'orange-light',
+          width: '25',
+          height: '3',
+          type: 'pending_activities',
+          displayMobile: true,
+          mobileOrder: 7
+        };
+        
+        updatedCards = [...updatedCards, pendingActivitiesCard];
+        needsUpdate = true;
+      }
+      
       if (needsUpdate) {
         handleCardsChange(updatedCards);
-        setSearchCardAdded(true);
-        setCommunicationsCardAdded(true);
-      } else {
-        if (!searchCardAdded && searchCardExists) {
-          setSearchCardAdded(true);
-        }
-        if (!communicationsCardAdded && communicationsCardExists) {
-          setCommunicationsCardAdded(true);
-        }
       }
     }
-  }, [cards, searchCardAdded, communicationsCardAdded, isMobile]);
+  }, [cards, isMobile]);
 
   const renderSpecialCardContent = (cardId: string) => {
     if (cardId === 'origem-demandas-card' || 

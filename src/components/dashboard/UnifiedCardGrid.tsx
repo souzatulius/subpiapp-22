@@ -1,3 +1,4 @@
+
 import React from 'react';
 import {
   DndContext,
@@ -16,7 +17,6 @@ import { useGridOccupancy } from '@/hooks/dashboard/useGridOccupancy';
 import PendingActivitiesCard from './cards/PendingActivitiesCard';
 import CommunicationsCard from './cards/CommunicationsCard';
 import OriginsDemandCardWrapper from './cards/OriginsDemandCardWrapper';
-import OriginsDemandChartCompact from './cards/OriginsDemandChartCompact';
 
 export interface UnifiedCardGridProps {
   cards: ActionCardItem[];
@@ -129,13 +129,13 @@ const UnifiedCardGrid: React.FC<UnifiedCardGridProps> = ({
           width: '50' as CardWidth,
           height: '2' as CardHeight
         };
-      } else if (card.title === "Ações Pendentes") {
+      } else if (card.title === "Ações Pendentes" || card.title === "Atividades Pendentes") {
         return {
           ...card,
           width: '25' as CardWidth,
           height: '3' as CardHeight
         };
-      } else if (card.title === "Avisos") {
+      } else if (card.title === "Avisos" || card.title === "Comunicados") {
         return {
           ...card,
           width: '25' as CardWidth,
@@ -152,6 +152,12 @@ const UnifiedCardGrid: React.FC<UnifiedCardGridProps> = ({
           ...card,
           width: '25' as CardWidth,
           height: '1' as CardHeight
+        };
+      } else if (card.title === "Ações em Andamento") {
+        return {
+          ...card,
+          width: '50' as CardWidth,
+          height: '2' as CardHeight
         };
       } else if (card.title === "Cadastro de nova solicitação de imprensa") {
         return {
@@ -194,8 +200,8 @@ const UnifiedCardGrid: React.FC<UnifiedCardGridProps> = ({
       if (customContent) return customContent;
     }
 
-    if (card.type === 'origin_demand_chart' || card.id === 'origem-demandas-card') {
-      return <OriginsDemandChartCompact className="w-full h-full" />;
+    if (card.type === 'origin_demand_chart' || card.id === 'origem-demandas-card' || card.title === "Ações em Andamento") {
+      return <OriginsDemandCardWrapper className="w-full h-full" />;
     }
     
     if (card.type === 'pending_activities' || card.id === 'pending-activities-card') {

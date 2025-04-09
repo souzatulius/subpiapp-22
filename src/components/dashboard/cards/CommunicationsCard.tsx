@@ -12,7 +12,13 @@ interface Communication {
   data_envio: string;
 }
 
-const CommunicationsCard: React.FC = () => {
+interface CommunicationsCardProps {
+  className?: string;
+}
+
+const CommunicationsCard: React.FC<CommunicationsCardProps> = ({ 
+  className = '' 
+}) => {
   const [communications, setCommunications] = useState<Communication[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -79,7 +85,7 @@ const CommunicationsCard: React.FC = () => {
   }
 
   return (
-    <div className="flex flex-col space-y-3 p-3 h-full">
+    <div className={`flex flex-col space-y-3 p-3 h-full ${className}`}>
       {communications.map(comm => (
         <div key={comm.id} className="border-b pb-2 last:border-b-0">
           <h4 className="font-medium text-sm">{comm.titulo}</h4>

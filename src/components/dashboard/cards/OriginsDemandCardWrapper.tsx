@@ -2,9 +2,15 @@
 import React from 'react';
 import OriginsDemandChartCompact from './OriginsDemandChartCompact';
 
-const OriginsDemandCardWrapper: React.FC = () => {
+interface OriginsDemandCardWrapperProps {
+  className?: string;
+}
+
+const OriginsDemandCardWrapper: React.FC<OriginsDemandCardWrapperProps> = ({ 
+  className = '' 
+}) => {
   return (
-    <div className="w-full h-full p-2">
+    <div className={`w-full h-full ${className}`}>
       <OriginsDemandChartCompact className="w-full h-full" />
     </div>
   );
