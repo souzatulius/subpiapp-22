@@ -1,4 +1,3 @@
-
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -66,7 +65,6 @@ export const createAdminNotification = async (userId: string, userName: string, 
   }
 };
 
-// Add the missing functions
 export const isUserApproved = async (userId: string): Promise<boolean> => {
   try {
     const { data, error } = await supabase
@@ -80,7 +78,7 @@ export const isUserApproved = async (userId: string): Promise<boolean> => {
       return false;
     }
     
-    return data?.status_conta === 'aprovado';
+    return data?.status_conta === 'aprovado' || data?.status_conta === 'ativo';
   } catch (error) {
     console.error('Failed to check user approval status:', error);
     return false;

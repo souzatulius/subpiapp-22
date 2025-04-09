@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useSupabaseAuth';
 import { Button } from '@/components/ui/button';
-import { CheckCircle2, Clock, InfoIcon } from 'lucide-react';
+import { CheckCircle2, Clock, InfoIcon, LogOut } from 'lucide-react';
 import AuthLayout from '@/components/AuthLayout';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -36,7 +36,8 @@ const EmailVerified = () => {
         console.log('Status da conta verificado diretamente:', data?.status_conta);
         setApprovalStatus(data?.status_conta);
         
-        if (data?.status_conta === 'aprovado') {
+        // Agora aceita tanto "aprovado" quanto "ativo" como status válidos
+        if (data?.status_conta === 'aprovado' || data?.status_conta === 'ativo') {
           console.log('Usuário realmente aprovado, permitindo acesso ao dashboard');
           setForceAllowAccess(true);
         }
@@ -62,6 +63,31 @@ const EmailVerified = () => {
   const handleForceAccess = () => {
     toast.info("Acessando o dashboard");
     navigate('/dashboard');
+  };
+
+  const handleUpdateStatus = async () => {
+    if (!user) return;
+
+    try {
+      // Atualizar o status do usuário para "ativo"
+      const { error } = await supabase
+        .from('usuarios')
+        .update({ status_conta: 'ativo' })
+        .eq('id', user.id);
+      
+      if (error) {
+        console.error('Erro ao atualizar status do usuário:', error);
+        toast.error("Erro ao atualizar status");
+        return;
+      }
+      
+      toast.success("Status atualizado para ativo");
+      setApprovalStatus('ativo');
+      setForceAllowAccess(true);
+    } catch (error) {
+      console.error("Erro ao atualizar status:", error);
+      toast.error("Erro ao processar atualização");
+    }
   };
   
   return (
@@ -104,16 +130,22 @@ const EmailVerified = () => {
         <div className="w-full pt-4 space-y-3">
           {user ? (
             <div className="space-y-3">
-              {(forceAllowAccess || approvalStatus === 'aprovado') && (
+              {(forceAllowAccess || approvalStatus === 'aprovado' || approvalStatus === 'ativo') && (
                 <Button onClick={handleForceAccess} className="w-full bg-green-600 hover:bg-green-700">
                   Acessar Dashboard
                 </Button>
               )}
               
+              {(!forceAllowAccess && approvalStatus !== 'aprovado' && approvalStatus !== 'ativo') && (
+                <Button onClick={handleUpdateStatus} className="w-full bg-blue-600 hover:bg-blue-700">
+                  Marcar como Ativo
+                </Button>
+              )}
+              
               <Button variant="outline" onClick={handleSignOut} className="w-full">
-                Sair da conta
+                <LogOut className="w-4 h-4 mr-2" /> Sair da conta
               </Button>
-              <Button asChild className="w-full">
+              <Button asChild variant="ghost" className="w-full">
                 <Link to="/login">Voltar para Login</Link>
               </Button>
             </div>
