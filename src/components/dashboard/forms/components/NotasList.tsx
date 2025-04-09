@@ -53,7 +53,7 @@ const NotasList: React.FC<NotasListProps> = ({
           placeholder="Buscar notas"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="pl-8 rounded-lg"
+          className="pl-8 rounded-xl"
         />
       </div>
       
@@ -69,7 +69,7 @@ const NotasList: React.FC<NotasListProps> = ({
             <NotaCard
               nota={nota}
               isSelected={selectedNota?.id === nota.id}
-              onClick={() => {}} // Empty function since we handle the click on the wrapper
+              onClick={() => onSelectNota(nota)}
             />
           </div>
         ))

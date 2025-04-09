@@ -44,7 +44,7 @@ const CriarNotaForm: React.FC<CriarNotaFormProps> = ({
           isLoading={isLoading} 
         />
       ) : (
-        <Card className="border border-gray-200 rounded-lg shadow-sm">
+        <Card className="border border-gray-200 rounded-xl shadow-sm">
           <CardContent className="p-6">
             <div className="space-y-6">
               {selectedDemanda && (

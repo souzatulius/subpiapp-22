@@ -34,11 +34,17 @@ const Notas = () => {
 
   // Navigate to view or edit a note
   const handleViewNote = (id: string) => {
+    // Fix the navigation path to match existing routes
     navigate(`/dashboard/comunicacao/notas/detalhe?id=${id}`);
   };
   
   const handleEditNote = (id: string) => {
+    // Fix the navigation path to match existing routes 
     navigate(`/dashboard/comunicacao/notas/editar?id=${id}`);
+  };
+  
+  const handleCreateNote = () => {
+    navigate('/dashboard/comunicacao/criar-nota');
   };
   
   return (
@@ -49,6 +55,16 @@ const Notas = () => {
         icon={<FileText className="h-6 w-6 mr-2" />}
         color="bg-gradient-to-r from-purple-600 to-purple-800"
       />
+      
+      <div className="mt-6 flex justify-end mb-4">
+        <Button 
+          onClick={handleCreateNote}
+          className="rounded-xl"
+        >
+          <FileText className="h-4 w-4 mr-2" />
+          Nova Nota
+        </Button>
+      </div>
       
       <div className="mt-6">
         <NotaForm />

@@ -29,6 +29,12 @@ const SmartSearchPopover: React.FC = () => {
     setIsOpen(false);
   };
 
+  // Transform suggestions to match the expected format for SearchInput
+  const formattedSuggestions = suggestions.map(suggestion => ({
+    title: suggestion.title || suggestion.name || 'Sugestão',
+    route: suggestion.route
+  }));
+
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>
@@ -36,13 +42,13 @@ const SmartSearchPopover: React.FC = () => {
           <Search className="h-5 w-5" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent align="end" className="w-[300px] p-0">
+      <PopoverContent align="end" className="w-[300px] p-0 rounded-xl">
         <div className="p-3">
           <SearchInput
             placeholder="O que vamos fazer?"
             onSearch={handleSearch}
             onSelectSuggestion={handleSelectSuggestion}
-            suggestions={suggestions}
+            suggestions={formattedSuggestions}
             className="py-3 text-xl"
           />
         </div>

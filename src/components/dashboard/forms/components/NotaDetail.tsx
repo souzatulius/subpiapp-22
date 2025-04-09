@@ -38,7 +38,7 @@ const NotaDetail: React.FC<NotaDetailProps> = ({
             variant="ghost"
             size="sm"
             onClick={onBack}
-            className="px-2 py-1 h-auto"
+            className="px-2 py-1 h-auto rounded-lg"
           >
             ← Voltar
           </Button>
@@ -48,7 +48,7 @@ const NotaDetail: React.FC<NotaDetailProps> = ({
             nota.status === 'aprovado' ? 'success' :
             nota.status === 'rejeitado' ? 'destructive' : 
             'default'
-          }>
+          } className="rounded-full">
             {nota.status === 'pendente' ? 'Pendente' : 
              nota.status === 'aprovado' ? 'Aprovada' :
              nota.status === 'rejeitado' ? 'Rejeitada' : 
@@ -71,7 +71,7 @@ const NotaDetail: React.FC<NotaDetailProps> = ({
       </CardHeader>
       
       <CardContent className="space-y-4">
-        <div className="whitespace-pre-wrap text-justify bg-slate-50 p-4 rounded-md border">
+        <div className="whitespace-pre-wrap text-justify bg-slate-50 p-4 rounded-xl border">
           {nota.texto}
         </div>
       </CardContent>
@@ -82,6 +82,7 @@ const NotaDetail: React.FC<NotaDetailProps> = ({
             variant="outline"
             onClick={onEditar}
             disabled={isSubmitting}
+            className="rounded-lg"
           >
             <Edit className="h-4 w-4 mr-2" />
             Editar
@@ -91,6 +92,7 @@ const NotaDetail: React.FC<NotaDetailProps> = ({
             variant="destructive"
             onClick={onRejeitar}
             disabled={isSubmitting || nota.status !== 'pendente'}
+            className="rounded-lg"
           >
             <X className="h-4 w-4 mr-2" />
             Rejeitar
@@ -100,6 +102,7 @@ const NotaDetail: React.FC<NotaDetailProps> = ({
             variant="default"
             onClick={onAprovar}
             disabled={isSubmitting || nota.status !== 'pendente'}
+            className="rounded-lg"
           >
             <Check className="h-4 w-4 mr-2" />
             Aprovar
