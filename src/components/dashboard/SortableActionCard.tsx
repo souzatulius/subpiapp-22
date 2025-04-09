@@ -1,20 +1,21 @@
-
 import React from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import ActionCard, { ActionCardProps } from './ActionCard';
 import { ActionCardItem } from '@/types/dashboard';
-import { useNavigate } from 'react-router-dom';
+import ActionCard from './ActionCard';
 
-type SortableActionCardProps = {
+export interface SortableActionCardProps {
   card: ActionCardItem;
-  onEdit: (id: string) => void;
-  onDelete: (id: string) => void;
+  onEdit: (card: ActionCardItem) => void;
+  onDelete: (cardId: string) => void;
   isDraggable?: boolean;
   isMobileView?: boolean;
-  children?: React.ReactNode;
   specialContent?: React.ReactNode;
-};
+  disableWiggleEffect?: boolean;
+  onSearchSubmit?: (query: string) => void;
+  specialData?: any;
+  showSpecialFeatures?: boolean;
+}
 
 const SortableActionCard: React.FC<SortableActionCardProps> = ({
   card,
@@ -22,54 +23,50 @@ const SortableActionCard: React.FC<SortableActionCardProps> = ({
   onDelete,
   isDraggable = false,
   isMobileView = false,
-  children,
-  specialContent
+  specialContent,
+  disableWiggleEffect,
+  onSearchSubmit,
+  specialData,
+  showSpecialFeatures
 }) => {
-  const navigate = useNavigate();
-  
   const {
     attributes,
     listeners,
     setNodeRef,
     transform,
     transition,
-  } = useSortable({ id: card.id });
+    isDragging,
+  } = useSortable({ 
+    id: card.id,
+    disabled: !isDraggable
+  });
 
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
+    opacity: isDragging ? 0.5 : 1,
   };
 
-  const handleClick = () => {
-    if (isDraggable || !card.path) return; // No navigation in edit mode
-    navigate(card.path);
-  };
+  const shouldWiggle = isDraggable && !disableWiggleEffect;
 
   return (
-    <div
-      ref={setNodeRef}
-      style={style}
-      onClick={handleClick}
-      {...(isDraggable ? { ...attributes, ...listeners } : {})}
-      className="w-full h-full"
+    <div 
+      ref={setNodeRef} 
+      style={style} 
+      {...attributes} 
+      {...listeners}
+      className={`${shouldWiggle ? 'animate-wiggle' : ''}`}
     >
       <ActionCard
-        id={card.id}
-        title={card.title}
-        subtitle={card.subtitle}
-        iconId={card.iconId}
-        path={card.path}
-        color={card.color}
-        isDraggable={isDraggable}
-        onEdit={onEdit ? () => onEdit(card.id) : undefined}
-        onDelete={onDelete ? () => onDelete(card.id) : undefined}
-        isCustom={card.isCustom}
+        card={card}
+        onEdit={onEdit}
+        onDelete={onDelete}
         isMobileView={isMobileView}
-        chartId={card.chartId}
         specialContent={specialContent}
-      >
-        {children}
-      </ActionCard>
+        onSearchSubmit={onSearchSubmit}
+        specialData={specialData}
+        showSpecialFeatures={showSpecialFeatures}
+      />
     </div>
   );
 };
