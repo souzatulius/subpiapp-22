@@ -53,7 +53,7 @@ const ESICPage: React.FC = () => {
       <main>
         {screen === 'list' && (
           <ProcessosList 
-            processos={processos as ESICProcesso[]}
+            processos={processos}
             isLoading={isLoading}
             onCreateProcesso={() => setScreen('create')}
             onViewProcesso={handleViewProcesso}
@@ -85,7 +85,7 @@ const ESICPage: React.FC = () => {
             justificativas={justificativas}
             isJustificativasLoading={isJustificativasLoading}
             onBack={() => setScreen('list')}
-            onEdit={handleEditProcesso}
+            onEdit={() => handleEditProcesso(selectedProcesso)}
             onAddJustificativa={handleAddJustificativa}
             onUpdateStatus={handleUpdateStatus}
             onUpdateSituacao={handleUpdateSituacao}

@@ -24,13 +24,13 @@ const ESICSearchHeader: React.FC<ESICSearchHeaderProps> = ({
   return (
     <div className="w-full space-y-4">
       <div className="flex gap-3">
-        {/* Search and New Process button in the same row */}
+        {/* Search field with white background and centered icon */}
         <div className="relative flex-1">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
+          <Search className="absolute left-2.5 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
           <Input
             type="search"
             placeholder="Buscar processos..."
-            className="pl-9 pr-4 py-2 h-10 bg-white border-gray-300"
+            className="pl-9 pr-4 py-2 h-10 bg-white border-gray-300 w-full"
             value={searchTerm}
             onChange={onSearchChange}
           />
@@ -50,7 +50,7 @@ const ESICSearchHeader: React.FC<ESICSearchHeaderProps> = ({
         <Button
           variant="outline"
           size="icon"
-          className={`h-9 w-9 ${viewMode === 'list' ? 'bg-gray-100 border-gray-400' : 'bg-white'}`}
+          className={`h-9 w-9 rounded-xl ${viewMode === 'list' ? 'bg-gray-100 border-gray-400' : 'bg-white'}`}
           onClick={() => onViewModeChange('list')}
           title="Visualização em lista"
         >
@@ -60,7 +60,7 @@ const ESICSearchHeader: React.FC<ESICSearchHeaderProps> = ({
         <Button
           variant="outline"
           size="icon"
-          className={`h-9 w-9 ${viewMode === 'cards' ? 'bg-gray-100 border-gray-400' : 'bg-white'}`}
+          className={`h-9 w-9 rounded-xl ${viewMode === 'cards' ? 'bg-gray-100 border-gray-400' : 'bg-white'}`}
           onClick={() => onViewModeChange('cards')}
           title="Visualização em cards"
         >
@@ -70,7 +70,7 @@ const ESICSearchHeader: React.FC<ESICSearchHeaderProps> = ({
         <Button
           variant="outline"
           size="icon"
-          className="h-9 w-9 bg-white hover:bg-gray-100"
+          className="h-9 w-9 bg-white hover:bg-gray-100 rounded-xl"
           onClick={onFilterClick}
           title="Filtros"
         >

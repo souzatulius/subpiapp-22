@@ -22,6 +22,8 @@ export const StatsCard: React.FC<StatsCardProps> = ({
 }) => {
   // Format value with comma as decimal separator
   const formatValue = (val: string | number): string => {
+    if (val === undefined || val === null) return '0';
+    
     const stringValue = val.toString();
     if (stringValue.includes('.')) {
       return stringValue.replace('.', ',');
@@ -30,16 +32,16 @@ export const StatsCard: React.FC<StatsCardProps> = ({
   };
   
   return (
-    <Card className="p-3 border border-blue-200 hover:shadow-md transition-all">
+    <Card className="p-3 border border-blue-200 hover:shadow-md transition-all rounded-xl">
       <div className="flex items-center justify-between mb-1">
         <h3 className="text-sm font-medium text-zinc-500">{title}</h3>
       </div>
       
       {isLoading ? (
         <>
-          <Skeleton className="h-7 w-24 bg-gray-200 mb-2" />
-          <Skeleton className="h-4 w-full bg-gray-100 mb-1" />
-          <Skeleton className="h-4 w-3/4 bg-gray-100" />
+          <Skeleton className="h-7 w-24 bg-gray-200 mb-2 rounded-lg" />
+          <Skeleton className="h-4 w-full bg-gray-100 mb-1 rounded-lg" />
+          <Skeleton className="h-4 w-3/4 bg-gray-100 rounded-lg" />
         </>
       ) : (
         <>
