@@ -12,10 +12,16 @@ export interface ESICProcesso {
   autor_nome?: string;
   texto: string;
   situacao: string;
-  status: "aberto" | "em_andamento" | "concluido" | "cancelado" | "respondido";
+  status: "novo_processo" | "aberto" | "em_andamento" | "concluido" | "cancelado" | "respondido" | "aguardando_justificativa" | "aguardando_aprovacao";
   autor?: {
     nome_completo: string;
   };
+  coordenacao_id?: string;
+  prazo_resposta?: string;
+  coordenacao?: {
+    nome: string;
+  };
+  sem_area_tecnica?: boolean;
 }
 
 export interface ESICProcessoFormValues {
@@ -38,6 +44,14 @@ export interface ESICJustificativa {
   autor_nome?: string;
   criado_em: string;
   gerado_por_ia: boolean;
+  autor?: {
+    nome_completo: string;
+  };
+}
+
+export interface ESICJustificativaFormValues {
+  texto: string;
+  gerado_por_ia: boolean;
 }
 
 export const statusLabels = {
@@ -45,12 +59,16 @@ export const statusLabels = {
   em_andamento: 'Em andamento',
   concluido: 'Concluído',
   cancelado: 'Cancelado',
-  respondido: 'Respondido'
+  respondido: 'Respondido',
+  novo_processo: 'Novo Processo',
+  aguardando_justificativa: 'Aguardando Justificativa',
+  aguardando_aprovacao: 'Aguardando Aprovação'
 };
 
 export const situacaoLabels = {
   em_tramitacao: 'Em tramitação',
   concluido: 'Concluído',
   cancelado: 'Cancelado',
-  pendente: 'Pendente'
+  pendente: 'Pendente',
+  prazo_prorrogado: 'Prazo Prorrogado'
 };
