@@ -64,16 +64,20 @@ const UserProfile: React.FC = () => {
 
   return (
     <ProtectedRoute>
-      <div className="flex flex-col min-h-screen bg-[#FFFAFA]">
-        <Header showControls={true} toggleSidebar={toggleSidebar} />
+      <div className="flex flex-col h-screen bg-[#FFFAFA]">
+        <Header showControls={true} toggleSidebar={toggleSidebar} className="flex-shrink-0" />
         
-        <div className="flex flex-1">
-          {!isMobile && <DashboardSidebar isOpen={sidebarOpen} />}
+        <div className="flex flex-1 overflow-hidden">
+          {!isMobile && (
+            <div className="h-full flex-shrink-0">
+              <DashboardSidebar isOpen={sidebarOpen} />
+            </div>
+          )}
           
-          <main className="flex-1 bg-[#FFFAFA]">
-            {!isMobile && <BreadcrumbBar />}
+          <main className="flex-1 flex flex-col overflow-auto">
+            {!isMobile && <BreadcrumbBar className="flex-shrink-0" />}
             
-            <div className="container max-w-7xl mx-auto">
+            <div className="flex-1 container max-w-7xl mx-auto w-full overflow-y-auto">
               <div className={`p-4 ${isMobile ? 'pb-16' : 'pb-4'}`}>
                 {isMobile && <BreadcrumbBar />}
                 <UserProfileView userProfile={userProfile} loading={loading} />
@@ -82,7 +86,7 @@ const UserProfile: React.FC = () => {
           </main>
         </div>
         
-        {isMobile && <MobileBottomNav />}
+        {isMobile && <MobileBottomNav className="flex-shrink-0" />}
       </div>
     </ProtectedRoute>
   );

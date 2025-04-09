@@ -22,9 +22,9 @@ const RankingSubs = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#FFFAFA]">
+    <div className="flex flex-col h-screen bg-[#FFFAFA]">
       {/* Header */}
-      <div className="transition-all duration-300">
+      <div className="flex-shrink-0">
         <Header showControls={true} toggleSidebar={toggleSidebar} />
         
         {/* Mobile breadcrumb directly below header */}
@@ -35,14 +35,18 @@ const RankingSubs = () => {
         )}
       </div>
       
-      <div className="flex flex-1 relative">
-        {!isMobile && <DashboardSidebar isOpen={sidebarOpen} />}
+      <div className="flex flex-1 overflow-hidden">
+        {!isMobile && (
+          <div className="h-full flex-shrink-0">
+            <DashboardSidebar isOpen={sidebarOpen} />
+          </div>
+        )}
         
-        <main className="flex-1 w-full bg-[#FFFAFA]">
+        <main className="flex-1 flex flex-col overflow-auto">
           {/* Desktop breadcrumb */}
-          {!isMobile && <BreadcrumbBar />}
+          {!isMobile && <BreadcrumbBar className="flex-shrink-0" />}
           
-          <div className="max-w-full mx-auto">
+          <div className="flex-1 max-w-full mx-auto w-full overflow-y-auto">
             <div className={`p-4 ${isMobile ? 'pb-32' : ''}`}>
               <div className="transition-all duration-300">
                 <h1 className="text-2xl font-bold text-gray-800 mb-6">Ranking das Subs</h1>
@@ -53,7 +57,7 @@ const RankingSubs = () => {
         </main>
       </div>
       
-      {isMobile && <MobileBottomNav />}
+      {isMobile && <MobileBottomNav className="flex-shrink-0" />}
     </div>
   );
 };

@@ -32,31 +32,33 @@ const DashboardLayout: React.FC = () => {
   };
 
   return (
-    // Use min-h-screen para garantir altura mínima de 100% da viewport
-    <div className="flex flex-col bg-[#FFFAFA] min-h-screen">
-      <div className="transition-all duration-300 min-h-[64px] z-10 flex-shrink-0">
-        <Header showControls={true} toggleSidebar={toggleSidebar} />
-        {!isMobile && <BreadcrumbBar className="mt-0 border-t-0" />}
-      </div>
+    <div className="flex flex-col h-screen bg-[#FFFAFA]">
+      <Header 
+        showControls={true} 
+        toggleSidebar={toggleSidebar} 
+        className="flex-shrink-0 z-10"
+      />
       
-      {/* Use flex-1 para ocupar todo o espaço disponível e flex para distribuir altura aos filhos */}
-      <div className="flex flex-1 h-[calc(100vh-64px)]">
-        {/* O container do sidebar precisa ter height: 100% */}
+      {/* Flex container que distribui a altura restante */}
+      <div className="flex flex-1 overflow-hidden">
+        {/* Container do sidebar com altura explícita */}
         {!isMobile && (
-          <div className="h-full">
+          <div className="h-full flex-shrink-0">
             <DashboardSidebar isOpen={sidebarOpen} />
           </div>
         )}
         
-        <main className="flex-1 w-full transition-all duration-300 bg-[#FFFAFA] overflow-auto">
-          <div className="max-w-7xl mx-auto w-full flex-1">
+        <main className="flex-1 flex flex-col overflow-auto">
+          {!isMobile && <BreadcrumbBar className="flex-shrink-0" />}
+          
+          <div className="flex-1 w-full max-w-7xl mx-auto overflow-y-auto">
             <motion.div 
-              className={`p-2 sm:p-4 ${isMobile ? 'pb-16 pt-0' : 'pb-6'} h-full`}
+              className={`p-2 sm:p-4 ${isMobile ? 'pb-16 pt-0' : 'pb-6'}`}
               initial={{ opacity: 1, y: 20 }} 
               animate={{ opacity: 1, y: 0 }} 
               transition={{ duration: 0.5 }}
             >
-              {isMobile && <BreadcrumbBar className="mb-0 sticky top-0 z-10 bg-white" />}
+              {isMobile && <BreadcrumbBar className="mb-4 sticky top-0 z-10 bg-white flex-shrink-0" />}
               
               <Outlet />
             </motion.div>

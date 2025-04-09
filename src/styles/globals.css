@@ -71,11 +71,17 @@
   * {
     @apply border-border;
   }
+  
+  html, body {
+    @apply h-full;
+  }
+  
   body {
     @apply bg-background text-foreground min-h-screen;
   }
-  html, body, #root {
-    height: 100%;
+  
+  #root {
+    @apply h-full;
   }
 }
 
