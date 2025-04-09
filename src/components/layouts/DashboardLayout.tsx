@@ -33,19 +33,21 @@ const DashboardLayout: React.FC = () => {
 
   return (
     <div className="flex flex-col bg-[#FFFAFA] min-h-screen">
-      <div className="fixed top-0 left-0 right-0 z-10 bg-white">
+      <div className="transition-all duration-300 min-h-[64px]">
         <Header showControls={true} toggleSidebar={toggleSidebar} />
         {/* Desktop breadcrumb - now attached directly to header */}
         {!isMobile && <BreadcrumbBar className="mt-0 border-t-0" />}
       </div>
       
-      <div className="flex flex-1 pt-[64px]">
-        {/* Sidebar fixed position and full height */}
-        {!isMobile && <DashboardSidebar isOpen={sidebarOpen} />}
+      <div className="flex flex-1 relative h-full">
+        {/* Sidebar with height set to full available height */}
+        {!isMobile && (
+          <div className="h-full sticky top-[64px]">
+            <DashboardSidebar isOpen={sidebarOpen} />
+          </div>
+        )}
         
-        <main 
-          className={`flex-1 transition-all duration-300 bg-[#FFFAFA] ${!isMobile ? (sidebarOpen ? 'ml-64' : 'ml-24') : ''}`}
-        >
+        <main className="flex-1 w-full transition-all duration-300 bg-[#FFFAFA]">
           <div className="max-w-7xl mx-auto w-full flex-1">
             <motion.div 
               className={`p-2 sm:p-4 ${isMobile ? 'pb-16 pt-0' : 'pb-6'} h-full`}
