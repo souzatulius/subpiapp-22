@@ -11,12 +11,14 @@ interface HeaderProps {
   showControls?: boolean;
   toggleSidebar?: () => void;
   hideUserMenu?: boolean;
+  className?: string; // Added className prop
 }
 
 const Header: React.FC<HeaderProps> = ({
   showControls = false,
   toggleSidebar,
-  hideUserMenu = false
+  hideUserMenu = false,
+  className = '' // Added default value for className
 }) => {
   const {
     userProfile
@@ -24,7 +26,7 @@ const Header: React.FC<HeaderProps> = ({
   const isMobile = useIsMobile();
   
   return (
-    <header className="sticky top-0 z-50 bg-white shadow-sm">
+    <header className={`sticky top-0 z-50 bg-white shadow-sm ${className}`}>
       <div className="w-full flex h-16 min-h-[64px] items-center justify-between">
         {/* Left side - Toggle button (hidden on mobile) */}
         <div className="w-1/4 flex items-center gap-4 relative">
