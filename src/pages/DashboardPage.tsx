@@ -19,6 +19,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { motion } from 'framer-motion';
 import { useCardStorage } from '@/hooks/dashboard/useCardStorage';
 import OriginsDemandChart from '@/components/dashboard/OriginsDemandChart';
+import OriginsDemandChartCompact from '@/components/dashboard/cards/OriginsDemandChartCompact';
 
 const DashboardPage: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -259,8 +260,8 @@ const DashboardPage: React.FC = () => {
   );
   
   function renderSpecialCardContent(cardId: string) {
-    if (cardId === 'origem-demandas-card') {
-      return <OriginsDemandChart className="h-full w-full" />;
+    if (cardId === 'origem-demandas-card' || cardId.includes('origemDemandas')) {
+      return <OriginsDemandChartCompact className="h-full w-full" />;
     }
     return null;
   }

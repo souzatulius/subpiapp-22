@@ -1,4 +1,3 @@
-
 import React from 'react';
 import {
   DndContext,
@@ -14,6 +13,7 @@ import { SortableUnifiedActionCard } from './UnifiedActionCard';
 import { getWidthClass, getHeightClass, getMobileSpecificDimensions } from './grid/GridUtilities';
 import { ActionCardItem, CardWidth, CardHeight } from '@/types/dashboard';
 import { useGridOccupancy } from '@/hooks/dashboard/useGridOccupancy';
+import OriginsDemandChartCompact from './cards/OriginsDemandChartCompact';
 
 export interface UnifiedCardGridProps {
   cards: ActionCardItem[];
@@ -210,7 +210,7 @@ const UnifiedCardGrid: React.FC<UnifiedCardGridProps> = ({
         <SortableContext items={processedCards.map(card => card.id)}>
           {processedCards.map(card => {
             // Check if this card has special content to be rendered
-            const specialContent = renderSpecialCardContent && (card.type === 'origin_demand_chart' || card.id === 'origem-demandas-card') 
+            const specialContent = renderSpecialCardContent && (card.type === 'origin_demand_chart' || card.id === 'origem-demandas-card' || card.chartId === 'origemDemandas') 
               ? renderSpecialCardContent(card.id) 
               : null;
               
