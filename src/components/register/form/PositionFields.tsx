@@ -104,18 +104,19 @@ const PositionFields: React.FC<PositionFieldsProps> = ({
 
   // Function to get the display text for coordination (sigla or full name)
   const getCoordinationDisplayText = (coord: SelectOption) => {
-    // Check if the value contains a sigla in parentheses
+    // Check if the value contains a sigla
     if (coord.sigla && coord.sigla.trim() !== '') {
       return coord.sigla; // Return just the sigla if available
     }
     
-    // Check if the value contains a sigla in parentheses (legacy format)
-    const match = coord.value.match(/\(([^)]+)\)/);
+    // For legacy format, check if the value contains a sigla in parentheses
+    const match = coord.value?.match(/\(([^)]+)\)/);
     if (match && match[1]) {
-      return match[1]; // Return just the sigla if available
+      return match[1].trim(); // Return just the sigla if available
     }
     
-    return coord.value; // Return the full name if no sigla
+    // If no sigla is available, just return the full name
+    return coord.label || coord.value;
   };
 
   // Function to get the display text for supervision (sigla or full name)

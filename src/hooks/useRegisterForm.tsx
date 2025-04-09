@@ -165,6 +165,16 @@ export const useRegisterForm = () => {
       const isCoordination = isCoordinationRole();
       const isManager = isManagerRole();
       
+      console.log("Sending signup request with data:", {
+        email: completeEmail,
+        nome_completo: formData.name,
+        aniversario: formData.birthday,
+        whatsapp: formData.whatsapp,
+        cargo_id: formData.role,
+        supervisao_tecnica_id: (isCoordination || isManager) ? null : formData.area || null,
+        coordenacao_id: formData.coordenacao
+      });
+      
       const { error } = await signUp(completeEmail, password, {
         nome_completo: formData.name,
         aniversario: formData.birthday,
@@ -175,6 +185,7 @@ export const useRegisterForm = () => {
       });
 
       if (error) {
+        console.error("Error during signup:", error);
         showAuthError(error);
       } else {
         toast.success("Registro enviado com sucesso. Seu acesso será aprovado por um administrador.");
