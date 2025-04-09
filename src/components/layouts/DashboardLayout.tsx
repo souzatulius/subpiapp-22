@@ -48,19 +48,21 @@ const DashboardLayout: React.FC = () => {
           </div>
         )}
         
-        <main className="flex-1 flex flex-col overflow-auto">
+        <main className="flex-1 flex flex-col overflow-hidden">
           {!isMobile && <BreadcrumbBar className="flex-shrink-0" />}
           
           <div className="flex-1 w-full max-w-7xl mx-auto overflow-y-auto">
             <motion.div 
-              className={`p-2 sm:p-4 ${isMobile ? 'pb-16 pt-0' : 'pb-6'}`}
+              className={`p-2 sm:p-4 ${isMobile ? 'pb-16 pt-0' : 'pb-6'} h-full`}
               initial={{ opacity: 1, y: 20 }} 
               animate={{ opacity: 1, y: 0 }} 
               transition={{ duration: 0.5 }}
             >
               {isMobile && <BreadcrumbBar className="mb-4 sticky top-0 z-10 bg-white flex-shrink-0" />}
               
-              <Outlet />
+              <div className="h-full">
+                <Outlet />
+              </div>
             </motion.div>
           </div>
         </main>

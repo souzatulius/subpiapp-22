@@ -50,48 +50,50 @@ const Settings = () => {
   
   return (
     <AdminProtectedRoute>
-      <div className="flex flex-col bg-[#FFFAFA]">
+      <div className="flex flex-col h-screen bg-[#FFFAFA]">
         {/* Header */}
         <div 
           style={isMobile ? scrollFadeStyles : undefined}
-          className={`${isMobile ? 'transition-all duration-300' : ''}`}
+          className={`${isMobile ? 'transition-all duration-300' : ''} flex-shrink-0`}
         >
           <Header showControls={true} toggleSidebar={toggleSidebar} />
         </div>
         
-        <div className="flex flex-1">
+        <div className="flex flex-1 overflow-hidden">
           {/* Only show sidebar on desktop */}
           {!isMobile && <DashboardSidebar isOpen={sidebarOpen} />}
           
-          <main className={`flex-1 ${isMobile ? 'pt-0' : ''} bg-[#FFFAFA]`}>
+          <main className={`flex-1 flex flex-col overflow-auto ${isMobile ? 'pt-0' : ''} bg-[#FFFAFA]`}>
             {/* Desktop breadcrumb - only show on desktop before content */}
-            {!isMobile && <BreadcrumbBar onSettingsClick={handleBackClick} />}
+            {!isMobile && <BreadcrumbBar onSettingsClick={handleBackClick} className="flex-shrink-0" />}
             
-            <div className="max-w-full mx-auto">
-              <div className={`p-4 ${isMobile ? 'pb-16' : 'pb-4'}`}>
+            <div className="flex-1 overflow-auto w-full max-w-full mx-auto">
+              <div className={`p-4 ${isMobile ? 'pb-16' : 'pb-4'} h-full`}>
                 {activeSection === 'dashboard' ? (
                   <div
                     style={isMobile ? scrollFadeStyles : undefined}
-                    className={`${isMobile ? 'transition-all duration-300' : ''}`}
+                    className={`${isMobile ? 'transition-all duration-300' : ''} h-full`}
                   >
                     {/* Mobile breadcrumb - directly attached to the top of WelcomeCard with no margin */}
-                    {isMobile && <div className="mb-0 sticky top-0 z-10"><BreadcrumbBar onSettingsClick={handleBackClick} /></div>}
+                    {isMobile && <div className="mb-0 sticky top-0 z-10 flex-shrink-0"><BreadcrumbBar onSettingsClick={handleBackClick} /></div>}
                     
                     <SettingsDashboard searchQuery={searchQuery} />
                   </div>
                 ) : (
-                  <div>
+                  <div className="h-full flex flex-col">
                     <h1 
-                      className={`text-2xl font-bold mb-6`}
+                      className={`text-2xl font-bold mb-6 flex-shrink-0`}
                       style={isMobile ? scrollFadeStyles : undefined}
                     >
                       {getSectionTitle(activeSection)}
                     </h1>
                     
                     {/* Mobile breadcrumb for non-dashboard sections */}
-                    {isMobile && <div className="mb-4 sticky top-0 z-10"><BreadcrumbBar onSettingsClick={handleBackClick} /></div>}
+                    {isMobile && <div className="mb-4 sticky top-0 z-10 flex-shrink-0"><BreadcrumbBar onSettingsClick={handleBackClick} /></div>}
                     
-                    <SettingsContent activeSection={activeSection} />
+                    <div className="flex-1 overflow-auto">
+                      <SettingsContent activeSection={activeSection} />
+                    </div>
                   </div>
                 )}
               </div>

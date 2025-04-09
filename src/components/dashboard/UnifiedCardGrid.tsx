@@ -195,14 +195,15 @@ const UnifiedCardGrid: React.FC<UnifiedCardGridProps> = ({
 
   // Helper function to render special content for specific card types
   const getSpecialContent = (card: ActionCardItem) => {
-    if (card.type === 'origin_demand_chart' || card.id === 'origem-demandas-card') {
-      return <OriginsDemandChartCompact className="w-full h-full" />;
-    }
-    
-    // Check if custom renderer function exists and use it
+    // Use renderSpecialCardContent first if provided
     if (renderSpecialCardContent) {
       const customContent = renderSpecialCardContent(card.id);
       if (customContent) return customContent;
+    }
+
+    // Fallback to built-in card types
+    if (card.type === 'origin_demand_chart' || card.id === 'origem-demandas-card') {
+      return <OriginsDemandChartCompact className="w-full h-full" />;
     }
     
     return null;

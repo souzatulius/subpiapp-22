@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Home, RotateCcw } from 'lucide-react';
 import { useDashboardCards } from '@/hooks/dashboard/useDashboardCards';
@@ -168,7 +169,11 @@ const DashboardPage: React.FC = () => {
         cardId.includes('origemDemandas') ||
         cardId.includes('origin-demand-chart') ||
         cardId.includes('origin_demand_chart')) {
-      return <OriginsDemandChartCompact className="h-full w-full p-2" />;
+      return (
+        <div className="w-full h-full p-2">
+          <OriginsDemandChartCompact className="w-full h-full" />
+        </div>
+      );
     }
     return null;
   };

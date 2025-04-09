@@ -183,7 +183,7 @@ export function UnifiedActionCard({
     // Se há conteúdo especial (como OriginsDemandChartCompact), renderiza-o
     if (specialContent) {
       return (
-        <div className="w-full h-full">
+        <div className="w-full h-full p-2">
           {specialContent}
         </div>
       );
