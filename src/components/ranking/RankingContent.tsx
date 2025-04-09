@@ -16,14 +16,18 @@ interface RankingContentProps {
   filterDialogOpen: boolean;
   setFilterDialogOpen: (open: boolean) => void;
   disableCardContainers?: boolean;
-  className?: string; // Add className prop
+  className?: string;
+  buttonText?: string;
+  lastUpdateText?: string;
 }
 
 const RankingContent: React.FC<RankingContentProps> = ({
   filterDialogOpen,
   setFilterDialogOpen,
   disableCardContainers = false,
-  className = '' // Default to empty string
+  className = '',
+  buttonText = "Atualizar Dados",
+  lastUpdateText = "Última atualização"
 }) => {
   const { user } = useAuth();
   const [uploadId, setUploadId] = useState<string | null>(null);
@@ -108,7 +112,7 @@ const RankingContent: React.FC<RankingContentProps> = ({
           <div className="flex flex-col md:flex-row gap-2 md:gap-4 mt-4 md:mt-0">
             {lastUpdateDate && (
               <div className="text-sm text-gray-600 flex items-center">
-                <span className="mr-2">Última atualização:</span>
+                <span className="mr-2">{lastUpdateText}:</span>
                 <span className="font-medium">{format(lastUpdateDate, 'dd/MM/yyyy HH:mm')}</span>
               </div>
             )}
@@ -120,7 +124,7 @@ const RankingContent: React.FC<RankingContentProps> = ({
               className="bg-orange-100 text-orange-700 border-orange-300 hover:bg-orange-200"
             >
               <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
-              Atualizar Dados
+              {buttonText}
             </Button>
           </div>
         </div>
