@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -115,10 +114,6 @@ const AuthCallback = () => {
           }
           
           console.log("Authentication successful, redirecting to dashboard");
-          toast({
-            title: "Login realizado com sucesso",
-            description: "Bem-vindo(a) de volta!",
-          });
           navigate('/dashboard');
         } else {
           console.log("No session found, redirecting to login");

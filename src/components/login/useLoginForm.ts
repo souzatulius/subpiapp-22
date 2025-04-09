@@ -17,7 +17,7 @@ export const useLoginForm = (navigate: NavigateFunction) => {
   const [loading, setLoading] = useState(false);
   const [emailError, setEmailError] = useState(false);
   const [passwordError, setPasswordError] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false); // Add isSubmitting state
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleEmailChange = (newEmail: string) => {
     setEmail(newEmail);
@@ -49,7 +49,7 @@ export const useLoginForm = (navigate: NavigateFunction) => {
     if (hasError) return;
 
     setLoading(true);
-    setIsSubmitting(true); // Set isSubmitting to true during login
+    setIsSubmitting(true);
 
     try {
       const completeEmail = completeEmailWithDomain(email);
@@ -58,12 +58,7 @@ export const useLoginForm = (navigate: NavigateFunction) => {
       if (error) {
         showAuthError(error);
       } else {
-        toast({
-          title: 'Login efetuado',
-          description: 'Você foi autenticado com sucesso.',
-          variant: 'success'
-        });
-
+        // Success toast removed from here
         navigate('/dashboard');
       }
     } catch (err: any) {
@@ -74,14 +69,14 @@ export const useLoginForm = (navigate: NavigateFunction) => {
       });
     } finally {
       setLoading(false);
-      setIsSubmitting(false); // Reset isSubmitting when done
+      setIsSubmitting(false);
     }
   };
 
   const handleGoogleLogin = async () => {
     try {
       setLoading(true);
-      setIsSubmitting(true); // Set isSubmitting to true during Google login
+      setIsSubmitting(true);
       await signInWithGoogle();
     } catch (error) {
       toast({
@@ -91,7 +86,7 @@ export const useLoginForm = (navigate: NavigateFunction) => {
       });
     } finally {
       setLoading(false);
-      setIsSubmitting(false); // Reset isSubmitting when done
+      setIsSubmitting(false);
     }
   };
 
@@ -102,7 +97,7 @@ export const useLoginForm = (navigate: NavigateFunction) => {
     authLoading,
     emailError,
     passwordError,
-    isSubmitting, // Include isSubmitting in the return value
+    isSubmitting,
     handleEmailChange,
     handlePasswordChange,
     handleLogin,
