@@ -199,7 +199,7 @@ const UnifiedCardGrid: React.FC<UnifiedCardGridProps> = ({
       if (customContent) return customContent;
     }
 
-    if (card.type === 'origin_demand_chart' || card.id === 'origem-demandas-card' || card.title === "Ações em Andamento") {
+    if (card.type === 'origin_demand_chart' || card.id === 'origem-demandas-card' || card.title === "Ações em Andamento" || card.title === "Atividades em Andamento") {
       return <OriginsDemandCardWrapper className="w-full h-full" />;
     }
     

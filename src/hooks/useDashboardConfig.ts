@@ -61,10 +61,11 @@ export const useDashboardConfig = (): DashboardConfigResult => {
         },
         {
           id: 'origem-demandas-card',
-          title: 'Ações em Andamento',
+          title: 'Atividades em Andamento',
+          subtitle: 'Demandas da semana por área técnica',
           iconId: 'BarChart2',
           path: '',
-          color: 'orange-light',
+          color: 'gray-light',
           width: '50',
           height: '2',
           type: 'origin_demand_chart',
