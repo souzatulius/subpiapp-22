@@ -1,4 +1,5 @@
 
+
 export interface Release {
   id: string;
   title: string;
@@ -6,7 +7,7 @@ export interface Release {
   imageUrl?: string;
   publishDate: string;
   author: string;
-  status: 'draft' | 'published' | 'archived';
+  status: 'draft' | 'published' | 'archived' | 'publicado' | 'rascunho' | 'arquivado';
   tags?: string[];
   summary?: string;
   created_at?: string;
@@ -29,3 +30,4 @@ export interface ReleaseSearchParams {
   startDate?: string;
   endDate?: string;
 }
+

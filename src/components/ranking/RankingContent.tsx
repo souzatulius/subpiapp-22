@@ -1,16 +1,16 @@
 
 import React, { useState, useEffect } from 'react';
-import UploadSection from './UploadSection';
-import FilterDialog from './filters/FilterDialog';
-import { useFilterManagement } from '@/hooks/ranking/useFilterManagement';
-import { useAuth } from '@/hooks/useSupabaseAuth';
-import { Card } from '@/components/ui/card';
-import DashboardCards from './insights/DashboardCards';
-import ChartsSection from './ChartsSection';
-import { useDemoData } from './DemoDataProvider';
-import { Loader2, RefreshCw } from 'lucide-react';
+import { SlidersHorizontal, Info, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { format } from 'date-fns';
+import ChartCard from './charts/ChartCard';
+import { useRankingCharts } from '@/hooks/ranking/useRankingCharts';
+import RankingFilterDialog from './filters/RankingFilterDialog';
+import RankingProgressCard from './charts/RankingProgressCard';
+import { formatDate } from '@/lib/utils';
+import InsightsPanel from './insights/InsightsPanel';
+import DashboardCards from './insights/DashboardCards';
+import RankingTabs from './tabs/RankingTabs';
+import { ChartConfig } from '@/types/ranking';
 
 interface RankingContentProps {
   filterDialogOpen: boolean;
@@ -26,154 +26,116 @@ const RankingContent: React.FC<RankingContentProps> = ({
   setFilterDialogOpen,
   disableCardContainers = false,
   className = '',
-  buttonText = "Atualizar Dados",
-  lastUpdateText = "Última atualização"
+  buttonText = 'Filtrar',
+  lastUpdateText = 'Última atualização'
 }) => {
-  const { user } = useAuth();
-  const [uploadId, setUploadId] = useState<string | null>(null);
-  const [isUploading, setIsUploading] = useState(false);
-  const [isSimulationActive, setIsSimulationActive] = useState(false);
-  const [lastUpdateDate, setLastUpdateDate] = useState<Date | null>(null);
-  const [isRefreshing, setIsRefreshing] = useState(false);
-
-  // Use demo data provider
-  const { sgzData, painelData, isLoading: isDemoLoading, hasData, refreshData } = useDemoData();
-
   const { 
-    filters, 
-    chartVisibility, 
-    handleFiltersChange, 
-    handleChartVisibilityChange, 
-    resetFilters 
-  } = useFilterManagement();
-
-  useEffect(() => {
-    if (sgzData?.length || painelData?.length) {
-      setLastUpdateDate(new Date());
-    }
-  }, [sgzData, painelData]);
-
-  const handleUploadComplete = (id: string, data: any[]) => {
-    console.log('SGZ Upload complete', id, data.length);
-    setUploadId(id);
-    setIsUploading(false);
-    setLastUpdateDate(new Date());
-  };
-
-  const handlePainelUploadComplete = (id: string, data: any[]) => {
-    console.log('Painel Upload complete', id, data.length);
-    setIsUploading(false);
-    setLastUpdateDate(new Date());
-  };
-
-  const handleUploadStart = () => {
-    setIsUploading(true);
+    charts, 
+    isLoading, 
+    refreshData, 
+    chartVisibility,
+    toggleChartVisibility,
+    lastUpdated,
+    currentTab,
+    setCurrentTab,
+    planilhaData,
+    painelData,
+    uploadId
+  } = useRankingCharts();
+  
+  // State to track which charts should show analysis instead of visualization
+  const [analysisVisibility, setAnalysisVisibility] = useState<Record<string, boolean>>({});
+  
+  // Toggle analysis visibility for a specific chart
+  const toggleAnalysisVisibility = (chartId: string) => {
+    setAnalysisVisibility(prevState => ({
+      ...prevState,
+      [chartId]: !prevState[chartId]
+    }));
   };
   
-  const handleSimulateIdealRanking = () => {
-    setIsSimulationActive(!isSimulationActive);
+  // Analyses text for charts
+  const chartAnalyses = {
+    evServ: "Há uma leve queda nas pendências, mas o ritmo ainda é lento. Cancelamentos são raros, o que é positivo, mas a curva de conclusões ainda não acelera. Reforça necessidade de gestão de fluxo.",
+    serviceDistribution: "A poda de árvores domina as reclamações. Importante verificar se há gargalos operacionais ou sazonalidade. O gráfico reforça a percepção pública sobre a vegetação urbana.",
+    executionTime: "Tapa-buraco tem maior tempo médio de resolução, indicando possível gargalo. Coleta de lixo e bueiros têm desempenho melhor. Boa oportunidade para revisão de contratos ou processos.",
+    districtsWronglyIncluded: "Distritos de outras subprefeituras estão gerando demandas atribuídas erroneamente à Sub Pinheiros. Isso distorce métricas e rankings, e deve ser corrigido com filtros automáticos e reclassificação.",
+    compByArea: "CTO é destaque em execução de serviços. Já Planejamento e COMDEC têm alto volume pendente. Pode indicar sobrecarga, falta de equipe ou burocracia. Hora de redistribuir ou intervir.",
+    top10OldestPending: "Enel e Sabesp concentram as pendências mais críticas. Isso prejudica diretamente a performance da subprefeitura no ranking. Intervenções de alto nível podem ser necessárias com esses parceiros.",
+    bottlenecks: "20% dos gargalos são externos (Enel e Sabesp). Reflete diretamente no desempenho do governo local e reforça a necessidade de articulação interinstitucional com concessionárias.",
+    idealRanking: "A Subprefeitura de Pinheiros estaria em 2º lugar sem interferências externas — um dado poderoso para narrativas de eficiência. O gap entre ranking real e ideal mostra onde o esforço deve ser concentrado.",
+    sgzRanking: "60% das OS são contabilizadas corretamente, mas 40% têm problemas (desconsideradas ou mal classificadas). Isso distorce rankings e penaliza injustamente a subprefeitura. Reforçar validação e reclassificação é essencial.",
+    attentionPoints: "Protocolos sem resposta e cadastros errados lideram os problemas. Muitos deles são evitáveis com revisão de processos internos e capacitação das equipes. Um ajuste aqui pode ter grande impacto positivo.",
   };
-
-  const handleRefreshData = async () => {
-    setIsRefreshing(true);
-    try {
-      await refreshData();
-      setLastUpdateDate(new Date());
-    } finally {
-      setIsRefreshing(false);
-    }
-  };
-
+  
   return (
-    <div className={`space-y-6 ${className}`}>
-      {/* Mostra um loader enquanto carrega os dados demo */}
-      {isDemoLoading && (
-        <div className="flex justify-center items-center py-12">
-          <Loader2 className="h-8 w-8 animate-spin text-orange-500" />
-          <span className="ml-3 text-lg text-orange-700">Carregando dados...</span>
-        </div>
-      )}
-      
-      {/* Seção de Upload Unificada - marked with upload-section class for hiding during PDF export */}
-      <Card className="p-4 bg-white border-blue-200 shadow-sm overflow-hidden hover:shadow-md transition-all upload-section">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4">
-          <div>
-            <h2 className="text-lg font-semibold text-orange-600 flex items-center">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-orange-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-              </svg>
-              Importação de Dados
-            </h2>
-            <p className="text-sm text-gray-600 mt-1">
-              Faça upload das planilhas SGZ e do Painel da Zeladoria para visualizar os dados
-            </p>
-          </div>
+    <div className="space-y-6">
+      {/* KPI Dashboard Cards */}
+      <DashboardCards dadosPlanilha={planilhaData || []} dadosPainel={painelData} uploadId={uploadId} />
+
+      {/* Filter Bar */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+          <RankingTabs currentTab={currentTab} onChange={setCurrentTab} />
           
-          <div className="flex flex-col md:flex-row gap-2 md:gap-4 mt-4 md:mt-0">
-            {lastUpdateDate && (
-              <div className="text-sm text-gray-600 flex items-center">
-                <span className="mr-2">{lastUpdateText}:</span>
-                <span className="font-medium">{format(lastUpdateDate, 'dd/MM/yyyy HH:mm')}</span>
-              </div>
-            )}
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={handleRefreshData} 
-              disabled={isRefreshing}
-              className="bg-orange-100 text-orange-700 border-orange-300 hover:bg-orange-200"
-            >
-              <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
-              {buttonText}
-            </Button>
+          <div className="text-xs text-gray-500 mt-1 sm:mt-0">
+            {lastUpdateText}: {lastUpdated ? formatDate(lastUpdated) : 'Carregando...'}
           </div>
         </div>
         
-        <div className="border border-dashed border-blue-300 rounded-lg p-4">
-          <UploadSection 
-            onUploadStart={handleUploadStart}
-            onUploadComplete={handleUploadComplete}
-            onPainelUploadComplete={handlePainelUploadComplete}
-            isUploading={isUploading}
-            user={user}
-          />
+        <div className="flex gap-2 w-full sm:w-auto">
+          <Button 
+            variant="outline" 
+            className="flex-1 sm:flex-none"
+            onClick={() => refreshData()}
+            disabled={isLoading}
+          >
+            <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
+            {buttonText}
+          </Button>
+          
+          <Button 
+            variant="default" 
+            className="flex-1 sm:flex-none"
+            onClick={() => setFilterDialogOpen(true)}
+          >
+            <SlidersHorizontal className="h-4 w-4 mr-2" />
+            Filtrar
+          </Button>
         </div>
-      </Card>
-      
-      {/* AI Insights Cards Section */}
-      {hasData && (
-        <Card className="p-4 bg-white border-blue-200 shadow-sm overflow-hidden hover:shadow-md transition-all">
-          <DashboardCards 
-            dadosPlanilha={sgzData || []} 
-            dadosPainel={painelData || []}
-            uploadId={uploadId || 'demo-data'} 
-            isSimulationActive={isSimulationActive}
-          />
-        </Card>
-      )}
+      </div>
 
-      {/* Charts Section - directly rendered without any container when disableCardContainers is true */}
-      {hasData && (
-        <ChartsSection
-          chartData={{}}
-          isLoading={isDemoLoading}
-          chartVisibility={chartVisibility}
-          sgzData={sgzData || []}
-          painelData={painelData || []}
-          onSimulateIdealRanking={handleSimulateIdealRanking}
-          isSimulationActive={isSimulationActive}
-          disableCardContainers={disableCardContainers}
-        />
-      )}
+      {/* Charts Grid */}
+      <div className={`grid grid-cols-1 md:grid-cols-2 gap-6 ${disableCardContainers ? '' : 'kpi-container'} ${className}`}>
+        {charts.map((chart: ChartConfig) => 
+          chartVisibility[chart.id] && (
+            <ChartCard 
+              key={chart.id} 
+              title={chart.title} 
+              subtitle={chart.subtitle}
+              value={chart.value || ''}
+              isLoading={isLoading} 
+              isDraggable={false}
+              onToggleVisibility={() => toggleChartVisibility(chart.id)}
+              onToggleAnalysis={() => toggleAnalysisVisibility(chart.id)}
+              analysis={(chartAnalyses as any)[chart.id]}
+              showAnalysis={analysisVisibility[chart.id]}
+            >
+              {chart.component}
+            </ChartCard>
+          )
+        )}
+      </div>
+
+      {/* Insights Panel */}
+      <InsightsPanel planilhaData={planilhaData || []} isLoading={isLoading} />
       
-      <FilterDialog 
+      {/* Filter Dialog */}
+      <RankingFilterDialog 
         open={filterDialogOpen} 
-        onOpenChange={setFilterDialogOpen}
-        filters={filters}
-        onFiltersChange={handleFiltersChange}
+        onOpenChange={setFilterDialogOpen} 
         chartVisibility={chartVisibility}
-        onChartVisibilityChange={handleChartVisibilityChange}
-        onResetFilters={resetFilters}
+        onToggleChartVisibility={toggleChartVisibility}
       />
     </div>
   );

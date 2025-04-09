@@ -1,4 +1,5 @@
 
+
 export interface Demand {
   id: string;
   title: string;
@@ -35,6 +36,16 @@ export interface Demand {
   area_coordenacao?: {
     descricao: string;
   } | null;
+  
+  // Properties for useDemandasData
+  tipo_midia?: string;
+  bairro?: string;
+  autor?: string;
+  telefone_solicitante?: string;
+  foto?: string;
+  regiao?: string;
+  foto_url?: string;
+  notas?: Note[];
 }
 
 export interface Note {
@@ -51,4 +62,6 @@ export interface CriarNotaFormProps {
   demandaId?: string;
   onSuccess?: () => void;
   onCancel?: () => void;
+  onClose?: () => void; // Add this property to fix the error
 }
+
