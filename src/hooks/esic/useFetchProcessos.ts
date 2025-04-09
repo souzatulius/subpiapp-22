@@ -24,6 +24,8 @@ export const useFetchProcessos = () => {
     setError(null);
 
     try {
+      console.log('Fetching esic_processos with options:', options);
+      
       // Build the query with the correct join syntax
       let query = supabase
         .from('esic_processos')
