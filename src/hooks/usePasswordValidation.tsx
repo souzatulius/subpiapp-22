@@ -1,25 +1,37 @@
 
 import { useState, useEffect } from 'react';
-import { validatePassword } from '@/lib/formValidation';
 
 export const usePasswordValidation = () => {
   const [password, setPassword] = useState('');
   const [showRequirements, setShowRequirements] = useState(false);
+  const [isValid, setIsValid] = useState(false);
   const [requirements, setRequirements] = useState({
-    min: false,
-    uppercase: false,
-    number: false
+    minLength: false,
+    hasUppercase: false,
+    hasLowercase: false,
+    hasNumber: false,
+    hasSpecialChar: false
   });
 
   useEffect(() => {
-    if (password) {
-      const validation = validatePassword(password);
-      setRequirements({
-        min: validation.min,
-        uppercase: validation.uppercase,
-        number: validation.number
-      });
-    }
+    // Check individual password requirements
+    const minLength = password.length >= 8;
+    const hasUppercase = /[A-Z]/.test(password);
+    const hasLowercase = /[a-z]/.test(password);
+    const hasNumber = /\d/.test(password);
+    const hasSpecialChar = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password);
+    
+    setRequirements({
+      minLength,
+      hasUppercase,
+      hasLowercase,
+      hasNumber,
+      hasSpecialChar
+    });
+    
+    // Check if all requirements are met
+    const valid = minLength && hasUppercase && hasLowercase && hasNumber && hasSpecialChar;
+    setIsValid(valid);
   }, [password]);
 
   return {
@@ -28,6 +40,6 @@ export const usePasswordValidation = () => {
     showRequirements,
     setShowRequirements,
     requirements,
-    isValid: requirements.min && requirements.uppercase && requirements.number
+    isValid
   };
 };

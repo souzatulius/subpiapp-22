@@ -1,98 +1,94 @@
 
 import React from 'react';
-import { Eye, EyeOff } from 'lucide-react';
-import PasswordRequirements from '@/components/PasswordRequirements';
 import { Input } from '@/components/ui/input';
+import { PasswordRequirement } from '@/components/PasswordRequirements';
 
 interface PasswordFieldsProps {
   password: string;
-  confirmPassword: string;
   setPassword: (password: string) => void;
-  setShowRequirements: (show: boolean) => void;
+  confirmPassword: string;
   showRequirements: boolean;
-  requirements: {
-    min: boolean;
-    uppercase: boolean;
-    number: boolean;
-  };
+  setShowRequirements: (show: boolean) => void;
+  requirements: Record<string, boolean>;
   errors: Record<string, boolean>;
-  handleChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement> | string, value?: string) => void;
+  handleChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
 const PasswordFields: React.FC<PasswordFieldsProps> = ({
   password,
-  confirmPassword,
   setPassword,
-  setShowRequirements,
+  confirmPassword,
   showRequirements,
+  setShowRequirements,
   requirements,
   errors,
   handleChange
 }) => {
-  const [showPassword, setShowPassword] = React.useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = React.useState(false);
-
   return (
-    <>
+    <div className="space-y-4">
       <div>
         <label htmlFor="password" className="block text-sm font-medium text-[#111827] mb-1">
           Senha
         </label>
-        <div className="relative">
-          <Input 
-            id="password" 
-            type={showPassword ? 'text' : 'password'} 
-            value={password} 
-            onChange={e => setPassword(e.target.value)} 
-            onFocus={() => setShowRequirements(true)} 
-            className={`pr-10 ${errors.password ? 'border-[#f57b35] focus:ring-[#f57b35]' : ''}`} 
-            placeholder="••••••••" 
-          />
-          <button 
-            type="button" 
-            className="absolute inset-y-0 right-0 pr-3 flex items-center" 
-            onClick={() => setShowPassword(!showPassword)}
-          >
-            {showPassword ? <EyeOff className="h-5 w-5 text-gray-400" /> : <Eye className="h-5 w-5 text-gray-400" />}
-          </button>
-        </div>
-        
-        <PasswordRequirements 
-          password={password}
-          requirements={requirements} 
-          visible={showRequirements && password.length > 0} 
+        <Input
+          type="password"
+          id="password"
+          name="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          onFocus={() => setShowRequirements(true)}
+          className={errors.password ? 'border-[#f57b35] focus:ring-[#f57b35]' : ''}
+          placeholder="Digite sua senha"
         />
+        {errors.password && <p className="mt-1 text-sm text-[#f57b35]">Senha inválida</p>}
         
-        {errors.password && !password && <p className="mt-1 text-sm text-[#f57b35]">Senha é obrigatória</p>}
+        {showRequirements && (
+          <div className="mt-2 rounded-md p-2 bg-gray-50">
+            <p className="text-xs text-gray-600 mb-1">Sua senha deve conter:</p>
+            <div className="space-y-1">
+              <PasswordRequirement
+                fulfilled={requirements.minLength}
+                label="Pelo menos 8 caracteres"
+              />
+              <PasswordRequirement
+                fulfilled={requirements.hasUppercase}
+                label="Pelo menos 1 letra maiúscula"
+              />
+              <PasswordRequirement
+                fulfilled={requirements.hasLowercase}
+                label="Pelo menos 1 letra minúscula"
+              />
+              <PasswordRequirement
+                fulfilled={requirements.hasNumber}
+                label="Pelo menos 1 número"
+              />
+              <PasswordRequirement
+                fulfilled={requirements.hasSpecialChar}
+                label="Pelo menos 1 caractere especial"
+              />
+            </div>
+          </div>
+        )}
       </div>
       
       <div>
         <label htmlFor="confirmPassword" className="block text-sm font-medium text-[#111827] mb-1">
-          Confirmar Senha
+          Confirmar senha
         </label>
-        <div className="relative">
-          <Input 
-            id="confirmPassword" 
-            name="confirmPassword" 
-            type={showConfirmPassword ? 'text' : 'password'} 
-            value={confirmPassword} 
-            onChange={handleChange} 
-            className={`pr-10 ${errors.confirmPassword ? 'border-[#f57b35] focus:ring-[#f57b35]' : ''}`} 
-            placeholder="••••••••" 
-          />
-          <button 
-            type="button" 
-            className="absolute inset-y-0 right-0 pr-3 flex items-center" 
-            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-          >
-            {showConfirmPassword ? <EyeOff className="h-5 w-5 text-gray-400" /> : <Eye className="h-5 w-5 text-gray-400" />}
-          </button>
-        </div>
-        {errors.confirmPassword && <p className="mt-1 text-sm text-[#f57b35]">
-            {!confirmPassword ? 'Confirme sua senha' : 'As senhas não coincidem'}
-          </p>}
+        <Input
+          type="password"
+          id="confirmPassword"
+          name="confirmPassword"
+          value={confirmPassword}
+          onChange={handleChange}
+          className={errors.confirmPassword ? 'border-[#f57b35] focus:ring-[#f57b35]' : ''}
+          placeholder="Confirme sua senha"
+        />
+        {errors.confirmPassword && (
+          <p className="mt-1 text-sm text-[#f57b35]">As senhas não conferem</p>
+        )}
       </div>
-    </>
+    </div>
   );
 };
 

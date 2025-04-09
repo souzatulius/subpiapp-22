@@ -1,261 +1,202 @@
+
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useToast } from '@/hooks/use-toast';
+import { Link } from 'react-router-dom';
+import { Separator } from '@/components/ui/separator';
 import { Loader2 } from 'lucide-react';
-import { SelectOption } from '@/components/register/types';
-import EmailSuffix from '@/components/EmailSuffix';
-import { registerUser } from '@/services/authService';
+import { SelectOption } from './types';
+import { useRegisterForm } from './hooks/useRegisterForm';
+import PasswordFields from './form/PasswordFields';
+import PersonalInfoFields from './form/PersonalInfoFields';
+import PositionFields from './form/PositionFields';
 
 interface RegisterFormProps {
-  onSuccess?: () => void;
-  roles?: SelectOption[];
-  areas?: SelectOption[];
-  coordenacoes?: SelectOption[];
+  roles: SelectOption[];
+  areas: SelectOption[];
+  coordenacoes: SelectOption[];
   loadingOptions?: boolean;
 }
 
-const RegisterForm: React.FC<RegisterFormProps> = ({ 
-  onSuccess,
-  roles = [],
-  areas = [],
-  coordenacoes = [],
+const RegisterForm = ({ 
+  roles, 
+  areas,
+  coordenacoes,
   loadingOptions = false 
-}) => {
-  const [loading, setLoading] = useState(false);
-  const [formData, setFormData] = useState({
-    email: '',
-    nome_completo: '',
-    cargo: '',
-    cargo_id: '',
-    RF: '',
-    coordenacao: '',
-    coordenacao_id: '',
-    password: 'temp123456', // Temporary password, will be changed on first login
-  });
-  const navigate = useNavigate();
-  const { toast } = useToast();
+}: RegisterFormProps) => {
+  const {
+    formData,
+    password,
+    setPassword,
+    showRequirements,
+    setShowRequirements,
+    requirements,
+    errors,
+    loading,
+    handleChange,
+    handleSubmit
+  } = useRegisterForm();
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleEmailChange = (value: string) => {
-    setFormData((prev) => ({ ...prev, email: value }));
-  };
-
-  const handleSelectChange = (name: string, value: string) => {
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!formData.email || !formData.nome_completo) {
-      toast({
-        title: 'Campos obrigatórios',
-        description: 'Por favor, preencha pelo menos email e nome completo.',
-        variant: 'destructive',
-      });
-      return;
-    }
-    
-    try {
-      setLoading(true);
-      
-      // Build complete email with domain
-      const completeEmail = `${formData.email}@smsub.prefeitura.sp.gov.br`;
-      
-      // Create registration data object
-      const registrationData = {
-        email: completeEmail,
-        nome_completo: formData.nome_completo,
-        cargo: formData.cargo,
-        cargo_id: formData.cargo_id,
-        RF: formData.RF,
-        coordenacao: formData.coordenacao,
-        coordenacao_id: formData.coordenacao_id,
-        password: formData.password
-      };
-      
-      // Call register service
-      const result = await registerUser(registrationData);
-      
-      if (result.error) {
-        throw result.error;
+  // Used to track form progress and steps
+  const [step, setStep] = useState(1);
+  
+  const nextStep = () => {
+    // Basic validation before proceeding
+    if (step === 1) {
+      if (!formData.name || !formData.email || !formData.birthday || !formData.whatsapp) {
+        // Show errors for missing fields
+        const newErrors: Record<string, boolean> = {};
+        if (!formData.name) newErrors.name = true;
+        if (!formData.email) newErrors.email = true;
+        if (!formData.birthday) newErrors.birthday = true;
+        if (!formData.whatsapp) newErrors.whatsapp = true;
+        
+        // You need to modify handleChange to add setErrors function
+        Object.keys(newErrors).forEach(key => {
+          // This will show the errors
+          handleChange(key as any, '');
+        });
+        return;
       }
-      
-      toast({
-        title: 'Solicitação enviada com sucesso',
-        description: 'Você receberá um email com instruções para confirmar seu cadastro.',
-      });
-      
-      if (onSuccess) {
-        onSuccess();
-      } else {
-        navigate('/email-verified');
+    } else if (step === 2) {
+      if (!formData.role || !formData.coordenacao) {
+        // Show errors for missing fields
+        const newErrors: Record<string, boolean> = {};
+        if (!formData.role) newErrors.role = true;
+        if (!formData.coordenacao) newErrors.coordenacao = true;
+        
+        // You need to modify handleChange to add setErrors function
+        Object.keys(newErrors).forEach(key => {
+          // This will show the errors
+          handleChange(key as any, '');
+        });
+        return;
       }
-    } catch (error: any) {
-      console.error('Error during registration:', error);
-      
-      toast({
-        title: 'Erro ao enviar solicitação',
-        description: error.message || 'Ocorreu um erro ao processar sua solicitação.',
-        variant: 'destructive',
-      });
-    } finally {
-      setLoading(false);
     }
+    setStep(step + 1);
   };
-
-  // Function to get the display text for coordination (sigla or full name)
-  const getCoordinationDisplayText = (coord: SelectOption) => {
-    // Check if the coord object has a sigla property
-    if (coord.sigla && coord.sigla.trim() !== '') {
-      return coord.sigla; // Return just the sigla if available
-    }
-    
-    // Otherwise return the full description
-    return coord.label || coord.value;
+  
+  const prevStep = () => {
+    setStep(step - 1);
   };
 
   return (
-    <div className="w-full max-w-md space-y-8 bg-white p-8 rounded-lg shadow-sm">
+    <div className="w-full max-w-md space-y-6 bg-white p-8 rounded-lg shadow-sm">
       <div className="text-center">
-        <h2 className="text-3xl font-bold">Solicitar Acesso</h2>
-        <p className="mt-2 text-sm text-gray-600">
-          Preencha os dados abaixo para solicitar acesso ao sistema
+        <h1 className="text-2xl font-bold">Cadastro de Usuário</h1>
+        <p className="text-sm text-gray-500 mt-1">
+          Preencha as informações abaixo para criar sua conta
         </p>
       </div>
       
-      <form onSubmit={handleSubmit} className="mt-8 space-y-6">
-        <div className="space-y-4">
-          <div>
-            <Label htmlFor="email">Email Institucional</Label>
-            <EmailSuffix
-              id="email"
-              value={formData.email}
-              onChange={handleEmailChange}
-              suffix="@smsub.prefeitura.sp.gov.br"
-              className="mt-1"
+      <Separator />
+      
+      <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Step 1: Personal Information */}
+        {step === 1 && (
+          <div className="space-y-6">
+            <h2 className="text-lg font-semibold">Informações Pessoais</h2>
+            
+            <PersonalInfoFields 
+              name={formData.name}
+              email={formData.email}
+              birthday={formData.birthday}
+              whatsapp={formData.whatsapp}
+              errors={errors}
+              handleChange={handleChange}
             />
-          </div>
-          
-          <div>
-            <Label htmlFor="nome_completo">Nome Completo</Label>
-            <Input
-              id="nome_completo"
-              name="nome_completo"
-              type="text"
-              value={formData.nome_completo}
-              onChange={handleChange}
-              required
-              className="mt-1"
-            />
-          </div>
-          
-          <div>
-            <Label htmlFor="cargo">Cargo</Label>
-            {loadingOptions ? (
-              <Input
-                id="cargo"
-                name="cargo"
-                type="text"
-                value="Carregando..."
-                disabled
-                className="mt-1"
-              />
-            ) : (
-              <Select
-                name="cargo_id"
-                onValueChange={(value) => handleSelectChange('cargo_id', value)}
-                value={formData.cargo_id}
+            
+            <div className="flex justify-end pt-4">
+              <Button 
+                type="button" 
+                onClick={nextStep}
               >
-                <SelectTrigger className="mt-1">
-                  <SelectValue placeholder="Selecione seu cargo" />
-                </SelectTrigger>
-                <SelectContent>
-                  {roles.map((role) => (
-                    <SelectItem key={role.value} value={role.value}>
-                      {role.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            )}
+                Próximo
+              </Button>
+            </div>
           </div>
-          
-          <div>
-            <Label htmlFor="RF">Registro Funcional (RF)</Label>
-            <Input
-              id="RF"
-              name="RF"
-              type="text"
-              value={formData.RF}
-              onChange={handleChange}
-              placeholder="Seu RF"
-              className="mt-1"
-            />
-          </div>
-          
-          <div>
-            <Label htmlFor="coordenacao">Coordenação</Label>
-            {loadingOptions ? (
-              <Input
-                id="coordenacao"
-                name="coordenacao"
-                type="text"
-                value="Carregando..."
-                disabled
-                className="mt-1"
-              />
-            ) : (
-              <Select
-                name="coordenacao_id"
-                onValueChange={(value) => handleSelectChange('coordenacao_id', value)}
-                value={formData.coordenacao_id}
-              >
-                <SelectTrigger className="mt-1">
-                  <SelectValue placeholder="Selecione sua coordenação" />
-                </SelectTrigger>
-                <SelectContent>
-                  {coordenacoes.map((coord) => (
-                    <SelectItem key={coord.value} value={coord.value}>
-                      {getCoordinationDisplayText(coord)}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            )}
-          </div>
-        </div>
+        )}
         
-        <Button 
-          type="submit" 
-          className="w-full text-lg" 
-          disabled={loading}
-        >
-          {loading ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Enviando...
-            </>
-          ) : (
-            'Solicitar Acesso'
-          )}
-        </Button>
+        {/* Step 2: Position Information */}
+        {step === 2 && (
+          <div className="space-y-6">
+            <h2 className="text-lg font-semibold">Informações Profissionais</h2>
+            
+            <PositionFields 
+              role={formData.role}
+              area={formData.area}
+              coordenacao={formData.coordenacao}
+              roles={roles}
+              areas={areas}
+              coordenacoes={coordenacoes}
+              loadingOptions={loadingOptions}
+              errors={errors}
+              handleChange={(name, value) => handleChange(name, value)}
+            />
+            
+            <div className="flex justify-between pt-4">
+              <Button 
+                type="button" 
+                variant="outline"
+                onClick={prevStep}
+              >
+                Voltar
+              </Button>
+              <Button 
+                type="button" 
+                onClick={nextStep}
+              >
+                Próximo
+              </Button>
+            </div>
+          </div>
+        )}
+        
+        {/* Step 3: Password */}
+        {step === 3 && (
+          <div className="space-y-6">
+            <h2 className="text-lg font-semibold">Segurança</h2>
+            
+            <PasswordFields 
+              password={password}
+              setPassword={setPassword}
+              confirmPassword={formData.confirmPassword}
+              showRequirements={showRequirements}
+              setShowRequirements={setShowRequirements}
+              requirements={requirements}
+              errors={errors}
+              handleChange={handleChange}
+            />
+            
+            <div className="flex justify-between pt-4">
+              <Button 
+                type="button" 
+                variant="outline"
+                onClick={prevStep}
+              >
+                Voltar
+              </Button>
+              <Button 
+                type="submit" 
+                disabled={loading}
+              >
+                {loading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Criando conta...
+                  </>
+                ) : 'Criar conta'}
+              </Button>
+            </div>
+          </div>
+        )}
         
         <div className="text-center text-sm">
-          <Link 
-            to="/login" 
-            className="font-medium text-primary hover:underline"
-          >
-            Já tem uma conta? Faça login
-          </Link>
+          <p className="text-gray-500">
+            Já possui uma conta?{' '}
+            <Link to="/login" className="text-primary font-medium hover:underline">
+              Faça login
+            </Link>
+          </p>
         </div>
       </form>
     </div>

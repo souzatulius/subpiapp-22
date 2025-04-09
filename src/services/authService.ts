@@ -13,6 +13,8 @@ export interface RegisterUserData {
   cargo?: string;
   RF?: string;
   coordenacao?: string;
+  aniversario?: string;
+  supervisao_tecnica_id?: string;
 }
 
 export const registerUser = async (userData: RegisterUserData) => {
@@ -22,7 +24,19 @@ export const registerUser = async (userData: RegisterUserData) => {
       ? { data: { user: { id: 'pending' } }, error: null }
       : await supabase.auth.signUp({
           email: userData.email,
-          password: userData.password
+          password: userData.password,
+          options: {
+            data: {
+              nome_completo: userData.nome_completo,
+              cargo_id: userData.cargo_id,
+              coordenacao_id: userData.coordenacao_id,
+              supervisao_tecnica_id: userData.supervisao_tecnica_id,
+              RF: userData.RF,
+              whatsapp: userData.whatsapp,
+              aniversario: userData.aniversario,
+              status: 'pendente'
+            }
+          }
         });
 
     if (authError) throw authError;
@@ -35,8 +49,10 @@ export const registerUser = async (userData: RegisterUserData) => {
         nome_completo: userData.nome_completo,
         cargo_id: userData.cargo_id,
         coordenacao_id: userData.coordenacao_id,
+        supervisao_tecnica_id: userData.supervisao_tecnica_id,
         RF: userData.RF, // Store RF in the database
         whatsapp: userData.whatsapp || null,
+        aniversario: userData.aniversario ? new Date(userData.aniversario) : null,
         status_conta: 'pendente' // Account needs approval by admin
       });
 

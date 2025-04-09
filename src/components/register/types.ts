@@ -1,9 +1,9 @@
 
 export interface SelectOption {
-  id?: string;  // Making it optional for backward compatibility
+  id?: string;
   value: string;
-  label: string;
-  sigla?: string; // Added to support coordination display in PositionFields.tsx
+  label?: string;
+  sigla?: string;
 }
 
 export interface FormData {
@@ -15,4 +15,15 @@ export interface FormData {
   area: string;
   coordenacao: string;
   confirmPassword: string;
+}
+
+export interface ProfileData {
+  nome_completo: string;
+  email: string;
+  whatsapp?: string;
+  aniversario?: string | Date;
+  foto_perfil_url?: string;
+  cargo_id?: string;
+  coordenacao_id?: string;
+  supervisao_tecnica_id?: string;
 }

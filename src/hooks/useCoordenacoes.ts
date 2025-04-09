@@ -6,6 +6,8 @@ export interface Coordenacao {
   id: string;
   descricao: string;
   sigla?: string;
+  value?: string;
+  label?: string;
 }
 
 export const useCoordenacoes = () => {

@@ -2,7 +2,7 @@
 import React from 'react';
 import EmailSuffix from '@/components/EmailSuffix';
 import { Input } from '@/components/ui/input';
-import { formatPhoneNumber, formatDateInput } from '@/lib/inputFormatting';
+import { formatPhone, formatDate } from '@/lib/formValidation';
 
 interface PersonalInfoFieldsProps {
   name: string;
@@ -22,7 +22,7 @@ const PersonalInfoFields: React.FC<PersonalInfoFieldsProps> = ({
   handleChange 
 }) => {
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const formatted = formatPhoneNumber(e.target.value);
+    const formatted = formatPhone(e.target.value);
     const syntheticEvent = {
       ...e,
       target: {
@@ -35,7 +35,7 @@ const PersonalInfoFields: React.FC<PersonalInfoFieldsProps> = ({
   };
 
   const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const formatted = formatDateInput(e.target.value);
+    const formatted = formatDate(e.target.value);
     const syntheticEvent = {
       ...e,
       target: {
