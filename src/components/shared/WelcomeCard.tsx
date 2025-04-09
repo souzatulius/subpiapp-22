@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Settings } from 'lucide-react';
+import { Settings, RotateCcw } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
@@ -36,7 +36,7 @@ const WelcomeCard: React.FC<WelcomeCardProps> = ({
   greeting = false,
   showResetButton = false,
   onResetClick,
-  resetButtonIcon
+  resetButtonIcon = <RotateCcw className="h-4 w-4" />
 }) => {
   // Ensure userName is treated as a string even if it's undefined
   const displayName = userName || '';

@@ -1,6 +1,6 @@
 
-import React, { useState } from 'react';
-import { PieChart, SlidersHorizontal, Printer, FileDown } from 'lucide-react';
+import React, { useState, useCallback } from 'react';
+import { PieChart, SlidersHorizontal, Printer, FileDown, RotateCcw } from 'lucide-react';
 import WelcomeCard from '@/components/shared/WelcomeCard';
 import { Button } from "@/components/ui/button";
 import { DndContext, DragOverlay, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
@@ -10,6 +10,7 @@ import FilterDialog from '@/components/relatorios/filters/FilterDialog';
 import { exportToPDF, printWithStyles } from '@/utils/pdfExport';
 import { motion } from 'framer-motion';
 import { useLocalStorage } from '@/hooks/use-local-storage';
+import { toast } from '@/components/ui/use-toast';
 
 // Import Chart registration to ensure scales are registered
 import '@/components/ranking/charts/ChartRegistration';
@@ -27,7 +28,10 @@ const RelatoriosPage = () => {
     performanceArea: true,
     notasEmitidas: true,
     noticiasVsReleases: true,
-    problemasComuns: true
+    problemasComuns: true,
+    demandasEsic: true,
+    resolucaoEsic: true,
+    processosCadastrados: true // Add new chart
   });
 
   const sensors = useSensors(
@@ -51,6 +55,27 @@ const RelatoriosPage = () => {
     }));
   };
 
+  const resetDashboard = useCallback(() => {
+    setChartVisibility({
+      origemDemandas: true,
+      distribuicaoPorTemas: true,
+      tempoMedioResposta: true,
+      performanceArea: true,
+      notasEmitidas: true,
+      noticiasVsReleases: true,
+      problemasComuns: true,
+      demandasEsic: true,
+      resolucaoEsic: true,
+      processosCadastrados: true
+    });
+    
+    toast({
+      title: "Dashboard resetado",
+      description: "Todos os cards foram restaurados para a visualização padrão.",
+      duration: 3000,
+    });
+  }, [setChartVisibility]);
+
   return (
     <motion.div 
       className="max-w-7xl mx-auto pdf-content"
@@ -58,15 +83,18 @@ const RelatoriosPage = () => {
       animate={{ opacity: 1, y: 0 }} 
       transition={{ duration: 0.5 }}
     >
-      {/* WelcomeCard com largura total */}
+      {/* WelcomeCard with reset button */}
       <WelcomeCard
         title="Relatórios da Comunicação"
         description="Ações e estatísticas da área"
         icon={<PieChart className="h-6 w-6 mr-2" />}
         color="bg-gradient-to-r from-gray-600 to-blue-700"
+        showResetButton={true}
+        onResetClick={resetDashboard}
+        resetButtonIcon={<RotateCcw className="h-4 w-4" />}
       />
 
-      {/* Botões apenas com ícones abaixo do WelcomeCard */}
+      {/* Buttons only with icons below WelcomeCard */}
       <div className="flex justify-end mt-4 gap-2">
         <Button 
           variant="outline" 
@@ -107,7 +135,7 @@ const RelatoriosPage = () => {
         />
       </div>
 
-      {/* Conteúdo principal com apenas visualização de gráficos */}
+      {/* Main content with chart visualization only */}
       <div className="mt-4 chart-container">
         <DndContext
           sensors={sensors}

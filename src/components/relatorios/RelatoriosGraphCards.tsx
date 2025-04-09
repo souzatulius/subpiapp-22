@@ -5,6 +5,7 @@ import { BarChart } from '@/components/relatorios/charts/BarChart';
 import { PieChart } from '@/components/relatorios/charts/PieChart';
 import { LineChart } from '@/components/relatorios/charts/LineChart';
 import { ArrowDown, Search, EyeOff } from "lucide-react";
+import { toast } from '@/components/ui/use-toast';
 
 interface RelatoriosGraphCardsProps {
   chartVisibility?: Record<string, boolean>;
@@ -20,11 +21,13 @@ const RelatoriosGraphCards: React.FC<RelatoriosGraphCardsProps> = ({
     noticiasVsReleases: true,
     problemasComuns: false,
     demandasEsic: true,
-    resolucaoEsic: true
+    resolucaoEsic: true,
+    processosCadastrados: true // Add new chart
   }
 }) => {
-  // State for tracking which charts should show their analysis
+  // State for tracking which charts should show their analysis and visibility
   const [analysisVisibility, setAnalysisVisibility] = useState<Record<string, boolean>>({});
+  const [localVisibility, setLocalVisibility] = useState<Record<string, boolean>>(chartVisibility);
   
   // Toggle analysis visibility for a specific chart
   const toggleAnalysis = (chartId: string) => {
@@ -32,6 +35,19 @@ const RelatoriosGraphCards: React.FC<RelatoriosGraphCardsProps> = ({
       ...prev,
       [chartId]: !prev[chartId]
     }));
+  };
+
+  // Toggle chart visibility
+  const toggleChartVisibility = (chartId: string) => {
+    setLocalVisibility(prev => {
+      const updated = { ...prev, [chartId]: !prev[chartId] };
+      toast({
+        title: updated[chartId] ? "Card visível" : "Card ocultado",
+        description: updated[chartId] ? "O card foi restaurado na visualização." : "O card foi ocultado da visualização. Use o botão de filtros para restaurá-lo.",
+        duration: 2000,
+      });
+      return updated;
+    });
   };
   
   // Dados para o gráfico de problemas mais frequentes
@@ -136,6 +152,15 @@ const RelatoriosGraphCards: React.FC<RelatoriosGraphCardsProps> = ({
     name: 'Justificadas',
     value: 25
   }];
+
+  // Dados para o novo gráfico de processos cadastrados x com justificativa
+  const processosCadastrados = [{
+    name: 'Cadastrados',
+    value: 120
+  }, {
+    name: 'Com Justificativa',
+    value: 35
+  }];
   
   // Análises dos gráficos
   const analyses = {
@@ -145,21 +170,42 @@ const RelatoriosGraphCards: React.FC<RelatoriosGraphCardsProps> = ({
     notasImprensa: "Picos de produção indicam momentos de crise ou grande demanda por posicionamentos. Oscilações sugerem oportunidade para padronizar e prever melhor o fluxo de comunicação oficial.",
     noticiasReleases: "O volume de notícias supera o de releases, indicando curadoria ativa do conteúdo recebido. A tendência de queda nos releases pode sinalizar diminuição no envio ou critérios mais rigorosos de publicação.",
     demandasEsic: "As demandas via e-SIC estão concentradas principalmente em informações sobre Obras (35%) e Licitações (25%), que somam 60% de todas as solicitações. Isto reflete o interesse público na transparência de gastos e execução de projetos. Recomenda-se aprimorar proativamente a divulgação destes dados no portal de transparência.",
-    resolucaoEsic: "75% das demandas e-SIC são respondidas completamente, enquanto 25% recebem justificativas para não fornecimento integral dos dados. Esta taxa de resposta completa está acima da média nacional (68%), indicando bom desempenho da equipe. Ainda assim, há espaço para melhoria, com meta para alcançar 85% de respostas completas nos próximos 3 meses."
+    resolucaoEsic: "75% das demandas e-SIC são respondidas completamente, enquanto 25% recebem justificativas para não fornecimento integral dos dados. Esta taxa de resposta completa está acima da média nacional (68%), indicando bom desempenho da equipe. Ainda assim, há espaço para melhoria, com meta para alcançar 85% de respostas completas nos próximos 3 meses.",
+    processosCadastrados: "Do total de 120 processos cadastrados no sistema, apenas 35 (29%) possuem justificativas formais registradas. O alto índice de processos sem justificativa (71%) indica uma oportunidade de melhoria no fluxo documental e na transparência das decisões administrativas."
   };
   
   // Componente de gráfico com hover controls
-  const ChartCard = ({ id, title, description, children, analysis }: { id: string, title: string, description: string, children: React.ReactNode, analysis: string }) => {
+  const ChartCard = ({ 
+    id, 
+    title, 
+    value,
+    description, 
+    children, 
+    analysis 
+  }: { 
+    id: string, 
+    title: string, 
+    value?: string | number,
+    description: string, 
+    children: React.ReactNode, 
+    analysis: string 
+  }) => {
     const [isHovering, setIsHovering] = useState(false);
     const isShowingAnalysis = analysisVisibility[id] || false;
+    const isVisible = localVisibility[id] !== false;
+    
+    if (!isVisible) return null;
     
     return (
       <Card className="shadow-sm hover:shadow-md transition-all rounded-xl" 
         onMouseEnter={() => setIsHovering(true)}
         onMouseLeave={() => setIsHovering(false)}
       >
-        <CardHeader className="pb-2 relative">
+        <CardHeader className="pb-1 pt-4 relative">
           <CardTitle className="text-lg font-semibold text-gray-800">{title}</CardTitle>
+          {value !== undefined && (
+            <p className="text-2xl font-bold text-blue-700">{value}</p>
+          )}
           <div>
             <p className="text-sm text-gray-600">{description}</p>
           </div>
@@ -175,9 +221,16 @@ const RelatoriosGraphCards: React.FC<RelatoriosGraphCardsProps> = ({
             >
               <Search size={16} />
             </button>
+            <button
+              onClick={() => toggleChartVisibility(id)}
+              className="p-1.5 rounded-full hover:bg-gray-100 text-orange-500 hover:text-orange-700 transition-colors"
+              title="Ocultar card"
+            >
+              <EyeOff size={16} />
+            </button>
           </div>
         </CardHeader>
-        <CardContent className="h-[300px]">
+        <CardContent className="h-[280px] pt-1 pb-3">
           {isShowingAnalysis ? (
             <div className="bg-gray-50 rounded-lg p-4 h-full overflow-auto">
               <h4 className="font-medium text-gray-700 mb-2">Análise de dados</h4>
@@ -198,6 +251,7 @@ const RelatoriosGraphCards: React.FC<RelatoriosGraphCardsProps> = ({
         <ChartCard 
           id="problemasFrequentes"
           title="Problemas frequentes"
+          value="128"
           description="Serviços mais questionados"
           analysis={analyses.problemasFrequentes}
         >
@@ -221,6 +275,7 @@ const RelatoriosGraphCards: React.FC<RelatoriosGraphCardsProps> = ({
         <ChartCard 
           id="origemDemandas"
           title="Origem das Demandas"
+          value="42%"
           description="De onde chegam as solicitações"
           analysis={analyses.origemDemandas}
         >
@@ -240,6 +295,7 @@ const RelatoriosGraphCards: React.FC<RelatoriosGraphCardsProps> = ({
         <ChartCard 
           id="areasTecnicas"
           title="Áreas técnicas acionadas"
+          value="38"
           description="Coordenações da Subprefeitura que trazem respostas"
           analysis={analyses.areasTecnicas}
         >
@@ -264,6 +320,7 @@ const RelatoriosGraphCards: React.FC<RelatoriosGraphCardsProps> = ({
         <ChartCard 
           id="notasImprensa"
           title="Notas Imprensa"
+          value="87"
           description="Posicionamentos enviados pela Subprefeitura"
           analysis={analyses.notasImprensa}
         >
@@ -286,6 +343,7 @@ const RelatoriosGraphCards: React.FC<RelatoriosGraphCardsProps> = ({
         <ChartCard 
           id="noticiasReleases"
           title="Notícias vs Releases"
+          value="42/32"
           description="Emails recebidos publicados como notícias do site"
           analysis={analyses.noticiasReleases}
         >
@@ -311,6 +369,7 @@ const RelatoriosGraphCards: React.FC<RelatoriosGraphCardsProps> = ({
         <ChartCard 
           id="demandasEsic"
           title="Demandas do e-SIC: Temas"
+          value="35%"
           description="Principais assuntos solicitados"
           analysis={analyses.demandasEsic}
         >
@@ -330,6 +389,7 @@ const RelatoriosGraphCards: React.FC<RelatoriosGraphCardsProps> = ({
         <ChartCard 
           id="resolucaoEsic"
           title="Resolução do e-SIC"
+          value="75%"
           description="Porcentagem de processos e justificativas"
           analysis={analyses.resolucaoEsic}
         >
@@ -340,6 +400,30 @@ const RelatoriosGraphCards: React.FC<RelatoriosGraphCardsProps> = ({
             showLabels={false} 
             legendPosition="right" 
             largePercentage={true} 
+          />
+        </ChartCard>
+      )}
+      
+      {/* Novo gráfico: Processos cadastrados x com justificativa */}
+      {chartVisibility.processosCadastrados && (
+        <ChartCard 
+          id="processosCadastrados"
+          title="Processos Cadastrados"
+          value="120"
+          description="Total de processos vs processos com justificativa"
+          analysis={analyses.processosCadastrados}
+        >
+          <BarChart 
+            data={processosCadastrados} 
+            xAxisDataKey="name" 
+            bars={[{
+              dataKey: 'value',
+              name: 'Quantidade',
+              color: '#0066FF'
+            }]} 
+            multiColorBars={true} 
+            barColors={['#0066FF', '#F97316']} 
+            showLegend={true} 
           />
         </ChartCard>
       )}
