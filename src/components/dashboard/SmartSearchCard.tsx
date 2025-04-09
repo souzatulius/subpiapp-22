@@ -17,6 +17,7 @@ const SmartSearchCard: React.FC<SmartSearchCardProps> = ({
   const [query, setQuery] = useState('');
   const [showSuggestions, setShowSuggestions] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const suggestionsRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
 
   // Keywords to route mapping
@@ -88,12 +89,12 @@ const SmartSearchCard: React.FC<SmartSearchCardProps> = ({
     setShowSuggestions(false);
   };
 
+  // Modified to allow spacebar to work normally
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    // Only handle Enter key - do NOT prevent default for Space or other keys
     if (e.key === "Enter") {
       handleSubmit(e as unknown as React.FormEvent);
     }
-    // Space and all other keys work normally without preventDefault
+    // All other keys including Space should work normally
   };
 
   const handleSelectSuggestion = (suggestion: { title: string; route: string; }) => {
@@ -114,14 +115,14 @@ const SmartSearchCard: React.FC<SmartSearchCardProps> = ({
             value={query}
             onChange={e => setQuery(e.target.value)}
             onKeyDown={handleKeyDown}
-            onFocus={() => setShowSuggestions(true)}
+            onFocus={() => setShowSuggestions(suggestions.length > 0)}
             onBlur={() => {
               // Use a timeout to allow clicks on suggestions to register before hiding
               setTimeout(() => {
-                if (!document.activeElement?.closest('.search-suggestions')) {
+                if (suggestionsRef.current && !suggestionsRef.current.contains(document.activeElement)) {
                   setShowSuggestions(false);
                 }
-              }, 200); // Increased timeout for better reliability
+              }, 200);
             }}
             className="pl-14 pr-4 py-6 rounded-xl border border-gray-300 w-full h-full bg-white text-2xl text-gray-800 placeholder:text-gray-600"
           />
@@ -130,6 +131,7 @@ const SmartSearchCard: React.FC<SmartSearchCardProps> = ({
         <AnimatePresence>
           {showSuggestions && suggestions.length > 0 && (
             <motion.div
+              ref={suggestionsRef}
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}

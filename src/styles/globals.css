@@ -120,20 +120,20 @@
   }
 }
 
-/* Garantir que elementos com z-index elevado se sobreponham corretamente */
+/* Search and dropdown visibility improvements */
 .search-suggestions {
   z-index: 9999 !important;
   position: absolute !important;
 }
 
-/* Garantir que containers não cortem dropdowns */
+/* Ensure parent containers don't hide dropdowns */
 .overflow-visible-container {
   overflow: visible !important;
   position: relative;
   z-index: 50;
 }
 
-/* Container específico para cards de pesquisa */
+/* Container for search cards */
 .search-card-container {
   overflow: visible !important;
   position: relative;
@@ -146,4 +146,32 @@
 .search-dropdown {
   z-index: 9999 !important;
   position: absolute !important;
+}
+
+/* Fix for card grid overflow issues */
+.card-grid-container {
+  overflow: visible !important;
+}
+
+/* Fix for any grid containers that might be cutting off dropdowns */
+.grid {
+  overflow: visible !important;
+}
+
+/* Even stronger position for search suggestion elements */
+div[role="combobox"],
+div[role="listbox"],
+.search-input-wrapper,
+.search-container {
+  position: relative !important;
+  z-index: 9999 !important;
+  overflow: visible !important;
+}
+
+/* Force suggestions to display above all other content */
+ul[role="listbox"],
+.suggestions-list,
+.search-dropdown {
+  position: absolute !important;
+  z-index: 9999 !important;
 }
