@@ -1,114 +1,145 @@
 
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Card } from '@/components/ui/card';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Eye, Pencil, Trash2, AlertCircle, Clock } from 'lucide-react';
-import { format, isPast } from 'date-fns';
+import { Eye, FileEdit, Trash2, MessageCircleMore } from 'lucide-react';
+import { ESICProcesso, statusLabels } from '@/types/esic';
+import { Badge } from '@/components/ui/badge';
+import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { cn } from '@/lib/utils';
 
 interface ProcessoCardProps {
-  processo: any;
-  onDeleteClick: () => void;
+  processo: ESICProcesso;
+  onViewClick?: (processo: ESICProcesso) => void;
+  onEditClick?: (processo: ESICProcesso) => void;
+  onDeleteClick?: (processo: ESICProcesso) => void;
+  onAddJustificativa?: () => void;
 }
 
-const ProcessoCard: React.FC<ProcessoCardProps> = ({ processo, onDeleteClick }) => {
-  const navigate = useNavigate();
-  
-  const handleViewClick = () => {
-    navigate(`/esic/view/${processo.id}`);
-  };
-  
-  const handleEditClick = () => {
-    navigate(`/esic/edit/${processo.id}`);
-  };
-  
-  const getStatusColor = (status: string) => {
+const ProcessoCard: React.FC<ProcessoCardProps> = ({
+  processo,
+  onViewClick,
+  onEditClick,
+  onDeleteClick,
+  onAddJustificativa
+}) => {
+  const getStatusColor = (status: string): string => {
     switch (status) {
-      case 'Em análise':
-        return 'bg-blue-100 text-blue-800';
-      case 'Concluído':
-        return 'bg-green-100 text-green-800';
-      case 'Aguardando complemento':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'Negado':
-        return 'bg-red-100 text-red-800';
+      case 'aguardando_justificativa':
+        return 'bg-amber-100 text-amber-800 hover:bg-amber-200';
+      case 'aguardando_aprovacao':
+        return 'bg-blue-100 text-blue-800 hover:bg-blue-200';
+      case 'concluido':
+        return 'bg-green-100 text-green-800 hover:bg-green-200';
+      case 'cancelado':
+        return 'bg-red-100 text-red-800 hover:bg-red-200';
+      case 'aberto':
+        return 'bg-purple-100 text-purple-800 hover:bg-purple-200';
+      case 'em_andamento':
+        return 'bg-orange-100 text-orange-800 hover:bg-orange-200';
       default:
-        return 'bg-gray-100 text-gray-800';
+        return 'bg-gray-100 text-gray-800 hover:bg-gray-200';
     }
   };
-  
-  const isPrazoExpired = processo.prazo ? isPast(new Date(processo.prazo)) : false;
-  
+
+  const handleViewClick = () => {
+    onViewClick && onViewClick(processo);
+  };
+
+  const handleEditClick = () => {
+    onEditClick && onEditClick(processo);
+  };
+
+  const handleDeleteClick = () => {
+    onDeleteClick && onDeleteClick(processo);
+  };
+
+  const handleJustificativaClick = () => {
+    onAddJustificativa && onAddJustificativa();
+  };
+
+  const dataProcesso = processo.data_processo 
+    ? format(new Date(processo.data_processo), 'dd/MM/yyyy', { locale: ptBR }) 
+    : 'Sem data';
+
   return (
-    <Card className="overflow-hidden hover:shadow-md transition-shadow duration-200">
-      <div className="p-4">
-        <div className="flex justify-between items-start mb-3">
-          <span className={`text-xs font-medium px-2 py-1 rounded-full ${getStatusColor(processo.status)}`}>
-            {processo.status}
-          </span>
-          <div className="flex items-center">
-            {isPrazoExpired && processo.status !== 'Concluído' && (
-              <span className="text-xs flex items-center text-red-600 mr-2">
-                <AlertCircle className="h-3 w-3 mr-1" />
-                Atrasado
-              </span>
-            )}
-            <span className="text-xs flex items-center text-gray-500">
-              <Clock className="h-3 w-3 mr-1" />
-              {processo.prazo 
-                ? format(new Date(processo.prazo), 'dd/MM/yyyy', { locale: ptBR })
-                : 'Sem prazo'}
-            </span>
-          </div>
-        </div>
-        
-        <h3 className="font-medium text-gray-900 mb-1 line-clamp-1">{processo.titulo}</h3>
-        
-        <div className="text-xs text-gray-500 mb-2">
-          <span className="font-medium">{processo.numero_processo}</span>
-          {processo.categoria && (
-            <span className="ml-2">• {processo.categoria}</span>
-          )}
-        </div>
-        
-        <div className="text-sm text-gray-600 mb-4 line-clamp-2">
-          <span className="font-medium">Solicitante:</span> {processo.solicitante}
-        </div>
-        
-        <div className="flex justify-between items-center">
-          <div className="text-xs text-gray-500">
-            {processo.created_at && format(new Date(processo.created_at), 'dd MMM yyyy', { locale: ptBR })}
+    <Card className="overflow-hidden border border-gray-200 rounded-xl hover:shadow-md transition-shadow">
+      <CardHeader className="p-4 pb-0">
+        <CardTitle className="text-base font-medium line-clamp-2">
+          {processo.assunto}
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="p-4 pt-2 pb-2">
+        <div className="space-y-2">
+          <div className="flex items-center justify-between text-sm text-gray-600">
+            <span>Protocolo:</span>
+            <span className="font-medium">{processo.protocolo}</span>
           </div>
           
-          <div className="flex space-x-1">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8 text-gray-500 hover:text-blue-600 hover:bg-blue-50"
-              onClick={handleViewClick}
-            >
-              <Eye className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8 text-gray-500 hover:text-orange-600 hover:bg-orange-50"
-              onClick={handleEditClick}
-            >
-              <Pencil className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8 text-gray-500 hover:text-red-600 hover:bg-red-50"
-              onClick={onDeleteClick}
-            >
-              <Trash2 className="h-4 w-4" />
-            </Button>
+          {processo.solicitante && (
+            <div className="flex items-center justify-between text-sm text-gray-600">
+              <span>Solicitante:</span>
+              <span className="font-medium">{processo.solicitante}</span>
+            </div>
+          )}
+          
+          <div className="flex items-center justify-between text-sm text-gray-600">
+            <span>Data:</span>
+            <span>{dataProcesso}</span>
+          </div>
+          
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-gray-600">Status:</span>
+            <Badge className={cn("rounded-xl font-normal", getStatusColor(processo.status))}>
+              {statusLabels[processo.status] || processo.status}
+            </Badge>
           </div>
         </div>
-      </div>
+      </CardContent>
+      <CardFooter className="flex justify-end space-x-2 p-4 pt-2 bg-gray-50">
+        {onAddJustificativa && (
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="rounded-xl" 
+            onClick={handleJustificativaClick}
+            title="Adicionar Justificativa"
+          >
+            <MessageCircleMore className="h-4 w-4" />
+          </Button>
+        )}
+        
+        <Button 
+          variant="outline" 
+          size="sm" 
+          className="rounded-xl" 
+          onClick={handleViewClick}
+          title="Visualizar"
+        >
+          <Eye className="h-4 w-4" />
+        </Button>
+        
+        <Button 
+          variant="outline" 
+          size="sm" 
+          className="rounded-xl" 
+          onClick={handleEditClick}
+          title="Editar"
+        >
+          <FileEdit className="h-4 w-4" />
+        </Button>
+        
+        <Button 
+          variant="outline" 
+          size="sm" 
+          className="rounded-xl text-red-500 hover:text-red-600" 
+          onClick={handleDeleteClick}
+          title="Excluir"
+        >
+          <Trash2 className="h-4 w-4" />
+        </Button>
+      </CardFooter>
     </Card>
   );
 };

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { 
@@ -52,7 +51,11 @@ const formSchema = z.object({
   situacao: z.string().min(1, {
     message: "A situação é obrigatória.",
   }),
-  assunto: z.string().optional(),
+  assunto: z.string().min(3, {
+    message: "O assunto deve ter pelo menos 3 caracteres.",
+  }).max(100, {
+    message: "O assunto não pode ter mais de 100 caracteres."
+  }),
   solicitante: z.string().optional(),
   coordenacao_id: z.string().optional(),
   prazo_resposta: z.date().optional(),
@@ -181,7 +184,7 @@ const ProcessoForm: React.FC<ProcessoFormProps> = ({
                           <Button
                             variant={"outline"}
                             className={cn(
-                              "w-full pl-3 text-left font-normal",
+                              "w-full pl-3 text-left font-normal rounded-xl",
                               !field.value && "text-muted-foreground"
                             )}
                           >
@@ -194,13 +197,14 @@ const ProcessoForm: React.FC<ProcessoFormProps> = ({
                           </Button>
                         </FormControl>
                       </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
+                      <PopoverContent className="w-auto p-0 rounded-xl" align="start">
                         <Calendar
                           mode="single"
                           selected={field.value}
                           onSelect={field.onChange}
                           initialFocus
                           locale={ptBR}
+                          className="rounded-xl"
                         />
                       </PopoverContent>
                     </Popover>
@@ -222,11 +226,11 @@ const ProcessoForm: React.FC<ProcessoFormProps> = ({
                       value={field.value}
                     >
                       <FormControl>
-                        <SelectTrigger>
+                        <SelectTrigger className="rounded-xl">
                           <SelectValue placeholder="Selecione a situação" />
                         </SelectTrigger>
                       </FormControl>
-                      <SelectContent>
+                      <SelectContent className="rounded-xl">
                         <SelectItem value="em_tramitacao">Em Tramitação</SelectItem>
                         <SelectItem value="prazo_prorrogado">Prazo Prorrogado</SelectItem>
                         <SelectItem value="concluido">Concluído</SelectItem>
@@ -247,7 +251,7 @@ const ProcessoForm: React.FC<ProcessoFormProps> = ({
                   <FormItem>
                     <FormLabel>Assunto</FormLabel>
                     <FormControl>
-                      <Input placeholder="Assunto do processo" {...field} />
+                      <Input placeholder="Assunto do processo" className="rounded-xl" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -262,7 +266,7 @@ const ProcessoForm: React.FC<ProcessoFormProps> = ({
                   <FormItem>
                     <FormLabel>Solicitante</FormLabel>
                     <FormControl>
-                      <Input placeholder="Nome do solicitante" {...field} />
+                      <Input placeholder="Nome do solicitante" className="rounded-xl" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -283,11 +287,11 @@ const ProcessoForm: React.FC<ProcessoFormProps> = ({
                     value={field.value}
                   >
                     <FormControl>
-                      <SelectTrigger>
+                      <SelectTrigger className="rounded-xl">
                         <SelectValue placeholder="Selecione a coordenação" />
                       </SelectTrigger>
                     </FormControl>
-                    <SelectContent>
+                    <SelectContent className="rounded-xl">
                       <SelectItem value="">Não atribuído</SelectItem>
                       {coordenacoes.map((coord) => (
                         <SelectItem key={coord.id} value={coord.id}>
@@ -313,28 +317,28 @@ const ProcessoForm: React.FC<ProcessoFormProps> = ({
                       <div className="flex space-x-2 text-xs">
                         <button 
                           type="button"
-                          className={`px-2 py-1 rounded ${prazoPredefinido === '5dias' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100'}`}
+                          className={`px-2 py-1 rounded-xl ${prazoPredefinido === '5dias' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100'}`}
                           onClick={() => handleCalculateDeadline('5dias')}
                         >
                           5 dias
                         </button>
                         <button 
                           type="button"
-                          className={`px-2 py-1 rounded ${prazoPredefinido === '10dias' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100'}`}
+                          className={`px-2 py-1 rounded-xl ${prazoPredefinido === '10dias' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100'}`}
                           onClick={() => handleCalculateDeadline('10dias')}
                         >
                           10 dias
                         </button>
                         <button 
                           type="button"
-                          className={`px-2 py-1 rounded ${prazoPredefinido === '20dias' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100'}`}
+                          className={`px-2 py-1 rounded-xl ${prazoPredefinido === '20dias' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100'}`}
                           onClick={() => handleCalculateDeadline('20dias')}
                         >
                           20 dias
                         </button>
                         <button 
                           type="button"
-                          className={`px-2 py-1 rounded ${prazoPredefinido === '30dias' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100'}`}
+                          className={`px-2 py-1 rounded-xl ${prazoPredefinido === '30dias' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100'}`}
                           onClick={() => handleCalculateDeadline('30dias')}
                         >
                           30 dias
@@ -347,7 +351,7 @@ const ProcessoForm: React.FC<ProcessoFormProps> = ({
                           <Button
                             variant={"outline"}
                             className={cn(
-                              "w-full pl-3 text-left font-normal",
+                              "w-full pl-3 text-left font-normal rounded-xl",
                               !field.value && "text-muted-foreground"
                             )}
                           >
@@ -360,13 +364,14 @@ const ProcessoForm: React.FC<ProcessoFormProps> = ({
                           </Button>
                         </FormControl>
                       </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
+                      <PopoverContent className="w-auto p-0 rounded-xl" align="start">
                         <Calendar
                           mode="single"
                           selected={field.value ? new Date(field.value) : undefined}
                           onSelect={field.onChange}
                           initialFocus
                           locale={ptBR}
+                          className="rounded-xl"
                         />
                       </PopoverContent>
                     </Popover>
@@ -386,7 +391,7 @@ const ProcessoForm: React.FC<ProcessoFormProps> = ({
                   <FormControl>
                     <Textarea 
                       placeholder="Descreva o processo" 
-                      className="min-h-[150px]"
+                      className="min-h-[150px] rounded-xl"
                       {...field} 
                     />
                   </FormControl>
@@ -399,12 +404,13 @@ const ProcessoForm: React.FC<ProcessoFormProps> = ({
       </CardContent>
       
       <CardFooter className="px-0 flex justify-end space-x-2">
-        <Button variant="outline" onClick={onCancel} disabled={isLoading}>
+        <Button variant="outline" onClick={onCancel} disabled={isLoading} className="rounded-xl">
           Cancelar
         </Button>
         <Button 
           onClick={form.handleSubmit(handleSubmit)}
           disabled={isLoading}
+          className="rounded-xl"
         >
           {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
           {mode === 'create' ? 'Criar Processo' : 'Salvar Alterações'}

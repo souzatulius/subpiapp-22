@@ -1,40 +1,37 @@
 
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { FilePlus } from 'lucide-react';
+import { FileQuestion } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
 
 interface ProcessoListEmptyProps {
   searchTerm?: string;
-  onCreateClick?: () => void;
 }
 
-const ProcessoListEmpty: React.FC<ProcessoListEmptyProps> = ({ 
-  searchTerm = '',
-  onCreateClick 
-}) => {
-  const navigate = useNavigate();
-  
-  const handleCreateClick = () => {
-    if (onCreateClick) {
-      onCreateClick();
-    } else {
-      navigate('/dashboard/esic?screen=create');
-    }
-  };
-  
+const ProcessoListEmpty: React.FC<ProcessoListEmptyProps> = ({ searchTerm }) => {
   return (
-    <div className="flex flex-col items-center justify-center p-8 text-center">
-      <FilePlus className="h-12 w-12 text-gray-400 mb-4" />
-      <h3 className="text-lg font-medium">Nenhum processo encontrado</h3>
-      <p className="text-gray-500 mb-4">
-        {searchTerm ? 'Tente ajustar os critérios de busca' : 'Não há processos cadastrados'}
-      </p>
-      <Button onClick={handleCreateClick}>
-        <FilePlus className="h-4 w-4 mr-2" />
-        Novo Processo
-      </Button>
-    </div>
+    <Card className="border-dashed border-2 border-gray-200 rounded-xl">
+      <CardContent className="p-6 flex flex-col items-center justify-center text-center space-y-4">
+        <div className="bg-gray-100 p-3 rounded-full">
+          <FileQuestion className="h-8 w-8 text-gray-400" />
+        </div>
+        
+        {searchTerm ? (
+          <div className="space-y-1">
+            <p className="text-lg font-medium">Nenhum resultado encontrado</p>
+            <p className="text-sm text-gray-500">
+              Não encontramos processos correspondentes a "<span className="font-medium">{searchTerm}</span>".
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-1">
+            <p className="text-lg font-medium">Nenhum processo</p>
+            <p className="text-sm text-gray-500">
+              Não existem processos e-SIC cadastrados no momento.
+            </p>
+          </div>
+        )}
+      </CardContent>
+    </Card>
   );
 };
 

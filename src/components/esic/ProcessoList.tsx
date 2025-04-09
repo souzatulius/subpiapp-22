@@ -1,13 +1,13 @@
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/hooks/useSupabaseAuth';
-import { toast } from '@/components/ui/use-toast';
-import { ESICProcesso } from '@/types/esic';
+import { ESICProcesso, statusLabels } from '@/types/esic';
 import ProcessoItem from './ProcessoItem';
 import ProcessoListEmpty from './ProcessoListEmpty';
 import ProcessoListSkeleton from './ProcessoListSkeleton';
+import ProcessoCard from './ProcessoCard';
+import { format } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
 
 interface ProcessoListProps {
   searchTerm?: string;
@@ -18,6 +18,7 @@ interface ProcessoListProps {
   onEditClick?: (processo: ESICProcesso) => void;
   onDeleteClick?: (processo: ESICProcesso) => void;
   showEmptyState?: boolean;
+  viewMode?: 'list' | 'cards';
 }
 
 const ProcessoList: React.FC<ProcessoListProps> = ({
@@ -29,71 +30,16 @@ const ProcessoList: React.FC<ProcessoListProps> = ({
   showEmptyState = false,
   processos: externalProcessos,
   isLoading: externalLoading,
+  viewMode = 'list'
 }) => {
-  const { user } = useAuth();
-  const [processos, setProcessos] = useState<ESICProcesso[]>([]);
-  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
-
-  useEffect(() => {
-    // If processos are provided externally, use those instead of fetching
-    if (externalProcessos) {
-      setProcessos(externalProcessos);
-      return;
-    }
-    
-    const fetchProcessos = async () => {
-      try {
-        setLoading(true);
-        
-        console.log('Fetching ESIC processos...');
-        
-        const { data, error } = await supabase
-          .from('esic_processos')
-          .select(`
-            *,
-            autor:usuarios(nome_completo)
-          `)
-          .order('created_at', { ascending: false });
-        
-        if (error) {
-          console.error('Error fetching ESIC processos:', error);
-          throw error;
-        }
-        
-        console.log('ESIC processos fetched:', data);
-        
-        // Cast the data to the correct type, handling the autor relationship
-        const formattedProcessos = data.map((processo: any) => {
-          // Handle the case where autor is null or not properly fetched
-          const autorNome = processo.autor?.nome_completo || 'Usuário';
-          
-          return {
-            ...processo,
-            autor_nome: autorNome,
-          } as ESICProcesso;
-        });
-        
-        setProcessos(formattedProcessos);
-      } catch (error) {
-        console.error('Error fetching processos:', error);
-        toast({
-          title: 'Erro ao carregar processos',
-          description: 'Não foi possível carregar a lista de processos.',
-          variant: 'destructive'
-        });
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchProcessos();
-  }, [externalProcessos]);
+  const processos = externalProcessos || [];
+  const isLoading = externalLoading || false;
 
   // Filter processos based on search term
   const filteredProcessos = processos.filter(processo => {
     return processo.assunto?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-           processo.protocolo?.toString().includes(searchTerm.toLowerCase()) ||
+           processo.protocolo?.toLowerCase().includes(searchTerm.toLowerCase()) ||
            (processo.solicitante?.toLowerCase() || '').includes(searchTerm.toLowerCase());
   });
 
@@ -103,18 +49,33 @@ const ProcessoList: React.FC<ProcessoListProps> = ({
     }
   };
 
-  const isLoadingState = externalLoading !== undefined ? externalLoading : loading;
-
-  if (isLoadingState) {
-    return <ProcessoListSkeleton />;
+  if (isLoading) {
+    return <ProcessoListSkeleton viewMode={viewMode} />;
   }
 
   if ((filteredProcessos.length === 0 && !showEmptyState) || (showEmptyState && processos.length === 0)) {
     return <ProcessoListEmpty searchTerm={searchTerm} />;
   }
 
+  if (viewMode === 'cards') {
+    return (
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+        {filteredProcessos.map((processo) => (
+          <ProcessoCard
+            key={processo.id}
+            processo={processo}
+            onViewClick={onViewClick}
+            onEditClick={onEditClick}
+            onDeleteClick={onDeleteClick}
+            onAddJustificativa={onAddJustificativa ? () => handleAddJustificativa(processo) : undefined}
+          />
+        ))}
+      </div>
+    );
+  }
+
   return (
-    <div className="space-y-4 py-0">
+    <div className="space-y-4">
       {filteredProcessos.map((processo) => (
         <ProcessoItem
           key={processo.id}

@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { ESICProcesso, ESICProcessoFormValues } from '@/types/esic';
@@ -33,7 +34,10 @@ export const useProcessos = () => {
       // Removed all filters to show all processes
       const { data, error } = await supabase
         .from('esic_processos')
-        .select('*')
+        .select(`
+          *,
+          autor:usuarios(nome_completo)
+        `)
         .order('criado_em', { ascending: false });
       
       if (error) throw error;
@@ -77,7 +81,12 @@ export const useProcessos = () => {
         texto: values.texto,
         situacao: values.situacao,
         status: 'novo_processo' as ESICProcesso['status'],
-        autor_id: user.id // Use autor_id instead of usuario_id
+        autor_id: user.id,
+        assunto: values.assunto,
+        solicitante: values.solicitante,
+        coordenacao_id: values.coordenacao_id,
+        prazo_resposta: values.prazo_resposta ? new Date(values.prazo_resposta).toISOString() : null,
+        protocolo: `ESIC-${Date.now().toString(36)}`
       };
       
       const { data, error } = await supabase

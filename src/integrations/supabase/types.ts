@@ -549,36 +549,59 @@ export type Database = {
       }
       esic_processos: {
         Row: {
+          assunto: string
           atualizado_em: string
           autor_id: string
+          coordenacao_id: string | null
           criado_em: string
           data_processo: string
           id: string
+          prazo_resposta: string | null
+          protocolo: string
           situacao: string
+          solicitante: string | null
           status: string
           texto: string
         }
         Insert: {
+          assunto: string
           atualizado_em?: string
           autor_id: string
+          coordenacao_id?: string | null
           criado_em?: string
           data_processo: string
           id?: string
+          prazo_resposta?: string | null
+          protocolo: string
           situacao: string
+          solicitante?: string | null
           status: string
           texto: string
         }
         Update: {
+          assunto?: string
           atualizado_em?: string
           autor_id?: string
+          coordenacao_id?: string | null
           criado_em?: string
           data_processo?: string
           id?: string
+          prazo_resposta?: string | null
+          protocolo?: string
           situacao?: string
+          solicitante?: string | null
           status?: string
           texto?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "esic_processos_coordenacao_id_fkey"
+            columns: ["coordenacao_id"]
+            isOneToOne: false
+            referencedRelation: "coordenacoes"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       historico_demandas: {
         Row: {
