@@ -2,7 +2,8 @@
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
-import { ESICProcesso } from '@/types/esic';
+import { ESICProcesso, ESICProcessoFormValues } from '@/types/esic';
+import { v4 as uuidv4 } from 'uuid';
 
 interface FilterOptions {
   page?: number;
@@ -72,23 +73,57 @@ export const useProcessos = () => {
     }
   };
 
-  const createProcesso = async (data: any, options?: { onSuccess?: () => void; onError?: (error: any) => void }) => {
+  const createProcesso = async (formValues: ESICProcessoFormValues, options?: { onSuccess?: () => void; onError?: (error: any) => void }) => {
     setIsCreating(true);
     setError(null);
 
     try {
+      // Generate a unique protocol number
+      const protocolo = `ESIC-${new Date().getFullYear()}-${uuidv4().substring(0, 8).toUpperCase()}`;
+
+      // Get user information from Supabase auth
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        throw new Error("Usuário não autenticado");
+      }
+
+      // Prepare data for Supabase
+      const processoData = {
+        protocolo,
+        assunto: formValues.assunto,
+        solicitante: formValues.solicitante,
+        data_processo: formValues.data_processo instanceof Date 
+          ? formValues.data_processo.toISOString().split('T')[0] 
+          : formValues.data_processo,
+        autor_id: user.id,
+        texto: formValues.texto,
+        situacao: formValues.situacao,
+        status: 'novo_processo',
+        coordenacao_id: formValues.coordenacao_id === 'none' ? null : formValues.coordenacao_id,
+        prazo_resposta: formValues.prazo_resposta instanceof Date 
+          ? formValues.prazo_resposta.toISOString().split('T')[0]
+          : formValues.prazo_resposta,
+      };
+
+      // Insert into Supabase
       const result = await supabase
         .from('esic_processos')
-        .insert(data)
+        .insert(processoData)
         .select();
 
       if (result.error) {
+        console.error('Erro ao criar processo:', result.error);
         throw result.error;
       }
 
       // Refresh process list
       fetchProcessos();
       options?.onSuccess?.();
+      
+      toast({
+        title: 'Processo criado com sucesso',
+        description: `O processo ${protocolo} foi criado com sucesso.`,
+      });
     } catch (err: any) {
       setError(err.message);
       options?.onError?.(err);
