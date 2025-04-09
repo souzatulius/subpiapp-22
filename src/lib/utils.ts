@@ -1,7 +1,7 @@
 
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
-import { format } from "date-fns"
+import { format, formatDistance } from "date-fns"
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -13,6 +13,15 @@ export function formatDateTime(dateString: string): string {
     return format(date, 'dd/MM/yy HH:mm');
   } catch (error) {
     return '-';
+  }
+}
+
+export function formatDate(date: Date | string): string {
+  try {
+    const dateObj = typeof date === 'string' ? new Date(date) : date;
+    return format(dateObj, 'dd/MM/yyyy');
+  } catch (error) {
+    return 'Data inválida';
   }
 }
 

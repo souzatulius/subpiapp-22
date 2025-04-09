@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { CalendarIcon } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { FilterOptions } from '@/components/ranking/types';
+import { FilterOptions } from '@/types/ranking';
 
 interface DateRangeFilterProps {
   dateRange: FilterOptions['dateRange'];

@@ -1,5 +1,4 @@
 
-
 export interface Demand {
   id: string;
   title: string;
@@ -46,6 +45,14 @@ export interface Demand {
   regiao?: string;
   foto_url?: string;
   notas?: Note[];
+  
+  // Properties needed by criar-nota
+  veiculo_imprensa?: string;
+  detalhes_solicitacao?: string;
+  perguntas?: string;
+  arquivo_url?: string;
+  tipo_veiculo?: string;
+  supervisao_tecnica?: any;
 }
 
 export interface Note {
@@ -62,6 +69,5 @@ export interface CriarNotaFormProps {
   demandaId?: string;
   onSuccess?: () => void;
   onCancel?: () => void;
-  onClose?: () => void; // Add this property to fix the error
+  onClose?: () => void;
 }
-
