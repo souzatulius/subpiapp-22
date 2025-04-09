@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { ActionCardItem } from '@/types/dashboard';
@@ -58,18 +57,6 @@ export const useDashboardConfig = (): DashboardConfigResult => {
           type: 'pending_activities',
           displayMobile: true,
           mobileOrder: 3
-        },
-        {
-          id: 'communications-card',
-          title: 'Comunicados',
-          iconId: 'Megaphone',
-          path: '',
-          color: 'deep-blue',
-          width: '25',
-          height: '2',
-          type: 'communications',
-          displayMobile: true,
-          mobileOrder: 4
         },
         {
           id: 'origem-demandas-card',

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import {
   DndContext,
@@ -15,7 +14,6 @@ import { getWidthClass, getHeightClass, getMobileSpecificDimensions } from './gr
 import { ActionCardItem, CardWidth, CardHeight } from '@/types/dashboard';
 import { useGridOccupancy } from '@/hooks/dashboard/useGridOccupancy';
 import PendingActivitiesCard from './cards/PendingActivitiesCard';
-import CommunicationsCard from './cards/CommunicationsCard';
 import OriginsDemandCardWrapper from './cards/OriginsDemandCardWrapper';
 
 export interface UnifiedCardGridProps {
@@ -206,10 +204,6 @@ const UnifiedCardGrid: React.FC<UnifiedCardGridProps> = ({
     
     if (card.type === 'pending_activities' || card.id === 'pending-activities-card') {
       return <PendingActivitiesCard />;
-    }
-    
-    if (card.type === 'communications' || card.id === 'communications-card') {
-      return <CommunicationsCard />;
     }
     
     return null;

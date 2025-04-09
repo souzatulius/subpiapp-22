@@ -112,7 +112,7 @@ const DashboardPage: React.FC = () => {
     if (cards && cards.length > 0) {
       const searchCardExists = cards.some(card => card.id === 'dashboard-search-card');
       const originDemandCardExists = cards.some(card => card.id === 'origem-demandas-card' || card.type === 'origin_demand_chart');
-      const communicationsCardExists = cards.some(card => card.id === 'communications-card');
+      
       const pendingActivitiesCardExists = cards.some(card => card.id === 'pending-activities-card');
       
       let updatedCards = [...cards];
@@ -152,24 +152,6 @@ const DashboardPage: React.FC = () => {
         };
         
         updatedCards = [...updatedCards, originDemandCard];
-        needsUpdate = true;
-      }
-      
-      if (!communicationsCardExists) {
-        const communicationsCard: ActionCardItem = {
-          id: 'communications-card',
-          title: 'Comunicados',
-          iconId: 'Megaphone',
-          path: '',
-          color: 'deep-blue',
-          width: '25',
-          height: '2',
-          type: 'communications',
-          displayMobile: true,
-          mobileOrder: 6
-        };
-        
-        updatedCards = [...updatedCards, communicationsCard];
         needsUpdate = true;
       }
       
