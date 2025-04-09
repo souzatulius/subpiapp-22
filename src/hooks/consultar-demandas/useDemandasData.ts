@@ -13,6 +13,7 @@ interface FilterParams {
   coordenacao?: string;
   tema?: string;
   status?: string;
+  prioridade?: string;
 }
 
 export const useDemandasData = () => {
@@ -42,7 +43,7 @@ export const useDemandasData = () => {
   const applyFilters = useCallback((filters: FilterParams) => {
     setActiveFilters(filters);
     
-    const { searchTerm, dateRange, coordenacao, tema, status } = filters;
+    const { searchTerm, dateRange, coordenacao, tema, status, prioridade } = filters;
     
     let filtered = [...demandas];
     
@@ -51,7 +52,7 @@ export const useDemandasData = () => {
       const lowerSearchTerm = searchTerm.toLowerCase();
       
       filtered = filtered.filter(demanda => {
-        const matchTitle = demanda.titulo.toLowerCase().includes(lowerSearchTerm);
+        const matchTitle = demanda.titulo?.toLowerCase().includes(lowerSearchTerm);
         const matchArea = demanda.area_coordenacao?.descricao?.toLowerCase().includes(lowerSearchTerm);
         const matchCoord = demanda.problema?.coordenacao?.descricao?.toLowerCase().includes(lowerSearchTerm);
         const matchProblem = demanda.problema?.descricao?.toLowerCase().includes(lowerSearchTerm);
@@ -100,6 +101,11 @@ export const useDemandasData = () => {
     // Apply status filter
     if (status && status !== 'todos') {
       filtered = filtered.filter(demanda => demanda.status === status);
+    }
+    
+    // Apply prioridade filter
+    if (prioridade && prioridade !== 'todas') {
+      filtered = filtered.filter(demanda => demanda.prioridade === prioridade);
     }
     
     setFilteredDemandas(filtered);

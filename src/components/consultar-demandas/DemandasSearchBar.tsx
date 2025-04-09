@@ -24,13 +24,13 @@ const DemandasSearchBar: React.FC<DemandasSearchBarProps> = ({
   };
 
   return (
-    <div className="w-full mb-6">
+    <div className="w-full">
       <div className="relative w-full">
         <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
         <Input 
           type="search" 
           placeholder="Buscar demandas..." 
-          className="pl-9 w-full" 
+          className="pl-9 w-full rounded-xl border-gray-300" 
           value={searchTerm} 
           onChange={handleSearchChange} 
         />

@@ -30,6 +30,8 @@ export const adaptDemandType = (demanda: DemandComponent): DemandType => {
     
     // Assign the properly typed notas array to the adapted demand
     adaptedDemand.notas = convertedNotas;
+  } else {
+    adaptedDemand.notas = [];
   }
   
   return adaptedDemand as DemandType;
@@ -55,7 +57,7 @@ export const adaptToDemandComponent = (demanda: DemandType): DemandComponent => 
       const componentNote: NoteComponent = {
         id: note.id,
         titulo: note.titulo,
-        conteudo: note.conteudo, // Already exists in demand type
+        conteudo: note.conteudo, 
         status: note.status,
         data_criacao: note.data_criacao,
         autor_id: note.autor_id,
@@ -63,6 +65,8 @@ export const adaptToDemandComponent = (demanda: DemandType): DemandComponent => 
       };
       return componentNote;
     });
+  } else {
+    componentDemand.notas = [];
   }
   
   return componentDemand as DemandComponent;
