@@ -15,18 +15,21 @@ export const adaptDemandType = (demanda: DemandComponent): DemandType => {
     autor: typeof demanda.autor === 'object' ? demanda.autor.nome_completo : demanda.autor as string
   };
   
-  // Handle notes separately if they exist
+  // Handle notes separately if they exist - explicitly cast to correct type
   if (demanda.notas && Array.isArray(demanda.notas)) {
-    // Ensure each note has the required conteudo property
-    adaptedDemand.notas = demanda.notas.map(note => ({
-      id: note.id,
-      titulo: note.titulo,
-      conteudo: note.conteudo || '', // Ensure conteudo is defined
-      status: note.status || 'pendente',
-      data_criacao: note.data_criacao || new Date().toISOString(),
-      autor_id: note.autor_id,
-      demanda_id: note.demanda_id
-    })) as NoteType[];
+    const typedNotes = demanda.notas.map(note => {
+      return {
+        id: note.id,
+        titulo: note.titulo,
+        conteudo: note.conteudo || '', // Ensure conteudo is defined
+        status: note.status || 'pendente',
+        data_criacao: note.data_criacao || new Date().toISOString(),
+        autor_id: note.autor_id || '',
+        demanda_id: note.demanda_id || ''
+      } as NoteType;
+    });
+    
+    adaptedDemand.notas = typedNotes;
   }
   
   return adaptedDemand as DemandType;
