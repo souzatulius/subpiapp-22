@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { 
@@ -39,6 +40,7 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { cn } from '@/lib/utils';
 import { ESICProcesso, ESICProcessoFormValues } from '@/types/esic';
+import { useCoordenacoes } from '@/hooks/useCoordenacoes';
 
 const formSchema = z.object({
   data_processo: z.date({
@@ -74,11 +76,11 @@ const ProcessoForm: React.FC<ProcessoFormProps> = ({
   onSubmit,
   isLoading,
   onCancel,
-  mode = 'create',
-  coordenacoes = []
+  mode = 'create'
 }) => {
   const { toast } = useToast();
   const [prazoPredefinido, setPrazoPredefinido] = useState<string | null>(null);
+  const { coordenacoes, isLoading: coordenacoesLoading } = useCoordenacoes();
   
   const form = useForm<ESICProcessoFormValues>({
     resolver: zodResolver(formSchema),
@@ -154,15 +156,21 @@ const ProcessoForm: React.FC<ProcessoFormProps> = ({
     form.setValue('prazo_resposta', deadline);
   };
 
+  // Transform coordenacoes data to the format expected by the SelectItem components
+  const formattedCoordenacoes = coordenacoes?.map(coord => ({
+    id: coord.id,
+    nome: coord.descricao
+  })) || [];
+
   return (
-    <Card className="w-full border-none shadow-none">
-      <CardHeader className="px-0">
-        <CardTitle>
+    <Card className="w-full border rounded-xl shadow-md">
+      <CardHeader className="px-6">
+        <CardTitle className="text-2xl font-semibold text-subpi-blue">
           {mode === 'create' ? 'Novo Processo' : 'Editar Processo'}
         </CardTitle>
       </CardHeader>
       
-      <CardContent className="px-0">
+      <CardContent className="px-6">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -275,15 +283,16 @@ const ProcessoForm: React.FC<ProcessoFormProps> = ({
                     onValueChange={field.onChange} 
                     defaultValue={field.value}
                     value={field.value}
+                    disabled={coordenacoesLoading}
                   >
                     <FormControl>
                       <SelectTrigger className="rounded-xl">
-                        <SelectValue placeholder="Selecione a coordenação" />
+                        <SelectValue placeholder={coordenacoesLoading ? "Carregando..." : "Selecione a coordenação"} />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent className="rounded-xl">
                       <SelectItem value="none">Não atribuído</SelectItem>
-                      {coordenacoes.map((coord) => (
+                      {formattedCoordenacoes.map((coord) => (
                         <SelectItem key={coord.id} value={coord.id}>
                           {coord.nome}
                         </SelectItem>
@@ -391,7 +400,7 @@ const ProcessoForm: React.FC<ProcessoFormProps> = ({
         </Form>
       </CardContent>
       
-      <CardFooter className="px-0 flex justify-end space-x-2">
+      <CardFooter className="px-6 flex justify-end space-x-2">
         <Button variant="outline" onClick={onCancel} disabled={isLoading} className="rounded-xl">
           Cancelar
         </Button>
