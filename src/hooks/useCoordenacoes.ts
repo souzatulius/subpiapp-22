@@ -25,15 +25,22 @@ export const useCoordenacoes = () => {
           
         if (error) throw error;
         
-        setCoordenacoes(data || []);
+        const formattedCoords = data?.map(coord => ({
+          ...coord,
+          // Format the label to include sigla in parentheses if available
+          label: coord.sigla ? `${coord.descricao} (${coord.sigla})` : coord.descricao,
+          value: coord.id
+        })) || [];
+        
+        setCoordenacoes(formattedCoords);
       } catch (err) {
         console.error('Error fetching coordenacoes:', err);
         setError(err as Error);
         // Provide some default data as fallback
         setCoordenacoes([
-          { id: 'default-1', descricao: 'CPO', sigla: 'CPO' },
-          { id: 'default-2', descricao: 'Assessoria', sigla: 'ASS' },
-          { id: 'default-3', descricao: 'Gabinete', sigla: 'GAB' }
+          { id: 'default-1', descricao: 'CPO', sigla: 'CPO', label: 'CPO', value: 'default-1' },
+          { id: 'default-2', descricao: 'Assessoria', sigla: 'ASS', label: 'Assessoria (ASS)', value: 'default-2' },
+          { id: 'default-3', descricao: 'Gabinete', sigla: 'GAB', label: 'Gabinete (GAB)', value: 'default-3' }
         ]);
       } finally {
         setIsLoading(false);

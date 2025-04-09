@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -8,6 +7,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
 import { SelectOption } from '@/components/register/types';
+import EmailSuffix from '@/components/EmailSuffix';
+import { registerUser } from '@/services/authService';
 
 interface RegisterFormProps {
   onSuccess?: () => void;
@@ -43,6 +44,10 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  const handleEmailChange = (value: string) => {
+    setFormData((prev) => ({ ...prev, email: value }));
+  };
+
   const handleSelectChange = (name: string, value: string) => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
@@ -62,18 +67,37 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
     try {
       setLoading(true);
       
-      // Call register service (implement this)
-      // await registerUser(formData);
+      // Build complete email with domain
+      const completeEmail = `${formData.email}@smsub.prefeitura.sp.gov.br`;
+      
+      // Create registration data object
+      const registrationData = {
+        email: completeEmail,
+        nome_completo: formData.nome_completo,
+        cargo: formData.cargo,
+        cargo_id: formData.cargo_id,
+        RF: formData.RF,
+        coordenacao: formData.coordenacao,
+        coordenacao_id: formData.coordenacao_id,
+        password: formData.password
+      };
+      
+      // Call register service
+      const result = await registerUser(registrationData);
+      
+      if (result.error) {
+        throw result.error;
+      }
       
       toast({
         title: 'Solicitação enviada com sucesso',
-        description: 'Você receberá um email com instruções para completar seu cadastro quando sua solicitação for aprovada.',
+        description: 'Você receberá um email com instruções para confirmar seu cadastro.',
       });
       
       if (onSuccess) {
         onSuccess();
       } else {
-        navigate('/register-success');
+        navigate('/email-verified');
       }
     } catch (error: any) {
       console.error('Error during registration:', error);
@@ -86,6 +110,17 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
     } finally {
       setLoading(false);
     }
+  };
+
+  // Function to get the display text for coordination (sigla or full name)
+  const getCoordinationDisplayText = (coord: SelectOption) => {
+    // Check if the coord object has a sigla property
+    if (coord.sigla && coord.sigla.trim() !== '') {
+      return coord.sigla; // Return just the sigla if available
+    }
+    
+    // Otherwise return the full description
+    return coord.label || coord.value;
   };
 
   return (
@@ -101,14 +136,11 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
         <div className="space-y-4">
           <div>
             <Label htmlFor="email">Email Institucional</Label>
-            <Input
+            <EmailSuffix
               id="email"
-              name="email"
-              type="email"
               value={formData.email}
-              onChange={handleChange}
-              placeholder="seu.email@prefeitura.sp.gov.br"
-              required
+              onChange={handleEmailChange}
+              suffix="@smsub.prefeitura.sp.gov.br"
               className="mt-1"
             />
           </div>
@@ -121,7 +153,6 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
               type="text"
               value={formData.nome_completo}
               onChange={handleChange}
-              placeholder="Nome Completo"
               required
               className="mt-1"
             />
@@ -194,7 +225,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
                 <SelectContent>
                   {coordenacoes.map((coord) => (
                     <SelectItem key={coord.value} value={coord.value}>
-                      {coord.label}
+                      {getCoordinationDisplayText(coord)}
                     </SelectItem>
                   ))}
                 </SelectContent>

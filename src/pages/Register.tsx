@@ -27,13 +27,29 @@ const Register = () => {
     }
   }, [session, navigate]);
   
+  // Transform coordenacoes to include sigla information
+  const enrichedCoordenacoes: SelectOption[] = coordenacoes.map(coord => ({
+    ...coord,
+    sigla: getSiglaFromCoord(coord)
+  }));
+  
+  // Helper function to extract sigla from coordenacao if available
+  function getSiglaFromCoord(coord: SelectOption): string {
+    // Check if the value contains a sigla in parentheses
+    const match = coord.label?.match(/\(([^)]+)\)/);
+    if (match && match[1]) {
+      return match[1].trim();
+    }
+    return '';
+  }
+  
   return (
     <AuthLayout>
       <div className="flex items-center justify-center w-full h-full">
         <RegisterForm 
           roles={roles} 
           areas={areas}
-          coordenacoes={coordenacoes}
+          coordenacoes={enrichedCoordenacoes}
           loadingOptions={loadingOptions} 
         />
       </div>

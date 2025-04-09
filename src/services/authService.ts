@@ -35,6 +35,7 @@ export const registerUser = async (userData: RegisterUserData) => {
         nome_completo: userData.nome_completo,
         cargo_id: userData.cargo_id,
         coordenacao_id: userData.coordenacao_id,
+        RF: userData.RF, // Store RF in the database
         whatsapp: userData.whatsapp || null,
         status_conta: 'pendente' // Account needs approval by admin
       });

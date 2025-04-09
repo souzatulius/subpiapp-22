@@ -1,69 +1,55 @@
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
-import AuthLayout from '@/components/AuthLayout';
-import AttentionBox from '@/components/ui/attention-box';
 import { useAuth } from '@/hooks/useSupabaseAuth';
+import { Button } from '@/components/ui/button';
+import { CheckCircle2, Clock, InfoIcon } from 'lucide-react';
+import AuthLayout from '@/components/AuthLayout';
 
 const EmailVerified = () => {
-  const { session, isApproved } = useAuth();
-
-  // Determine the message to show based on user status
-  const getStatusMessage = () => {
-    if (!session) {
-      return {
-        title: "Cadastro Realizado com Sucesso",
-        message: "Por favor, verifique seu email para validar o seu cadastro. Após a validação, seu acesso será aprovado por um administrador."
-      };
-    } else if (!isApproved) {
-      return {
-        title: "Aguardando Aprovação",
-        message: "Seu email foi verificado com sucesso! Aguarde a aprovação do seu acesso por um administrador do sistema."
-      };
-    } else {
-      return {
-        title: "Acesso Aprovado",
-        message: "Seu acesso foi aprovado! Você já pode acessar o sistema."
-      };
-    }
-  };
-
-  const status = getStatusMessage();
-
+  const { user } = useAuth();
+  
   return (
     <AuthLayout>
-      <div className="bg-white rounded-xl shadow-lg p-4 sm:p-8 w-full max-w-md mx-auto">
-        <h2 className="text-2xl font-bold mb-4 text-slate-900">
-          {status.title}
-        </h2>
-        
-        <AttentionBox title={session ? "Status do Acesso" : "Verificação de Email"} className="mb-6">
-          {status.message}
-        </AttentionBox>
-        
-        {!session ? (
-          <>
-            <p className="text-gray-600 mb-4">
-              Enviamos um link de confirmação para o seu email. Clique no link para validar o seu cadastro.
-            </p>
-            
-            <p className="text-gray-600 mb-6">
-              Não recebeu o email? Verifique sua pasta de spam ou entre em contato com o suporte.
-            </p>
-          </>
-        ) : !isApproved ? (
-          <p className="text-gray-600 mb-6">
-            Seu cadastro está sendo analisado. Assim que for aprovado, você receberá uma notificação por email.
+      <div className="flex flex-col items-center justify-center w-full max-w-md p-8 mx-auto space-y-6 bg-white rounded-lg shadow-md">
+        <div className="flex flex-col items-center space-y-4 text-center">
+          {user ? (
+            <CheckCircle2 className="w-16 h-16 text-green-500" />
+          ) : (
+            <InfoIcon className="w-16 h-16 text-blue-500" />
+          )}
+          
+          <h1 className="text-3xl font-bold">
+            {user ? 'Email Verificado' : 'Verifique seu Email'}
+          </h1>
+          
+          <div className="p-4 bg-blue-50 text-blue-800 rounded-lg flex items-start space-x-3">
+            <Clock className="w-5 h-5 mt-0.5 flex-shrink-0" />
+            <div className="text-left">
+              <p className="font-medium">Solicitação em análise</p>
+              <p className="text-sm mt-1">
+                Seu cadastro foi recebido e está pendente de aprovação por um administrador.
+                Você receberá um email quando seu acesso for aprovado.
+              </p>
+            </div>
+          </div>
+          
+          <p className="text-gray-600">
+            {user
+              ? 'Aguarde a aprovação do seu acesso por um administrador.'
+              : 'Enviamos um link para confirmar seu email. Por favor, verifique sua caixa de entrada.'}
           </p>
-        ) : (
-          <p className="text-gray-600 mb-6">
-            Você já pode acessar todas as funcionalidades do sistema.
-          </p>
-        )}
+        </div>
         
-        <Link to="/login" className="block w-full bg-[#003570] text-white py-3 px-4 hover:bg-blue-900 transition-all duration-200 flex items-center justify-center font-medium rounded-xl shadow-sm hover:shadow-md">
-          {isApproved ? "Acessar o Sistema" : "Voltar para Login"}
-        </Link>
+        <div className="w-full pt-4 space-y-3">
+          <Button asChild className="w-full">
+            <Link to="/login">Voltar para Login</Link>
+          </Button>
+          
+          <p className="text-sm text-center text-gray-500">
+            Precisa de ajuda? Entre em contato com o administrador do sistema.
+          </p>
+        </div>
       </div>
     </AuthLayout>
   );
