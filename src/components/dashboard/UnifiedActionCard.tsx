@@ -78,6 +78,8 @@ export interface UnifiedActionCardProps extends ActionCardItem {
   specialCardsData?: any;
   hasSubtitle?: boolean;
   isMobileView?: boolean;
+  contentClassname?: string;
+  isPendingActions?: boolean;
 }
 
 export function SortableUnifiedActionCard(props: UnifiedActionCardProps) {
@@ -160,6 +162,7 @@ export function UnifiedActionCard({
   hasBadge,
   badgeValue,
   hasSubtitle,
+  contentClassname = '',
 }: UnifiedActionCardProps & { sortableProps?: SortableProps }) {
   const navigate = useNavigate();
   
@@ -275,7 +278,7 @@ export function UnifiedActionCard({
   };
   
   return (
-    <div className="h-full relative group" onClick={isEditing ? undefined : handleCardClick}>
+    <div className={`h-full relative group ${contentClassname}`} onClick={isEditing ? undefined : handleCardClick}>
       {renderCardContent()}
       
       {(isEditing || onEdit) && (

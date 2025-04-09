@@ -209,7 +209,7 @@ const UnifiedCardGrid: React.FC<UnifiedCardGridProps> = ({
                 quickDemandTitle={quickDemandTitle}
                 onQuickDemandTitleChange={onQuickDemandTitleChange}
                 onQuickDemandSubmit={onQuickDemandSubmit}
-                onSearchSubmit={onSearchSubmit ? (query) => onSearchSubmit(query) : undefined}
+                onSearchSubmit={onSearchSubmit}
                 specialCardsData={specialCardsData}
                 isCustom={card.isCustom}
                 hasBadge={card.hasBadge}
