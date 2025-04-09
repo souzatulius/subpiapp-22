@@ -18,6 +18,7 @@ import { toast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
 import { motion } from 'framer-motion';
 import { useCardStorage } from '@/hooks/dashboard/useCardStorage';
+import OriginDemandSection from '@/components/dashboard/OriginDemandSection';
 
 const DashboardPage: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -183,6 +184,8 @@ const DashboardPage: React.FC = () => {
                     onResetClick={handleResetDashboard}
                   />
                 </div>
+                
+                <OriginDemandSection />
                 
                 <div className={`relative ${isMobile ? 'pb-32' : ''}`}>
                   {isLoading ? (
