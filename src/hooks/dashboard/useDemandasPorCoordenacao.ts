@@ -94,74 +94,51 @@ export const useDemandasPorCoordenacao = () => {
             };
           });
           
-          // Fetch demandas grouped by day and coordenação
-          let demandasData;
-          let demandasError;
+          // Fetch demandas data directly with SQL query
+          const startDateStr = format(startDay, 'yyyy-MM-dd');
+          const endDateStr = format(addDays(startDay, 4), 'yyyy-MM-dd');
           
-          try {
-            // Try to use RPC if available
-            const result = await supabase.rpc('demandas_por_coordenacao_e_dia', {
-              start_date: format(startDay, 'yyyy-MM-dd'),
-              end_date: format(addDays(startDay, 4), 'yyyy-MM-dd')
-            });
-            
-            demandasData = result.data;
-            demandasError = result.error;
-          } catch (rpcError) {
-            // Fallback: perform manual query since RPC might not exist
-            console.log('RPC not available, using manual query', rpcError);
-            const result = await supabase
-              .from('demandas')
-              .select(`
-                id, 
-                criado_em, 
-                coordenacao_id, 
-                coordenacao:coordenacoes(id, descricao)
-              `)
-              .gte('criado_em', format(startDay, 'yyyy-MM-dd'))
-              .lte('criado_em', format(addDays(startDay, 4), 'yyyy-MM-dd'));
-            
-            demandasData = result.data;
-            demandasError = result.error;
-          }
+          const { data: demandasData, error: demandasError } = await supabase
+            .from('demandas')
+            .select(`
+              id, 
+              criado_em, 
+              coordenacao_id, 
+              coordenacao:coordenacoes(id, descricao)
+            `)
+            .gte('criado_em', startDateStr)
+            .lte('criado_em', endDateStr);
           
           if (demandasError) throw demandasError;
           
-          // Process demandas data
-          let processedDemandas: DemandaCountByCoordination[] = [];
+          // Process demandas data (manually aggregate)
+          const groupedDemandas: Record<string, DemandaCountByCoordination> = {};
           
           if (demandasData) {
-            // Check if data is already aggregated (from RPC)
-            if (demandasData[0] && 'quantidade' in demandasData[0]) {
-              processedDemandas = demandasData as DemandaCountByCoordination[];
-            } else {
-              // Manually aggregate the data
-              const groupedData = (demandasData as any[]).reduce((acc, item) => {
-                const date = new Date(item.criado_em);
-                const day = format(date, 'yyyy-MM-dd');
-                const coordId = item.coordenacao_id || 'sem_coordenacao';
-                const coordNome = item.coordenacao?.descricao || 'Sem coordenação';
-                
-                const key = `${day}-${coordId}`;
-                
-                if (!acc[key]) {
-                  acc[key] = {
-                    dia: day,
-                    dia_formatado: format(date, 'EEEE', { locale: ptBR }),
-                    data: date,
-                    coordenacao_id: coordId,
-                    coordenacao_nome: coordNome,
-                    quantidade: 0
-                  };
-                }
-                
-                acc[key].quantidade += 1;
-                return acc;
-              }, {} as Record<string, DemandaCountByCoordination>);
+            demandasData.forEach(item => {
+              const date = new Date(item.criado_em);
+              const day = format(date, 'yyyy-MM-dd');
+              const coordId = item.coordenacao_id || 'sem_coordenacao';
+              const coordNome = item.coordenacao?.descricao || 'Sem coordenação';
               
-              processedDemandas = Object.values(groupedData);
-            }
+              const key = `${day}-${coordId}`;
+              
+              if (!groupedDemandas[key]) {
+                groupedDemandas[key] = {
+                  dia: day,
+                  dia_formatado: format(date, 'EEEE', { locale: ptBR }),
+                  data: date,
+                  coordenacao_id: coordId,
+                  coordenacao_nome: coordNome,
+                  quantidade: 0
+                };
+              }
+              
+              groupedDemandas[key].quantidade += 1;
+            });
           }
+          
+          const processedDemandas = Object.values(groupedDemandas);
           
           // Ensure we have entries for all days of the week for each coordenação
           const fullDemandasData: DemandaCountByCoordination[] = [];
@@ -193,63 +170,37 @@ export const useDemandasPorCoordenacao = () => {
           
           setDemandas(fullDemandasData);
           
-          // Fetch notas oficiais data
-          let notasData;
-          let notasError;
-          
-          try {
-            // Try to use RPC if available
-            const result = await supabase.rpc('notas_por_dia', {
-              start_date: format(startDay, 'yyyy-MM-dd'),
-              end_date: format(addDays(startDay, 4), 'yyyy-MM-dd')
-            });
-            
-            notasData = result.data;
-            notasError = result.error;
-          } catch (rpcError) {
-            // Fallback: perform manual query since RPC might not exist
-            console.log('RPC not available, using manual query', rpcError);
-            const result = await supabase
-              .from('notas_oficiais')
-              .select('id, criado_em')
-              .gte('criado_em', format(startDay, 'yyyy-MM-dd'))
-              .lte('criado_em', format(addDays(startDay, 4), 'yyyy-MM-dd'));
-            
-            notasData = result.data;
-            notasError = result.error;
-          }
+          // Fetch notas data directly
+          const { data: notasData, error: notasError } = await supabase
+            .from('notas_oficiais')
+            .select('id, criado_em')
+            .gte('criado_em', startDateStr)
+            .lte('criado_em', endDateStr);
           
           if (notasError) throw notasError;
           
-          // Process notas data
-          let processedNotas: NotasCount[] = [];
+          // Process notas data (manually aggregate)
+          const groupedNotas: Record<string, NotasCount> = {};
           
           if (notasData) {
-            // Check if data is already aggregated (from RPC)
-            if (notasData[0] && 'quantidade' in notasData[0]) {
-              processedNotas = notasData as NotasCount[];
-            } else {
-              // Manually aggregate the data
-              const groupedData = (notasData as any[]).reduce((acc, item) => {
-                const date = new Date(item.criado_em);
-                const day = format(date, 'yyyy-MM-dd');
-                
-                if (!acc[day]) {
-                  acc[day] = {
-                    dia: day,
-                    dia_formatado: format(date, 'EEEE', { locale: ptBR }),
-                    data: date,
-                    quantidade: 0
-                  };
-                }
-                
-                acc[day].quantidade += 1;
-                return acc;
-              }, {} as Record<string, NotasCount>);
+            notasData.forEach(item => {
+              const date = new Date(item.criado_em);
+              const day = format(date, 'yyyy-MM-dd');
               
-              processedNotas = Object.values(groupedData);
-            }
+              if (!groupedNotas[day]) {
+                groupedNotas[day] = {
+                  dia: day,
+                  dia_formatado: format(date, 'EEEE', { locale: ptBR }),
+                  data: date,
+                  quantidade: 0
+                };
+              }
+              
+              groupedNotas[day].quantidade += 1;
+            });
           }
+          
+          const processedNotas = Object.values(groupedNotas);
           
           // Ensure we have entries for all days of the week for notas
           const fullNotasData = weekdays.map(day => {
