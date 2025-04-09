@@ -13,7 +13,6 @@ import { useComunicacaoDashboard } from '@/hooks/dashboard/useComunicacaoDashboa
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';
-import SmartSearchCard from '@/components/dashboard/SmartSearchCard';
 import { ActionCardItem, CardColor } from '@/types/dashboard';
 import { useOriginOptions } from '@/hooks/dashboard-management/useOriginOptions';
 import { useOrigens } from '@/hooks/comunicacao/useOrigens';
@@ -64,30 +63,14 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
         return card;
       });
       
-      // Check if search card exists, otherwise add it
-      const hasSearchCard = updatedCards.some(card => card.id === 'comunicacao-search-card');
-      
-      if (!hasSearchCard) {
-        const searchCard: ActionCardItem = {
-          id: 'comunicacao-search-card',
-          title: 'Busca Rápida',
-          iconId: 'search',
-          path: '',
-          color: 'bg-white' as CardColor,
-          width: '100',
-          height: '0.5',
-          type: 'smart_search',
-          isCustom: true,
-          displayMobile: true,
-          mobileOrder: 0
-        };
-        
-        // Insert after the reset button (as second item)
-        updatedCards.splice(1, 0, searchCard);
-      }
+      // Remove search cards
+      const filteredCards = updatedCards.filter(card => 
+        card.id !== 'comunicacao-search-card' && 
+        card.type !== 'smart_search'
+      );
       
       // Check if we have the origin selection card
-      const hasOriginSelectionCard = updatedCards.some(card => card.type === 'origin_selection');
+      const hasOriginSelectionCard = filteredCards.some(card => card.type === 'origin_selection');
       
       if (!hasOriginSelectionCard) {
         const originCard: ActionCardItem = {
@@ -100,14 +83,14 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
           height: '2',
           type: 'origin_selection',
           displayMobile: true,
-          mobileOrder: updatedCards.length
+          mobileOrder: filteredCards.length
         };
         
-        updatedCards.push(originCard);
+        filteredCards.push(originCard);
       }
       
-      if (JSON.stringify(updatedCards) !== JSON.stringify(cards)) {
-        handleCardsReorder(updatedCards);
+      if (JSON.stringify(filteredCards) !== JSON.stringify(cards)) {
+        handleCardsReorder(filteredCards);
       }
     }
   }, [cards]);
@@ -121,31 +104,9 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
     });
   };
 
-  const handleSearchSubmit = (query: string) => {
-    console.log("Search submitted:", query);
-    // Here you would implement your search logic
-  };
-
   if (!isPreview && !user) {
     return <LoadingIndicator />;
   }
-
-  // Helper to render specific card content based on type
-  const renderCardContent = (cardId: string) => {
-    if (cardId === 'comunicacao-search-card') {
-      return (
-        <div className="w-full h-full flex items-center justify-center px-4">
-          <div className="w-[80%]">
-            <SmartSearchCard 
-              placeholder="O que deseja fazer?" 
-              onSearch={handleSearchSubmit}
-            />
-          </div>
-        </div>
-      );
-    }
-    return null;
-  };
 
   const specialData = {
     originOptions: originOptions
@@ -191,8 +152,6 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
               onHideCard={handleCardHide}
               isMobileView={isMobile}
               isEditMode={isEditMode}
-              renderSpecialCardContent={renderCardContent}
-              onSearchSubmit={handleSearchSubmit}
               specialCardsData={specialData}
               disableWiggleEffect={true}
               showSpecialFeatures={true}

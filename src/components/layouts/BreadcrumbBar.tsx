@@ -43,6 +43,9 @@ const BreadcrumbBar: React.FC<BreadcrumbBarProps> = ({
     return ['zeladoria'].includes(path);
   };
 
+  // Hide Dashboard from breadcrumb
+  const filteredPaths = paths.filter(path => path !== 'dashboard');
+
   return (
     <div className={`bg-white border-b border-gray-200 py-2 px-4 ${className}`}>
       <div className="flex items-center text-sm text-gray-500">
@@ -54,10 +57,10 @@ const BreadcrumbBar: React.FC<BreadcrumbBarProps> = ({
           <span>Início</span>
         </Link>
 
-        {paths.map((path, i) => (
+        {filteredPaths.map((path, i) => (
           <React.Fragment key={i}>
             <ChevronRight className="h-4 w-4 mx-1" />
-            {i === paths.length - 1 || (onSettingsClick && path === 'settings') || isNonClickable(path) ? (
+            {i === filteredPaths.length - 1 || (onSettingsClick && path === 'settings') || isNonClickable(path) ? (
               <span 
                 className={`${(onSettingsClick && path === 'settings') ? 'cursor-pointer hover:text-primary' : ''}`}
                 onClick={onSettingsClick && path === 'settings' ? onSettingsClick : undefined}
@@ -66,7 +69,7 @@ const BreadcrumbBar: React.FC<BreadcrumbBarProps> = ({
               </span>
             ) : (
               <Link 
-                to={`/${paths.slice(0, i + 1).join('/')}`}
+                to={`/${['dashboard', ...filteredPaths.slice(0, i + 1)].join('/')}`}
                 className="hover:text-primary transition-colors"
               >
                 {getLabel(path)}

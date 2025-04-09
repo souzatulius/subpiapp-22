@@ -36,7 +36,7 @@ const DashboardLayout: React.FC = () => {
       <div className="transition-all duration-300 min-h-[64px]">
         <Header showControls={true} toggleSidebar={toggleSidebar} />
         {/* Desktop breadcrumb - now attached directly to header */}
-        {!isMobile && <BreadcrumbBar className="mt-0 border-t-0" />}
+        <BreadcrumbBar className="mt-0 border-t-0" />
       </div>
       
       <div className="flex flex-1 relative h-full">
