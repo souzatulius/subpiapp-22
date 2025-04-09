@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { ESICProcesso, ESICProcessoFormValues } from '@/types/esic';
@@ -41,15 +42,23 @@ export const useProcessos = () => {
       
       console.log(`Processos encontrados: ${data?.length || 0}`);
       
-      const typedData = (data || []).map(item => ({
-        ...item,
-        protocolo: item.protocolo || `ESIC-${item.id.slice(0, 8)}`,
-        assunto: item.assunto || `Processo e-SIC #${item.id.slice(0, 8)}`,
-        created_at: item.criado_em,
-        situacao: item.situacao as ESICProcesso['situacao'],
-        status: item.status as ESICProcesso['status'],
-        autor: item.autor as { nome_completo: string }
-      })) as ESICProcesso[];
+      const typedData = (data || []).map(item => {
+        // Handle possible error in autor field by providing a default
+        let autorNome = 'Usuário';
+        if (item.autor && typeof item.autor === 'object' && 'nome_completo' in item.autor) {
+          autorNome = item.autor.nome_completo;
+        }
+        
+        return {
+          ...item,
+          protocolo: item.protocolo || `ESIC-${item.id.slice(0, 8)}`,
+          assunto: item.assunto || `Processo e-SIC #${item.id.slice(0, 8)}`,
+          created_at: item.criado_em,
+          situacao: item.situacao as ESICProcesso['situacao'],
+          status: item.status as ESICProcesso['status'],
+          autor: { nome_completo: autorNome }
+        };
+      }) as ESICProcesso[];
       
       setProcessos(typedData);
     } catch (error) {
@@ -126,17 +135,26 @@ export const useProcessos = () => {
         .from('esic_processos')
         .update(params.data)
         .eq('id', params.id)
-        .select()
+        .select(`
+          *,
+          autor:usuarios(nome_completo)
+        `)
         .single();
       
       if (error) throw error;
+      
+      // Handle possible error in autor field by providing a default
+      let autorNome = 'Usuário';
+      if (data.autor && typeof data.autor === 'object' && 'nome_completo' in data.autor) {
+        autorNome = data.autor.nome_completo;
+      }
       
       const typedData = {
         ...data,
         created_at: data.criado_em,
         situacao: data.situacao as ESICProcesso['situacao'],
         status: data.status as ESICProcesso['status'],
-        autor: data.autor as { nome_completo: string }
+        autor: { nome_completo: autorNome }
       } as ESICProcesso;
       
       setProcessos(prev => prev.map(p => p.id === params.id ? typedData : p));

@@ -1,9 +1,9 @@
+
 import React, { useRef } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { useNavigate } from 'react-router-dom';
 import { useRecentSearches } from '@/hooks/dashboard/useRecentSearches';
 import { toast } from '@/hooks/use-toast';
-import SearchInput from './search/SearchInput';
 
 interface DashboardSearchCardProps {
   isEditMode?: boolean;
@@ -51,9 +51,7 @@ const DashboardSearchCard: React.FC<DashboardSearchCardProps> = ({ isEditMode = 
   return (
     <div ref={containerRef} className="w-full">
       <Card className="w-full border border-blue-100 rounded-xl">
-        <CardContent className="p-1.5">
-          
-        </CardContent>
+        {/* Removed the empty CardContent section */}
       </Card>
     </div>
   );
