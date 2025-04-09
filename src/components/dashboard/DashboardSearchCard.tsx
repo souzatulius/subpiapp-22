@@ -13,8 +13,10 @@ interface DashboardSearchCardProps {
 const DashboardSearchCard: React.FC<DashboardSearchCardProps> = ({ isEditMode = false }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [isActive, setIsActive] = useState(false);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [suggestions, setSuggestions] = useState<string[]>([]);
   const navigate = useNavigate();
-  const { addRecentSearch } = useRecentSearches();
+  const { addRecentSearch, recentSearches } = useRecentSearches();
   
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,9 +41,33 @@ const DashboardSearchCard: React.FC<DashboardSearchCardProps> = ({ isEditMode = 
   };
   
   const handleKeyDown = (e: React.KeyboardEvent) => {
+    // Não bloqueamos eventos de teclado aqui para permitir que o espaço funcione
     if (e.key === 'Enter') {
       handleSearch(e as unknown as React.FormEvent);
     }
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setSearchQuery(value);
+    
+    // Filtra sugestões das pesquisas recentes
+    if (value.trim()) {
+      const filtered = (recentSearches || [])
+        .filter(recent => recent.toLowerCase().includes(value.toLowerCase()))
+        .slice(0, 5);
+      setSuggestions(filtered);
+      setShowSuggestions(filtered.length > 0);
+    } else {
+      setSuggestions([]);
+      setShowSuggestions(false);
+    }
+  };
+  
+  const handleSelectSuggestion = (suggestion: string) => {
+    setSearchQuery(suggestion);
+    navigate(`/pesquisa?q=${encodeURIComponent(suggestion)}`);
+    setShowSuggestions(false);
   };
   
   if (isEditMode) {
@@ -60,17 +86,23 @@ const DashboardSearchCard: React.FC<DashboardSearchCardProps> = ({ isEditMode = 
   return (
     <Card className={`w-full border transition-all duration-200 rounded-xl ${isActive ? 'border-blue-400 shadow-md' : 'border-blue-100'}`}>
       <CardContent className="p-1.5">
-        <form onSubmit={handleSearch} className="flex items-center w-full">
-          <div className="flex items-center flex-grow px-3 py-1.5">
+        <form onSubmit={handleSearch} className="flex items-center w-full relative">
+          <div className="flex items-center flex-grow px-3 py-1.5 relative">
             <Search className="h-5 w-5 text-gray-400 mr-2" />
             <input
               type="text"
               placeholder="Pesquisar no dashboard..."
               className="flex-grow bg-transparent border-none focus:outline-none text-gray-800 placeholder:text-gray-400"
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              onFocus={() => setIsActive(true)}
-              onBlur={() => setIsActive(false)}
+              onChange={handleInputChange}
+              onFocus={() => {
+                setIsActive(true);
+                if (suggestions.length > 0) setShowSuggestions(true);
+              }}
+              onBlur={() => {
+                setIsActive(false);
+                setTimeout(() => setShowSuggestions(false), 200);
+              }}
               onKeyDown={handleKeyDown}
             />
           </div>
@@ -79,6 +111,25 @@ const DashboardSearchCard: React.FC<DashboardSearchCardProps> = ({ isEditMode = 
             <span>+</span>
             <span className="mx-1">K</span>
           </div>
+          
+          {showSuggestions && suggestions.length > 0 && (
+            <div 
+              className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 shadow-lg rounded-xl z-50"
+              style={{ position: 'absolute', zIndex: 50 }}
+            >
+              <ul className="py-1">
+                {suggestions.map((suggestion, index) => (
+                  <li
+                    key={index}
+                    className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                    onMouseDown={() => handleSelectSuggestion(suggestion)}
+                  >
+                    {suggestion}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </form>
       </CardContent>
     </Card>

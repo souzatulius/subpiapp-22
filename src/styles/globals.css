@@ -85,6 +85,17 @@
   }
 }
 
+/* Garantir que dropdowns não sejam cortados */
+.dropdown-container {
+  position: relative;
+  z-index: 50;
+}
+
+.dropdown-content {
+  position: absolute;
+  z-index: 50;
+}
+
 /* Wiggle animation for draggable items */
 @keyframes wiggle {
   0%, 100% { transform: rotate(-1deg); }
@@ -107,4 +118,15 @@
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
   }
+}
+
+/* Garantir que elementos com z-index elevado se sobreponham corretamente */
+.search-suggestions {
+  z-index: 9999;
+  position: relative;
+}
+
+/* Garantir que containers não cortem dropdowns */
+.overflow-visible-container {
+  overflow: visible !important;
 }
