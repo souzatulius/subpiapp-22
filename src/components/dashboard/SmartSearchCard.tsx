@@ -73,6 +73,7 @@ const SmartSearchCard: React.FC<SmartSearchCardProps> = ({
     if (suggestions.length > 0) {
       navigate(suggestions[0].route);
       setQuery('');
+      setShowSuggestions(false);
       return;
     }
 
@@ -81,13 +82,13 @@ const SmartSearchCard: React.FC<SmartSearchCardProps> = ({
       onSearch(query);
     }
 
-    // Default action if no handler is provided
     navigate(`/search?q=${encodeURIComponent(query)}`);
     setQuery('');
+    setShowSuggestions(false);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    // Only handle the Enter key - do not interfere with space or other keys
+    // Apenas trata o Enter. O espaço e outras teclas funcionam normalmente.
     if (e.key === "Enter") {
       handleSubmit(e as unknown as React.FormEvent);
     }
@@ -100,10 +101,10 @@ const SmartSearchCard: React.FC<SmartSearchCardProps> = ({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="w-full h-full relative overflow-visible-container">
+    <form onSubmit={handleSubmit} className="relative w-full h-full z-10">
       <div className="relative w-full h-full">
         <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-6 w-6 text-orange-500 z-10" />
-        <Input 
+        <Input
           ref={inputRef}
           type="text"
           placeholder={placeholder}
@@ -111,11 +112,17 @@ const SmartSearchCard: React.FC<SmartSearchCardProps> = ({
           onChange={e => setQuery(e.target.value)}
           onKeyDown={handleKeyDown}
           onFocus={() => setShowSuggestions(true)}
-          onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+          onBlur={() => {
+            setTimeout(() => {
+              if (!document.activeElement?.closest('.search-suggestions')) {
+                setShowSuggestions(false);
+              }
+            }, 150);
+          }}
           className="pl-14 pr-4 py-6 rounded-xl border border-gray-300 w-full h-full bg-white text-2xl text-gray-800 placeholder:text-gray-600"
         />
       </div>
-      
+
       <AnimatePresence>
         {showSuggestions && suggestions.length > 0 && (
           <motion.div
