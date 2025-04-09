@@ -40,7 +40,6 @@ import { ptBR } from "date-fns/locale";
 import { cn } from '@/lib/utils';
 import { ESICProcesso, ESICProcessoFormValues } from '@/types/esic';
 
-// Form validation schema using zod
 const formSchema = z.object({
   data_processo: z.date({
     required_error: "A data do processo é obrigatória.",
@@ -81,7 +80,6 @@ const ProcessoForm: React.FC<ProcessoFormProps> = ({
   const { toast } = useToast();
   const [prazoPredefinido, setPrazoPredefinido] = useState<string | null>(null);
   
-  // Form initialization
   const form = useForm<ESICProcessoFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -95,7 +93,6 @@ const ProcessoForm: React.FC<ProcessoFormProps> = ({
     },
   });
 
-  // Update form with processo data if provided (edit mode)
   useEffect(() => {
     if (initialValues && mode === 'edit') {
       form.reset({
@@ -110,7 +107,6 @@ const ProcessoForm: React.FC<ProcessoFormProps> = ({
     }
   }, [initialValues, form, mode]);
 
-  // Handle form submission
   const handleSubmit = async (values: ESICProcessoFormValues) => {
     try {
       await onSubmit(values);
@@ -130,7 +126,6 @@ const ProcessoForm: React.FC<ProcessoFormProps> = ({
     }
   };
 
-  // Calculate predefined deadlines based on selected date
   const handleCalculateDeadline = (option: string) => {
     setPrazoPredefinido(option);
     const baseDate = form.getValues('data_processo');
@@ -171,7 +166,6 @@ const ProcessoForm: React.FC<ProcessoFormProps> = ({
         <Form {...form}>
           <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Data do Processo */}
               <FormField
                 control={form.control}
                 name="data_processo"
@@ -213,7 +207,6 @@ const ProcessoForm: React.FC<ProcessoFormProps> = ({
                 )}
               />
               
-              {/* Situação */}
               <FormField
                 control={form.control}
                 name="situacao"
@@ -243,7 +236,6 @@ const ProcessoForm: React.FC<ProcessoFormProps> = ({
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Assunto */}
               <FormField
                 control={form.control}
                 name="assunto"
@@ -258,7 +250,6 @@ const ProcessoForm: React.FC<ProcessoFormProps> = ({
                 )}
               />
               
-              {/* Solicitante */}
               <FormField
                 control={form.control}
                 name="solicitante"
@@ -274,7 +265,6 @@ const ProcessoForm: React.FC<ProcessoFormProps> = ({
               />
             </div>
             
-            {/* Coordenação */}
             <FormField
               control={form.control}
               name="coordenacao_id"
@@ -292,7 +282,7 @@ const ProcessoForm: React.FC<ProcessoFormProps> = ({
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent className="rounded-xl">
-                      <SelectItem value="">Não atribuído</SelectItem>
+                      <SelectItem value="none">Não atribuído</SelectItem>
                       {coordenacoes.map((coord) => (
                         <SelectItem key={coord.id} value={coord.id}>
                           {coord.nome}
@@ -305,7 +295,6 @@ const ProcessoForm: React.FC<ProcessoFormProps> = ({
               )}
             />
             
-            {/* Prazo para Resposta */}
             <div>
               <FormField
                 control={form.control}
@@ -381,7 +370,6 @@ const ProcessoForm: React.FC<ProcessoFormProps> = ({
               />
             </div>
             
-            {/* Texto/Descrição */}
             <FormField
               control={form.control}
               name="texto"
