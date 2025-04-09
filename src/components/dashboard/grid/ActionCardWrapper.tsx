@@ -1,4 +1,3 @@
-
 import React from 'react';
 import SortableActionCard from '../SortableActionCard';
 import { ActionCardItem } from '@/types/dashboard';
@@ -11,6 +10,7 @@ import QuickDemandCardWrapper from './card-types/QuickDemandCardWrapper';
 import NewCardButtonWrapper from './card-types/NewCardButtonWrapper';
 import DynamicDataCard from '../DynamicDataCard';
 import DashboardSearchCard from '../DashboardSearchCard';
+import CommunicationsCard from '../cards/CommunicationsCard';
 import * as LucideIcons from 'lucide-react';
 
 interface ActionCardWrapperProps {
@@ -66,7 +66,7 @@ const ActionCardWrapper: React.FC<ActionCardWrapperProps> = ({
       'check-circle': () => import('lucide-react').then(mod => mod.CheckCircle),
       'file-text': () => import('lucide-react').then(mod => mod.FileText),
       'list-filter': () => import('lucide-react').then(mod => mod.ListFilter),
-      // Add more icons as needed
+      'megaphone': () => import('lucide-react').then(mod => mod.Megaphone),
     };
     
     const LoadedIcon = React.lazy(() => 
@@ -85,6 +85,11 @@ const ActionCardWrapper: React.FC<ActionCardWrapperProps> = ({
     // Check if it's a smart search card
     if (card.type === 'smart_search') {
       return <DashboardSearchCard isEditMode={true} />;
+    }
+    
+    // Check if it's a communications card
+    if (card.type === 'communications') {
+      return <CommunicationsCard id={card.id} title={card.title} />;
     }
     
     // Check if it's a dynamic data card
@@ -168,7 +173,7 @@ const ActionCardWrapper: React.FC<ActionCardWrapperProps> = ({
   return (
     <SortableActionCard 
       key={card.id} 
-      card={card.isSearch || card.isStandard || card.type === 'data_dynamic' || card.type === 'smart_search' ? {
+      card={card.isSearch || card.isStandard || card.type === 'data_dynamic' || card.type === 'smart_search' || card.type === 'communications' ? {
         ...card,
         path: '' // Remove path to prevent default click behavior for special cards
       } : card} 

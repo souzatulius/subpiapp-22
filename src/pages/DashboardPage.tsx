@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Home, RotateCcw } from 'lucide-react';
 import { useDashboardCards } from '@/hooks/dashboard/useDashboardCards';
@@ -28,6 +27,7 @@ const DashboardPage: React.FC = () => {
   const [isEditCardModalOpen, setIsEditCardModalOpen] = useState(false);
   const [selectedCard, setSelectedCard] = useState<ActionCardItem | null>(null);
   const [searchCardAdded, setSearchCardAdded] = useState(false);
+  const [communicationsCardAdded, setCommunicationsCardAdded] = useState(false);
   const isMobile = useIsMobile();
   const { user } = useAuth();
   
@@ -110,9 +110,10 @@ const DashboardPage: React.FC = () => {
   };
 
   useEffect(() => {
-    if (cards && cards.length > 0 && !searchCardAdded) {
+    if (cards && cards.length > 0 && (!searchCardAdded || !communicationsCardAdded)) {
       const searchCardExists = cards.some(card => card.id === 'dashboard-search-card');
       const originDemandCardExists = cards.some(card => card.id === 'origem-demandas-card');
+      const communicationsCardExists = cards.some(card => card.id === 'communications-card');
       
       let updatedCards = [...cards];
       let needsUpdate = false;
@@ -154,14 +155,38 @@ const DashboardPage: React.FC = () => {
         needsUpdate = true;
       }
       
+      if (!communicationsCardExists) {
+        const communicationsCard: ActionCardItem = {
+          id: 'communications-card',
+          title: 'Avisos',
+          iconId: 'Megaphone',
+          path: '',
+          color: 'bg-white',
+          width: isMobile ? '100' : '50',
+          height: '2',
+          type: 'communications',
+          displayMobile: true,
+          mobileOrder: 3
+        };
+        
+        updatedCards = [...updatedCards, communicationsCard];
+        needsUpdate = true;
+      }
+      
       if (needsUpdate) {
         handleCardsChange(updatedCards);
         setSearchCardAdded(true);
-      } else if (!searchCardAdded && searchCardExists) {
-        setSearchCardAdded(true);
+        setCommunicationsCardAdded(true);
+      } else {
+        if (!searchCardAdded && searchCardExists) {
+          setSearchCardAdded(true);
+        }
+        if (!communicationsCardAdded && communicationsCardExists) {
+          setCommunicationsCardAdded(true);
+        }
       }
     }
-  }, [cards, searchCardAdded, isMobile]);
+  }, [cards, searchCardAdded, communicationsCardAdded, isMobile]);
 
   const renderSpecialCardContent = (cardId: string) => {
     if (cardId === 'origem-demandas-card' || 

@@ -32,7 +32,8 @@ export type CardType =
   | 'recent_notes' 
   | 'origin_selection' 
   | 'smart_search'
-  | 'origin_demand_chart';
+  | 'origin_demand_chart'
+  | 'communications';
 
 export type DataSourceKey = 
   | 'pendencias_por_coordenacao' 
