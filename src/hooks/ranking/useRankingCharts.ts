@@ -24,70 +24,70 @@ export const useRankingCharts = () => {
       title: 'Evolução de Serviços em Andamento',
       subtitle: 'Quantidade de pedidos por status',
       value: '157',
-      component: <div className="h-full w-full flex items-center justify-center">Gráfico de Evolução</div>,
+      component: "Gráfico de Evolução"
     },
     {
       id: 'serviceDistribution',
       title: 'Distribuição por Serviço',
       subtitle: 'Tipos de serviços mais demandados',
       value: '45%',
-      component: <div className="h-full w-full flex items-center justify-center">Gráfico de Distribuição</div>,
+      component: "Gráfico de Distribuição"
     },
     {
       id: 'executionTime',
       title: 'Tempo Médio de Execução',
       subtitle: 'Dias até finalização por tipo de serviço',
       value: '18,5 dias',
-      component: <div className="h-full w-full flex items-center justify-center">Gráfico de Tempo</div>,
+      component: "Gráfico de Tempo"
     },
     {
       id: 'districtsWronglyIncluded',
       title: 'Distritos Incluídos Erroneamente',
       subtitle: 'Locais fora da área de atuação',
       value: '12',
-      component: <div className="h-full w-full flex items-center justify-center">Gráfico de Distritos</div>,
+      component: "Gráfico de Distritos"
     },
     {
       id: 'compByArea',
       title: 'Comparativo por Áreas',
       subtitle: 'Desempenho por coordenação',
       value: 'CTO 87%',
-      component: <div className="h-full w-full flex items-center justify-center">Gráfico Comparativo</div>,
+      component: "Gráfico Comparativo"
     },
     {
       id: 'top10OldestPending',
       title: 'Top 10 Pendências Antigas',
       subtitle: 'Ordens de serviço com maior tempo em aberto',
       value: '245 dias',
-      component: <div className="h-full w-full flex items-center justify-center">Gráfico de Pendências</div>,
+      component: "Gráfico de Pendências"
     },
     {
       id: 'bottlenecks',
       title: 'Gargalos Identificados',
       subtitle: 'Principais pontos de atenção',
       value: '5 críticos',
-      component: <div className="h-full w-full flex items-center justify-center">Gráfico de Gargalos</div>,
+      component: "Gráfico de Gargalos"
     },
     {
       id: 'idealRanking',
       title: 'Ranking Ideal',
       subtitle: 'Posição sem fatores externos',
       value: '2º lugar',
-      component: <div className="h-full w-full flex items-center justify-center">Gráfico de Ranking</div>,
+      component: "Gráfico de Ranking"
     },
     {
       id: 'sgzRanking',
       title: 'SGZ vs Ranking',
       subtitle: 'Comparação entre sistemas',
       value: '60% match',
-      component: <div className="h-full w-full flex items-center justify-center">Gráfico de SGZ</div>,
+      component: "Gráfico de SGZ"
     },
     {
       id: 'attentionPoints',
       title: 'Pontos de Atenção',
       subtitle: 'Principais problemas identificados',
       value: '8 pontos',
-      component: <div className="h-full w-full flex items-center justify-center">Gráfico de Pontos</div>,
+      component: "Gráfico de Pontos"
     }
   ]);
 

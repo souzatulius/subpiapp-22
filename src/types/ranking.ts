@@ -4,7 +4,7 @@ export interface ChartConfig {
   title: string;
   subtitle?: string;
   value?: string | number;
-  component: React.ReactNode;
+  component: string;
 }
 
 export interface ChartVisibility {

@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { Filter, LayoutDashboard, RotateCw } from 'lucide-react';
+import { Filter, LayoutDashboard } from 'lucide-react';
 import { ChartVisibility } from '@/types/ranking';
 import DateRangeFilter from './DateRangeFilter';
 
@@ -19,7 +19,7 @@ interface RankingFilterDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   chartVisibility: ChartVisibility;
-  onToggleChartVisibility: (chartId: string, isVisible: boolean) => void;
+  onToggleChartVisibility: (chartId: string) => void;
 }
 
 const RankingFilterDialog: React.FC<RankingFilterDialogProps> = ({
@@ -71,8 +71,8 @@ const RankingFilterDialog: React.FC<RankingFilterDialogProps> = ({
                     <Switch
                       id={`chart-${chartName}`}
                       checked={isVisible}
-                      onCheckedChange={(checked) => 
-                        onToggleChartVisibility(chartName, checked)
+                      onCheckedChange={() => 
+                        onToggleChartVisibility(chartName)
                       }
                       className="data-[state=checked]:bg-orange-500"
                     />

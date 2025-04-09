@@ -108,7 +108,9 @@ const ChartCard: React.FC<ChartCardProps> = ({
               <p className="text-sm text-gray-700">{analysis}</p>
             </div>
           ) : (
-            <div className="w-full h-full overflow-hidden">{children}</div>
+            <div className="w-full h-full overflow-hidden flex items-center justify-center">
+              {typeof children === 'string' ? children : children}
+            </div>
           )}
         </div>
       </CardContent>
