@@ -1,13 +1,12 @@
 
 import React from 'react';
 import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { Search, Filter } from 'lucide-react';
+import { Search } from 'lucide-react';
 
 interface DemandasSearchBarProps {
   searchTerm: string;
   setSearchTerm: (term: string) => void;
-  onSearch?: (term: string) => void; // Added this prop to match usage
+  onSearch?: (term: string) => void;
 }
 
 const DemandasSearchBar: React.FC<DemandasSearchBarProps> = ({ 
@@ -25,21 +24,17 @@ const DemandasSearchBar: React.FC<DemandasSearchBarProps> = ({
   };
 
   return (
-    <div className="flex flex-col md:flex-row gap-4 mb-6">
-      <div className="relative flex-1">
+    <div className="w-full mb-6">
+      <div className="relative w-full">
         <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
         <Input 
           type="search" 
           placeholder="Buscar demandas..." 
-          className="pl-9" 
+          className="pl-9 w-full" 
           value={searchTerm} 
           onChange={handleSearchChange} 
         />
       </div>
-      <Button variant="outline" className="md:w-auto flex items-center gap-2">
-        <Filter className="h-4 w-4" />
-        Filtros
-      </Button>
     </div>
   );
 };

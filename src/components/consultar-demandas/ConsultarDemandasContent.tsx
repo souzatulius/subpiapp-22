@@ -13,7 +13,7 @@ import DemandaCards from './DemandaCards';
 import FilterBar from './FilterBar';
 import { DateRange } from 'react-day-picker';
 import { Button } from '@/components/ui/button';
-import { ChevronDown, ChevronUp, Filter, FileText, MessageSquare, Eye } from 'lucide-react';
+import { ChevronDown, ChevronUp, Filter } from 'lucide-react';
 
 const ConsultarDemandasContent = () => {
   const navigate = useNavigate();
@@ -125,26 +125,12 @@ const ConsultarDemandasContent = () => {
 
   return (
     <div className="container mx-auto">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-2">
+      <div className="w-full mb-4">
         <DemandasSearchBar
           searchTerm={searchTerm}
           setSearchTerm={setSearchTerm}
           onSearch={handleSearch}
         />
-        
-        <Button 
-          variant="outline" 
-          className="flex items-center gap-1.5"
-          onClick={toggleFilters}
-        >
-          <Filter className="h-4 w-4" />
-          Filtros
-          {showFilters ? (
-            <ChevronUp className="h-4 w-4" />
-          ) : (
-            <ChevronDown className="h-4 w-4" />
-          )}
-        </Button>
       </div>
       
       {showFilters && (
@@ -164,39 +150,11 @@ const ConsultarDemandasContent = () => {
       )}
       
       {viewMode === 'cards' ? (
-        <>
-          <div className="flex gap-2 mb-4">
-            <Button 
-              className="bg-orange-300 hover:bg-orange-400 text-white rounded-full"
-              onClick={() => console.log("Detalhes action")}
-            >
-              <Eye className="h-4 w-4 mr-1.5" />
-              Detalhes
-            </Button>
-            
-            <Button 
-              className="bg-orange-300 hover:bg-orange-400 text-white rounded-full"
-              onClick={() => console.log("Respostas action")}
-            >
-              <MessageSquare className="h-4 w-4 mr-1.5" />
-              Respostas
-            </Button>
-            
-            <Button 
-              className="bg-orange-300 hover:bg-orange-400 text-white rounded-full"
-              onClick={() => selectedDemand && handleViewNota(selectedDemand.id)}
-            >
-              <FileText className="h-4 w-4 mr-1.5" />
-              Nota Oficial
-            </Button>
-          </div>
-          
-          <DemandaCards
-            demandas={demandas as any}
-            isLoading={isLoading}
-            onSelectDemand={handleViewDemand as any}
-          />
-        </>
+        <DemandaCards
+          demandas={demandas as any}
+          isLoading={isLoading}
+          onSelectDemand={handleViewDemand as any}
+        />
       ) : (
         <DemandasTable
           demandas={demandas as any}
