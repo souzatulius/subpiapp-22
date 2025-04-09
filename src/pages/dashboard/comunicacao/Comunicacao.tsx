@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useAuth } from '@/hooks/useSupabaseAuth';
 import { MessageSquareReply, RotateCcw } from 'lucide-react';
@@ -124,9 +123,10 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
     return <LoadingIndicator />;
   }
 
-  // Função para renderizar conteúdo especial baseado no ID do card
   const renderSpecialCardContent = (cardId: string) => {
-    if (cardId === 'origem-demandas-card' || cardId.includes('origem-demandas')) {
+    if (cardId === 'origem-demandas-card' || cardId.includes('origem-demandas') || 
+        cardId.includes('origemDemandas') || cardId.includes('origin-demand-chart') || 
+        cardId.type === 'origin_demand_chart') {
       return <OriginsDemandChartCompact className="w-full h-full" />;
     }
     return null;
