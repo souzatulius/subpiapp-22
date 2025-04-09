@@ -113,7 +113,7 @@ const ProcessoForm: React.FC<ProcessoFormProps> = ({
                       <Button
                         variant={'outline'}
                         className={cn(
-                          'pl-3 text-left font-normal',
+                          'pl-3 text-left font-normal bg-white rounded-lg',
                           !field.value && 'text-muted-foreground'
                         )}
                       >
@@ -126,7 +126,7 @@ const ProcessoForm: React.FC<ProcessoFormProps> = ({
                       </Button>
                     </FormControl>
                   </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
+                  <PopoverContent className="w-auto p-0 rounded-lg" align="start">
                     <Calendar
                       mode="single"
                       selected={field.value}
@@ -136,6 +136,7 @@ const ProcessoForm: React.FC<ProcessoFormProps> = ({
                       }
                       locale={ptBR}
                       initialFocus
+                      className="rounded-lg"
                     />
                   </PopoverContent>
                 </Popover>
@@ -157,7 +158,7 @@ const ProcessoForm: React.FC<ProcessoFormProps> = ({
                       <Button
                         variant={'outline'}
                         className={cn(
-                          'pl-3 text-left font-normal',
+                          'pl-3 text-left font-normal bg-white rounded-lg',
                           !field.value && 'text-muted-foreground'
                         )}
                       >
@@ -170,7 +171,7 @@ const ProcessoForm: React.FC<ProcessoFormProps> = ({
                       </Button>
                     </FormControl>
                   </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
+                  <PopoverContent className="w-auto p-0 rounded-lg" align="start">
                     <Calendar
                       mode="single"
                       selected={field.value}
@@ -180,6 +181,7 @@ const ProcessoForm: React.FC<ProcessoFormProps> = ({
                       }
                       locale={ptBR}
                       initialFocus
+                      className="rounded-lg"
                     />
                   </PopoverContent>
                 </Popover>
@@ -200,7 +202,10 @@ const ProcessoForm: React.FC<ProcessoFormProps> = ({
             <FormItem>
               <FormLabel>Assunto</FormLabel>
               <FormControl>
-                <Input placeholder="Digite o assunto do processo" {...field} />
+                <Input 
+                  className="bg-white rounded-lg" 
+                  {...field} 
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -218,6 +223,7 @@ const ProcessoForm: React.FC<ProcessoFormProps> = ({
                   <Checkbox
                     checked={field.value}
                     onCheckedChange={field.onChange}
+                    className="rounded"
                   />
                 </FormControl>
                 <div className="space-y-1 leading-none">
@@ -239,7 +245,7 @@ const ProcessoForm: React.FC<ProcessoFormProps> = ({
                   <FormLabel>Nome do Solicitante</FormLabel>
                   <FormControl>
                     <Input 
-                      placeholder="Digite o nome do solicitante" 
+                      className="bg-white rounded-lg"
                       {...field} 
                       value={field.value || ''}
                     />
@@ -262,6 +268,7 @@ const ProcessoForm: React.FC<ProcessoFormProps> = ({
                   <Checkbox
                     checked={field.value}
                     onCheckedChange={field.onChange}
+                    className="rounded"
                   />
                 </FormControl>
                 <div className="space-y-1 leading-none">
@@ -287,11 +294,11 @@ const ProcessoForm: React.FC<ProcessoFormProps> = ({
                     value={field.value}
                   >
                     <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecione uma coordenação" />
+                      <SelectTrigger className="bg-white rounded-lg">
+                        <SelectValue />
                       </SelectTrigger>
                     </FormControl>
-                    <SelectContent>
+                    <SelectContent className="rounded-lg">
                       <SelectItem value="none">Nenhuma</SelectItem>
                       {coordenacoes.map((coord) => (
                         <SelectItem key={coord.id} value={coord.id}>
@@ -319,11 +326,11 @@ const ProcessoForm: React.FC<ProcessoFormProps> = ({
               <FormLabel>Situação</FormLabel>
               <Select onValueChange={field.onChange} defaultValue={field.value}>
                 <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione a situação do processo" />
+                  <SelectTrigger className="bg-white rounded-lg">
+                    <SelectValue />
                   </SelectTrigger>
                 </FormControl>
-                <SelectContent>
+                <SelectContent className="rounded-lg">
                   {Object.entries(situacaoLabels).map(([value, label]) => (
                     <SelectItem key={value} value={value}>
                       {label}
@@ -345,8 +352,7 @@ const ProcessoForm: React.FC<ProcessoFormProps> = ({
               <FormLabel>Descrição</FormLabel>
               <FormControl>
                 <Textarea
-                  placeholder="Digite a descrição detalhada do processo"
-                  className="min-h-[200px]"
+                  className="min-h-[200px] bg-white rounded-lg"
                   {...field}
                 />
               </FormControl>
@@ -357,11 +363,11 @@ const ProcessoForm: React.FC<ProcessoFormProps> = ({
 
         <div className="flex justify-end space-x-4">
           {onCancel && (
-            <Button type="button" variant="outline" onClick={onCancel}>
+            <Button type="button" variant="outline" onClick={onCancel} className="rounded-lg">
               Cancelar
             </Button>
           )}
-          <Button type="submit" disabled={isSubmitting}>
+          <Button type="submit" disabled={isSubmitting} className="rounded-lg">
             {isSubmitting ? 'Salvando...' : isEditing ? 'Atualizar' : 'Criar Processo'}
           </Button>
         </div>

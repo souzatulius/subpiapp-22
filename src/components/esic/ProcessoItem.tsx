@@ -1,14 +1,11 @@
 
 import React from 'react';
-import { Card, CardContent } from '@/components/ui/card';
+import { ESICProcesso, statusLabels, situacaoLabels } from '@/types/esic';
+import { formatDistanceToNow, format, parseISO } from 'date-fns';
+import { pt } from 'date-fns/locale';
+import { Eye, Edit, Trash2, FilePlus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Eye, FileEdit, Trash2, MessageCircleMore } from 'lucide-react';
-import { ESICProcesso, statusLabels } from '@/types/esic';
 import { Badge } from '@/components/ui/badge';
-import { format } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
-import { cn } from '@/lib/utils';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface ProcessoItemProps {
   processo: ESICProcesso;
@@ -25,131 +22,121 @@ const ProcessoItem: React.FC<ProcessoItemProps> = ({
   onDeleteClick,
   onAddJustificativa
 }) => {
-  const getStatusColor = (status: string): string => {
-    switch (status) {
-      case 'aguardando_justificativa':
-        return 'bg-amber-100 text-amber-800 hover:bg-amber-200';
-      case 'aguardando_aprovacao':
-        return 'bg-blue-100 text-blue-800 hover:bg-blue-200';
-      case 'concluido':
-        return 'bg-green-100 text-green-800 hover:bg-green-200';
-      case 'cancelado':
-        return 'bg-red-100 text-red-800 hover:bg-red-200';
-      case 'aberto':
-        return 'bg-purple-100 text-purple-800 hover:bg-purple-200';
-      case 'em_andamento':
-        return 'bg-orange-100 text-orange-800 hover:bg-orange-200';
-      default:
-        return 'bg-gray-100 text-gray-800 hover:bg-gray-200';
-    }
+  // Format creation date
+  const formattedDate = processo.criado_em 
+    ? formatDistanceToNow(parseISO(processo.criado_em), { addSuffix: true, locale: pt }) 
+    : '';
+
+  // Format process date
+  const formattedProcessDate = processo.data_processo 
+    ? format(new Date(processo.data_processo), 'dd/MM/yyyy') 
+    : '';
+  
+  // Status badge color
+  const getStatusBadgeClass = (status: string) => {
+    const statusMap: Record<string, string> = {
+      'aberto': 'bg-green-100 text-green-800 hover:bg-green-200',
+      'em_andamento': 'bg-blue-100 text-blue-800 hover:bg-blue-200',
+      'concluido': 'bg-purple-100 text-purple-800 hover:bg-purple-200',
+      'cancelado': 'bg-gray-100 text-gray-800 hover:bg-gray-200',
+      'respondido': 'bg-teal-100 text-teal-800 hover:bg-teal-200'
+    };
+    return statusMap[status] || 'bg-gray-100 text-gray-800 hover:bg-gray-200';
   };
 
-  const handleViewClick = () => {
-    onViewClick && onViewClick(processo);
+  // Situação badge color
+  const getSituacaoBadgeClass = (situacao: string) => {
+    const situacaoMap: Record<string, string> = {
+      'em_tramitacao': 'bg-orange-100 text-orange-800 hover:bg-orange-200',
+      'concluido': 'bg-green-100 text-green-800 hover:bg-green-200',
+      'cancelado': 'bg-red-100 text-red-800 hover:bg-red-200',
+      'pendente': 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200'
+    };
+    return situacaoMap[situacao] || 'bg-gray-100 text-gray-800 hover:bg-gray-200';
   };
-
-  const handleEditClick = () => {
-    onEditClick && onEditClick(processo);
-  };
-
-  const handleDeleteClick = () => {
-    onDeleteClick && onDeleteClick(processo);
-  };
-
-  const handleJustificativaClick = () => {
-    onAddJustificativa && onAddJustificativa();
-  };
-
-  const dataProcesso = processo.data_processo 
-    ? format(new Date(processo.data_processo), 'dd/MM/yyyy', { locale: ptBR }) 
-    : 'Sem data';
 
   return (
-    <Card className="overflow-hidden border border-gray-200 hover:border-gray-300 rounded-xl transition-shadow">
-      <CardContent className="p-4">
-        <div className="flex flex-wrap md:flex-nowrap items-center justify-between gap-4">
-          <div className="space-y-1 w-full md:w-auto md:flex-1">
-            <div className="flex items-center">
-              <h3 className="font-medium text-lg">{processo.assunto}</h3>
-            </div>
-            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-gray-600">
-              <div className="flex items-center gap-1">
-                <span className="font-medium">Protocolo:</span>
-                <span>{processo.protocolo}</span>
-              </div>
-              
-              {processo.solicitante && (
-                <div className="flex items-center gap-1">
-                  <span className="font-medium">Solicitante:</span>
-                  <span>{processo.solicitante}</span>
-                </div>
-              )}
-              
-              <div className="flex items-center gap-1">
-                <span className="font-medium">Data:</span>
-                <span>{dataProcesso}</span>
-              </div>
-            </div>
+    <div className="bg-white rounded-lg border border-gray-200 p-4 hover:shadow-md transition-shadow">
+      <div className="flex flex-col sm:flex-row justify-between">
+        <div className="space-y-2">
+          <div className="flex flex-wrap gap-2 items-center">
+            <Badge variant="outline" className={getStatusBadgeClass(processo.status)}>
+              {statusLabels[processo.status as keyof typeof statusLabels] || processo.status}
+            </Badge>
+            <Badge variant="outline" className={getSituacaoBadgeClass(processo.situacao)}>
+              {situacaoLabels[processo.situacao as keyof typeof situacaoLabels] || processo.situacao}
+            </Badge>
+            <span className="text-xs text-gray-500">
+              Protocolo: {processo.protocolo}
+            </span>
           </div>
           
-          <div className="flex items-center justify-between gap-4 w-full md:w-auto">
-            <Badge className={cn("rounded-xl", getStatusColor(processo.status))}>
-              {statusLabels[processo.status] || processo.status}
-            </Badge>
-            
-            <div className="flex items-center space-x-2">
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      className="rounded-xl" 
-                      onClick={handleJustificativaClick}
-                    >
-                      <MessageCircleMore className="h-4 w-4" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Inserir justificativa</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-              
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="rounded-xl" 
-                onClick={handleViewClick}
-                title="Visualizar"
-              >
-                <Eye className="h-4 w-4" />
-              </Button>
-              
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="rounded-xl" 
-                onClick={handleEditClick}
-                title="Editar"
-              >
-                <FileEdit className="h-4 w-4" />
-              </Button>
-              
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="rounded-xl text-red-500 hover:text-red-600" 
-                onClick={handleDeleteClick}
-                title="Excluir"
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            </div>
+          <h3 className="font-medium text-lg text-gray-800">{processo.assunto}</h3>
+          
+          <div className="flex flex-wrap gap-3 text-sm text-gray-600">
+            <span>
+              Solicitante: {processo.solicitante || 'Não especificado'}
+            </span>
+            <span>
+              Data: {formattedProcessDate}
+            </span>
+            <span className="text-gray-400">
+              Criado {formattedDate}
+            </span>
           </div>
         </div>
-      </CardContent>
-    </Card>
+        
+        <div className="flex items-center gap-2 mt-4 sm:mt-0">
+          {onAddJustificativa && (
+            <Button 
+              size="icon" 
+              variant="outline" 
+              onClick={onAddJustificativa}
+              title="Adicionar justificativa"
+              className="rounded-full"
+            >
+              <FilePlus className="h-4 w-4" />
+            </Button>
+          )}
+          
+          {onViewClick && (
+            <Button 
+              size="icon" 
+              variant="outline" 
+              onClick={() => onViewClick(processo)}
+              title="Visualizar"
+              className="rounded-full"
+            >
+              <Eye className="h-4 w-4" />
+            </Button>
+          )}
+          
+          {onEditClick && (
+            <Button 
+              size="icon" 
+              variant="outline" 
+              onClick={() => onEditClick(processo)}
+              title="Editar"
+              className="rounded-full"
+            >
+              <Edit className="h-4 w-4" />
+            </Button>
+          )}
+          
+          {onDeleteClick && (
+            <Button 
+              size="icon" 
+              variant="outline" 
+              onClick={() => onDeleteClick(processo)}
+              title="Excluir"
+              className="rounded-full text-red-500 hover:text-red-600 hover:bg-red-50"
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          )}
+        </div>
+      </div>
+    </div>
   );
 };
 

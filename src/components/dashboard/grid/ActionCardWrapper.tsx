@@ -1,3 +1,4 @@
+
 import React from 'react';
 import SortableActionCard from '../SortableActionCard';
 import { ActionCardItem } from '@/types/dashboard';
@@ -11,6 +12,7 @@ import NewCardButtonWrapper from './card-types/NewCardButtonWrapper';
 import DynamicDataCard from '../DynamicDataCard';
 import DashboardSearchCard from '../DashboardSearchCard';
 import CommunicationsCard from '../cards/CommunicationsCard';
+import OriginSelectionCard from '../cards/OriginSelectionCard';
 import * as LucideIcons from 'lucide-react';
 
 interface ActionCardWrapperProps {
@@ -29,6 +31,7 @@ interface ActionCardWrapperProps {
     notesToApprove: number;
     responsesToDo: number;
     isLoading: boolean;
+    originOptions?: any[];
   };
 }
 
@@ -90,6 +93,11 @@ const ActionCardWrapper: React.FC<ActionCardWrapperProps> = ({
     // Check if it's a communications card
     if (card.type === 'communications') {
       return <CommunicationsCard id={card.id} title={card.title} />;
+    }
+
+    // Check if it's an origin selection card
+    if (card.type === 'origin_selection') {
+      return <OriginSelectionCard options={specialCardsData.originOptions} />;
     }
     
     // Check if it's a dynamic data card
@@ -173,7 +181,7 @@ const ActionCardWrapper: React.FC<ActionCardWrapperProps> = ({
   return (
     <SortableActionCard 
       key={card.id} 
-      card={card.isSearch || card.isStandard || card.type === 'data_dynamic' || card.type === 'smart_search' || card.type === 'communications' ? {
+      card={card.isSearch || card.isStandard || card.type === 'data_dynamic' || card.type === 'smart_search' || card.type === 'communications' || card.type === 'origin_selection' ? {
         ...card,
         path: '' // Remove path to prevent default click behavior for special cards
       } : card} 

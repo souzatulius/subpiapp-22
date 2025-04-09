@@ -1,80 +1,68 @@
 
 import React from 'react';
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Search, List, Grid, SlidersHorizontal, Plus } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Plus, List, Grid, Filter } from 'lucide-react';
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 
 interface ESICSearchHeaderProps {
   searchTerm: string;
   onSearchChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  onViewModeChange: (mode: 'list' | 'cards') => void;
+  viewMode: 'list' | 'cards';
+  onViewModeChange: (value: 'list' | 'cards') => void;
   onFilterClick: () => void;
   onNewProcessClick: () => void;
-  viewMode: 'list' | 'cards';
 }
 
 const ESICSearchHeader: React.FC<ESICSearchHeaderProps> = ({
   searchTerm,
   onSearchChange,
+  viewMode,
   onViewModeChange,
   onFilterClick,
-  onNewProcessClick,
-  viewMode
+  onNewProcessClick
 }) => {
   return (
-    <div className="w-full space-y-4">
-      <div className="flex gap-3">
-        {/* Search field with white background and centered icon */}
-        <div className="relative flex-1">
-          <Search className="absolute left-2.5 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
-          <Input
-            type="search"
-            placeholder="Buscar processos..."
-            className="pl-9 pr-4 py-2 h-10 bg-white border-gray-300 w-full"
-            value={searchTerm}
-            onChange={onSearchChange}
-          />
-        </div>
+    <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+      <div className="flex-1 w-full sm:w-auto">
+        <Input
+          placeholder="Pesquisar processos..."
+          value={searchTerm}
+          onChange={onSearchChange}
+          className="bg-white rounded-lg border-gray-200"
+        />
+      </div>
+      
+      <div className="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-end">
+        <ToggleGroup 
+          type="single" 
+          value={viewMode}
+          onValueChange={(value) => value && onViewModeChange(value as 'list' | 'cards')}
+          className="border rounded-lg"
+        >
+          <ToggleGroupItem value="list" aria-label="Lista">
+            <List className="h-4 w-4" />
+          </ToggleGroupItem>
+          <ToggleGroupItem value="cards" aria-label="Cards">
+            <Grid className="h-4 w-4" />
+          </ToggleGroupItem>
+        </ToggleGroup>
+        
+        <Button 
+          variant="outline" 
+          size="icon"
+          onClick={onFilterClick}
+          className="rounded-lg"
+        >
+          <Filter className="h-4 w-4" />
+        </Button>
         
         <Button 
           onClick={onNewProcessClick}
-          className="bg-blue-600 hover:bg-blue-700 text-white h-10 px-4 whitespace-nowrap"
+          className="rounded-lg"
         >
           <Plus className="h-4 w-4 mr-2" />
-          <span>Novo Processo</span>
-        </Button>
-      </div>
-      
-      {/* View toggle buttons in a separate row below */}
-      <div className="flex justify-end gap-2">
-        <Button
-          variant="outline"
-          size="icon"
-          className={`h-9 w-9 rounded-xl ${viewMode === 'list' ? 'bg-gray-100 border-gray-400' : 'bg-white'}`}
-          onClick={() => onViewModeChange('list')}
-          title="Visualização em lista"
-        >
-          <List className="h-4 w-4 text-gray-700" />
-        </Button>
-        
-        <Button
-          variant="outline"
-          size="icon"
-          className={`h-9 w-9 rounded-xl ${viewMode === 'cards' ? 'bg-gray-100 border-gray-400' : 'bg-white'}`}
-          onClick={() => onViewModeChange('cards')}
-          title="Visualização em cards"
-        >
-          <Grid className="h-4 w-4 text-gray-700" />
-        </Button>
-        
-        <Button
-          variant="outline"
-          size="icon"
-          className="h-9 w-9 bg-white hover:bg-gray-100 rounded-xl"
-          onClick={onFilterClick}
-          title="Filtros"
-        >
-          <SlidersHorizontal className="h-4 w-4 text-gray-700" />
+          Novo Processo
         </Button>
       </div>
     </div>

@@ -4,13 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import * as LucideIcons from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
-
-interface OriginOption {
-  id: string;
-  title: string;
-  icon: React.ReactNode | string;
-  path?: string;
-}
+import { OriginOption } from '@/types/dashboard';
 
 interface OriginSelectionCardProps {
   title?: string;

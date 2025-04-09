@@ -1,3 +1,4 @@
+
 import React from 'react';
 import {
   AlertDialog,
@@ -8,36 +9,39 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+} from '@/components/ui/alert-dialog';
 import { Loader2 } from 'lucide-react';
 
 interface DeleteProcessoDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onConfirm: () => void;
-  isDeleting?: boolean;
+  isDeleting: boolean;
 }
 
 const DeleteProcessoDialog: React.FC<DeleteProcessoDialogProps> = ({
   open,
   onOpenChange,
   onConfirm,
-  isDeleting = false,
+  isDeleting = false
 }) => {
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogContent>
+      <AlertDialogContent className="rounded-lg">
         <AlertDialogHeader>
-          <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
+          <AlertDialogTitle className="text-red-600">Excluir processo</AlertDialogTitle>
           <AlertDialogDescription>
-            Esta ação não pode ser desfeita. Tem certeza de que deseja excluir este processo?
+            Tem certeza de que deseja excluir este processo? Esta ação não pode ser desfeita.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={isDeleting}>Cancelar</AlertDialogCancel>
+          <AlertDialogCancel className="rounded-lg" disabled={isDeleting}>Cancelar</AlertDialogCancel>
           <AlertDialogAction
-            onClick={onConfirm}
-            className="bg-red-600 hover:bg-red-700"
+            className="rounded-lg bg-red-600 hover:bg-red-700"
+            onClick={(e) => {
+              e.preventDefault();
+              onConfirm();
+            }}
             disabled={isDeleting}
           >
             {isDeleting ? (
