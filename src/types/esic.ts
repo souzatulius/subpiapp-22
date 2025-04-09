@@ -14,12 +14,12 @@ export interface ESICProcesso {
   situacao: string;
   status: "aberto" | "em_andamento" | "concluido" | "cancelado" | "aguardando_justificativa" | "aguardando_aprovacao" | "novo_processo";
   autor?: {
-    nome_completo: string;
+    nome_completo?: string;  // Make nome_completo optional
   };
   coordenacao_id?: string;
   prazo_resposta?: string;
   coordenacao?: {
-    nome: string;
+    nome?: string;  // Make nome optional
   };
 }
 

@@ -2,16 +2,17 @@
 import { useState } from 'react';
 import { ESICProcesso, ESICProcessoFormValues, ESICJustificativaFormValues } from '@/types/esic';
 import { useToast } from '@/components/ui/use-toast';
-import { useProcessos } from '@/hooks/esic/useProcessos';
-import { useJustificativas } from '@/hooks/esic/useJustificativas';
-import { useProcessoDialog } from '@/hooks/esic/useProcessoDialog';
+import { useProcessos } from './useProcessos';
+import { useJustificativas } from './useJustificativas';
+import { useProcessoDialog } from './useProcessoDialog';
+import { useScreenManagement } from './useScreenManagement';
+import { useProcessoOperations } from './useProcessoOperations';
+import { ESICStateReturn } from './types';
 
-export type ScreenState = 'list' | 'create' | 'edit' | 'view' | 'justify';
-
-export const useESICPageState = () => {
-  const [screen, setScreen] = useState<ScreenState>('list');
+export const useESICPageState = (): ESICStateReturn => {
   const { toast } = useToast();
   
+  // Use the extracted hooks
   const { 
     deleteConfirmOpen, 
     processoToDelete, 
@@ -22,9 +23,9 @@ export const useESICPageState = () => {
   const { 
     processos, 
     isLoading, 
-    error,  // Make sure we extract the error state
-    selectedProcesso, 
-    setSelectedProcesso,
+    error,
+    selectedProcesso: processosSelectedProcesso, 
+    setSelectedProcesso: processosSetSelectedProcesso,
     createProcesso,
     updateProcesso,
     deleteProcesso,
@@ -35,6 +36,21 @@ export const useESICPageState = () => {
   } = useProcessos();
   
   const {
+    screen,
+    setScreen,
+    selectedProcesso,
+    setSelectedProcesso,
+    handleViewProcesso,
+    handleEditProcesso,
+    handleAddJustificativa
+  } = useScreenManagement();
+
+  // Sync the selected processo from useProcessos with the one in useScreenManagement
+  if (processosSelectedProcesso !== selectedProcesso) {
+    processosSetSelectedProcesso(selectedProcesso);
+  }
+  
+  const {
     justificativas,
     isLoading: isJustificativasLoading,
     createJustificativa,
@@ -42,6 +58,12 @@ export const useESICPageState = () => {
     isCreating: isJustificativaCreating,
     isGenerating,
   } = useJustificativas(selectedProcesso?.id);
+
+  // Get processo operations
+  const { handleUpdateStatus, handleUpdateSituacao, handleUpdateProcesso } = useProcessoOperations(
+    updateProcesso,
+    setSelectedProcesso
+  );
   
   const handleCreateProcesso = async (values: ESICProcessoFormValues): Promise<void> => {
     return new Promise((resolve, reject) => {
@@ -62,38 +84,12 @@ export const useESICPageState = () => {
     });
   };
   
-  const handleUpdateProcesso = async (values: ESICProcessoFormValues): Promise<void> => {
+  const processUpdateHandler = async (values: ESICProcessoFormValues): Promise<void> => {
     if (!selectedProcesso) return Promise.reject(new Error('Nenhum processo selecionado'));
-    
-    return new Promise((resolve, reject) => {
-      updateProcesso(
-        { 
-          id: selectedProcesso.id, 
-          data: {
-            data_processo: values.data_processo.toISOString(),
-            situacao: values.situacao,
-            texto: values.texto,
-            assunto: values.assunto,
-            solicitante: values.solicitante,
-            coordenacao_id: values.coordenacao_id,
-            prazo_resposta: values.prazo_resposta ? new Date(values.prazo_resposta).toISOString() : undefined
-          } 
-        },
-        {
-          onSuccess: () => {
-            setScreen('view');
-            toast({
-              title: 'Processo atualizado com sucesso',
-              description: 'As alterações foram salvas no sistema.',
-            });
-            resolve();
-          },
-          onError: (error) => {
-            reject(error);
-          }
-        }
-      );
-    });
+    return handleUpdateProcesso(selectedProcesso.id, values)
+      .then(() => {
+        setScreen('view');
+      });
   };
   
   const handleDeleteProcesso = (id: string) => {
@@ -114,17 +110,7 @@ export const useESICPageState = () => {
     });
   };
   
-  const handleViewProcesso = (processo: ESICProcesso) => {
-    setSelectedProcesso(processo);
-    setScreen('view');
-  };
-  
-  const handleEditProcesso = (processo: ESICProcesso) => {
-    setSelectedProcesso(processo);
-    setScreen('edit');
-  };
-  
-  const handleAddJustificativa = () => {
+  const processAddJustificativaHandler = () => {
     if (selectedProcesso && selectedProcesso.status !== 'concluido') {
       if (selectedProcesso.status === 'novo_processo') {
         updateProcesso({
@@ -132,7 +118,7 @@ export const useESICPageState = () => {
           data: { status: 'aguardando_justificativa' }
         });
       }
-      setScreen('justify');
+      handleAddJustificativa();
     }
   };
   
@@ -187,45 +173,19 @@ export const useESICPageState = () => {
       );
     });
   };
-  
-  const handleUpdateStatus = (status: 'novo_processo' | 'aguardando_justificativa' | 'aguardando_aprovacao' | 'concluido') => {
-    if (!selectedProcesso) return;
-    
-    updateProcesso(
-      {
-        id: selectedProcesso.id,
-        data: { status }
-      },
-      {
-        onSuccess: () => {
-          toast({
-            title: 'Status atualizado',
-            description: `O status do processo foi alterado.`,
-          });
-          setSelectedProcesso(prev => prev ? { ...prev, status } : null);
-        },
-      }
-    );
+
+  // Handle status updates with the processo ID
+  const statusUpdateHandler = (status: 'novo_processo' | 'aguardando_justificativa' | 'aguardando_aprovacao' | 'concluido') => {
+    if (selectedProcesso) {
+      handleUpdateStatus(status)(selectedProcesso.id);
+    }
   };
-  
-  const handleUpdateSituacao = (situacao: 'em_tramitacao' | 'prazo_prorrogado' | 'concluido') => {
-    if (!selectedProcesso) return;
-    
-    updateProcesso(
-      {
-        id: selectedProcesso.id,
-        data: { situacao }
-      },
-      {
-        onSuccess: () => {
-          toast({
-            title: 'Situação atualizada',
-            description: `A situação do processo foi alterada.`,
-          });
-          setSelectedProcesso(prev => prev ? { ...prev, situacao } : null);
-        },
-      }
-    );
+
+  // Handle situacao updates with the processo ID
+  const situacaoUpdateHandler = (situacao: 'em_tramitacao' | 'prazo_prorrogado' | 'concluido') => {
+    if (selectedProcesso) {
+      handleUpdateSituacao(situacao)(selectedProcesso.id);
+    }
   };
 
   return {
@@ -235,7 +195,7 @@ export const useESICPageState = () => {
     processoToDelete,
     processos,
     isLoading,
-    error,  // Make sure we expose the error state
+    error,
     selectedProcesso,
     justificativas,
     isJustificativasLoading,
@@ -246,16 +206,16 @@ export const useESICPageState = () => {
     isGenerating,
     resetDeleteDialogState,
     handleCreateProcesso,
-    handleUpdateProcesso,
+    handleUpdateProcesso: processUpdateHandler,
     handleDeleteProcesso,
     confirmDeleteProcesso,
     handleViewProcesso,
     handleEditProcesso,
-    handleAddJustificativa,
+    handleAddJustificativa: processAddJustificativaHandler,
     handleCreateJustificativa,
     handleGenerateJustificativa,
-    handleUpdateStatus,
-    handleUpdateSituacao,
+    handleUpdateStatus: statusUpdateHandler,
+    handleUpdateSituacao: situacaoUpdateHandler,
     fetchProcessos
   };
 };

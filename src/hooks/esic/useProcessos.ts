@@ -90,24 +90,40 @@ export const useProcessos = () => {
 
       if (data) {
         // Transform the data to match the ESICProcesso type
-        const processedData: ESICProcesso[] = data.map(p => ({
-          id: p.id,
-          protocolo: p.protocolo,
-          assunto: p.assunto,
-          solicitante: p.solicitante,
-          data_processo: p.data_processo,
-          criado_em: p.criado_em,
-          created_at: p.criado_em, // Use criado_em for created_at
-          atualizado_em: p.atualizado_em,
-          autor_id: p.autor_id,
-          texto: p.texto,
-          situacao: p.situacao,
-          status: p.status,
-          autor: undefined, // We don't have autor data
-          coordenacao_id: p.coordenacao_id,
-          prazo_resposta: p.prazo_resposta,
-          coordenacao: p.coordenacao,
-        }));
+        const processedData = data.map((p: any) => {
+          // Ensure status is one of the valid types defined in ESICProcesso
+          let status: ESICProcesso['status'] = 'novo_processo'; // default
+          
+          // Map the status from database to the expected type
+          if (p.status === 'aberto' || 
+              p.status === 'em_andamento' ||
+              p.status === 'concluido' ||
+              p.status === 'cancelado' ||
+              p.status === 'aguardando_justificativa' ||
+              p.status === 'aguardando_aprovacao' ||
+              p.status === 'novo_processo') {
+            status = p.status as ESICProcesso['status'];
+          }
+          
+          return {
+            id: p.id,
+            protocolo: p.protocolo,
+            assunto: p.assunto,
+            solicitante: p.solicitante,
+            data_processo: p.data_processo,
+            criado_em: p.criado_em,
+            created_at: p.criado_em, // Use criado_em for created_at
+            atualizado_em: p.atualizado_em,
+            autor_id: p.autor_id,
+            texto: p.texto,
+            situacao: p.situacao,
+            status: status,
+            autor: undefined, // We don't have autor data
+            coordenacao_id: p.coordenacao_id,
+            prazo_resposta: p.prazo_resposta,
+            coordenacao: { nome: p.coordenacao } // Use the coordenacao field as is
+          } as ESICProcesso;
+        });
         
         setProcessos(processedData);
         setTotal(count || 0);

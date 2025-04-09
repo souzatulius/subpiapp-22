@@ -12,6 +12,7 @@ import ConfirmDialog from '@/components/ui/confirm-dialog';
 import { useIsMobile } from '@/hooks/use-mobile';
 import MobileBottomNav from '@/components/layouts/MobileBottomNav';
 import { ESICProcesso } from '@/types/esic';
+import { useEffect } from 'react';
 
 const ESICPage = () => {
   const [sidebarOpen, setSidebarOpen] = React.useState(false);
@@ -42,8 +43,16 @@ const ESICPage = () => {
     handleGenerateJustificativa,
     handleUpdateStatus,
     handleUpdateSituacao,
-    setScreen
+    setScreen,
+    fetchProcessos
   } = useESICPageState();
+
+  // Fetch processes when component mounts and when we go back to list view
+  useEffect(() => {
+    if (screen === 'list') {
+      fetchProcessos();
+    }
+  }, [screen, fetchProcessos]);
 
   // For ProcessoList filtering
   const [searchTerm, setSearchTerm] = React.useState('');
