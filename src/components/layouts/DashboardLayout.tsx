@@ -32,17 +32,18 @@ const DashboardLayout: React.FC = () => {
   };
 
   return (
+    // Use min-h-screen para garantir altura mínima de 100% da viewport
     <div className="flex flex-col bg-[#FFFAFA] min-h-screen">
-      <div className="transition-all duration-300 min-h-[64px] z-10">
+      <div className="transition-all duration-300 min-h-[64px] z-10 flex-shrink-0">
         <Header showControls={true} toggleSidebar={toggleSidebar} />
-        {/* Desktop breadcrumb - now attached directly to header */}
         {!isMobile && <BreadcrumbBar className="mt-0 border-t-0" />}
       </div>
       
-      <div className="flex flex-1 relative h-[calc(100vh-64px)]">
-        {/* Sidebar with full height */}
+      {/* Use flex-1 para ocupar todo o espaço disponível e flex para distribuir altura aos filhos */}
+      <div className="flex flex-1 h-[calc(100vh-64px)]">
+        {/* O container do sidebar precisa ter height: 100% */}
         {!isMobile && (
-          <div className="h-full sticky top-[64px]">
+          <div className="h-full">
             <DashboardSidebar isOpen={sidebarOpen} />
           </div>
         )}
@@ -55,7 +56,6 @@ const DashboardLayout: React.FC = () => {
               animate={{ opacity: 1, y: 0 }} 
               transition={{ duration: 0.5 }}
             >
-              {/* Only on mobile, render BreadcrumbBar right BEFORE the main content, now sticky */}
               {isMobile && <BreadcrumbBar className="mb-0 sticky top-0 z-10 bg-white" />}
               
               <Outlet />

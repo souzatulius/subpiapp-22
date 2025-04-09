@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { getNavigationSections } from '@/components/dashboard/sidebar/navigationConfig';
@@ -22,22 +21,16 @@ interface SidebarItemProps {
 const SidebarItem: React.FC<SidebarItemProps> = ({ to, icon, label, isCollapsed }) => {
   const location = useLocation();
   
-  // Custom isActive logic
   const isActive = (() => {
-    // For Dashboard/Início, only active on exact match
     if (to === '/dashboard') {
       return location.pathname === '/dashboard';
     }
     
-    // For Relatórios, only active on exact match or under relatorios paths
     if (to === '/dashboard/comunicacao/relatorios') {
       return location.pathname.includes('/relatorios');
     }
     
-    // For other items, check if path starts with the link
-    return location.pathname.startsWith(to) && 
-           // But exclude relatorios paths from making Comunicacao active
-           !(to === '/dashboard/comunicacao' && location.pathname.includes('/relatorios'));
+    return location.pathname.startsWith(to) && !(to === '/dashboard/comunicacao' && location.pathname.includes('/relatorios'));
   })();
 
   return (
@@ -60,7 +53,6 @@ const SidebarItem: React.FC<SidebarItemProps> = ({ to, icon, label, isCollapsed 
   );
 };
 
-// Loading skeleton for sidebar items
 const SidebarItemSkeleton = ({ isCollapsed }: { isCollapsed: boolean }) => {
   return (
     <div className={cn(
@@ -81,11 +73,9 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ isOpen }) => {
   const [userDepartment, setUserDepartment] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   
-  // Base sidebar width calculation - increased width for collapsed state
   const sidebarWidth = isOpen ? "w-64" : "w-24";
   const sidebarPadding = isOpen ? "px-4" : "px-3";
   
-  // Fetch user department
   useEffect(() => {
     const fetchUserDepartment = async () => {
       if (!user) {
@@ -115,10 +105,8 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ isOpen }) => {
     fetchUserDepartment();
   }, [user]);
   
-  // Get navigation items from centralized config
   const allNavigationItems = getNavigationSections();
   
-  // Filter for only the specified navigation items: Início, Comunicação, Relatórios, Zeladoria (Ranking)
   const allowedPages = ['dashboard', 'comunicacao', 'relatorios', 'ranking'];
   
   const navigationItems = allNavigationItems
@@ -132,17 +120,15 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ isOpen }) => {
   
   return (
     <aside
-      className={`${sidebarWidth} ${sidebarPadding} py-6 flex-shrink-0 border-r border-[#00357033] bg-[#051b2c] h-full min-h-full overflow-y-auto flex flex-col transition-all duration-300 ease-in-out`}
+      className={`${sidebarWidth} ${sidebarPadding} py-6 flex-shrink-0 border-r border-[#00357033] bg-[#051b2c] h-full overflow-y-auto flex flex-col transition-all duration-300 ease-in-out`}
     >
       <nav className="flex-1 flex flex-col">
         <div className="space-y-4 flex-1">
           {isLoading ? (
-            // Show loading skeletons while fetching data
             Array.from({ length: 4 }).map((_, index) => (
               <SidebarItemSkeleton key={index} isCollapsed={!isOpen} />
             ))
           ) : (
-            // Show actual navigation items once loaded
             navigationItems.map((item) => (
               <SidebarItem
                 key={item.id}

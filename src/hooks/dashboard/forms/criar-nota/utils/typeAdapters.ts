@@ -17,7 +17,7 @@ export const adaptDemandType = (demanda: DemandComponent): DemandType => {
   
   // Handle notes separately if they exist - explicitly cast to correct type
   if (demanda.notas && Array.isArray(demanda.notas)) {
-    const typedNotes = demanda.notas.map(note => {
+    adaptedDemand.notas = demanda.notas.map(note => {
       return {
         id: note.id,
         titulo: note.titulo,
@@ -28,8 +28,6 @@ export const adaptDemandType = (demanda: DemandComponent): DemandType => {
         demanda_id: note.demanda_id || ''
       } as NoteType;
     });
-    
-    adaptedDemand.notas = typedNotes;
   }
   
   return adaptedDemand as DemandType;
