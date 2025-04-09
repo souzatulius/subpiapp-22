@@ -1,9 +1,7 @@
 
 import React from 'react';
-import { Grid2X2, List, Filter, Plus } from 'lucide-react';
+import { Search, LayoutGrid, List } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useNavigate } from 'react-router-dom';
 
 interface DemandFilterProps {
   viewMode: 'cards' | 'list';
@@ -18,56 +16,48 @@ const DemandFilter: React.FC<DemandFilterProps> = ({
   filterStatus, 
   setFilterStatus 
 }) => {
-  const navigate = useNavigate();
-
-  const handleCreateDemand = () => {
-    // TODO: Implement navigation to create demand form
-    // For now, we'll just alert
-    alert('Função para criar demanda será implementada em breve!');
-  };
-
   return (
-    <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
-      <div className="flex items-center gap-2">
-        <Select value={filterStatus} onValueChange={setFilterStatus}>
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Filtrar por status" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="pendente">Pendentes</SelectItem>
-            <SelectItem value="em_andamento">Em Andamento</SelectItem>
-            <SelectItem value="concluida">Concluídas</SelectItem>
-            <SelectItem value="arquivada">Arquivadas</SelectItem>
-            <SelectItem value="cancelada">Canceladas</SelectItem>
-            <SelectItem value="todos">Todos</SelectItem>
-          </SelectContent>
-        </Select>
+    <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+      <div className="relative w-full md:w-80">
+        <input
+          type="text"
+          placeholder="Buscar demandas..."
+          className="pl-10 pr-4 py-3 w-full border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" // Updated to rounded-xl
+        />
+        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
       </div>
-
-      <div className="flex items-center gap-2">
-        <div className="border rounded-md overflow-hidden flex">
-          <Button 
-            variant={viewMode === 'cards' ? 'default' : 'ghost'} 
-            size="sm" 
-            className="rounded-none"
+      
+      <div className="flex flex-wrap gap-3 w-full md:w-auto">
+        <div className="flex border rounded-xl overflow-hidden bg-gray-50 mr-3"> {/* Updated to rounded-xl */}
+          <Button
+            variant="ghost"
+            className={`px-4 py-2 ${viewMode === 'cards' ? 'bg-white text-blue-600' : 'bg-transparent'} transition-colors`}
             onClick={() => setViewMode('cards')}
           >
-            <Grid2X2 className="h-4 w-4" />
+            <LayoutGrid size={18} className="mr-2" />
+            Cards
           </Button>
-          <Button 
-            variant={viewMode === 'list' ? 'default' : 'ghost'} 
-            size="sm" 
-            className="rounded-none"
+          <Button
+            variant="ghost"
+            className={`px-4 py-2 ${viewMode === 'list' ? 'bg-white text-blue-600' : 'bg-transparent'} transition-colors`}
             onClick={() => setViewMode('list')}
           >
-            <List className="h-4 w-4" />
+            <List size={18} className="mr-2" />
+            Lista
           </Button>
         </div>
-
-        <Button variant="action" size="sm" onClick={handleCreateDemand}>
-          <Plus className="h-4 w-4" />
-          Nova Demanda
-        </Button>
+        
+        <select
+          value={filterStatus}
+          onChange={(e) => setFilterStatus(e.target.value)}
+          className="px-4 py-2 border border-gray-300 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" // Updated to rounded-xl
+        >
+          <option value="todos">Todas</option>
+          <option value="pendente">Pendentes</option>
+          <option value="respondida">Respondidas</option>
+          <option value="aprovada">Aprovadas</option>
+          <option value="recusada">Recusadas</option>
+        </select>
       </div>
     </div>
   );

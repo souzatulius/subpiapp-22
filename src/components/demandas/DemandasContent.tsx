@@ -26,7 +26,7 @@ const DemandasContent: React.FC = () => {
   }, [fetchedDemandas]);
 
   return (
-    <Card className="bg-white shadow-sm">
+    <Card className="bg-white shadow-sm rounded-xl"> {/* Updated to rounded-xl */}
       <CardHeader className="pb-2 border-b">
         <CardTitle className="text-2xl font-bold text-[#003570]">
           Gerenciamento de Demandas

@@ -30,7 +30,7 @@ export const useInitialCards = (userDepartment: string | null) => {
         title: "Nova Solicitação",
         path: "/dashboard/comunicacao/cadastrar",
         iconId: "Pencil", 
-        color: getBgColor('gray-medium'),
+        color: getBgColor('blue-light'), // Changed from gray-medium to blue-light
         width: "25",
         height: "1",
         type: "standard",
@@ -40,10 +40,10 @@ export const useInitialCards = (userDepartment: string | null) => {
       },
       {
         id: 'consultar-demandas',
-        title: "Consultar Demandas",
+        title: "Demandas",
         path: "/dashboard/comunicacao/demandas",
         iconId: "FileText", 
-        color: getBgColor('deep-blue'),
+        color: getBgColor('blue-dark'), // Changed to blue-dark (azul escuro)
         width: "25",
         height: "1",
         type: "standard",
@@ -55,7 +55,7 @@ export const useInitialCards = (userDepartment: string | null) => {
         title: "Responder Demandas",
         path: "/dashboard/comunicacao/responder",
         iconId: "MessageSquare", 
-        color: getBgColor('gray-medium'),
+        color: getBgColor('gray-medium'), // Already gray-medium
         width: "25",
         height: "1",
         type: "standard",
@@ -135,7 +135,7 @@ export const useInitialCards = (userDepartment: string | null) => {
         title: 'Processos e-SIC',
         path: '/dashboard/esic',
         iconId: 'FileSearch',
-        color: getBgColor('blue-light'),
+        color: getBgColor('blue-dark'), // Changed from blue-light to blue-dark
         width: '50',
         height: '1',
         type: 'standard',
@@ -148,7 +148,7 @@ export const useInitialCards = (userDepartment: string | null) => {
         title: 'Notificações',
         path: '/dashboard/notificacoes',
         iconId: 'Bell',
-        color: getBgColor('deep-blue'),
+        color: getBgColor('deep-blue'), // Already deep-blue
         width: '25',
         height: '1',
         type: 'standard',
@@ -185,7 +185,7 @@ export const useInitialCards = (userDepartment: string | null) => {
         title: "Relatórios da Comunicação",
         path: "/dashboard/comunicacao/relatorios",
         iconId: "PieChart",
-        color: getBgColor('orange-light'),
+        color: getBgColor('orange-light'), // Already orange-light
         width: "25",
         height: "1",
         type: "standard",

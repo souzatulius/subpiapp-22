@@ -35,9 +35,9 @@ const ActionCards: React.FC<ActionCardsProps> = ({
       subtitle: 'Registre novas solicitações da imprensa',
       iconId: 'PlusCircle',
       path: `${baseUrl ? `/${baseUrl}` : ''}/cadastrar`,
-      color: 'blue-vivid' as CardColor,
+      color: 'blue-light' as CardColor, // Changed from blue-vivid to blue-light
       width: '25',
-      height: '2', // Changed from '1' to '2' to double the height
+      height: '2', 
       type: 'standard',
       displayMobile: true,
       mobileOrder: 1
@@ -48,9 +48,9 @@ const ActionCards: React.FC<ActionCardsProps> = ({
       subtitle: 'Responda às demandas pendentes',
       iconId: 'MessageSquare',
       path: `${baseUrl ? `/${baseUrl}` : ''}/responder`,
-      color: 'green-neon' as CardColor,
+      color: 'gray-medium' as CardColor, // Changed from green-neon to gray-medium
       width: '25',
-      height: '2', // Changed from '1' to '2' to double the height
+      height: '2', 
       type: 'standard',
       displayMobile: true,
       mobileOrder: 2
@@ -61,9 +61,9 @@ const ActionCards: React.FC<ActionCardsProps> = ({
       subtitle: 'Elabore notas oficiais',
       iconId: 'FileText',
       path: `${baseUrl ? `/${baseUrl}` : ''}/criar-nota`,
-      color: 'orange-dark' as CardColor,
+      color: 'orange-light' as CardColor, // Changed from orange-dark to orange-light
       width: '25',
-      height: '2', // Changed from '1' to '2' to double the height
+      height: '2', 
       type: 'standard',
       displayMobile: true,
       mobileOrder: 3
@@ -74,9 +74,9 @@ const ActionCards: React.FC<ActionCardsProps> = ({
       subtitle: 'Revise e aprove notas oficiais',
       iconId: 'CheckCircle',
       path: `${baseUrl ? `/${baseUrl}` : ''}/aprovar-nota`,
-      color: 'blue-dark' as CardColor,
+      color: 'blue-dark' as CardColor, // Changed to blue-dark
       width: '25',
-      height: '2', // Changed from '1' to '2' to double the height
+      height: '2', 
       type: 'standard',
       displayMobile: true,
       mobileOrder: 4
