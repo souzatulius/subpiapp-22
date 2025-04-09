@@ -34,11 +34,15 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           const approved = await isUserApproved(data.session.user.id);
           setIsApproved(approved);
           
+          // Permitir acesso à página de email-verified mesmo se não aprovado
+          const allowedUnapprovedRoutes = ['/email-verified', '/login'];
+          
           if (approved && location.pathname === '/login') {
             console.log('Usuário aprovado, redirecionando para dashboard');
             navigate('/dashboard');
-          } else if (!approved && data.session && location.pathname !== '/email-verified') {
-            // Redirect to email-verified page if user is not approved
+          } else if (!approved && data.session && 
+                    !allowedUnapprovedRoutes.includes(location.pathname)) {
+            // Redirecionar para email-verified page se o usuário não está aprovado e não está em uma rota permitida
             console.log('Usuário não aprovado, redirecionando para página de verificação');
             toast.info("Seu acesso ainda não foi aprovado por um administrador.");
             navigate('/email-verified');
@@ -58,10 +62,14 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
             const approved = await isUserApproved(newSession.user.id);
             setIsApproved(approved);
             
+            // Permitir acesso à página de email-verified mesmo se não aprovado
+            const allowedUnapprovedRoutes = ['/email-verified', '/login'];
+            
             if (approved && location.pathname === '/login') {
               navigate('/dashboard');
-            } else if (!approved && newSession && location.pathname !== '/email-verified') {
-              // Redirect to email-verified page if user is not approved
+            } else if (!approved && newSession && 
+                      !allowedUnapprovedRoutes.includes(location.pathname)) {
+              // Redirecionar para email-verified page se o usuário não está aprovado e não está em uma rota permitida
               toast.info("Seu acesso ainda não foi aprovado por um administrador.");
               navigate('/email-verified');
             }

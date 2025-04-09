@@ -7,7 +7,15 @@ import { CheckCircle2, Clock, InfoIcon } from 'lucide-react';
 import AuthLayout from '@/components/AuthLayout';
 
 const EmailVerified = () => {
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
+  
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+    } catch (error) {
+      console.error("Erro ao realizar logout:", error);
+    }
+  };
   
   return (
     <AuthLayout>
@@ -42,9 +50,20 @@ const EmailVerified = () => {
         </div>
         
         <div className="w-full pt-4 space-y-3">
-          <Button asChild className="w-full">
-            <Link to="/login">Voltar para Login</Link>
-          </Button>
+          {user ? (
+            <div className="space-y-3">
+              <Button variant="outline" onClick={handleSignOut} className="w-full">
+                Sair da conta
+              </Button>
+              <Button asChild className="w-full">
+                <Link to="/login">Voltar para Login</Link>
+              </Button>
+            </div>
+          ) : (
+            <Button asChild className="w-full">
+              <Link to="/login">Voltar para Login</Link>
+            </Button>
+          )}
           
           <p className="text-sm text-center text-gray-500">
             Precisa de ajuda? Entre em contato com o administrador do sistema.
