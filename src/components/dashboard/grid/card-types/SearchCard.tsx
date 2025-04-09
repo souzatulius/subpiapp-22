@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { ActionCardItem } from '@/types/dashboard';
 import SmartSearchCard from '../../SmartSearchCard';
@@ -9,11 +10,13 @@ interface SearchCardProps {
 
 const SearchCard: React.FC<SearchCardProps> = ({ card, onSearchSubmit }) => {
   return (
-    <div className="relative w-full h-full overflow-visible z-[20]">
-      <SmartSearchCard
-        placeholder={card.title}
-        onSearch={onSearchSubmit}
-      />
+    <div className="relative w-full h-full overflow-visible">
+      <div className="w-full h-full overflow-visible-container">
+        <SmartSearchCard
+          placeholder={card.title}
+          onSearch={onSearchSubmit}
+        />
+      </div>
     </div>
   );
 };

@@ -1,3 +1,4 @@
+
 import React, { useRef, useState } from 'react';
 import { Search, Command } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
@@ -41,7 +42,7 @@ const DashboardSearchCard: React.FC<DashboardSearchCardProps> = ({ isEditMode = 
     if (e.key === 'Enter') {
       handleSearch(e as unknown as React.FormEvent);
     }
-    // Espaço e outras teclas funcionam normalmente sem preventDefault
+    // Space and other keys work normally without preventDefault
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -85,7 +86,7 @@ const DashboardSearchCard: React.FC<DashboardSearchCardProps> = ({ isEditMode = 
         isActive ? 'border-blue-400 shadow-md' : 'border-blue-100'
       }`}
     >
-      <CardContent className="p-1.5 relative z-10"> {/* z-10 aqui garante que o dropdown fique acima */}
+      <CardContent className="p-1.5 relative overflow-visible z-50">
         <form onSubmit={handleSearch} className="flex items-center w-full relative">
           <div className="flex items-center flex-grow px-3 py-1.5 relative w-full">
             <Search className="h-5 w-5 text-gray-400 mr-2" />
@@ -101,7 +102,7 @@ const DashboardSearchCard: React.FC<DashboardSearchCardProps> = ({ isEditMode = 
               }}
               onBlur={(e) => {
                 setIsActive(false);
-                // ⏳ atraso para permitir clicar numa sugestão antes de fechar
+                // Delay to allow clicking on suggestions
                 setTimeout(() => {
                   if (
                     suggestionsRef.current &&
@@ -109,7 +110,7 @@ const DashboardSearchCard: React.FC<DashboardSearchCardProps> = ({ isEditMode = 
                   ) {
                     setShowSuggestions(false);
                   }
-                }, 150);
+                }, 200);
               }}
               onKeyDown={handleKeyDown}
             />
@@ -124,14 +125,15 @@ const DashboardSearchCard: React.FC<DashboardSearchCardProps> = ({ isEditMode = 
           {showSuggestions && suggestions.length > 0 && (
             <div
               ref={suggestionsRef}
-              className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 shadow-lg rounded-xl z-50"
+              className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 shadow-lg rounded-xl z-[9999]"
+              style={{ position: 'absolute', zIndex: 9999 }}
             >
               <ul className="py-1">
                 {suggestions.map((suggestion, index) => (
                   <li
                     key={index}
                     className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                    onMouseDown={() => handleSelectSuggestion(suggestion)} // mantém clique antes do blur
+                    onMouseDown={() => handleSelectSuggestion(suggestion)}
                   >
                     {suggestion}
                   </li>
