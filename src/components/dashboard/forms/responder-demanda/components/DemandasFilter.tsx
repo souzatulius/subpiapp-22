@@ -1,11 +1,11 @@
 
 import React, { useState } from 'react';
-import { Search, Filter, Grid, List, ArrowLeft } from 'lucide-react';
-import { Input } from '@/components/ui/input';
+import { Filter, Grid, List, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ViewMode } from '../types';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useIsMobile } from '@/hooks/use-mobile';
+import DemandasSearchBar from '@/components/consultar-demandas/DemandasSearchBar';
 
 interface DemandasFilterProps {
   searchTerm: string;
@@ -32,7 +32,7 @@ const DemandasFilter: React.FC<DemandasFilterProps> = ({
   setViewMode,
   areas,
   onBack,
-  showBackButton = false // Default to false to hide the button
+  showBackButton = false
 }) => {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const isMobile = useIsMobile();
@@ -74,15 +74,12 @@ const DemandasFilter: React.FC<DemandasFilterProps> = ({
           </Button>
         )}
 
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-          <Input
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="Buscar demanda..."
-            className="pl-9 pr-4 py-2 rounded-xl"
-          />
-        </div>
+        <DemandasSearchBar
+          searchTerm={searchTerm}
+          setSearchTerm={setSearchTerm}
+          placeholder="Buscar demanda..."
+          className="flex-1"
+        />
 
         <Button
           variant="outline"

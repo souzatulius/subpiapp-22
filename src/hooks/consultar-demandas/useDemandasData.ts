@@ -20,6 +20,7 @@ export const useDemandasData = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredDemandas, setFilteredDemandas] = useState<Demand[]>([]);
   const [activeFilters, setActiveFilters] = useState<FilterParams>({});
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
   
   const {
     data: demandas = [],
@@ -39,6 +40,15 @@ export const useDemandasData = () => {
     handleDeleteConfirm
   } = useDemandasActions(refetch);
 
+  // Debounce search term to avoid unnecessary filtering
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
   // Filter demandas based on all filters
   const applyFilters = useCallback((filters: FilterParams) => {
     setActiveFilters(filters);
@@ -56,8 +66,10 @@ export const useDemandasData = () => {
         const matchArea = demanda.area_coordenacao?.descricao?.toLowerCase().includes(lowerSearchTerm);
         const matchCoord = demanda.problema?.coordenacao?.descricao?.toLowerCase().includes(lowerSearchTerm);
         const matchProblem = demanda.problema?.descricao?.toLowerCase().includes(lowerSearchTerm);
+        const matchStatus = demanda.status?.toLowerCase().includes(lowerSearchTerm);
+        const matchPrioridade = demanda.prioridade?.toLowerCase().includes(lowerSearchTerm);
         
-        return matchTitle || matchArea || matchProblem || matchCoord;
+        return matchTitle || matchArea || matchProblem || matchCoord || matchStatus || matchPrioridade;
       });
     }
     
@@ -113,8 +125,8 @@ export const useDemandasData = () => {
 
   // Update filtered demandas when search term changes or demandas are loaded
   useEffect(() => {
-    applyFilters({ searchTerm });
-  }, [searchTerm, demandas, applyFilters]);
+    applyFilters({ searchTerm: debouncedSearchTerm, ...activeFilters });
+  }, [debouncedSearchTerm, demandas, applyFilters, activeFilters]);
 
   return {
     searchTerm,

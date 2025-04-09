@@ -11,6 +11,7 @@ import { Demand } from '@/types/demand';
 const DemandasContent: React.FC = () => {
   const [viewMode, setViewMode] = useState<'cards' | 'list'>('cards');
   const [filterStatus, setFilterStatus] = useState<string>('pendente');
+  const [searchTerm, setSearchTerm] = useState<string>('');
   
   const {
     demandas: fetchedDemandas,
@@ -21,12 +22,24 @@ const DemandasContent: React.FC = () => {
     handleCloseDetail
   } = useDemandas(filterStatus);
 
+  // Filter demands by search term
+  const filteredDemandas = fetchedDemandas.filter(demand => {
+    if (!searchTerm.trim()) return true;
+    
+    const term = searchTerm.toLowerCase();
+    return (
+      (demand.title?.toLowerCase().includes(term)) ||
+      (demand.origem?.toLowerCase().includes(term)) ||
+      (demand.status?.toLowerCase().includes(term))
+    );
+  });
+
   useEffect(() => {
     console.log("Demandas atualizadas:", fetchedDemandas);
   }, [fetchedDemandas]);
 
   return (
-    <Card className="bg-white shadow-sm rounded-xl"> {/* Updated to rounded-xl */}
+    <Card className="bg-white shadow-sm rounded-xl">
       <CardHeader className="pb-2 border-b">
         <CardTitle className="text-2xl font-bold text-[#003570]">
           Gerenciamento de Demandas
@@ -37,12 +50,14 @@ const DemandasContent: React.FC = () => {
           viewMode={viewMode} 
           setViewMode={setViewMode} 
           filterStatus={filterStatus} 
-          setFilterStatus={setFilterStatus} 
+          setFilterStatus={setFilterStatus}
+          searchTerm={searchTerm}
+          setSearchTerm={setSearchTerm}
         />
         
         {viewMode === 'cards' ? 
-          <DemandCards demandas={fetchedDemandas} isLoading={isLoading} onSelectDemand={handleSelectDemand} /> : 
-          <DemandList demandas={fetchedDemandas} isLoading={isLoading} onSelectDemand={handleSelectDemand} />
+          <DemandCards demandas={filteredDemandas} isLoading={isLoading} onSelectDemand={handleSelectDemand} /> : 
+          <DemandList demandas={filteredDemandas} isLoading={isLoading} onSelectDemand={handleSelectDemand} />
         }
 
         <DemandDetail demand={selectedDemand} isOpen={isDetailOpen} onClose={handleCloseDetail} />
