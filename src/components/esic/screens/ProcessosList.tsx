@@ -28,12 +28,18 @@ const ProcessosList: React.FC<ProcessosListProps> = ({
     setFilterTerm(e.target.value);
   };
   
+  // Log the received processes to help with debugging
+  console.log('ProcessosList received processos:', processos);
+  
+  // Filter processes based on the search term
   const filteredProcessos = processos?.filter(processo => 
     processo.assunto?.toLowerCase().includes(filterTerm.toLowerCase()) ||
     processo.protocolo?.toLowerCase().includes(filterTerm.toLowerCase()) ||
     processo.texto?.toLowerCase().includes(filterTerm.toLowerCase()) ||
     (processo.solicitante || '').toLowerCase().includes(filterTerm.toLowerCase())
   ) || [];
+
+  console.log('Filtered processos:', filteredProcessos);
 
   return (
     <div className="space-y-4">

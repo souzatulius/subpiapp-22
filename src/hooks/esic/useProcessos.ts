@@ -35,6 +35,7 @@ export const useProcessos = () => {
   const [isDeleting, setIsDeleting] = useState(false);
 
   const fetchProcessos = async (options: FilterOptions = {}) => {
+    console.log('Fetching processos with options:', options);
     setLoading(true);
     setError(null);
 
@@ -83,6 +84,10 @@ export const useProcessos = () => {
       
       const { data, error, count } = await query;
 
+      console.log('Fetched data:', data);
+      console.log('Error:', error);
+      console.log('Count:', count);
+
       if (error) {
         throw new Error(error.message);
       }
@@ -96,6 +101,7 @@ export const useProcessos = () => {
         setTotal(0);
       }
     } catch (err: any) {
+      console.error('Error fetching processos:', err);
       setError(err.message);
       toast({
         title: 'Erro ao buscar processos',

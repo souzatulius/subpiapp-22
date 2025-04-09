@@ -39,12 +39,12 @@ const ESICPage: React.FC = () => {
     handleGenerateJustificativa,
     handleUpdateStatus,
     handleUpdateSituacao,
-    // Add the fetchProcessos function from state
     fetchProcessos
   } = useESICPageState();
   
-  // Add useEffect to fetch processes when the page loads or when screen changes back to list
+  // Fetch processes when the component mounts and when the screen changes back to list
   useEffect(() => {
+    console.log('ESICPage useEffect - fetching processos');
     if (screen === 'list') {
       fetchProcessos();
     }
