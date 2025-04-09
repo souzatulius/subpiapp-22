@@ -13,6 +13,7 @@ const SmartSearchCard: React.FC<SmartSearchCardProps> = ({
   onSearch
 }) => {
   const navigate = useNavigate();
+  const [searchQuery, setSearchQuery] = useState('');
   
   // Keywords to route mapping
   const keywordRoutes = {
@@ -48,14 +49,15 @@ const SmartSearchCard: React.FC<SmartSearchCardProps> = ({
 
   // Generate suggestions based on input query
   const suggestions = React.useMemo(() => {
-    const matchedRoutes = Object.entries(keywordRoutes)
+    if (searchQuery.length < 4) return [];
+    
+    return Object.entries(keywordRoutes)
+      .filter(([keyword]) => keyword.includes(searchQuery.toLowerCase()))
       .map(([keyword, route]) => ({
         title: keyword.charAt(0).toUpperCase() + keyword.slice(1),
         route
       }));
-
-    return matchedRoutes;
-  }, []);
+  }, [searchQuery]);
 
   const handleSearch = (query: string) => {
     if (onSearch) {
@@ -67,6 +69,10 @@ const SmartSearchCard: React.FC<SmartSearchCardProps> = ({
   const handleSelectSuggestion = (suggestion: { title: string; route: string }) => {
     navigate(suggestion.route);
   };
+  
+  const handleSearchChange = (value: string) => {
+    setSearchQuery(value);
+  };
 
   return (
     <div className="w-full h-full">
@@ -75,6 +81,7 @@ const SmartSearchCard: React.FC<SmartSearchCardProps> = ({
         onSearch={handleSearch}
         onSelectSuggestion={handleSelectSuggestion}
         suggestions={suggestions}
+        onChange={handleSearchChange}
       />
     </div>
   );

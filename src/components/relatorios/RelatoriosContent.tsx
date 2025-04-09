@@ -1,159 +1,102 @@
 
 import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { useRelatorioItemsState } from './hooks/useRelatorioItemsState';
-import { createRelatorioItems } from './utils/relatorioItemsFactory';
-import { DndContext, closestCenter, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
-import { useChartComponents } from './hooks/useChartComponents';
-import TemasTecnicos from './sections/TemasTecnicos';
-import TempoDesempenho from './sections/TempoDesempenho';
-import NotasOficiais from './sections/NotasOficiais';
-import ESIC from './sections/ESIC';
-import { useReportsData, ReportFilters } from './hooks/useReportsData';
-import StatsCards from './components/StatsCards';
-import { DateRange } from "react-day-picker";
+import { RelatoriosKPICards } from './RelatoriosKPICards';
+import RelatoriosGraphCards from './RelatoriosGraphCards';
+import { PieChart, SlidersHorizontal, Printer, FileDown } from 'lucide-react';
+import { Button } from "@/components/ui/button";
+import { useLocalStorage } from '@/hooks/use-local-storage';
+import { ReportFilters } from './hooks/useReportsData';
 
 interface RelatoriosContentProps {
-  filterDialogOpen?: boolean;
-  setFilterDialogOpen?: React.Dispatch<React.SetStateAction<boolean>>;
+  filterDialogOpen: boolean;
+  setFilterDialogOpen: (open: boolean) => void;
   filters?: ReportFilters;
 }
 
-export const RelatoriosContent: React.FC<RelatoriosContentProps> = ({ 
-  filterDialogOpen, 
+export const RelatoriosContent: React.FC<RelatoriosContentProps> = ({
+  filterDialogOpen,
   setFilterDialogOpen,
   filters = {}
 }) => {
-  const defaultDateRange: DateRange = {
-    from: new Date(new Date().setMonth(new Date().getMonth() - 3)),
-    to: new Date(),
+  const [chartVisibility, setChartVisibility] = useLocalStorage<Record<string, boolean>>('relatorios-chart-visibility', {
+    origemDemandas: true,
+    distribuicaoPorTemas: true,
+    tempoMedioResposta: true,
+    performanceArea: true,
+    notasEmitidas: true,
+    noticiasVsReleases: true,
+    problemasComuns: true,
+    demandasEsic: true,
+    resolucaoEsic: true,
+    processosCadastrados: true
+  });
+
+  const resetDashboardChartVisibility = () => {
+    setChartVisibility({
+      origemDemandas: true,
+      distribuicaoPorTemas: true,
+      tempoMedioResposta: true,
+      performanceArea: true,
+      notasEmitidas: true,
+      noticiasVsReleases: true,
+      problemasComuns: true,
+      demandasEsic: true,
+      resolucaoEsic: true,
+      processosCadastrados: true
+    });
   };
-  
-  const [dateRange, setDateRange] = React.useState<DateRange>(defaultDateRange);
-  const [isLoading, setIsLoading] = useState(true);
-  
-  const sensors = useSensors(
-    useSensor(PointerSensor, {
-      activationConstraint: { distance: 5 },
-    })
-  );
-  
-  const currentFilters = {
-    ...filters,
-    dateRange: filters.dateRange || dateRange
-  };
-  
-  // Acompanhe o carregamento de dados com console logs
-  console.log('RelatoriosContent - currentFilters:', currentFilters);
-  
-  const { reportsData, cardStats, isLoading: dataLoading } = useReportsData(currentFilters);
-  
-  console.log('RelatoriosContent - reportsData:', reportsData);
-  console.log('RelatoriosContent - cardStats:', cardStats);
-  
-  const { chartComponents } = useChartComponents();
 
-  const initialItems = React.useMemo(() => createRelatorioItems({
-    chartData: reportsData || {},
-    chartComponents,
-    isLoading: isLoading || dataLoading,
-    hiddenItems: [],
-    expandedAnalyses: [],
-    analysisOnlyItems: []
-  }), [chartComponents, isLoading, dataLoading, reportsData]);
-
-  const {
-    items,
-    hiddenItems,
-    expandedAnalyses,
-    analysisOnlyItems,
-    toggleItemVisibility,
-    toggleAnalysisExpanded,
-    toggleAnalysisOnly
-  } = useRelatorioItemsState(initialItems);
-
+  // Reset visibility when page loads
   useEffect(() => {
-    // Definir um timer para simular carregamento, mas se os dados reais já estiverem prontos, termine mais cedo
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, dataLoading ? 800 : 300);  // Reduzindo os tempos para melhorar a percepção de performance
-    
-    return () => clearTimeout(timer);
-  }, [dataLoading]);
-
-  const temasTecnicosItems = items.filter(item => ['distribuicaoPorTemas', 'origemDemandas'].includes(item.id));
-  const tempoDesempenhoItems = items.filter(item => ['tempoMedioResposta', 'performanceArea'].includes(item.id));
-  const notasOficiaisItems = items.filter(item => ['notasEmitidas'].includes(item.id));
-  const esicItems = items.filter(item => ['temasESIC', 'resolucaoESIC'].includes(item.id));
-
-  const loading = isLoading || dataLoading;
-
-  // Use the correct function names
-  const handleDragEnd = () => {
-    // Implementation for drag and drop functionality
-    console.log("Drag ended");
-  };
-  
-  const handleToggleVisibility = (id: string) => {
-    toggleItemVisibility(id);
-  };
-  
-  const handleToggleAnalysis = (id: string) => {
-    toggleAnalysisExpanded(id);
-  };
-  
-  const handleToggleView = (id: string) => {
-    toggleAnalysisOnly(id);
-  };
+    if (window.location.search.includes('reset=true')) {
+      resetDashboardChartVisibility();
+    }
+  }, []);
 
   return (
-    <DndContext 
-      sensors={sensors}
-      collisionDetection={closestCenter}
-      onDragEnd={handleDragEnd}
-    >
-      <motion.div 
-        className="space-y-6"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.5 }}
-      >
-        <StatsCards cardStats={cardStats} isLoading={loading} />
+    <div className="space-y-6">
+      <div className="flex flex-col sm:flex-row justify-between items-center gap-3 mb-6">
+        <h2 className="text-xl font-semibold text-gray-800 flex items-center">
+          <PieChart className="h-5 w-5 mr-2 text-blue-600" />
+          Estatísticas e Relatórios
+        </h2>
         
-        <TemasTecnicos 
-          items={temasTecnicosItems} 
-          isLoading={loading}
-          handleToggleVisibility={handleToggleVisibility}
-          handleToggleAnalysis={handleToggleAnalysis}
-          handleToggleView={handleToggleView}
-        />
-        
-        <TempoDesempenho
-          items={tempoDesempenhoItems}
-          isLoading={loading}
-          handleToggleVisibility={handleToggleVisibility}
-          handleToggleAnalysis={handleToggleAnalysis}
-          handleToggleView={handleToggleView}
-        />
-        
-        <NotasOficiais
-          items={notasOficiaisItems}
-          isLoading={loading}
-          handleToggleVisibility={handleToggleVisibility}
-          handleToggleAnalysis={handleToggleAnalysis}
-          handleToggleView={handleToggleView}
-        />
-        
-        <ESIC
-          items={esicItems}
-          isLoading={loading}
-          handleToggleVisibility={handleToggleVisibility}
-          handleToggleAnalysis={handleToggleAnalysis}
-          handleToggleView={handleToggleView}
-        />
-      </motion.div>
-    </DndContext>
+        <div className="flex gap-2">
+          <Button 
+            variant="outline" 
+            size="sm"
+            className="bg-white hover:bg-gray-100 border-gray-200 text-gray-600"
+            onClick={() => window.print()}
+          >
+            <Printer className="h-4 w-4 mr-2" />
+            <span className="hidden sm:inline">Imprimir</span>
+          </Button>
+          
+          <Button 
+            variant="outline"
+            size="sm"
+            className="bg-white hover:bg-gray-100 border-gray-200 text-gray-600"
+            onClick={() => {}}
+          >
+            <FileDown className="h-4 w-4 mr-2" />
+            <span className="hidden sm:inline">Exportar</span>
+          </Button>
+          
+          <Button 
+            variant="default" 
+            size="sm"
+            onClick={() => setFilterDialogOpen(true)}
+            className="bg-blue-600 hover:bg-blue-700"
+          >
+            <SlidersHorizontal className="h-4 w-4 mr-2" />
+            <span className="hidden sm:inline">Filtros</span>
+          </Button>
+        </div>
+      </div>
+      
+      <RelatoriosKPICards />
+      
+      <RelatoriosGraphCards chartVisibility={chartVisibility} />
+    </div>
   );
 };
-
-export default RelatoriosContent;

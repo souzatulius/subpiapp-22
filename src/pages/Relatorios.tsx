@@ -29,6 +29,11 @@ const Relatorios = () => {
   const handleFiltersChange = (newFilters: ReportFilters) => {
     setFilters(newFilters);
   };
+  
+  const handleResetDashboard = () => {
+    // Forçar um reload da página para resetar completamente o dashboard
+    window.location.reload();
+  };
 
   return (
     <div className="flex flex-col h-screen bg-[#FFFAFA]">
@@ -73,6 +78,8 @@ const Relatorios = () => {
                     buttonIcon={<SlidersHorizontal className="h-4 w-4" />}
                     buttonVariant="action"
                     onButtonClick={() => setFilterDialogOpen(true)}
+                    showResetButton={true}
+                    onResetClick={handleResetDashboard}
                   />
                 </div>
                

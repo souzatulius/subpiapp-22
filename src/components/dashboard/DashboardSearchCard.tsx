@@ -38,10 +38,12 @@ const DashboardSearchCard: React.FC<DashboardSearchCardProps> = ({ isEditMode = 
   const suggestions = React.useMemo(() => {
     if (searchQuery.length < 4) return [];
     
-    return (recentSearches || []).map(search => ({
-      title: search,
-      route: `/pesquisa?q=${encodeURIComponent(search)}`
-    }));
+    return (recentSearches || [])
+      .filter(search => search.toLowerCase().includes(searchQuery.toLowerCase()))
+      .map(search => ({
+        title: search,
+        route: `/pesquisa?q=${encodeURIComponent(search)}`
+      }));
   }, [recentSearches, searchQuery]);
 
   if (isEditMode) {
@@ -67,11 +69,6 @@ const DashboardSearchCard: React.FC<DashboardSearchCardProps> = ({ isEditMode = 
             onChange={handleSearchInputChange}
             className="w-full"
           />
-          {searchQuery.length > 0 && searchQuery.length < 4 && (
-            <div className="mt-2 text-xs text-gray-500 italic">
-              Digite pelo menos 4 caracteres para ver sugestões
-            </div>
-          )}
         </CardContent>
       </Card>
     </div>

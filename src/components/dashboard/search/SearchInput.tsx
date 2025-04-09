@@ -28,7 +28,6 @@ const SearchInput: React.FC<SearchInputProps> = ({
 }) => {
   const [query, setQuery] = useState('');
   const [showSuggestions, setShowSuggestions] = useState(false);
-  const [filteredSuggestions, setFilteredSuggestions] = useState<SearchSuggestion[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const isMounted = useRef(true);
@@ -39,26 +38,12 @@ const SearchInput: React.FC<SearchInputProps> = ({
     };
   }, []);
 
-  useEffect(() => {
-    if (query && suggestions.length) {
-      const filtered = suggestions.filter(suggestion =>
-        suggestion.title.toLowerCase().includes(query.toLowerCase())
-      ).slice(0, 5);
-      
-      setFilteredSuggestions(filtered);
-      setShowSuggestions(filtered.length > 0);
-    } else {
-      setFilteredSuggestions([]);
-      setShowSuggestions(false);
-    }
-  }, [query, suggestions]);
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!query.trim()) return;
 
-    if (filteredSuggestions.length > 0 && onSelectSuggestion) {
-      onSelectSuggestion(filteredSuggestions[0]);
+    if (suggestions.length > 0 && onSelectSuggestion) {
+      onSelectSuggestion(suggestions[0]);
     } else if (onSearch) {
       onSearch(query);
     }
@@ -71,6 +56,13 @@ const SearchInput: React.FC<SearchInputProps> = ({
     // Call the onChange prop if provided
     if (onChange) {
       onChange(newValue);
+    }
+    
+    // Only show suggestions if query is at least 4 characters
+    if (newValue.length >= 4 && suggestions.length > 0) {
+      setShowSuggestions(true);
+    } else {
+      setShowSuggestions(false);
     }
   };
 
@@ -102,15 +94,21 @@ const SearchInput: React.FC<SearchInputProps> = ({
             placeholder={placeholder}
             value={query}
             onChange={handleInputChange}
-            onFocus={() => setShowSuggestions(filteredSuggestions.length > 0)}
+            onFocus={() => query.length >= 4 && suggestions.length > 0 && setShowSuggestions(true)}
             onBlur={handleBlur}
-            className={`pl-14 pr-4 py-6 rounded-xl border border-gray-300 w-full bg-white text-2xl text-gray-800 placeholder:text-gray-600 ${className}`}
+            className={`pl-14 pr-4 py-6 rounded-xl border border-gray-300 w-full bg-white text-xl text-gray-800 placeholder:text-gray-600 ${className}`}
           />
         </div>
       </form>
 
+      {query.length > 0 && query.length < 4 && (
+        <div className="mt-2 text-xs text-gray-500 italic">
+          Digite pelo menos 4 caracteres para ver sugestões
+        </div>
+      )}
+
       <SearchSuggestionsPortal
-        suggestions={filteredSuggestions}
+        suggestions={suggestions}
         isOpen={showSuggestions}
         anchorRef={containerRef}
         onSelect={handleSelectSuggestion}
