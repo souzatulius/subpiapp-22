@@ -94,53 +94,65 @@ const UserProfileMenu = () => {
   };
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="relative h-10 w-10 rounded-full">
-          <Avatar className="h-10 w-10">
-            {userProfile?.foto_perfil_url ? (
-              <AvatarImage 
-                src={userProfile.foto_perfil_url} 
-                alt={userProfile.nome_completo || 'User avatar'} 
-              />
-            ) : (
-              <AvatarFallback className="bg-orange-500 text-white">{getInitials()}</AvatarFallback>
-            )}
-          </Avatar>
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
-        {isMobile && (
-          <>
-            <DropdownMenuLabel className="font-normal">
-              <div className="flex flex-col space-y-1">
-                <p className="font-bold text-sm">{getFirstAndLastName()}</p>
-                <p className="text-xs text-muted-foreground truncate">{userProfile?.email}</p>
-                {userProfile?.coordenacao && (
-                  <p className="text-xs text-muted-foreground">
-                    {userProfile.coordenacao.descricao}
-                  </p>
-                )}
-              </div>
-            </DropdownMenuLabel>
-            <DropdownMenuSeparator />
-          </>
-        )}
-        <DropdownMenuItem onClick={() => navigate('/profile')}>
-          <User className="mr-2 h-4 w-4" />
-          <span>Perfil</span>
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => navigate('/settings')}>
-          <Settings className="mr-2 h-4 w-4" />
-          <span>Configurações</span>
-        </DropdownMenuItem>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={handleLogout}>
-          <LogOut className="mr-2 h-4 w-4" />
-          <span>Sair</span>
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+    <div className="flex items-center">
+      {/* Desktop view - Show name and department */}
+      {!isMobile && (
+        <div className="mr-3 text-right hidden md:block">
+          <h3 className="font-bold text-[#003570]">{getFirstAndLastName()}</h3>
+          <p className="text-sm text-gray-500">
+            {userProfile?.coordenacao?.descricao || 'Sem coordenação'}
+          </p>
+        </div>
+      )}
+
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" className="relative h-10 w-10 rounded-full">
+            <Avatar className="h-10 w-10">
+              {userProfile?.foto_perfil_url ? (
+                <AvatarImage 
+                  src={userProfile.foto_perfil_url} 
+                  alt={userProfile.nome_completo || 'User avatar'} 
+                />
+              ) : (
+                <AvatarFallback className="bg-orange-500 text-white">{getInitials()}</AvatarFallback>
+              )}
+            </Avatar>
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          {isMobile && (
+            <>
+              <DropdownMenuLabel className="font-normal">
+                <div className="flex flex-col space-y-1">
+                  <p className="font-bold text-sm">{getFirstAndLastName()}</p>
+                  <p className="text-xs text-muted-foreground truncate">{userProfile?.email}</p>
+                  {userProfile?.coordenacao && (
+                    <p className="text-xs text-muted-foreground">
+                      {userProfile.coordenacao.descricao}
+                    </p>
+                  )}
+                </div>
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator />
+            </>
+          )}
+          <DropdownMenuItem onClick={() => navigate('/profile')}>
+            <User className="mr-2 h-4 w-4" />
+            <span>Perfil</span>
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => navigate('/settings')}>
+            <Settings className="mr-2 h-4 w-4" />
+            <span>Configurações</span>
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem onClick={handleLogout}>
+            <LogOut className="mr-2 h-4 w-4" />
+            <span>Sair</span>
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </div>
   );
 };
 

@@ -8,6 +8,8 @@ export interface Release {
   author: string;
   status: 'draft' | 'published' | 'archived';
   tags?: string[];
+  summary?: string;
+  created_at?: string;
 }
 
 export interface News {
