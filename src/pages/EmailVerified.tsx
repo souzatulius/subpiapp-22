@@ -6,11 +6,13 @@ import { Button } from '@/components/ui/button';
 import { CheckCircle2, Clock, InfoIcon } from 'lucide-react';
 import AuthLayout from '@/components/AuthLayout';
 import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 const EmailVerified = () => {
   const { user, signOut, isApproved } = useAuth();
   const [checkingStatus, setCheckingStatus] = useState(false);
   const [forceAllowAccess, setForceAllowAccess] = useState(false);
+  const [approvalStatus, setApprovalStatus] = useState<string | null>(null);
   const navigate = useNavigate();
   
   useEffect(() => {
@@ -32,6 +34,7 @@ const EmailVerified = () => {
         }
         
         console.log('Status da conta verificado diretamente:', data?.status_conta);
+        setApprovalStatus(data?.status_conta);
         
         if (data?.status_conta === 'aprovado') {
           console.log('Usuário realmente aprovado, permitindo acesso ao dashboard');
@@ -50,12 +53,14 @@ const EmailVerified = () => {
   const handleSignOut = async () => {
     try {
       await signOut();
+      navigate('/login'); // Garantir que o redirecionamento ocorra após o logout
     } catch (error) {
       console.error("Erro ao realizar logout:", error);
     }
   };
   
   const handleForceAccess = () => {
+    toast.info("Acessando o dashboard");
     navigate('/dashboard');
   };
   
@@ -81,6 +86,11 @@ const EmailVerified = () => {
                 Seu cadastro foi recebido e está pendente de aprovação por um administrador.
                 Você receberá um email quando seu acesso for aprovado.
               </p>
+              {approvalStatus && (
+                <p className="text-sm mt-1 font-medium">
+                  Status atual: <span className="capitalize">{approvalStatus}</span>
+                </p>
+              )}
             </div>
           </div>
           
@@ -94,7 +104,7 @@ const EmailVerified = () => {
         <div className="w-full pt-4 space-y-3">
           {user ? (
             <div className="space-y-3">
-              {forceAllowAccess && (
+              {(forceAllowAccess || approvalStatus === 'aprovado') && (
                 <Button onClick={handleForceAccess} className="w-full bg-green-600 hover:bg-green-700">
                   Acessar Dashboard
                 </Button>

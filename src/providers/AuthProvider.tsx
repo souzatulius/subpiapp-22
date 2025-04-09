@@ -43,8 +43,11 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           console.log('Status de aprovação:', approved);
           setIsApproved(approved);
           
-          // Permitir acesso à página de email-verified e login mesmo se não aprovado
+          // Lista de rotas permitidas mesmo sem aprovação
           const allowedUnapprovedRoutes = ['/email-verified', '/login'];
+          
+          // Verificar se a rota atual é permitida para usuários não aprovados
+          const isCurrentRouteAllowed = allowedUnapprovedRoutes.includes(location.pathname);
           
           if (approved) {
             console.log('Usuário aprovado, verificando rota atual:', location.pathname);
@@ -53,14 +56,12 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
               console.log('Redirecionando para dashboard');
               navigate('/dashboard');
             }
-          } else if (!approved && data.session) {
+          } else if (!approved && data.session && !isCurrentRouteAllowed) {
             console.log('Usuário não aprovado, verificando rota atual:', location.pathname);
-            // Se o usuário não está aprovado e está tentando acessar uma rota protegida
-            if (!allowedUnapprovedRoutes.includes(location.pathname)) {
-              console.log('Rota não permitida, redirecionando para página de verificação');
-              toast.info("Seu acesso ainda não foi aprovado por um administrador.");
-              navigate('/email-verified');
-            }
+            console.log('Rota atual não permitida:', location.pathname);
+            console.log('Redirecionando para página de verificação');
+            toast.info("Seu acesso ainda não foi aprovado por um administrador.");
+            navigate('/email-verified');
           }
         } else {
           console.log('Nenhuma sessão de usuário encontrada');
@@ -80,6 +81,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
             
             // Permitir acesso à página de email-verified e login mesmo se não aprovado
             const allowedUnapprovedRoutes = ['/email-verified', '/login'];
+            const isCurrentRouteAllowed = allowedUnapprovedRoutes.includes(location.pathname);
             
             if (approved) {
               console.log('Usuário aprovado, verificando rota atual:', location.pathname);
@@ -88,14 +90,12 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
                 console.log('Redirecionando para dashboard');
                 navigate('/dashboard');
               }
-            } else if (!approved) {
+            } else if (!approved && !isCurrentRouteAllowed) {
               console.log('Usuário não aprovado, verificando rota atual:', location.pathname);
-              // Se o usuário não está aprovado e está tentando acessar uma rota protegida
-              if (!allowedUnapprovedRoutes.includes(location.pathname)) {
-                console.log('Rota não permitida, redirecionando para página de verificação');
-                toast.info("Seu acesso ainda não foi aprovado por um administrador.");
-                navigate('/email-verified');
-              }
+              console.log('Rota atual não permitida:', location.pathname);
+              console.log('Redirecionando para página de verificação');
+              toast.info("Seu acesso ainda não foi aprovado por um administrador.");
+              navigate('/email-verified');
             }
           } else {
             setIsApproved(null);
