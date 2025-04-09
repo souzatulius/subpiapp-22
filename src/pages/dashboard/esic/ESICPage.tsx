@@ -10,6 +10,7 @@ import ProcessoView from '@/components/esic/screens/ProcessoView';
 import JustificativaCreate from '@/components/esic/screens/JustificativaCreate';
 import { useESICPageState } from '@/hooks/esic/useESICPageState';
 import { ESICProcesso } from '@/types/esic';
+import { toast } from '@/components/ui/use-toast';
 
 const ESICPage: React.FC = () => {
   const {
@@ -19,6 +20,7 @@ const ESICPage: React.FC = () => {
     processoToDelete,
     processos,
     isLoading,
+    error,
     selectedProcesso,
     justificativas,
     isJustificativasLoading,
@@ -46,7 +48,13 @@ const ESICPage: React.FC = () => {
   useEffect(() => {
     console.log('ESICPage useEffect - fetching processos');
     if (screen === 'list') {
-      fetchProcessos();
+      fetchProcessos().catch(err => {
+        toast({
+          variant: "destructive",
+          title: "Erro ao carregar processos",
+          description: err.message || "Ocorreu um erro ao carregar os processos"
+        });
+      });
     }
   }, [screen, fetchProcessos]);
   
@@ -64,6 +72,7 @@ const ESICPage: React.FC = () => {
           <ProcessosList 
             processos={processos}
             isLoading={isLoading}
+            error={error}
             onCreateProcesso={() => setScreen('create')}
             onViewProcesso={handleViewProcesso}
             onEditProcesso={handleEditProcesso}

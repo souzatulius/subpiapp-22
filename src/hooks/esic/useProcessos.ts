@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
@@ -34,7 +33,7 @@ export const useProcessos = () => {
   const [isUpdating, setIsUpdating] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  const fetchProcessos = async (options: FilterOptions = {}) => {
+  const fetchProcessos = async (options: FilterOptions = {}): Promise<void> => {
     console.log('Fetching processos with options:', options);
     setLoading(true);
     setError(null);
@@ -93,8 +92,17 @@ export const useProcessos = () => {
       }
 
       if (data) {
-        // Type assertion to handle the conversion properly
-        setProcessos(data as unknown as ESICProcesso[]);
+        // Properly cast the data to ensure it's correctly typed
+        const processedData = Array.isArray(data) ? data.map(p => ({
+          ...p,
+          autor_nome: p.autor?.nome_completo || '',
+          // Ensure proper date formatting
+          data_processo: p.data_processo ? p.data_processo : '',
+          created_at: p.criado_em || '',
+          // Other potential transformations can be added here
+        })) : [];
+        
+        setProcessos(processedData as ESICProcesso[]);
         setTotal(count || 0);
       } else {
         setProcessos([]);
@@ -103,11 +111,8 @@ export const useProcessos = () => {
     } catch (err: any) {
       console.error('Error fetching processos:', err);
       setError(err.message);
-      toast({
-        title: 'Erro ao buscar processos',
-        description: 'Ocorreu um erro ao carregar os processos. Tente novamente mais tarde.',
-        variant: 'destructive',
-      });
+      // Don't show toast here as it's better to handle at the component level
+      // for a better UX, but keep the error state
     } finally {
       setLoading(false);
     }
