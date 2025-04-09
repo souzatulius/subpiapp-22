@@ -81,6 +81,7 @@ export interface UnifiedActionCardProps extends ActionCardItem {
   isMobileView?: boolean;
   contentClassname?: string;
   isPendingActions?: boolean;
+  specialContent?: React.ReactNode;
 }
 
 export function SortableUnifiedActionCard(props: UnifiedActionCardProps) {
@@ -165,6 +166,8 @@ export function UnifiedActionCard({
   hasSubtitle,
   contentClassname = '',
   isPendingActions,
+  specialContent,
+  children
 }: UnifiedActionCardProps & { sortableProps?: SortableProps }) {
   const navigate = useNavigate();
   
@@ -174,7 +177,23 @@ export function UnifiedActionCard({
     }
   };
   
+  // Determina o conteúdo do card com base nas propriedades
   const renderCardContent = () => {
+    // Se há conteúdo especial (como OriginsDemandChartCompact), renderiza-o
+    if (specialContent) {
+      return (
+        <div className="w-full h-full">
+          {specialContent}
+        </div>
+      );
+    }
+
+    // Se há children diretamente passados ao componente
+    if (children) {
+      return children;
+    }
+
+    // Se é um card de KPI dinâmico
     if (type === 'data_dynamic' && specialCardsData?.kpis) {
       const kpis = specialCardsData.kpis;
       
@@ -214,6 +233,7 @@ export function UnifiedActionCard({
       }
     }
     
+    // Tipos especiais de cards
     if (type === 'in_progress_demands' && specialCardsData?.lists) {
       return (
         <DynamicListCard 
@@ -258,6 +278,7 @@ export function UnifiedActionCard({
       );
     }
     
+    // Card padrão dentro do ActionCard
     return (
       <div className="h-full" onClick={handleCardClick}>
         <ActionCard
@@ -280,7 +301,12 @@ export function UnifiedActionCard({
   };
   
   return (
-    <div className={`h-full relative group ${contentClassname}`} onClick={isEditing ? undefined : handleCardClick}>
+    <div 
+      className={`h-full relative group ${contentClassname} ${
+        specialContent ? 'overflow-hidden rounded-xl' : ''
+      }`} 
+      onClick={isEditing ? undefined : handleCardClick}
+    >
       {renderCardContent()}
       
       {(isEditing || onEdit) && (

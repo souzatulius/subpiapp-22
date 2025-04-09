@@ -108,9 +108,9 @@ const ActionCard = ({
 
       <div className="relative h-full flex flex-col items-center justify-center text-center py-2.5 px-2">
         {specialContent ? (
-          <>{specialContent}</>
+          <div className="w-full h-full">{specialContent}</div>
         ) : children ? (
-          <>{children}</>
+          children
         ) : chartId ? (
           <div className="w-full h-full flex flex-col">
             <ChartPreview chartId={chartId} />

@@ -1,102 +1,88 @@
 
 import React from 'react';
+import { DndContext, PointerSensor, closestCenter, KeyboardSensor, DragEndEvent } from '@dnd-kit/core';
+import { restrictToParentElement } from '@dnd-kit/modifiers';
+import { useSensor, useSensors } from '@dnd-kit/core';
 import { ActionCardItem } from '@/types/dashboard';
-import {
-  DndContext,
-  closestCenter,
-  KeyboardSensor,
-  PointerSensor,
-  useSensor,
-  useSensors,
-  DragEndEvent
-} from '@dnd-kit/core';
-import {
-  arrayMove,
-  SortableContext,
-  sortableKeyboardCoordinates,
-  verticalListSortingStrategy,
-} from '@dnd-kit/sortable';
-import CardGrid from './CardGrid';
-import { restrictToWindowEdges } from '@dnd-kit/modifiers';
-import { useGridOccupancy } from '@/hooks/dashboard/useGridOccupancy';
+import UnifiedCardGrid from './UnifiedCardGrid';
 
 interface CardGridContainerProps {
   cards: ActionCardItem[];
   onCardsChange: (cards: ActionCardItem[]) => void;
-  onEditCard: (card: ActionCardItem) => void;
-  onHideCard: (cardId: string) => void;
+  onEditCard?: (card: ActionCardItem) => void;
+  onHideCard?: (id: string) => void;
+  onDeleteCard?: (id: string) => void;
   isMobileView?: boolean;
   isEditMode?: boolean;
-  renderSpecialCardContent?: (cardId: string) => React.ReactNode | null;
+  quickDemandTitle?: string;
+  onQuickDemandTitleChange?: (value: string) => void;
+  onQuickDemandSubmit?: () => void;
   onSearchSubmit?: (query: string) => void;
-  specialCardsData?: any;
   disableWiggleEffect?: boolean;
   showSpecialFeatures?: boolean;
+  specialCardsData?: any;
+  renderSpecialCardContent?: (cardId: string) => React.ReactNode | null;
 }
 
-const CardGridContainer: React.FC<CardGridContainerProps> = ({
-  cards,
+const CardGridContainer: React.FC<CardGridContainerProps> = ({ 
+  cards, 
   onCardsChange,
   onEditCard,
   onHideCard,
+  onDeleteCard,
   isMobileView = false,
   isEditMode = false,
-  renderSpecialCardContent,
+  quickDemandTitle,
+  onQuickDemandTitleChange,
+  onQuickDemandSubmit,
   onSearchSubmit,
-  specialCardsData,
-  disableWiggleEffect,
-  showSpecialFeatures
+  disableWiggleEffect = false,
+  showSpecialFeatures = true,
+  specialCardsData = {
+    overdueCount: 0,
+    overdueItems: [],
+    notesToApprove: 0,
+    responsesToDo: 0,
+    isLoading: false,
+  },
+  renderSpecialCardContent
 }) => {
   const sensors = useSensors(
     useSensor(PointerSensor, {
-      activationConstraint: {
-        distance: 8,
-      },
+      activationConstraint: { distance: 8 },
     }),
-    useSensor(KeyboardSensor, {
-      coordinateGetter: sortableKeyboardCoordinates,
-    })
+    useSensor(KeyboardSensor)
   );
 
-  // Handle the end of a drag event - reorder cards
+  // Function to handle drag end (handled by UnifiedCardGrid now)
   const handleDragEnd = (event: DragEndEvent) => {
-    const { active, over } = event;
-    
-    if (over && active.id !== over.id) {
-      const oldIndex = cards.findIndex((card) => card.id === active.id);
-      const newIndex = cards.findIndex((card) => card.id === over.id);
-      
-      if (oldIndex !== -1 && newIndex !== -1) {
-        const newCards = arrayMove(cards, oldIndex, newIndex);
-        onCardsChange(newCards);
-      }
-    }
+    // This is now handled by UnifiedCardGrid
   };
 
   return (
-    <DndContext
-      sensors={sensors}
+    <DndContext 
+      sensors={sensors} 
+      modifiers={[restrictToParentElement]} 
       collisionDetection={closestCenter}
       onDragEnd={handleDragEnd}
-      modifiers={[restrictToWindowEdges]}
     >
-      <SortableContext
-        items={cards.map(card => card.id)}
-        strategy={verticalListSortingStrategy}
-      >
-        <CardGrid 
-          cards={cards}
-          onEditCard={onEditCard}
-          onHideCard={onHideCard}
-          isMobileView={isMobileView}
-          isEditMode={isEditMode}
-          renderSpecialCardContent={renderSpecialCardContent}
-          onSearchSubmit={onSearchSubmit}
-          specialCardsData={specialCardsData}
-          disableWiggleEffect={disableWiggleEffect}
-          showSpecialFeatures={showSpecialFeatures}
-        />
-      </SortableContext>
+      <UnifiedCardGrid
+        cards={cards}
+        onCardsChange={onCardsChange}
+        onEditCard={onEditCard}
+        onDeleteCard={onDeleteCard}
+        onHideCard={onHideCard}
+        isMobileView={isMobileView}
+        isEditMode={isEditMode}
+        quickDemandTitle={quickDemandTitle}
+        onQuickDemandTitleChange={onQuickDemandTitleChange}
+        onQuickDemandSubmit={onQuickDemandSubmit}
+        onSearchSubmit={onSearchSubmit}
+        disableWiggleEffect={disableWiggleEffect}
+        showSpecialFeatures={showSpecialFeatures}
+        specialCardsData={specialCardsData}
+        renderSpecialCardContent={renderSpecialCardContent}
+      />
     </DndContext>
   );
 };

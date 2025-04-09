@@ -162,6 +162,17 @@ const DashboardPage: React.FC = () => {
     }
   }, [cards, searchCardAdded, isMobile]);
 
+  const renderSpecialCardContent = (cardId: string) => {
+    if (cardId === 'origem-demandas-card' || 
+        cardId.includes('origem-demandas') || 
+        cardId.includes('origemDemandas') ||
+        cardId.includes('origin-demand-chart') ||
+        cardId.includes('origin_demand_chart')) {
+      return <OriginsDemandChartCompact className="h-full w-full p-2" />;
+    }
+    return null;
+  };
+
   if (!user) {
     return <LoadingIndicator message="Carregando..." />;
   }
@@ -175,7 +186,6 @@ const DashboardPage: React.FC = () => {
       />
       
       <div className="flex flex-1 overflow-hidden">
-        {/* Sidebar - desktop only with full height */}
         {!isMobile && (
           <div className="h-full flex-shrink-0">
             <DashboardSidebar isOpen={sidebarOpen} />
@@ -183,7 +193,6 @@ const DashboardPage: React.FC = () => {
         )}
         
         <main className="flex-1 flex flex-col overflow-auto">
-          {/* Only show breadcrumb once based on device type */}
           {!isMobile ? (
             <BreadcrumbBar className="flex-shrink-0" />
           ) : (
@@ -258,13 +267,6 @@ const DashboardPage: React.FC = () => {
       {isMobile && <MobileBottomNav />}
     </div>
   );
-  
-  function renderSpecialCardContent(cardId: string) {
-    if (cardId === 'origem-demandas-card' || cardId.includes('origem-demandas') || cardId.includes('origemDemandas')) {
-      return <OriginsDemandChartCompact className="h-full w-full" />;
-    }
-    return null;
-  }
 };
 
 export default DashboardPage;
