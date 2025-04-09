@@ -102,12 +102,12 @@ export const useDemandasPorCoordenacao = () => {
             .from('demandas')
             .select(`
               id, 
-              criado_em, 
+              atualizado_em, 
               coordenacao_id, 
               coordenacao:coordenacoes(id, descricao)
             `)
-            .gte('criado_em', startDateStr)
-            .lte('criado_em', endDateStr);
+            .gte('atualizado_em', startDateStr)
+            .lte('atualizado_em', endDateStr);
           
           if (demandasError) throw demandasError;
           
@@ -116,7 +116,7 @@ export const useDemandasPorCoordenacao = () => {
           
           if (demandasData) {
             demandasData.forEach(item => {
-              const date = new Date(item.criado_em);
+              const date = new Date(item.atualizado_em);
               const day = format(date, 'yyyy-MM-dd');
               const coordId = item.coordenacao_id || 'sem_coordenacao';
               const coordNome = item.coordenacao?.descricao || 'Sem coordenação';
