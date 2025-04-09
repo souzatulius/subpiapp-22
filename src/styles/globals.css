@@ -120,69 +120,19 @@
   }
 }
 
-/* Search and dropdown visibility improvements */
-.search-suggestions {
-  z-index: 9999 !important;
-  position: absolute !important;
+/* Search portal container styles */
+#search-suggestions-portal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 9999;
+  pointer-events: none;
+  width: 100%;
+  height: 100%;
 }
 
-/* Ensure parent containers don't hide dropdowns */
-.overflow-visible-container {
-  overflow: visible !important;
-  position: relative;
-  z-index: 50;
-}
-
-/* Container for search cards */
-.search-card-container {
-  overflow: visible !important;
-  position: relative !important;
-  z-index: 9999 !important;
-}
-
-/* Ensure all dropdowns have high z-index */
-.dropdown, 
-.suggestion-dropdown, 
-.search-dropdown {
-  z-index: 9999 !important;
-  position: absolute !important;
-}
-
-/* Fix for card grid overflow issues */
-.card-grid-container {
-  overflow: visible !important;
-}
-
-/* Fix for any grid containers that might be cutting off dropdowns */
+/* Fix for grid containers that might be cutting off dropdowns */
 .grid {
-  overflow: visible !important;
-}
-
-/* Even stronger position for search suggestion elements */
-div[role="combobox"],
-div[role="listbox"],
-.search-input-wrapper,
-.search-container {
-  position: relative !important;
-  z-index: 9999 !important;
-  overflow: visible !important;
-}
-
-/* Force suggestions to display above all other content */
-ul[role="listbox"],
-.suggestions-list,
-.search-dropdown {
-  position: absolute !important;
-  z-index: 9999 !important;
-}
-
-/* Ensure parent elements of search components don't clip or hide dropdowns */
-.search-card-container,
-.overflow-visible-container,
-.search-container,
-.search-input-wrapper {
-  z-index: 9999 !important;
-  position: relative !important;
   overflow: visible !important;
 }
 

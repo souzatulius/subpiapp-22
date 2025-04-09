@@ -1,9 +1,7 @@
 
-import React, { useRef, useState } from 'react';
-import { Search } from 'lucide-react';
-import { Input } from '@/components/ui/input';
+import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import SearchInput from './search/SearchInput';
 
 interface SmartSearchCardProps {
   placeholder?: string;
@@ -14,12 +12,8 @@ const SmartSearchCard: React.FC<SmartSearchCardProps> = ({
   placeholder = "O que deseja fazer?",
   onSearch
 }) => {
-  const [query, setQuery] = useState('');
-  const [showSuggestions, setShowSuggestions] = useState(false);
-  const inputRef = useRef<HTMLInputElement>(null);
-  const suggestionsRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
-
+  
   // Keywords to route mapping
   const keywordRoutes = {
     "nota": "/dashboard/comunicacao/notas",
@@ -54,115 +48,34 @@ const SmartSearchCard: React.FC<SmartSearchCardProps> = ({
 
   // Generate suggestions based on input query
   const suggestions = React.useMemo(() => {
-    if (!query.trim()) return [];
-    const lowerQuery = query.toLowerCase();
     const matchedRoutes = Object.entries(keywordRoutes)
-      .filter(([keyword]) => keyword.toLowerCase().includes(lowerQuery))
       .map(([keyword, route]) => ({
         title: keyword.charAt(0).toUpperCase() + keyword.slice(1),
         route
-      }))
-      .slice(0, 5); // Limit to 5 suggestions
+      }));
 
     return matchedRoutes;
-  }, [query]);
+  }, []);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!query) return;
-
-    // If we have suggestions, navigate to the first one
-    if (suggestions.length > 0) {
-      navigate(suggestions[0].route);
-      setQuery('');
-      setShowSuggestions(false);
-      return;
-    }
-
-    // Otherwise, pass the query to the search handler
+  const handleSearch = (query: string) => {
     if (onSearch) {
       onSearch(query);
     }
-
     navigate(`/search?q=${encodeURIComponent(query)}`);
-    setQuery('');
-    setShowSuggestions(false);
   };
 
-  // Handle key events without blocking spacebar
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter") {
-      handleSubmit(e as unknown as React.FormEvent);
-    }
-    // All other keys including Space should work normally - NO preventDefault here
-  };
-
-  const handleSelectSuggestion = (suggestion: { title: string; route: string; }) => {
+  const handleSelectSuggestion = (suggestion: { title: string; route: string }) => {
     navigate(suggestion.route);
-    setQuery('');
-    setShowSuggestions(false);
   };
 
   return (
-    <div className="relative w-full h-full overflow-visible search-input-wrapper" style={{ zIndex: 9999 }}>
-      <form onSubmit={handleSubmit} className="relative w-full h-full">
-        <div className="relative w-full h-full">
-          <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-6 w-6 text-orange-500 z-10" />
-          <Input
-            ref={inputRef}
-            type="text"
-            placeholder={placeholder}
-            value={query}
-            onChange={e => setQuery(e.target.value)}
-            onKeyDown={handleKeyDown}
-            onFocus={() => setShowSuggestions(suggestions.length > 0)}
-            onBlur={() => {
-              // Use a timeout to allow clicks on suggestions to register before hiding
-              setTimeout(() => {
-                if (suggestionsRef.current && !suggestionsRef.current.contains(document.activeElement)) {
-                  setShowSuggestions(false);
-                }
-              }, 200);
-            }}
-            className="pl-14 pr-4 py-6 rounded-xl border border-gray-300 w-full h-full bg-white text-2xl text-gray-800 placeholder:text-gray-600"
-          />
-        </div>
-
-        <AnimatePresence>
-          {showSuggestions && suggestions.length > 0 && (
-            <motion.div
-              ref={suggestionsRef}
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.2 }}
-              className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 shadow-md rounded-xl search-suggestions"
-              style={{ 
-                position: 'absolute', 
-                zIndex: 9999,
-                width: '100%'
-              }}
-            >
-              <ul className="py-1">
-                {suggestions.map((suggestion, i) => (
-                  <li
-                    key={i}
-                    className="px-3 py-2 hover:bg-gray-100 cursor-pointer flex items-center text-xl font-medium"
-                    onMouseDown={() => handleSelectSuggestion(suggestion)}
-                  >
-                    <div className="flex-grow">
-                      <div className="font-medium text-gray-700">{suggestion.title}</div>
-                    </div>
-                    <div className="text-gray-400">
-                      <Search className="h-6 w-6" />
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </form>
+    <div className="w-full h-full">
+      <SearchInput
+        placeholder={placeholder}
+        onSearch={handleSearch}
+        onSelectSuggestion={handleSelectSuggestion}
+        suggestions={suggestions}
+      />
     </div>
   );
 };
