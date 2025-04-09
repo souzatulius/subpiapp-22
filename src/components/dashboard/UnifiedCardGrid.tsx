@@ -1,4 +1,3 @@
-
 import React from 'react';
 import {
   DndContext,
@@ -14,6 +13,9 @@ import { SortableUnifiedActionCard } from './UnifiedActionCard';
 import { getWidthClass, getHeightClass, getMobileSpecificDimensions } from './grid/GridUtilities';
 import { ActionCardItem, CardWidth, CardHeight } from '@/types/dashboard';
 import { useGridOccupancy } from '@/hooks/dashboard/useGridOccupancy';
+import PendingActivitiesCard from './cards/PendingActivitiesCard';
+import CommunicationsCard from './cards/CommunicationsCard';
+import OriginsDemandCardWrapper from './cards/OriginsDemandCardWrapper';
 import OriginsDemandChartCompact from './cards/OriginsDemandChartCompact';
 
 export interface UnifiedCardGridProps {
@@ -66,14 +68,12 @@ const UnifiedCardGrid: React.FC<UnifiedCardGridProps> = ({
       if (oldIndex !== -1 && newIndex !== -1) {
         const newCards = arrayMove([...cards], oldIndex, newIndex);
         
-        // If in mobile view, update mobileOrder for all cards
         if (isMobileView) {
           newCards.forEach((card, index) => {
             card.mobileOrder = index;
           });
         }
         
-        // Call onCardsChange with updated cards to persist changes
         onCardsChange(newCards);
       }
     }
@@ -81,25 +81,21 @@ const UnifiedCardGrid: React.FC<UnifiedCardGridProps> = ({
 
   const visibleCards = cards.filter(card => !card.isHidden);
 
-  // Sort cards by mobileOrder when in mobile view
   const displayedCards = isMobileView
     ? visibleCards
         .filter((card) => card.displayMobile !== false)
         .sort((a, b) => (a.mobileOrder ?? 999) - (b.mobileOrder ?? 999))
     : visibleCards;
 
-  // Apply specific dimensions for certain cards
   const processedCards = displayedCards.map(card => {
     if (isMobileView) {
-      // Aplicar dimensões específicas para cards no modo mobile
       const mobileSpecific = getMobileSpecificDimensions(card.title);
       
-      // Override for Origin Demand card in mobile
       if (card.id === 'origem-demandas-card' || card.type === 'origin_demand_chart') {
         return {
           ...card,
-          width: '100' as CardWidth,  // Full width on mobile
-          height: '2' as CardHeight   // 2 rows height
+          width: '100' as CardWidth,
+          height: '2' as CardHeight
         };
       }
       
@@ -109,66 +105,65 @@ const UnifiedCardGrid: React.FC<UnifiedCardGridProps> = ({
         height: mobileSpecific.height
       };
     } else {
-      // Ajustes específicos para desktop
       if (card.title === "Busca Rápida") {
         return {
           ...card,
-          width: '100' as CardWidth, // 4 columns
-          height: '0.5' as CardHeight  // Half row height
+          width: '100' as CardWidth,
+          height: '0.5' as CardHeight
         };
       } else if (card.id === 'origem-demandas-card' || card.type === 'origin_demand_chart') {
         return {
           ...card,
-          width: '50' as CardWidth, // 2 columns
-          height: '2' as CardHeight  // 2 rows
+          width: '50' as CardWidth,
+          height: '2' as CardHeight
         };
       } else if (card.title === "Demandas") {
         return {
           ...card,
-          width: '25' as CardWidth, // 1 column
-          height: '1' as CardHeight  // 1 row
+          width: '25' as CardWidth,
+          height: '1' as CardHeight
         };
       } else if (card.title === "Origem das Demandas") {
         return {
           ...card,
-          width: '50' as CardWidth, // 2 columns
-          height: '2' as CardHeight  // 2 rows
+          width: '50' as CardWidth,
+          height: '2' as CardHeight
         };
       } else if (card.title === "Ações Pendentes") {
         return {
           ...card,
-          width: '25' as CardWidth, // 1 column
-          height: '3' as CardHeight  // 3 rows
+          width: '25' as CardWidth,
+          height: '3' as CardHeight
         };
       } else if (card.title === "Avisos") {
         return {
           ...card,
-          width: '25' as CardWidth, // 1 column
-          height: '2' as CardHeight  // 2 rows
+          width: '25' as CardWidth,
+          height: '2' as CardHeight
         };
       } else if (card.title === "Processos e-SIC") {
         return {
           ...card,
-          width: '50' as CardWidth, // 2 columns
-          height: '1' as CardHeight  // 1 row
+          width: '50' as CardWidth,
+          height: '1' as CardHeight
         };
       } else if (card.title === "Notificações") {
         return {
           ...card,
-          width: '25' as CardWidth, // 1 column
-          height: '1' as CardHeight  // 1 row
+          width: '25' as CardWidth,
+          height: '1' as CardHeight
         };
       } else if (card.title === "Cadastro de nova solicitação de imprensa") {
         return {
           ...card,
-          width: '50' as CardWidth, // 2 columns
-          height: '2' as CardHeight  // 2 rows
+          width: '50' as CardWidth,
+          height: '2' as CardHeight
         };
       } else if (card.type === "origin_selection") {
         return {
           ...card,
-          width: '50' as CardWidth, // 2 columns
-          height: '2' as CardHeight  // 2 rows
+          width: '50' as CardWidth,
+          height: '2' as CardHeight
         };
       }
     }
@@ -193,17 +188,22 @@ const UnifiedCardGrid: React.FC<UnifiedCardGridProps> = ({
     );
   }
 
-  // Helper function to render special content for specific card types
   const getSpecialContent = (card: ActionCardItem) => {
-    // Use renderSpecialCardContent first if provided
     if (renderSpecialCardContent) {
       const customContent = renderSpecialCardContent(card.id);
       if (customContent) return customContent;
     }
 
-    // Fallback to built-in card types
     if (card.type === 'origin_demand_chart' || card.id === 'origem-demandas-card') {
       return <OriginsDemandChartCompact className="w-full h-full" />;
+    }
+    
+    if (card.type === 'pending_activities' || card.id === 'pending-activities-card') {
+      return <PendingActivitiesCard />;
+    }
+    
+    if (card.type === 'communications' || card.id === 'communications-card') {
+      return <CommunicationsCard />;
     }
     
     return null;
@@ -218,7 +218,6 @@ const UnifiedCardGrid: React.FC<UnifiedCardGridProps> = ({
       <div className={`w-full grid gap-y-3 gap-x-3 ${isMobileView ? 'grid-cols-2' : 'grid-cols-4'}`}>
         <SortableContext items={processedCards.map(card => card.id)}>
           {processedCards.map(card => {
-            // Get special content if available
             const specialContent = getSpecialContent(card);
               
             return (

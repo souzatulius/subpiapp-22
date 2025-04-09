@@ -1,9 +1,10 @@
-
 import { useState, useEffect } from 'react';
+import { v4 as uuidv4 } from 'uuid';
+import { ActionCardItem } from '@/types/dashboard';
 
 export interface DashboardConfigResult {
-  actionCards: any[];
-  setActionCards: (cards: any[]) => void;
+  actionCards: ActionCardItem[];
+  setActionCards: (cards: ActionCardItem[]) => void;
   isLoadingDashboard: boolean;
   viewType: 'grid' | 'list';
   setViewType: (viewType: 'grid' | 'list') => void;
@@ -11,7 +12,7 @@ export interface DashboardConfigResult {
 }
 
 export const useDashboardConfig = (): DashboardConfigResult => {
-  const [actionCards, setActionCards] = useState<any[]>([]);
+  const [actionCards, setActionCards] = useState<ActionCardItem[]>([]);
   const [isLoadingDashboard, setIsLoadingDashboard] = useState(true);
   const [viewType, setViewType] = useState<'grid' | 'list'>('grid');
   const [firstName, setFirstName] = useState<string>('Usuário');
@@ -19,7 +20,71 @@ export const useDashboardConfig = (): DashboardConfigResult => {
   useEffect(() => {
     // Mock loading state
     const loadTimer = setTimeout(() => {
-      setActionCards([]);
+      const defaultCards: ActionCardItem[] = [
+        {
+          id: 'dashboard-search-card',
+          title: 'Busca Rápida',
+          iconId: 'Search',
+          path: '',
+          color: 'bg-white',
+          width: '100',
+          height: '0.5',
+          type: 'smart_search',
+          isSearch: true,
+          displayMobile: true,
+          mobileOrder: 1
+        },
+        {
+          id: uuidv4(),
+          title: 'Demandas',
+          iconId: 'FileText',
+          path: '/dashboard/comunicacao/demandas',
+          color: 'deep-blue',
+          width: '25',
+          height: '1',
+          type: 'standard',
+          displayMobile: true,
+          mobileOrder: 2
+        },
+        {
+          id: 'pending-activities-card',
+          title: 'Atividades Pendentes',
+          iconId: 'Clock',
+          path: '',
+          color: 'orange-light',
+          width: '25',
+          height: '3',
+          type: 'pending_activities',
+          displayMobile: true,
+          mobileOrder: 3
+        },
+        {
+          id: 'communications-card',
+          title: 'Comunicados',
+          iconId: 'Megaphone',
+          path: '',
+          color: 'deep-blue',
+          width: '25',
+          height: '2',
+          type: 'communications',
+          displayMobile: true,
+          mobileOrder: 4
+        },
+        {
+          id: 'origem-demandas-card',
+          title: 'Ações em Andamento',
+          iconId: 'BarChart2',
+          path: '',
+          color: 'orange-light',
+          width: '50',
+          height: '2',
+          type: 'origin_demand_chart',
+          displayMobile: true,
+          mobileOrder: 5
+        }
+      ];
+
+      setActionCards(defaultCards);
       setIsLoadingDashboard(false);
       
       // Try to get user's first name from localStorage or any other source

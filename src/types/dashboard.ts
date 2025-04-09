@@ -1,4 +1,3 @@
-
 export type CardWidth = '25' | '50' | '75' | '100';
 export type CardHeight = '0.5' | '1' | '2' | '3' | '4';
 export type CardColor = 
@@ -33,7 +32,8 @@ export type CardType =
   | 'origin_selection' 
   | 'smart_search'
   | 'origin_demand_chart'
-  | 'communications';
+  | 'communications'
+  | 'pending_activities';
 
 export type DataSourceKey = 
   | 'pendencias_por_coordenacao' 

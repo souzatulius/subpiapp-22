@@ -1,121 +1,93 @@
 
 import React, { useEffect, useState } from 'react';
-import { Card, CardContent } from '@/components/ui/card';
-import { Megaphone, Calendar, ArrowRight } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
-
-interface CommunicationsCardProps {
-  id: string;
-  title?: string;
-  limit?: number;
-}
+import { Megaphone } from 'lucide-react';
+import { formatDistanceToNow } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
 
 interface Communication {
   id: string;
   titulo: string;
-  data_envio: string;
   mensagem: string;
+  data_envio: string;
 }
 
-const CommunicationsCard: React.FC<CommunicationsCardProps> = ({
-  id,
-  title = "Avisos",
-  limit = 5
-}) => {
-  const navigate = useNavigate();
+const CommunicationsCard: React.FC = () => {
   const [communications, setCommunications] = useState<Communication[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetchCommunications = async () => {
       setIsLoading(true);
-      
       try {
         const { data, error } = await supabase
           .from('comunicados')
           .select('id, titulo, mensagem, data_envio')
           .order('data_envio', { ascending: false })
-          .limit(limit);
-          
-        if (error) throw error;
-        
-        const formattedCommunications = (data || []).map(item => ({
-          id: item.id,
-          titulo: item.titulo,
-          mensagem: item.mensagem,
-          data_envio: new Date(item.data_envio).toLocaleDateString('pt-BR')
-        }));
-        
-        setCommunications(formattedCommunications);
-      } catch (err) {
-        console.error("Error fetching communications:", err);
-        setCommunications([]);
+          .limit(3);
+
+        if (error) {
+          console.error('Error fetching communications:', error);
+          return;
+        }
+
+        setCommunications(data || []);
+      } catch (error) {
+        console.error('Failed to fetch communications:', error);
       } finally {
         setIsLoading(false);
       }
     };
-    
-    fetchCommunications();
-  }, [limit]);
 
-  const handleViewAllClick = () => {
-    navigate('/dashboard/settings/comunicados');
+    fetchCommunications();
+    // Refresh every 10 minutes
+    const interval = setInterval(fetchCommunications, 10 * 60 * 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const formatTimeAgo = (dateString: string) => {
+    try {
+      return formatDistanceToNow(new Date(dateString), {
+        addSuffix: true,
+        locale: ptBR
+      });
+    } catch {
+      return 'Data desconhecida';
+    }
   };
-  
-  const handleCommunicationClick = (id: string) => {
-    navigate(`/dashboard/settings/comunicados/${id}`);
-  };
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col space-y-3 p-3 h-full">
+        {[1, 2, 3].map(i => (
+          <div key={i} className="animate-pulse flex flex-col space-y-2">
+            <div className="h-4 bg-gray-200 rounded w-2/3"></div>
+            <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  if (communications.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full p-4">
+        <Megaphone className="h-8 w-8 text-gray-300 mb-2" />
+        <p className="text-gray-500 text-sm text-center">Não há comunicados recentes</p>
+      </div>
+    );
+  }
 
   return (
-    <Card className="h-full w-full">
-      <CardContent className="p-4 h-full flex flex-col">
-        <div className="flex items-center justify-between mb-3">
-          <h3 className="font-medium text-gray-800 flex items-center">
-            <Megaphone className="h-4 w-4 text-blue-500 mr-2" />
-            {title}
-          </h3>
+    <div className="flex flex-col space-y-3 p-3 h-full">
+      {communications.map(comm => (
+        <div key={comm.id} className="border-b pb-2 last:border-b-0">
+          <h4 className="font-medium text-sm">{comm.titulo}</h4>
+          <p className="text-xs text-gray-500 line-clamp-2">{comm.mensagem}</p>
+          <p className="text-xs text-gray-400 mt-1">{formatTimeAgo(comm.data_envio)}</p>
         </div>
-        
-        <div className="flex-1 overflow-auto">
-          {isLoading ? (
-            <div className="h-full flex items-center justify-center">
-              <p className="text-sm text-gray-500">Carregando avisos...</p>
-            </div>
-          ) : communications.length > 0 ? (
-            <ul className="space-y-2">
-              {communications.map(comm => (
-                <li 
-                  key={comm.id}
-                  onClick={() => handleCommunicationClick(comm.id)}
-                  className="p-2 rounded-md hover:bg-gray-50 cursor-pointer border border-gray-100"
-                >
-                  <p className="text-sm font-medium">{comm.titulo}</p>
-                  <p className="text-xs text-gray-500 mt-1 line-clamp-2">{comm.mensagem}</p>
-                  <div className="flex items-center mt-1 text-xs text-gray-400">
-                    <Calendar className="h-3 w-3 mr-1" />
-                    {comm.data_envio}
-                  </div>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <div className="h-full flex items-center justify-center">
-              <p className="text-sm text-gray-500">Não há avisos disponíveis.</p>
-            </div>
-          )}
-        </div>
-        
-        {communications.length > 0 && (
-          <button 
-            onClick={handleViewAllClick}
-            className="mt-3 text-xs self-end px-3 py-1 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded flex items-center"
-          >
-            Ver todos <ArrowRight className="h-3 w-3 ml-1" />
-          </button>
-        )}
-      </CardContent>
-    </Card>
+      ))}
+    </div>
   );
 };
 
