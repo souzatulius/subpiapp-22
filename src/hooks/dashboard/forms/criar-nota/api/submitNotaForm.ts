@@ -3,7 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
 import { Demand } from '@/types/demand';
 
-interface SubmitNotaFormParams {
+interface SubmitNotaFormProps {
   titulo: string;
   texto: string;
   userId: string | undefined;
@@ -11,71 +11,79 @@ interface SubmitNotaFormParams {
   selectedDemanda: Demand | null;
 }
 
-/**
- * Submits the nota form to the server
- */
 export const submitNotaForm = async ({
   titulo,
   texto,
   userId,
   selectedDemandaId,
   selectedDemanda
-}: SubmitNotaFormParams) => {
+}: SubmitNotaFormProps): Promise<boolean> => {
+  if (!userId) {
+    toast({
+      title: "Erro de autenticação",
+      description: "Você precisa estar logado para criar uma nota.",
+      variant: "destructive"
+    });
+    return false;
+  }
+
   try {
-    // Get problema data to associate with the note
-    const { data: problemaData, error: problemaError } = await supabase
-      .from('problemas')
-      .select('id, coordenacao_id')
-      .eq('id', selectedDemanda?.problema_id || '')
-      .maybeSingle();
-    
-    if (problemaError && problemaError.code !== 'PGRST116') {
-      throw problemaError;
-    }
-    
+    // Buscar o ID do problema associado à área da demanda
     let problemaId = selectedDemanda?.problema_id;
-    let coordenacaoId = problemaData?.coordenacao_id || selectedDemanda?.coordenacao_id || null;
     
+    // If there's no problem ID, we need to create one
     if (!problemaId) {
-      // If no problema_id found on demand, create a default one
-      const { data: newProblema, error: newProblemaError } = await supabase
+      const { data: problemaData, error: problemaError } = await supabase
         .from('problemas')
-        .insert({ 
-          descricao: 'Problema Padrão',
-          coordenacao_id: coordenacaoId
-        })
-        .select();
-        
-      if (newProblemaError) throw newProblemaError;
+        .select('id')
+        .limit(1);
       
-      problemaId = newProblema[0].id;
+      if (problemaError) throw problemaError;
+      
+      if (!problemaData || problemaData.length === 0) {
+        // Create a default problem
+        const coordenacaoId = selectedDemanda?.coordenacao_id || null;
+        
+        const { data: newProblema, error: newProblemaError } = await supabase
+          .from('problemas')
+          .insert({ 
+            descricao: 'Problema Padrão',
+            coordenacao_id: coordenacaoId 
+          })
+          .select();
+          
+        if (newProblemaError) throw newProblemaError;
+        
+        problemaId = newProblema[0].id;
+      } else {
+        problemaId = problemaData[0].id;
+      }
     }
     
-    // Create the note including coordenacao_id from the problema
+    // Create the note
     const { data, error } = await supabase
       .from('notas_oficiais')
       .insert({
         titulo,
         texto,
+        coordenacao_id: selectedDemanda?.coordenacao_id || null,
         autor_id: userId,
         status: 'pendente',
         demanda_id: selectedDemandaId,
-        problema_id: problemaId,
-        coordenacao_id: coordenacaoId
+        problema_id: problemaId
       })
       .select();
     
     if (error) throw error;
     
-    // Update the demand status to reflect that a note has been created
+    // Update the demand status
     const { error: updateError } = await supabase
       .from('demandas')
-      .update({ status: 'aguardando_aprovacao' })
+      .update({ status: 'respondida' })
       .eq('id', selectedDemandaId);
       
     if (updateError) {
       console.error('Error updating demand status:', updateError);
-      // Don't throw here, we still want to show success for the note creation
     }
     
     toast({
@@ -91,7 +99,6 @@ export const submitNotaForm = async ({
       description: error.message || "Ocorreu um erro ao processar sua solicitação.",
       variant: "destructive"
     });
-    
     return false;
   }
 };

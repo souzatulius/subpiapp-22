@@ -8,6 +8,7 @@ import { fetchDemandResponse } from './api/fetchDemandResponse';
 import { formatResponses } from './utils/formatResponses';
 import { submitNotaForm } from './api/submitNotaForm';
 import { validateNotaForm } from './validators/validateNotaForm';
+import { adaptDemandType } from './utils/typeAdapters';
 
 export const useNotaForm = (onClose: () => void) => {
   const { user } = useAuth();
@@ -60,12 +61,15 @@ export const useNotaForm = (onClose: () => void) => {
     try {
       setIsSubmitting(true);
       
+      // Use the adapter to convert the demand type if selectedDemanda exists
+      const adaptedDemanda = selectedDemanda ? adaptDemandType(selectedDemanda) : null;
+      
       const success = await submitNotaForm({
         titulo,
         texto,
         userId: user?.id,
         selectedDemandaId,
-        selectedDemanda
+        selectedDemanda: adaptedDemanda
       });
       
       if (success) {
