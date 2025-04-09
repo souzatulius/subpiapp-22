@@ -18,11 +18,16 @@ const ChartAnalysis: React.FC<ChartAnalysisProps> = ({
   isFullAnalysisMode = false 
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
   
   return (
-    <div className="mt-2 relative">
+    <div 
+      className="mt-2 relative"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
       {/* Position the button in the top right of the chart card */}
-      <div className="absolute top-0 right-0 p-2">
+      <div className={`absolute top-0 right-0 p-2 transition-opacity ${isHovered ? 'opacity-100' : 'opacity-0'}`}>
         {onToggleView && (
           <Button 
             variant="ghost" 

@@ -39,9 +39,13 @@ const DashboardLayout: React.FC = () => {
         {!isMobile && <BreadcrumbBar className="mt-0 border-t-0" />}
       </div>
       
-      <div className="flex flex-1 relative">
-        {/* Sidebar with height set to full available space */}
-        {!isMobile && <DashboardSidebar isOpen={sidebarOpen} />}
+      <div className="flex flex-1 relative h-full">
+        {/* Sidebar with height set to full available height */}
+        {!isMobile && (
+          <div className="h-full sticky top-[64px]">
+            <DashboardSidebar isOpen={sidebarOpen} />
+          </div>
+        )}
         
         <main className="flex-1 w-full transition-all duration-300 bg-[#FFFAFA]">
           <div className="max-w-7xl mx-auto w-full flex-1">
