@@ -19,12 +19,54 @@ const SmartSearchCard: React.FC<SmartSearchCardProps> = ({
   const inputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
 
-  // Mock suggestions for now - these would be dynamically loaded in a real implementation
-  const suggestions = query ? [
-    { title: 'Nova demanda', route: '/dashboard/comunicacao/cadastrar' },
-    { title: 'Ver demandas', route: '/dashboard/comunicacao/demandas' },
-    { title: 'Aprovar notas', route: '/dashboard/comunicacao/aprovar-nota' }
-  ] : [];
+  // Keywords to route mapping
+  const keywordRoutes = {
+    "nota": "/dashboard/comunicacao/notas",
+    "notas": "/dashboard/comunicacao/notas",
+    "demanda": "/dashboard/comunicacao/demandas",
+    "demandas": "/dashboard/comunicacao/demandas",
+    "nova": "/dashboard/comunicacao/cadastrar",
+    "cadastrar": "/dashboard/comunicacao/cadastrar",
+    "criar": "/dashboard/comunicacao/criar-nota",
+    "aprovar": "/dashboard/comunicacao/aprovar-nota",
+    "release": "/dashboard/comunicacao/cadastrar-release",
+    "notícia": "/dashboard/comunicacao/releases",
+    "noticia": "/dashboard/comunicacao/releases",
+    "esic": "/dashboard/esic",
+    "ranking": "/dashboard/zeladoria/ranking-subs",
+    "relatório": "/dashboard/comunicacao/relatorios",
+    "relatorio": "/dashboard/comunicacao/relatorios",
+    "ajuste": "/perfil",
+    "perfil": "/perfil",
+    "responder": "/dashboard/comunicacao/responder",
+    "subs": "/dashboard/zeladoria/ranking-subs",
+    "zeladoria": "/dashboard/zeladoria/ranking-subs",
+    "recusar": "/dashboard/comunicacao/aprovar-nota",
+    "reprovar": "/dashboard/comunicacao/aprovar-nota",
+    "editar": "/dashboard/comunicacao/notas",
+    "avisos": "/dashboard/comunicacao",
+    "coordenação": "/dashboard/comunicacao",
+    "coordenacao": "/dashboard/comunicacao",
+    "notificações": "/dashboard/notificacoes",
+    "notificacoes": "/dashboard/notificacoes",
+  };
+
+  // Generate suggestions based on input query
+  const suggestions = React.useMemo(() => {
+    if (!query.trim()) return [];
+    
+    const lowerQuery = query.toLowerCase();
+    
+    const matchedRoutes = Object.entries(keywordRoutes)
+      .filter(([keyword]) => keyword.toLowerCase().includes(lowerQuery))
+      .map(([keyword, route]) => ({
+        title: keyword.charAt(0).toUpperCase() + keyword.slice(1),
+        route
+      }))
+      .slice(0, 5); // Limit to 5 suggestions
+      
+    return matchedRoutes;
+  }, [query]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -54,19 +96,21 @@ const SmartSearchCard: React.FC<SmartSearchCardProps> = ({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="w-full">
-      <div className="relative">
-        <Input
-          ref={inputRef}
-          type="text" 
-          className="pl-4 pr-14 py-6 rounded-xl border border-gray-300 w-full h-[80%] bg-white text-2xl text-gray-800 placeholder:text-gray-600"
-          placeholder={placeholder}
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          onFocus={() => setShowSuggestions(true)}
-          onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
-        />
-        <Search className="absolute right-4 top-1/2 transform -translate-y-1/2 h-8 w-8 text-gray-500" />
+    <form onSubmit={handleSubmit} className="w-full h-full">
+      <div className="relative flex items-center justify-center w-full h-full">
+        <div className="w-[80%] relative">
+          <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-8 w-8 text-orange-500" />
+          <Input
+            ref={inputRef}
+            type="text" 
+            className="pl-14 pr-4 py-6 rounded-xl border border-gray-300 w-full h-[80%] bg-white text-2xl text-gray-800 placeholder:text-gray-600"
+            placeholder={placeholder}
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            onFocus={() => setShowSuggestions(true)}
+            onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+          />
+        </div>
       </div>
       
       <AnimatePresence>
@@ -76,7 +120,7 @@ const SmartSearchCard: React.FC<SmartSearchCardProps> = ({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.2 }}
-            className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 shadow-md rounded-xl z-10"
+            className="absolute top-full left-0 right-0 mt-1 mx-[10%] bg-white border border-gray-200 shadow-md rounded-xl z-10"
           >
             <ul className="py-1">
               {suggestions.map((suggestion, i) => (

@@ -40,6 +40,7 @@ const DashboardLayout: React.FC = () => {
       </div>
       
       <div className="flex flex-1 relative">
+        {/* Sidebar with height set to full available space */}
         {!isMobile && <DashboardSidebar isOpen={sidebarOpen} />}
         
         <main className="flex-1 w-full transition-all duration-300 bg-[#FFFAFA]">

@@ -178,7 +178,7 @@ const DashboardPage: React.FC = () => {
                   variant="outline" 
                   size="lg" 
                   onClick={handleResetDashboard}
-                  className="text-blue-600 border-blue-300 hover:bg-blue-50 py-8 whitespace-nowrap"
+                  className="text-blue-600 border-blue-300 hover:bg-blue-50 py-4 whitespace-nowrap"
                   disabled={isSaving}
                 >
                   <RotateCcw className="h-4 w-4 mr-2" />

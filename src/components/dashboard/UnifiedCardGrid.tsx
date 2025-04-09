@@ -162,6 +162,14 @@ const UnifiedCardGrid: React.FC<UnifiedCardGridProps> = ({
     );
   }
 
+  // Helper function to get card-specific styling
+  const getCardContentStyle = (cardTitle: string) => {
+    if (cardTitle === "Origem das Demandas") {
+      return "p-0 h-full flex items-center justify-center";
+    }
+    return "";
+  };
+
   return (
     <DndContext
       sensors={sensors}
@@ -209,6 +217,7 @@ const UnifiedCardGrid: React.FC<UnifiedCardGridProps> = ({
                 hasSubtitle={!!card.subtitle}
                 isMobileView={isMobileView}
                 isPendingActions={card.isPendingActions}
+                contentClassname={getCardContentStyle(card.title)}
               />
             </div>
           ))}
