@@ -91,8 +91,8 @@ const ResponderDemandaContent: React.FC = () => {
           hideBackButton={true} // Hide the back button in the form as we now have it in the filter bar
         />
       ) : (
-        <Card className="border border-gray-200 shadow-sm rounded-xl">
-          <CardContent className="p-6 rounded-xl">
+        <Card className="border border-gray-200 shadow-sm rounded-lg">
+          <CardContent className="p-6">
             {viewMode === 'cards' ? (
               <DemandaGrid 
                 demandas={filteredDemandas} 

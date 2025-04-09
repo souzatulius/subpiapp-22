@@ -28,10 +28,6 @@ interface CardGridContainerProps {
   isMobileView?: boolean;
   isEditMode?: boolean;
   renderSpecialCardContent?: (cardId: string) => React.ReactNode | null;
-  onSearchSubmit?: (query: string) => void;
-  specialCardsData?: Record<string, any>;
-  disableWiggleEffect?: boolean;
-  showSpecialFeatures?: boolean;
 }
 
 const CardGridContainer: React.FC<CardGridContainerProps> = ({
@@ -41,11 +37,7 @@ const CardGridContainer: React.FC<CardGridContainerProps> = ({
   onHideCard,
   isMobileView = false,
   isEditMode = false,
-  renderSpecialCardContent,
-  onSearchSubmit,
-  specialCardsData,
-  disableWiggleEffect,
-  showSpecialFeatures
+  renderSpecialCardContent
 }) => {
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -91,10 +83,6 @@ const CardGridContainer: React.FC<CardGridContainerProps> = ({
           isMobileView={isMobileView}
           isEditMode={isEditMode}
           renderSpecialCardContent={renderSpecialCardContent}
-          onSearchSubmit={onSearchSubmit}
-          specialCardsData={specialCardsData}
-          disableWiggleEffect={disableWiggleEffect}
-          showSpecialFeatures={showSpecialFeatures}
         />
       </SortableContext>
     </DndContext>

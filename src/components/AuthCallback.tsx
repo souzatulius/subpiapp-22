@@ -115,14 +115,10 @@ const AuthCallback = () => {
           }
           
           console.log("Authentication successful, redirecting to dashboard");
-          
-          // Add duration to the success toast to make it auto-dismiss
           toast({
             title: "Login realizado com sucesso",
             description: "Bem-vindo(a) de volta!",
-            duration: 5000, // Auto dismiss after 5 seconds
           });
-          
           navigate('/dashboard');
         } else {
           console.log("No session found, redirecting to login");
