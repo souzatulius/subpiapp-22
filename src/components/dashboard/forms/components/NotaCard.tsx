@@ -41,7 +41,7 @@ const NotaCard: React.FC<NotaCardProps> = ({ nota, isSelected, onClick }) => {
   return (
     <Card 
       key={nota.id} 
-      className={`cursor-pointer transition-all hover:shadow-md ${
+      className={`cursor-pointer transition-all hover:shadow-md rounded-xl ${
         isSelected ? 'border-2 border-[#003570]' : 'border border-gray-200'
       }`}
       onClick={onClick}

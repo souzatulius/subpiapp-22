@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { LogOut, Settings, User, Bell } from 'lucide-react';
@@ -52,7 +53,7 @@ const ProfileMenu: React.FC = () => {
   } : null;
 
   if (isLoading) {
-    return <div className="w-8 h-8 rounded-full bg-gray-200 animate-pulse" />;
+    return <div className="w-10 h-10 rounded-full bg-gray-200 animate-pulse" />;
   }
 
   const displayName = userProfile?.nome_completo || 'Usuário';
@@ -69,7 +70,7 @@ const ProfileMenu: React.FC = () => {
             <AvatarDisplay 
               nome={displayName}
               imageSrc={photoUrl}
-              size="md"
+              size="lg"
             />
           </button>
         </DropdownMenuTrigger>

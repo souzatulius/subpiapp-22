@@ -82,7 +82,7 @@ const NotasContent = () => {
     <div className="container mx-auto px-4 py-6">
       <h1 className="text-2xl font-semibold mb-6">Consultar Notas Oficiais</h1>
       
-      <Card className="mb-6 border border-gray-200">
+      <Card className="mb-6 border border-gray-200 rounded-xl">
         <CardContent className="p-6">
           <NotasFilter 
             searchTerm={searchTerm}
@@ -98,23 +98,27 @@ const NotasContent = () => {
       </Card>
       
       {viewMode === 'table' ? (
-        <NotasTable 
-          notas={filteredNotas}
-          loading={loading}
-          formatDate={formatDate}
-          onViewNota={handleViewNota}
-          onEditNota={(nota: NotaOficial) => handleEditNota(nota.id)}
-          onDeleteNota={handleDeleteClick}
-        />
+        <div className="rounded-xl overflow-hidden">
+          <NotasTable 
+            notas={filteredNotas}
+            loading={loading}
+            formatDate={formatDate}
+            onViewNota={handleViewNota}
+            onEditNota={(nota: NotaOficial) => handleEditNota(nota.id)}
+            onDeleteNota={handleDeleteClick}
+          />
+        </div>
       ) : (
-        <NotasCards 
-          notas={filteredNotas}
-          loading={loading}
-          formatDate={formatDate}
-          onView={handleViewNota}
-          onEdit={(nota: NotaOficial) => handleEditNota(nota.id)}
-          onDelete={handleDeleteClick}
-        />
+        <div className="rounded-xl overflow-hidden">
+          <NotasCards 
+            notas={filteredNotas}
+            loading={loading}
+            formatDate={formatDate}
+            onView={handleViewNota}
+            onEdit={(nota: NotaOficial) => handleEditNota(nota.id)}
+            onDelete={handleDeleteClick}
+          />
+        </div>
       )}
       
       {/* Detail Dialog */}

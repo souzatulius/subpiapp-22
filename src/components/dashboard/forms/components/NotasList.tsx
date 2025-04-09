@@ -45,7 +45,7 @@ const NotasList: React.FC<NotasListProps> = ({
   );
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 rounded-xl overflow-hidden border border-gray-200 p-4 bg-white">
       <div className="relative">
         <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
         <Input
@@ -53,7 +53,7 @@ const NotasList: React.FC<NotasListProps> = ({
           placeholder="Buscar notas"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="pl-8"
+          className="pl-8 rounded-lg"
         />
       </div>
       

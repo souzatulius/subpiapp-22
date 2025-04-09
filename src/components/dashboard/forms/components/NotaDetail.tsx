@@ -31,7 +31,7 @@ const NotaDetail: React.FC<NotaDetailProps> = ({
     : 'Data não disponível';
 
   return (
-    <Card className="shadow-sm mb-4">
+    <Card className="shadow-sm mb-4 rounded-xl">
       <CardHeader className="pb-2">
         <div className="flex justify-between items-start mb-2">
           <Button 

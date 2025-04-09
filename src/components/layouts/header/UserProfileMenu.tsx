@@ -97,7 +97,7 @@ const UserProfileMenu = () => {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="relative h-10 w-10 rounded-full">
-          <Avatar className="h-8 w-8">
+          <Avatar className="h-10 w-10">
             {userProfile?.foto_perfil_url ? (
               <AvatarImage 
                 src={userProfile.foto_perfil_url} 

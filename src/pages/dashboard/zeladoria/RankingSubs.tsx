@@ -74,6 +74,8 @@ const RankingSubs = () => {
             setFilterDialogOpen={setFilterDialogOpen} 
             disableCardContainers={true}
             className={isMobile ? "mobile-kpi-grid" : ""} 
+            buttonText="Atualizar"
+            lastUpdateText="Atualização"
           />
         </DemoDataProvider>
       </div>
