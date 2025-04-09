@@ -14,6 +14,7 @@ interface ChartItemProps {
   analysis?: string;
   isAnalysisExpanded: boolean;
   showAnalysisOnly: boolean;
+  isLoading?: boolean; // Added isLoading prop
   onToggleVisibility: () => void;
   onToggleAnalysis: () => void;
   onToggleView: () => void;
@@ -28,6 +29,7 @@ const ChartItem: React.FC<ChartItemProps> = ({
   analysis,
   isAnalysisExpanded,
   showAnalysisOnly,
+  isLoading = false, // Added with default value
   onToggleVisibility,
   onToggleAnalysis,
   onToggleView
@@ -67,8 +69,14 @@ const ChartItem: React.FC<ChartItemProps> = ({
           </Button>
         </div>
 
-        {!showAnalysisOnly && (
+        {!showAnalysisOnly && !isLoading && (
           <div className="mb-2">{component}</div>
+        )}
+        
+        {isLoading && (
+          <div className="flex items-center justify-center h-40">
+            <p className="text-gray-400">Carregando...</p>
+          </div>
         )}
 
         {analysis && (

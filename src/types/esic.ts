@@ -6,7 +6,7 @@ export interface ESICProcesso {
   solicitante?: string;
   data_processo: string;
   criado_em: string;
-  created_at: string;
+  created_at?: string; // Changed to optional
   atualizado_em: string;
   autor_id: string;
   autor_nome?: string;
@@ -18,6 +18,9 @@ export interface ESICProcesso {
   };
   coordenacao_id?: string;
   prazo_resposta?: string;
+  coordenacao?: {
+    nome: string;
+  };
 }
 
 export interface ESICProcessoFormValues {

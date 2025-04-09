@@ -53,7 +53,8 @@ export const useProcessos = () => {
       }
 
       if (data) {
-        setProcessos(data as ESICProcesso[]);
+        // Type assertion to handle the conversion properly
+        setProcessos(data as unknown as ESICProcesso[]);
         setTotal(count || 0);
       } else {
         setProcessos([]);
