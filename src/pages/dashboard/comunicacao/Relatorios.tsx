@@ -1,5 +1,5 @@
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { PieChart, SlidersHorizontal, Printer, FileDown, RotateCcw } from 'lucide-react';
 import WelcomeCard from '@/components/shared/WelcomeCard';
 import { Button } from "@/components/ui/button";
@@ -15,24 +15,35 @@ import { toast } from '@/components/ui/use-toast';
 // Import Chart registration to ensure scales are registered
 import '@/components/ranking/charts/ChartRegistration';
 
+const DEFAULT_CHART_VISIBILITY = {
+  origemDemandas: true,
+  distribuicaoPorTemas: true,
+  tempoMedioResposta: true,
+  performanceArea: true,
+  notasEmitidas: true,
+  noticiasVsReleases: true,
+  problemasComuns: true,
+  demandasEsic: true,
+  resolucaoEsic: true,
+  processosCadastrados: true // Add new chart
+};
+
 const RelatoriosPage = () => {
   const [isDragging, setIsDragging] = useState(false);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   
   // Store chart visibility state in local storage
-  const [chartVisibility, setChartVisibility] = useLocalStorage<Record<string, boolean>>('relatorios-chart-visibility', {
-    origemDemandas: true,
-    distribuicaoPorTemas: true,
-    tempoMedioResposta: true,
-    performanceArea: true,
-    notasEmitidas: true,
-    noticiasVsReleases: true,
-    problemasComuns: true,
-    demandasEsic: true,
-    resolucaoEsic: true,
-    processosCadastrados: true // Add new chart
-  });
+  const [chartVisibility, setChartVisibility] = useLocalStorage<Record<string, boolean>>(
+    'relatorios-chart-visibility', 
+    DEFAULT_CHART_VISIBILITY
+  );
+  
+  // Store chart positions in local storage
+  const [chartPositions, setChartPositions] = useLocalStorage<Record<string, number>>(
+    'relatorios-chart-positions',
+    {}
+  );
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -56,25 +67,18 @@ const RelatoriosPage = () => {
   };
 
   const resetDashboard = useCallback(() => {
-    setChartVisibility({
-      origemDemandas: true,
-      distribuicaoPorTemas: true,
-      tempoMedioResposta: true,
-      performanceArea: true,
-      notasEmitidas: true,
-      noticiasVsReleases: true,
-      problemasComuns: true,
-      demandasEsic: true,
-      resolucaoEsic: true,
-      processosCadastrados: true
-    });
+    // Reset to default visibility
+    setChartVisibility(DEFAULT_CHART_VISIBILITY);
+    
+    // Reset positions
+    setChartPositions({});
     
     toast({
       title: "Dashboard resetado",
       description: "Todos os cards foram restaurados para a visualização padrão.",
       duration: 3000,
     });
-  }, [setChartVisibility]);
+  }, [setChartVisibility, setChartPositions]);
 
   return (
     <motion.div 
@@ -145,7 +149,11 @@ const RelatoriosPage = () => {
         >
           <div className="space-y-4">
             <RelatoriosKPICards />
-            <RelatoriosGraphCards chartVisibility={chartVisibility} />
+            <RelatoriosGraphCards 
+              chartVisibility={chartVisibility} 
+              chartPositions={chartPositions}
+              setChartPositions={setChartPositions}
+            />
           </div>
           
           <DragOverlay>
