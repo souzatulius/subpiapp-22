@@ -13,6 +13,7 @@ interface SearchInputProps {
   placeholder?: string;
   onSearch?: (query: string) => void;
   onSelectSuggestion?: (suggestion: SearchSuggestion) => void;
+  onChange?: (value: string) => void;
   className?: string;
   suggestions?: SearchSuggestion[];
 }
@@ -21,6 +22,7 @@ const SearchInput: React.FC<SearchInputProps> = ({
   placeholder = "O que deseja fazer?",
   onSearch,
   onSelectSuggestion,
+  onChange,
   className = "",
   suggestions = []
 }) => {
@@ -63,7 +65,13 @@ const SearchInput: React.FC<SearchInputProps> = ({
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setQuery(e.target.value);
+    const newValue = e.target.value;
+    setQuery(newValue);
+    
+    // Call the onChange prop if provided
+    if (onChange) {
+      onChange(newValue);
+    }
   };
 
   const handleSelectSuggestion = (suggestion: SearchSuggestion) => {
