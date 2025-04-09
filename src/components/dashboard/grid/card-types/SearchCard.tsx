@@ -10,8 +10,8 @@ interface SearchCardProps {
 
 const SearchCard: React.FC<SearchCardProps> = ({ card, onSearchSubmit }) => {
   return (
-    <div className="relative w-full h-full overflow-visible z-50">
-      <div className="w-full h-full overflow-visible-container">
+    <div className="relative w-full h-full overflow-visible z-50 search-card-container">
+      <div className="w-full h-full overflow-visible">
         <SmartSearchCard
           placeholder={card.title}
           onSearch={onSearchSubmit}

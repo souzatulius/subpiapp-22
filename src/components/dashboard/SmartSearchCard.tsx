@@ -89,12 +89,12 @@ const SmartSearchCard: React.FC<SmartSearchCardProps> = ({
     setShowSuggestions(false);
   };
 
-  // Modified to allow spacebar to work normally
+  // Handle key events without blocking spacebar
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter") {
       handleSubmit(e as unknown as React.FormEvent);
     }
-    // All other keys including Space should work normally
+    // All other keys including Space should work normally - NO preventDefault here
   };
 
   const handleSelectSuggestion = (suggestion: { title: string; route: string; }) => {
@@ -104,7 +104,7 @@ const SmartSearchCard: React.FC<SmartSearchCardProps> = ({
   };
 
   return (
-    <div className="relative w-full h-full overflow-visible z-[20]">
+    <div className="relative w-full h-full overflow-visible search-input-wrapper" style={{ zIndex: 9999 }}>
       <form onSubmit={handleSubmit} className="relative w-full h-full">
         <div className="relative w-full h-full">
           <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-6 w-6 text-orange-500 z-10" />
@@ -136,8 +136,12 @@ const SmartSearchCard: React.FC<SmartSearchCardProps> = ({
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.2 }}
-              className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 shadow-md rounded-xl z-[9999] w-full search-suggestions"
-              style={{ position: 'absolute', zIndex: 9999 }}
+              className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 shadow-md rounded-xl search-suggestions"
+              style={{ 
+                position: 'absolute', 
+                zIndex: 9999,
+                width: '100%'
+              }}
             >
               <ul className="py-1">
                 {suggestions.map((suggestion, i) => (

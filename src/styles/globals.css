@@ -136,8 +136,8 @@
 /* Container for search cards */
 .search-card-container {
   overflow: visible !important;
-  position: relative;
-  z-index: 50;
+  position: relative !important;
+  z-index: 9999 !important;
 }
 
 /* Ensure all dropdowns have high z-index */
@@ -174,4 +174,24 @@ ul[role="listbox"],
 .search-dropdown {
   position: absolute !important;
   z-index: 9999 !important;
+}
+
+/* Ensure parent elements of search components don't clip or hide dropdowns */
+.search-card-container,
+.overflow-visible-container,
+.search-container,
+.search-input-wrapper {
+  z-index: 9999 !important;
+  position: relative !important;
+  overflow: visible !important;
+}
+
+/* Fix for dashboard grid */
+.dashboard-grid,
+.dashboard-container,
+.flex.flex-col.h-screen,
+.flex-1.flex.flex-col.overflow-auto,
+.flex-1.overflow-auto,
+.card-grid-container {
+  overflow: visible !important;
 }

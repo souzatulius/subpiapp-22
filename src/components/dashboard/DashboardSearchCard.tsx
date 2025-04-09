@@ -82,7 +82,7 @@ const DashboardSearchCard: React.FC<DashboardSearchCardProps> = ({ isEditMode = 
   }
 
   return (
-    <div ref={containerRef} className="relative z-50">
+    <div ref={containerRef} className="relative search-container z-50 overflow-visible" style={{ zIndex: 50 }}>
       <Card
         className={`w-full border transition-all duration-200 rounded-xl ${
           isActive ? 'border-blue-400 shadow-md' : 'border-blue-100'
@@ -130,7 +130,7 @@ const DashboardSearchCard: React.FC<DashboardSearchCardProps> = ({ isEditMode = 
       {showSuggestions && suggestions.length > 0 && (
         <div
           ref={suggestionsRef}
-          className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 shadow-lg rounded-xl z-[9999]"
+          className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 shadow-lg rounded-xl suggestion-dropdown"
           style={{ position: 'absolute', zIndex: 9999 }}
         >
           <ul className="py-1">
