@@ -1,8 +1,6 @@
-
 import React from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Card } from '@/components/ui/card';
-
 interface StatsCardProps {
   title: string;
   value: string | number;
@@ -11,7 +9,6 @@ interface StatsCardProps {
   isLoading?: boolean;
   description?: string;
 }
-
 export const StatsCard: React.FC<StatsCardProps> = ({
   title,
   value,
@@ -28,27 +25,20 @@ export const StatsCard: React.FC<StatsCardProps> = ({
     }
     return stringValue;
   };
-
-  return (
-    <Card className="p-4 border border-blue-200 hover:shadow-md transition-all">
+  return <Card className="p-4 border border-blue-200 hover:shadow-md transition-all">
       <div className="flex items-center justify-between mb-2">
-        <h3 className="text-sm font-medium text-blue-700">{title}</h3>
+        <h3 className="text-sm font-medium text-zinc-500">{title}</h3>
       </div>
       
-      {isLoading ? (
-        <>
+      {isLoading ? <>
           <Skeleton className="h-7 w-24 bg-gray-200 mb-2" />
           <Skeleton className="h-4 w-full bg-gray-100 mb-1" />
           <Skeleton className="h-4 w-3/4 bg-gray-100" />
-        </>
-      ) : (
-        <>
+        </> : <>
           <p className="text-2xl font-bold text-blue-600 mb-2">{formatValue(value)}</p>
           <p className="text-xs text-gray-600 line-clamp-2">
             {description || comparison || ''}
           </p>
-        </>
-      )}
-    </Card>
-  );
+        </>}
+    </Card>;
 };
