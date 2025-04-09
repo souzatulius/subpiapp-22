@@ -136,83 +136,93 @@ const DashboardPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#FFFAFA]">
-      <div className={`${isMobile ? 'transition-all duration-300' : ''}`}>
-        <Header showControls={true} toggleSidebar={toggleSidebar} />
-        {/* Breadcrumb colocado aqui diretamente após o header, como nas outras páginas */}
-        <BreadcrumbBar className="mt-0 border-t-0" />
-      </div>
+    <div className="flex flex-col h-screen bg-[#FFFAFA]">
+      <Header 
+        showControls={true} 
+        toggleSidebar={toggleSidebar} 
+        className="flex-shrink-0" 
+      />
       
       <div className="flex flex-1 overflow-hidden">
-        {!isMobile && <DashboardSidebar isOpen={sidebarOpen} />}
+        {/* Sidebar - desktop only with full height */}
+        {!isMobile && (
+          <div className="h-full flex-shrink-0">
+            <DashboardSidebar isOpen={sidebarOpen} />
+          </div>
+        )}
         
-        <main className="flex-1 overflow-auto bg-[#FFFAFA]">
-          <motion.div 
-            className="max-w-7xl mx-auto p-4"
-            initial={{ opacity: 0, y: 20 }} 
-            animate={{ opacity: 1, y: 0 }} 
-            transition={{ duration: 0.5 }}
-          >
-            <div className="space-y-6">
-              {isMobile && (
-                <div className="mb-0">
-                  <BreadcrumbBar />
-                </div>
-              )}
-              
-              <div className="w-full">
-                <WelcomeCard 
-                  title="Dashboard" 
-                  description="Arraste e edite os cards para personalizar a sua tela" 
-                  icon={<Home className="h-6 w-6 mr-2" />} 
-                  color="bg-gradient-to-r from-blue-800 to-blue-950"
-                  userName={firstName || ''}
-                  greeting={true}
-                />
-              </div>
-              
-              <div className="flex items-center justify-between gap-4">
-                <div className="flex-1">
-                  <DashboardSearchCard />
-                </div>
-                <Button 
-                  variant="outline" 
-                  size="lg" 
-                  onClick={handleResetDashboard}
-                  className="text-blue-600 border-blue-300 hover:bg-blue-50 py-4 whitespace-nowrap"
-                  disabled={isSaving}
-                >
-                  <RotateCcw className="h-4 w-4 mr-2" />
-                  Resetar
-                </Button>
-              </div>
-              
-              <div className={`relative ${isMobile ? 'pb-32' : ''}`}>
-                {isLoading ? (
-                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                    {Array.from({ length: 8 }).map((_, index) => (
-                      <Skeleton key={index} className="h-32 w-full rounded-lg" />
-                    ))}
-                  </div>
-                ) : cards && cards.length > 0 ? (
-                  <div className="px-2 py-2">
-                    <CardGridContainer 
-                      cards={cards.filter(card => !card.isHidden)} 
-                      onCardsChange={handleCardsChange}
-                      onEditCard={handleCardEdit}
-                      onHideCard={handleHideCard}
-                      isMobileView={isMobile}
-                      isEditMode={isEditMode}
-                    />
-                  </div>
-                ) : (
-                  <div className="p-4 text-center text-gray-500">
-                    Nenhum card disponível.
-                  </div>
-                )}
-              </div>
+        <main className="flex-1 flex flex-col overflow-auto">
+          {/* Only show breadcrumb once based on device type */}
+          {!isMobile ? (
+            <BreadcrumbBar className="flex-shrink-0" />
+          ) : (
+            <div className="sticky top-0 z-10 bg-white">
+              <BreadcrumbBar className="flex-shrink-0" />
             </div>
-          </motion.div>
+          )}
+          
+          <div className="flex-1 overflow-auto">
+            <motion.div 
+              className="max-w-7xl mx-auto p-4"
+              initial={{ opacity: 0, y: 20 }} 
+              animate={{ opacity: 1, y: 0 }} 
+              transition={{ duration: 0.5 }}
+            >
+              <div className="space-y-6">
+                <div className="w-full">
+                  <WelcomeCard 
+                    title="Dashboard" 
+                    description="Arraste e edite os cards para personalizar a sua tela" 
+                    icon={<Home className="h-6 w-6 mr-2" />} 
+                    color="bg-gradient-to-r from-blue-800 to-blue-950"
+                    userName={firstName || ''}
+                    greeting={true}
+                  />
+                </div>
+                
+                <div className="flex items-center justify-between gap-4">
+                  <div className="flex-1">
+                    <DashboardSearchCard />
+                  </div>
+                  <Button 
+                    variant="outline" 
+                    size="lg" 
+                    onClick={handleResetDashboard}
+                    className="text-blue-600 border-blue-300 hover:bg-blue-50 py-4 whitespace-nowrap"
+                    disabled={isSaving}
+                  >
+                    <RotateCcw className="h-4 w-4 mr-2" />
+                    Resetar
+                  </Button>
+                </div>
+                
+                <div className={`relative ${isMobile ? 'pb-32' : ''}`}>
+                  {isLoading ? (
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                      {Array.from({ length: 8 }).map((_, index) => (
+                        <Skeleton key={index} className="h-32 w-full rounded-lg" />
+                      ))}
+                    </div>
+                  ) : cards && cards.length > 0 ? (
+                    <div className="px-2 py-2">
+                      <CardGridContainer 
+                        cards={cards.filter(card => !card.isHidden)} 
+                        onCardsChange={handleCardsChange}
+                        onEditCard={handleCardEdit}
+                        onHideCard={handleHideCard}
+                        isMobileView={isMobile}
+                        isEditMode={isEditMode}
+                      />
+                    </div>
+                  ) : (
+                    <div className="p-4 text-center text-gray-500">
+                      Nenhum card disponível.
+                    </div>
+                  )}
+                </div>
+              </div>
+            </motion.div>
+          </div>
         </main>
       </div>
       
