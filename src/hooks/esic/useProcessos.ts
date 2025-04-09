@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
 import { ESICProcesso, ESICProcessoFormValues } from '@/types/esic';
 import { v4 as uuidv4 } from 'uuid';
+import { useFetchProcessos } from './useFetchProcessos';
 
 interface FilterOptions {
   page?: number;
@@ -16,6 +17,7 @@ interface FilterOptions {
 }
 
 export const useProcessos = () => {
+  const { fetchProcessos: fetchProcessosList, error: fetchError, loading: fetchLoading } = useFetchProcessos();
   const [processos, setProcessos] = useState<ESICProcesso[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -40,99 +42,11 @@ export const useProcessos = () => {
     setError(null);
 
     try {
-      // Build the query without trying to join autor
-      let query = supabase
-        .from('esic_processos')
-        .select('*', { count: 'exact' });
-      
-      // Apply filters if they exist
-      const mergedOptions = { ...filterOptions, ...options };
-      
-      if (mergedOptions.searchTerm) {
-        query = query.or(`assunto.ilike.%${mergedOptions.searchTerm}%,protocolo.ilike.%${mergedOptions.searchTerm}%,solicitante.ilike.%${mergedOptions.searchTerm}%,texto.ilike.%${mergedOptions.searchTerm}%`);
-      }
-      
-      if (mergedOptions.status) {
-        query = query.eq('status', mergedOptions.status);
-      }
-      
-      if (mergedOptions.coordenacao) {
-        query = query.eq('coordenacao_id', mergedOptions.coordenacao);
-      }
-      
-      if (mergedOptions.dataInicio) {
-        query = query.gte('data_processo', mergedOptions.dataInicio);
-      }
-      
-      if (mergedOptions.dataFim) {
-        query = query.lte('data_processo', mergedOptions.dataFim);
-      }
-      
-      // Apply pagination
-      if (mergedOptions.page && mergedOptions.pageSize) {
-        const from = (mergedOptions.page - 1) * mergedOptions.pageSize;
-        const to = from + mergedOptions.pageSize - 1;
-        query = query.range(from, to);
-      }
-      
-      // Apply ordering
-      query = query.order('criado_em', { ascending: false });
-      
-      const { data, error, count } = await query;
-
-      console.log('Fetched data:', data);
-      console.log('Error:', error);
-      console.log('Count:', count);
-
-      if (error) {
-        throw new Error(error.message);
-      }
-
-      if (data) {
-        // Transform the data to match the ESICProcesso type
-        const processedData = data.map((p: any) => {
-          // Ensure status is one of the valid types defined in ESICProcesso
-          let status: ESICProcesso['status'] = 'novo_processo'; // default
-          
-          // Map the status from database to the expected type
-          if (p.status === 'aberto' || 
-              p.status === 'em_andamento' ||
-              p.status === 'concluido' ||
-              p.status === 'cancelado' ||
-              p.status === 'aguardando_justificativa' ||
-              p.status === 'aguardando_aprovacao' ||
-              p.status === 'novo_processo') {
-            status = p.status as ESICProcesso['status'];
-          }
-          
-          return {
-            id: p.id,
-            protocolo: p.protocolo,
-            assunto: p.assunto,
-            solicitante: p.solicitante,
-            data_processo: p.data_processo,
-            criado_em: p.criado_em,
-            created_at: p.criado_em, // Use criado_em for created_at
-            atualizado_em: p.atualizado_em,
-            autor_id: p.autor_id,
-            texto: p.texto,
-            situacao: p.situacao,
-            status: status,
-            autor: undefined, // We don't have autor data
-            coordenacao_id: p.coordenacao_id,
-            prazo_resposta: p.prazo_resposta,
-            coordenacao: { nome: p.coordenacao } // Use the coordenacao field as is
-          } as ESICProcesso;
-        });
-        
-        setProcessos(processedData);
-        setTotal(count || 0);
-      } else {
-        setProcessos([]);
-        setTotal(0);
-      }
+      const processedData = await fetchProcessosList(options);
+      setProcessos(processedData);
+      // Total will be updated by useFetchProcessos
     } catch (err: any) {
-      console.error('Error fetching processos:', err);
+      console.error('Error in fetchProcessos:', err);
       setError(err.message);
     } finally {
       setLoading(false);
@@ -164,7 +78,7 @@ export const useProcessos = () => {
         autor_id: user.id,
         texto: formValues.texto,
         situacao: formValues.situacao,
-        status: 'novo_processo',
+        status: 'novo_processo' as ESICProcesso['status'],
         coordenacao_id: formValues.coordenacao_id === 'none' ? null : formValues.coordenacao_id,
         prazo_resposta: formValues.prazo_resposta instanceof Date 
           ? formValues.prazo_resposta.toISOString().split('T')[0]
@@ -211,6 +125,11 @@ export const useProcessos = () => {
     setError(null);
 
     try {
+      // Ensure status is a valid enum value if it's being updated
+      if (params.data.status && !isValidStatus(params.data.status)) {
+        params.data.status = 'novo_processo';
+      }
+
       const result = await supabase
         .from('esic_processos')
         .update(params.data)
@@ -286,10 +205,23 @@ export const useProcessos = () => {
     }
   };
 
+  // Helper function to validate status value
+  const isValidStatus = (status: string): status is ESICProcesso['status'] => {
+    return [
+      'novo_processo', 
+      'aberto', 
+      'em_andamento', 
+      'concluido', 
+      'cancelado', 
+      'aguardando_justificativa', 
+      'aguardando_aprovacao'
+    ].includes(status);
+  };
+
   return {
     processos,
-    isLoading: loading,
-    error,
+    isLoading: loading || fetchLoading,
+    error: error || fetchError,
     total,
     filterOptions,
     setFilterOptions,
