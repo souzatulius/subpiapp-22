@@ -1,3 +1,4 @@
+
 import React from 'react';
 import {
   DndContext,
@@ -207,52 +208,62 @@ const UnifiedCardGrid: React.FC<UnifiedCardGridProps> = ({
     >
       <div className={`w-full grid gap-y-3 gap-x-3 ${isMobileView ? 'grid-cols-2' : 'grid-cols-4'}`}>
         <SortableContext items={processedCards.map(card => card.id)}>
-          {processedCards.map(card => (
-            <div
-              key={card.id}
-              className={`${getWidthClass(card.width, isMobileView)} ${getHeightClass(card.height, isMobileView)}`}
-            >
-              <SortableUnifiedActionCard
-                id={card.id}
-                title={card.title}
-                subtitle={card.subtitle}
-                iconId={card.iconId}
-                path={card.path}
-                color={card.color}
-                width={card.width}
-                height={card.height}
-                isDraggable={true}
-                isEditing={isEditMode}
-                onEdit={onEditCard ? (id) => {
-                  const cardToEdit = cards.find(c => c.id === id);
-                  if (cardToEdit) onEditCard(cardToEdit);
-                } : undefined}
-                onDelete={onDeleteCard}
-                onHide={onHideCard}
-                iconSize={isMobileView ? 'lg' : 'xl'}
-                disableWiggleEffect={disableWiggleEffect}
-                type={card.type}
-                isQuickDemand={card.isQuickDemand}
-                isSearch={card.isSearch}
-                showSpecialFeatures={showSpecialFeatures}
-                quickDemandTitle={quickDemandTitle}
-                onQuickDemandTitleChange={onQuickDemandTitleChange}
-                onQuickDemandSubmit={onQuickDemandSubmit}
-                onSearchSubmit={onSearchSubmit}
-                specialCardsData={specialCardsData}
-                isCustom={card.isCustom}
-                hasBadge={card.hasBadge}
-                badgeValue={card.badgeValue}
-                hasSubtitle={!!card.subtitle}
-                isMobileView={isMobileView}
-                isPendingActions={card.isPendingActions}
-                contentClassname={getCardContentStyle(card.title, card.type)}
-                specialContent={renderSpecialCardContent && card.type === 'origin_demand_chart' 
-                  ? renderSpecialCardContent(card.id) 
-                  : undefined}
-              />
-            </div>
-          ))}
+          {processedCards.map(card => {
+            // Check if this card has special content to be rendered
+            const specialContent = renderSpecialCardContent && (card.type === 'origin_demand_chart' || card.id === 'origem-demandas-card') 
+              ? renderSpecialCardContent(card.id) 
+              : null;
+              
+            return (
+              <div
+                key={card.id}
+                className={`${getWidthClass(card.width, isMobileView)} ${getHeightClass(card.height, isMobileView)}`}
+              >
+                {specialContent ? (
+                  <div className="h-full w-full rounded-lg shadow-sm bg-white">
+                    {specialContent}
+                  </div>
+                ) : (
+                  <SortableUnifiedActionCard
+                    id={card.id}
+                    title={card.title}
+                    subtitle={card.subtitle}
+                    iconId={card.iconId}
+                    path={card.path}
+                    color={card.color}
+                    width={card.width}
+                    height={card.height}
+                    isDraggable={true}
+                    isEditing={isEditMode}
+                    onEdit={onEditCard ? (id) => {
+                      const cardToEdit = cards.find(c => c.id === id);
+                      if (cardToEdit) onEditCard(cardToEdit);
+                    } : undefined}
+                    onDelete={onDeleteCard}
+                    onHide={onHideCard}
+                    iconSize={isMobileView ? 'lg' : 'xl'}
+                    disableWiggleEffect={disableWiggleEffect}
+                    type={card.type}
+                    isQuickDemand={card.isQuickDemand}
+                    isSearch={card.isSearch}
+                    showSpecialFeatures={showSpecialFeatures}
+                    quickDemandTitle={quickDemandTitle}
+                    onQuickDemandTitleChange={onQuickDemandTitleChange}
+                    onQuickDemandSubmit={onQuickDemandSubmit}
+                    onSearchSubmit={onSearchSubmit}
+                    specialCardsData={specialCardsData}
+                    isCustom={card.isCustom}
+                    hasBadge={card.hasBadge}
+                    badgeValue={card.badgeValue}
+                    hasSubtitle={!!card.subtitle}
+                    isMobileView={isMobileView}
+                    isPendingActions={card.isPendingActions}
+                    contentClassname={getCardContentStyle(card.title, card.type)}
+                  />
+                )}
+              </div>
+            );
+          })}
         </SortableContext>
       </div>
     </DndContext>
