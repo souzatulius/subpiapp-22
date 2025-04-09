@@ -64,9 +64,9 @@ const SortableChartCard: React.FC<SortableChartCardProps> = ({
       style={style}
       onMouseEnter={() => setIsHovering(true)}
       onMouseLeave={() => setIsHovering(false)}
-      className="relative h-full"
+      className="relative h-full rounded-xl"
     >
-      <Card className="border border-gray-200 bg-white shadow-sm h-full">
+      <Card className="border border-gray-200 bg-white shadow-sm h-full rounded-xl overflow-hidden">
         {title && (
           <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
             <div>
@@ -123,7 +123,7 @@ const SortableChartCard: React.FC<SortableChartCardProps> = ({
           {/* Chart or Analysis */}
           <div>
             {showAnalysisOnly ? (
-              <div className="p-4 bg-gray-50 min-h-[250px]">
+              <div className="p-4 bg-gray-50 min-h-[250px] rounded-b-xl">
                 <h4 className="font-medium text-gray-800 mb-2">Análise:</h4>
                 <p className="text-sm text-gray-600">{analysis}</p>
               </div>

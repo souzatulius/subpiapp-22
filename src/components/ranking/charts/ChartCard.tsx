@@ -15,6 +15,8 @@ interface ChartCardProps {
   className?: string;
   isDraggable?: boolean;
   trendIndicator?: ReactNode;
+  analysis?: string;
+  showAnalysis?: boolean;
 }
 
 const ChartCard: React.FC<ChartCardProps> = ({ 
@@ -27,7 +29,9 @@ const ChartCard: React.FC<ChartCardProps> = ({
   onToggleAnalysis,
   className = '',
   isDraggable = true,
-  trendIndicator
+  trendIndicator,
+  analysis,
+  showAnalysis = false
 }) => {
   const [isHovering, setIsHovering] = useState(false);
 
@@ -39,7 +43,7 @@ const ChartCard: React.FC<ChartCardProps> = ({
 
   return (
     <Card 
-      className={`overflow-hidden border border-blue-200 hover:shadow-md transition-all bg-white ${className} ${isDraggable ? 'cursor-grab active:cursor-grabbing' : ''}`}
+      className={`overflow-hidden border border-blue-200 hover:shadow-md transition-all bg-white rounded-xl ${className} ${isDraggable ? 'cursor-grab active:cursor-grabbing' : ''}`}
       onMouseEnter={() => setIsHovering(true)}
       onMouseLeave={() => setIsHovering(false)}
     >
@@ -97,6 +101,11 @@ const ChartCard: React.FC<ChartCardProps> = ({
               <div className="mt-2 text-blue-400 text-sm animate-pulse">
                 Carregando dados...
               </div>
+            </div>
+          ) : showAnalysis && analysis ? (
+            <div className="w-full h-full overflow-auto bg-gray-50 rounded-lg p-4">
+              <h4 className="font-medium text-blue-700 mb-2">Análise de dados</h4>
+              <p className="text-sm text-gray-700">{analysis}</p>
             </div>
           ) : (
             <div className="w-full h-full overflow-hidden">{children}</div>
