@@ -24,10 +24,10 @@ export const useFetchProcessos = () => {
     setError(null);
 
     try {
-      // Build the query - modified to remove the problematic join
+      // Build the query with the correct join syntax
       let query = supabase
         .from('esic_processos')
-        .select('*, coordenacao:coordenacao_id(nome)', { count: 'exact' });
+        .select('*, coordenacao:coordenacoes(nome)', { count: 'exact' });
       
       // Apply filters
       if (options.searchTerm) {
@@ -93,7 +93,9 @@ export const useFetchProcessos = () => {
             status: status,
             coordenacao_id: p.coordenacao_id,
             prazo_resposta: p.prazo_resposta,
-            coordenacao: p.coordenacao
+            coordenacao: p.coordenacao ? {
+              nome: p.coordenacao.nome
+            } : undefined
           };
         });
         

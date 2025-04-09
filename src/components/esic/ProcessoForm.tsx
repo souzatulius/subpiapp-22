@@ -1,486 +1,372 @@
 
-import React, { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
-import { 
-  Form, 
-  FormField, 
-  FormItem, 
-  FormLabel, 
-  FormControl, 
-  FormMessage 
-} from '@/components/ui/form';
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
-} from '@/components/ui/select';
-import { Textarea } from '@/components/ui/textarea';
-import { Input } from '@/components/ui/input';
-import { 
-  Card, 
-  CardContent, 
-  CardFooter, 
-  CardHeader, 
-  CardTitle 
-} from '@/components/ui/card';
+import React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { useToast } from '@/components/ui/use-toast';
-import { CalendarIcon, Loader2 } from 'lucide-react';
-import { 
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
+import { Button } from '@/components/ui/button';
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Calendar } from '@/components/ui/calendar';
-import { format } from "date-fns";
-import { ptBR } from "date-fns/locale";
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { format } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
+import { CalendarIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { ESICProcesso, ESICProcessoFormValues } from '@/types/esic';
-import { useCoordenacoes } from '@/hooks/useCoordenacoes';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { ESICProcesso, ESICProcessoFormValues, situacaoLabels } from '@/types/esic';
+import { Checkbox } from '@/components/ui/checkbox';
 
+// Define the form schema
 const formSchema = z.object({
   data_processo: z.date({
-    required_error: "A data do processo é obrigatória.",
+    required_error: 'A data do processo é obrigatória.',
   }),
-  texto: z.string().min(10, {
-    message: "O texto deve ter pelo menos 10 caracteres.",
-  }),
-  situacao: z.string().min(1, {
-    message: "A situação é obrigatória.",
-  }),
-  assunto: z.string().min(3, {
-    message: "O assunto deve ter pelo menos 3 caracteres.",
-  }).max(100, {
-    message: "O assunto não pode ter mais de 100 caracteres."
-  }),
+  assunto: z.string().min(3, 'O assunto deve ter pelo menos 3 caracteres.'),
   solicitante: z.string().optional(),
+  texto: z.string().min(10, 'A descrição deve ter pelo menos 10 caracteres.'),
+  situacao: z.string({
+    required_error: 'A situação é obrigatória.',
+  }),
   coordenacao_id: z.string().optional(),
   prazo_resposta: z.date().optional(),
-  sem_area_tecnica: z.boolean().optional(),
-  sem_identificacao: z.boolean().optional(),
+  sem_area_tecnica: z.boolean().default(false),
+  sem_identificacao: z.boolean().default(false),
 });
 
 interface ProcessoFormProps {
-  initialValues?: ESICProcesso;
+  defaultValues?: Partial<ESICProcessoFormValues>;
   onSubmit: (values: ESICProcessoFormValues) => Promise<void>;
-  isLoading: boolean;
-  onCancel: () => void;
-  mode?: 'create' | 'edit';
+  isSubmitting?: boolean;
+  onCancel?: () => void;
   coordenacoes?: { id: string; nome: string }[];
+  isEditing?: boolean;
 }
 
 const ProcessoForm: React.FC<ProcessoFormProps> = ({
-  initialValues,
+  defaultValues,
   onSubmit,
-  isLoading,
+  isSubmitting = false,
   onCancel,
-  mode = 'create'
+  coordenacoes = [],
+  isEditing = false,
 }) => {
-  const { toast } = useToast();
-  const [prazoPredefinido, setPrazoPredefinido] = useState<string | null>(null);
-  const { coordenacoes, isLoading: coordenacoesLoading } = useCoordenacoes();
-  const [solicitanteOption, setSolicitanteOption] = useState<'identificado' | 'sem_identificacao'>('identificado');
-  const [coordenacaoOption, setCoordenacaoOption] = useState<'com_area' | 'sem_area'>('com_area');
-  
   const form = useForm<ESICProcessoFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      data_processo: new Date(),
-      texto: '',
-      situacao: 'em_tramitacao',
-      assunto: '',
-      solicitante: '',
-      coordenacao_id: '',
-      prazo_resposta: undefined,
-      sem_area_tecnica: false,
-      sem_identificacao: false,
+      data_processo: defaultValues?.data_processo ? new Date(defaultValues.data_processo) : new Date(),
+      assunto: defaultValues?.assunto || '',
+      solicitante: defaultValues?.solicitante || '',
+      texto: defaultValues?.texto || '',
+      situacao: defaultValues?.situacao || 'em_tramitacao',
+      coordenacao_id: defaultValues?.coordenacao_id || undefined,
+      prazo_resposta: defaultValues?.prazo_resposta ? new Date(defaultValues.prazo_resposta) : undefined,
+      sem_area_tecnica: defaultValues?.coordenacao_id === null || false,
+      sem_identificacao: defaultValues?.solicitante === 'Sem identificação' || false,
     },
   });
 
-  useEffect(() => {
-    if (initialValues && mode === 'edit') {
-      // Initialize radio button values based on data
-      if (initialValues.solicitante === 'Sem identificação') {
-        setSolicitanteOption('sem_identificacao');
-      }
-      
-      if (!initialValues.coordenacao_id) {
-        setCoordenacaoOption('sem_area');
-      }
-      
-      form.reset({
-        data_processo: initialValues.data_processo ? new Date(initialValues.data_processo) : new Date(),
-        texto: initialValues.texto || '',
-        situacao: initialValues.situacao || 'em_tramitacao',
-        assunto: initialValues.assunto || '',
-        solicitante: initialValues.solicitante || '',
-        coordenacao_id: initialValues.coordenacao_id || '',
-        prazo_resposta: initialValues.prazo_resposta ? new Date(initialValues.prazo_resposta) : undefined,
-        sem_area_tecnica: !initialValues.coordenacao_id,
-        sem_identificacao: initialValues.solicitante === 'Sem identificação',
-      });
-    }
-  }, [initialValues, form, mode]);
+  const semAreaTecnica = form.watch('sem_area_tecnica');
+  const semIdentificacao = form.watch('sem_identificacao');
 
-  const handleSubmit = async (values: ESICProcessoFormValues) => {
-    try {
-      // Set values based on radio selections
-      if (solicitanteOption === 'sem_identificacao') {
-        values.solicitante = 'Sem identificação';
-      }
-      
-      if (coordenacaoOption === 'sem_area') {
-        values.coordenacao_id = null;
-      }
-      
-      await onSubmit(values);
-      toast({
-        title: mode === 'create' ? "Processo criado" : "Processo atualizado",
-        description: mode === 'create' 
-          ? "O processo foi criado com sucesso." 
-          : "O processo foi atualizado com sucesso.",
-      });
-    } catch (error) {
-      console.error("Erro ao processar formulário:", error);
-      toast({
-        variant: "destructive",
-        title: "Erro",
-        description: "Ocorreu um erro ao salvar o processo.",
-      });
+  React.useEffect(() => {
+    if (semAreaTecnica) {
+      form.setValue('coordenacao_id', undefined);
     }
-  };
-
-  const handleCalculateDeadline = (option: string) => {
-    setPrazoPredefinido(option);
-    const baseDate = form.getValues('data_processo');
-    
-    if (!baseDate) return;
-    
-    const deadline = new Date(baseDate);
-    
-    switch (option) {
-      case '5dias':
-        deadline.setDate(deadline.getDate() + 5);
-        break;
-      case '10dias':
-        deadline.setDate(deadline.getDate() + 10);
-        break;
-      case '20dias':
-        deadline.setDate(deadline.getDate() + 20);
-        break;
-      case '30dias':
-        deadline.setDate(deadline.getDate() + 30);
-        break;
-      default:
-        break;
+  }, [semAreaTecnica, form]);
+  
+  React.useEffect(() => {
+    if (semIdentificacao) {
+      form.setValue('solicitante', '');
     }
-    
-    form.setValue('prazo_resposta', deadline);
-  };
-
-  // Transform coordenacoes data to the format expected by the SelectItem components
-  const formattedCoordenacoes = coordenacoes?.map(coord => ({
-    id: coord.id,
-    nome: coord.descricao
-  })) || [];
+  }, [semIdentificacao, form]);
 
   return (
-    <Card className="w-full border rounded-xl shadow-md">
-      <CardHeader className="px-6">
-        <CardTitle className="text-2xl font-semibold text-subpi-blue">
-          {mode === 'create' ? 'Novo Processo' : 'Editar Processo'}
-        </CardTitle>
-      </CardHeader>
-      
-      <CardContent className="px-6">
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="data_processo"
-                render={({ field }) => (
-                  <FormItem className="flex flex-col">
-                    <FormLabel>Data do Processo</FormLabel>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <FormControl>
-                          <Button
-                            variant={"outline"}
-                            className={cn(
-                              "w-full pl-3 text-left font-normal rounded-xl",
-                              !field.value && "text-muted-foreground"
-                            )}
-                          >
-                            {field.value ? (
-                              format(field.value, "dd/MM/yyyy", { locale: ptBR })
-                            ) : (
-                              <span>Selecione a data</span>
-                            )}
-                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                          </Button>
-                        </FormControl>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0 rounded-xl" align="start">
-                        <Calendar
-                          mode="single"
-                          selected={field.value}
-                          onSelect={field.onChange}
-                          initialFocus
-                          locale={ptBR}
-                          className="rounded-xl"
-                        />
-                      </PopoverContent>
-                    </Popover>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <FormField
-                control={form.control}
-                name="situacao"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Situação</FormLabel>
-                    <Select 
-                      onValueChange={field.onChange} 
-                      defaultValue={field.value}
-                      value={field.value}
-                    >
-                      <FormControl>
-                        <SelectTrigger className="rounded-xl">
-                          <SelectValue placeholder="Selecione a situação" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent className="rounded-xl">
-                        <SelectItem value="em_tramitacao">Em Tramitação</SelectItem>
-                        <SelectItem value="prazo_prorrogado">Prazo Prorrogado</SelectItem>
-                        <SelectItem value="concluido">Concluído</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="assunto"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Assunto</FormLabel>
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Data do Processo */}
+          <FormField
+            control={form.control}
+            name="data_processo"
+            render={({ field }) => (
+              <FormItem className="flex flex-col">
+                <FormLabel>Data do Processo</FormLabel>
+                <Popover>
+                  <PopoverTrigger asChild>
                     <FormControl>
-                      <Input placeholder="Assunto do processo" className="rounded-xl" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <div className="space-y-4">
-                <FormLabel>Solicitante</FormLabel>
-                <RadioGroup 
-                  defaultValue="identificado" 
-                  value={solicitanteOption}
-                  onValueChange={(value) => setSolicitanteOption(value as 'identificado' | 'sem_identificacao')}
-                  className="flex mb-4 space-x-6"
-                >
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="identificado" id="identificado" />
-                    <label htmlFor="identificado" className="cursor-pointer">Identificado</label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="sem_identificacao" id="sem_identificacao" />
-                    <label htmlFor="sem_identificacao" className="cursor-pointer">Sem identificação</label>
-                  </div>
-                </RadioGroup>
-                
-                {solicitanteOption === 'identificado' && (
-                  <FormField
-                    control={form.control}
-                    name="solicitante"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormControl>
-                          <Input placeholder="Nome do solicitante" className="rounded-xl" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                )}
-              </div>
-            </div>
-            
-            <div className="space-y-4">
-              <FormLabel>Coordenação Responsável</FormLabel>
-              <RadioGroup 
-                defaultValue="com_area" 
-                value={coordenacaoOption}
-                onValueChange={(value) => setCoordenacaoOption(value as 'com_area' | 'sem_area')}
-                className="flex mb-4 space-x-6"
-              >
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="com_area" id="com_area" />
-                  <label htmlFor="com_area" className="cursor-pointer">Área técnica específica</label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="sem_area" id="sem_area" />
-                  <label htmlFor="sem_area" className="cursor-pointer">Sem área técnica específica</label>
-                </div>
-              </RadioGroup>
-              
-              {coordenacaoOption === 'com_area' && (
-                <FormField
-                  control={form.control}
-                  name="coordenacao_id"
-                  render={({ field }) => (
-                    <FormItem>
-                      <Select 
-                        onValueChange={field.onChange} 
-                        defaultValue={field.value}
-                        value={field.value}
-                        disabled={coordenacoesLoading}
+                      <Button
+                        variant={'outline'}
+                        className={cn(
+                          'pl-3 text-left font-normal',
+                          !field.value && 'text-muted-foreground'
+                        )}
                       >
-                        <FormControl>
-                          <SelectTrigger className="rounded-xl">
-                            <SelectValue placeholder={coordenacoesLoading ? "Carregando..." : "Selecione a coordenação"} />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent className="rounded-xl">
-                          <SelectItem value="none">Não atribuído</SelectItem>
-                          {formattedCoordenacoes.map((coord) => (
-                            <SelectItem key={coord.id} value={coord.id}>
-                              {coord.nome}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              )}
-            </div>
-            
-            <div>
-              <FormField
-                control={form.control}
-                name="prazo_resposta"
-                render={({ field }) => (
-                  <FormItem className="flex flex-col">
-                    <div className="flex justify-between items-center">
-                      <FormLabel>Prazo para Resposta</FormLabel>
-                      <div className="flex space-x-2 text-xs">
-                        <button 
-                          type="button"
-                          className={`px-2 py-1 rounded-xl ${prazoPredefinido === '5dias' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100'}`}
-                          onClick={() => handleCalculateDeadline('5dias')}
-                        >
-                          5 dias
-                        </button>
-                        <button 
-                          type="button"
-                          className={`px-2 py-1 rounded-xl ${prazoPredefinido === '10dias' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100'}`}
-                          onClick={() => handleCalculateDeadline('10dias')}
-                        >
-                          10 dias
-                        </button>
-                        <button 
-                          type="button"
-                          className={`px-2 py-1 rounded-xl ${prazoPredefinido === '20dias' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100'}`}
-                          onClick={() => handleCalculateDeadline('20dias')}
-                        >
-                          20 dias
-                        </button>
-                        <button 
-                          type="button"
-                          className={`px-2 py-1 rounded-xl ${prazoPredefinido === '30dias' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100'}`}
-                          onClick={() => handleCalculateDeadline('30dias')}
-                        >
-                          30 dias
-                        </button>
-                      </div>
-                    </div>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <FormControl>
-                          <Button
-                            variant={"outline"}
-                            className={cn(
-                              "w-full pl-3 text-left font-normal rounded-xl",
-                              !field.value && "text-muted-foreground"
-                            )}
-                          >
-                            {field.value ? (
-                              format(new Date(field.value), "dd/MM/yyyy", { locale: ptBR })
-                            ) : (
-                              <span>Selecione a data</span>
-                            )}
-                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                          </Button>
-                        </FormControl>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0 rounded-xl" align="start">
-                        <Calendar
-                          mode="single"
-                          selected={field.value ? new Date(field.value) : undefined}
-                          onSelect={field.onChange}
-                          initialFocus
-                          locale={ptBR}
-                          className="rounded-xl"
-                        />
-                      </PopoverContent>
-                    </Popover>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-            
+                        {field.value ? (
+                          format(field.value, 'PPP', { locale: ptBR })
+                        ) : (
+                          <span>Selecione uma data</span>
+                        )}
+                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                      </Button>
+                    </FormControl>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={field.value}
+                      onSelect={field.onChange}
+                      disabled={(date) =>
+                        date > new Date() || date < new Date('1900-01-01')
+                      }
+                      locale={ptBR}
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          {/* Prazo de Resposta */}
+          <FormField
+            control={form.control}
+            name="prazo_resposta"
+            render={({ field }) => (
+              <FormItem className="flex flex-col">
+                <FormLabel>Prazo de Resposta (opcional)</FormLabel>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <FormControl>
+                      <Button
+                        variant={'outline'}
+                        className={cn(
+                          'pl-3 text-left font-normal',
+                          !field.value && 'text-muted-foreground'
+                        )}
+                      >
+                        {field.value ? (
+                          format(field.value, 'PPP', { locale: ptBR })
+                        ) : (
+                          <span>Selecione uma data</span>
+                        )}
+                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                      </Button>
+                    </FormControl>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={field.value}
+                      onSelect={field.onChange}
+                      disabled={(date) =>
+                        date < new Date()
+                      }
+                      locale={ptBR}
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+                <FormDescription>
+                  Data limite para resposta ao munícipe.
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        {/* Assunto */}
+        <FormField
+          control={form.control}
+          name="assunto"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Assunto</FormLabel>
+              <FormControl>
+                <Input placeholder="Digite o assunto do processo" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {/* Solicitante */}
+        <div className="space-y-4">
+          <FormField
+            control={form.control}
+            name="sem_identificacao"
+            render={({ field }) => (
+              <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                <FormControl>
+                  <Checkbox
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
+                </FormControl>
+                <div className="space-y-1 leading-none">
+                  <FormLabel>Sem identificação</FormLabel>
+                  <FormDescription>
+                    Marque esta opção se o solicitante não se identificou.
+                  </FormDescription>
+                </div>
+              </FormItem>
+            )}
+          />
+
+          {!semIdentificacao && (
             <FormField
               control={form.control}
-              name="texto"
+              name="solicitante"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Texto/Descrição</FormLabel>
+                  <FormLabel>Nome do Solicitante</FormLabel>
                   <FormControl>
-                    <Textarea 
-                      placeholder="Descreva o processo" 
-                      className="min-h-[150px] rounded-xl"
+                    <Input 
+                      placeholder="Digite o nome do solicitante" 
                       {...field} 
+                      value={field.value || ''}
                     />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-          </form>
-        </Form>
-      </CardContent>
-      
-      <CardFooter className="px-6 flex justify-end space-x-2">
-        <Button variant="outline" onClick={onCancel} disabled={isLoading} className="rounded-xl">
-          Cancelar
-        </Button>
-        <Button 
-          onClick={form.handleSubmit(handleSubmit)}
-          disabled={isLoading}
-          className="rounded-xl"
-        >
-          {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-          {mode === 'create' ? 'Criar Processo' : 'Salvar Alterações'}
-        </Button>
-      </CardFooter>
-    </Card>
+          )}
+        </div>
+
+        {/* Coordenação */}
+        <div className="space-y-4">
+          <FormField
+            control={form.control}
+            name="sem_area_tecnica"
+            render={({ field }) => (
+              <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                <FormControl>
+                  <Checkbox
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
+                </FormControl>
+                <div className="space-y-1 leading-none">
+                  <FormLabel>Sem área técnica específica</FormLabel>
+                  <FormDescription>
+                    Marque esta opção se o processo não se destina a uma área técnica específica.
+                  </FormDescription>
+                </div>
+              </FormItem>
+            )}
+          />
+
+          {!semAreaTecnica && (
+            <FormField
+              control={form.control}
+              name="coordenacao_id"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Coordenação</FormLabel>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                    value={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione uma coordenação" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="none">Nenhuma</SelectItem>
+                      {coordenacoes.map((coord) => (
+                        <SelectItem key={coord.id} value={coord.id}>
+                          {coord.nome}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormDescription>
+                    Coordenação responsável pelo processo.
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          )}
+        </div>
+
+        {/* Situação */}
+        <FormField
+          control={form.control}
+          name="situacao"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Situação</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione a situação do processo" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {Object.entries(situacaoLabels).map(([value, label]) => (
+                    <SelectItem key={value} value={value}>
+                      {label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {/* Texto */}
+        <FormField
+          control={form.control}
+          name="texto"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Descrição</FormLabel>
+              <FormControl>
+                <Textarea
+                  placeholder="Digite a descrição detalhada do processo"
+                  className="min-h-[200px]"
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <div className="flex justify-end space-x-4">
+          {onCancel && (
+            <Button type="button" variant="outline" onClick={onCancel}>
+              Cancelar
+            </Button>
+          )}
+          <Button type="submit" disabled={isSubmitting}>
+            {isSubmitting ? 'Salvando...' : isEditing ? 'Atualizar' : 'Criar Processo'}
+          </Button>
+        </div>
+      </form>
+    </Form>
   );
 };
 
