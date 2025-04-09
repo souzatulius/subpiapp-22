@@ -214,7 +214,7 @@ export const getCommunicationActionCards = (): ActionCardItem[] => {
       id: uuidv4(),
       title: 'Cadastrar Demanda',
       iconId: 'Pencil',
-      path: '/dashboard/comunicacao/nova-demanda',
+      path: '/dashboard/comunicacao/cadastrar', // Updated path
       color: 'gray-medium',
       width: '25',
       height: '1',
@@ -224,7 +224,7 @@ export const getCommunicationActionCards = (): ActionCardItem[] => {
     },
     {
       id: uuidv4(),
-      title: 'Nova Demanda',
+      title: 'Todas as Demandas', // Changed from "Nova Demanda" to "Todas as Demandas"
       iconId: 'FileText',
       path: '/dashboard/comunicacao/demandas',
       color: 'deep-blue',
@@ -238,7 +238,7 @@ export const getCommunicationActionCards = (): ActionCardItem[] => {
       id: uuidv4(),
       title: 'Aprovar Nota',
       iconId: 'CheckCircle',
-      path: '/dashboard/comunicacao/aprovar',
+      path: '/dashboard/comunicacao/aprovar-nota', // Updated path
       color: 'bg-orange-500',
       width: '25',
       height: '1',

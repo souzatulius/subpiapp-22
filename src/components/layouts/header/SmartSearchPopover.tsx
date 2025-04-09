@@ -13,6 +13,7 @@ import SearchInput from '@/components/dashboard/search/SearchInput';
 
 const SmartSearchPopover: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   const {
     suggestions,
     isLoading
@@ -28,12 +29,18 @@ const SmartSearchPopover: React.FC = () => {
     navigate(suggestion.route);
     setIsOpen(false);
   };
+  
+  const handleSearchInputChange = (value: string) => {
+    setSearchQuery(value);
+  };
 
-  // Transform suggestions to match the expected format for SearchInput
-  const formattedSuggestions = suggestions.map(suggestion => ({
-    title: suggestion.label || 'Sugestão',
-    route: suggestion.route
-  }));
+  // Only show suggestions when the user types 4 or more characters
+  const filteredSuggestions = searchQuery.length >= 4 
+    ? suggestions.map(suggestion => ({
+        title: suggestion.label || 'Sugestão',
+        route: suggestion.route
+      }))
+    : [];
 
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
@@ -48,14 +55,21 @@ const SmartSearchPopover: React.FC = () => {
             placeholder="O que vamos fazer?"
             onSearch={handleSearch}
             onSelectSuggestion={handleSelectSuggestion}
-            suggestions={formattedSuggestions}
+            suggestions={filteredSuggestions}
+            onChange={handleSearchInputChange}
             className="py-3 text-xl"
           />
         </div>
         
-        {isLoading && (
+        {isLoading && searchQuery.length >= 4 && (
           <div className="p-3 text-sm text-gray-500 italic text-center border-t">
             Buscando...
+          </div>
+        )}
+        
+        {searchQuery.length > 0 && searchQuery.length < 4 && (
+          <div className="p-3 text-sm text-gray-500 italic text-center border-t">
+            Digite pelo menos 4 caracteres para ver sugestões
           </div>
         )}
       </PopoverContent>

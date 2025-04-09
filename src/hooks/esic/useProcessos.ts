@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { ESICProcesso, ESICProcessoFormValues } from '@/types/esic';
@@ -43,10 +42,9 @@ export const useProcessos = () => {
       console.log(`Processos encontrados: ${data?.length || 0}`);
       
       const typedData = (data || []).map(item => {
-        // Handle possible error in autor field by providing a default
         let autorNome = 'Usuário';
         if (item.autor && typeof item.autor === 'object' && 'nome_completo' in item.autor) {
-          autorNome = item.autor.nome_completo;
+          autorNome = (item.autor as { nome_completo: string }).nome_completo;
         }
         
         return {
@@ -143,10 +141,9 @@ export const useProcessos = () => {
       
       if (error) throw error;
       
-      // Handle possible error in autor field by providing a default
       let autorNome = 'Usuário';
       if (data.autor && typeof data.autor === 'object' && 'nome_completo' in data.autor) {
-        autorNome = data.autor.nome_completo;
+        autorNome = (data.autor as { nome_completo: string }).nome_completo;
       }
       
       const typedData = {

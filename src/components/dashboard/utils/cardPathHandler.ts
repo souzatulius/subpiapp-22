@@ -6,8 +6,10 @@ export const getCorrectPath = (title: string, path: string): string => {
   // Fix common path issues based on card title
   if (title === "Nova Solicitação" && path.includes("cadastrar-demanda")) {
     return "/dashboard/comunicacao/cadastrar";
-  } else if (title === "Nova Demanda" && !path.includes("comunicacao/cadastrar")) {
+  } else if (title === "Cadastrar Demanda" && !path.includes("cadastrar")) {
     return "/dashboard/comunicacao/cadastrar";
+  } else if (title === "Todas as Demandas" && !path.includes("comunicacao/demandas")) {
+    return "/dashboard/comunicacao/demandas";
   } else if (title === "Aprovar Nota" && (path.includes("aprovar-nota-oficial") || path.includes("notas/aprovar"))) {
     return "/dashboard/comunicacao/aprovar-nota";
   } else if (title === "Responder Demandas" && (path.includes("responder-demanda") || path.includes("responder-demandas") || path.includes("demandas/pendentes"))) {

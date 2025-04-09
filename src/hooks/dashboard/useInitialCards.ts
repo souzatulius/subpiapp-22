@@ -28,9 +28,9 @@ export const useInitialCards = (userDepartment: string | null) => {
       {
         id: 'nova-solicitacao',
         title: "Nova Solicitação",
-        path: "/dashboard/comunicacao/cadastrar",
+        path: "/dashboard/comunicacao/cadastrar", // Updated path
         iconId: "Pencil", 
-        color: getBgColor('blue-light'), // Changed from gray-medium to blue-light
+        color: getBgColor('blue-light'),
         width: "25",
         height: "1",
         type: "standard",
@@ -40,10 +40,10 @@ export const useInitialCards = (userDepartment: string | null) => {
       },
       {
         id: 'consultar-demandas',
-        title: "Demandas",
+        title: "Todas as Demandas", // Changed from "Demandas" to "Todas as Demandas"
         path: "/dashboard/comunicacao/demandas",
         iconId: "FileText", 
-        color: getBgColor('blue-dark'), // Changed to blue-dark (azul escuro)
+        color: getBgColor('blue-dark'),
         width: "25",
         height: "1",
         type: "standard",
