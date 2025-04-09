@@ -1,6 +1,7 @@
 
 import { Demand as DemandComponent } from '@/components/dashboard/forms/criar-nota/types';
-import { Demand as DemandType } from '@/types/demand';
+import { Demand as DemandType, Note as NoteType } from '@/types/demand';
+import { Note as NoteComponent } from '@/components/dashboard/forms/criar-nota/types';
 
 export const adaptDemandType = (demanda: DemandComponent): DemandType => {
   // Create a new object with all properties from the original demand
@@ -13,6 +14,15 @@ export const adaptDemandType = (demanda: DemandComponent): DemandType => {
     bairro: typeof demanda.bairro === 'object' ? demanda.bairro.nome : demanda.bairro as string,
     autor: typeof demanda.autor === 'object' ? demanda.autor.nome_completo : demanda.autor as string
   };
+  
+  // Handle notes separately if they exist
+  if (demanda.notas && Array.isArray(demanda.notas)) {
+    // Ensure each note has the required conteudo property
+    adaptedDemand.notas = demanda.notas.map(note => ({
+      ...note,
+      conteudo: note.conteudo || '' // Ensure conteudo is defined
+    })) as NoteType[];
+  }
   
   return adaptedDemand as DemandType;
 };
