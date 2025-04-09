@@ -1,4 +1,3 @@
-
 import React, { useRef } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { useNavigate } from 'react-router-dom';
@@ -53,14 +52,7 @@ const DashboardSearchCard: React.FC<DashboardSearchCardProps> = ({ isEditMode = 
     <div ref={containerRef} className="w-full">
       <Card className="w-full border border-blue-100 rounded-xl">
         <CardContent className="p-1.5">
-          <SearchInput
-            placeholder="Pesquisar no dashboard..."
-            onSearch={handleSearch}
-            onSelectSuggestion={(suggestion) => {
-              navigate(suggestion.route);
-            }}
-            suggestions={suggestions}
-          />
+          
         </CardContent>
       </Card>
     </div>

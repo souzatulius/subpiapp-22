@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { ESICProcesso, ESICProcessoFormValues } from '@/types/esic';
@@ -25,13 +24,11 @@ export const useProcessos = () => {
   const { user } = useAuth();
   const { toast } = useToast();
 
-  // Função para buscar todos os processos
   const fetchProcessos = useCallback(async () => {
     try {
       setIsLoading(true);
       console.log('Buscando processos e-SIC...');
       
-      // Removed all filters to show all processes
       const { data, error } = await supabase
         .from('esic_processos')
         .select(`
@@ -44,14 +41,14 @@ export const useProcessos = () => {
       
       console.log(`Processos encontrados: ${data?.length || 0}`);
       
-      // Cast the data to the expected type with type assertion to ensure all required properties are present
       const typedData = (data || []).map(item => ({
         ...item,
         protocolo: item.protocolo || `ESIC-${item.id.slice(0, 8)}`,
         assunto: item.assunto || `Processo e-SIC #${item.id.slice(0, 8)}`,
         created_at: item.criado_em,
         situacao: item.situacao as ESICProcesso['situacao'],
-        status: item.status as ESICProcesso['status']
+        status: item.status as ESICProcesso['status'],
+        autor: item.autor as { nome_completo: string }
       })) as ESICProcesso[];
       
       setProcessos(typedData);
@@ -67,12 +64,10 @@ export const useProcessos = () => {
     }
   }, [toast]);
 
-  // Carregar processos ao montar o componente
   useEffect(() => {
     fetchProcessos();
   }, [fetchProcessos]);
 
-  // Criar novo processo
   const createProcesso = async (values: ESICProcessoFormValues, options?: UseProcessosOptions) => {
     if (!user) return;
     
@@ -100,12 +95,12 @@ export const useProcessos = () => {
       
       if (error) throw error;
       
-      // Atualizar a lista de processos
       const typedData = {
         ...data,
         created_at: data.criado_em,
         situacao: data.situacao as ESICProcesso['situacao'],
-        status: data.status as ESICProcesso['status']
+        status: data.status as ESICProcesso['status'],
+        autor: { nome_completo: user?.user_metadata?.name || 'Usuário' }
       } as ESICProcesso;
       
       setProcessos(prev => [typedData, ...prev]);
@@ -123,7 +118,6 @@ export const useProcessos = () => {
     }
   };
 
-  // Atualizar processo existente
   const updateProcesso = async (params: UpdateProcessoParams, options?: UseProcessosOptions) => {
     try {
       setIsUpdating(true);
@@ -137,17 +131,16 @@ export const useProcessos = () => {
       
       if (error) throw error;
       
-      // Atualizar a lista de processos
       const typedData = {
         ...data,
         created_at: data.criado_em,
         situacao: data.situacao as ESICProcesso['situacao'],
-        status: data.status as ESICProcesso['status']
+        status: data.status as ESICProcesso['status'],
+        autor: data.autor as { nome_completo: string }
       } as ESICProcesso;
       
       setProcessos(prev => prev.map(p => p.id === params.id ? typedData : p));
       
-      // Atualizar o processo selecionado, se for o mesmo
       if (selectedProcesso && selectedProcesso.id === params.id) {
         setSelectedProcesso(typedData);
       }
@@ -166,7 +159,6 @@ export const useProcessos = () => {
     }
   };
 
-  // Excluir processo
   const deleteProcesso = async (id: string, options?: UseProcessosOptions) => {
     try {
       setIsDeleting(true);
@@ -178,10 +170,8 @@ export const useProcessos = () => {
       
       if (error) throw error;
       
-      // Atualizar a lista de processos
       setProcessos(prev => prev.filter(p => p.id !== id));
       
-      // Limpar o processo selecionado, se for o mesmo
       if (selectedProcesso && selectedProcesso.id === id) {
         setSelectedProcesso(null);
       }

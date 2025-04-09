@@ -31,7 +31,7 @@ const SmartSearchPopover: React.FC = () => {
 
   // Transform suggestions to match the expected format for SearchInput
   const formattedSuggestions = suggestions.map(suggestion => ({
-    title: suggestion.title || suggestion.name || 'Sugestão',
+    title: suggestion.label || 'Sugestão',
     route: suggestion.route
   }));
 
