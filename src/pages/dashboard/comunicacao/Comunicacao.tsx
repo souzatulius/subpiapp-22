@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useAuth } from '@/hooks/useSupabaseAuth';
 import { MessageSquareReply, RotateCcw } from 'lucide-react';
@@ -11,7 +10,6 @@ import LoadingIndicator from '@/components/shared/LoadingIndicator';
 import CardGridContainer from '@/components/dashboard/CardGridContainer';
 import { useComunicacaoDashboard } from '@/hooks/dashboard/useComunicacaoDashboard';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';
 import { ActionCardItem, CardColor } from '@/types/dashboard';
 import { useOriginOptions } from '@/hooks/dashboard-management/useOriginOptions';
@@ -47,7 +45,6 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
     resetDashboard
   } = useComunicacaoDashboard(user, isPreview, department);
 
-  // Update card titles and handle special cards
   React.useEffect(() => {
     if (cards.length > 0) {
       const updatedCards = cards.map(card => {
@@ -63,13 +60,11 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
         return card;
       });
       
-      // Remove search cards
       const filteredCards = updatedCards.filter(card => 
         card.id !== 'comunicacao-search-card' && 
         card.type !== 'smart_search'
       );
       
-      // Check if we have the origin selection card
       const hasOriginSelectionCard = filteredCards.some(card => card.type === 'origin_selection');
       
       if (!hasOriginSelectionCard) {
@@ -120,20 +115,10 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
           description="Gerencie demandas e notas oficiais"
           icon={<MessageSquareReply className="h-6 w-6 mr-2" />}
           color="bg-gradient-to-r from-[#0066FF] to-blue-700"
+          showResetButton={true}
+          resetButtonIcon={<RotateCcw className="h-4 w-4" />}
+          onResetClick={handleResetDashboard}
         />
-      </div>
-
-      {/* Reset dashboard button with updated text */}
-      <div className="flex justify-end">
-        <Button 
-          variant="outline" 
-          size="lg" 
-          onClick={handleResetDashboard}
-          className="text-blue-600 border-blue-300 hover:bg-blue-50 py-4"
-        >
-          <RotateCcw className="h-4 w-4 mr-2" />
-          Resetar
-        </Button>
       </div>
       
       {isLoading ? (

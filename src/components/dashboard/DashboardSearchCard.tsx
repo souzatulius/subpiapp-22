@@ -41,7 +41,8 @@ const DashboardSearchCard: React.FC<DashboardSearchCardProps> = ({ isEditMode = 
   };
   
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    // Não bloqueamos eventos de teclado aqui para permitir que o espaço funcione
+    // Do not prevent default for space key - this allows space to work normally
+    // Only handle special keys like Enter explicitly
     if (e.key === 'Enter') {
       handleSearch(e as unknown as React.FormEvent);
     }
@@ -114,8 +115,7 @@ const DashboardSearchCard: React.FC<DashboardSearchCardProps> = ({ isEditMode = 
           
           {showSuggestions && suggestions.length > 0 && (
             <div 
-              className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 shadow-lg rounded-xl z-50"
-              style={{ position: 'absolute', zIndex: 50 }}
+              className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 shadow-lg rounded-xl z-50 search-suggestions"
             >
               <ul className="py-1">
                 {suggestions.map((suggestion, index) => (

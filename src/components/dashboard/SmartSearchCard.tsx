@@ -1,4 +1,3 @@
-
 import React, { useRef, useState } from 'react';
 import { Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -88,8 +87,7 @@ const SmartSearchCard: React.FC<SmartSearchCardProps> = ({
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    // Removi qualquer preventDefault que pudesse estar bloqueando o espaço
-    // Apenas manipular teclas especiais como setas para navegação, se necessário
+    // Only handle the Enter key - do not interfere with space or other keys
     if (e.key === "Enter") {
       handleSubmit(e as unknown as React.FormEvent);
     }
@@ -102,7 +100,7 @@ const SmartSearchCard: React.FC<SmartSearchCardProps> = ({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="w-full h-full relative">
+    <form onSubmit={handleSubmit} className="w-full h-full relative overflow-visible-container">
       <div className="relative w-full h-full">
         <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-6 w-6 text-orange-500 z-10" />
         <Input 
@@ -125,8 +123,7 @@ const SmartSearchCard: React.FC<SmartSearchCardProps> = ({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.2 }}
-            className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 shadow-md rounded-xl z-50 w-full"
-            style={{ position: 'absolute', zIndex: 50 }}
+            className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 shadow-md rounded-xl z-50 w-full search-suggestions"
           >
             <ul className="py-1">
               {suggestions.map((suggestion, i) => (

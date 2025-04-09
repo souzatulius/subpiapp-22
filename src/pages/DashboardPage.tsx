@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Home, RotateCcw } from 'lucide-react';
 import { useDashboardCards } from '@/hooks/dashboard/useDashboardCards';
@@ -17,8 +16,6 @@ import DashboardSearchCard from '@/components/dashboard/DashboardSearchCard';
 import { ActionCardItem } from '@/types/dashboard';
 import { toast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Button } from '@/components/ui/button';
-import { useScrollFade } from '@/hooks/useScrollFade';
 import { motion } from 'framer-motion';
 import { useCardStorage } from '@/hooks/dashboard/useCardStorage';
 
@@ -47,8 +44,6 @@ const DashboardPage: React.FC = () => {
   } = useDashboardCards();
 
   const { saveCardConfig, isSaving } = useCardStorage(user, userCoordenaticaoId);
-
-  const scrollFadeStyles = useScrollFade();
 
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
@@ -103,6 +98,12 @@ const DashboardPage: React.FC = () => {
       const defaultCards = resetDashboard();
       await saveCardConfig(defaultCards);
     }
+    
+    toast({
+      title: "Dashboard resetado",
+      description: "O dashboard foi restaurado para a configuração padrão.",
+      variant: "default"
+    });
   };
 
   useEffect(() => {
@@ -177,6 +178,9 @@ const DashboardPage: React.FC = () => {
                     color="bg-gradient-to-r from-blue-800 to-blue-950"
                     userName={firstName || ''}
                     greeting={true}
+                    showResetButton={true}
+                    resetButtonIcon={<RotateCcw className="h-4 w-4" />}
+                    onResetClick={handleResetDashboard}
                   />
                 </div>
                 
@@ -184,16 +188,6 @@ const DashboardPage: React.FC = () => {
                   <div className="flex-1">
                     <DashboardSearchCard />
                   </div>
-                  <Button 
-                    variant="outline" 
-                    size="lg" 
-                    onClick={handleResetDashboard}
-                    className="text-blue-600 border-blue-300 hover:bg-blue-50 py-4 whitespace-nowrap"
-                    disabled={isSaving}
-                  >
-                    <RotateCcw className="h-4 w-4 mr-2" />
-                    Resetar
-                  </Button>
                 </div>
                 
                 <div className={`relative ${isMobile ? 'pb-32' : ''}`}>

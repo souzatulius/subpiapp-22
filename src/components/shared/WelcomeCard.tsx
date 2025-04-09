@@ -3,6 +3,7 @@ import React from 'react';
 import { Settings } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface WelcomeCardProps {
   title: string;
@@ -16,6 +17,9 @@ interface WelcomeCardProps {
   buttonIcon?: React.ReactNode;
   buttonVariant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link" | "action";
   onButtonClick?: () => void;
+  showResetButton?: boolean;
+  onResetClick?: () => void;
+  resetButtonIcon?: React.ReactNode;
 }
 
 const WelcomeCard: React.FC<WelcomeCardProps> = ({
@@ -29,7 +33,10 @@ const WelcomeCard: React.FC<WelcomeCardProps> = ({
   buttonVariant = "outline",
   onButtonClick,
   userName,
-  greeting = false
+  greeting = false,
+  showResetButton = false,
+  onResetClick,
+  resetButtonIcon
 }) => {
   // Ensure userName is treated as a string even if it's undefined
   const displayName = userName || '';
@@ -58,8 +65,28 @@ const WelcomeCard: React.FC<WelcomeCardProps> = ({
             </p>
           </div>
           
-          {showButton && (
-            <div>
+          <div className="flex items-center gap-2">
+            {showResetButton && (
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={onResetClick}
+                      className="bg-white/10 border-white/20 hover:bg-white/20"
+                    >
+                      {resetButtonIcon}
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Resetar Dashboard</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            )}
+            
+            {showButton && (
               <Button
                 variant={buttonVariant}
                 onClick={onButtonClick}
@@ -68,8 +95,8 @@ const WelcomeCard: React.FC<WelcomeCardProps> = ({
                 {buttonIcon && <span className="mr-2">{buttonIcon}</span>}
                 {buttonText}
               </Button>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       </CardContent>
     </Card>
