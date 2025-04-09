@@ -1,7 +1,7 @@
 
 import { useState } from 'react';
 import { useAuth } from '@/hooks/useSupabaseAuth';
-import { Demand } from '@/types/demand';
+import { Demand } from '@/components/dashboard/forms/criar-nota/types';
 import { ResponseQA } from '@/components/dashboard/forms/criar-nota/types';
 import { useNavigate } from 'react-router-dom';
 import { fetchDemandResponse } from './api/fetchDemandResponse';

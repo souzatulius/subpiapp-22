@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { Demand } from './types';
+import { Demand } from '@/components/dashboard/forms/criar-nota/types';
 
 export const useDemandasData = () => {
   const [demandas, setDemandas] = useState<Demand[]>([]);
@@ -24,6 +24,7 @@ export const useDemandasData = () => {
             coordenacao_id,
             problema_id,
             problema:problemas (
+              id,
               descricao
             ),
             origem_id,
@@ -79,19 +80,19 @@ export const useDemandasData = () => {
               return {
                 ...demanda,
                 horario_publicacao: demanda.horario_publicacao || '',
-                area_coordenacao: null, // Add the required property with a default value
-                supervisao_tecnica: null, // Add other required properties
+                area_coordenacao: null,
+                supervisao_tecnica: null,
                 notas: []
-              } as Demand;
+              } as unknown as Demand;
             }
 
             return {
               ...demanda,
               horario_publicacao: demanda.horario_publicacao || '',
-              area_coordenacao: null, // Add the required property with a default value
-              supervisao_tecnica: null, // Add other required properties
+              area_coordenacao: null,
+              supervisao_tecnica: null,
               notas: notas || []
-            } as Demand;
+            } as unknown as Demand;
           })
         );
 

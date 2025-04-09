@@ -15,12 +15,15 @@ export interface Demand {
   } | null;
   area_coordenacao: {
     descricao: string;
+    id?: string;
   } | null;
   origem: {
     descricao: string;
+    id?: string;
   } | null;
   tipo_midia: {
     descricao: string;
+    id?: string;
   } | null;
   bairro: {
     nome: string;
@@ -40,14 +43,30 @@ export interface Demand {
   perguntas: Record<string, string> | null | any;
   servico: {
     descricao: string;
+    id?: string;
   } | null;
   arquivo_url: string | null;
   anexos: string[] | null;
   servico_id?: string;
   problema: {
     descricao: string | null;
+    id?: string;
+    coordenacao?: any;
   } | null;
   protocolo?: string | null;
+  notas?: Note[] | null;
+  origem_id?: string;
+  tipo_midia_id?: string;
+}
+
+export interface Note {
+  id: string;
+  titulo: string;
+  conteudo?: string;
+  status?: string;
+  data_criacao?: string;
+  autor_id: string;
+  demanda_id?: string;
 }
 
 export interface ResponseQA {

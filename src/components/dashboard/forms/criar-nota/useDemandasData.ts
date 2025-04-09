@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
-import { Demand } from '@/types/demand';
+import { Demand } from './types';
 
 export const useDemandasData = () => {
   const [demandas, setDemandas] = useState<Demand[]>([]);
@@ -81,10 +81,11 @@ export const useDemandasData = () => {
                 bairro: null,
                 autor: null,
                 servico: null,
+                problema: { descricao: problemaData?.descricao || null },
                 // Make sure these properties exist and are set properly
                 arquivo_url: demanda.arquivo_url || null,
                 anexos: demanda.anexos || null
-              } as Demand;
+              } as unknown as Demand; // Use unknown to bypass type checking
             }
             
             // Se não tiver problema, criar objeto com valores padrão
@@ -105,10 +106,11 @@ export const useDemandasData = () => {
               bairro: null,
               autor: null,
               servico: null,
+              problema: { descricao: null },
               // Make sure these properties exist and are set properly
               arquivo_url: demanda.arquivo_url || null,
               anexos: demanda.anexos || null
-            } as Demand;
+            } as unknown as Demand; // Use unknown to bypass type checking
           })
         );
         

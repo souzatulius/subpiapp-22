@@ -1,21 +1,13 @@
 
-import { toast } from '@/components/ui/use-toast';
-import { Demand } from '@/types/demand';
-
-interface ValidateNotaFormParams {
+interface NotaFormData {
   titulo: string;
   texto: string;
-  selectedDemanda: Demand | null;
+  selectedDemanda: any;
 }
 
-/**
- * Validates the nota form fields
- */
-export const validateNotaForm = ({
-  titulo,
-  texto,
-  selectedDemanda
-}: ValidateNotaFormParams): boolean => {
+import { toast } from '@/components/ui/use-toast';
+
+export const validateNotaForm = ({ titulo, texto, selectedDemanda }: NotaFormData): boolean => {
   // Validação
   if (!titulo.trim()) {
     toast({

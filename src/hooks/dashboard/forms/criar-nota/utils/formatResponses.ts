@@ -1,9 +1,7 @@
 
 import { ResponseQA } from '@/components/dashboard/forms/criar-nota/types';
 
-/**
- * Helper function to format the responses text
- */
+// Helper function to format the responses text
 export const formatResponses = (responseText: string | null): ResponseQA[] => {
   if (!responseText) return [];
   

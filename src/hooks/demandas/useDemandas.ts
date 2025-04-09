@@ -52,8 +52,9 @@ export const useDemandas = (filterStatus: string = 'pendente') => {
               descricao: item.coordenacao?.descricao || ''
             },
             supervisao_tecnica: item.supervisao_tecnica || { id: undefined, descricao: '' },
-            servico: item.servico || { descricao: '' }
-          } as Demand;
+            servico: item.servico || { descricao: '' },
+            anexos: item.anexos || null,
+          } as unknown as Demand;
         });
       } catch (error: any) {
         console.error('Exception fetching demandas:', error);

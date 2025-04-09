@@ -7,6 +7,7 @@ import DemandaSelection from './criar-nota/DemandaSelection';
 import DemandaInfo from './criar-nota/DemandaInfo';
 import NotaForm from './criar-nota/NotaForm';
 import { CriarNotaFormProps } from '@/types/demand';
+import { Demand } from '@/components/dashboard/forms/criar-nota/types';
 
 const CriarNotaForm: React.FC<CriarNotaFormProps> = ({
   onClose
@@ -39,7 +40,7 @@ const CriarNotaForm: React.FC<CriarNotaFormProps> = ({
           filteredDemandas={filteredDemandas} 
           searchTerm={searchTerm} 
           setSearchTerm={setSearchTerm} 
-          onDemandaSelect={demandaId => handleDemandaSelect(demandaId, demandas)} 
+          onDemandaSelect={(demandaId) => handleDemandaSelect(demandaId, demandas as Demand[])} 
           isLoading={isLoading} 
         />
       ) : (
@@ -48,7 +49,7 @@ const CriarNotaForm: React.FC<CriarNotaFormProps> = ({
             <div className="space-y-6">
               {selectedDemanda && (
                 <DemandaInfo 
-                  selectedDemanda={selectedDemanda} 
+                  selectedDemanda={selectedDemanda as Demand} 
                   formattedResponses={formattedResponses} 
                 />
               )}
@@ -60,7 +61,7 @@ const CriarNotaForm: React.FC<CriarNotaFormProps> = ({
                 setTexto={setTexto} 
                 handleSubmit={handleSubmit} 
                 isSubmitting={isSubmitting} 
-                selectedDemanda={selectedDemanda} 
+                selectedDemanda={selectedDemanda as Demand} 
                 formattedResponses={formattedResponses} 
               />
             </div>

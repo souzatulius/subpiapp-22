@@ -1,16 +1,17 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { SlidersHorizontal, Info, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import ChartCard from './charts/ChartCard';
 import { useRankingCharts } from '@/hooks/ranking/useRankingCharts';
 import RankingFilterDialog from './filters/RankingFilterDialog';
-import RankingProgressCard from './charts/RankingProgressCard';
 import { formatDate } from '@/lib/utils';
 import InsightsPanel from './insights/InsightsPanel';
 import DashboardCards from './insights/DashboardCards';
 import RankingTabs from './tabs/RankingTabs';
 import { ChartConfig } from '@/types/ranking';
+
+// Remove the RankingProgressCard import as it's not being used directly here
 
 interface RankingContentProps {
   filterDialogOpen: boolean;
