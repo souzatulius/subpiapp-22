@@ -18,6 +18,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { motion } from 'framer-motion';
 import { useCardStorage } from '@/hooks/dashboard/useCardStorage';
 import { v4 as uuidv4 } from 'uuid';
+import OriginsDemandChartCompact from '@/components/dashboard/cards/OriginsDemandChartCompact';
 
 const DashboardPage: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
