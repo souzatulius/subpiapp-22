@@ -48,18 +48,6 @@ export const useDashboardConfig = (): DashboardConfigResult => {
           mobileOrder: 2
         },
         {
-          id: 'pending-activities-card',
-          title: 'Atividades Pendentes',
-          iconId: 'Clock',
-          path: '',
-          color: 'orange-light',
-          width: '25',
-          height: '3',
-          type: 'pending_activities',
-          displayMobile: true,
-          mobileOrder: 3
-        },
-        {
           id: 'origem-demandas-card',
           title: 'Atividades em Andamento',
           subtitle: 'Demandas da semana por área técnica',

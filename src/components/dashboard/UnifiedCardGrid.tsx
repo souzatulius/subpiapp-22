@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import {
   DndContext,
   closestCenter,
@@ -86,7 +86,8 @@ const UnifiedCardGrid: React.FC<UnifiedCardGridProps> = ({
         .sort((a, b) => (a.mobileOrder ?? 999) - (b.mobileOrder ?? 999))
     : visibleCards;
 
-  const processedCards = displayedCards.map(card => {
+  // Memoize this function to avoid unnecessary recalculations
+  const processCardDimensions = useCallback((card: ActionCardItem) => {
     if (isMobileView) {
       const mobileSpecific = getMobileSpecificDimensions(card.title);
       
@@ -122,58 +123,20 @@ const UnifiedCardGrid: React.FC<UnifiedCardGridProps> = ({
           width: '25' as CardWidth,
           height: '1' as CardHeight
         };
-      } else if (card.title === "Origem das Demandas") {
-        return {
-          ...card,
-          width: '50' as CardWidth,
-          height: '2' as CardHeight
-        };
-      } else if (card.title === "Ações Pendentes" || card.title === "Atividades Pendentes") {
+      } else if (card.title === "Atividades Pendentes") {
         return {
           ...card,
           width: '25' as CardWidth,
           height: '3' as CardHeight
         };
-      } else if (card.title === "Avisos" || card.title === "Comunicados") {
-        return {
-          ...card,
-          width: '25' as CardWidth,
-          height: '2' as CardHeight
-        };
-      } else if (card.title === "Processos e-SIC") {
-        return {
-          ...card,
-          width: '50' as CardWidth,
-          height: '1' as CardHeight
-        };
-      } else if (card.title === "Notificações") {
-        return {
-          ...card,
-          width: '25' as CardWidth,
-          height: '1' as CardHeight
-        };
-      } else if (card.title === "Ações em Andamento") {
-        return {
-          ...card,
-          width: '50' as CardWidth,
-          height: '2' as CardHeight
-        };
-      } else if (card.title === "Cadastro de nova solicitação de imprensa") {
-        return {
-          ...card,
-          width: '50' as CardWidth,
-          height: '2' as CardHeight
-        };
-      } else if (card.type === "origin_selection") {
-        return {
-          ...card,
-          width: '50' as CardWidth,
-          height: '2' as CardHeight
-        };
       }
     }
     return card;
-  });
+  }, [isMobileView]);
+
+  const processedCards = React.useMemo(() => {
+    return displayedCards.map(card => processCardDimensions(card));
+  }, [displayedCards, processCardDimensions]);
 
   const { occupiedSlots } = useGridOccupancy(
     processedCards.map(card => ({
@@ -199,7 +162,8 @@ const UnifiedCardGrid: React.FC<UnifiedCardGridProps> = ({
       if (customContent) return customContent;
     }
 
-    if (card.type === 'origin_demand_chart' || card.id === 'origem-demandas-card' || card.title === "Ações em Andamento" || card.title === "Atividades em Andamento") {
+    if (card.type === 'origin_demand_chart' || card.id === 'origem-demandas-card' || 
+        card.title === "Atividades em Andamento") {
       return <OriginsDemandCardWrapper className="w-full h-full" />;
     }
     

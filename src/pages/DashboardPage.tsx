@@ -17,7 +17,6 @@ import { toast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
 import { motion } from 'framer-motion';
 import { useCardStorage } from '@/hooks/dashboard/useCardStorage';
-import { v4 as uuidv4 } from 'uuid';
 import OriginsDemandChartCompact from '@/components/dashboard/cards/OriginsDemandChartCompact';
 
 const DashboardPage: React.FC = () => {
@@ -25,7 +24,6 @@ const DashboardPage: React.FC = () => {
   const [isEditMode, setIsEditMode] = useState(false);
   const [isEditCardModalOpen, setIsEditCardModalOpen] = useState(false);
   const [selectedCard, setSelectedCard] = useState<ActionCardItem | null>(null);
-  const [searchCardAdded, setSearchCardAdded] = useState(false);
   const isMobile = useIsMobile();
   const { user } = useAuth();
   
@@ -108,11 +106,13 @@ const DashboardPage: React.FC = () => {
   };
 
   useEffect(() => {
-    if (cards && cards.length > 0) {
-      const searchCardExists = cards.some(card => card.id === 'dashboard-search-card');
-      const originDemandCardExists = cards.some(card => card.id === 'origem-demandas-card' || card.type === 'origin_demand_chart');
-      const pendingActivitiesCardExists = cards.some(card => card.id === 'pending-activities-card');
-      
+    if (!cards || cards.length === 0) return;
+    
+    const searchCardExists = cards.some(card => card.id === 'dashboard-search-card');
+    const originDemandCardExists = cards.some(card => card.id === 'origem-demandas-card' || card.type === 'origin_demand_chart');
+    const pendingActivitiesCardExists = cards.some(card => card.id === 'pending-activities-card');
+    
+    if (!searchCardExists || !originDemandCardExists || !pendingActivitiesCardExists) {
       let updatedCards = [...cards];
       let needsUpdate = false;
       
@@ -176,7 +176,7 @@ const DashboardPage: React.FC = () => {
         handleCardsChange(updatedCards);
       }
     }
-  }, [cards, isMobile]);
+  }, [cards, isMobile, handleCardsChange]);
 
   const renderSpecialCardContent = (cardId: string) => {
     if (cardId === 'origem-demandas-card' || 
@@ -184,11 +184,7 @@ const DashboardPage: React.FC = () => {
         cardId.includes('origemDemandas') ||
         cardId.includes('origin-demand-chart') ||
         cardId.includes('origin_demand_chart')) {
-      return (
-        <div className="w-full h-full p-2">
-          <OriginsDemandChartCompact className="w-full h-full" />
-        </div>
-      );
+      return <OriginsDemandCardWrapper className="w-full h-full" />;
     }
     return null;
   };
