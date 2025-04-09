@@ -82,6 +82,7 @@ export interface UnifiedActionCardProps extends ActionCardItem {
   contentClassname?: string;
   isPendingActions?: boolean;
   specialContent?: React.ReactNode;
+  children?: React.ReactNode; // Added children property to fix the TypeScript error
 }
 
 export function SortableUnifiedActionCard(props: UnifiedActionCardProps) {
