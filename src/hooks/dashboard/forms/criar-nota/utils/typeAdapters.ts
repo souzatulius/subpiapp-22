@@ -15,13 +15,13 @@ export const adaptDemandType = (demanda: DemandComponent): DemandType => {
     autor: typeof demanda.autor === 'object' ? demanda.autor.nome_completo : demanda.autor as string
   };
   
-  // Handle notes separately if they exist - explicitly ensuring conteudo exists
+  // Handle notes separately - ensure they're properly converted to NoteType
   if (demanda.notas && Array.isArray(demanda.notas)) {
     // Convert each note, ensuring the required fields are present
-    const convertedNotas = demanda.notas.map((note): NoteType => ({
+    const convertedNotas: NoteType[] = demanda.notas.map((note): NoteType => ({
       id: note.id,
       titulo: note.titulo,
-      conteudo: note.conteudo || '', // Ensure conteudo is never undefined
+      conteudo: note.conteudo || '', // Ensure conteudo is ALWAYS a string (never undefined)
       status: note.status || 'pendente',
       data_criacao: note.data_criacao || new Date().toISOString(),
       autor_id: note.autor_id,
@@ -50,14 +50,14 @@ export const adaptToDemandComponent = (demanda: DemandType): DemandComponent => 
       : demanda.servico as any
   };
   
-  // Handle converting notes if needed
+  // Handle converting notes if needed - now converting from NoteType to NoteComponent properly
   if (demanda.notas && Array.isArray(demanda.notas)) {
     componentDemand.notas = demanda.notas.map(note => {
       // Convert from NoteType to NoteComponent
       const componentNote: NoteComponent = {
         id: note.id,
         titulo: note.titulo,
-        conteudo: note.conteudo, 
+        conteudo: note.conteudo, // This is already required in NoteType, so it will always be present
         status: note.status,
         data_criacao: note.data_criacao,
         autor_id: note.autor_id,
