@@ -21,6 +21,7 @@ const ESICPage = () => {
     deleteConfirmOpen,
     processos,
     isLoading,
+    error,
     selectedProcesso,
     justificativas,
     isJustificativasLoading,
@@ -65,6 +66,7 @@ const ESICPage = () => {
             <ProcessosList 
               processos={processos as ESICProcesso[]}
               isLoading={isLoading}
+              error={error}
               onCreateProcesso={() => setScreen('create')}
               onViewProcesso={handleViewProcesso}
               onEditProcesso={handleEditProcesso}
