@@ -20,6 +20,14 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const navigate = useNavigate();
   const location = useLocation();
 
+  // Para debug - identificar o status de aprovação atual
+  useEffect(() => {
+    if (user) {
+      console.log('Estado atual - usuário:', user.id);
+      console.log('Estado atual - aprovação:', isApproved);
+    }
+  }, [user, isApproved]);
+
   useEffect(() => {
     const initialize = async () => {
       setLoading(true);
@@ -32,20 +40,27 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         if (data.session?.user) {
           console.log('Sessão encontrada para usuário:', data.session.user.id);
           const approved = await isUserApproved(data.session.user.id);
+          console.log('Status de aprovação:', approved);
           setIsApproved(approved);
           
-          // Permitir acesso à página de email-verified mesmo se não aprovado
+          // Permitir acesso à página de email-verified e login mesmo se não aprovado
           const allowedUnapprovedRoutes = ['/email-verified', '/login'];
           
-          if (approved && location.pathname === '/login') {
-            console.log('Usuário aprovado, redirecionando para dashboard');
-            navigate('/dashboard');
-          } else if (!approved && data.session && 
-                    !allowedUnapprovedRoutes.includes(location.pathname)) {
-            // Redirecionar para email-verified page se o usuário não está aprovado e não está em uma rota permitida
-            console.log('Usuário não aprovado, redirecionando para página de verificação');
-            toast.info("Seu acesso ainda não foi aprovado por um administrador.");
-            navigate('/email-verified');
+          if (approved) {
+            console.log('Usuário aprovado, verificando rota atual:', location.pathname);
+            // Se estiver na página de login ou email-verified e for aprovado, redirecionar para dashboard
+            if (location.pathname === '/login' || location.pathname === '/email-verified') {
+              console.log('Redirecionando para dashboard');
+              navigate('/dashboard');
+            }
+          } else if (!approved && data.session) {
+            console.log('Usuário não aprovado, verificando rota atual:', location.pathname);
+            // Se o usuário não está aprovado e está tentando acessar uma rota protegida
+            if (!allowedUnapprovedRoutes.includes(location.pathname)) {
+              console.log('Rota não permitida, redirecionando para página de verificação');
+              toast.info("Seu acesso ainda não foi aprovado por um administrador.");
+              navigate('/email-verified');
+            }
           }
         } else {
           console.log('Nenhuma sessão de usuário encontrada');
@@ -60,18 +75,27 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           if (newSession?.user) {
             console.log('Verificando aprovação para:', newSession.user.id);
             const approved = await isUserApproved(newSession.user.id);
+            console.log('Status de aprovação após alteração:', approved);
             setIsApproved(approved);
             
-            // Permitir acesso à página de email-verified mesmo se não aprovado
+            // Permitir acesso à página de email-verified e login mesmo se não aprovado
             const allowedUnapprovedRoutes = ['/email-verified', '/login'];
             
-            if (approved && location.pathname === '/login') {
-              navigate('/dashboard');
-            } else if (!approved && newSession && 
-                      !allowedUnapprovedRoutes.includes(location.pathname)) {
-              // Redirecionar para email-verified page se o usuário não está aprovado e não está em uma rota permitida
-              toast.info("Seu acesso ainda não foi aprovado por um administrador.");
-              navigate('/email-verified');
+            if (approved) {
+              console.log('Usuário aprovado, verificando rota atual:', location.pathname);
+              // Se estiver na página de login ou email-verified e for aprovado, redirecionar para dashboard
+              if (location.pathname === '/login' || location.pathname === '/email-verified') {
+                console.log('Redirecionando para dashboard');
+                navigate('/dashboard');
+              }
+            } else if (!approved) {
+              console.log('Usuário não aprovado, verificando rota atual:', location.pathname);
+              // Se o usuário não está aprovado e está tentando acessar uma rota protegida
+              if (!allowedUnapprovedRoutes.includes(location.pathname)) {
+                console.log('Rota não permitida, redirecionando para página de verificação');
+                toast.info("Seu acesso ainda não foi aprovado por um administrador.");
+                navigate('/email-verified');
+              }
             }
           } else {
             setIsApproved(null);

@@ -1,13 +1,51 @@
 
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useSupabaseAuth';
 import { Button } from '@/components/ui/button';
 import { CheckCircle2, Clock, InfoIcon } from 'lucide-react';
 import AuthLayout from '@/components/AuthLayout';
+import { supabase } from '@/integrations/supabase/client';
 
 const EmailVerified = () => {
-  const { user, signOut } = useAuth();
+  const { user, signOut, isApproved } = useAuth();
+  const [checkingStatus, setCheckingStatus] = useState(false);
+  const [forceAllowAccess, setForceAllowAccess] = useState(false);
+  const navigate = useNavigate();
+  
+  useEffect(() => {
+    const checkUserStatus = async () => {
+      if (!user) return;
+      
+      setCheckingStatus(true);
+      try {
+        // Verificar diretamente no banco de dados o status do usuário
+        const { data, error } = await supabase
+          .from('usuarios')
+          .select('status_conta')
+          .eq('id', user.id)
+          .single();
+        
+        if (error) {
+          console.error('Erro ao verificar status do usuário:', error);
+          return;
+        }
+        
+        console.log('Status da conta verificado diretamente:', data?.status_conta);
+        
+        if (data?.status_conta === 'aprovado') {
+          console.log('Usuário realmente aprovado, permitindo acesso ao dashboard');
+          setForceAllowAccess(true);
+        }
+      } catch (error) {
+        console.error('Erro ao verificar status de aprovação:', error);
+      } finally {
+        setCheckingStatus(false);
+      }
+    };
+    
+    checkUserStatus();
+  }, [user]);
   
   const handleSignOut = async () => {
     try {
@@ -15,6 +53,10 @@ const EmailVerified = () => {
     } catch (error) {
       console.error("Erro ao realizar logout:", error);
     }
+  };
+  
+  const handleForceAccess = () => {
+    navigate('/dashboard');
   };
   
   return (
@@ -52,6 +94,12 @@ const EmailVerified = () => {
         <div className="w-full pt-4 space-y-3">
           {user ? (
             <div className="space-y-3">
+              {forceAllowAccess && (
+                <Button onClick={handleForceAccess} className="w-full bg-green-600 hover:bg-green-700">
+                  Acessar Dashboard
+                </Button>
+              )}
+              
               <Button variant="outline" onClick={handleSignOut} className="w-full">
                 Sair da conta
               </Button>
