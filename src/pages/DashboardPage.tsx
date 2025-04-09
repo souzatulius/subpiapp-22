@@ -26,7 +26,6 @@ const DashboardPage: React.FC = () => {
   const [isEditCardModalOpen, setIsEditCardModalOpen] = useState(false);
   const [selectedCard, setSelectedCard] = useState<ActionCardItem | null>(null);
   const [searchCardAdded, setSearchCardAdded] = useState(false);
-  const [communicationsCardAdded, setCommunicationsCardAdded] = useState(false);
   const isMobile = useIsMobile();
   const { user } = useAuth();
   
@@ -112,7 +111,6 @@ const DashboardPage: React.FC = () => {
     if (cards && cards.length > 0) {
       const searchCardExists = cards.some(card => card.id === 'dashboard-search-card');
       const originDemandCardExists = cards.some(card => card.id === 'origem-demandas-card' || card.type === 'origin_demand_chart');
-      
       const pendingActivitiesCardExists = cards.some(card => card.id === 'pending-activities-card');
       
       let updatedCards = [...cards];
