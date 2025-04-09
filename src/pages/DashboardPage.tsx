@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Home, RotateCcw } from 'lucide-react';
 import { useDashboardCards } from '@/hooks/dashboard/useDashboardCards';
@@ -21,8 +20,6 @@ import { Button } from '@/components/ui/button';
 import { useScrollFade } from '@/hooks/useScrollFade';
 import { motion } from 'framer-motion';
 import { useCardStorage } from '@/hooks/dashboard/useCardStorage';
-import { Switch } from '@/components/ui/switch';
-import { Label } from '@/components/ui/label';
 
 const DashboardPage: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -30,7 +27,6 @@ const DashboardPage: React.FC = () => {
   const [isEditCardModalOpen, setIsEditCardModalOpen] = useState(false);
   const [selectedCard, setSelectedCard] = useState<ActionCardItem | null>(null);
   const [searchCardAdded, setSearchCardAdded] = useState(false);
-  const [useAbsolutePositioning, setUseAbsolutePositioning] = useState(true); // Enable by default
   const isMobile = useIsMobile();
   const { user } = useAuth();
   
@@ -178,31 +174,16 @@ const DashboardPage: React.FC = () => {
                 <div className="flex-1">
                   <DashboardSearchCard />
                 </div>
-                
-                <div className="flex items-center gap-4">
-                  {/* Add a toggle for grid positioning type */}
-                  <div className="flex items-center space-x-2">
-                    <Switch 
-                      id="grid-positioning"
-                      checked={useAbsolutePositioning}
-                      onCheckedChange={setUseAbsolutePositioning}
-                    />
-                    <Label htmlFor="grid-positioning" className="text-sm whitespace-nowrap">
-                      Posicionamento livre
-                    </Label>
-                  </div>
-                  
-                  <Button 
-                    variant="outline" 
-                    size="lg" 
-                    onClick={handleResetDashboard}
-                    className="text-blue-600 border-blue-300 hover:bg-blue-50 py-4 whitespace-nowrap"
-                    disabled={isSaving}
-                  >
-                    <RotateCcw className="h-4 w-4 mr-2" />
-                    Resetar
-                  </Button>
-                </div>
+                <Button 
+                  variant="outline" 
+                  size="lg" 
+                  onClick={handleResetDashboard}
+                  className="text-blue-600 border-blue-300 hover:bg-blue-50 py-4 whitespace-nowrap"
+                  disabled={isSaving}
+                >
+                  <RotateCcw className="h-4 w-4 mr-2" />
+                  Resetar
+                </Button>
               </div>
               
               <div className={`relative ${isMobile ? 'pb-32' : ''}`}>
@@ -221,7 +202,6 @@ const DashboardPage: React.FC = () => {
                       onHideCard={handleHideCard}
                       isMobileView={isMobile}
                       isEditMode={isEditMode}
-                      useAbsolutePositioning={useAbsolutePositioning}
                     />
                   </div>
                 ) : (

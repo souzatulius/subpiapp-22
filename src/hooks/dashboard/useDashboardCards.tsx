@@ -7,82 +7,6 @@ import { getDefaultCards } from './defaultCards';
 import { toast } from '@/hooks/use-toast';
 import { useCardStorage } from './useCardStorage';
 
-// Helper function to initialize or update grid positions for cards
-const ensureGridPositions = (cards: ActionCardItem[]): ActionCardItem[] => {
-  // First, filter out visible cards and sort them if they have positions
-  const visibleCards = cards.filter(card => !card.isHidden);
-  
-  // Separate cards with and without positions
-  const positionedCards = visibleCards.filter(
-    card => card.isPositionFixed && card.gridRow !== undefined && card.gridColumn !== undefined
-  );
-  
-  const unpositionedCards = visibleCards.filter(
-    card => !card.isPositionFixed || card.gridRow === undefined || card.gridColumn === undefined
-  );
-  
-  // Auto-assign positions to cards without them
-  const columns = 4; // Standard desktop grid columns
-  let currentRow = 0;
-  let currentCol = 0;
-  
-  const positionedUnpositionedCards = unpositionedCards.map(card => {
-    // Calculate width and height in grid cells
-    const width = getCardWidthInColumns(card.width);
-    const height = getCardHeightInRows(card.height);
-    
-    // Check if card would overflow current row
-    if (currentCol + width > columns) {
-      currentCol = 0;
-      currentRow++;
-    }
-    
-    // Assign position
-    const positioned = {
-      ...card,
-      gridRow: currentRow,
-      gridColumn: currentCol,
-      isPositionFixed: false // Not manually positioned
-    };
-    
-    // Move current position for next card
-    currentCol += width;
-    
-    // Move to next row if end of row
-    if (currentCol >= columns) {
-      currentCol = 0;
-      currentRow++;
-    }
-    
-    return positioned;
-  });
-  
-  // Combine positioned and newly positioned cards
-  return [...positionedCards, ...positionedUnpositionedCards, ...cards.filter(card => card.isHidden)];
-};
-
-// Helper functions to convert width/height strings to column/row counts
-function getCardWidthInColumns(width?: string): number {
-  switch (width) {
-    case '25': return 1;
-    case '50': return 2;
-    case '75': return 3;
-    case '100': return 4;
-    default: return 1;
-  }
-}
-
-function getCardHeightInRows(height?: string): number {
-  switch (height) {
-    case '0.5': return 1;
-    case '1': return 1;
-    case '2': return 2;
-    case '3': return 3;
-    case '4': return 4;
-    default: return 1;
-  }
-}
-
 export const useDashboardCards = () => {
   const [cards, setCards] = useState<ActionCardItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -96,8 +20,7 @@ export const useDashboardCards = () => {
       
       if (!user) {
         const defaultCards = getDefaultCards();
-        const positionedCards = ensureGridPositions(defaultCards);
-        setCards(positionedCards);
+        setCards(defaultCards);
         setIsLoading(false);
         return;
       }
@@ -113,25 +36,21 @@ export const useDashboardCards = () => {
           console.log('Fallback to default cards');
           // Fallback to default cards
           const defaultCards = getDefaultCards();
-          const positionedCards = ensureGridPositions(defaultCards);
-          setCards(positionedCards);
+          setCards(defaultCards);
         } else {
           console.log('Using user cards from DB');
           // Parse JSON if needed
-          let userCards = typeof data.cards_config === 'string' 
+          const userCards = typeof data.cards_config === 'string' 
             ? JSON.parse(data.cards_config) 
             : data.cards_config;
             
-          // Ensure all cards have grid positions
-          userCards = ensureGridPositions(userCards);
           setCards(userCards);
         }
       } catch (error) {
         console.error('Error fetching user dashboard settings:', error);
         // Fallback to default cards
         const defaultCards = getDefaultCards();
-        const positionedCards = ensureGridPositions(defaultCards);
-        setCards(positionedCards);
+        setCards(defaultCards);
       } finally {
         setIsLoading(false);
       }
@@ -152,16 +71,14 @@ export const useDashboardCards = () => {
       });
     }
     
-    // Ensure all cards have grid positions
-    const positionedCards = ensureGridPositions(updatedCards);
-    setCards(positionedCards);
+    setCards(updatedCards);
     
     // Auto-save configuration to database
     if (user) {
-      saveCardConfig(positionedCards);
+      saveCardConfig(updatedCards);
     }
     
-    return positionedCards;
+    return updatedCards;
   };
 
   // Handle card edit with auto-save
@@ -199,15 +116,14 @@ export const useDashboardCards = () => {
   // Reset dashboard to default configuration
   const resetDashboard = () => {
     const defaultCards = getDefaultCards();
-    const positionedCards = ensureGridPositions(defaultCards);
-    setCards(positionedCards);
+    setCards(defaultCards);
     
     // Auto-save configuration to database
     if (user) {
-      saveCardConfig(positionedCards);
+      saveCardConfig(defaultCards);
     }
     
-    return positionedCards;
+    return defaultCards;
   };
 
   return {

@@ -1,4 +1,3 @@
-
 import React, { useRef, useState } from 'react';
 import { Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -97,20 +96,18 @@ const SmartSearchCard: React.FC<SmartSearchCardProps> = ({
 
   return (
     <form onSubmit={handleSubmit} className="w-full h-full">
-      <div className="relative flex items-center justify-center w-full h-full">
-        <div className="w-[80%] relative">
-          <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-8 w-8 text-orange-500" />
-          <Input
-            ref={inputRef}
-            type="text" 
-            className="pl-14 pr-4 py-6 rounded-xl border border-gray-300 w-full h-[80%] bg-white text-2xl text-gray-800 placeholder:text-gray-600"
-            placeholder={placeholder}
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            onFocus={() => setShowSuggestions(true)}
-            onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
-          />
-        </div>
+      <div className="relative w-full h-full">
+        <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-6 w-6 text-orange-500 z-10" />
+        <Input
+          ref={inputRef}
+          type="text" 
+          className="pl-14 pr-4 py-6 rounded-xl border border-gray-300 w-full bg-white text-2xl text-gray-800 placeholder:text-gray-600"
+          placeholder={placeholder}
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          onFocus={() => setShowSuggestions(true)}
+          onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+        />
       </div>
       
       <AnimatePresence>
@@ -120,7 +117,7 @@ const SmartSearchCard: React.FC<SmartSearchCardProps> = ({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.2 }}
-            className="absolute top-full left-0 right-0 mt-1 mx-[10%] bg-white border border-gray-200 shadow-md rounded-xl z-10"
+            className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 shadow-md rounded-xl z-10 w-full"
           >
             <ul className="py-1">
               {suggestions.map((suggestion, i) => (

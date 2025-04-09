@@ -5,7 +5,6 @@ import { CSS } from '@dnd-kit/utilities';
 import { ActionCardItem } from '@/types/dashboard';
 import { getWidthClass, getHeightClass } from './grid/GridUtilities';
 import UnifiedActionCard from './UnifiedActionCard';
-import UnifiedCardGrid from './UnifiedCardGrid';
 
 interface CardGridProps {
   cards: ActionCardItem[];
@@ -18,7 +17,6 @@ interface CardGridProps {
   specialCardsData?: any;
   disableWiggleEffect?: boolean;
   showSpecialFeatures?: boolean;
-  useAbsolutePositioning?: boolean; // New prop
 }
 
 const SortableActionCard = ({ 
@@ -114,38 +112,13 @@ const CardGrid: React.FC<CardGridProps> = ({
   onSearchSubmit,
   specialCardsData,
   disableWiggleEffect,
-  showSpecialFeatures,
-  useAbsolutePositioning = true // Default to using the new absolute positioning
+  showSpecialFeatures
 }) => {
-  // If using absolute positioning, use the UnifiedCardGrid with absolute positioning
-  if (useAbsolutePositioning) {
-    return (
-      <UnifiedCardGrid
-        cards={cards}
-        onCardsChange={(updatedCards) => {
-          // Handle card changes through the parent components
-          // This is a placeholder since we don't modify the cards directly here
-        }}
-        onEditCard={onEditCard}
-        onDeleteCard={(id) => {}} // Not used in this context
-        onHideCard={onHideCard}
-        isMobileView={isMobileView}
-        isEditMode={isEditMode}
-        disableWiggleEffect={disableWiggleEffect}
-        showSpecialFeatures={showSpecialFeatures}
-        onSearchSubmit={onSearchSubmit}
-        specialCardsData={specialCardsData}
-        useAbsolutePositioning={true}
-      />
-    );
-  }
-  
   // For mobile view, use a single column
   const gridClass = isMobileView 
     ? "grid grid-cols-1 gap-4" 
     : "grid grid-cols-4 gap-4";
     
-  // Fallback to the traditional grid layout
   return (
     <div className={gridClass}>
       {cards.map((card) => (
