@@ -1,5 +1,6 @@
 
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 
 export const showAuthError = (error: any) => {
   let message = 'Ocorreu um erro desconhecido';
@@ -62,5 +63,55 @@ export const createAdminNotification = async (userId: string, userName: string, 
     if (error) throw error;
   } catch (error) {
     console.error('Error creating admin notification:', error);
+  }
+};
+
+// Add the missing functions
+export const isUserApproved = async (userId: string): Promise<boolean> => {
+  try {
+    const { data, error } = await supabase
+      .from('usuarios')
+      .select('status_conta')
+      .eq('id', userId)
+      .single();
+    
+    if (error) {
+      console.error('Error checking user approval status:', error);
+      return false;
+    }
+    
+    return data?.status_conta === 'aprovado';
+  } catch (error) {
+    console.error('Failed to check user approval status:', error);
+    return false;
+  }
+};
+
+export const updateUserProfile = async (userId: string, userData: any) => {
+  try {
+    // Format aniversario if it exists and is in DD/MM/YYYY format
+    let formattedData = { ...userData };
+    
+    if (userData.aniversario) {
+      const formattedDate = formatDateForDatabase(userData.aniversario);
+      if (formattedDate) {
+        formattedData.aniversario = formattedDate;
+      }
+    }
+    
+    const { data, error } = await supabase
+      .from('usuarios')
+      .update(formattedData)
+      .eq('id', userId);
+      
+    if (error) {
+      console.error('Error updating user profile:', error);
+      return { error };
+    }
+    
+    return { data, error: null };
+  } catch (error) {
+    console.error('Exception during profile update:', error);
+    return { error };
   }
 };

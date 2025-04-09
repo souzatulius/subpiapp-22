@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Input } from '@/components/ui/input';
-import { PasswordRequirement } from '@/components/PasswordRequirements';
+import PasswordRequirement from '@/components/PasswordRequirement';
 
 interface PasswordFieldsProps {
   password: string;

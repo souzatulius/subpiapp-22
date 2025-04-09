@@ -1,6 +1,7 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { ProfileData } from '@/components/profile/types';
+import { formatDateForDatabase } from '@/lib/authUtils';
 
 export interface RegisterUserData {
   email: string;
@@ -42,6 +43,12 @@ export const registerUser = async (userData: RegisterUserData) => {
     if (authError) throw authError;
 
     if (authData?.user) {
+      // Format aniversario if it exists
+      let formattedAniversario = null;
+      if (userData.aniversario) {
+        formattedAniversario = formatDateForDatabase(userData.aniversario);
+      }
+      
       // Create the user profile in the usuarios table
       const { error: profileError } = await supabase.from('usuarios').insert({
         id: authData.user.id,
@@ -52,7 +59,7 @@ export const registerUser = async (userData: RegisterUserData) => {
         supervisao_tecnica_id: userData.supervisao_tecnica_id,
         RF: userData.RF, // Store RF in the database
         whatsapp: userData.whatsapp || null,
-        aniversario: userData.aniversario ? new Date(userData.aniversario) : null,
+        aniversario: formattedAniversario,
         status_conta: 'pendente' // Account needs approval by admin
       });
 
@@ -70,14 +77,20 @@ export const registerUser = async (userData: RegisterUserData) => {
 
 export const updateProfile = async (profileData: Partial<ProfileData>, userId: string) => {
   try {
+    // Format aniversario if it exists
+    let formattedAniversario = null;
+    if (profileData.aniversario && typeof profileData.aniversario === 'string') {
+      formattedAniversario = formatDateForDatabase(profileData.aniversario);
+    } else if (profileData.aniversario instanceof Date) {
+      formattedAniversario = profileData.aniversario.toISOString().split('T')[0];
+    }
+    
     const { error } = await supabase
       .from('usuarios')
       .update({
         nome_completo: profileData.nome_completo,
         whatsapp: profileData.whatsapp || null,
-        aniversario: profileData.aniversario instanceof Date ? 
-          profileData.aniversario.toISOString().split('T')[0] : 
-          profileData.aniversario || null
+        aniversario: formattedAniversario
       })
       .eq('id', userId);
 
@@ -91,10 +104,10 @@ export const updateProfile = async (profileData: Partial<ProfileData>, userId: s
 };
 
 // Auth functions needed by AuthProvider
-export const setupAuthListener = (callback: (user: any) => void) => {
+export const setupAuthListener = (callback: (session: any) => void) => {
   const { data: { subscription } } = supabase.auth.onAuthStateChange(
     (_event, session) => {
-      callback(session?.user || null);
+      callback(session);
     }
   );
   return subscription;
