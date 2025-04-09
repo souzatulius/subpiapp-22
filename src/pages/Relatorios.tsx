@@ -12,6 +12,8 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import MobileBottomNav from '@/components/layouts/MobileBottomNav';
 import { useScrollFade } from '@/hooks/useScrollFade';
 import { ReportFilters } from '@/components/relatorios/hooks/useReportsData';
+import { useLocalStorage } from '@/hooks/use-local-storage';
+import { toast } from '@/hooks/use-toast';
 // Import Chart registration to ensure scales are registered
 import '@/components/ranking/charts/ChartRegistration';
 
@@ -21,6 +23,18 @@ const Relatorios = () => {
   const [filters, setFilters] = useState<ReportFilters>({});
   const isMobile = useIsMobile();
   const scrollFadeStyles = useScrollFade({ threshold: 10, fadeDistance: 80 });
+  const [chartVisibility, setChartVisibility] = useLocalStorage<Record<string, boolean>>('relatorios-chart-visibility', {
+    origemDemandas: true,
+    distribuicaoPorTemas: true,
+    tempoMedioResposta: true,
+    performanceArea: true,
+    notasEmitidas: true,
+    noticiasVsReleases: true,
+    problemasComuns: true,
+    demandasEsic: true,
+    resolucaoEsic: true,
+    processosCadastrados: true
+  });
 
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
@@ -31,8 +45,28 @@ const Relatorios = () => {
   };
   
   const handleResetDashboard = () => {
-    // Forçar um reload da página para resetar completamente o dashboard
-    window.location.reload();
+    // Reset chart visibility in localStorage
+    setChartVisibility({
+      origemDemandas: true,
+      distribuicaoPorTemas: true,
+      tempoMedioResposta: true,
+      performanceArea: true,
+      notasEmitidas: true,
+      noticiasVsReleases: true,
+      problemasComuns: true,
+      demandasEsic: true,
+      resolucaoEsic: true,
+      processosCadastrados: true
+    });
+    
+    // Force a reload of the page with a reset parameter
+    window.location.href = window.location.pathname + '?reset=true';
+
+    toast({
+      title: "Dashboard resetado",
+      description: "Todos os cards foram restaurados para a visualização padrão.",
+      duration: 3000,
+    });
   };
 
   return (

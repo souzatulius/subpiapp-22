@@ -56,6 +56,7 @@ const RelatoriosPage = () => {
   };
 
   const resetDashboard = useCallback(() => {
+    // Reset to default visibility
     setChartVisibility({
       origemDemandas: true,
       distribuicaoPorTemas: true,
@@ -68,6 +69,9 @@ const RelatoriosPage = () => {
       resolucaoEsic: true,
       processosCadastrados: true
     });
+    
+    // Force reload with reset param to ensure component re-renders with default positions
+    window.location.href = window.location.pathname + '?reset=true';
     
     toast({
       title: "Dashboard resetado",

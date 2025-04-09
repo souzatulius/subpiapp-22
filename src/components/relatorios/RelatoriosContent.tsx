@@ -6,6 +6,7 @@ import { PieChart, SlidersHorizontal, Printer, FileDown } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { useLocalStorage } from '@/hooks/use-local-storage';
 import { ReportFilters } from './hooks/useReportsData';
+import { toast } from '@/components/ui/use-toast';
 
 interface RelatoriosContentProps {
   filterDialogOpen: boolean;
@@ -44,9 +45,15 @@ export const RelatoriosContent: React.FC<RelatoriosContentProps> = ({
       resolucaoEsic: true,
       processosCadastrados: true
     });
+    
+    toast({
+      title: "Dashboard resetado",
+      description: "Todos os cards foram restaurados para a visualização padrão.",
+      duration: 3000,
+    });
   };
 
-  // Reset visibility when page loads
+  // Reset visibility when page loads if reset param exists in URL
   useEffect(() => {
     if (window.location.search.includes('reset=true')) {
       resetDashboardChartVisibility();

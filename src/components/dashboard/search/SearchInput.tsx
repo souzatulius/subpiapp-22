@@ -65,6 +65,20 @@ const SearchInput: React.FC<SearchInputProps> = ({
       setShowSuggestions(false);
     }
   };
+  
+  // Add specific handling for the space key
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    // Don't do anything special for space key - let default behavior work
+    if (e.key === ' ') {
+      // We specifically avoid any preventDefault or stopPropagation here
+      return;
+    }
+
+    // Handle the Enter key for form submission
+    if (e.key === 'Enter') {
+      handleSubmit(e);
+    }
+  };
 
   const handleSelectSuggestion = (suggestion: SearchSuggestion) => {
     if (onSelectSuggestion) {
@@ -75,12 +89,12 @@ const SearchInput: React.FC<SearchInputProps> = ({
   };
 
   const handleBlur = () => {
-    // Small delay to allow click on suggestion
+    // Use a longer delay to ensure we don't interfere with typing
     setTimeout(() => {
       if (isMounted.current) {
         setShowSuggestions(false);
       }
-    }, 200);
+    }, 300);
   };
 
   return (
@@ -94,18 +108,13 @@ const SearchInput: React.FC<SearchInputProps> = ({
             placeholder={placeholder}
             value={query}
             onChange={handleInputChange}
+            onKeyDown={handleKeyDown}
             onFocus={() => query.length >= 4 && suggestions.length > 0 && setShowSuggestions(true)}
             onBlur={handleBlur}
             className={`pl-14 pr-4 py-6 rounded-xl border border-gray-300 w-full bg-white text-xl text-gray-800 placeholder:text-gray-600 ${className}`}
           />
         </div>
       </form>
-
-      {query.length > 0 && query.length < 4 && (
-        <div className="mt-2 text-xs text-gray-500 italic">
-          Digite pelo menos 4 caracteres para ver sugestões
-        </div>
-      )}
 
       <SearchSuggestionsPortal
         suggestions={suggestions}
