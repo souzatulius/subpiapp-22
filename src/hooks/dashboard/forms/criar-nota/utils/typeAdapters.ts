@@ -19,8 +19,13 @@ export const adaptDemandType = (demanda: DemandComponent): DemandType => {
   if (demanda.notas && Array.isArray(demanda.notas)) {
     // Ensure each note has the required conteudo property
     adaptedDemand.notas = demanda.notas.map(note => ({
-      ...note,
-      conteudo: note.conteudo || '' // Ensure conteudo is defined
+      id: note.id,
+      titulo: note.titulo,
+      conteudo: note.conteudo || '', // Ensure conteudo is defined
+      status: note.status || 'pendente',
+      data_criacao: note.data_criacao || new Date().toISOString(),
+      autor_id: note.autor_id,
+      demanda_id: note.demanda_id
     })) as NoteType[];
   }
   
