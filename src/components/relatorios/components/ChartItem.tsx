@@ -1,10 +1,8 @@
 
 import React from 'react';
-import { RelatorioCard } from './RelatorioCard';
-import { useSortable } from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
-import { motion } from 'framer-motion';
-import { Eye, EyeOff, Search } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Eye, EyeOff, ChevronDown, ChevronUp, BarChart4, FileText } from 'lucide-react';
 
 interface ChartItemProps {
   id: string;
@@ -14,16 +12,14 @@ interface ChartItemProps {
   component: React.ReactNode;
   isVisible: boolean;
   analysis?: string;
-  isAnalysisExpanded?: boolean;
-  showAnalysisOnly?: boolean;
-  isLoading?: boolean;
+  isAnalysisExpanded: boolean;
+  showAnalysisOnly: boolean;
   onToggleVisibility: () => void;
   onToggleAnalysis: () => void;
   onToggleView: () => void;
 }
 
 const ChartItem: React.FC<ChartItemProps> = ({
-  id,
   title,
   value,
   description,
@@ -32,92 +28,83 @@ const ChartItem: React.FC<ChartItemProps> = ({
   analysis,
   isAnalysisExpanded,
   showAnalysisOnly,
-  isLoading,
   onToggleVisibility,
   onToggleAnalysis,
   onToggleView
 }) => {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id });
-  
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-    opacity: isDragging ? 0.5 : 1,
-    zIndex: isDragging ? 1000 : 1,
-  };
-  
-  if (!isVisible) return null;
-  
+  if (!isVisible) {
+    return (
+      <Card className="h-full">
+        <CardContent className="p-4 flex flex-col items-center justify-center h-full min-h-[200px] text-center">
+          <p className="text-gray-400 mb-2">Este gráfico está oculto</p>
+          <Button variant="outline" size="sm" onClick={onToggleVisibility}>
+            <Eye className="mr-2 h-4 w-4" />
+            Mostrar gráfico
+          </Button>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
-    <motion.div
-      ref={setNodeRef}
-      style={style}
-      className="col-span-1 h-full transition-all duration-300 cursor-move"
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, scale: 0.95 }}
-      {...attributes}
-      {...listeners}
-    >
-      <div className="relative h-full group">
-        <div className="absolute top-0 right-0 p-1.5 z-10 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
-          {analysis && (
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                onToggleView();
-              }}
-              className="p-1 rounded-full bg-white text-orange-600 hover:text-orange-800 shadow-sm hover:shadow transition-all"
-              title={showAnalysisOnly ? "Mostrar gráfico" : "Mostrar análise"}
-            >
-              <Search size={16} />
-            </button>
-          )}
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              onToggleVisibility();
-            }}
-            className="p-1 rounded-full bg-white text-orange-600 hover:text-orange-800 shadow-sm hover:shadow transition-all"
-            title={isVisible ? "Ocultar gráfico" : "Mostrar gráfico"}
-          >
-            {isVisible ? <EyeOff size={16} /> : <Eye size={16} />}
-          </button>
+    <Card className="h-full relative group">
+      <CardContent className="p-4">
+        <div className="mb-2">
+          <h3 className="font-medium">{title}</h3>
+          {value && <p className="text-2xl font-bold mt-1">{value}</p>}
+          {description && <p className="text-sm text-gray-500">{description}</p>}
         </div>
-        
-        <div className="h-full">
-          {showAnalysisOnly && analysis ? (
-            <div className="p-4 bg-gradient-to-r from-orange-100 to-orange-200 rounded-lg border border-orange-300 shadow-sm h-full flex flex-col">
-              <h3 className="text-lg font-medium text-orange-800 mb-2">{title} - Análise</h3>
-              <p className="text-orange-700 flex-1 overflow-auto">{analysis}</p>
-            </div>
-          ) : (
-            <RelatorioCard 
-              title={title} 
-              description={description}
-              value={value}
-              isLoading={isLoading}
-              analysis={analysis}
-            >
-              {component}
-            </RelatorioCard>
-          )}
-        </div>
-        
-        {isAnalysisExpanded && !showAnalysisOnly && analysis && (
-          <motion.div 
-            initial={{ opacity: 0, height: 0 }} 
-            animate={{ opacity: 1, height: 'auto' }}
-            transition={{ duration: 0.3 }}
-            className="mt-2 p-3 bg-orange-100 rounded-md text-sm text-orange-700"
-            onClick={(e) => e.stopPropagation()}
+
+        <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-8 w-8 p-0 rounded-full"
+            onClick={onToggleVisibility}
+            title="Ocultar gráfico"
           >
-            <h4 className="font-medium mb-1">{title} - Análise</h4>
-            <p>{analysis}</p>
-          </motion.div>
+            <EyeOff className="h-4 w-4" />
+          </Button>
+        </div>
+
+        {!showAnalysisOnly && (
+          <div className="mb-2">{component}</div>
         )}
-      </div>
-    </motion.div>
+
+        {analysis && (
+          <div className="mt-4 bg-gray-50 p-3 rounded-md">
+            <div className="flex items-center justify-between mb-2">
+              <h4 className="text-sm font-medium text-gray-600">
+                <FileText className="inline mr-1 h-4 w-4" /> Análise
+              </h4>
+              <div className="flex gap-1">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-6 w-6 p-0"
+                  onClick={onToggleView}
+                  title={showAnalysisOnly ? "Mostrar gráfico" : "Mostrar apenas análise"}
+                >
+                  {showAnalysisOnly ? <BarChart4 className="h-3 w-3" /> : <FileText className="h-3 w-3" />}
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-6 w-6 p-0"
+                  onClick={onToggleAnalysis}
+                  title={isAnalysisExpanded ? "Reduzir análise" : "Expandir análise"}
+                >
+                  {isAnalysisExpanded ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
+                </Button>
+              </div>
+            </div>
+            <div className={isAnalysisExpanded ? "" : "line-clamp-3"}>
+              <p className="text-sm text-gray-600">{analysis}</p>
+            </div>
+          </div>
+        )}
+      </CardContent>
+    </Card>
   );
 };
 

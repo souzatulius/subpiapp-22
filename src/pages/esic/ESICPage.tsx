@@ -11,6 +11,7 @@ import JustificativaCreate from '@/components/esic/screens/JustificativaCreate';
 import ConfirmDialog from '@/components/ui/confirm-dialog';
 import { useIsMobile } from '@/hooks/use-mobile';
 import MobileBottomNav from '@/components/layouts/MobileBottomNav';
+import { ESICProcesso } from '@/types/esic';
 
 const ESICPage = () => {
   const [sidebarOpen, setSidebarOpen] = React.useState(false);
@@ -62,7 +63,7 @@ const ESICPage = () => {
         <main className="flex-1 p-4 md:p-8 pb-24 sm:pb-8">
           {screen === 'list' && (
             <ProcessosList 
-              processos={processos}
+              processos={processos as ESICProcesso[]}
               isLoading={isLoading}
               onCreateProcesso={() => setScreen('create')}
               onViewProcesso={handleViewProcesso}

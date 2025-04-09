@@ -9,6 +9,7 @@ import ProcessoEdit from '@/components/esic/screens/ProcessoEdit';
 import ProcessoView from '@/components/esic/screens/ProcessoView';
 import JustificativaCreate from '@/components/esic/screens/JustificativaCreate';
 import { useESICPageState } from '@/hooks/esic/useESICPageState';
+import { ESICProcesso } from '@/types/esic';
 
 const ESICPage: React.FC = () => {
   const {
@@ -52,7 +53,7 @@ const ESICPage: React.FC = () => {
       <main>
         {screen === 'list' && (
           <ProcessosList 
-            processos={processos}
+            processos={processos as ESICProcesso[]}
             isLoading={isLoading}
             onCreateProcesso={() => setScreen('create')}
             onViewProcesso={handleViewProcesso}

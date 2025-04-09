@@ -3,8 +3,17 @@ import React from 'react';
 import { StatsCard } from './components/StatsCard';
 import { useReportsData } from './hooks/useReportsData';
 import ESICProcessesCard from './ESICProcessesCard';
+import { useQueryClient } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 
 export const RelatoriosKPICards: React.FC = () => {
+  const [esicStats, setEsicStats] = React.useState({
+    total: 0,
+    responded: 0,
+    justified: 0
+  });
+  const [loadingESIC, setLoadingESIC] = React.useState(true);
+
   // Get report data with default filters
   const { cardStats: stats, isLoading: isLoadingStats } = useReportsData({
     dateRange: {
@@ -31,6 +40,42 @@ export const RelatoriosKPICards: React.FC = () => {
     ...defaultStats,
     ...(stats || {})
   };
+
+  // Fetch ESIC stats
+  React.useEffect(() => {
+    const fetchESICStats = async () => {
+      setLoadingESIC(true);
+      try {
+        // Get total count
+        const { count: total } = await supabase
+          .from('esic_processos')
+          .select('*', { count: 'exact', head: true });
+        
+        // Get responded count
+        const { count: responded } = await supabase
+          .from('esic_processos')
+          .select('*', { count: 'exact', head: true })
+          .eq('status', 'concluido');
+        
+        // Get justified count
+        const { count: justified } = await supabase
+          .from('esic_justificativas')
+          .select('*', { count: 'exact', head: true });
+        
+        setEsicStats({
+          total: total || 0,
+          responded: responded || 0,
+          justified: justified || 0
+        });
+      } catch (error) {
+        console.error('Error fetching ESIC stats:', error);
+      } finally {
+        setLoadingESIC(false);
+      }
+    };
+    
+    fetchESICStats();
+  }, []);
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
@@ -59,7 +104,12 @@ export const RelatoriosKPICards: React.FC = () => {
       />
 
       {/* KPI de Processos e-SIC */}
-      <ESICProcessesCard loading={isLoadingStats} />
+      <ESICProcessesCard 
+        loading={loadingESIC} 
+        total={esicStats.total}
+        responded={esicStats.responded}
+        justified={esicStats.justified}
+      />
     </div>
   );
 };

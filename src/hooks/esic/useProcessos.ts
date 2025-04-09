@@ -1,22 +1,8 @@
-import { useState, useEffect } from 'react';
+
+import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
-
-interface Processo {
-  id: string;
-  assunto: string;
-  numero_sei: string;
-  data_cadastro: string;
-  prazo: string;
-  autor: {
-    nome: string;
-    sobrenome: string;
-  };
-  coordenacao: {
-    nome: string;
-  };
-  status: string;
-}
+import { ESICProcesso } from '@/types/esic';
 
 interface FilterOptions {
   page?: number;
@@ -28,15 +14,12 @@ interface FilterOptions {
   dataFim?: string;
 }
 
-const formatAutorName = (item: any) => {
-  return item.autor ? `${item.autor.nome} ${item.autor.sobrenome}` : 'Usuário anônimo';
-};
-
 export const useProcessos = () => {
-  const [processos, setProcessos] = useState<Processo[]>([]);
+  const [processos, setProcessos] = useState<ESICProcesso[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [total, setTotal] = useState(0);
+  const [selectedProcesso, setSelectedProcesso] = useState<ESICProcesso | null>(null);
   const [filterOptions, setFilterOptions] = useState<FilterOptions>({
     page: 1,
     pageSize: 10,
@@ -46,74 +29,31 @@ export const useProcessos = () => {
     dataInicio: '',
     dataFim: '',
   });
+  const [isCreating, setIsCreating] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const fetchProcessos = async (options: FilterOptions = {}) => {
     setLoading(true);
     setError(null);
 
-    let query = supabase
-      .from('processos')
-      .select(`
-        id,
-        assunto,
-        numero_sei,
-        data_cadastro,
-        prazo,
-        autor:usuarios ( nome, sobrenome ),
-        coordenacao:coordenacoes ( nome ),
-        status,
-        total:count
-      `, { count: 'exact' })
-      .order('data_cadastro', { ascending: false });
-
-    if (options.searchTerm) {
-      query = query.ilike('assunto', `%${options.searchTerm}%`);
-    }
-
-    if (options.status) {
-      query = query.eq('status', options.status);
-    }
-
-    if (options.coordenacao) {
-      query = query.eq('coordenacao_id', options.coordenacao);
-    }
-
-    if (options.dataInicio && options.dataFim) {
-      query = query.gte('data_cadastro', options.dataInicio);
-      query = query.lte('data_cadastro', options.dataFim);
-    }
-
-    const page = options.page || filterOptions.page || 1;
-    const pageSize = options.pageSize || filterOptions.pageSize || 10;
-    const startIndex = (page - 1) * pageSize;
-    const endIndex = startIndex + pageSize - 1;
-
-    query = query.range(startIndex, endIndex);
-
     try {
-      const { data, error, count } = await query;
+      // Use 'esic_processos' instead of 'processos'
+      const { data, error, count } = await supabase
+        .from('esic_processos')
+        .select(`
+          *,
+          autor:autor_id (nome_completo),
+          coordenacao:coordenacao_id (nome)
+        `, { count: 'exact' })
+        .order('criado_em', { ascending: false });
 
       if (error) {
         throw new Error(error.message);
       }
 
       if (data) {
-        const formattedProcessos = data.map(item => ({
-          id: item.id,
-          assunto: item.assunto,
-          numero_sei: item.numero_sei,
-          data_cadastro: item.data_cadastro,
-          prazo: item.prazo,
-          autor: {
-            nome: item.autor ? item.autor.nome : 'Usuário',
-            sobrenome: item.autor ? item.autor.sobrenome : 'Anônimo'
-          },
-          coordenacao: {
-            nome: item.coordenacao ? item.coordenacao.nome : 'Desconhecida'
-          },
-          status: item.status
-        }));
-        setProcessos(formattedProcessos);
+        setProcessos(data as ESICProcesso[]);
         setTotal(count || 0);
       } else {
         setProcessos([]);
@@ -131,281 +71,134 @@ export const useProcessos = () => {
     }
   };
 
-  const updateProcessoStatus = async (id: string, newStatus: string) => {
-    setLoading(true);
+  const createProcesso = async (data: any, options?: { onSuccess?: () => void; onError?: (error: any) => void }) => {
+    setIsCreating(true);
     setError(null);
 
     try {
-      const { error } = await supabase
-        .from('processos')
-        .update({ status: newStatus })
-        .eq('id', id);
+      const result = await supabase
+        .from('esic_processos')
+        .insert(data)
+        .select();
 
-      if (error) {
-        throw new Error(error.message);
+      if (result.error) {
+        throw result.error;
       }
 
-      setProcessos(prevProcessos =>
-        prevProcessos.map(processo =>
-          processo.id === id ? { ...processo, status: newStatus } : processo
-        )
-      );
-      toast({
-        title: 'Status do processo atualizado',
-        description: 'O status do processo foi atualizado com sucesso.',
-      });
+      // Refresh process list
+      fetchProcessos();
+      options?.onSuccess?.();
     } catch (err: any) {
       setError(err.message);
-      toast({
-        title: 'Erro ao atualizar status',
-        description: 'Ocorreu um erro ao atualizar o status do processo. Tente novamente mais tarde.',
-        variant: 'destructive',
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const createProcesso = async (processoData: Omit<Processo, 'id' | 'autor'> & { autor_id: string, coordenacao_id: string }) => {
-    setLoading(true);
-    setError(null);
-
-    try {
-      const { data, error } = await supabase
-        .from('processos')
-        .insert([
-          {
-            assunto: processoData.assunto,
-            numero_sei: processoData.numero_sei,
-            data_cadastro: processoData.data_cadastro,
-            prazo: processoData.prazo,
-            autor_id: processoData.autor_id,
-            coordenacao_id: processoData.coordenacao_id,
-            status: processoData.status,
-          },
-        ])
-        .select(`
-          id,
-          assunto,
-          numero_sei,
-          data_cadastro,
-          prazo,
-          autor:usuarios ( nome, sobrenome ),
-          coordenacao:coordenacoes ( nome ),
-          status
-        `);
-
-      if (error) {
-        throw new Error(error.message);
-      }
-
-      if (data && data.length > 0) {
-        const newProcesso = data[0];
-        setProcessos(prevProcessos => [
-          ...prevProcessos,
-          {
-            id: newProcesso.id,
-            assunto: newProcesso.assunto,
-            numero_sei: newProcesso.numero_sei,
-            data_cadastro: newProcesso.data_cadastro,
-            prazo: newProcesso.prazo,
-            autor: {
-              nome: newProcesso.autor ? newProcesso.autor.nome : 'Usuário',
-              sobrenome: newProcesso.autor ? newProcesso.autor.sobrenome : 'Anônimo'
-            },
-            coordenacao: {
-              nome: newProcesso.coordenacao ? newProcesso.coordenacao.nome : 'Desconhecida'
-            },
-            status: newProcesso.status
-          }
-        ]);
-        toast({
-          title: 'Processo criado com sucesso',
-          description: 'O processo foi criado e adicionado à lista.',
-        });
-      }
-    } catch (err: any) {
-      setError(err.message);
+      options?.onError?.(err);
       toast({
         title: 'Erro ao criar processo',
-        description: 'Ocorreu um erro ao criar o processo. Tente novamente mais tarde.',
+        description: err.message,
         variant: 'destructive',
       });
     } finally {
-      setLoading(false);
+      setIsCreating(false);
     }
   };
 
-  const deleteProcesso = async (id: string) => {
-    setLoading(true);
+  const updateProcesso = async (
+    params: { id: string; data: any }, 
+    options?: { onSuccess?: () => void; onError?: (error: any) => void }
+  ) => {
+    setIsUpdating(true);
+    setError(null);
+
+    try {
+      const result = await supabase
+        .from('esic_processos')
+        .update(params.data)
+        .eq('id', params.id)
+        .select();
+
+      if (result.error) {
+        throw result.error;
+      }
+
+      // Update local state
+      if (result.data && result.data.length > 0) {
+        setProcessos(prev => 
+          prev.map(p => p.id === params.id ? { ...p, ...params.data } : p)
+        );
+        
+        // Update selected processo if it's the one being edited
+        if (selectedProcesso && selectedProcesso.id === params.id) {
+          setSelectedProcesso({ ...selectedProcesso, ...params.data });
+        }
+      }
+      
+      options?.onSuccess?.();
+    } catch (err: any) {
+      setError(err.message);
+      options?.onError?.(err);
+      toast({
+        title: 'Erro ao atualizar processo',
+        description: err.message,
+        variant: 'destructive',
+      });
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  const deleteProcesso = async (
+    id: string,
+    options?: { onSuccess?: () => void; onError?: (error: any) => void }
+  ) => {
+    setIsDeleting(true);
     setError(null);
 
     try {
       const { error } = await supabase
-        .from('processos')
+        .from('esic_processos')
         .delete()
         .eq('id', id);
 
       if (error) {
-        throw new Error(error.message);
+        throw error;
       }
 
-      setProcessos(prevProcessos => prevProcessos.filter(processo => processo.id !== id));
-      toast({
-        title: 'Processo excluído com sucesso',
-        description: 'O processo foi removido da lista.',
-      });
+      // Update local state
+      setProcessos(prev => prev.filter(p => p.id !== id));
+      
+      // Clear selected process if it's the one being deleted
+      if (selectedProcesso && selectedProcesso.id === id) {
+        setSelectedProcesso(null);
+      }
+      
+      options?.onSuccess?.();
     } catch (err: any) {
       setError(err.message);
+      options?.onError?.(err);
       toast({
         title: 'Erro ao excluir processo',
-        description: 'Ocorreu um erro ao excluir o processo. Tente novamente mais tarde.',
+        description: err.message,
         variant: 'destructive',
       });
     } finally {
-      setLoading(false);
-    }
-  };
-
-  const getProcessoById = async (id: string) => {
-    setLoading(true);
-    setError(null);
-
-    try {
-      const { data, error } = await supabase
-        .from('processos')
-        .select(`
-          id,
-          assunto,
-          numero_sei,
-          data_cadastro,
-          prazo,
-          autor:usuarios ( nome, sobrenome ),
-          coordenacao:coordenacoes ( nome ),
-          status
-        `)
-        .eq('id', id)
-        .single();
-
-      if (error) {
-        throw new Error(error.message);
-      }
-
-      if (data) {
-        return {
-          id: data.id,
-          assunto: data.assunto,
-          numero_sei: data.numero_sei,
-          data_cadastro: data.data_cadastro,
-          prazo: data.prazo,
-          autor: {
-            nome: data.autor ? data.autor.nome : 'Usuário',
-            sobrenome: data.autor ? data.autor.sobrenome : 'Anônimo'
-          },
-          coordenacao: {
-            nome: data.coordenacao ? data.coordenacao.nome : 'Desconhecida'
-          },
-          status: data.status
-        };
-      } else {
-        return null;
-      }
-    } catch (err: any) {
-      setError(err.message);
-      toast({
-        title: 'Erro ao buscar processo',
-        description: 'Ocorreu um erro ao buscar o processo. Tente novamente mais tarde.',
-        variant: 'destructive',
-      });
-      return null;
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const updateProcesso = async (id: string, updates: Partial<Processo> & { coordenacao_id: string }) => {
-    setLoading(true);
-    setError(null);
-
-    try {
-      const { data, error } = await supabase
-        .from('processos')
-        .update({
-          assunto: updates.assunto,
-          numero_sei: updates.numero_sei,
-          data_cadastro: updates.data_cadastro,
-          prazo: updates.prazo,
-          coordenacao_id: updates.coordenacao_id,
-          status: updates.status,
-        })
-        .eq('id', id)
-        .select(`
-          id,
-          assunto,
-          numero_sei,
-          data_cadastro,
-          prazo,
-          autor:usuarios ( nome, sobrenome ),
-          coordenacao:coordenacoes ( nome ),
-          status
-        `);
-
-      if (error) {
-        throw new Error(error.message);
-      }
-
-     if (data && data.length > 0) {
-        const updatedProcesso = data[0];
-        setProcessos(prevProcessos =>
-          prevProcessos.map(processo =>
-            processo.id === id
-              ? {
-                  id: updatedProcesso.id,
-                  assunto: updatedProcesso.assunto,
-                  numero_sei: updatedProcesso.numero_sei,
-                  data_cadastro: updatedProcesso.data_cadastro,
-                  prazo: updatedProcesso.prazo,
-                  autor: {
-                    nome: updatedProcesso.autor ? updatedProcesso.autor.nome : 'Usuário',
-                    sobrenome: updatedProcesso.autor ? updatedProcesso.autor.sobrenome : 'Anônimo'
-                  },
-                  coordenacao: {
-                    nome: updatedProcesso.coordenacao ? updatedProcesso.coordenacao.nome : 'Desconhecida'
-                  },
-                  status: updatedProcesso.status
-                }
-              : processo
-          )
-        );
-        toast({
-          title: 'Processo atualizado com sucesso',
-          description: 'O processo foi atualizado com sucesso.',
-        });
-      }
-    } catch (err: any) {
-      setError(err.message);
-      toast({
-        title: 'Erro ao atualizar processo',
-        description: 'Ocorreu um erro ao atualizar o processo. Tente novamente mais tarde.',
-        variant: 'destructive',
-      });
-    } finally {
-      setLoading(false);
+      setIsDeleting(false);
     }
   };
 
   return {
     processos,
-    loading,
+    isLoading: loading,
     error,
     total,
     filterOptions,
     setFilterOptions,
     fetchProcessos,
-    updateProcessoStatus,
+    selectedProcesso,
+    setSelectedProcesso,
     createProcesso,
-    deleteProcesso,
-    getProcessoById,
     updateProcesso,
+    deleteProcesso,
+    isCreating,
+    isUpdating,
+    isDeleting
   };
 };
