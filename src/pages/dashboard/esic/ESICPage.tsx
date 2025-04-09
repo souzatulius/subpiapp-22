@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { FileText } from 'lucide-react';
 import WelcomeCard from '@/components/shared/WelcomeCard';
 import DeleteProcessoDialog from '@/components/esic/dialogs/DeleteProcessoDialog';
@@ -38,8 +38,17 @@ const ESICPage: React.FC = () => {
     handleCreateJustificativa,
     handleGenerateJustificativa,
     handleUpdateStatus,
-    handleUpdateSituacao
+    handleUpdateSituacao,
+    // Add the fetchProcessos function from state
+    fetchProcessos
   } = useESICPageState();
+  
+  // Add useEffect to fetch processes when the page loads or when screen changes back to list
+  useEffect(() => {
+    if (screen === 'list') {
+      fetchProcessos();
+    }
+  }, [screen, fetchProcessos]);
   
   return (
     <div className="container mx-auto py-6 px-2 sm:px-4 md:px-6 space-y-6">

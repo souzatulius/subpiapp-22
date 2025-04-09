@@ -39,15 +39,49 @@ export const useProcessos = () => {
     setError(null);
 
     try {
-      // Use 'esic_processos' instead of 'processos'
-      const { data, error, count } = await supabase
+      // Build the query with filters
+      let query = supabase
         .from('esic_processos')
         .select(`
           *,
           autor:autor_id (nome_completo),
           coordenacao:coordenacao_id (nome)
-        `, { count: 'exact' })
-        .order('criado_em', { ascending: false });
+        `, { count: 'exact' });
+      
+      // Apply filters if they exist
+      const mergedOptions = { ...filterOptions, ...options };
+      
+      if (mergedOptions.searchTerm) {
+        query = query.or(`assunto.ilike.%${mergedOptions.searchTerm}%,protocolo.ilike.%${mergedOptions.searchTerm}%,solicitante.ilike.%${mergedOptions.searchTerm}%,texto.ilike.%${mergedOptions.searchTerm}%`);
+      }
+      
+      if (mergedOptions.status) {
+        query = query.eq('status', mergedOptions.status);
+      }
+      
+      if (mergedOptions.coordenacao) {
+        query = query.eq('coordenacao_id', mergedOptions.coordenacao);
+      }
+      
+      if (mergedOptions.dataInicio) {
+        query = query.gte('data_processo', mergedOptions.dataInicio);
+      }
+      
+      if (mergedOptions.dataFim) {
+        query = query.lte('data_processo', mergedOptions.dataFim);
+      }
+      
+      // Apply pagination
+      if (mergedOptions.page && mergedOptions.pageSize) {
+        const from = (mergedOptions.page - 1) * mergedOptions.pageSize;
+        const to = from + mergedOptions.pageSize - 1;
+        query = query.range(from, to);
+      }
+      
+      // Apply ordering
+      query = query.order('criado_em', { ascending: false });
+      
+      const { data, error, count } = await query;
 
       if (error) {
         throw new Error(error.message);

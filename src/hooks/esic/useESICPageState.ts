@@ -29,7 +29,8 @@ export const useESICPageState = () => {
     deleteProcesso,
     isCreating,
     isUpdating,
-    isDeleting
+    isDeleting,
+    fetchProcessos // Make sure we have this function available
   } = useProcessos();
   
   const {
@@ -46,6 +47,7 @@ export const useESICPageState = () => {
       createProcesso(values, {
         onSuccess: () => {
           setScreen('list');
+          fetchProcessos(); // Add this to refresh the list after creation
           toast({
             title: 'Processo criado com sucesso',
             description: 'O novo processo foi adicionado ao sistema.',
@@ -251,6 +253,7 @@ export const useESICPageState = () => {
     handleCreateJustificativa,
     handleGenerateJustificativa,
     handleUpdateStatus,
-    handleUpdateSituacao
+    handleUpdateSituacao,
+    fetchProcessos // Export this function
   };
 };
