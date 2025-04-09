@@ -30,7 +30,7 @@ export interface ESICProcessoFormValues {
   assunto: string;
   solicitante?: string;
   coordenacao_id?: string | null;
-  prazo_resposta?: Date | string;
+  prazo_resposta?: Date | null;
   sem_area_tecnica?: boolean;
   sem_identificacao?: boolean;
 }

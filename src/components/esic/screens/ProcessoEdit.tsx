@@ -21,13 +21,13 @@ const ProcessoEdit: React.FC<ProcessoEditProps> = ({
 
   // Convert processo to form values
   const defaultValues: Partial<ESICProcessoFormValues> = {
-    data_processo: processo.data_processo,
+    data_processo: processo.data_processo ? new Date(processo.data_processo) : new Date(),
     assunto: processo.assunto,
     solicitante: processo.solicitante,
     texto: processo.texto,
     situacao: processo.situacao,
     coordenacao_id: processo.coordenacao_id,
-    prazo_resposta: processo.prazo_resposta,
+    prazo_resposta: processo.prazo_resposta ? new Date(processo.prazo_resposta) : undefined,
     sem_area_tecnica: !processo.coordenacao_id,
     sem_identificacao: processo.solicitante === 'Sem identificação',
   };
@@ -38,7 +38,7 @@ const ProcessoEdit: React.FC<ProcessoEditProps> = ({
       try {
         const { data, error } = await supabase
           .from('coordenacoes')
-          .select('id, descricao:nome')
+          .select('id, descricao')
           .order('descricao', { ascending: true });
         
         if (error) throw error;

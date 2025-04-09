@@ -23,7 +23,7 @@ const ProcessoCreate: React.FC<ProcessoCreateProps> = ({
       try {
         const { data, error } = await supabase
           .from('coordenacoes')
-          .select('id, descricao:nome')
+          .select('id, descricao')
           .order('descricao', { ascending: true });
         
         if (error) throw error;
