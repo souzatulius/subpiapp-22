@@ -184,12 +184,6 @@ const DashboardPage: React.FC = () => {
                   />
                 </div>
                 
-                <div className="flex items-center justify-between gap-4">
-                  <div className="flex-1">
-                    <DashboardSearchCard />
-                  </div>
-                </div>
-                
                 <div className={`relative ${isMobile ? 'pb-32' : ''}`}>
                   {isLoading ? (
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
