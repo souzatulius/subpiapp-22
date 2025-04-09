@@ -15,20 +15,22 @@ export const adaptDemandType = (demanda: DemandComponent): DemandType => {
     autor: typeof demanda.autor === 'object' ? demanda.autor.nome_completo : demanda.autor as string
   };
   
-  // Handle notes separately if they exist - explicitly cast to correct type with required conteudo field
+  // Handle notes separately if they exist
   if (demanda.notas && Array.isArray(demanda.notas)) {
-    adaptedDemand.notas = demanda.notas.map(note => {
-      const typedNote: NoteType = {
+    // Create a new array with explicit NoteType type to satisfy TypeScript
+    const notasConverted: NoteType[] = demanda.notas.map(note => {
+      // Ensure all required properties are present for NoteType
+      return {
         id: note.id,
         titulo: note.titulo,
-        conteudo: note.conteudo || '', // Ensure conteudo is defined and never undefined
+        conteudo: note.conteudo || '', // Ensure conteudo is defined (required in NoteType)
         status: note.status || 'pendente',
         data_criacao: note.data_criacao || new Date().toISOString(),
         autor_id: note.autor_id,
         demanda_id: note.demanda_id || ''
       };
-      return typedNote;
     });
+    adaptedDemand.notas = notasConverted;
   }
   
   return adaptedDemand as DemandType;
@@ -46,6 +48,23 @@ export const adaptToDemandComponent = (demanda: DemandType): DemandComponent => 
       ? { descricao: demanda.servico, id: demanda.servico_id }
       : demanda.servico as any
   };
+  
+  // Handle converting notes if needed
+  if (demanda.notas && Array.isArray(demanda.notas)) {
+    componentDemand.notas = demanda.notas.map(note => {
+      // Convert from NoteType to NoteComponent
+      const componentNote: NoteComponent = {
+        id: note.id,
+        titulo: note.titulo,
+        conteudo: note.conteudo, // Already exists in demand type
+        status: note.status,
+        data_criacao: note.data_criacao,
+        autor_id: note.autor_id,
+        demanda_id: note.demanda_id
+      };
+      return componentNote;
+    });
+  }
   
   return componentDemand as DemandComponent;
 };
