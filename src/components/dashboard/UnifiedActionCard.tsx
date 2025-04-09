@@ -1,5 +1,5 @@
 
-import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { ActionCardItem, CardWidth, CardHeight, CardColor, CardType } from '@/types/dashboard';
@@ -10,7 +10,6 @@ import DynamicListCard from '@/components/settings/dashboard-management/DynamicL
 import OriginSelectionCard from './cards/OriginSelectionCard';
 import SmartSearchCard from './SmartSearchCard';
 import CardControls from './card-parts/CardControls';
-import { useNavigate } from 'react-router-dom';
 
 export interface Controls {
   cardId: string;
@@ -82,7 +81,7 @@ export interface UnifiedActionCardProps extends ActionCardItem {
   contentClassname?: string;
   isPendingActions?: boolean;
   specialContent?: React.ReactNode;
-  children?: React.ReactNode; // Added children property to fix the TypeScript error
+  children?: React.ReactNode;
 }
 
 export function SortableUnifiedActionCard(props: UnifiedActionCardProps) {
@@ -296,6 +295,7 @@ export function UnifiedActionCard({
           iconSize={iconSize}
           isMobileView={isMobileView}
           showControls={false}
+          subtitle={subtitle}
         />
       </div>
     );

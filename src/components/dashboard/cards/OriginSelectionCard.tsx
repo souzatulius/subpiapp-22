@@ -1,8 +1,15 @@
 
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
+import * as LucideIcons from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { OriginOption } from '@/types/dashboard';
+
+interface OriginOption {
+  id: string;
+  title: string;
+  icon: React.ReactNode | string;
+  path?: string;
+}
 
 interface OriginSelectionCardProps {
   title: string;
@@ -11,32 +18,57 @@ interface OriginSelectionCardProps {
 
 const OriginSelectionCard: React.FC<OriginSelectionCardProps> = ({ title, options }) => {
   const navigate = useNavigate();
-  
-  const handleOriginSelect = (originId: string) => {
-    navigate(`/dashboard/comunicacao/cadastrar?origem_id=${originId}`);
-  };
-  
-  return (
-    <Card className="h-full flex flex-col">
-      <CardHeader>
-        <CardTitle className="text-lg text-blue-700 font-poppins">{title}</CardTitle>
-      </CardHeader>
+
+  // Function to get the correct icon component
+  const getIconComponent = (iconName: string | React.ReactNode) => {
+    if (React.isValidElement(iconName)) return iconName;
+    
+    if (typeof iconName === 'string') {
+      // Convert string to Lucide icon format (first letter uppercase, rest lowercase)
+      const formattedIconName = iconName.charAt(0).toUpperCase() + iconName.slice(1).toLowerCase();
       
-      <CardContent className="flex-grow flex flex-col justify-center">
-        <p className="text-lg font-medium mb-4 text-gray-700 font-poppins">De onde vem esta demanda?</p>
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+      // Check if icon exists in Lucide library
+      const LucideIcon = (LucideIcons as any)[formattedIconName];
+      
+      if (LucideIcon && typeof LucideIcon === 'function') {
+        return <LucideIcon className="h-5 w-5" />;
+      }
+    }
+    
+    // Default icon if not found
+    return <LucideIcons.BadgePlus className="h-5 w-5" />;
+  };
+
+  const handleOptionClick = (optionId: string, optionPath?: string) => {
+    if (optionPath) {
+      navigate(optionPath);
+    } else {
+      navigate(`/cadastrar?origem_id=${optionId}`);
+    }
+  };
+
+  return (
+    <Card className="h-full">
+      <CardContent className="p-4 h-full flex flex-col">
+        <h3 className="text-gray-700 font-medium mb-2">
+          {title}
+        </h3>
+        <p className="text-2xl font-semibold text-orange-500 mb-4">
+          De onde vem esta demanda?
+        </p>
+        <div className="grid grid-cols-4 gap-2 mt-2">
           {options.map((option) => (
             <button
               key={option.id}
-              onClick={() => handleOriginSelect(option.id)}
-              className="p-3 bg-white hover:bg-blue-50 border border-gray-200 rounded-md text-center transition-colors 
-                         flex flex-col items-center justify-center h-24 
-                         hover:border-blue-300 hover:shadow-md font-poppins"
+              onClick={() => handleOptionClick(option.id, option.path)}
+              className="flex flex-col items-center justify-center p-2 rounded-lg hover:bg-gray-100 transition-colors bg-gradient-to-b from-gray-50 to-gray-100"
             >
-              <div className="text-2xl mb-2 text-blue-700">
-                {typeof option.icon === 'string' ? option.icon : option.icon}
-              </div>
-              <span className="text-sm font-medium text-gray-800">{option.title}</span>
+              <span className="flex justify-center items-center w-10 h-10 rounded-full bg-white text-orange-500 mb-2 shadow-sm">
+                {getIconComponent(option.icon)}
+              </span>
+              <span className="text-xs font-medium text-gray-700 text-center">
+                {option.title}
+              </span>
             </button>
           ))}
         </div>

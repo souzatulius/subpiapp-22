@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useAuth } from '@/hooks/useSupabaseAuth';
 import { MessageSquareReply, RotateCcw } from 'lucide-react';
@@ -15,6 +16,7 @@ import { ActionCardItem, CardColor } from '@/types/dashboard';
 import { useOriginOptions } from '@/hooks/dashboard-management/useOriginOptions';
 import { useOrigens } from '@/hooks/comunicacao/useOrigens';
 import { useOriginIcon } from '@/hooks/useOriginIcon';
+import OriginsDemandChartCompact from '@/components/dashboard/cards/OriginsDemandChartCompact';
 
 interface ComunicacaoDashboardProps {
   isPreview?: boolean;
@@ -84,6 +86,25 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
         filteredCards.push(originCard);
       }
       
+      const hasOriginDemandChart = filteredCards.some(card => card.type === 'origin_demand_chart');
+      
+      if (!hasOriginDemandChart) {
+        const chartCard: ActionCardItem = {
+          id: 'origem-demandas-card',
+          title: 'Origem das Demandas',
+          iconId: 'PieChart',
+          path: '',
+          color: 'bg-white',
+          width: '50',
+          height: '2',
+          type: 'origin_demand_chart',
+          displayMobile: true,
+          mobileOrder: filteredCards.length + 1
+        };
+        
+        filteredCards.push(chartCard);
+      }
+      
       if (JSON.stringify(filteredCards) !== JSON.stringify(cards)) {
         handleCardsReorder(filteredCards);
       }
@@ -102,6 +123,14 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
   if (!isPreview && !user) {
     return <LoadingIndicator />;
   }
+
+  // Função para renderizar conteúdo especial baseado no ID do card
+  const renderSpecialCardContent = (cardId: string) => {
+    if (cardId === 'origem-demandas-card' || cardId.includes('origem-demandas')) {
+      return <OriginsDemandChartCompact className="w-full h-full" />;
+    }
+    return null;
+  };
 
   const specialData = {
     originOptions: originOptions
@@ -140,6 +169,7 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
               specialCardsData={specialData}
               disableWiggleEffect={true}
               showSpecialFeatures={true}
+              renderSpecialCardContent={renderSpecialCardContent}
             />
           </div>
         ) : (

@@ -161,3 +161,30 @@
   flex: 1;
   overflow: auto;
 }
+
+/* Ensure full height layout in settings and dashboard pages */
+#root, 
+html, 
+body,
+.h-screen,
+[class*="flex-col h-screen"],
+[class*="flex h-screen"],
+.flex-1,
+.overflow-hidden,
+main,
+.max-w-7xl,
+.h-full {
+  height: 100%; 
+}
+
+/* Flexbox layout for full height pages */
+.flex-height-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.flex-height-container > .flex-1 {
+  flex: 1 1 auto;
+  min-height: 0;
+}

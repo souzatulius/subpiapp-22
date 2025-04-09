@@ -39,7 +39,7 @@ const DashboardLayout: React.FC = () => {
         className="flex-shrink-0 z-10"
       />
       
-      {/* Flex container que distribui a altura restante */}
+      {/* Flex container para distribuir a altura restante */}
       <div className="flex flex-1 overflow-hidden">
         {/* Container do sidebar com altura explícita */}
         {!isMobile && (

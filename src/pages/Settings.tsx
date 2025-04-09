@@ -68,16 +68,18 @@ const Settings = () => {
             {!isMobile && <BreadcrumbBar onSettingsClick={handleBackClick} className="flex-shrink-0" />}
             
             <div className="flex-1 overflow-auto w-full max-w-full mx-auto">
-              <div className={`p-4 ${isMobile ? 'pb-16' : 'pb-4'} h-full`}>
+              <div className={`p-4 ${isMobile ? 'pb-16' : 'pb-4'} h-full flex flex-col`}>
                 {activeSection === 'dashboard' ? (
                   <div
                     style={isMobile ? scrollFadeStyles : undefined}
-                    className={`${isMobile ? 'transition-all duration-300' : ''} h-full`}
+                    className={`${isMobile ? 'transition-all duration-300' : ''} flex-1 flex flex-col`}
                   >
                     {/* Mobile breadcrumb - directly attached to the top of WelcomeCard with no margin */}
                     {isMobile && <div className="mb-0 sticky top-0 z-10 flex-shrink-0"><BreadcrumbBar onSettingsClick={handleBackClick} /></div>}
                     
-                    <SettingsDashboard searchQuery={searchQuery} />
+                    <div className="flex-1">
+                      <SettingsDashboard searchQuery={searchQuery} />
+                    </div>
                   </div>
                 ) : (
                   <div className="h-full flex flex-col">
