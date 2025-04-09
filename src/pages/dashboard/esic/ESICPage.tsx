@@ -58,6 +58,12 @@ const ESICPage: React.FC = () => {
     }
   }, [screen, fetchProcessos]);
   
+  // Handler for adding justification directly from the process list
+  const handleAddJustificativaFromList = (processo: ESICProcesso) => {
+    handleViewProcesso(processo);
+    handleAddJustificativa();
+  };
+  
   return (
     <div className="container mx-auto py-6 px-2 sm:px-4 md:px-6 space-y-6">
       <WelcomeCard 
@@ -77,6 +83,7 @@ const ESICPage: React.FC = () => {
             onViewProcesso={handleViewProcesso}
             onEditProcesso={handleEditProcesso}
             onDeleteProcesso={handleDeleteProcesso}
+            onAddJustificativa={handleAddJustificativaFromList}
           />
         )}
         

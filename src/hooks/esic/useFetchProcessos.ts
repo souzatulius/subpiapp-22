@@ -27,7 +27,7 @@ export const useFetchProcessos = () => {
       // Build the query
       let query = supabase
         .from('esic_processos')
-        .select('*', { count: 'exact' });
+        .select('*, coordenacao:coordenacao_id (nome), autor:autor_id (nome_completo)', { count: 'exact' });
       
       // Apply filters
       if (options.searchTerm) {
@@ -63,22 +63,27 @@ export const useFetchProcessos = () => {
       const { data, error, count } = await query;
 
       if (error) {
+        console.error("Error fetching processos:", error);
         throw new Error(error.message);
       }
 
       if (data) {
         // Transform the data
-        const processedData = data.map((p: any) => {
+        const processedData = data.map((p: any): ESICProcesso => {
           // Ensure status is one of the valid types
-          let status: ESICProcesso['status'] = 'novo_processo';
-          if (p.status === 'aberto' || 
-              p.status === 'em_andamento' ||
-              p.status === 'concluido' ||
-              p.status === 'cancelado' ||
-              p.status === 'aguardando_justificativa' ||
-              p.status === 'aguardando_aprovacao' ||
-              p.status === 'novo_processo') {
-            status = p.status as ESICProcesso['status'];
+          let status: ESICProcesso['status'] = p.status;
+          
+          // Validate the status to ensure it's one of the allowed values
+          if (
+            p.status !== 'aberto' && 
+            p.status !== 'em_andamento' &&
+            p.status !== 'concluido' &&
+            p.status !== 'cancelado' &&
+            p.status !== 'aguardando_justificativa' &&
+            p.status !== 'aguardando_aprovacao' &&
+            p.status !== 'novo_processo'
+          ) {
+            status = 'novo_processo'; // Default to novo_processo if invalid
           }
           
           return {
@@ -94,25 +99,26 @@ export const useFetchProcessos = () => {
             texto: p.texto,
             situacao: p.situacao,
             status: status,
-            autor: undefined,
+            autor: p.autor,
             coordenacao_id: p.coordenacao_id,
             prazo_resposta: p.prazo_resposta,
-            coordenacao: { nome: p.coordenacao }
-          } as ESICProcesso;
+            coordenacao: p.coordenacao
+          };
         });
         
+        console.log('Processed processos data:', processedData);
         setProcessos(processedData);
         setTotal(count || 0);
         return processedData;
-      } else {
-        setProcessos([]);
-        setTotal(0);
-        return [];
       }
+      
+      setProcessos([]);
+      setTotal(0);
+      return [];
     } catch (err: any) {
       console.error('Error fetching processos:', err);
       setError(err.message);
-      return [];
+      throw err;
     } finally {
       setLoading(false);
     }

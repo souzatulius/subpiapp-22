@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface ProcessoItemProps {
   processo: ESICProcesso;
@@ -97,17 +98,23 @@ const ProcessoItem: React.FC<ProcessoItemProps> = ({
             </Badge>
             
             <div className="flex items-center space-x-2">
-              {onAddJustificativa && (
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className="rounded-xl" 
-                  onClick={handleJustificativaClick}
-                  title="Adicionar Justificativa"
-                >
-                  <MessageCircleMore className="h-4 w-4" />
-                </Button>
-              )}
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="rounded-xl" 
+                      onClick={handleJustificativaClick}
+                    >
+                      <MessageCircleMore className="h-4 w-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Inserir justificativa</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
               
               <Button 
                 variant="outline" 

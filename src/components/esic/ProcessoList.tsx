@@ -6,14 +6,12 @@ import ProcessoItem from './ProcessoItem';
 import ProcessoListEmpty from './ProcessoListEmpty';
 import ProcessoListSkeleton from './ProcessoListSkeleton';
 import ProcessoCard from './ProcessoCard';
-import { format } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
 
 interface ProcessoListProps {
   searchTerm?: string;
   processos?: ESICProcesso[];
   isLoading?: boolean;
-  onAddJustificativa?: (processoId: string, processoTexto: string) => void;
+  onAddJustificativa?: (processo: ESICProcesso) => void;
   onViewClick?: (processo: ESICProcesso) => void;
   onEditClick?: (processo: ESICProcesso) => void;
   onDeleteClick?: (processo: ESICProcesso) => void;
@@ -28,13 +26,13 @@ const ProcessoList: React.FC<ProcessoListProps> = ({
   onEditClick,
   onDeleteClick,
   showEmptyState = false,
-  processos: externalProcessos,
-  isLoading: externalLoading,
+  processos = [],
+  isLoading = false,
   viewMode = 'list'
 }) => {
   const navigate = useNavigate();
-  const processos = externalProcessos || [];
-  const isLoading = externalLoading || false;
+  
+  console.log("ProcessoList received processos:", processos);
 
   // Filter processos based on search term
   const filteredProcessos = processos.filter(processo => {
@@ -42,12 +40,6 @@ const ProcessoList: React.FC<ProcessoListProps> = ({
            processo.protocolo?.toLowerCase().includes(searchTerm.toLowerCase()) ||
            (processo.solicitante?.toLowerCase() || '').includes(searchTerm.toLowerCase());
   });
-
-  const handleAddJustificativa = (processo: ESICProcesso) => {
-    if (onAddJustificativa) {
-      onAddJustificativa(processo.id, processo.assunto);
-    }
-  };
 
   if (isLoading) {
     return <ProcessoListSkeleton viewMode={viewMode} />;
@@ -67,7 +59,7 @@ const ProcessoList: React.FC<ProcessoListProps> = ({
             onViewClick={onViewClick}
             onEditClick={onEditClick}
             onDeleteClick={onDeleteClick}
-            onAddJustificativa={onAddJustificativa ? () => handleAddJustificativa(processo) : undefined}
+            onAddJustificativa={onAddJustificativa ? () => onAddJustificativa(processo) : undefined}
           />
         ))}
       </div>
@@ -83,7 +75,7 @@ const ProcessoList: React.FC<ProcessoListProps> = ({
           onViewClick={onViewClick}
           onEditClick={onEditClick}
           onDeleteClick={onDeleteClick}
-          onAddJustificativa={onAddJustificativa ? () => handleAddJustificativa(processo) : undefined}
+          onAddJustificativa={onAddJustificativa ? () => onAddJustificativa(processo) : undefined}
         />
       ))}
     </div>

@@ -1,93 +1,87 @@
 
-import { ESICProcessoFormValues } from '@/types/esic';
-import { useToast } from '@/components/ui/use-toast';
+import { ESICProcesso, ESICProcessoFormValues } from '@/types/esic';
+
+type UpdateProcessoFunc = (params: { id: string; data: any }, options?: any) => Promise<any>;
 
 export const useProcessoOperations = (
-  updateProcesso: (params: { id: string; data: any }, options?: { onSuccess?: () => void; onError?: (error: any) => void }) => void,
-  setSelectedProcesso: (processo: any) => void
+  updateProcesso: UpdateProcessoFunc,
+  setSelectedProcesso: (processo: ESICProcesso | null) => void,
 ) => {
-  const { toast } = useToast();
-
-  const handleUpdateStatus = (status: 'novo_processo' | 'aguardando_justificativa' | 'aguardando_aprovacao' | 'concluido') => {
-    return (processoId: string) => {
-      if (!processoId) return;
+  // Update processo handler with detailed form values
+  const handleUpdateProcesso = async (id: string, values: ESICProcessoFormValues): Promise<void> => {
+    try {
+      const updatedData = {
+        assunto: values.assunto,
+        solicitante: values.solicitante,
+        situacao: values.situacao,
+        texto: values.texto,
+        data_processo: values.data_processo instanceof Date 
+          ? values.data_processo.toISOString().split('T')[0]
+          : values.data_processo,
+        prazo_resposta: values.prazo_resposta instanceof Date 
+          ? values.prazo_resposta.toISOString().split('T')[0]
+          : values.prazo_resposta,
+        coordenacao_id: values.coordenacao_id === 'none' ? null : values.coordenacao_id,
+      };
       
-      updateProcesso(
-        {
+      const result = await updateProcesso({ id, data: updatedData });
+      
+      if (result) {
+        setSelectedProcesso(result);
+      }
+      
+      return Promise.resolve();
+    } catch (error) {
+      console.error("Error updating processo:", error);
+      return Promise.reject(error);
+    }
+  };
+
+  // Status update handler
+  const handleUpdateStatus = (status: 'novo_processo' | 'aguardando_justificativa' | 'aguardando_aprovacao' | 'concluido') => {
+    return async (processoId: string): Promise<void> => {
+      try {
+        const result = await updateProcesso({
           id: processoId,
           data: { status }
-        },
-        {
-          onSuccess: () => {
-            toast({
-              title: 'Status atualizado',
-              description: `O status do processo foi alterado.`,
-            });
-            setSelectedProcesso(prev => prev ? { ...prev, status } : null);
-          },
+        });
+        
+        if (result) {
+          setSelectedProcesso(result);
         }
-      );
+        
+        return Promise.resolve();
+      } catch (error) {
+        console.error("Error updating status:", error);
+        return Promise.reject(error);
+      }
     };
   };
 
+  // Situacao update handler
   const handleUpdateSituacao = (situacao: 'em_tramitacao' | 'prazo_prorrogado' | 'concluido') => {
-    return (processoId: string) => {
-      if (!processoId) return;
-      
-      updateProcesso(
-        {
+    return async (processoId: string): Promise<void> => {
+      try {
+        const result = await updateProcesso({
           id: processoId,
           data: { situacao }
-        },
-        {
-          onSuccess: () => {
-            toast({
-              title: 'Situação atualizada',
-              description: `A situação do processo foi alterada.`,
-            });
-            setSelectedProcesso(prev => prev ? { ...prev, situacao } : null);
-          },
+        });
+        
+        if (result) {
+          setSelectedProcesso(result);
         }
-      );
+        
+        return Promise.resolve();
+      } catch (error) {
+        console.error("Error updating situacao:", error);
+        return Promise.reject(error);
+      }
     };
-  };
-
-  const handleUpdateProcesso = async (id: string, values: ESICProcessoFormValues): Promise<void> => {
-    if (!id) return Promise.reject(new Error('Nenhum processo selecionado'));
-    
-    return new Promise((resolve, reject) => {
-      updateProcesso(
-        { 
-          id, 
-          data: {
-            data_processo: values.data_processo.toISOString(),
-            situacao: values.situacao,
-            texto: values.texto,
-            assunto: values.assunto,
-            solicitante: values.solicitante,
-            coordenacao_id: values.coordenacao_id,
-            prazo_resposta: values.prazo_resposta ? new Date(values.prazo_resposta).toISOString() : undefined
-          } 
-        },
-        {
-          onSuccess: () => {
-            toast({
-              title: 'Processo atualizado com sucesso',
-              description: 'As alterações foram salvas no sistema.',
-            });
-            resolve();
-          },
-          onError: (error) => {
-            reject(error);
-          }
-        }
-      );
-    });
   };
 
   return {
+    handleUpdateProcesso,
     handleUpdateStatus,
-    handleUpdateSituacao,
-    handleUpdateProcesso
+    handleUpdateSituacao
   };
 };

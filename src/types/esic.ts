@@ -1,4 +1,3 @@
-
 export interface ESICProcesso {
   id: string;
   protocolo: string;
@@ -6,7 +5,7 @@ export interface ESICProcesso {
   solicitante?: string;
   data_processo: string;
   criado_em: string;
-  created_at?: string; // Changed to optional
+  created_at?: string;
   atualizado_em: string;
   autor_id: string;
   autor_nome?: string;
@@ -14,12 +13,12 @@ export interface ESICProcesso {
   situacao: string;
   status: "aberto" | "em_andamento" | "concluido" | "cancelado" | "aguardando_justificativa" | "aguardando_aprovacao" | "novo_processo";
   autor?: {
-    nome_completo?: string;  // Make nome_completo optional
+    nome_completo?: string;
   };
   coordenacao_id?: string;
   prazo_resposta?: string;
   coordenacao?: {
-    nome?: string;  // Make nome optional
+    nome?: string;
   };
 }
 

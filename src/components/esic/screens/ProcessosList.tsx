@@ -14,6 +14,7 @@ interface ProcessosListProps {
   onViewProcesso: (processo: ESICProcesso) => void;
   onEditProcesso: (processo: ESICProcesso) => void;
   onDeleteProcesso: (id: string) => void;
+  onAddJustificativa?: (processo: ESICProcesso) => void;
 }
 
 const ProcessosList: React.FC<ProcessosListProps> = ({
@@ -23,7 +24,8 @@ const ProcessosList: React.FC<ProcessosListProps> = ({
   onCreateProcesso,
   onViewProcesso,
   onEditProcesso,
-  onDeleteProcesso
+  onDeleteProcesso,
+  onAddJustificativa
 }) => {
   const [filterTerm, setFilterTerm] = useState('');
   const [viewMode, setViewMode] = useState<'list' | 'cards'>('list');
@@ -34,16 +36,6 @@ const ProcessosList: React.FC<ProcessosListProps> = ({
   
   console.log('ProcessosList received processos:', processos);
   
-  // Filter processes based on the search term
-  const filteredProcessos = processos?.filter(processo => 
-    processo.assunto?.toLowerCase().includes(filterTerm.toLowerCase()) ||
-    processo.protocolo?.toLowerCase().includes(filterTerm.toLowerCase()) ||
-    processo.texto?.toLowerCase().includes(filterTerm.toLowerCase()) ||
-    (processo.solicitante || '').toLowerCase().includes(filterTerm.toLowerCase())
-  ) || [];
-
-  console.log('Filtered processos:', filteredProcessos);
-
   return (
     <div className="space-y-4">
       <ESICSearchHeader 
@@ -67,11 +59,12 @@ const ProcessosList: React.FC<ProcessosListProps> = ({
       
       <ProcessoList 
         searchTerm={filterTerm}
-        processos={filteredProcessos}
+        processos={processos}
         isLoading={isLoading}
         onViewClick={onViewProcesso}
         onEditClick={onEditProcesso}
         onDeleteClick={(processo) => onDeleteProcesso(processo.id)}
+        onAddJustificativa={onAddJustificativa}
         showEmptyState={true}
         viewMode={viewMode}
       />

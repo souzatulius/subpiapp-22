@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface ProcessoCardProps {
   processo: ESICProcesso;
@@ -98,17 +99,23 @@ const ProcessoCard: React.FC<ProcessoCardProps> = ({
         </div>
       </CardContent>
       <CardFooter className="flex justify-end space-x-2 p-4 pt-2 bg-gray-50">
-        {onAddJustificativa && (
-          <Button 
-            variant="outline" 
-            size="sm" 
-            className="rounded-xl" 
-            onClick={handleJustificativaClick}
-            title="Adicionar Justificativa"
-          >
-            <MessageCircleMore className="h-4 w-4" />
-          </Button>
-        )}
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="rounded-xl" 
+                onClick={handleJustificativaClick}
+              >
+                <MessageCircleMore className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Inserir justificativa</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
         
         <Button 
           variant="outline" 
