@@ -1,13 +1,8 @@
 
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useNavigate } from 'react-router-dom';
-
-interface OriginOption {
-  id: string;
-  title: string;
-  icon: React.ReactNode | string;
-}
+import { OriginOption } from '@/types/dashboard';
 
 interface OriginSelectionCardProps {
   title: string;
@@ -27,8 +22,9 @@ const OriginSelectionCard: React.FC<OriginSelectionCardProps> = ({ title, option
         <CardTitle className="text-lg text-blue-700">{title}</CardTitle>
       </CardHeader>
       
-      <CardContent className="flex-grow">
-        <div className="grid grid-cols-2 gap-2">
+      <CardContent className="flex-grow flex flex-col justify-center">
+        <p className="text-lg font-medium mb-4 text-gray-700">De onde vem esta demanda?</p>
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
           {options.map((option) => (
             <button
               key={option.id}

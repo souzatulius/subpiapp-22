@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Building2, Users, Newspaper, Phone, Mail, Globe } from 'lucide-react';
-import { OriginOption } from '@/components/settings/dashboard-management/OriginSelectionCard';
+import { OriginOption } from '@/types/dashboard';
 
 export const useOriginOptions = () => {
   const originOptions: OriginOption[] = [
