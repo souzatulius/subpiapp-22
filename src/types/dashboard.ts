@@ -25,7 +25,15 @@ export type CardColor =
   | 'neutral-800'
   | 'orange-700';
 
-export type CardType = 'standard' | 'data_dynamic' | 'in_progress_demands' | 'recent_notes' | 'origin_selection' | 'smart_search';
+export type CardType = 
+  | 'standard' 
+  | 'data_dynamic' 
+  | 'in_progress_demands' 
+  | 'recent_notes' 
+  | 'origin_selection' 
+  | 'smart_search'
+  | 'origin_demand_chart';
+
 export type DataSourceKey = 
   | 'pendencias_por_coordenacao' 
   | 'notas_aguardando_aprovacao' 

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import {
   DndContext,
@@ -30,6 +29,7 @@ export interface UnifiedCardGridProps {
   onQuickDemandSubmit?: () => void;
   onSearchSubmit?: (query: string) => void;
   specialCardsData?: any;
+  renderSpecialCardContent?: (cardId: string) => React.ReactNode | null;
 }
 
 const UnifiedCardGrid: React.FC<UnifiedCardGridProps> = ({
@@ -46,7 +46,8 @@ const UnifiedCardGrid: React.FC<UnifiedCardGridProps> = ({
   onQuickDemandTitleChange,
   onQuickDemandSubmit,
   onSearchSubmit,
-  specialCardsData
+  specialCardsData,
+  renderSpecialCardContent
 }) => {
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
@@ -90,6 +91,16 @@ const UnifiedCardGrid: React.FC<UnifiedCardGridProps> = ({
     if (isMobileView) {
       // Aplicar dimensões específicas para cards no modo mobile
       const mobileSpecific = getMobileSpecificDimensions(card.title);
+      
+      // Override for Origin Demand card in mobile
+      if (card.id === 'origem-demandas-card' || card.type === 'origin_demand_chart') {
+        return {
+          ...card,
+          width: '100' as CardWidth,  // Full width on mobile
+          height: '2' as CardHeight   // 2 rows height
+        };
+      }
+      
       return {
         ...card,
         width: mobileSpecific.width,
@@ -102,6 +113,12 @@ const UnifiedCardGrid: React.FC<UnifiedCardGridProps> = ({
           ...card,
           width: '100' as CardWidth, // 4 columns
           height: '0.5' as CardHeight  // Half row height
+        };
+      } else if (card.id === 'origem-demandas-card' || card.type === 'origin_demand_chart') {
+        return {
+          ...card,
+          width: '50' as CardWidth, // 2 columns
+          height: '2' as CardHeight  // 2 rows
         };
       } else if (card.title === "Demandas") {
         return {
@@ -176,7 +193,7 @@ const UnifiedCardGrid: React.FC<UnifiedCardGridProps> = ({
 
   // Helper function to get card-specific styling
   const getCardContentStyle = (cardTitle: string, cardType?: string) => {
-    if (cardTitle === "Origem das Demandas" || cardType === 'origin_selection') {
+    if (cardTitle === "Origem das Demandas" || cardType === 'origin_demand_chart') {
       return "p-0 h-full flex items-center justify-center";
     }
     return "";
@@ -230,6 +247,9 @@ const UnifiedCardGrid: React.FC<UnifiedCardGridProps> = ({
                 isMobileView={isMobileView}
                 isPendingActions={card.isPendingActions}
                 contentClassname={getCardContentStyle(card.title, card.type)}
+                specialContent={renderSpecialCardContent && card.type === 'origin_demand_chart' 
+                  ? renderSpecialCardContent(card.id) 
+                  : undefined}
               />
             </div>
           ))}

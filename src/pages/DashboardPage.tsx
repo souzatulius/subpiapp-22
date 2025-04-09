@@ -18,7 +18,7 @@ import { toast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
 import { motion } from 'framer-motion';
 import { useCardStorage } from '@/hooks/dashboard/useCardStorage';
-import OriginDemandSection from '@/components/dashboard/OriginDemandSection';
+import OriginsDemandChart from '@/components/dashboard/OriginsDemandChart';
 
 const DashboardPage: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -110,6 +110,10 @@ const DashboardPage: React.FC = () => {
   useEffect(() => {
     if (cards && cards.length > 0 && !searchCardAdded) {
       const searchCardExists = cards.some(card => card.id === 'dashboard-search-card');
+      const originDemandCardExists = cards.some(card => card.id === 'origem-demandas-card');
+      
+      let updatedCards = [...cards];
+      let needsUpdate = false;
       
       if (!searchCardExists) {
         const searchCard: ActionCardItem = {
@@ -126,12 +130,36 @@ const DashboardPage: React.FC = () => {
           mobileOrder: 1
         };
         
-        const updatedCards = [searchCard, ...cards];
+        updatedCards = [searchCard, ...updatedCards];
+        needsUpdate = true;
+      }
+      
+      if (!originDemandCardExists) {
+        const originDemandCard: ActionCardItem = {
+          id: 'origem-demandas-card',
+          title: 'Origem das Demandas',
+          iconId: 'BarChart2',
+          path: '',
+          color: 'bg-white',
+          width: isMobile ? '100' : '50',
+          height: '2',
+          type: 'origin_demand_chart',
+          displayMobile: true,
+          mobileOrder: 2
+        };
+        
+        updatedCards = [...updatedCards, originDemandCard];
+        needsUpdate = true;
+      }
+      
+      if (needsUpdate) {
         handleCardsChange(updatedCards);
+        setSearchCardAdded(true);
+      } else if (!searchCardAdded && searchCardExists) {
         setSearchCardAdded(true);
       }
     }
-  }, [cards, searchCardAdded]);
+  }, [cards, searchCardAdded, isMobile]);
 
   if (!user) {
     return <LoadingIndicator message="Carregando..." />;
@@ -185,8 +213,6 @@ const DashboardPage: React.FC = () => {
                   />
                 </div>
                 
-                <OriginDemandSection />
-                
                 <div className={`relative ${isMobile ? 'pb-32' : ''}`}>
                   {isLoading ? (
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -203,6 +229,8 @@ const DashboardPage: React.FC = () => {
                         onHideCard={handleHideCard}
                         isMobileView={isMobile}
                         isEditMode={isEditMode}
+                        renderSpecialCardContent={renderSpecialCardContent}
+                        showSpecialFeatures={true}
                       />
                     </div>
                   ) : (
@@ -229,6 +257,13 @@ const DashboardPage: React.FC = () => {
       {isMobile && <MobileBottomNav />}
     </div>
   );
+  
+  function renderSpecialCardContent(cardId: string) {
+    if (cardId === 'origem-demandas-card') {
+      return <OriginsDemandChart className="h-full w-full" />;
+    }
+    return null;
+  }
 };
 
 export default DashboardPage;
