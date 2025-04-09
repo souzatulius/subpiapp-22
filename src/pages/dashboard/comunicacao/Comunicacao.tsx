@@ -15,9 +15,6 @@ import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';
 import SmartSearchCard from '@/components/dashboard/SmartSearchCard';
 import { ActionCardItem, CardColor } from '@/types/dashboard';
-import { useOriginOptions } from '@/hooks/dashboard-management/useOriginOptions';
-import { useOrigens } from '@/hooks/comunicacao/useOrigens';
-import { useOriginIcon } from '@/hooks/useOriginIcon';
 
 interface ComunicacaoDashboardProps {
   isPreview?: boolean;
@@ -31,7 +28,6 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
   const { user } = useAuth();
   const { firstName } = useUserData(user?.id);
   const isMobile = useIsMobile();
-  const { originOptions } = useOriginOptions();
   
   const {
     cards,
@@ -48,7 +44,7 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
     resetDashboard
   } = useComunicacaoDashboard(user, isPreview, department);
 
-  // Update card titles and handle special cards
+  // Update card titles for the yellow and gray news cards
   React.useEffect(() => {
     if (cards.length > 0) {
       const updatedCards = cards.map(card => {
@@ -57,9 +53,6 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
         }
         if (card.title === 'Notícias' && card.color === 'bg-gray-500') {
           return { ...card, title: 'Ver Releases e Notícias' };
-        }
-        if (card.title === 'Criar Nota') {
-          return { ...card, title: 'Criar Nota de Imprensa' };
         }
         return card;
       });
@@ -73,9 +66,9 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
           title: 'Busca Rápida',
           iconId: 'search',
           path: '',
-          color: 'bg-white' as CardColor,
-          width: '100',
-          height: '0.5',
+          color: 'bg-white' as CardColor, // Type assertion to CardColor
+          width: '100', // Full width
+          height: '0.5', // Half height
           type: 'smart_search',
           isCustom: true,
           displayMobile: true,
@@ -84,26 +77,6 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
         
         // Insert after the reset button (as second item)
         updatedCards.splice(1, 0, searchCard);
-      }
-      
-      // Check if we have the origin selection card
-      const hasOriginSelectionCard = updatedCards.some(card => card.type === 'origin_selection');
-      
-      if (!hasOriginSelectionCard) {
-        const originCard: ActionCardItem = {
-          id: 'origin-selection-card',
-          title: 'Cadastro de nova solicitação de imprensa',
-          iconId: 'Newspaper',
-          path: '',
-          color: 'bg-white',
-          width: '50',
-          height: '2',
-          type: 'origin_selection',
-          displayMobile: true,
-          mobileOrder: updatedCards.length
-        };
-        
-        updatedCards.push(originCard);
       }
       
       if (JSON.stringify(updatedCards) !== JSON.stringify(cards)) {
@@ -121,11 +94,6 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
     });
   };
 
-  const handleSearchSubmit = (query: string) => {
-    console.log("Search submitted:", query);
-    // Here you would implement your search logic
-  };
-
   if (!isPreview && !user) {
     return <LoadingIndicator />;
   }
@@ -136,19 +104,12 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
       return (
         <div className="w-full h-full flex items-center justify-center px-4">
           <div className="w-[80%]">
-            <SmartSearchCard 
-              placeholder="O que deseja fazer?" 
-              onSearch={handleSearchSubmit}
-            />
+            <SmartSearchCard placeholder="O que deseja fazer?" />
           </div>
         </div>
       );
     }
     return null;
-  };
-
-  const specialData = {
-    originOptions: originOptions
   };
 
   return (
@@ -166,9 +127,9 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
       <div className="flex justify-end">
         <Button 
           variant="outline" 
-          size="lg" 
+          size="sm" 
           onClick={handleResetDashboard}
-          className="text-blue-600 border-blue-300 hover:bg-blue-50 py-4"
+          className="text-blue-600 border-blue-300 hover:bg-blue-50"
         >
           <RotateCcw className="h-4 w-4 mr-2" />
           Resetar
@@ -192,10 +153,6 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
               isMobileView={isMobile}
               isEditMode={isEditMode}
               renderSpecialCardContent={renderCardContent}
-              onSearchSubmit={handleSearchSubmit}
-              specialCardsData={specialData}
-              disableWiggleEffect={true}
-              showSpecialFeatures={true}
             />
           </div>
         ) : (

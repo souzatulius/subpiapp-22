@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
@@ -164,7 +163,6 @@ export function UnifiedActionCard({
   badgeValue,
   hasSubtitle,
   contentClassname = '',
-  isPendingActions,
 }: UnifiedActionCardProps & { sortableProps?: SortableProps }) {
   const navigate = useNavigate();
   
@@ -243,7 +241,7 @@ export function UnifiedActionCard({
     if (type === 'origin_selection' && specialCardsData?.originOptions) {
       return (
         <OriginSelectionCard 
-          title="Cadastro de nova solicitação de imprensa"
+          title="De onde vem a demanda?"
           options={specialCardsData.originOptions || []}
         />
       );

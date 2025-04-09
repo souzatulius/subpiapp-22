@@ -212,10 +212,10 @@ export const getCommunicationActionCards = (): ActionCardItem[] => {
     },
     {
       id: uuidv4(),
-      title: 'Cadastrar Demanda',
-      iconId: 'Pencil',
+      title: 'Nova Demanda',
+      iconId: 'Pencil', // Updated to match the new icon scheme
       path: '/dashboard/comunicacao/nova-demanda',
-      color: 'gray-medium',
+      color: 'gray-medium', // Updated to match the new color scheme
       width: '25',
       height: '1',
       type: 'standard',
@@ -224,10 +224,10 @@ export const getCommunicationActionCards = (): ActionCardItem[] => {
     },
     {
       id: uuidv4(),
-      title: 'Nova Demanda',
-      iconId: 'FileText',
+      title: 'Demandas em Andamento',
+      iconId: 'FileText', // Updated to match the new icon scheme
       path: '/dashboard/comunicacao/demandas',
-      color: 'deep-blue',
+      color: 'deep-blue', // Updated to match the new color scheme
       width: '25',
       height: '1',
       type: 'standard',
@@ -236,10 +236,10 @@ export const getCommunicationActionCards = (): ActionCardItem[] => {
     },
     {
       id: uuidv4(),
-      title: 'Aprovar Nota',
+      title: 'Aprovar Notas',
       iconId: 'CheckCircle',
       path: '/dashboard/comunicacao/aprovar',
-      color: 'bg-orange-500',
+      color: 'bg-orange-500', // Updated to match the new color scheme
       width: '25',
       height: '1',
       type: 'standard',
@@ -248,63 +248,15 @@ export const getCommunicationActionCards = (): ActionCardItem[] => {
     },
     {
       id: uuidv4(),
-      title: 'Criar Nota de Imprensa',
+      title: 'Criar Nota',
       iconId: 'FileText',
       path: '/dashboard/comunicacao/criar-nota',
-      color: 'orange-light',
+      color: 'orange-light', // Updated to match the new color scheme
       width: '25',
       height: '1',
       type: 'standard',
       displayMobile: true,
       mobileOrder: 5
-    },
-    {
-      id: uuidv4(),
-      title: 'Consultar Notas',
-      iconId: 'FileSearch',
-      path: '/dashboard/comunicacao/notas',
-      color: 'deep-blue',
-      width: '25',
-      height: '1',
-      type: 'standard',
-      displayMobile: true,
-      mobileOrder: 6
-    },
-    {
-      id: uuidv4(),
-      title: 'Cadastrar Release',
-      iconId: 'Edit',
-      path: '/dashboard/comunicacao/cadastrar-release',
-      color: 'gray-medium',
-      width: '25',
-      height: '1',
-      type: 'standard',
-      displayMobile: true,
-      mobileOrder: 7
-    },
-    {
-      id: uuidv4(),
-      title: 'Releases e Notícias',
-      iconId: 'Newspaper',
-      path: '/dashboard/comunicacao/releases',
-      color: 'blue-light',
-      width: '25',
-      height: '1',
-      type: 'standard',
-      displayMobile: true,
-      mobileOrder: 8
-    },
-    {
-      id: uuidv4(),
-      title: 'Cadastro de nova solicitação de imprensa',
-      iconId: 'Newspaper',
-      path: '',
-      color: 'bg-white',
-      width: '50',
-      height: '2',
-      type: 'origin_selection', 
-      displayMobile: true,
-      mobileOrder: 9
     }
   ];
 };

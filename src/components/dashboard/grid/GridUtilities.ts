@@ -75,17 +75,8 @@ export const getMobileSpecificDimensions = (cardTitle: string): { width: CardWid
     case "Responder Demandas":
     case "Ranking da Zeladoria":
     case "Nova Solicitação":
-    case "Nova Demanda":
-    case "Cadastrar Demanda":
-    case "Aprovar Nota":
-    case "Criar Nota":
-    case "Criar Nota de Imprensa":
-    case "Consultar Notas":
-    case "Cadastrar Release":
-    case "Releases e Notícias":
       return { width: '50' as CardWidth, height: '1' as CardHeight }; // 1 column, 1 row on mobile
     case "Origem das Demandas":
-    case "Cadastro de nova solicitação de imprensa":
       return { width: '100' as CardWidth, height: '2' as CardHeight }; // 2 columns, 2 rows on mobile
     case "Ações Pendentes":
       return { width: '50' as CardWidth, height: '2' as CardHeight }; // 1 column, 2 rows on mobile

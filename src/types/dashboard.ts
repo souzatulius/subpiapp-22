@@ -1,4 +1,3 @@
-
 export type CardWidth = '25' | '50' | '75' | '100';
 export type CardHeight = '0.5' | '1' | '2' | '3' | '4';
 export type CardColor = 
@@ -33,13 +32,6 @@ export type DataSourceKey =
   | 'ultimas_acoes_coordenacao'
   | 'comunicados_por_cargo'
   | string; // Adicionando string como tipo válido para DataSourceKey
-
-export interface OriginOption {
-  id: string;
-  title: string;
-  icon: React.ReactNode | string;
-  path?: string;
-}
 
 export interface ActionCardItem {
   id: string;
