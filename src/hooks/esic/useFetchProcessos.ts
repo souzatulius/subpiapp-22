@@ -24,10 +24,10 @@ export const useFetchProcessos = () => {
     setError(null);
 
     try {
-      // Build the query
+      // Build the query - modified to remove the problematic join
       let query = supabase
         .from('esic_processos')
-        .select('*, coordenacao:coordenacao_id (nome), autor:autor_id (nome_completo)', { count: 'exact' });
+        .select('*, coordenacao:coordenacao_id(nome)', { count: 'exact' });
       
       // Apply filters
       if (options.searchTerm) {
@@ -71,18 +71,10 @@ export const useFetchProcessos = () => {
         // Transform the data
         const processedData = data.map((p: any): ESICProcesso => {
           // Ensure status is one of the valid types
-          let status: ESICProcesso['status'] = p.status;
+          let status: ESICProcesso['status'] = p.status as ESICProcesso['status'];
           
           // Validate the status to ensure it's one of the allowed values
-          if (
-            p.status !== 'aberto' && 
-            p.status !== 'em_andamento' &&
-            p.status !== 'concluido' &&
-            p.status !== 'cancelado' &&
-            p.status !== 'aguardando_justificativa' &&
-            p.status !== 'aguardando_aprovacao' &&
-            p.status !== 'novo_processo'
-          ) {
+          if (!['aberto', 'em_andamento', 'concluido', 'cancelado', 'aguardando_justificativa', 'aguardando_aprovacao', 'novo_processo'].includes(p.status)) {
             status = 'novo_processo'; // Default to novo_processo if invalid
           }
           
@@ -99,7 +91,6 @@ export const useFetchProcessos = () => {
             texto: p.texto,
             situacao: p.situacao,
             status: status,
-            autor: p.autor,
             coordenacao_id: p.coordenacao_id,
             prazo_resposta: p.prazo_resposta,
             coordenacao: p.coordenacao

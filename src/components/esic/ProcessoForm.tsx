@@ -41,6 +41,7 @@ import { ptBR } from "date-fns/locale";
 import { cn } from '@/lib/utils';
 import { ESICProcesso, ESICProcessoFormValues } from '@/types/esic';
 import { useCoordenacoes } from '@/hooks/useCoordenacoes';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 
 const formSchema = z.object({
   data_processo: z.date({
@@ -60,6 +61,8 @@ const formSchema = z.object({
   solicitante: z.string().optional(),
   coordenacao_id: z.string().optional(),
   prazo_resposta: z.date().optional(),
+  sem_area_tecnica: z.boolean().optional(),
+  sem_identificacao: z.boolean().optional(),
 });
 
 interface ProcessoFormProps {
@@ -81,6 +84,8 @@ const ProcessoForm: React.FC<ProcessoFormProps> = ({
   const { toast } = useToast();
   const [prazoPredefinido, setPrazoPredefinido] = useState<string | null>(null);
   const { coordenacoes, isLoading: coordenacoesLoading } = useCoordenacoes();
+  const [solicitanteOption, setSolicitanteOption] = useState<'identificado' | 'sem_identificacao'>('identificado');
+  const [coordenacaoOption, setCoordenacaoOption] = useState<'com_area' | 'sem_area'>('com_area');
   
   const form = useForm<ESICProcessoFormValues>({
     resolver: zodResolver(formSchema),
@@ -92,11 +97,22 @@ const ProcessoForm: React.FC<ProcessoFormProps> = ({
       solicitante: '',
       coordenacao_id: '',
       prazo_resposta: undefined,
+      sem_area_tecnica: false,
+      sem_identificacao: false,
     },
   });
 
   useEffect(() => {
     if (initialValues && mode === 'edit') {
+      // Initialize radio button values based on data
+      if (initialValues.solicitante === 'Sem identificação') {
+        setSolicitanteOption('sem_identificacao');
+      }
+      
+      if (!initialValues.coordenacao_id) {
+        setCoordenacaoOption('sem_area');
+      }
+      
       form.reset({
         data_processo: initialValues.data_processo ? new Date(initialValues.data_processo) : new Date(),
         texto: initialValues.texto || '',
@@ -105,12 +121,23 @@ const ProcessoForm: React.FC<ProcessoFormProps> = ({
         solicitante: initialValues.solicitante || '',
         coordenacao_id: initialValues.coordenacao_id || '',
         prazo_resposta: initialValues.prazo_resposta ? new Date(initialValues.prazo_resposta) : undefined,
+        sem_area_tecnica: !initialValues.coordenacao_id,
+        sem_identificacao: initialValues.solicitante === 'Sem identificação',
       });
     }
   }, [initialValues, form, mode]);
 
   const handleSubmit = async (values: ESICProcessoFormValues) => {
     try {
+      // Set values based on radio selections
+      if (solicitanteOption === 'sem_identificacao') {
+        values.solicitante = 'Sem identificação';
+      }
+      
+      if (coordenacaoOption === 'sem_area') {
+        values.coordenacao_id = null;
+      }
+      
       await onSubmit(values);
       toast({
         title: mode === 'create' ? "Processo criado" : "Processo atualizado",
@@ -258,51 +285,91 @@ const ProcessoForm: React.FC<ProcessoFormProps> = ({
                 )}
               />
               
-              <FormField
-                control={form.control}
-                name="solicitante"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Solicitante</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Nome do solicitante" className="rounded-xl" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
+              <div className="space-y-4">
+                <FormLabel>Solicitante</FormLabel>
+                <RadioGroup 
+                  defaultValue="identificado" 
+                  value={solicitanteOption}
+                  onValueChange={(value) => setSolicitanteOption(value as 'identificado' | 'sem_identificacao')}
+                  className="flex mb-4 space-x-6"
+                >
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="identificado" id="identificado" />
+                    <label htmlFor="identificado" className="cursor-pointer">Identificado</label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="sem_identificacao" id="sem_identificacao" />
+                    <label htmlFor="sem_identificacao" className="cursor-pointer">Sem identificação</label>
+                  </div>
+                </RadioGroup>
+                
+                {solicitanteOption === 'identificado' && (
+                  <FormField
+                    control={form.control}
+                    name="solicitante"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <Input placeholder="Nome do solicitante" className="rounded-xl" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                 )}
-              />
+              </div>
             </div>
             
-            <FormField
-              control={form.control}
-              name="coordenacao_id"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Coordenação Responsável</FormLabel>
-                  <Select 
-                    onValueChange={field.onChange} 
-                    defaultValue={field.value}
-                    value={field.value}
-                    disabled={coordenacoesLoading}
-                  >
-                    <FormControl>
-                      <SelectTrigger className="rounded-xl">
-                        <SelectValue placeholder={coordenacoesLoading ? "Carregando..." : "Selecione a coordenação"} />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent className="rounded-xl">
-                      <SelectItem value="none">Não atribuído</SelectItem>
-                      {formattedCoordenacoes.map((coord) => (
-                        <SelectItem key={coord.id} value={coord.id}>
-                          {coord.nome}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
+            <div className="space-y-4">
+              <FormLabel>Coordenação Responsável</FormLabel>
+              <RadioGroup 
+                defaultValue="com_area" 
+                value={coordenacaoOption}
+                onValueChange={(value) => setCoordenacaoOption(value as 'com_area' | 'sem_area')}
+                className="flex mb-4 space-x-6"
+              >
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="com_area" id="com_area" />
+                  <label htmlFor="com_area" className="cursor-pointer">Área técnica específica</label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="sem_area" id="sem_area" />
+                  <label htmlFor="sem_area" className="cursor-pointer">Sem área técnica específica</label>
+                </div>
+              </RadioGroup>
+              
+              {coordenacaoOption === 'com_area' && (
+                <FormField
+                  control={form.control}
+                  name="coordenacao_id"
+                  render={({ field }) => (
+                    <FormItem>
+                      <Select 
+                        onValueChange={field.onChange} 
+                        defaultValue={field.value}
+                        value={field.value}
+                        disabled={coordenacoesLoading}
+                      >
+                        <FormControl>
+                          <SelectTrigger className="rounded-xl">
+                            <SelectValue placeholder={coordenacoesLoading ? "Carregando..." : "Selecione a coordenação"} />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent className="rounded-xl">
+                          <SelectItem value="none">Não atribuído</SelectItem>
+                          {formattedCoordenacoes.map((coord) => (
+                            <SelectItem key={coord.id} value={coord.id}>
+                              {coord.nome}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               )}
-            />
+            </div>
             
             <div>
               <FormField

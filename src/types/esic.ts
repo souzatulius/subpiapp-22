@@ -1,3 +1,4 @@
+
 export interface ESICProcesso {
   id: string;
   protocolo: string;
@@ -28,8 +29,10 @@ export interface ESICProcessoFormValues {
   situacao: string;
   assunto: string;
   solicitante?: string;
-  coordenacao_id?: string;
+  coordenacao_id?: string | null;
   prazo_resposta?: Date | string;
+  sem_area_tecnica?: boolean;
+  sem_identificacao?: boolean;
 }
 
 export interface ESICJustificativa {

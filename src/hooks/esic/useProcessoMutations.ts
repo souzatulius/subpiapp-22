@@ -37,7 +37,7 @@ export const useProcessoMutations = () => {
       const processoData = {
         protocolo,
         assunto: formValues.assunto,
-        solicitante: formValues.solicitante,
+        solicitante: formValues.sem_identificacao ? 'Sem identificação' : formValues.solicitante,
         data_processo: formValues.data_processo instanceof Date 
           ? formValues.data_processo.toISOString().split('T')[0] 
           : formValues.data_processo,
@@ -45,7 +45,7 @@ export const useProcessoMutations = () => {
         texto: formValues.texto,
         situacao: formValues.situacao,
         status: 'novo_processo' as ESICProcesso['status'],
-        coordenacao_id: formValues.coordenacao_id === 'none' ? null : formValues.coordenacao_id,
+        coordenacao_id: formValues.sem_area_tecnica ? null : (formValues.coordenacao_id === 'none' ? null : formValues.coordenacao_id),
         prazo_resposta: formValues.prazo_resposta instanceof Date 
           ? formValues.prazo_resposta.toISOString().split('T')[0]
           : formValues.prazo_resposta,
@@ -107,6 +107,18 @@ export const useProcessoMutations = () => {
         if (!validStatuses.includes(params.data.status)) {
           params.data.status = 'novo_processo';
         }
+      }
+      
+      // Handle special case for coordenacao_id to be null
+      if (params.data.sem_area_tecnica) {
+        params.data.coordenacao_id = null;
+        delete params.data.sem_area_tecnica;
+      }
+      
+      // Handle special case for solicitante
+      if (params.data.sem_identificacao) {
+        params.data.solicitante = 'Sem identificação';
+        delete params.data.sem_identificacao;
       }
 
       const result = await supabase
