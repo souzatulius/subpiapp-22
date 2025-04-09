@@ -139,6 +139,18 @@ const UnifiedCardGrid: React.FC<UnifiedCardGridProps> = ({
           width: '25' as CardWidth, // 1 column
           height: '1' as CardHeight  // 1 row
         };
+      } else if (card.title === "Cadastro de nova solicitação de imprensa") {
+        return {
+          ...card,
+          width: '50' as CardWidth, // 2 columns
+          height: '2' as CardHeight  // 2 rows
+        };
+      } else if (card.type === "origin_selection") {
+        return {
+          ...card,
+          width: '50' as CardWidth, // 2 columns
+          height: '2' as CardHeight  // 2 rows
+        };
       }
     }
     return card;
@@ -163,8 +175,8 @@ const UnifiedCardGrid: React.FC<UnifiedCardGridProps> = ({
   }
 
   // Helper function to get card-specific styling
-  const getCardContentStyle = (cardTitle: string) => {
-    if (cardTitle === "Origem das Demandas") {
+  const getCardContentStyle = (cardTitle: string, cardType?: string) => {
+    if (cardTitle === "Origem das Demandas" || cardType === 'origin_selection') {
       return "p-0 h-full flex items-center justify-center";
     }
     return "";
@@ -217,7 +229,7 @@ const UnifiedCardGrid: React.FC<UnifiedCardGridProps> = ({
                 hasSubtitle={!!card.subtitle}
                 isMobileView={isMobileView}
                 isPendingActions={card.isPendingActions}
-                contentClassname={getCardContentStyle(card.title)}
+                contentClassname={getCardContentStyle(card.title, card.type)}
               />
             </div>
           ))}
