@@ -11,6 +11,10 @@ interface CardGridProps {
   isMobileView?: boolean;
   isEditMode?: boolean;
   renderSpecialCardContent?: (cardId: string) => React.ReactNode | null;
+  onSearchSubmit?: (query: string) => void;
+  specialCardsData?: Record<string, any>;
+  disableWiggleEffect?: boolean;
+  showSpecialFeatures?: boolean;
 }
 
 const CardGrid: React.FC<CardGridProps> = ({
@@ -19,7 +23,11 @@ const CardGrid: React.FC<CardGridProps> = ({
   onHideCard,
   isMobileView = false,
   isEditMode = false,
-  renderSpecialCardContent
+  renderSpecialCardContent,
+  onSearchSubmit,
+  specialCardsData,
+  disableWiggleEffect,
+  showSpecialFeatures
 }) => {
   // Filter cards to only display visible ones
   const visibleCards = cards.filter(card => !card.isHidden);
@@ -55,6 +63,10 @@ const CardGrid: React.FC<CardGridProps> = ({
               isDraggable={isEditMode}
               isMobileView={isMobileView}
               specialContent={renderSpecialCardContent && renderSpecialCardContent(card.id)}
+              disableWiggleEffect={disableWiggleEffect}
+              onSearchSubmit={onSearchSubmit}
+              specialData={specialCardsData?.[card.id]}
+              showSpecialFeatures={showSpecialFeatures}
             />
           </div>
         );
