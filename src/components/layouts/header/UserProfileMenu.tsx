@@ -95,10 +95,10 @@ const UserProfileMenu = () => {
 
   return (
     <div className="flex items-center">
-      {/* Desktop view - Show name and department */}
+      {/* Desktop view - Show name and department with reduced font size */}
       {!isMobile && (
         <div className="mr-3 text-right hidden md:block">
-          <h3 className="font-bold text-[#003570]">{getFirstAndLastName()}</h3>
+          <h3 className="font-bold text-base text-[#003570]">{getFirstAndLastName()}</h3>
           <p className="text-sm text-gray-500">
             {userProfile?.coordenacao?.descricao || 'Sem coordenação'}
           </p>
