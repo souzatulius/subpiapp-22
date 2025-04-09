@@ -1,8 +1,8 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { startOfWeek, addDays, format, isSameDay } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { ChartData } from '@/types/charts';
 
 type DemandaCountByCoordination = {
   dia: string;
@@ -34,7 +34,6 @@ export const useDemandasPorCoordenacao = () => {
   const [error, setError] = useState<string | null>(null);
   const [lastFetched, setLastFetched] = useState<Date | null>(null);
 
-  // Define cores para as coordenações
   const coresCoordenacao: Record<string, string> = {
     'Comunicação': '#0D6EFD',  // azul escuro
     'Zeladoria': '#FD7E14',    // laranja
@@ -44,17 +43,14 @@ export const useDemandasPorCoordenacao = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      // Check if we should fetch new data (if no data or last fetch was more than 1 hour ago)
       if (!lastFetched || new Date().getTime() - lastFetched.getTime() > 60 * 60 * 1000) {
         setIsLoading(true);
         setError(null);
         
         try {
-          // Get start and end of current week (Monday to Friday)
           const today = new Date();
           const startDay = startOfWeek(today, { weekStartsOn: 1 }); // Monday
-          
-          // Fetch coordenações
+
           const { data: coordenacoesData, error: coordenacoesError } = await supabase
             .from('coordenacoes')
             .select('id, descricao')
@@ -62,11 +58,9 @@ export const useDemandasPorCoordenacao = () => {
           
           if (coordenacoesError) throw coordenacoesError;
           
-          // Map coordenações to their respective colors
           const coordenacoesWithColors = coordenacoesData.map((coord) => {
-            let cor = '#212529'; // Default color
+            let cor = '#212529';
             
-            // Assign color based on name
             if (coord.descricao.includes('Comunicação')) {
               cor = coresCoordenacao['Comunicação'];
             } else if (coord.descricao.includes('Zeladoria')) {
@@ -84,7 +78,6 @@ export const useDemandasPorCoordenacao = () => {
           
           setCoordenacoes(coordenacoesWithColors);
           
-          // Create array of weekdays (Monday to Friday)
           const weekdays = Array.from({ length: 5 }, (_, i) => {
             const date = addDays(startDay, i);
             return {
@@ -94,7 +87,6 @@ export const useDemandasPorCoordenacao = () => {
             };
           });
           
-          // Fetch demandas data directly with SQL query
           const startDateStr = format(startDay, 'yyyy-MM-dd');
           const endDateStr = format(addDays(startDay, 4), 'yyyy-MM-dd');
           
@@ -111,7 +103,6 @@ export const useDemandasPorCoordenacao = () => {
           
           if (demandasError) throw demandasError;
           
-          // Process demandas data (manually aggregate)
           const groupedDemandas: Record<string, DemandaCountByCoordination> = {};
           
           if (demandasData) {
@@ -140,7 +131,6 @@ export const useDemandasPorCoordenacao = () => {
           
           const processedDemandas = Object.values(groupedDemandas);
           
-          // Ensure we have entries for all days of the week for each coordenação
           const fullDemandasData: DemandaCountByCoordination[] = [];
           
           weekdays.forEach(day => {
@@ -170,7 +160,6 @@ export const useDemandasPorCoordenacao = () => {
           
           setDemandas(fullDemandasData);
           
-          // Fetch notas data directly
           const { data: notasData, error: notasError } = await supabase
             .from('notas_oficiais')
             .select('id, criado_em')
@@ -179,7 +168,6 @@ export const useDemandasPorCoordenacao = () => {
           
           if (notasError) throw notasError;
           
-          // Process notas data (manually aggregate)
           const groupedNotas: Record<string, NotasCount> = {};
           
           if (notasData) {
@@ -202,7 +190,6 @@ export const useDemandasPorCoordenacao = () => {
           
           const processedNotas = Object.values(groupedNotas);
           
-          // Ensure we have entries for all days of the week for notas
           const fullNotasData = weekdays.map(day => {
             const existing = processedNotas.find(n => n.dia === day.dia);
             
@@ -235,7 +222,6 @@ export const useDemandasPorCoordenacao = () => {
     fetchData();
   }, [lastFetched]);
 
-  // Prepare chart data structure
   const getChartData = () => {
     if (!demandas.length || !notas.length) return null;
     
@@ -243,52 +229,24 @@ export const useDemandasPorCoordenacao = () => {
       new Set(demandas.map(d => d.dia))
     ).sort();
     
-    const labels = weekDays.map(day => {
-      const demanda = demandas.find(d => d.dia === day);
-      return demanda ? demanda.dia_formatado.charAt(0).toUpperCase() + demanda.dia_formatado.slice(1, 3) : '';
-    });
-    
-    // Create datasets for each coordenação
-    const coordenacaoDatasets = coordenacoes.map(coord => {
+    const chartData: ChartData[] = weekDays.map(day => {
+      const dayDemandas = demandas.filter(d => d.dia === day);
+      const dayNota = notas.find(n => n.dia === day);
+      
+      const dayLabel = dayDemandas.length > 0 
+        ? dayDemandas[0].dia_formatado.charAt(0).toUpperCase() + dayDemandas[0].dia_formatado.slice(1, 3)
+        : '';
+      
+      const demandasSum = dayDemandas.reduce((sum, d) => sum + d.quantidade, 0);
+      
       return {
-        label: coord.nome,
-        data: weekDays.map(day => {
-          const encontrado = demandas.find(
-            d => d.dia === day && d.coordenacao_id === coord.id
-          );
-          return encontrado ? encontrado.quantidade : 0;
-        }),
-        backgroundColor: coord.cor,
-        borderColor: coord.cor,
-        borderWidth: 1,
-        borderRadius: 4,
-        barPercentage: 0.8,
-        categoryPercentage: 0.9 / (coordenacoes.length + 1) // Leave room for notas
+        name: dayLabel,
+        demandas: demandasSum,
+        notas: dayNota?.quantidade || 0
       };
     });
     
-    // Create dataset for notas
-    const notasDataset = {
-      label: 'Notas de Imprensa',
-      data: weekDays.map(day => {
-        const encontrado = notas.find(n => n.dia === day);
-        return encontrado ? encontrado.quantidade : 0;
-      }),
-      backgroundColor: '#212529', // cinza escuro
-      borderColor: '#212529',
-      borderWidth: 1,
-      borderRadius: 4,
-      barPercentage: 0.8,
-      categoryPercentage: 0.9 / (coordenacoes.length + 1) // Same size as others
-    };
-    
-    // Combine all datasets
-    const datasets = [...coordenacaoDatasets, notasDataset];
-    
-    return {
-      labels,
-      datasets
-    };
+    return chartData;
   };
   
   return {

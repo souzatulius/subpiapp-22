@@ -1,3 +1,4 @@
+
 import React from 'react';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Cell, TooltipProps
@@ -95,29 +96,6 @@ const GroupedBarChart: React.FC<GroupedBarChartProps> = ({
       </ResponsiveContainer>
     </div>
   );
-};
-
-// Atualizar o CustomTooltip para aceitar a propriedade compact
-const CustomTooltip = ({ active, payload, label, compact }: TooltipProps<any, any> & { compact?: boolean }) => {
-  if (active && payload && payload.length) {
-    return (
-      <div className={`bg-white p-${compact ? '1' : '2'} border border-gray-200 rounded shadow-sm`}>
-        <p className={`text-gray-700 font-medium text-${compact ? 'xs' : 'sm'} mb-1`}>{label}</p>
-        {payload.map((p, i) => (
-          <div key={i} className="flex items-center">
-            <div
-              className="w-2 h-2 rounded-full mr-1"
-              style={{ backgroundColor: p.color }}
-            />
-            <p className={`text-${compact ? 'xs' : 'sm'} text-gray-600`}>
-              {p.name}: <span className="font-medium">{p.value}</span>
-            </p>
-          </div>
-        ))}
-      </div>
-    );
-  }
-  return null;
 };
 
 export default GroupedBarChart;
