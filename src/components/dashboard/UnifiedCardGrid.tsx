@@ -1,3 +1,4 @@
+
 import React from 'react';
 import {
   DndContext,
@@ -192,6 +193,14 @@ const UnifiedCardGrid: React.FC<UnifiedCardGridProps> = ({
     );
   }
 
+  // Helper function to render special content for specific card types
+  const renderSpecialContent = (card: ActionCardItem) => {
+    if (card.type === 'origin_demand_chart' || card.id === 'origem-demandas-card') {
+      return <OriginsDemandChartCompact className="h-full w-full" />;
+    }
+    return null;
+  };
+
   // Helper function to get card-specific styling
   const getCardContentStyle = (cardTitle: string, cardType?: string) => {
     if (cardTitle === "Origem das Demandas" || cardType === 'origin_demand_chart') {
@@ -210,9 +219,7 @@ const UnifiedCardGrid: React.FC<UnifiedCardGridProps> = ({
         <SortableContext items={processedCards.map(card => card.id)}>
           {processedCards.map(card => {
             // Check if this card has special content to be rendered
-            const specialContent = renderSpecialCardContent && (card.type === 'origin_demand_chart' || card.id === 'origem-demandas-card' || card.chartId === 'origemDemandas') 
-              ? renderSpecialCardContent(card.id) 
-              : null;
+            const specialContent = renderSpecialContent(card);
               
             return (
               <div

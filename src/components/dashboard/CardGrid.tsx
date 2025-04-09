@@ -58,7 +58,8 @@ const SortableActionCard = ({
     opacity: isDragging ? 0.8 : 1,
   };
   
-  const specialContent = renderSpecialCardContent && renderSpecialCardContent(card.id);
+  // Get special content if renderer is provided
+  const specialContent = renderSpecialCardContent ? renderSpecialCardContent(card.id) : null;
   const width = card.width || '25';
   const height = card.height || '1';
   

@@ -260,7 +260,7 @@ const DashboardPage: React.FC = () => {
   );
   
   function renderSpecialCardContent(cardId: string) {
-    if (cardId === 'origem-demandas-card' || cardId.includes('origemDemandas')) {
+    if (cardId === 'origem-demandas-card' || cardId.includes('origem-demandas') || cardId.includes('origemDemandas')) {
       return <OriginsDemandChartCompact className="h-full w-full" />;
     }
     return null;
