@@ -11,10 +11,6 @@ import CardGridContainer from '@/components/dashboard/CardGridContainer';
 import { useComunicacaoDashboard } from '@/hooks/dashboard/useComunicacaoDashboard';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from '@/hooks/use-toast';
-import { ActionCardItem, CardColor } from '@/types/dashboard';
-import { useOriginOptions } from '@/hooks/dashboard-management/useOriginOptions';
-import { useOrigens } from '@/hooks/comunicacao/useOrigens';
-import { useOriginIcon } from '@/hooks/useOriginIcon';
 import OriginsDemandChartCompact from '@/components/dashboard/cards/OriginsDemandChartCompact';
 import PendingTasksCard from '@/components/dashboard/cards/PendingTasksCard';
 
@@ -30,7 +26,6 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
   const { user } = useAuth();
   const { firstName } = useUserData(user?.id);
   const isMobile = useIsMobile();
-  const { originOptions } = useOriginOptions();
   
   const {
     cards,
@@ -44,7 +39,8 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
     handleSaveCardEdit,
     setIsEditModalOpen,
     handleCardsReorder,
-    resetDashboard
+    resetDashboard,
+    specialCardsData
   } = useComunicacaoDashboard(user, isPreview, department);
 
   React.useEffect(() => {
@@ -66,7 +62,6 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
         card.id !== 'comunicacao-search-card' && 
         card.type !== 'smart_search' &&
         card.title !== 'Origem das Demandas' &&
-        // Adicionando filtro para remover o card "Ações Pendentes"
         !card.isPendingActions
       );
       
@@ -156,10 +151,6 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
     return null;
   };
 
-  const specialData = {
-    originOptions: originOptions
-  };
-
   return (
     <div className="space-y-6 bg-[#FFFAFA]">
       <div className="w-full mb-2">
@@ -190,7 +181,7 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
               onHideCard={handleCardHide}
               isMobileView={isMobile}
               isEditMode={isEditMode}
-              specialCardsData={specialData}
+              specialCardsData={specialCardsData}
               disableWiggleEffect={true}
               showSpecialFeatures={true}
               renderSpecialCardContent={renderSpecialCardContent}

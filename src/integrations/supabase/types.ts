@@ -461,7 +461,37 @@ export type Database = {
         }
         Relationships: []
       }
-      department_dashboards: {
+      department_dashboard: {
+        Row: {
+          cards_config: string
+          created_at: string | null
+          department: string
+          id: string
+          updated_at: string | null
+          updated_by: string | null
+          view_type: string
+        }
+        Insert: {
+          cards_config: string
+          created_at?: string | null
+          department: string
+          id?: string
+          updated_at?: string | null
+          updated_by?: string | null
+          view_type?: string
+        }
+        Update: {
+          cards_config?: string
+          created_at?: string | null
+          department?: string
+          id?: string
+          updated_at?: string | null
+          updated_by?: string | null
+          view_type?: string
+        }
+        Relationships: []
+      }
+      department_dashboard_comunicacao: {
         Row: {
           cards_config: string
           created_at: string | null
@@ -2025,6 +2055,30 @@ export type Database = {
           created_at?: string
           id?: string
           updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_dashboard_comunicacao: {
+        Row: {
+          cards_config: string
+          created_at: string | null
+          id: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          cards_config: string
+          created_at?: string | null
+          id?: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          cards_config?: string
+          created_at?: string | null
+          id?: string
+          updated_at?: string | null
           user_id?: string
         }
         Relationships: []

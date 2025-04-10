@@ -1,35 +1,39 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/hooks/useSupabaseAuth';
 import { toast } from '@/components/ui/use-toast';
 import { ActionCardItem } from '@/types/dashboard';
+import { DashboardType } from './useDashboardType';
 
 export const useAutosaveDashboard = (
-  initialCards: ActionCardItem[],
-  saveTrigger?: number 
+  userId: string | undefined,
+  department: string | null,
+  defaultCards: ActionCardItem[],
+  dashboardType: DashboardType = 'main'
 ) => {
-  const { user } = useAuth();
-  const [cards, setCards] = useState<ActionCardItem[]>(initialCards);
+  const [cards, setCards] = useState<ActionCardItem[]>(defaultCards);
   const [loading, setLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [lastSaved, setLastSaved] = useState<string | null>(null);
 
+  // Determine which table to use based on dashboard type
+  const tableName = dashboardType === 'main' ? 'user_dashboard' : 'user_dashboard_comunicacao';
+
   // Load dashboard cards on mount
   useEffect(() => {
-    if (!user) return;
+    if (!userId) return;
     
     const loadDashboard = async () => {
       setLoading(true);
       try {
         const { data, error } = await supabase
-          .from('user_dashboard')
+          .from(tableName)
           .select('cards_config')
-          .eq('user_id', user.id)
+          .eq('user_id', userId)
           .single();
 
         if (error) {
-          console.error('Error loading dashboard:', error);
+          console.error(`Error loading ${dashboardType} dashboard:`, error);
         } else if (data?.cards_config) {
           try {
             // Parse the JSON string from the database
@@ -42,28 +46,28 @@ export const useAutosaveDashboard = (
           }
         }
       } catch (err) {
-        console.error('Error in loadDashboard:', err);
+        console.error(`Error in load${dashboardType}Dashboard:`, err);
       } finally {
         setLoading(false);
       }
     };
 
     loadDashboard();
-  }, [user]);
+  }, [userId, tableName, dashboardType]);
 
   // Save dashboard cards whenever they change
   const saveDashboard = useCallback(async (cardsToSave: ActionCardItem[]) => {
-    if (!user) return;
+    if (!userId) return;
     
     setIsSaving(true);
     try {
       const cardsJson = JSON.stringify(cardsToSave);
       
       const { data, error } = await supabase
-        .from('user_dashboard')
+        .from(tableName)
         .upsert(
           { 
-            user_id: user.id, 
+            user_id: userId, 
             cards_config: cardsJson,
             updated_at: new Date().toISOString() // Convert Date to string
           },
@@ -71,7 +75,7 @@ export const useAutosaveDashboard = (
         );
 
       if (error) {
-        console.error('Error saving dashboard:', error);
+        console.error(`Error saving ${dashboardType} dashboard:`, error);
         toast({
           title: 'Erro ao salvar dashboard',
           description: 'Não foi possível salvar suas alterações no dashboard.',
@@ -81,35 +85,57 @@ export const useAutosaveDashboard = (
         setLastSaved(new Date().toISOString());
       }
     } catch (err) {
-      console.error('Error in saveDashboard:', err);
+      console.error(`Error in save${dashboardType}Dashboard:`, err);
     } finally {
       setIsSaving(false);
     }
-  }, [user]);
+  }, [userId, tableName, dashboardType]);
 
-  // Debounced save
-  useEffect(() => {
-    if (!user || cards === initialCards) return;
-    
-    const timeoutId = setTimeout(() => {
-      saveDashboard(cards);
-    }, 1000); // 1 second debounce
-    
-    return () => clearTimeout(timeoutId);
-  }, [cards, saveDashboard, initialCards, user]);
+  // Handle card reordering
+  const handleCardsReorder = useCallback((updatedCards: ActionCardItem[]) => {
+    setCards(updatedCards);
+    saveDashboard(updatedCards);
+    return updatedCards;
+  }, [saveDashboard]);
 
-  // Manual save trigger
-  useEffect(() => {
-    if (saveTrigger && cards.length > 0) {
-      saveDashboard(cards);
-    }
-  }, [saveTrigger, saveDashboard, cards]);
+  // Handle editing a card
+  const handleSaveCardEdit = useCallback((updatedCard: ActionCardItem) => {
+    const updatedCards = cards.map(card => 
+      card.id === updatedCard.id ? updatedCard : card
+    );
+    
+    setCards(updatedCards);
+    saveDashboard(updatedCards);
+    return updatedCards;
+  }, [cards, saveDashboard]);
+
+  // Handle hiding a card
+  const handleCardHide = useCallback((cardId: string) => {
+    const updatedCards = cards.map(card => 
+      card.id === cardId ? { ...card, isHidden: true } : card
+    );
+    
+    setCards(updatedCards);
+    saveDashboard(updatedCards);
+    return updatedCards;
+  }, [cards, saveDashboard]);
+
+  // Reset dashboard to default
+  const resetDashboard = useCallback(() => {
+    setCards(defaultCards);
+    saveDashboard(defaultCards);
+    return defaultCards;
+  }, [defaultCards, saveDashboard]);
 
   return {
     cards,
     setCards,
     loading,
     isSaving,
-    lastSaved
+    lastSaved,
+    handleCardsReorder,
+    handleSaveCardEdit,
+    handleCardHide,
+    resetDashboard
   };
 };

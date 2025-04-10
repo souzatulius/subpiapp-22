@@ -1,15 +1,14 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { ActionCardItem } from '@/types/dashboard';
-import { getCommunicationActionCards } from '@/hooks/dashboard/defaultCards';
-import { useAuth } from '@/hooks/useSupabaseAuth';
+import { getDefaultCards } from '@/hooks/dashboard/defaultCards';
 import { supabase } from '@/integrations/supabase/client';
 import { useAutosaveDashboard } from '@/hooks/dashboard/useAutosaveDashboard';
 
-export const useComunicacaoDashboard = (
+export const useMainDashboard = (
   user: any,
   isPreview = false,
-  department = 'comunicacao'
+  department = 'main'
 ) => {
   const userId = user?.id;
   const [isEditMode, setIsEditMode] = useState(false);
@@ -27,9 +26,9 @@ export const useComunicacaoDashboard = (
   });
 
   // Get default cards for this department
-  const defaultCards = getCommunicationActionCards();
+  const defaultCards = getDefaultCards();
   
-  // Use the autosave hook with 'communication' dashboard type
+  // Use the autosave hook with 'main' dashboard type
   const {
     cards,
     isSaving,
@@ -38,7 +37,7 @@ export const useComunicacaoDashboard = (
     handleSaveCardEdit,
     handleCardHide,
     resetDashboard
-  } = useAutosaveDashboard(userId, department, defaultCards, 'communication');
+  } = useAutosaveDashboard(userId, department, defaultCards, 'main');
 
   const toggleEditMode = useCallback(() => {
     setIsEditMode(prev => !prev);
@@ -50,7 +49,7 @@ export const useComunicacaoDashboard = (
   }, []);
 
   useEffect(() => {
-    // Focus on loading special cards data (pending demands, notes to approve, etc.)
+    // Focus on loading special cards data
     const loadSpecialCardsData = async () => {
       if (isPreview || !userId) {
         setIsLoading(false);
