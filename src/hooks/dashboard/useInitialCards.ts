@@ -135,12 +135,12 @@ export const useInitialCards = (userDepartment: string | null) => {
         title: 'Processos e-SIC',
         path: '/dashboard/esic',
         iconId: 'FileSearch',
-        color: getBgColor('blue-dark'), // Changed from blue-light to blue-dark
-        width: '50',
+        color: getBgColor('deep-blue'),
+        width: '25',
         height: '1',
         type: 'standard',
         displayMobile: true,
-        mobileOrder: 10,
+        mobileOrder: 9,
         allowedDepartments: ['comunicacao', 'gabinete']
       },
       {
@@ -148,7 +148,7 @@ export const useInitialCards = (userDepartment: string | null) => {
         title: 'Notificações',
         path: '/dashboard/notificacoes',
         iconId: 'Bell',
-        color: getBgColor('deep-blue'), // Already deep-blue
+        color: getBgColor('deep-blue'),
         width: '25',
         height: '1',
         type: 'standard',
@@ -162,7 +162,7 @@ export const useInitialCards = (userDepartment: string | null) => {
         iconId: 'Pencil',
         color: getBgColor('gray-medium'),
         width: '25',
-        height: '2',
+        height: '1',
         type: 'standard',
         displayMobile: true,
         mobileOrder: 9,
@@ -170,12 +170,12 @@ export const useInitialCards = (userDepartment: string | null) => {
       },
       {
         id: 'ver-releases',
-        title: 'Ver Releases e Notícias',
+        title: 'Releases e Notícias',
         path: '/dashboard/comunicacao/releases',
-        iconId: 'FileText',
-        color: getBgColor('deep-blue'),
+        iconId: 'Newspaper',
+        color: getBgColor('blue-light'),
         width: '25',
-        height: '2',
+        height: '1',
         type: 'standard',
         displayMobile: true,
         mobileOrder: 10
@@ -185,7 +185,7 @@ export const useInitialCards = (userDepartment: string | null) => {
         title: "Relatórios da Comunicação",
         path: "/dashboard/comunicacao/relatorios",
         iconId: "PieChart",
-        color: getBgColor('orange-light'), // Already orange-light
+        color: getBgColor('orange-light'),
         width: "25",
         height: "1",
         type: "standard",

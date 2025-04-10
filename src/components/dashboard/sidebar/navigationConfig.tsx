@@ -5,7 +5,9 @@ import {
   FileText,
   MessageSquare,
   Trophy,
-  Home
+  Home,
+  Newspaper,
+  FileSearch
 } from 'lucide-react';
 
 export type NavigationItem = {
@@ -41,6 +43,18 @@ export const getNavigationSections = (): NavigationItem[] => {
       label: 'Zeladoria',
       path: '/dashboard/zeladoria/ranking-subs',
       icon: <Trophy className="w-8 h-8" />,
+    },
+    {
+      id: 'esic',
+      label: 'e-SIC',
+      path: '/dashboard/esic',
+      icon: <FileSearch className="w-8 h-8" />,
+    },
+    {
+      id: 'releases',
+      label: 'Releases',
+      path: '/dashboard/comunicacao/releases',
+      icon: <Newspaper className="w-8 h-8" />,
     },
   ];
 };

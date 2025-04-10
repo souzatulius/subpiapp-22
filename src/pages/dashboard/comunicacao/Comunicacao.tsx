@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useAuth } from '@/hooks/useSupabaseAuth';
 import { MessageSquareReply, RotateCcw } from 'lucide-react';
@@ -52,7 +51,7 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
           return { ...card, title: 'Cadastrar Release' };
         }
         if (card.title === 'Notícias' && card.color === 'bg-gray-500') {
-          return { ...card, title: 'Ver Releases e Notícias' };
+          return { ...card, title: 'Releases e Notícias' };
         }
         if (card.title === 'Criar Nota') {
           return { ...card, title: 'Criar Nota de Imprensa' };
@@ -66,6 +65,50 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
         card.title !== 'Origem das Demandas' &&
         !card.isPendingActions
       );
+      
+      const hasESICCard = filteredCards.some(card => 
+        card.title === 'Processos e-SIC' || 
+        card.path.includes('/esic')
+      );
+      
+      if (!hasESICCard) {
+        const esicCard: ActionCardItem = {
+          id: 'esic-card',
+          title: 'Processos e-SIC',
+          iconId: 'FileSearch',
+          path: '/dashboard/esic',
+          color: 'deep-blue',
+          width: '25',
+          height: '2',
+          type: 'standard',
+          displayMobile: true,
+          mobileOrder: filteredCards.length
+        };
+        
+        filteredCards.push(esicCard);
+      }
+      
+      const hasReleasesCard = filteredCards.some(card => 
+        card.title === 'Releases e Notícias' || 
+        card.path.includes('/releases')
+      );
+      
+      if (!hasReleasesCard) {
+        const releasesCard: ActionCardItem = {
+          id: 'releases-card',
+          title: 'Releases e Notícias',
+          iconId: 'Newspaper',
+          path: '/dashboard/comunicacao/releases',
+          color: 'blue-light',
+          width: '25',
+          height: '2',
+          type: 'standard',
+          displayMobile: true,
+          mobileOrder: filteredCards.length + 1
+        };
+        
+        filteredCards.push(releasesCard);
+      }
       
       const hasOriginSelectionCard = filteredCards.some(card => card.type === 'origin_selection');
       
