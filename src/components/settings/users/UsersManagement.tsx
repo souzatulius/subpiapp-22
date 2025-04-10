@@ -99,12 +99,8 @@ const UsersManagement = () => {
     setIsDeleteDialogOpen(true);
   };
 
-  const handleApprove = (user: User, roleName?: string) => {
-    if (roleName) {
-      approveUser(user.id, user.nome_completo, user.email, roleName);
-    } else {
-      openApprovalDialog(user);
-    }
+  const handleApprove = (user: User) => {
+    openApprovalDialog(user);
   };
 
   const handleRemoveAccess = (user: User) => {

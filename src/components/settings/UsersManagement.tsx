@@ -1,14 +1,15 @@
+
 import React, { useState, useEffect } from 'react';
-import { useUsersManagement } from './useUsersManagement';
-import UsersLayout from './UsersLayout';
-import { useUserActions } from './useUserActions';
-import { useUserEdit } from './hooks/useUserEdit';
-import { useUserDelete } from './hooks/useUserDelete';
-import { usePasswordReset } from './hooks/usePasswordReset';
-import { useUserApproval } from './hooks/useUserApproval';
-import { useUserAccessRemoval } from './hooks/useUserAccessRemoval';
-import { useUserInvite } from './hooks/useUserInvite';
-import UserApprovalDialog from './UserApprovalDialog';
+import { useUsersManagement } from './users/useUsersManagement';
+import UsersLayout from './users/UsersLayout';
+import { useUserActions } from './users/useUserActions';
+import { useUserEdit } from './users/hooks/useUserEdit';
+import { useUserDelete } from './users/hooks/useUserDelete';
+import { usePasswordReset } from './users/hooks/usePasswordReset';
+import { useUserApproval } from './users/hooks/useUserApproval';
+import { useUserAccessRemoval } from './users/hooks/useUserAccessRemoval';
+import { useUserInvite } from './users/hooks/useUserInvite';
+import UserApprovalDialog from './users/UserApprovalDialog';
 import { supabase } from '@/integrations/supabase/client';
 import { User } from './users/types';
 
