@@ -1,4 +1,4 @@
-import { FileText, Activity, Bell, Calendar, CheckCircle, Clock, HelpCircle, Home, BarChart2, Info, Mail, MapPin, MessageSquare, Phone, Settings, ShoppingCart, Star, Tool, User, Zap, Box, Briefcase, Archive, Award, BarChart, BookOpen, Camera, Cast, Clipboard, Coffee, Command, Compass, CreditCard, Database, Download, Edit, Eye, Facebook, Filter, Folder, Gift, Github, Globe, Heart, Image, Instagram, Key, Layers, LifeBuoy, Link, Linkedin, List, Lock, Map, Monitor, Music, Package, Paperclip, PenTool, Percent, PieChart, Printer, Radio, RefreshCw, Save, Search, Send, Server, Share2, Slash, Sliders, Smartphone, Speaker, Square, Tag, Target, Terminal, ThumbsUp, Trash2, Truck, Tv, Twitter, Umbrella, Upload, Video, Wifi, Youtube } from 'lucide-react';
+import { FileText, Activity, Bell, Calendar, CheckCircle, Clock, HelpCircle, Home, BarChart2, Info, Mail, MapPin, MessageSquare, Phone, Settings, ShoppingCart, Star, User, Zap, Box, Briefcase, Archive, Award, BarChart, BookOpen, Camera, Cast, Clipboard, Coffee, Command, Compass, CreditCard, Database, Download, Edit, Eye, Facebook, Filter, Folder, Gift, Github, Globe, Heart, Image, Instagram, Key, Layers, LifeBuoy, Link, Linkedin, List, Lock, Map, Monitor, Music, Package, Paperclip, PenTool, Percent, PieChart, Printer, Radio, RefreshCw, Save, Search, Send, Server, Share2, Slash, Sliders, Smartphone, Speaker, Square, Tag, Target, Terminal, ThumbsUp, Trash2, Truck, Tv, Twitter, Umbrella, Upload, Video, Wifi, Youtube } from 'lucide-react';
 import React from 'react';
 
 export interface WidthOption {
@@ -92,26 +92,26 @@ export const dashboardPages = [
 ];
 
 export const iconsData = [
-  { id: 'clipboard-list', label: 'Cadastrar Demanda', component: <ClipboardList className="h-5 w-5" /> },
+  { id: 'clipboard-list', label: 'Cadastrar Demanda', component: <Clipboard className="h-5 w-5" /> },
   { id: 'message-square', label: 'Responder Demanda', component: <MessageSquare className="h-5 w-5" /> },
   { id: 'file-text', label: 'Criar Nota Oficial', component: <FileText className="h-5 w-5" /> },
   { id: 'check-circle', label: 'Aprovar Nota Oficial', component: <CheckCircle className="h-5 w-5" /> },
   { id: 'search', label: 'Consultar Notas', component: <Search className="h-5 w-5" /> },
   { id: 'list', label: 'Consultar Demandas', component: <List className="h-5 w-5" /> },
-  { id: 'layout-dashboard', label: 'Dashboard', component: <LayoutDashboard className="h-5 w-5" /> },
+  { id: 'layout-dashboard', label: 'Dashboard', component: <Home className="h-5 w-5" /> },
   { id: 'settings', label: 'Configurações', component: <Settings className="h-5 w-5" /> },
-  { id: 'users', label: 'Usuários', component: <Users className="h-5 w-5" /> },
+  { id: 'users', label: 'Usuários', component: <User className="h-5 w-5" /> },
   { id: 'bell', label: 'Notificações', component: <Bell className="h-5 w-5" /> },
   { id: 'briefcase', label: 'Cargos', component: <Briefcase className="h-5 w-5" /> },
-  { id: 'file-stack', label: 'Serviços', component: <FileStack className="h-5 w-5" /> },
+  { id: 'file-stack', label: 'Serviços', component: <FileText className="h-5 w-5" /> },
   { id: 'image', label: 'Tipos de Mídia', component: <Image className="h-5 w-5" /> },
-  { id: 'inbox', label: 'Origem das Demandas', component: <Inbox className="h-5 w-5" /> },
+  { id: 'inbox', label: 'Origem das Demandas', component: <Box className="h-5 w-5" /> },
   { id: 'map-pin', label: 'Distritos e Bairros', component: <MapPin className="h-5 w-5" /> },
 ];
 
 export const getIconComponentById = (id: string): JSX.Element => {
   const icon = iconsData.find(icon => icon.id === id);
-  return icon?.component || <ClipboardList className="h-5 w-5" />;
+  return icon?.component || <Clipboard className="h-5 w-5" />;
 };
 
 export const identifyIconComponent = (icon: React.ReactNode): string => {

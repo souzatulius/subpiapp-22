@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { X, AlertCircle } from "lucide-react";
 import { useState } from "react";
-import { formSchema } from "./types";
+import { formSchema, FormSchema } from "./types";
 import CardFormFields from "./CardFormFields";
 import { ActionCardItem } from "@/types/dashboard";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -22,7 +22,7 @@ function EditCardModal({ isOpen, onClose, onSave, card }: EditCardModalProps) {
   const [selectedIconId, setSelectedIconId] = useState<string>(card.iconId);
   const [error, setError] = useState<string | null>(null);
 
-  const form = useForm({
+  const form = useForm<FormSchema>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       title: card.title,
@@ -31,7 +31,7 @@ function EditCardModal({ isOpen, onClose, onSave, card }: EditCardModalProps) {
       path: card.path || "",
       color: card.color,
       iconId: card.iconId,
-      width: card.width || "25",
+      width: (card.width as "25" | "50" | "75" | "100") || "25",
       height: (card.height as "0.5" | "1" | "2" | "3" | "4") || "1",
       dataSourceKey: card.dataSourceKey || "",
       displayMobile: card.displayMobile !== false,
@@ -41,7 +41,7 @@ function EditCardModal({ isOpen, onClose, onSave, card }: EditCardModalProps) {
     }
   });
 
-  const handleSubmit = (data: any) => {
+  const handleSubmit = (data: FormSchema) => {
     try {
       // Filter empty string subtitle to undefined
       const subtitle = data.subtitle?.trim() ? data.subtitle : undefined;
