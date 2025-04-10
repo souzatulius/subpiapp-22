@@ -13,9 +13,8 @@ export const adaptDemandType = (selectedDemanda: Demand): any => {
     problema_id: selectedDemanda.problema_id || null,
     coordenacao_id: selectedDemanda.coordenacao_id || null,
     supervisao_tecnica_id: selectedDemanda.supervisao_tecnica_id || null,
-    // Fix: The bairro object might not have an id property according to the type definition
-    // Instead, we'll pass the bairro_id from the Demand if it exists, or null
-    bairro_id: selectedDemanda.bairro_id || null,
+    // Fix: Access the bairro object and extract the id if it exists
+    bairro_id: selectedDemanda.bairro?.id || null,
     area_coordenacao: selectedDemanda.area_coordenacao || null,
     supervisao_tecnica: selectedDemanda.supervisao_tecnica || null,
     bairro: selectedDemanda.bairro || null,
