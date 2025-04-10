@@ -7,7 +7,7 @@ interface UserActionsProps {
   setIsDeleteDialogOpen: (open: boolean) => void;
   setUserToDelete: (user: User) => void;
   resetPassword: (user: User) => void;
-  approveUser: (user: User, roleName?: string) => void;
+  approveUser: (user: User) => void;
   removeAccess: (user: User) => void;
 }
 
@@ -34,8 +34,8 @@ export const useUserActions = ({
     resetPassword(user);
   };
 
-  const handleApprove = (user: User, roleName: string = 'leitor') => {
-    approveUser(user, roleName);
+  const handleApprove = (user: User) => {
+    approveUser(user);
   };
 
   const handleRemoveAccess = (user: User) => {

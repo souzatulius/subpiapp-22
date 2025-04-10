@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import {
   Dialog,
   DialogContent,
@@ -11,13 +11,12 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { User } from './types';
 import { Loader2 } from 'lucide-react';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface UserApprovalDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   user: User | null;
-  onApprove: (userId: string, userName: string, userEmail: string, roleName: string) => void;
+  onApprove: (userId: string, userName: string, userEmail: string) => void;
   approving: boolean;
 }
 
@@ -28,13 +27,11 @@ const UserApprovalDialog: React.FC<UserApprovalDialogProps> = ({
   onApprove,
   approving
 }) => {
-  const [selectedRole, setSelectedRole] = useState('leitor');
-
   if (!user) return null;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onApprove(user.id, user.nome_completo, user.email, selectedRole);
+    onApprove(user.id, user.nome_completo, user.email);
     onOpenChange(false);
   };
 
@@ -57,23 +54,8 @@ const UserApprovalDialog: React.FC<UserApprovalDialogProps> = ({
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="role-select">Permissão Inicial</Label>
-              <Select 
-                value={selectedRole} 
-                onValueChange={setSelectedRole}
-              >
-                <SelectTrigger id="role-select">
-                  <SelectValue placeholder="Selecione uma permissão" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="leitor">Leitor (acesso básico)</SelectItem>
-                  <SelectItem value="criar_demanda">Criar Demandas</SelectItem>
-                  <SelectItem value="responder_demanda">Responder Demandas</SelectItem>
-                  <SelectItem value="admin">Administrador</SelectItem>
-                </SelectContent>
-              </Select>
-              <p className="text-xs text-gray-500">
-                Você poderá atribuir permissões adicionais após a aprovação.
+              <p className="text-sm text-gray-700">
+                Este usuário receberá permissão de Administrador automaticamente após a aprovação.
               </p>
             </div>
           </div>

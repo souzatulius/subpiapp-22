@@ -7,7 +7,7 @@ import { User } from '../types';
 export const useUserApproval = (refreshUsers: () => Promise<void>) => {
   const [approving, setApproving] = useState(false);
 
-  const approveUser = async (userId: string, userName: string, userEmail: string, roleName?: string) => {
+  const approveUser = async (userId: string, userName: string, userEmail: string) => {
     setApproving(true);
     
     try {
@@ -24,30 +24,15 @@ export const useUserApproval = (refreshUsers: () => Promise<void>) => {
       
       if (updateError) throw updateError;
       
-      // Add default permission if role name is not provided
-      if (!roleName) {
-        roleName = 'padrão';
-      }
+      // Admin permission ID (fixed value)
+      const adminPermissionId = '213c5690-ed4a-4b77-b565-39465b0a4247';
       
-      // Get the permission ID for the given role name
-      const { data: permissionData, error: permissionError } = await supabase
-        .from('permissoes')
-        .select('id')
-        .eq('descricao', roleName)
-        .single();
-      
-      if (permissionError) throw permissionError;
-      
-      if (!permissionData?.id) {
-        throw new Error(`Permissão para papel '${roleName}' não encontrada`);
-      }
-      
-      // Create a user permission with the selected role
+      // Always assign Admin permission to approved users
       const { error: permissionAssignError } = await supabase
         .from('usuario_permissoes')
         .insert({
           usuario_id: userId,
-          permissao_id: permissionData.id
+          permissao_id: adminPermissionId
         });
       
       if (permissionAssignError) throw permissionAssignError;
@@ -70,7 +55,7 @@ export const useUserApproval = (refreshUsers: () => Promise<void>) => {
       // Successfully updated user status and assigned permission
       toast({
         title: "Usuário aprovado",
-        description: `${userName} (${userEmail}) agora tem acesso ao sistema.`
+        description: `${userName} (${userEmail}) agora tem acesso ao sistema com permissão de Administrador.`
       });
       
       // Refresh the users list

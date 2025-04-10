@@ -1,15 +1,14 @@
-
 import React, { useState, useEffect } from 'react';
-import { useUsersManagement } from './users/useUsersManagement';
-import UsersLayout from './users/UsersLayout';
-import { useUserActions } from './users/useUserActions';
-import { useUserEdit } from './users/hooks/useUserEdit';
-import { useUserDelete } from './users/hooks/useUserDelete';
-import { usePasswordReset } from './users/hooks/usePasswordReset';
-import { useUserApproval } from './users/hooks/useUserApproval';
-import { useUserAccessRemoval } from './users/hooks/useUserAccessRemoval';
-import { useUserInvite } from './users/hooks/useUserInvite';
-import UserApprovalDialog from './users/UserApprovalDialog';
+import { useUsersManagement } from './useUsersManagement';
+import UsersLayout from './UsersLayout';
+import { useUserActions } from './useUserActions';
+import { useUserEdit } from './hooks/useUserEdit';
+import { useUserDelete } from './hooks/useUserDelete';
+import { usePasswordReset } from './hooks/usePasswordReset';
+import { useUserApproval } from './hooks/useUserApproval';
+import { useUserAccessRemoval } from './hooks/useUserAccessRemoval';
+import { useUserInvite } from './hooks/useUserInvite';
+import UserApprovalDialog from './UserApprovalDialog';
 import { supabase } from '@/integrations/supabase/client';
 import { User } from './users/types';
 
@@ -99,12 +98,10 @@ const UsersManagement = () => {
     setIsDeleteDialogOpen(true);
   };
 
-  const handleApprove = (user: User, roleName?: string) => {
-    if (roleName) {
-      approveUser(user.id, user.nome_completo, user.email, roleName);
-    } else {
-      openApprovalDialog(user);
-    }
+  // Modificar para não passar o parâmetro roleName
+  const handleApprove = (user: User) => {
+    // Aprovação direta sem roleName
+    approveUser(user.id, user.nome_completo, user.email);
   };
 
   const handleRemoveAccess = (user: User) => {
@@ -125,7 +122,7 @@ const UsersManagement = () => {
     setIsDeleteDialogOpen,
     setUserToDelete: handleDelete,
     resetPassword: handleResetPassword,
-    approveUser: handleApprove,
+    approveUser: openApprovalDialog, // Abrir diálogo sempre
     removeAccess: handleRemoveAccess
   });
 
@@ -152,7 +149,9 @@ const UsersManagement = () => {
     approving,
     removing,
     isEditSubmitting,
-    onRefresh: handleRefreshData
+    onRefresh: handleRefreshData,
+    statusFilter,
+    setStatusFilter
   };
   
   return (
