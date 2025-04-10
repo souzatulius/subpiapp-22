@@ -8,7 +8,7 @@ import { X, AlertCircle } from "lucide-react";
 import { useState, useEffect } from "react";
 import { formSchema } from "./types";
 import CardFormFields from "./CardFormFields";
-import { ActionCardItem, CardHeight } from "@/types/dashboard";
+import { ActionCardItem, CardHeight, CardWidth } from "@/types/dashboard";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { FormSchema } from "@/types/formSchema";
 
