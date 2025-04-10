@@ -11,7 +11,7 @@ export const formSchema = z.object({
   color: z.custom<CardColor>(),
   iconId: z.string(),
   width: z.enum(["25", "50", "75", "100"]).default("25"),
-  height: z.enum(["1", "2"]).default("1"),
+  height: z.enum(["0.5", "1", "2", "3", "4"]).default("1"),
   dataSourceKey: z.string().optional(),
   displayMobile: z.boolean().default(true),
   mobileOrder: z.number().default(0),
@@ -31,7 +31,7 @@ export interface CardCustomizationModalProps {
     path?: string;
     color: CardColor;
     width?: "25" | "50" | "75" | "100";
-    height?: "1" | "2";
+    height?: "0.5" | "1" | "2" | "3" | "4";
     dataSourceKey?: string;
     displayMobile?: boolean;
     mobileOrder?: number;

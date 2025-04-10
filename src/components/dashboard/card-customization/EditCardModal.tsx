@@ -32,12 +32,11 @@ function EditCardModal({ isOpen, onClose, onSave, card }: EditCardModalProps) {
       color: card.color,
       iconId: card.iconId,
       width: card.width || "25",
-      height: card.height || "1",
+      height: (card.height as "0.5" | "1" | "2" | "3" | "4") || "1",
       dataSourceKey: card.dataSourceKey || "",
       displayMobile: card.displayMobile !== false,
       mobileOrder: card.mobileOrder || 0,
       allowedDepartments: card.allowedDepartments || [],
-      // Check if allowedRoles exists in the card object, if not, provide an empty array as default
       allowedRoles: card.allowedRoles || []
     }
   });

@@ -1,24 +1,33 @@
-
-import {
-  ClipboardList,
-  MessageSquare,
-  FileText,
-  CheckCircle,
-  Search,
-  List,
-  LayoutDashboard,
-  Settings,
-  Users,
-  Bell,
-  Briefcase,
-  FileStack,
-  Image,
-  Inbox,
-  MapPin,
-} from 'lucide-react';
+import { FileText, Activity, Bell, Calendar, CheckCircle, Clock, HelpCircle, Home, BarChart2, Info, Mail, MapPin, MessageSquare, Phone, Settings, ShoppingCart, Star, Tool, User, Zap, Box, Briefcase, Archive, Award, BarChart, BookOpen, Camera, Cast, Clipboard, Coffee, Command, Compass, CreditCard, Database, Download, Edit, Eye, Facebook, Filter, Folder, Gift, Github, Globe, Heart, Image, Instagram, Key, Layers, LifeBuoy, Link, Linkedin, List, Lock, Map, Monitor, Music, Package, Paperclip, PenTool, Percent, PieChart, Printer, Radio, RefreshCw, Save, Search, Send, Server, Share2, Slash, Sliders, Smartphone, Speaker, Square, Tag, Target, Terminal, ThumbsUp, Trash2, Truck, Tv, Twitter, Umbrella, Upload, Video, Wifi, Youtube } from 'lucide-react';
 import React from 'react';
 
-// Function to get color class based on color name
+export interface WidthOption {
+  id: string;
+  value: string;
+  label: string;
+}
+
+export interface HeightOption {
+  id: string;
+  value: string;
+  label: string;
+}
+
+export const widthOptions: WidthOption[] = [
+  { id: '25', value: '25', label: '25%' },
+  { id: '50', value: '50', label: '50%' },
+  { id: '75', value: '75', label: '75%' },
+  { id: '100', value: '100', label: '100%' },
+];
+
+export const heightOptions: HeightOption[] = [
+  { id: '0.5', value: '0.5', label: 'Compacto' },
+  { id: '1', value: '1', label: 'Padrão' },
+  { id: '2', value: '2', label: 'Médio' },
+  { id: '3', value: '3', label: 'Grande' },
+  { id: '4', value: '4', label: 'Extra Grande' },
+];
+
 export const getColorClass = (color: string): string => {
   switch (color) {
     case 'blue':
@@ -62,7 +71,6 @@ export const getColorClass = (color: string): string => {
   }
 };
 
-// List of dashboard pages for the select dropdown
 export const dashboardPages = [
   { value: '/dashboard', label: 'Dashboard' },
   { value: '/dashboard/comunicacao', label: 'Comunicação' },
@@ -83,7 +91,6 @@ export const dashboardPages = [
   { value: '/settings?tab=areas', label: 'Áreas de Coordenação (Configurações)' },
 ];
 
-// Define the icon data with proper React elements
 export const iconsData = [
   { id: 'clipboard-list', label: 'Cadastrar Demanda', component: <ClipboardList className="h-5 w-5" /> },
   { id: 'message-square', label: 'Responder Demanda', component: <MessageSquare className="h-5 w-5" /> },
@@ -102,18 +109,15 @@ export const iconsData = [
   { id: 'map-pin', label: 'Distritos e Bairros', component: <MapPin className="h-5 w-5" /> },
 ];
 
-// Function to get the icon component by its ID - returning a JSX Element
 export const getIconComponentById = (id: string): JSX.Element => {
   const icon = iconsData.find(icon => icon.id === id);
   return icon?.component || <ClipboardList className="h-5 w-5" />;
 };
 
-// Function to identify the icon component based on its type
 export const identifyIconComponent = (icon: React.ReactNode): string => {
   if (React.isValidElement(icon)) {
     const iconType = icon.type;
     
-    // Find a matching icon by comparing the component types
     for (const item of iconsData) {
       if (React.isValidElement(item.component) && item.component.type === iconType) {
         return item.id;
@@ -121,17 +125,5 @@ export const identifyIconComponent = (icon: React.ReactNode): string => {
     }
   }
   
-  return 'clipboard-list'; // Default fallback
+  return 'clipboard-list';
 };
-
-export const widthOptions = [
-  { id: 'w25', value: '25', label: '25%' },
-  { id: 'w50', value: '50', label: '50%' },
-  { id: 'w75', value: '75', label: '75%' },
-  { id: 'w100', value: '100', label: '100%' },
-];
-
-export const heightOptions = [
-  { id: 'h1', value: '1', label: 'Normal' },
-  { id: 'h2', value: '2', label: 'Duplo' },
-];

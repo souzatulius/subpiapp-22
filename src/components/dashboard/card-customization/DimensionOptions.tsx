@@ -49,7 +49,7 @@ const DimensionOptions: React.FC<DimensionOptionsProps> = ({ form }) => {
               <RadioGroup
                 value={field.value}
                 onValueChange={field.onChange}
-                className="flex gap-4"
+                className="flex flex-wrap gap-4"
               >
                 {heightOptions.map((option) => (
                   <div key={option.id} className="flex items-center space-x-1">

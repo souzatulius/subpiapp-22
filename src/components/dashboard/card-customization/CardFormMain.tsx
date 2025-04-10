@@ -29,7 +29,7 @@ export default function CardFormMain({ initialData, onSave, onCancel }: CardForm
       color: initialData?.color || "blue-light",
       iconId: initialData?.iconId || "Activity",
       width: initialData?.width || "25",
-      height: initialData?.height || "1",
+      height: (initialData?.height as "0.5" | "1" | "2" | "3" | "4") || "1",
       dataSourceKey: initialData?.dataSourceKey || "",
       displayMobile: initialData?.displayMobile !== false,
       mobileOrder: initialData?.mobileOrder || 0,
