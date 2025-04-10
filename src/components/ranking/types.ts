@@ -33,3 +33,20 @@ export interface FilterOptions {
   departamento?: string[];
   [key: string]: any;
 }
+
+export interface ChartItem {
+  id: string;
+  title: string;
+  component: React.ReactNode;
+  isVisible: boolean;
+  analysis?: string;
+  isAnalysisExpanded?: boolean;
+  showAnalysisOnly?: boolean;
+}
+
+export interface ChartFilter {
+  id: string;
+  label: string;
+  value: string;
+  isActive: boolean;
+}

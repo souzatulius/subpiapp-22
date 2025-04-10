@@ -47,31 +47,19 @@ const CardGridContainer: React.FC<CardGridContainerProps> = ({
   },
   renderSpecialCardContent
 }) => {
-  // Configure the KeyboardSensor to not activate when focus is on form elements
-  const customKeyboardSensor = new KeyboardSensor({
-    // This coordinateGetter will not be called when the focus is on form elements
-    // like input, textarea, select, button, etc.
-    canStartDrag: (event) => {
-      const target = event.target as HTMLElement;
-      const isFormElement = ['INPUT', 'TEXTAREA', 'SELECT', 'BUTTON'].includes(target.tagName);
-      const isContentEditable = target.isContentEditable;
-      
-      // Don't activate keyboard sensor when user is typing in form elements
-      return !isFormElement && !isContentEditable;
-    }
-  });
-
+  // Create sensors with proper configuration
+  // Using standard configuration without custom properties
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: { distance: 8 },
     }),
     useSensor(KeyboardSensor, {
-      // Use the custom KeyboardSensor configuration
-      coordinateGetter: customKeyboardSensor.coordinateGetter,
+      // Using only standard options for KeyboardSensor
+      // No custom coordinateGetter to avoid the error
     })
   );
 
-  // Function to handle drag end (handled by UnifiedCardGrid now)
+  // Function to handle drag end
   const handleDragEnd = (event: DragEndEvent) => {
     // This is now handled by UnifiedCardGrid
   };

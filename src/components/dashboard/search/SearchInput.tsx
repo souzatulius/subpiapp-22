@@ -40,6 +40,7 @@ const SearchInput: React.FC<SearchInputProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    e.stopPropagation(); // Prevent event from bubbling up to DndKit
     if (!query.trim()) return;
 
     if (suggestions.length > 0 && onSelectSuggestion) {
@@ -50,6 +51,7 @@ const SearchInput: React.FC<SearchInputProps> = ({
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    e.stopPropagation(); // Prevent event from bubbling up to DndKit
     const newValue = e.target.value;
     setQuery(newValue);
     
@@ -93,8 +95,13 @@ const SearchInput: React.FC<SearchInputProps> = ({
     }, 300);
   };
 
+  // Add click handler to stop propagation
+  const handleClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+  };
+
   return (
-    <div ref={containerRef} className="relative w-full">
+    <div ref={containerRef} className="relative w-full" onClick={handleClick}>
       <form onSubmit={handleSubmit}>
         <div className="relative">
           <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-6 w-6 text-orange-500 z-10" />
@@ -105,6 +112,7 @@ const SearchInput: React.FC<SearchInputProps> = ({
             value={query}
             onChange={handleInputChange}
             onKeyDown={handleKeyDown}
+            onClick={handleClick}
             onFocus={() => query.length >= 4 && suggestions.length > 0 && setShowSuggestions(true)}
             onBlur={handleBlur}
             className={`pl-14 pr-4 py-6 rounded-xl border border-gray-300 w-full bg-white text-xl text-gray-800 placeholder:text-gray-600 ${className}`}
