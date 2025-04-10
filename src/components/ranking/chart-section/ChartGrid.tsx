@@ -46,8 +46,10 @@ const ChartGrid: React.FC<ChartGridProps> = ({
           return null;
         }
         
-        // Use the proper accessor for the active node's bounding rectangle
-        return args.context.active?.rect?.current?.translated ?? null;
+        // Use the proper accessor for the active node's coordinates
+        // Return coordinates in the correct format (x, y) instead of ClientRect
+        const rect = args.context.active?.rect?.current?.translated;
+        return rect ? { x: rect.left, y: rect.top } : null;
       }
     })
   );

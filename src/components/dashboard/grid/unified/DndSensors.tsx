@@ -15,7 +15,10 @@ export const useDndSensors = () => {
           return null;
         }
         
-        return args.context.active?.rect?.current?.translated ?? null;
+        // Return coordinates in the correct format (Coordinates or null)
+        // Instead of returning ClientRect which is causing the type error
+        const rect = args.context.active?.rect?.current?.translated;
+        return rect ? { x: rect.left, y: rect.top } : null;
       }
     })
   );
