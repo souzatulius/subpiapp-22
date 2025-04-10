@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { 
   Dialog, 
   DialogContent, 
@@ -18,7 +18,7 @@ interface FilterDialogProps {
   isOpen: boolean;
   onClose: () => void;
   chartVisibility: ChartVisibility;
-  setChartVisibility: (visibility: ChartVisibility) => void;
+  setChartVisibility: React.Dispatch<React.SetStateAction<ChartVisibility>>;
 }
 
 const FilterDialog: React.FC<FilterDialogProps> = ({
@@ -29,10 +29,10 @@ const FilterDialog: React.FC<FilterDialogProps> = ({
 }) => {
   // Toggle individual chart visibility
   const handleToggleChart = (chartName: keyof ChartVisibility) => {
-    setChartVisibility({
-      ...chartVisibility,
-      [chartName]: !chartVisibility[chartName]
-    });
+    setChartVisibility(prevState => ({
+      ...prevState,
+      [chartName]: !prevState[chartName]
+    }));
   };
 
   // Reset all charts to visible

@@ -25,30 +25,11 @@ export interface ChartVisibility {
 }
 
 export interface FilterOptions {
-  dateRange?: {
-    from: Date | null;
-    to: Date | null;
-  };
-  status?: string[];
-  serviceTypes?: string[];
-  distritos?: string[];
-  // Add fields that are actually being used in the code
   dataInicio?: string;
   dataFim?: string;
+  status?: string[];
+  distritos?: string[];
   tiposServico?: string[];
   departamento?: string[];
-}
-
-export interface ChartFilter extends FilterOptions {
-  showSimulation?: boolean;
-}
-
-export interface ChartItem {
-  id: string;
-  title: string;
-  component: React.ReactNode;
-  isVisible: boolean;
-  analysis: string;
-  isAnalysisExpanded: boolean;
-  showAnalysisOnly: boolean;
+  [key: string]: any;
 }
