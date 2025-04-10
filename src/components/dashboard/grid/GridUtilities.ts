@@ -97,3 +97,13 @@ export const getMobileSpecificDimensions = (cardTitle: string): { width: CardWid
       return { width: '50' as CardWidth, height: '1' as CardHeight }; // Default size for mobile
   }
 };
+
+// Function to determine if a card can be placed next to a height-2 card
+export const canPlaceNextToHeightTwo = (occupiedSpace: boolean[][], startRow: number, startCol: number): boolean => {
+  // Check if the specified position is available for a height-1 card
+  if (startRow >= occupiedSpace.length) return false;
+  if (startCol >= 4) return false; // Grid has 4 columns max
+  
+  // Check if this specific position is free
+  return !occupiedSpace[startRow][startCol];
+};

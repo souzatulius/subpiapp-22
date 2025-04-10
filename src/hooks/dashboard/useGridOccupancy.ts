@@ -34,8 +34,11 @@ const widthToSlots = (width: string, isMobileView: boolean): number => {
 // Convert height string to number of slots
 const heightToSlots = (height: string): number => {
   switch (height) {
+    case '0.5': return 1;
     case '1': return 1;
     case '2': return 2;
+    case '3': return 3;
+    case '4': return 4;
     default: return 1;
   }
 };
@@ -85,8 +88,13 @@ export const useGridOccupancy = (cards: CardDimensions[], isMobileView: boolean)
       return;
     }
     
-    // Sort cards to ensure consistent placement
-    const sortedCards = [...cards];
+    // First pass: place height-2 cards
+    const sortedCards = [...cards].sort((a, b) => {
+      // Sort by height (descending) to place taller cards first
+      const heightA = parseInt(a.height || '1');
+      const heightB = parseInt(b.height || '1');
+      return heightB - heightA;
+    });
     
     // Place each card in the grid
     sortedCards.forEach(card => {
@@ -106,7 +114,18 @@ export const useGridOccupancy = (cards: CardDimensions[], isMobileView: boolean)
         // Try to place the card at each column position
         for (let colIndex = 0; colIndex <= totalColumns - cardWidth; colIndex++) {
           if (canPlaceCard(newOccupiedSlots, rowIndex, colIndex, cardWidth, cardHeight)) {
-            // Place the card
+            // Special handling for height-1 cards that could fit beside height-2 cards
+            if (cardHeight === 1 && cardWidth === 1) {
+              // Look for adjacent height-2 card slots
+              const adjacentSlot = findAdjacentToHeightTwoSlot(newOccupiedSlots, rowIndex);
+              if (adjacentSlot !== -1) {
+                placeCard(newOccupiedSlots, rowIndex, adjacentSlot, cardWidth, cardHeight);
+                placed = true;
+                break;
+              }
+            }
+            
+            // Standard placement
             placeCard(newOccupiedSlots, rowIndex, colIndex, cardWidth, cardHeight);
             placed = true;
             break;
@@ -139,6 +158,26 @@ export const useGridOccupancy = (cards: CardDimensions[], isMobileView: boolean)
       }
     }
     return true; // All required slots are free
+  };
+  
+  // Find a slot adjacent to a height-2 card if available
+  const findAdjacentToHeightTwoSlot = (
+    grid: boolean[][],
+    rowIndex: number
+  ): number => {
+    if (grid.length <= rowIndex || rowIndex + 1 >= grid.length) return -1;
+    
+    for (let col = 0; col < 4; col++) {
+      // Check if this column is free in current row
+      if (!grid[rowIndex][col]) {
+        // Check if the same column one row below is occupied
+        // This would indicate a height-2 card is present
+        if (grid[rowIndex + 1] && grid[rowIndex + 1][col]) {
+          return col;
+        }
+      }
+    }
+    return -1;
   };
   
   // Mark slots as occupied by a card
