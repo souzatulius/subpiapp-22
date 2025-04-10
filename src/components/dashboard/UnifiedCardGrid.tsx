@@ -68,7 +68,7 @@ const UnifiedCardGrid: React.FC<UnifiedCardGridProps> = ({
           return null;
         }
         
-        return args.context.activeNodeRect;
+        return args.context.activeNode ? args.context.activeNode.node.getBoundingClientRect() : null;
       }
     })
   );

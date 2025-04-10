@@ -47,7 +47,7 @@ const ChartGrid: React.FC<ChartGridProps> = ({
         }
         
         // Use the default coordinate getter for other elements
-        return args.context.activeNodeRect;
+        return args.context.activeNode ? args.context.activeNode.node.getBoundingClientRect() : null;
       }
     })
   );
