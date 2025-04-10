@@ -1,12 +1,12 @@
 
 // Import the necessary dependencies correctly
-import { UseSortableArguments, UseSortableReturn } from '@dnd-kit/sortable';
+import { useSortable } from '@dnd-kit/sortable';
 
-// Define the SortableProps type without using ReturnType
+// Define the SortableProps type using the correct approach
 export interface SortableProps {
-  attributes: UseSortableReturn['attributes'];
-  listeners: UseSortableReturn['listeners'];
-  setNodeRef: UseSortableReturn['setNodeRef'];
+  attributes: ReturnType<typeof useSortable>['attributes'];
+  listeners: ReturnType<typeof useSortable>['listeners'];
+  setNodeRef: ReturnType<typeof useSortable>['setNodeRef'];
 }
 
 // Add any other types that might be needed for card components
