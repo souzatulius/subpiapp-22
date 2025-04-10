@@ -1,5 +1,5 @@
 
-import { CardColor, CardType, DataSourceKey } from './dashboard';
+import { CardColor, CardType, DataSourceKey, CardWidth, CardHeight } from './dashboard';
 
 export interface FormSchema {
   title: string;
@@ -7,9 +7,9 @@ export interface FormSchema {
   type?: CardType;
   path?: string;
   color: CardColor;
-  iconId?: string;
-  width?: '25' | '50' | '75' | '100';
-  height?: '1' | '2';
+  iconId: string;
+  width?: CardWidth;
+  height?: CardHeight;
   dataSourceKey?: DataSourceKey;
   displayMobile?: boolean;
   mobileOrder?: number;

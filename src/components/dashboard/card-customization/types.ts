@@ -1,7 +1,7 @@
 
 import { z } from 'zod';
 import { ReactNode } from 'react';
-import { CardColor, CardType } from '@/types/dashboard';
+import { CardColor, CardType, CardHeight, CardWidth } from '@/types/dashboard';
 
 export const formSchema = z.object({
   title: z.string().min(2, "Título deve ter pelo menos 2 caracteres").max(50, "Título deve ter no máximo 50 caracteres"),
@@ -26,12 +26,13 @@ export interface CardCustomizationModalProps {
   onClose: () => void;
   onSave: (data: {
     title: string;
+    subtitle?: string;
     type?: CardType;
-    icon: ReactNode;
     path?: string;
     color: CardColor;
-    width?: "25" | "50" | "75" | "100";
-    height?: "0.5" | "1" | "2" | "3" | "4";
+    iconId: string;
+    width?: CardWidth;
+    height?: CardHeight;
     dataSourceKey?: string;
     displayMobile?: boolean;
     mobileOrder?: number;

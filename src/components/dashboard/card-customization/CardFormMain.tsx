@@ -4,7 +4,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
-import { formSchema, FormSchema } from "./types";
+import { FormSchema } from "@/types/formSchema";
+import { formSchema } from "./types";
 import CardFormFields from "./CardFormFields";
 import CardFormPreview from "./CardFormPreview";
 
@@ -29,7 +30,7 @@ export default function CardFormMain({ initialData, onSave, onCancel }: CardForm
       color: initialData?.color || "blue-light",
       iconId: initialData?.iconId || "Activity",
       width: initialData?.width || "25",
-      height: (initialData?.height as "0.5" | "1" | "2" | "3" | "4") || "1",
+      height: initialData?.height || "1",
       dataSourceKey: initialData?.dataSourceKey || "",
       displayMobile: initialData?.displayMobile !== false,
       mobileOrder: initialData?.mobileOrder || 0,

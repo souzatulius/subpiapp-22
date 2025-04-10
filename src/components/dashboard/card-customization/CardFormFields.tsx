@@ -1,4 +1,3 @@
-
 import { UseFormReturn } from "react-hook-form";
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
@@ -8,7 +7,6 @@ import { FormSchema } from "@/types/formSchema";
 import IconSelector from "./IconSelector";
 import ColorOptions from "./ColorOptions";
 import DimensionOptions from "./DimensionOptions";
-import { Label } from "@/components/ui/label";
 
 interface CardFormFieldsProps {
   form: UseFormReturn<FormSchema>;

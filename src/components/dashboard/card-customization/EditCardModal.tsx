@@ -8,7 +8,7 @@ import { X, AlertCircle } from "lucide-react";
 import { useState, useEffect } from "react";
 import { formSchema } from "./types";
 import CardFormFields from "./CardFormFields";
-import { ActionCardItem } from "@/types/dashboard";
+import { ActionCardItem, CardHeight } from "@/types/dashboard";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { FormSchema } from "@/types/formSchema";
 
@@ -32,8 +32,8 @@ function EditCardModal({ isOpen, onClose, onSave, card }: EditCardModalProps) {
       path: card.path || "",
       color: card.color,
       iconId: card.iconId,
-      width: (card.width as "25" | "50" | "75" | "100") || "25",
-      height: (card.height as "0.5" | "1" | "2" | "3" | "4") || "1",
+      width: (card.width as CardWidth) || "25",
+      height: (card.height as CardHeight) || "1",
       dataSourceKey: card.dataSourceKey || "",
       displayMobile: card.displayMobile !== false,
       mobileOrder: card.mobileOrder || 0,
@@ -52,8 +52,8 @@ function EditCardModal({ isOpen, onClose, onSave, card }: EditCardModalProps) {
         path: card.path || "",
         color: card.color,
         iconId: card.iconId,
-        width: (card.width as "25" | "50" | "75" | "100") || "25",
-        height: (card.height as "0.5" | "1" | "2" | "3" | "4") || "1",
+        width: (card.width as CardWidth) || "25",
+        height: (card.height as CardHeight) || "1",
         dataSourceKey: card.dataSourceKey || "",
         displayMobile: card.displayMobile !== false,
         mobileOrder: card.mobileOrder || 0,
@@ -85,7 +85,7 @@ function EditCardModal({ isOpen, onClose, onSave, card }: EditCardModalProps) {
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-4xl w-[80vw] max-h-[80vh] overflow-y-auto bg-gradient-to-b from-white to-gray-50 rounded-xl border border-gray-200 shadow-lg">
         <DialogHeader className="border-b border-gray-200 pb-4">
-          <DialogTitle className="text-xl font-semibold text-subpi-blue">Personalizar Card</DialogTitle>
+          <DialogTitle className="text-xl font-semibold text-blue-600">Personalizar Card</DialogTitle>
           <Button
             variant="ghost"
             size="icon"

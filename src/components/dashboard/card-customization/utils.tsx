@@ -91,27 +91,104 @@ export const dashboardPages = [
   { value: '/settings?tab=areas', label: 'Áreas de Coordenação (Configurações)' },
 ];
 
-export const iconsData = [
-  { id: 'clipboard-list', label: 'Cadastrar Demanda', component: <Clipboard className="h-5 w-5" /> },
-  { id: 'message-square', label: 'Responder Demanda', component: <MessageSquare className="h-5 w-5" /> },
-  { id: 'file-text', label: 'Criar Nota Oficial', component: <FileText className="h-5 w-5" /> },
-  { id: 'check-circle', label: 'Aprovar Nota Oficial', component: <CheckCircle className="h-5 w-5" /> },
-  { id: 'search', label: 'Consultar Notas', component: <Search className="h-5 w-5" /> },
-  { id: 'list', label: 'Consultar Demandas', component: <List className="h-5 w-5" /> },
-  { id: 'layout-dashboard', label: 'Dashboard', component: <Home className="h-5 w-5" /> },
-  { id: 'settings', label: 'Configurações', component: <Settings className="h-5 w-5" /> },
-  { id: 'users', label: 'Usuários', component: <User className="h-5 w-5" /> },
-  { id: 'bell', label: 'Notificações', component: <Bell className="h-5 w-5" /> },
-  { id: 'briefcase', label: 'Cargos', component: <Briefcase className="h-5 w-5" /> },
-  { id: 'file-stack', label: 'Serviços', component: <FileText className="h-5 w-5" /> },
-  { id: 'image', label: 'Tipos de Mídia', component: <Image className="h-5 w-5" /> },
-  { id: 'inbox', label: 'Origem das Demandas', component: <Box className="h-5 w-5" /> },
-  { id: 'map-pin', label: 'Distritos e Bairros', component: <MapPin className="h-5 w-5" /> },
+// Add the icons data
+const iconsData = [
+  { id: 'Activity', component: Activity },
+  { id: 'Archive', component: Archive },
+  { id: 'Award', component: Award },
+  { id: 'BarChart', component: BarChart },
+  { id: 'BarChart2', component: BarChart2 },
+  { id: 'Bell', component: Bell },
+  { id: 'Box', component: Box },
+  { id: 'BookOpen', component: BookOpen },
+  { id: 'Briefcase', component: Briefcase },
+  { id: 'Calendar', component: Calendar },
+  { id: 'Camera', component: Camera },
+  { id: 'Cast', component: Cast },
+  { id: 'CheckCircle', component: CheckCircle },
+  { id: 'Clipboard', component: Clipboard },
+  { id: 'Clock', component: Clock },
+  { id: 'Coffee', component: Coffee },
+  { id: 'Command', component: Command },
+  { id: 'Compass', component: Compass },
+  { id: 'CreditCard', component: CreditCard },
+  { id: 'Database', component: Database },
+  { id: 'Download', component: Download },
+  { id: 'Edit', component: Edit },
+  { id: 'Eye', component: Eye },
+  { id: 'Facebook', component: Facebook },
+  { id: 'FileText', component: FileText },
+  { id: 'Filter', component: Filter },
+  { id: 'Folder', component: Folder },
+  { id: 'Gift', component: Gift },
+  { id: 'Github', component: Github },
+  { id: 'Globe', component: Globe },
+  { id: 'Heart', component: Heart },
+  { id: 'HelpCircle', component: HelpCircle },
+  { id: 'Home', component: Home },
+  { id: 'Image', component: Image },
+  { id: 'Info', component: Info },
+  { id: 'Instagram', component: Instagram },
+  { id: 'Key', component: Key },
+  { id: 'Layers', component: Layers },
+  { id: 'LifeBuoy', component: LifeBuoy },
+  { id: 'Link', component: Link },
+  { id: 'Linkedin', component: Linkedin },
+  { id: 'List', component: List },
+  { id: 'Lock', component: Lock },
+  { id: 'Mail', component: Mail },
+  { id: 'Map', component: Map },
+  { id: 'MapPin', component: MapPin },
+  { id: 'MessageSquare', component: MessageSquare },
+  { id: 'Monitor', component: Monitor },
+  { id: 'Music', component: Music },
+  { id: 'Package', component: Package },
+  { id: 'Paperclip', component: Paperclip },
+  { id: 'PenTool', component: PenTool },
+  { id: 'Percent', component: Percent },
+  { id: 'Phone', component: Phone },
+  { id: 'PieChart', component: PieChart },
+  { id: 'Printer', component: Printer },
+  { id: 'Radio', component: Radio },
+  { id: 'RefreshCw', component: RefreshCw },
+  { id: 'Save', component: Save },
+  { id: 'Search', component: Search },
+  { id: 'Send', component: Send },
+  { id: 'Server', component: Server },
+  { id: 'Settings', component: Settings },
+  { id: 'Share2', component: Share2 },
+  { id: 'ShoppingCart', component: ShoppingCart },
+  { id: 'Slash', component: Slash },
+  { id: 'Sliders', component: Sliders },
+  { id: 'Smartphone', component: Smartphone },
+  { id: 'Speaker', component: Speaker },
+  { id: 'Square', component: Square },
+  { id: 'Star', component: Star },
+  { id: 'Tag', component: Tag },
+  { id: 'Target', component: Target },
+  { id: 'Terminal', component: Terminal },
+  { id: 'ThumbsUp', component: ThumbsUp },
+  { id: 'Trash2', component: Trash2 },
+  { id: 'Truck', component: Truck },
+  { id: 'Tv', component: Tv },
+  { id: 'Twitter', component: Twitter },
+  { id: 'Umbrella', component: Umbrella },
+  { id: 'Upload', component: Upload },
+  { id: 'User', component: User },
+  { id: 'Video', component: Video },
+  { id: 'Wifi', component: Wifi },
+  { id: 'Youtube', component: Youtube },
+  { id: 'Zap', component: Zap },
 ];
+
+// Add the getAllIcons function
+export const getAllIcons = () => {
+  return iconsData;
+};
 
 export const getIconComponentById = (id: string): JSX.Element => {
   const icon = iconsData.find(icon => icon.id === id);
-  return icon?.component || <Clipboard className="h-5 w-5" />;
+  return icon?.component ? React.createElement(icon.component, { className: "h-5 w-5" }) : <Clipboard className="h-5 w-5" />;
 };
 
 export const identifyIconComponent = (icon: React.ReactNode): string => {
@@ -125,5 +202,5 @@ export const identifyIconComponent = (icon: React.ReactNode): string => {
     }
   }
   
-  return 'clipboard-list';
+  return 'Activity';
 };
