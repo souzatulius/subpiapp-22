@@ -57,7 +57,20 @@ const UnifiedCardGrid: React.FC<UnifiedCardGridProps> = ({
 }) => {
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
-    useSensor(KeyboardSensor)
+    useSensor(KeyboardSensor, {
+      coordinateGetter: (event, args) => {
+        const target = event.target as HTMLElement;
+        const isInputElement = target.tagName.toLowerCase() === 'input' || 
+                              target.tagName.toLowerCase() === 'textarea' ||
+                              target.isContentEditable;
+
+        if (isInputElement) {
+          return null;
+        }
+        
+        return args.context.activeNodeRect;
+      }
+    })
   );
 
   const handleDragEnd = (event: DragEndEvent) => {

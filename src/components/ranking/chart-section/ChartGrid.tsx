@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { DndContext, closestCenter, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
+import { DndContext, closestCenter, PointerSensor, useSensor, useSensors, KeyboardSensor } from '@dnd-kit/core';
 import { SortableContext } from '@dnd-kit/sortable';
 import { ChartItem } from '../hooks/useChartItemsState';
 import SortableChartCard from '../chart-components/SortableChartCard';
@@ -28,10 +28,27 @@ const ChartGrid: React.FC<ChartGridProps> = ({
   handleToggleView,
   disableCardContainers = false
 }) => {
-  // Set up DnD sensors
+  // Set up DnD sensors with proper configuration
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: { distance: 5 },
+    }),
+    useSensor(KeyboardSensor, {
+      // Add a custom coordinateGetter to prevent keyboard handling when focus is on input/textarea
+      coordinateGetter: (event, args) => {
+        const target = event.target as HTMLElement;
+        const isInputElement = target.tagName.toLowerCase() === 'input' || 
+                              target.tagName.toLowerCase() === 'textarea' ||
+                              target.isContentEditable;
+
+        if (isInputElement) {
+          // Return null to prevent DnD operation when focus is on input elements
+          return null;
+        }
+        
+        // Use the default coordinate getter for other elements
+        return args.context.activeNodeRect;
+      }
     })
   );
   

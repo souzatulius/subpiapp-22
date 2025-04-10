@@ -48,14 +48,26 @@ const CardGridContainer: React.FC<CardGridContainerProps> = ({
   renderSpecialCardContent
 }) => {
   // Create sensors with proper configuration
-  // Using standard configuration without custom properties
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: { distance: 8 },
     }),
     useSensor(KeyboardSensor, {
-      // Using only standard options for KeyboardSensor
-      // No custom coordinateGetter to avoid the error
+      // Add a custom coordinateGetter to prevent keyboard handling when focus is on input/textarea
+      coordinateGetter: (event, args) => {
+        const target = event.target as HTMLElement;
+        const isInputElement = target.tagName.toLowerCase() === 'input' || 
+                              target.tagName.toLowerCase() === 'textarea' ||
+                              target.isContentEditable;
+
+        if (isInputElement) {
+          // Return null to prevent DnD operation when focus is on input elements
+          return null;
+        }
+        
+        // Use the default coordinate getter for other elements
+        return args.context.activeNodeRect;
+      }
     })
   );
 
