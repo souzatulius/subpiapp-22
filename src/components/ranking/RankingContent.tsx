@@ -10,9 +10,6 @@ import InsightsPanel from './insights/InsightsPanel';
 import DashboardCards from './insights/DashboardCards';
 import RankingTabs from './tabs/RankingTabs';
 import { ChartConfig } from '@/types/ranking';
-import OriginsDemandChart from '@/components/dashboard/cards/OriginsDemandChart';
-
-// Remove the RankingProgressCard import as it's not being used directly here
 
 interface RankingContentProps {
   filterDialogOpen: boolean;
@@ -105,11 +102,6 @@ const RankingContent: React.FC<RankingContentProps> = ({
             Filtrar
           </Button>
         </div>
-      </div>
-
-      {/* Origin Demand Chart */}
-      <div className={`${disableCardContainers ? '' : 'kpi-container'} ${className}`}>
-        <OriginsDemandChart />
       </div>
 
       {/* Charts Grid */}
