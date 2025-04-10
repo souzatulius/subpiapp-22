@@ -1,4 +1,3 @@
-
 import React, { useCallback } from 'react';
 import {
   DndContext,
@@ -86,7 +85,6 @@ const UnifiedCardGrid: React.FC<UnifiedCardGridProps> = ({
         .sort((a, b) => (a.mobileOrder ?? 999) - (b.mobileOrder ?? 999))
     : visibleCards;
 
-  // Memoize this function to avoid unnecessary recalculations
   const processCardDimensions = useCallback((card: ActionCardItem) => {
     if (isMobileView) {
       const mobileSpecific = getMobileSpecificDimensions(card.title);
@@ -164,11 +162,20 @@ const UnifiedCardGrid: React.FC<UnifiedCardGridProps> = ({
 
     if (card.type === 'origin_demand_chart' || card.id === 'origem-demandas-card' || 
         card.title === "Atividades em Andamento") {
-      return <OriginsDemandCardWrapper className="w-full h-full" />;
+      return <OriginsDemandCardWrapper 
+        className="w-full h-full" 
+        color={card.color}
+        title={card.title}
+        subtitle={card.subtitle}
+      />;
     }
     
     if (card.type === 'pending_activities' || card.id === 'pending-activities-card') {
-      return <PendingActivitiesCard />;
+      return <PendingActivitiesCard 
+        color={card.color}
+        title={card.title}
+        subtitle={card.subtitle}
+      />;
     }
     
     return null;

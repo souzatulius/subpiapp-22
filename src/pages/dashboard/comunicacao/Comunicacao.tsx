@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useAuth } from '@/hooks/useSupabaseAuth';
 import { MessageSquareReply, RotateCcw } from 'lucide-react';
@@ -125,13 +124,25 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
   }
 
   const renderSpecialCardContent = (card: string | ActionCardItem) => {
-    // Check if it's a special chart card
     if (typeof card === 'string') {
-      if (card === 'origem-demandas-card' || card.includes('origem-demandas') || card.includes('origemDemandas') || card.includes('origin-demand-chart')) {
-        return <OriginsDemandChartCompact className="w-full h-full" />;
+      const foundCard = cards.find(c => c.id === card);
+      
+      if (card === 'origem-demandas-card' || card.includes('origem-demandas') || 
+          card.includes('origemDemandas') || card.includes('origin-demand-chart')) {
+        return <OriginsDemandChartCompact 
+          className="w-full h-full" 
+          color={foundCard?.color} 
+          title={foundCard?.title} 
+          subtitle={foundCard?.subtitle} 
+        />;
       }
     } else if (card.type === 'origin_demand_chart') {
-      return <OriginsDemandChartCompact className="w-full h-full" />;
+      return <OriginsDemandChartCompact 
+        className="w-full h-full" 
+        color={card.color} 
+        title={card.title} 
+        subtitle={card.subtitle} 
+      />;
     }
     
     return null;

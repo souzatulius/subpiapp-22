@@ -180,12 +180,21 @@ const DashboardPage: React.FC = () => {
   }, [cards, isMobile, handleCardsChange]);
 
   const renderSpecialCardContent = (cardId: string) => {
+    const card = cards.find(c => c.id === cardId);
+    
+    if (!card) return null;
+    
     if (cardId === 'origem-demandas-card' || 
         cardId.includes('origem-demandas') || 
         cardId.includes('origemDemandas') ||
         cardId.includes('origin-demand-chart') ||
         cardId.includes('origin_demand_chart')) {
-      return <OriginsDemandCardWrapper className="w-full h-full" />;
+      return <OriginsDemandCardWrapper 
+        className="w-full h-full" 
+        color={card.color}
+        title={card.title}
+        subtitle={card.subtitle}
+      />;
     }
     return null;
   };

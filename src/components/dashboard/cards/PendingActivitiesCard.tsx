@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Clock, AlertTriangle } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { getColorClass } from '@/components/dashboard/card-customization/utils';
 
 interface PendingItem {
   id: string;
@@ -11,9 +12,20 @@ interface PendingItem {
   createdAt: string;
 }
 
-const PendingActivitiesCard: React.FC = () => {
+interface PendingActivitiesCardProps {
+  color?: string;
+  title?: string;
+  subtitle?: string;
+}
+
+const PendingActivitiesCard: React.FC<PendingActivitiesCardProps> = ({
+  color = 'orange-light',
+  title = 'Atividades Pendentes',
+  subtitle
+}) => {
   const [pendingItems, setPendingItems] = useState<PendingItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const bgColorClass = getColorClass(color);
 
   useEffect(() => {
     const fetchPendingItems = async () => {
@@ -80,7 +92,11 @@ const PendingActivitiesCard: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="flex flex-col space-y-3 p-3 h-full">
+      <div className={`flex flex-col space-y-3 p-3 h-full ${bgColorClass} rounded-xl`}>
+        <div className="mb-2">
+          <h3 className="font-semibold text-lg">{title}</h3>
+          {subtitle && <p className="text-sm opacity-80">{subtitle}</p>}
+        </div>
         {[1, 2, 3].map(i => (
           <div key={i} className="animate-pulse flex items-center space-x-2">
             <div className="rounded-full bg-gray-200 h-4 w-4"></div>
@@ -93,34 +109,47 @@ const PendingActivitiesCard: React.FC = () => {
 
   if (pendingItems.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center h-full p-4">
-        <Clock className="h-8 w-8 text-gray-300 mb-2" />
-        <p className="text-gray-500 text-sm text-center">Não há atividades pendentes</p>
+      <div className={`flex flex-col h-full ${bgColorClass} rounded-xl p-4`}>
+        <div className="mb-2">
+          <h3 className="font-semibold text-lg">{title}</h3>
+          {subtitle && <p className="text-sm opacity-80">{subtitle}</p>}
+        </div>
+        <div className="flex flex-col items-center justify-center h-full p-4">
+          <Clock className="h-8 w-8 opacity-30 mb-2" />
+          <p className="text-opacity-70 text-sm text-center">Não há atividades pendentes</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col space-y-2 p-3 h-full">
-      {pendingItems.map(item => (
-        <div 
-          key={item.id}
-          className="flex items-start space-x-2 p-2 rounded-md hover:bg-gray-50 transition-colors"
-        >
-          <AlertTriangle 
-            className={cn(
-              "h-4 w-4 mt-0.5",
-              item.type === 'demand' ? "text-amber-500" : "text-blue-500"
-            )} 
-          />
-          <div>
-            <p className="text-sm font-medium line-clamp-2">{item.title}</p>
-            <p className="text-xs text-gray-500">
-              {item.type === 'demand' ? 'Demanda pendente' : 'Nota para aprovação'}
-            </p>
+    <div className={`flex flex-col h-full ${bgColorClass} rounded-xl p-3`}>
+      <div className="mb-2">
+        <h3 className="font-semibold text-lg">{title}</h3>
+        {subtitle && <p className="text-sm opacity-80">{subtitle}</p>}
+      </div>
+
+      <div className="flex-1 space-y-2">
+        {pendingItems.map(item => (
+          <div 
+            key={item.id}
+            className="flex items-start space-x-2 p-2 rounded-md bg-white bg-opacity-30 hover:bg-opacity-50 transition-colors"
+          >
+            <AlertTriangle 
+              className={cn(
+                "h-4 w-4 mt-0.5",
+                item.type === 'demand' ? "text-amber-500" : "text-blue-500"
+              )} 
+            />
+            <div>
+              <p className="text-sm font-medium line-clamp-2">{item.title}</p>
+              <p className="text-xs opacity-70">
+                {item.type === 'demand' ? 'Demanda pendente' : 'Nota para aprovação'}
+              </p>
+            </div>
           </div>
-        </div>
-      ))}
+        ))}
+      </div>
     </div>
   );
 };

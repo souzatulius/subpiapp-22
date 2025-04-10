@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useDemandasPorCoordenacao } from '@/hooks/dashboard/useDemandasPorCoordenacao';
 import GroupedBarChart from '@/components/dashboard/charts/GroupedBarChart';
@@ -6,10 +5,16 @@ import { Loader2 } from 'lucide-react';
 
 interface OriginsDemandChartCompactProps {
   className?: string;
+  color?: string;
+  title?: string;
+  subtitle?: string;
 }
 
 const OriginsDemandChartCompact: React.FC<OriginsDemandChartCompactProps> = ({ 
-  className = ''
+  className = '',
+  color,
+  title,
+  subtitle
 }) => {
   const { chartData, isLoading, error, refresh } = useDemandasPorCoordenacao();
 
