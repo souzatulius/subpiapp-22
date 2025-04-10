@@ -2,7 +2,6 @@
 import React from 'react';
 import { DndContext, closestCenter } from '@dnd-kit/core';
 import { SortableContext } from '@dnd-kit/sortable';
-import { useSensors, useSensor, PointerSensor, KeyboardSensor } from '@dnd-kit/core';
 import { ChartItem } from '../hooks/useChartItemsState';
 import SortableChartCard from '../chart-components/SortableChartCard';
 
@@ -82,5 +81,8 @@ const ChartGrid: React.FC<ChartGridProps> = ({
     </DndContext>
   );
 };
+
+// Import the necessary dependencies at the top of the file
+import { useSensors, useSensor, PointerSensor, KeyboardSensor } from '@dnd-kit/core';
 
 export default ChartGrid;
