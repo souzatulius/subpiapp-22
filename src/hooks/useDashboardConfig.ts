@@ -59,6 +59,19 @@ export const useDashboardConfig = (): DashboardConfigResult => {
           type: 'origin_demand_chart',
           displayMobile: true,
           mobileOrder: 5
+        },
+        {
+          id: 'acoes-pendentes-card',
+          title: 'Ações Pendentes',
+          iconId: 'AlertTriangle',
+          path: '',
+          color: 'bg-white',
+          width: '25',
+          height: '2',
+          type: 'pending_tasks',
+          isPendingTasks: true,
+          displayMobile: true,
+          mobileOrder: 3
         }
       ];
 

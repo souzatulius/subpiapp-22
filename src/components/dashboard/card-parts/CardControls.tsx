@@ -1,10 +1,13 @@
+
 import React from 'react';
 import { Pencil, X, EyeOff } from 'lucide-react';
+
 interface CardControlsProps {
   onDelete?: () => void;
   onEdit?: () => void;
   onHide?: () => void;
 }
+
 const CardControls: React.FC<CardControlsProps> = ({
   onDelete,
   onEdit,
@@ -33,4 +36,5 @@ const CardControls: React.FC<CardControlsProps> = ({
         </button>}
     </div>;
 };
+
 export default CardControls;

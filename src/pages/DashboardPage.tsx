@@ -19,6 +19,7 @@ import { motion } from 'framer-motion';
 import { useCardStorage } from '@/hooks/dashboard/useCardStorage';
 import OriginsDemandChartCompact from '@/components/dashboard/cards/OriginsDemandChartCompact';
 import OriginsDemandCardWrapper from '@/components/dashboard/cards/OriginsDemandCardWrapper';
+import PendingTasksCard from '@/components/dashboard/cards/PendingTasksCard';
 
 const DashboardPage: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -175,6 +176,16 @@ const DashboardPage: React.FC = () => {
         subtitle={card.subtitle}
       />;
     }
+    
+    if (cardId === 'acoes-pendentes-card' || cardId.includes('acoes-pendentes') || card.isPendingTasks) {
+      return <PendingTasksCard 
+        id={card.id} 
+        title={card.title} 
+        userDepartmentId={userCoordenaticaoId} 
+        isComunicacao={userCoordenaticaoId === 'comunicacao'} 
+      />;
+    }
+    
     return null;
   };
 

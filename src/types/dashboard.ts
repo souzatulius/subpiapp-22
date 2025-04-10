@@ -1,4 +1,3 @@
-
 export type CardWidth = '25' | '50' | '75' | '100';
 export type CardHeight = '0.5' | '1' | '2' | '3' | '4';
 export type CardColor = 
@@ -34,7 +33,8 @@ export type CardType =
   | 'smart_search'
   | 'origin_demand_chart'
   | 'communications'
-  | 'pending_activities';
+  | 'pending_actions'
+  | 'pending_tasks';
 
 export type DataSourceKey = 
   | 'pendencias_por_coordenacao' 
@@ -78,4 +78,5 @@ export interface ActionCardItem {
   badgeValue?: number;
   subtitle?: string;
   chartId?: string;
+  isPendingTasks?: boolean;
 }

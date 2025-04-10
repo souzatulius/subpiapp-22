@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useAuth } from '@/hooks/useSupabaseAuth';
 import { MessageSquareReply, RotateCcw } from 'lucide-react';
@@ -17,6 +16,7 @@ import { useOriginOptions } from '@/hooks/dashboard-management/useOriginOptions'
 import { useOrigens } from '@/hooks/comunicacao/useOrigens';
 import { useOriginIcon } from '@/hooks/useOriginIcon';
 import OriginsDemandChartCompact from '@/components/dashboard/cards/OriginsDemandChartCompact';
+import PendingTasksCard from '@/components/dashboard/cards/PendingTasksCard';
 
 interface ComunicacaoDashboardProps {
   isPreview?: boolean;
