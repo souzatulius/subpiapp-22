@@ -79,7 +79,7 @@ const ComunicadosCard: React.FC<ComunicadosCardProps> = ({
 
   if (isLoading) {
     return (
-      <div className="flex flex-col space-y-3 p-4 h-full">
+      <div className="flex flex-col space-y-3 p-4 h-full border border-gray-100 rounded-xl shadow-md">
         {[1, 2, 3].map(i => (
           <div key={i} className="animate-pulse flex flex-col space-y-2">
             <div className="h-4 bg-gray-200 rounded w-2/3"></div>
@@ -92,8 +92,8 @@ const ComunicadosCard: React.FC<ComunicadosCardProps> = ({
 
   if (comunicados.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center h-full p-4">
-        <Megaphone className="h-8 w-8 text-gray-300 mb-2" />
+      <div className="flex flex-col items-center justify-center h-full p-4 border border-gray-100 rounded-xl shadow-md">
+        <Megaphone className="h-12 w-12 text-gray-300 mb-2" />
         <p className="text-gray-500 text-sm text-center">Não há comunicados recentes</p>
         <Button 
           variant="outline" 
@@ -109,7 +109,7 @@ const ComunicadosCard: React.FC<ComunicadosCardProps> = ({
   }
 
   return (
-    <div className={`flex flex-col h-full ${className}`}>
+    <div className={`flex flex-col h-full border border-gray-100 rounded-xl shadow-md ${className}`}>
       <div className="flex-1 overflow-auto p-4">
         <h3 className="font-bold mb-4 text-lg">{title}</h3>
         <div className="space-y-3">

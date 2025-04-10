@@ -1,4 +1,3 @@
-
 import React, { useCallback } from 'react';
 import {
   DndContext,
@@ -18,6 +17,8 @@ import PendingActivitiesCard from './cards/PendingActivitiesCard';
 import OriginsDemandCardWrapper from './cards/OriginsDemandCardWrapper';
 import PendingTasksCard from './cards/PendingTasksCard';
 import ComunicadosCard from './cards/ComunicadosCard';
+import UserProfileCard from './cards/UserProfileCard';
+import NotificationSettingsCard from './cards/NotificationSettingsCard';
 
 export interface UnifiedCardGridProps {
   cards: ActionCardItem[];
@@ -118,7 +119,7 @@ const UnifiedCardGrid: React.FC<UnifiedCardGridProps> = ({
           width: '50' as CardWidth,
           height: '2' as CardHeight
         };
-      } else if (card.title === "Demandas") {
+      } else if (card.title === "Demandas" || card.title === "Área da Comunicação") {
         return {
           ...card,
           width: '25' as CardWidth,
@@ -164,6 +165,9 @@ const UnifiedCardGrid: React.FC<UnifiedCardGridProps> = ({
     }
 
     if (card.type === 'origin_demand_chart' || card.id === 'origem-demandas-card' || 
+        card.id.includes('origem-demandas') || 
+        card.id.includes('origemDemandas') ||
+        card.id.includes('origin-demand-chart') ||
         card.title === "Atividades em Andamento") {
       return <OriginsDemandCardWrapper 
         className="w-full h-full" 
@@ -194,7 +198,21 @@ const UnifiedCardGrid: React.FC<UnifiedCardGridProps> = ({
       return <ComunicadosCard 
         id={card.id}
         title={card.title}
-        className="w-full h-full"
+        className="w-full h-full shadow-md border border-gray-100 rounded-xl"
+      />;
+    }
+    
+    if (card.type === 'user_profile' || card.isUserProfile) {
+      return <UserProfileCard
+        id={card.id}
+        title={card.title}
+      />;
+    }
+    
+    if (card.type === 'notification_settings' || card.isNotificationSettings) {
+      return <NotificationSettingsCard
+        id={card.id}
+        title={card.title}
       />;
     }
     
@@ -251,6 +269,8 @@ const UnifiedCardGrid: React.FC<UnifiedCardGridProps> = ({
                   hasSubtitle={!!card.subtitle}
                   isMobileView={isMobileView}
                   isPendingActions={card.isPendingActions}
+                  isUserProfile={card.isUserProfile}
+                  isNotificationSettings={card.isNotificationSettings}
                   specialContent={specialContent}
                 />
               </div>

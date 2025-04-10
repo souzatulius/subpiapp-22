@@ -35,7 +35,9 @@ export type CardType =
   | 'origin_demand_chart'
   | 'communications'
   | 'pending_actions'
-  | 'pending_tasks';
+  | 'pending_tasks'
+  | 'user_profile'
+  | 'notification_settings';
 
 export type DataSourceKey = 
   | 'pendencias_por_coordenacao' 
@@ -82,5 +84,7 @@ export interface ActionCardItem {
   isPendingTasks?: boolean;
   departmentId?: string;
   isComunicacao?: boolean;
-  isComunicados?: boolean; // Nova flag para identificar o card de Comunicados
+  isComunicados?: boolean;
+  isUserProfile?: boolean;
+  isNotificationSettings?: boolean;
 }

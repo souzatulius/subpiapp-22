@@ -40,7 +40,7 @@ const getIconSize = (size?: 'sm' | 'md' | 'lg' | 'xl'): string => {
     case 'lg': return 'w-12 h-12';
     case 'xl': return 'w-16 h-16';
     case 'md':
-    default: return 'w-10 h-10';
+    default: return 'w-12 h-12'; // Changed from w-10 h-10 to w-12 h-12
   }
 };
 

@@ -22,6 +22,8 @@ export const getIconComponentFromId = (iconId: string) => {
     'pie-chart': () => import('lucide-react').then(mod => mod.PieChart),
     'message-square': () => import('lucide-react').then(mod => mod.MessageSquare),
     'megaphone': () => import('lucide-react').then(mod => mod.Megaphone),
+    'user': () => import('lucide-react').then(mod => mod.User),
+    'newspaper': () => import('lucide-react').then(mod => mod.Newspaper),
   };
   
   const LoadedIcon = React.lazy(() => 
@@ -59,9 +61,9 @@ export const getDefaultCards = (): ActionCardItem[] => {
     },
     {
       id: uuidv4(),
-      title: 'Demandas',
-      iconId: 'FileText',
-      path: '/dashboard/comunicacao/demandas',
+      title: 'Área da Comunicação',
+      iconId: 'Bell',
+      path: '/dashboard/comunicacao',
       color: 'deep-blue',
       width: '25',
       height: '1',
@@ -70,30 +72,17 @@ export const getDefaultCards = (): ActionCardItem[] => {
       mobileOrder: 2
     },
     {
-      id: uuidv4(),
-      title: 'Avisos',
-      subtitle: 'Notas da coordenação',
-      iconId: 'Bell',
-      path: '/dashboard/comunicacao',
-      color: 'deep-blue',
-      width: '25',
+      id: 'origem-demandas-card',
+      title: 'Atividades em Andamento',
+      subtitle: 'Demandas da semana por área técnica',
+      iconId: 'BarChart2',
+      path: '',
+      color: 'gray-light',
+      width: '50',
       height: '2',
-      type: 'standard',
+      type: 'origin_demand_chart',
       displayMobile: true,
       mobileOrder: 3
-    },
-    {
-      id: uuidv4(),
-      title: 'Responder Demandas',
-      subtitle: 'Pendências',
-      iconId: 'MessageSquare',
-      path: '/dashboard/comunicacao/responder',
-      color: 'gray-medium',
-      width: '25',
-      height: '1',
-      type: 'standard',
-      displayMobile: true,
-      mobileOrder: 4
     },
     {
       id: 'acoes-pendentes-card',
@@ -106,7 +95,7 @@ export const getDefaultCards = (): ActionCardItem[] => {
       type: 'pending_tasks',
       isPendingTasks: true,
       displayMobile: true,
-      mobileOrder: 5
+      mobileOrder: 4
     },
     {
       id: 'comunicados-card',
@@ -119,15 +108,26 @@ export const getDefaultCards = (): ActionCardItem[] => {
       type: 'communications',
       isComunicados: true,
       displayMobile: true,
+      mobileOrder: 5
+    },
+    {
+      id: uuidv4(),
+      title: 'Aprovar Notas de Imprensa',
+      iconId: 'FileText',
+      path: 'comunicacao/criar-nota',
+      color: 'orange-light',
+      width: '25',
+      height: '1',
+      type: 'standard',
+      displayMobile: true,
       mobileOrder: 6
     },
     {
       id: uuidv4(),
-      title: 'Ranking da Zeladoria',
-      subtitle: 'Produtividade das Subsecretarias',
-      iconId: 'TrendingUp',
-      path: '/dashboard/zeladoria/ranking-subs',
-      color: 'bg-orange-500',
+      title: 'Notícias do Site',
+      iconId: 'Newspaper',
+      path: 'comunicacao/releases',
+      color: 'blue-light',
       width: '25',
       height: '1',
       type: 'standard',
@@ -135,55 +135,30 @@ export const getDefaultCards = (): ActionCardItem[] => {
       mobileOrder: 7
     },
     {
-      id: uuidv4(),
-      title: 'Nova Solicitação',
-      iconId: 'Pencil',
-      path: '/dashboard/comunicacao/cadastrar',
-      color: 'gray-medium',
+      id: 'perfil-usuario-card',
+      title: 'Perfil do Usuário',
+      iconId: 'User',
+      path: '',
+      color: 'deep-blue',
       width: '25',
-      height: '1',
-      type: 'standard',
+      height: '2',
+      type: 'user_profile',
+      isUserProfile: true,
       displayMobile: true,
       mobileOrder: 8
     },
     {
-      id: uuidv4(),
-      title: 'Relatórios da Comunicação',
-      subtitle: 'Estatísticas e análises',
-      iconId: 'PieChart',
-      path: '/dashboard/comunicacao/relatorios',
-      color: 'orange-light',
-      width: '50',
-      height: '1',
-      type: 'standard',
-      chartId: 'origemDemandas',
+      id: 'ajustes-notificacao-card',
+      title: 'Ajustes de Notificação',
+      iconId: 'Bell',
+      path: '',
+      color: 'blue-dark',
+      width: '25',
+      height: '2',
+      type: 'notification_settings',
+      isNotificationSettings: true,
       displayMobile: true,
       mobileOrder: 9
-    },
-    {
-      id: uuidv4(),
-      title: 'Processos e-SIC',
-      subtitle: 'Acessos à informação',
-      iconId: 'FileSearch',
-      path: '/dashboard/esic',
-      color: 'blue-light',
-      width: '50',
-      height: '1',
-      type: 'standard',
-      displayMobile: true,
-      mobileOrder: 10
-    },
-    {
-      id: uuidv4(),
-      title: 'Notificações',
-      iconId: 'Bell',
-      path: '/dashboard/notificacoes',
-      color: 'deep-blue',
-      width: '25',
-      height: '1',
-      type: 'standard',
-      displayMobile: true,
-      mobileOrder: 11
     }
   ];
 };
@@ -340,6 +315,56 @@ export const getCommunicationActionCards = (): ActionCardItem[] => {
       isComunicacao: true,
       displayMobile: true,
       mobileOrder: 11
+    },
+    {
+      id: uuidv4(),
+      title: 'Aprovar Notas de Imprensa',
+      iconId: 'FileText',
+      path: 'comunicacao/criar-nota',
+      color: 'orange-light',
+      width: '25',
+      height: '1',
+      type: 'standard',
+      displayMobile: true,
+      mobileOrder: 12
+    },
+    {
+      id: uuidv4(),
+      title: 'Notícias do Site',
+      iconId: 'Newspaper',
+      path: 'comunicacao/releases',
+      color: 'blue-light',
+      width: '25',
+      height: '1',
+      type: 'standard',
+      displayMobile: true,
+      mobileOrder: 13
+    },
+    {
+      id: 'perfil-usuario-card',
+      title: 'Perfil do Usuário',
+      iconId: 'User',
+      path: '',
+      color: 'deep-blue',
+      width: '25',
+      height: '2',
+      type: 'user_profile',
+      isUserProfile: true,
+      displayMobile: true,
+      mobileOrder: 14
+    },
+    {
+      id: 'ajustes-notificacao-card',
+      title: 'Ajustes de Notificação',
+      iconId: 'Bell',
+      path: '',
+      color: 'blue-dark',
+      width: '25',
+      height: '2',
+      type: 'notification_settings',
+      isNotificationSettings: true,
+      displayMobile: true,
+      mobileOrder: 15
     }
   ];
 };

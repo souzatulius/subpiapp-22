@@ -37,9 +37,9 @@ export const useDashboardConfig = (): DashboardConfigResult => {
         },
         {
           id: uuidv4(),
-          title: 'Demandas',
-          iconId: 'FileText',
-          path: '/dashboard/comunicacao/demandas',
+          title: 'Área da Comunicação',
+          iconId: 'Bell',
+          path: '/dashboard/comunicacao',
           color: 'deep-blue',
           width: '25',
           height: '1',
@@ -85,6 +85,56 @@ export const useDashboardConfig = (): DashboardConfigResult => {
           isComunicados: true,
           displayMobile: true,
           mobileOrder: 4
+        },
+        {
+          id: uuidv4(),
+          title: 'Aprovar Notas de Imprensa',
+          iconId: 'FileText',
+          path: 'comunicacao/criar-nota',
+          color: 'orange-light',
+          width: '25',
+          height: '2',
+          type: 'standard',
+          displayMobile: true,
+          mobileOrder: 6
+        },
+        {
+          id: uuidv4(),
+          title: 'Notícias do Site',
+          iconId: 'Newspaper',
+          path: 'comunicacao/releases',
+          color: 'blue-light',
+          width: '25',
+          height: '2',
+          type: 'standard',
+          displayMobile: true,
+          mobileOrder: 7
+        },
+        {
+          id: 'perfil-usuario-card',
+          title: 'Perfil do Usuário',
+          iconId: 'User',
+          path: '',
+          color: 'deep-blue',
+          width: '25',
+          height: '2',
+          type: 'user_profile',
+          isUserProfile: true,
+          displayMobile: true,
+          mobileOrder: 8
+        },
+        {
+          id: 'ajustes-notificacao-card',
+          title: 'Ajustes de Notificação',
+          iconId: 'Bell',
+          path: '',
+          color: 'blue-dark',
+          width: '25',
+          height: '2',
+          type: 'notification_settings',
+          isNotificationSettings: true,
+          displayMobile: true,
+          mobileOrder: 9
         }
       ];
 

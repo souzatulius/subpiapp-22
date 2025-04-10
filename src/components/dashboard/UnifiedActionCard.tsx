@@ -80,6 +80,8 @@ export interface UnifiedActionCardProps extends ActionCardItem {
   isMobileView?: boolean;
   contentClassname?: string;
   isPendingActions?: boolean;
+  isUserProfile?: boolean;
+  isNotificationSettings?: boolean;
   specialContent?: React.ReactNode;
   children?: React.ReactNode;
 }
@@ -166,13 +168,15 @@ export function UnifiedActionCard({
   hasSubtitle,
   contentClassname = '',
   isPendingActions,
+  isUserProfile,
+  isNotificationSettings,
   specialContent,
   children
 }: UnifiedActionCardProps & { sortableProps?: SortableProps }) {
   const navigate = useNavigate();
   
   const handleCardClick = () => {
-    if (path && !isEditing) {
+    if (path && !isEditing && !isUserProfile && !isNotificationSettings) {
       navigate(path);
     }
   };
