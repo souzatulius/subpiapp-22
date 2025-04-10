@@ -1,6 +1,7 @@
 
 // Import necessário para registrar plugins de Chart.js 
 import { Chart, ChartOptions, registerables } from 'chart.js';
+import { barChartColors, pieChartColors, lineChartColors } from '../utils/chartColors';
 
 // Registrar todos os componentes necessários do Chart.js 
 Chart.register(...registerables);
@@ -23,29 +24,27 @@ Chart.defaults.animation = {
 // Configurações para eixos
 Chart.defaults.scales.linear.beginAtZero = true;
 
-// Paleta de cores em tons de laranja
-export const orangePalette = [
-  '#fb923c', // orange-400
-  '#f97316', // orange-500
-  '#ea580c', // orange-600
-  '#c2410c', // orange-700
-  '#9a3412', // orange-800
+// Paleta de cores em tons de laranja e azul
+export const customPalette = [
+  '#0368fe', // Blue primary
+  '#f26812', // Orange secondary
+  '#1e40af', // Dark blue
+  '#64748e', // Gray
+  '#c2410c', // Dark orange/brown
 ];
 
-// Paleta alternada laranja/cinza
-export const orangeGrayPalette = [
-  '#f97316', // orange-500
-  '#71717a', // gray-500
-  '#ea580c', // orange-600
-  '#52525b', // gray-600
-  '#c2410c', // orange-700
-  '#3f3f46', // gray-700
+// Paleta alternada laranja/azul
+export const alternatingPalette = [
+  '#0368fe', // Blue primary
+  '#f26812', // Orange secondary
+  '#1e40af', // Dark blue
+  '#c2410c', // Dark orange/brown
+  '#64748e', // Gray
 ];
 
 // Função de utilidade para gerar tons de laranja baseado em índice
 export const getOrangeShade = (index: number): string => {
-  const shades = ['#fff7ed', '#ffedd5', '#fed7aa', '#fdba74', '#fb923c', '#f97316', '#ea580c', '#c2410c'];
-  return shades[index % shades.length];
+  return customPalette[index % customPalette.length];
 };
 
 // Função de utilidade para formatar números
@@ -70,16 +69,16 @@ export const formatDays = (days: number): string => {
 
 // Configurações para temas
 export const chartTheme = {
-  orange: {
-    backgroundColor: orangePalette,
-    borderColor: orangePalette.map(color => color),
-    hoverBackgroundColor: orangePalette.map(color => color),
+  primary: {
+    backgroundColor: barChartColors,
+    borderColor: barChartColors.map(color => color),
+    hoverBackgroundColor: barChartColors.map(color => color),
     hoverBorderColor: '#ffffff',
   },
-  orangeGray: {
-    backgroundColor: orangeGrayPalette,
-    borderColor: orangeGrayPalette.map(color => color),
-    hoverBackgroundColor: orangeGrayPalette.map(color => color),
+  alternating: {
+    backgroundColor: alternatingPalette,
+    borderColor: alternatingPalette.map(color => color),
+    hoverBackgroundColor: alternatingPalette.map(color => color),
     hoverBorderColor: '#ffffff',
   },
 };
