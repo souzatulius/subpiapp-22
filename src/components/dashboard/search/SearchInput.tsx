@@ -66,14 +66,11 @@ const SearchInput: React.FC<SearchInputProps> = ({
     }
   };
   
-  // Add specific handling for the space key
+  // Handle key presses
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    // Don't do anything special for space key - let default behavior work
-    if (e.key === ' ') {
-      // We specifically avoid any preventDefault or stopPropagation here
-      return;
-    }
-
+    // Removido o tratamento especial para a tecla espaço
+    // Permitindo que o comportamento padrão do espaço funcione
+    
     // Handle the Enter key for form submission
     if (e.key === 'Enter') {
       handleSubmit(e);
