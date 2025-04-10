@@ -21,17 +21,13 @@ export const getIconComponentFromId = (iconId: string) => {
     'pencil': () => import('lucide-react').then(mod => mod.Pencil),
     'pie-chart': () => import('lucide-react').then(mod => mod.PieChart),
     'message-square': () => import('lucide-react').then(mod => mod.MessageSquare),
-    // Add more icons as needed
   };
   
-  // Create a lazy-loaded component without using JSX directly
   const LoadedIcon = React.lazy(() => 
     IconMap[iconId] ? IconMap[iconId]() : import('lucide-react').then(mod => ({ default: mod.ClipboardList }))
   );
   
-  // Return a function that creates the component
   return function IconComponent(props: any) {
-    // This function will be used in a React component where JSX is available
     return React.createElement(
       React.Suspense,
       { 
@@ -47,15 +43,14 @@ export const getIconComponentFromId = (iconId: string) => {
 // Get default cards
 export const getDefaultCards = (): ActionCardItem[] => {
   return [
-    // Add the search card as the first item
     {
       id: 'dashboard-search-card',
       title: 'Busca Rápida',
       iconId: 'Search',
       path: '',
       color: 'bg-white',
-      width: '100', // Full width
-      height: '0.5', // Half height
+      width: '100',
+      height: '0.5',
       type: 'smart_search',
       isSearch: true,
       displayMobile: true,
@@ -67,8 +62,8 @@ export const getDefaultCards = (): ActionCardItem[] => {
       iconId: 'FileText',
       path: '/dashboard/comunicacao/demandas',
       color: 'deep-blue',
-      width: '25', // 1 column on desktop
-      height: '1', // 1 row
+      width: '25',
+      height: '1',
       type: 'standard',
       displayMobile: true,
       mobileOrder: 2
@@ -131,25 +126,12 @@ export const getDefaultCards = (): ActionCardItem[] => {
       iconId: 'PieChart',
       path: '/dashboard/comunicacao/relatorios',
       color: 'orange-light',
-      width: '50', // 2 columns on desktop
-      height: '1',  // 1 row on desktop
+      width: '50',
+      height: '1',
       type: 'standard',
       chartId: 'origemDemandas',
       displayMobile: true,
       mobileOrder: 7
-    },
-    {
-      id: uuidv4(),
-      title: 'Ações Pendentes',
-      iconId: 'AlertTriangle',
-      path: '/dashboard/comunicacao/responder',
-      color: 'bg-orange-500',
-      width: '25', // 1 column on desktop
-      height: '3',  // 3 rows on desktop, updated as requested
-      type: 'in_progress_demands',
-      isPendingActions: true,
-      displayMobile: true,
-      mobileOrder: 8
     },
     {
       id: uuidv4(),
@@ -158,8 +140,8 @@ export const getDefaultCards = (): ActionCardItem[] => {
       iconId: 'FileSearch',
       path: '/dashboard/esic',
       color: 'blue-light',
-      width: '50', // 2 columns on desktop
-      height: '1',  // 1 row on desktop
+      width: '50',
+      height: '1',
       type: 'standard',
       displayMobile: true,
       mobileOrder: 9
@@ -170,8 +152,8 @@ export const getDefaultCards = (): ActionCardItem[] => {
       iconId: 'Bell',
       path: '/dashboard/notificacoes',
       color: 'deep-blue',
-      width: '25', // 1 column on desktop
-      height: '1',  // 1 row on desktop
+      width: '25',
+      height: '1',
       type: 'standard',
       displayMobile: true,
       mobileOrder: 10
@@ -182,15 +164,14 @@ export const getDefaultCards = (): ActionCardItem[] => {
 // Get communication action cards 
 export const getCommunicationActionCards = (): ActionCardItem[] => {
   return [
-    // Add the search card as the first item
     {
       id: 'dashboard-search-card',
       title: 'Busca Rápida',
       iconId: 'Search',
       path: '',
       color: 'bg-white',
-      width: '100', // Full width
-      height: '0.5', // Half height
+      width: '100',
+      height: '0.5',
       type: 'smart_search',
       isSearch: true,
       displayMobile: true,
@@ -200,7 +181,7 @@ export const getCommunicationActionCards = (): ActionCardItem[] => {
       id: uuidv4(),
       title: 'Cadastrar Demanda',
       iconId: 'Pencil',
-      path: '/dashboard/comunicacao/cadastrar', // Updated path
+      path: '/dashboard/comunicacao/cadastrar',
       color: 'gray-medium',
       width: '25',
       height: '1',
@@ -210,7 +191,7 @@ export const getCommunicationActionCards = (): ActionCardItem[] => {
     },
     {
       id: uuidv4(),
-      title: 'Todas as Demandas', // Changed from "Nova Demanda" to "Todas as Demandas"
+      title: 'Todas as Demandas',
       iconId: 'FileText',
       path: '/dashboard/comunicacao/demandas',
       color: 'deep-blue',
@@ -224,7 +205,7 @@ export const getCommunicationActionCards = (): ActionCardItem[] => {
       id: uuidv4(),
       title: 'Aprovar Nota',
       iconId: 'CheckCircle',
-      path: '/dashboard/comunicacao/aprovar-nota', // Updated path
+      path: '/dashboard/comunicacao/aprovar-nota',
       color: 'bg-orange-500',
       width: '25',
       height: '1',
@@ -288,7 +269,7 @@ export const getCommunicationActionCards = (): ActionCardItem[] => {
       color: 'bg-white',
       width: '50',
       height: '2',
-      type: 'origin_selection', 
+      type: 'origin_selection',
       displayMobile: true,
       mobileOrder: 9
     }

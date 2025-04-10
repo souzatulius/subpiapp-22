@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useAuth } from '@/hooks/useSupabaseAuth';
 import { MessageSquareReply, RotateCcw } from 'lucide-react';
@@ -64,7 +65,9 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
       const filteredCards = updatedCards.filter(card => 
         card.id !== 'comunicacao-search-card' && 
         card.type !== 'smart_search' &&
-        card.title !== 'Origem das Demandas'
+        card.title !== 'Origem das Demandas' &&
+        // Adicionando filtro para remover o card "Ações Pendentes"
+        !card.isPendingActions
       );
       
       const hasOriginSelectionCard = filteredCards.some(card => card.type === 'origin_selection');

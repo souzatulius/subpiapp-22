@@ -111,7 +111,6 @@ const DashboardPage: React.FC = () => {
     
     const searchCardExists = cards.some(card => card.id === 'dashboard-search-card');
     const originDemandCardExists = cards.some(card => card.id === 'origem-demandas-card' || card.type === 'origin_demand_chart');
-    const pendingActivitiesCardExists = cards.some(card => card.id === 'pending-activities-card');
     
     let updatedCards = [...cards];
     let needsUpdate = false;
@@ -151,24 +150,6 @@ const DashboardPage: React.FC = () => {
       };
       
       updatedCards = [...updatedCards, originDemandCard];
-      needsUpdate = true;
-    }
-    
-    if (!pendingActivitiesCardExists) {
-      const pendingActivitiesCard: ActionCardItem = {
-        id: 'pending-activities-card',
-        title: 'Atividades Pendentes',
-        iconId: 'Clock',
-        path: '',
-        color: 'orange-light',
-        width: '25',
-        height: '3',
-        type: 'pending_activities',
-        displayMobile: true,
-        mobileOrder: 7
-      };
-      
-      updatedCards = [...updatedCards, pendingActivitiesCard];
       needsUpdate = true;
     }
     
