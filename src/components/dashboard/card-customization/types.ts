@@ -5,6 +5,7 @@ import { CardColor } from '@/types/dashboard';
 
 export const formSchema = z.object({
   title: z.string().min(2, "Título deve ter pelo menos 2 caracteres").max(50, "Título deve ter no máximo 50 caracteres"),
+  subtitle: z.string().optional(),
   type: z.enum(["standard", "data_dynamic"]).default("standard"),
   path: z.string().optional(),
   color: z.custom<CardColor>(),

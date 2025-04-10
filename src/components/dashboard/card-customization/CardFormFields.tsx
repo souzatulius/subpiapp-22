@@ -135,20 +135,12 @@ const CardFormFields: React.FC<Props> = ({
 
       <FormField
         control={form.control}
-        name="type"
+        name="subtitle"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Tipo</FormLabel>
+            <FormLabel>Subtítulo <span className="text-gray-400 text-xs">(opcional)</span></FormLabel>
             <FormControl>
-              <Select value={field.value} onValueChange={field.onChange}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione tipo de card" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="standard">Padrão</SelectItem>
-                  <SelectItem value="data_dynamic">Com dados</SelectItem>
-                </SelectContent>
-              </Select>
+              <Input placeholder="Subtítulo do card" {...field} value={field.value || ''} />
             </FormControl>
             <FormMessage />
           </FormItem>

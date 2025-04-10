@@ -1,66 +1,93 @@
 
-import React from 'react';
-import { Form } from '@/components/ui/form';
-import { UseFormReturn } from 'react-hook-form';
-import { FormSchema } from './types';
-import { Button } from '@/components/ui/button';
-import CardFormPreview from './CardFormPreview';
-import CardFormFields from './CardFormFields';
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Form } from "@/components/ui/form";
+import { formSchema, FormSchema } from "./types";
+import CardFormFields from "./CardFormFields";
+import CardFormPreview from "./CardFormPreview";
 
 interface CardFormMainProps {
-  form: UseFormReturn<FormSchema>;
-  onClose: () => void;
-  selectedIconId: string;
-  setSelectedIconId: (id: string) => void;
-  initialData: any;
-  onSubmit: (data: FormSchema) => void;
+  initialData?: Partial<FormSchema>;
+  onSave: (data: FormSchema) => void;
+  onCancel: () => void;
 }
 
-const CardFormMain: React.FC<CardFormMainProps> = ({
-  form,
-  onClose,
-  selectedIconId,
-  setSelectedIconId,
-  initialData,
-  onSubmit
-}) => {
-  return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        <div className="flex flex-col md:flex-row gap-6">
-          {/* Card form fields - left side */}
-          <div className="w-full md:w-1/2">
-            <CardFormFields 
-              form={form}
-              selectedIconId={selectedIconId}
-              setSelectedIconId={setSelectedIconId}
-            />
-          </div>
-          
-          {/* Preview - right side */}
-          <div className="w-full md:w-1/2">
-            <CardFormPreview 
-              title={form.watch('title')} 
-              iconId={selectedIconId}
-              color={form.watch('color')}
-              width={form.watch('width')}
-              height={form.watch('height')}
-            />
-          </div>
-        </div>
-        
-        {/* Action buttons at the bottom */}
-        <div className="flex justify-end space-x-3 pt-2">
-          <Button variant="outline" type="button" onClick={onClose}>
-            Cancelar
-          </Button>
-          <Button variant="default" type="submit">
-            {initialData ? 'Salvar' : 'Criar Card'}
-          </Button>
-        </div>
-      </form>
-    </Form>
+export default function CardFormMain({ initialData, onSave, onCancel }: CardFormMainProps) {
+  const [selectedIconId, setSelectedIconId] = useState<string>(
+    initialData?.iconId || "Activity"
   );
-};
 
-export default CardFormMain;
+  const form = useForm<FormSchema>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      title: initialData?.title || "",
+      subtitle: initialData?.subtitle || "",
+      type: initialData?.type || "standard",
+      path: initialData?.path || "",
+      color: initialData?.color || "blue-light",
+      iconId: initialData?.iconId || "Activity",
+      width: initialData?.width || "25",
+      height: initialData?.height || "1",
+      dataSourceKey: initialData?.dataSourceKey || "",
+      displayMobile: initialData?.displayMobile !== false,
+      mobileOrder: initialData?.mobileOrder || 0,
+      allowedDepartments: initialData?.allowedDepartments || [],
+      allowedRoles: initialData?.allowedRoles || []
+    },
+  });
+
+  const formValues = form.watch();
+
+  function onSubmit(data: FormSchema) {
+    // Ensure we have the selected icon ID
+    data.iconId = selectedIconId;
+    
+    // Filter empty string subtitle to undefined
+    const finalData = {
+      ...data,
+      subtitle: data.subtitle?.trim() ? data.subtitle : undefined
+    };
+    
+    onSave(finalData);
+  }
+
+  return (
+    <div>
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-6">
+              <h3 className="text-lg font-medium">Configuração</h3>
+              <CardFormFields
+                form={form}
+                selectedIconId={selectedIconId}
+                setSelectedIconId={setSelectedIconId}
+              />
+            </div>
+            
+            <div className="space-y-6">
+              <h3 className="text-lg font-medium">Pré-visualização</h3>
+              <CardFormPreview
+                title={formValues.title}
+                subtitle={formValues.subtitle}
+                iconId={selectedIconId}
+                color={formValues.color}
+                width={formValues.width}
+                height={formValues.height}
+              />
+            </div>
+          </div>
+
+          <div className="flex justify-end space-x-4">
+            <Button type="button" variant="outline" onClick={onCancel}>
+              Cancelar
+            </Button>
+            <Button type="submit">Salvar Card</Button>
+          </div>
+        </form>
+      </Form>
+    </div>
+  );
+}

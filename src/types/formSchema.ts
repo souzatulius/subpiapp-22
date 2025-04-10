@@ -1,7 +1,9 @@
+
 import { CardColor, CardType, DataSourceKey } from './dashboard';
 
 export interface FormSchema {
   title: string;
+  subtitle?: string;
   type?: CardType;
   path?: string;
   color: CardColor;
