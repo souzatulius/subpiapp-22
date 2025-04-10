@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -56,17 +55,21 @@ const formSchema = z.object({
 });
 
 interface ProcessoFormProps {
-  onSubmit: (values: ESICProcessoFormValues) => Promise<void>;
   defaultValues?: Partial<ESICProcessoFormValues>;
-  isLoading: boolean;
-  isEdit?: boolean;
+  onSubmit: (values: ESICProcessoFormValues) => Promise<void>;
+  onCancel: () => void;
+  coordenacoes: { id: string; nome: string }[];
+  isEditing?: boolean;
+  isSubmitting?: boolean;
 }
 
 const ProcessoForm: React.FC<ProcessoFormProps> = ({
   onSubmit,
+  onCancel,
   defaultValues,
-  isLoading,
-  isEdit = false
+  coordenacoes,
+  isEditing = false,
+  isSubmitting = false
 }) => {
   const [showCoordenacoes, setShowCoordenacoes] = useState(!defaultValues?.sem_area_tecnica);
   
@@ -403,8 +406,11 @@ const ProcessoForm: React.FC<ProcessoFormProps> = ({
         )}
         
         <div className="pt-4 flex justify-end">
-          <Button type="submit" disabled={isLoading}>
-            {isLoading ? 'Salvando...' : isEdit ? 'Atualizar Processo' : 'Criar Processo'}
+          <Button type="submit" disabled={isSubmitting}>
+            {isSubmitting ? 'Salvando...' : isEditing ? 'Atualizar Processo' : 'Criar Processo'}
+          </Button>
+          <Button variant="outline" onClick={onCancel} className="ml-2">
+            Cancelar
           </Button>
         </div>
       </form>

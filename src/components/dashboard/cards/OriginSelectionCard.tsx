@@ -5,6 +5,7 @@ import * as LucideIcons from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { OriginOption } from '@/types/dashboard';
+import { Loader2 } from 'lucide-react';
 
 interface OriginSelectionCardProps {
   title?: string;
@@ -34,6 +35,8 @@ const OriginSelectionCard: React.FC<OriginSelectionCardProps> = ({ title, option
         .order('descricao', { ascending: true });
 
       if (error) throw error;
+
+      console.log('Fetched origin data:', data);
 
       // Transform the data to match our OriginOption interface
       const formattedOptions = data?.map(origin => ({
@@ -90,20 +93,20 @@ const OriginSelectionCard: React.FC<OriginSelectionCardProps> = ({ title, option
         </p>
         {isLoading ? (
           <div className="flex justify-center items-center h-32">
-            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-orange-500"></div>
+            <Loader2 className="h-6 w-6 animate-spin text-orange-500" />
           </div>
         ) : (
-          <div className="grid grid-cols-4 gap-2 mt-2">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 mt-2">
             {options.map((option) => (
               <button
                 key={option.id}
                 onClick={() => handleOptionClick(option.id, option.path)}
-                className="flex flex-col items-center justify-center p-2 rounded-lg hover:bg-gray-100 transition-colors bg-gradient-to-b from-gray-50 to-gray-100"
+                className="flex flex-col items-center justify-center p-3 rounded-lg hover:bg-gray-100 transition-colors bg-gradient-to-b from-gray-50 to-gray-100 border border-gray-100 shadow-sm"
               >
                 <span className="flex justify-center items-center w-10 h-10 rounded-full bg-white text-orange-500 mb-2 shadow-sm">
                   {getIconComponent(option.icon)}
                 </span>
-                <span className="text-xs font-medium text-gray-700 text-center">
+                <span className="text-xs font-medium text-gray-700 text-center line-clamp-2">
                   {option.title}
                 </span>
               </button>

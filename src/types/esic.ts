@@ -20,6 +20,10 @@ export interface ESICProcesso {
   autor?: {
     nome_completo?: string;
   };
+  // Renamed from coordenacao to avoid type error
+  coordenacao_id_info?: {
+    nome: string;
+  };
 }
 
 export interface ESICProcessoFormValues {

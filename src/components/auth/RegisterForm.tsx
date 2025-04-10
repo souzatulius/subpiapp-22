@@ -1,179 +1,248 @@
-
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { useToast } from '@/hooks/use-toast';
-import { Loader2 } from 'lucide-react';
-import { registerUser } from '@/services/authService';
+import { useNavigate } from 'react-router-dom';
+import { zodResolver } from "@hookform/resolvers/zod"
+import { useForm } from 'react-hook-form';
+import * as z from "zod"
 
-interface RegisterFormProps {
-  onSuccess?: () => void;
-}
+import { cn } from "@/lib/utils"
+import { Button } from "@/components/ui/button"
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form"
+import { Input } from "@/components/ui/input"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useToast } from "@/components/ui/use-toast"
+import { signUp } from '@/services/authService';
+import { useCargos } from '@/hooks/useCargos';
+import { useCoordenacoes } from '@/hooks/useCoordenacoes';
+import { useSupervisoesTecnicas } from '@/hooks/useSupervisoesTecnicas';
 
-const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess }) => {
-  const [loading, setLoading] = useState(false);
-  const [formData, setFormData] = useState({
-    email: '',
-    nome_completo: '',
-    cargo: '',
-    RF: '',
-    coordenacao: '',
-  });
+const formSchema = z.object({
+  nome_completo: z.string().min(2, {
+    message: "Nome completo deve ter pelo menos 2 caracteres.",
+  }),
+  email: z.string().email({
+    message: "Email inválido.",
+  }),
+  password: z.string().min(6, {
+    message: "Senha deve ter pelo menos 6 caracteres.",
+  }),
+  whatsapp: z.string().optional(),
+  cargo: z.string().min(1, {
+    message: "Cargo é obrigatório.",
+  }),
+  coordenacao: z.string().min(1, {
+    message: "Coordenação é obrigatória.",
+  }),
+  supervisao_tecnica: z.string().optional(),
+})
+
+interface FormValues extends z.infer<typeof formSchema> {}
+
+const RegisterForm = () => {
+  const [error, setError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
-  const { toast } = useToast();
+  const { toast } = useToast()
+  const { cargos, isLoading: isLoadingCargos } = useCargos();
+  const { coordenacoes, isLoading: isLoadingCoordenacoes } = useCoordenacoes();
+  const { supervisoesTecnicas, isLoading: isLoadingSupervisoes } = useSupervisoesTecnicas();
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
+  const form = useForm<FormValues>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      nome_completo: "",
+      email: "",
+      password: "",
+      whatsapp: "",
+      cargo: "",
+      coordenacao: "",
+      supervisao_tecnica: "",
+    },
+  })
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!formData.email || !formData.nome_completo) {
-      toast({
-        title: 'Campos obrigatórios',
-        description: 'Por favor, preencha pelo menos email e nome completo.',
-        variant: 'destructive',
-      });
-      return;
-    }
+  const handleSubmit = async (values: FormValues) => {
+    setError(null);
+    setIsSubmitting(true);
     
     try {
-      setLoading(true);
+      // Modified to pass email, password, and userData separately
+      const { data, error } = await signUp(
+        values.email, 
+        values.password, 
+        {
+          nome_completo: values.nome_completo,
+          whatsapp: values.whatsapp,
+          cargo_id: values.cargo,
+          coordenacao_id: values.coordenacao,
+          supervisao_tecnica_id: values.supervisao_tecnica
+        }
+      );
       
-      await registerUser(formData);
-      
-      toast({
-        title: 'Solicitação enviada com sucesso',
-        description: 'Você receberá um email com instruções para completar seu cadastro quando sua solicitação for aprovada.',
-      });
-      
-      if (onSuccess) {
-        onSuccess();
+      if (error) {
+        setError(error.message);
+        toast({
+          title: "Erro ao criar conta",
+          description: error.message,
+          variant: "destructive",
+        })
       } else {
-        navigate('/register-success');
+        toast({
+          title: "Conta criada com sucesso!",
+          description: "Você será redirecionado para a página de login.",
+        })
+        navigate("/login");
       }
-    } catch (error: any) {
-      console.error('Error during registration:', error);
-      
+    } catch (err: any) {
+      console.error("Erro ao criar conta:", err);
+      setError("Ocorreu um erro ao criar a conta. Por favor, tente novamente.");
       toast({
-        title: 'Erro ao enviar solicitação',
-        description: error.message || 'Ocorreu um erro ao processar sua solicitação.',
-        variant: 'destructive',
-      });
+        title: "Erro ao criar conta",
+        description: err.message || "Ocorreu um erro ao criar a conta. Por favor, tente novamente.",
+        variant: "destructive",
+      })
     } finally {
-      setLoading(false);
+      setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="w-full max-w-md space-y-8">
-      <div className="text-center">
-        <h2 className="text-3xl font-bold">Solicitar Acesso</h2>
-        <p className="mt-2 text-sm text-gray-600">
-          Preencha os dados abaixo para solicitar acesso ao sistema
-        </p>
-      </div>
-      
-      <form onSubmit={handleSubmit} className="mt-8 space-y-6">
-        <div className="space-y-4">
-          <div>
-            <Label htmlFor="email">Email Institucional</Label>
-            <Input
-              id="email"
-              name="email"
-              type="email"
-              value={formData.email}
-              onChange={handleChange}
-              placeholder="seu.email@prefeitura.sp.gov.br"
-              required
-              className="mt-1"
-            />
-          </div>
-          
-          <div>
-            <Label htmlFor="nome_completo">Nome Completo</Label>
-            <Input
-              id="nome_completo"
-              name="nome_completo"
-              type="text"
-              value={formData.nome_completo}
-              onChange={handleChange}
-              placeholder="Nome Completo"
-              required
-              className="mt-1"
-            />
-          </div>
-          
-          <div>
-            <Label htmlFor="cargo">Cargo</Label>
-            <Input
-              id="cargo"
-              name="cargo"
-              type="text"
-              value={formData.cargo}
-              onChange={handleChange}
-              placeholder="Seu cargo ou função"
-              className="mt-1"
-            />
-          </div>
-          
-          <div>
-            <Label htmlFor="RF">Registro Funcional (RF)</Label>
-            <Input
-              id="RF"
-              name="RF"
-              type="text"
-              value={formData.RF}
-              onChange={handleChange}
-              placeholder="Seu RF"
-              className="mt-1"
-            />
-          </div>
-          
-          <div>
-            <Label htmlFor="coordenacao">Coordenação</Label>
-            <Input
-              id="coordenacao"
-              name="coordenacao"
-              type="text"
-              value={formData.coordenacao}
-              onChange={handleChange}
-              placeholder="Sua coordenação ou setor"
-              className="mt-1"
-            />
-          </div>
-        </div>
-        
-        <Button 
-          type="submit" 
-          className="w-full text-lg" 
-          disabled={loading}
-        >
-          {loading ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Enviando...
-            </>
-          ) : (
-            'Solicitar Acesso'
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+        <FormField
+          control={form.control}
+          name="nome_completo"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Nome Completo</FormLabel>
+              <FormControl>
+                <Input placeholder="Digite seu nome completo" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
           )}
+        />
+        <FormField
+          control={form.control}
+          name="email"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Email</FormLabel>
+              <FormControl>
+                <Input placeholder="Digite seu email" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="password"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Senha</FormLabel>
+              <FormControl>
+                <Input type="password" placeholder="Digite sua senha" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="whatsapp"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>WhatsApp (opcional)</FormLabel>
+              <FormControl>
+                <Input placeholder="Digite seu WhatsApp" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="cargo"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Cargo</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione um cargo" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {cargos?.map((cargo) => (
+                    <SelectItem key={cargo.id} value={cargo.id}>{cargo.descricao}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="coordenacao"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Coordenação</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione uma coordenação" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {coordenacoes?.map((coordenacao) => (
+                    <SelectItem key={coordenacao.id} value={coordenacao.id}>{coordenacao.descricao}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="supervisao_tecnica"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Supervisão Técnica (opcional)</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione uma supervisão técnica" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {supervisoesTecnicas?.map((supervisao) => (
+                    <SelectItem key={supervisao.id} value={supervisao.id}>{supervisao.descricao}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <Button type="submit" disabled={isSubmitting}>
+          {isSubmitting ? "Criando conta..." : "Criar conta"}
         </Button>
-        
-        <div className="text-center text-sm">
-          <Link 
-            to="/login" 
-            className="font-medium text-primary hover:underline"
-          >
-            Já tem uma conta? Faça login
-          </Link>
-        </div>
+
+        {error && (
+          <p className="text-red-500">{error}</p>
+        )}
       </form>
-    </div>
-  );
-};
+    </Form>
+  )
+}
 
 export default RegisterForm;

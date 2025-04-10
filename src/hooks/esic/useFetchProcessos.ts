@@ -92,7 +92,8 @@ export const useFetchProcessos = () => {
             status: status,
             coordenacao_id: p.coordenacao_id,
             prazo_resposta: p.prazo_resposta,
-            coordenacao: p.coordenacao ? {
+            // Fix the coordenacao property to match the expected format in ESICProcesso type
+            coordenacao_id_info: p.coordenacao ? {
               nome: p.coordenacao.nome
             } : undefined,
             // Map the database field names to the interface field names

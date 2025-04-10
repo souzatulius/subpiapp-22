@@ -1,8 +1,8 @@
-
 import React, { useState, useEffect } from 'react';
 import { ESICProcesso, ESICProcessoFormValues } from '@/types/esic';
 import ProcessoForm from '@/components/esic/ProcessoForm';
 import { supabase } from '@/integrations/supabase/client';
+import { Button, ArrowLeft, Loader2 } from 'lucide-react';
 
 interface ProcessoEditProps {
   processo: ESICProcesso;
@@ -58,14 +58,33 @@ const ProcessoEdit: React.FC<ProcessoEditProps> = ({
   }, []);
 
   return (
-    <ProcessoForm 
-      defaultValues={defaultValues}
-      onSubmit={onSubmit} 
-      isSubmitting={isLoading}
-      onCancel={onCancel}
-      coordenacoes={coordenacoes}
-      isEditing={true}
-    />
+    <div className="container px-4 py-6 mx-auto">
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-semibold">Editar Processo e-SIC</h1>
+        <Button variant="outline" onClick={onCancel}>
+          <ArrowLeft className="mr-2 h-4 w-4" /> Voltar
+        </Button>
+      </div>
+      
+      {isLoading ? (
+        <div className="text-center">
+          <Loader2 className="h-8 w-8 animate-spin mx-auto" />
+        </div>
+      ) : processo ? (
+        <ProcessoForm
+          defaultValues={defaultValues}
+          onSubmit={onSubmit}
+          isSubmitting={isLoading}
+          onCancel={onCancel}
+          coordenacoes={coordenacoes}
+          isEditing={true}
+        />
+      ) : (
+        <div className="text-center">
+          <p className="text-red-500">Processo não encontrado</p>
+        </div>
+      )}
+    </div>
   );
 };
 
