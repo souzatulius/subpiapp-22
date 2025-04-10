@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Sparkles } from 'lucide-react';
@@ -125,6 +126,12 @@ const NotaForm: React.FC<NotaFormProps> = ({
     }
   };
 
+  const onSubmitClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    console.log("Submit button clicked - calling handleSubmit");
+    handleSubmit();
+  };
+
   return (
     <>      
       <div className="flex justify-between items-center mt-6">
@@ -135,7 +142,7 @@ const NotaForm: React.FC<NotaFormProps> = ({
           variant="outline"
           onClick={handleGenerateSuggestion}
           disabled={isGeneratingSuggestion || !selectedDemanda}
-          className="ml-4 text-[#003570] border-[#003570] hover:bg-[#EEF2F8]"
+          className="ml-4 text-[#003570] border-[#003570] hover:bg-[#EEF2F8] rounded-xl"
         >
           <Sparkles className="h-4 w-4 mr-2" />
           {isGeneratingSuggestion ? "Gerando..." : "Gerar sugestão"}
@@ -147,7 +154,7 @@ const NotaForm: React.FC<NotaFormProps> = ({
           id="titulo" 
           value={titulo} 
           onChange={(e) => setTitulo(e.target.value)} 
-          className="rounded-lg"
+          className="rounded-xl"
         />
       </div>
       
@@ -158,15 +165,15 @@ const NotaForm: React.FC<NotaFormProps> = ({
           value={texto} 
           onChange={(e) => setTexto(e.target.value)} 
           rows={10}
-          className="rounded-lg"
+          className="rounded-xl"
         />
       </div>
       
       <div className="flex justify-end pt-4 mt-4">
         <Button 
-          onClick={handleSubmit}
+          onClick={onSubmitClick}
           disabled={isSubmitting}
-          className="bg-[#003570] hover:bg-[#002855] rounded-lg"
+          className="bg-[#003570] hover:bg-[#002855] rounded-xl"
         >
           {isSubmitting ? "Enviando..." : "Enviar para Aprovação"}
         </Button>

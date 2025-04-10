@@ -28,19 +28,38 @@ export const submitNotaForm = async ({
   }
 
   try {
-    // Buscar o ID do problema associado à área da demanda
-    let problemaId = selectedDemanda?.problema_id;
+    console.log("Starting submitNotaForm with:", { userId, selectedDemandaId });
     
-    // If there's no problem ID, we need to create one
+    // First, try to get the problema_id from the selectedDemanda
+    let problemaId = selectedDemanda?.problema_id;
+    console.log("Initial problema_id from selectedDemanda:", problemaId);
+    
+    // If there's no problem ID, we need to find or create one
     if (!problemaId) {
-      const { data: problemaData, error: problemaError } = await supabase
-        .from('problemas')
-        .select('id')
-        .limit(1);
+      console.log("No problema_id found, looking for existing problems");
       
-      if (problemaError) throw problemaError;
+      // Look for a problem associated with the coordination
+      let query = supabase.from('problemas').select('id');
       
-      if (!problemaData || problemaData.length === 0) {
+      // If we have a coordenacao_id, filter by it
+      if (selectedDemanda?.coordenacao_id) {
+        query = query.eq('coordenacao_id', selectedDemanda.coordenacao_id);
+      }
+      
+      // Get the first problem as a fallback
+      const { data: problemaData, error: problemaError } = await query.limit(1);
+      
+      if (problemaError) {
+        console.error('Error fetching problems:', problemaError);
+        throw problemaError;
+      }
+      
+      if (problemaData && problemaData.length > 0) {
+        problemaId = problemaData[0].id;
+        console.log("Using existing problem:", problemaId);
+      } else {
+        console.log("No existing problem found, creating a new one");
+        
         // Create a default problem
         const coordenacaoId = selectedDemanda?.coordenacao_id || null;
         
@@ -52,29 +71,43 @@ export const submitNotaForm = async ({
           })
           .select();
           
-        if (newProblemaError) throw newProblemaError;
+        if (newProblemaError) {
+          console.error('Error creating problem:', newProblemaError);
+          throw newProblemaError;
+        }
         
         problemaId = newProblema[0].id;
-      } else {
-        problemaId = problemaData[0].id;
+        console.log("Created new problem:", problemaId);
       }
     }
+    
+    console.log("Final problema_id to use:", problemaId);
+    
+    // Prepare the data for inserting the note
+    const noteData = {
+      titulo,
+      texto,
+      coordenacao_id: selectedDemanda?.coordenacao_id || null,
+      autor_id: userId,
+      status: 'pendente',
+      demanda_id: selectedDemandaId,
+      problema_id: problemaId
+    };
+    
+    console.log("Inserting note with data:", noteData);
     
     // Create the note
     const { data, error } = await supabase
       .from('notas_oficiais')
-      .insert({
-        titulo,
-        texto,
-        coordenacao_id: selectedDemanda?.coordenacao_id || null,
-        autor_id: userId,
-        status: 'pendente',
-        demanda_id: selectedDemandaId,
-        problema_id: problemaId
-      })
+      .insert(noteData)
       .select();
     
-    if (error) throw error;
+    if (error) {
+      console.error('Error creating note:', error);
+      throw error;
+    }
+    
+    console.log("Note created successfully:", data);
     
     // Update the demand status
     const { error: updateError } = await supabase
@@ -84,6 +117,9 @@ export const submitNotaForm = async ({
       
     if (updateError) {
       console.error('Error updating demand status:', updateError);
+      // Don't throw here as the note was already created
+    } else {
+      console.log("Demand status updated to 'respondida'");
     }
     
     toast({

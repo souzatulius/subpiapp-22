@@ -1,14 +1,19 @@
 
-interface NotaFormData {
+import { toast } from '@/components/ui/use-toast';
+import { Demand } from '@/components/dashboard/forms/criar-nota/types';
+
+interface ValidateNotaFormProps {
   titulo: string;
   texto: string;
-  selectedDemanda: any;
+  selectedDemanda: Demand | null;
 }
 
-import { toast } from '@/components/ui/use-toast';
-
-export const validateNotaForm = ({ titulo, texto, selectedDemanda }: NotaFormData): boolean => {
-  // Validação
+export const validateNotaForm = ({
+  titulo,
+  texto,
+  selectedDemanda
+}: ValidateNotaFormProps): boolean => {
+  // Validate title
   if (!titulo.trim()) {
     toast({
       title: "Título obrigatório",
@@ -18,6 +23,7 @@ export const validateNotaForm = ({ titulo, texto, selectedDemanda }: NotaFormDat
     return false;
   }
 
+  // Validate content
   if (!texto.trim()) {
     toast({
       title: "Conteúdo obrigatório",
@@ -27,10 +33,11 @@ export const validateNotaForm = ({ titulo, texto, selectedDemanda }: NotaFormDat
     return false;
   }
 
-  if (!selectedDemanda) {
+  // Validate demand selection
+  if (!selectedDemanda || !selectedDemanda.id) {
     toast({
       title: "Demanda inválida",
-      description: "Selecione uma demanda válida.",
+      description: "É necessário selecionar uma demanda válida para criar a nota.",
       variant: "destructive"
     });
     return false;

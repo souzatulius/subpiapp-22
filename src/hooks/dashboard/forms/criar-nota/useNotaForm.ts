@@ -27,6 +27,7 @@ export const useNotaForm = (onClose: () => void) => {
     // Find the selected demand
     const selected = demandas.find(d => d.id === demandaId);
     if (selected) {
+      console.log("Selected demand:", selected);
       setSelectedDemanda(selected);
       
       // Set a default title based on the demand title
@@ -49,6 +50,12 @@ export const useNotaForm = (onClose: () => void) => {
   };
 
   const handleSubmit = async () => {
+    console.log("Submit button clicked with data:", {
+      titulo,
+      texto,
+      selectedDemanda: selectedDemanda ? { id: selectedDemanda.id, titulo: selectedDemanda.titulo } : null
+    });
+    
     // Validation
     const isValid = validateNotaForm({
       titulo,
@@ -60,9 +67,12 @@ export const useNotaForm = (onClose: () => void) => {
 
     try {
       setIsSubmitting(true);
+      console.log("Validation passed, proceeding with submission");
       
       // Use the adapter to convert the demand type if selectedDemanda exists
       const adaptedDemanda = selectedDemanda ? adaptDemandType(selectedDemanda) : null;
+      
+      console.log("Adapted demand:", adaptedDemanda);
       
       const success = await submitNotaForm({
         titulo,
@@ -73,9 +83,12 @@ export const useNotaForm = (onClose: () => void) => {
       });
       
       if (success) {
+        console.log("Note created successfully, navigating to dashboard");
         // Redirect to dashboard
         navigate('/dashboard/comunicacao');
       }
+    } catch (error) {
+      console.error("Error in handleSubmit:", error);
     } finally {
       setIsSubmitting(false);
     }
