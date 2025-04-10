@@ -1,3 +1,4 @@
+
 import React, { useCallback } from 'react';
 import {
   DndContext,
@@ -14,6 +15,7 @@ import { getWidthClass, getHeightClass, getMobileSpecificDimensions } from './gr
 import { ActionCardItem, CardWidth, CardHeight } from '@/types/dashboard';
 import { useGridOccupancy } from '@/hooks/dashboard/useGridOccupancy';
 import PendingActivitiesCard from './cards/PendingActivitiesCard';
+import OriginsDemandCardWrapper from './cards/OriginsDemandCardWrapper';
 
 export interface UnifiedCardGridProps {
   cards: ActionCardItem[];
@@ -76,11 +78,7 @@ const UnifiedCardGrid: React.FC<UnifiedCardGridProps> = ({
     }
   };
 
-  const visibleCards = cards.filter(card => 
-    !card.isHidden && 
-    card.id !== 'origem-demandas-card' && 
-    card.type !== 'origin_demand_chart'
-  );
+  const visibleCards = cards.filter(card => !card.isHidden);
 
   const displayedCards = isMobileView
     ? visibleCards
@@ -88,9 +86,18 @@ const UnifiedCardGrid: React.FC<UnifiedCardGridProps> = ({
         .sort((a, b) => (a.mobileOrder ?? 999) - (b.mobileOrder ?? 999))
     : visibleCards;
 
+  // Memoize this function to avoid unnecessary recalculations
   const processCardDimensions = useCallback((card: ActionCardItem) => {
     if (isMobileView) {
       const mobileSpecific = getMobileSpecificDimensions(card.title);
+      
+      if (card.id === 'origem-demandas-card' || card.type === 'origin_demand_chart') {
+        return {
+          ...card,
+          width: '100' as CardWidth,
+          height: '2' as CardHeight
+        };
+      }
       
       return {
         ...card,
@@ -103,6 +110,12 @@ const UnifiedCardGrid: React.FC<UnifiedCardGridProps> = ({
           ...card,
           width: '100' as CardWidth,
           height: '0.5' as CardHeight
+        };
+      } else if (card.id === 'origem-demandas-card' || card.type === 'origin_demand_chart') {
+        return {
+          ...card,
+          width: '50' as CardWidth,
+          height: '2' as CardHeight
         };
       } else if (card.title === "Demandas") {
         return {
@@ -147,6 +160,11 @@ const UnifiedCardGrid: React.FC<UnifiedCardGridProps> = ({
     if (renderSpecialCardContent) {
       const customContent = renderSpecialCardContent(card.id);
       if (customContent) return customContent;
+    }
+
+    if (card.type === 'origin_demand_chart' || card.id === 'origem-demandas-card' || 
+        card.title === "Atividades em Andamento") {
+      return <OriginsDemandCardWrapper className="w-full h-full" />;
     }
     
     if (card.type === 'pending_activities' || card.id === 'pending-activities-card') {
