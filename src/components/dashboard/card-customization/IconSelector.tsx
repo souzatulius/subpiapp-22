@@ -1,45 +1,81 @@
 
-import React from 'react';
-import * as LucideIcons from 'lucide-react';
+import { useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Search } from "lucide-react";
+import { getAllIcons } from "./utils";
+import { cn } from "@/lib/utils";
 
 interface IconSelectorProps {
-  selectedIconId: string;
+  selectedIcon: string;
   onIconSelect: (iconId: string) => void;
-  maxIcons?: number;
 }
 
-const IconSelector: React.FC<IconSelectorProps> = ({ 
-  selectedIconId, 
-  onIconSelect,
-  maxIcons = 25
-}) => {
-  const renderIconComponent = (iconId: string) => {
-    const IconComponent = (LucideIcons as any)[iconId];
-    if (!IconComponent) return null;
-    return <IconComponent className="h-6 w-6" />;
-  };
+export default function IconSelector({
+  selectedIcon,
+  onIconSelect
+}: IconSelectorProps) {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [icons, setIcons] = useState<{ id: string; component: any }[]>([]);
+
+  useEffect(() => {
+    const allIcons = getAllIcons();
+    setIcons(allIcons);
+  }, []);
+
+  const filteredIcons = searchTerm
+    ? icons.filter(icon => 
+        icon.id.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+    : icons;
 
   return (
-    <div className="grid grid-cols-5 gap-2 h-40 overflow-y-auto p-2 border rounded-md">
-      {Object.keys(LucideIcons)
-        .filter(key => 
-          typeof (LucideIcons as any)[key] === 'function' && 
-          !['createLucideIcon', 'default'].includes(key)
-        )
-        .slice(0, maxIcons)
-        .map((key) => (
-          <div
-            key={key}
-            className={`flex items-center justify-center p-2 border rounded-md cursor-pointer hover:bg-gray-100 ${
-              selectedIconId === key ? 'bg-blue-100 border-blue-500' : ''
-            }`}
-            onClick={() => onIconSelect(key)}
-          >
-            {renderIconComponent(key)}
-          </div>
-        ))}
+    <div className="space-y-3">
+      <div className="relative">
+        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
+        <Input
+          type="text"
+          placeholder="Buscar ícones..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="pl-9 border-gray-300"
+        />
+      </div>
+      
+      <ScrollArea className="h-40 rounded-md border border-gray-200">
+        <div className="grid grid-cols-6 gap-1 p-2">
+          {filteredIcons.map((icon) => {
+            const isSelected = icon.id === selectedIcon;
+            return (
+              <Button
+                key={icon.id}
+                type="button"
+                variant="ghost"
+                size="sm"
+                className={cn(
+                  "h-10 w-10 rounded-md p-0 flex items-center justify-center",
+                  isSelected && "bg-blue-100 text-blue-700 ring-1 ring-blue-500"
+                )}
+                onClick={() => onIconSelect(icon.id)}
+                title={icon.id}
+              >
+                <icon.component className="h-5 w-5" />
+              </Button>
+            );
+          })}
+          
+          {filteredIcons.length === 0 && (
+            <div className="col-span-6 py-4 text-center text-sm text-gray-500">
+              Nenhum ícone encontrado
+            </div>
+          )}
+        </div>
+      </ScrollArea>
+      
+      <div className="text-xs text-gray-500 mt-1">
+        Ícone selecionado: {selectedIcon}
+      </div>
     </div>
   );
-};
-
-export default IconSelector;
+}

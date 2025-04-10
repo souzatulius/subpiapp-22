@@ -1,70 +1,52 @@
 
-import React from 'react';
-import { FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
-import { UseFormReturn } from 'react-hook-form';
-import { FormSchema } from './types';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { widthOptions, heightOptions } from './utils';
-import { Label } from '@/components/ui/label';
+import { CardWidth, CardHeight } from "@/types/dashboard";
+import { cn } from "@/lib/utils";
 
 interface DimensionOptionsProps {
-  form: UseFormReturn<FormSchema>;
+  type: "width" | "height";
+  selectedValue: string;
+  onValueSelect: (value: any) => void;
 }
 
-const DimensionOptions: React.FC<DimensionOptionsProps> = ({ form }) => {
-  return (
-    <div className="space-y-2">
-      <FormField
-        control={form.control}
-        name="width"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Largura</FormLabel>
-            <FormControl>
-              <RadioGroup
-                value={field.value}
-                onValueChange={field.onChange}
-                className="flex flex-wrap gap-2"
-              >
-                {widthOptions.map((option) => (
-                  <div key={option.id} className="flex items-center space-x-1">
-                    <RadioGroupItem value={option.value} id={`width-${option.id}`} />
-                    <Label htmlFor={`width-${option.id}`} className="text-sm cursor-pointer">{option.label}</Label>
-                  </div>
-                ))}
-              </RadioGroup>
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
+export default function DimensionOptions({
+  type,
+  selectedValue,
+  onValueSelect
+}: DimensionOptionsProps) {
+  const widthOptions: { value: CardWidth; display: string }[] = [
+    { value: "25", display: "25%" },
+    { value: "50", display: "50%" },
+    { value: "75", display: "75%" },
+    { value: "100", display: "100%" },
+  ];
 
-      <FormField
-        control={form.control}
-        name="height"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Altura</FormLabel>
-            <FormControl>
-              <RadioGroup
-                value={field.value}
-                onValueChange={field.onChange}
-                className="flex flex-wrap gap-4"
-              >
-                {heightOptions.map((option) => (
-                  <div key={option.id} className="flex items-center space-x-1">
-                    <RadioGroupItem value={option.value} id={`height-${option.id}`} />
-                    <Label htmlFor={`height-${option.id}`} className="text-sm cursor-pointer">{option.label}</Label>
-                  </div>
-                ))}
-              </RadioGroup>
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
+  const heightOptions: { value: CardHeight; display: string }[] = [
+    { value: "0.5", display: "Mini" },
+    { value: "1", display: "P" },
+    { value: "2", display: "M" },
+    { value: "3", display: "G" },
+    { value: "4", display: "XG" },
+  ];
+
+  const options = type === "width" ? widthOptions : heightOptions;
+
+  return (
+    <div className="grid grid-cols-4 gap-1">
+      {options.map((option) => (
+        <button
+          key={option.value}
+          type="button"
+          onClick={() => onValueSelect(option.value)}
+          className={cn(
+            "px-2 py-1 text-sm rounded-md border border-gray-300 hover:bg-gray-50 transition-colors",
+            selectedValue === option.value 
+              ? "bg-blue-100 text-blue-700 border-blue-400 font-medium" 
+              : "bg-white"
+          )}
+        >
+          {option.display}
+        </button>
+      ))}
     </div>
   );
-};
-
-export default DimensionOptions;
+}

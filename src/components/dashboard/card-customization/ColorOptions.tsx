@@ -1,57 +1,71 @@
 
-import React from 'react';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Label } from '@/components/ui/label';
-import { CardColor } from '@/types/dashboard';
+import { useState } from "react";
+import { CardColor } from "@/types/dashboard";
+import { cn } from "@/lib/utils";
+import { getColorClass } from "@/components/dashboard/card-customization/utils";
 
 interface ColorOptionsProps {
-  selectedColor: string;
-  onSelectColor: (color: string) => void;
+  selectedColor: CardColor;
+  onColorSelect: (color: CardColor) => void;
 }
 
-const ColorOptions: React.FC<ColorOptionsProps> = ({ selectedColor, onSelectColor }) => {
-  // Updated color options - removed gray-lighter (too close to white) and added dark gray
-  const colorOptions: Array<{value: string; display: string; className: string}> = [
-    { value: 'blue-vivid', display: 'Azul Vivo', className: 'bg-[#0066FF] border-blue-600 text-white' },
-    { value: 'blue-light', display: 'Azul Claro', className: 'bg-[#66B2FF] border-blue-400 text-white' },
-    { value: 'blue-dark', display: 'Azul Escuro', className: 'bg-[#1D4ED8] border-blue-900 text-white' },
-    { value: 'green-neon', display: 'Verde Neon', className: 'bg-[#66FF66] border-green-600 text-gray-800' },
-    { value: 'green-dark', display: 'Verde Escuro', className: 'bg-[#00CC00] border-green-800 text-gray-800' },
-    { value: 'green-teal', display: 'Verde Teal', className: 'bg-[#029e65] border-green-700 text-white' },  // Nova cor adicionada
-    { value: 'gray-light', display: 'Cinza Claro', className: 'bg-[#F5F5F5] border-gray-300 text-gray-800' },
-    { value: 'gray-medium', display: 'Cinza Médio', className: 'bg-[#D4D4D4] border-gray-400 text-gray-800' },
-    { value: 'orange-dark', display: 'Laranja Escuro', className: 'bg-[#F25C05] border-orange-600 text-white' },
-    { value: 'orange-light', display: 'Laranja Claro', className: 'bg-[#F89E66] border-orange-400 text-white' },
-    { value: 'deep-blue', display: 'Azul Profundo', className: 'bg-[#051A2C] border-blue-950 text-white' },
-    { value: 'neutral-800', display: 'Cinza Escuro', className: 'bg-neutral-800 border-neutral-700 text-white' }, 
+export default function ColorOptions({
+  selectedColor,
+  onColorSelect
+}: ColorOptionsProps) {
+  const colorOptions: { value: CardColor; displayName: string }[] = [
+    { value: "blue-light", displayName: "Azul Claro" },
+    { value: "blue-vivid", displayName: "Azul Vivo" },
+    { value: "blue-dark", displayName: "Azul Escuro" },
+    { value: "orange-light", displayName: "Laranja Claro" },
+    { value: "orange-dark", displayName: "Laranja Escuro" },
+    { value: "gray-light", displayName: "Cinza Claro" },
+    { value: "gray-medium", displayName: "Cinza Médio" },
+    { value: "green-neon", displayName: "Verde Neon" },
+    { value: "green-dark", displayName: "Verde Escuro" },
+    { value: "green-teal", displayName: "Verde Água" },
+    { value: "deep-blue", displayName: "Azul Profundo" },
+    { value: "bg-white", displayName: "Branco" },
+    { value: "bg-blue-500", displayName: "Azul" },
+    { value: "bg-orange-500", displayName: "Laranja" },
+    { value: "bg-gray-500", displayName: "Cinza" },
+    { value: "bg-green-500", displayName: "Verde" },
+    { value: "bg-yellow-500", displayName: "Amarelo" },
+    { value: "bg-teal-500", displayName: "Turquesa" },
+    { value: "bg-red-500", displayName: "Vermelho" },
+    { value: "bg-purple-500", displayName: "Roxo" },
   ];
 
-  return (
-    <RadioGroup 
-      value={selectedColor}
-      onValueChange={onSelectColor}
-      className="flex flex-wrap gap-3"
-    >
-      {colorOptions.map((option) => (
-        <div key={option.value} className="flex flex-col items-center">
-          <RadioGroupItem 
-            value={option.value} 
-            id={`color-${option.value}`} 
-            className="sr-only"
-          />
-          <Label
-            htmlFor={`color-${option.value}`}
-            className={`flex items-center justify-center w-8 h-8 rounded-full cursor-pointer border transition-all ${
-              selectedColor === option.value 
-                ? 'ring-2 ring-offset-2 ring-blue-500' 
-                : 'hover:scale-110'
-            } ${option.className}`}
-            aria-label={option.display}
-          />
-        </div>
-      ))}
-    </RadioGroup>
-  );
-};
+  const handleColorSelect = (color: CardColor) => {
+    onColorSelect(color);
+  };
 
-export default ColorOptions;
+  return (
+    <div className="grid grid-cols-5 gap-2">
+      {colorOptions.map((color) => {
+        const isSelected = color.value === selectedColor;
+        const colorClass = getColorClass(color.value);
+        
+        return (
+          <button
+            key={color.value}
+            type="button"
+            className={cn(
+              "h-10 rounded-md border relative",
+              colorClass,
+              isSelected ? "ring-2 ring-blue-600 ring-offset-2" : "hover:opacity-90"
+            )}
+            onClick={() => handleColorSelect(color.value)}
+            title={color.displayName}
+          >
+            {isSelected && (
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="h-2 w-2 rounded-full bg-blue-600"></div>
+              </div>
+            )}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
