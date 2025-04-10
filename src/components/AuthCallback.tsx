@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -6,7 +7,6 @@ import { toast } from '@/components/ui/use-toast';
 const AuthCallback = () => {
   const navigate = useNavigate();
   const [error, setError] = useState<string | null>(null);
-  const [errorDetails, setErrorDetails] = useState<string | null>(null);
   const [processingAuth, setProcessingAuth] = useState(true);
 
   useEffect(() => {
@@ -20,149 +20,83 @@ const AuthCallback = () => {
       
       // Check for errors in both hash and query parameters
       const errorDescription = hashParams.get('error_description') || queryParams.get('error_description');
-      const errorType = hashParams.get('error') || queryParams.get('error');
-      const errorCode = hashParams.get('error_code') || queryParams.get('error_code');
       
-      console.log("URL parameters:", { 
-        hash: Object.fromEntries(hashParams.entries()),
-        query: Object.fromEntries(queryParams.entries()),
-        errorType,
-        errorCode,
-        errorDescription,
-        url: window.location.href
-      });
-      
-      if (errorType || errorDescription) {
-        console.error('Error from OAuth provider:', { errorType, errorCode, errorDescription });
-        
-        let userMessage = 'Erro na autenticação com Google';
-        let errorDetailsMsg = errorDescription || 'Detalhes não disponíveis';
-        
-        // Customize messages based on error type and code
-        if (errorDescription?.includes('domain_mismatch') || errorType === 'access_denied') {
-          userMessage = 'A conta Google utilizada não pertence ao domínio @smsub.prefeitura.sp.gov.br';
-          errorDetailsMsg = 'Por favor, utilize uma conta Google do domínio @smsub.prefeitura.sp.gov.br';
-        } else if (errorType === 'unauthorized_client') {
-          userMessage = 'Configuração de autenticação inválida';
-          errorDetailsMsg = 'O cliente OAuth não está configurado corretamente. Entre em contato com o administrador.';
-        } else if (errorType === 'access_denied') {
-          userMessage = 'Acesso negado';
-          errorDetailsMsg = 'A permissão para acessar o recurso foi negada.';
-        } else if (errorType === 'server_error' && errorCode === 'unexpected_failure') {
-          userMessage = 'Erro ao trocar código de autenticação';
-          errorDetailsMsg = 'Não foi possível completar o processo de autenticação. Verifique as URLs de redirecionamento no Google Console e no Supabase.';
-        }
-        
-        setError(userMessage);
-        setErrorDetails(errorDetailsMsg);
+      if (errorDescription) {
+        console.error('Error during authentication flow:', errorDescription);
+        setError(errorDescription);
         setProcessingAuth(false);
-        
-        toast({
-          title: "Erro de autenticação",
-          description: userMessage,
-          variant: "destructive"
-        });
-        
-        // Navigate back to login after a short delay
-        setTimeout(() => navigate('/login'), 5000);
         return;
       }
-
-      console.log("No error params found, proceeding with auth check");
-
-      // Handle successful authentication
+      
+      // Check for email verification parameters
+      const type = hashParams.get('type') || queryParams.get('type');
+      
       try {
-        const { data, error } = await supabase.auth.getSession();
-        
-        if (error) {
-          console.error('Erro no callback de autenticação:', error);
-          setError('Falha ao verificar sessão');
-          setErrorDetails(error.message);
-          setProcessingAuth(false);
+        if (type === 'email_confirmation' || type === 'recovery') {
+          // This is an email verification flow
+          // No need to process further as AuthProvider will handle the redirect
+          console.log('Detected email verification flow, redirecting to email-verified page');
           
-          toast({
-            title: "Erro de autenticação",
-            description: error.message,
-            variant: "destructive"
-          });
-          
-          setTimeout(() => navigate('/login'), 3000);
-          return;
-        }
-
-        if (data?.session) {
-          // Check if user email matches the organization domain
-          const userEmail = data.session.user?.email || '';
-          console.log("Authenticated user email:", userEmail);
-          
-          if (!userEmail.endsWith('@smsub.prefeitura.sp.gov.br')) {
-            console.warn('Email domain not allowed:', userEmail);
-            await supabase.auth.signOut(); // Sign out the user
+          // If email was verified, update the usuario status
+          try {
+            const { data: { session } } = await supabase.auth.getSession();
             
-            setError('Apenas emails do domínio @smsub.prefeitura.sp.gov.br são permitidos');
-            setErrorDetails(`Email utilizado: ${userEmail}`);
-            setProcessingAuth(false);
-            
-            toast({
-              title: "Domínio não permitido",
-              description: "Apenas emails do domínio @smsub.prefeitura.sp.gov.br são permitidos",
-              variant: "destructive"
-            });
-            
-            setTimeout(() => navigate('/login'), 3000);
-            return;
+            if (session?.user) {
+              console.log('Updating confirmed email user status:', session.user.id);
+              
+              // Update the user's status_conta to 'pendente' (awaiting approval)
+              await supabase
+                .from('usuarios')
+                .update({ status_conta: 'pendente' })
+                .eq('id', session.user.id);
+            }
+          } catch (updateError) {
+            console.error('Error updating user status after verification:', updateError);
           }
           
-          console.log("Authentication successful, redirecting to dashboard");
-          navigate('/dashboard');
-        } else {
-          console.log("No session found, redirecting to login");
-          setProcessingAuth(false);
-          navigate('/login');
+          navigate('/email-verified');
+          return;
         }
-      } catch (callbackError) {
-        console.error('Erro durante processamento do callback:', callbackError);
-        setError('Erro inesperado durante autenticação');
-        setErrorDetails('Por favor, tente novamente ou entre em contato com o suporte');
+        
+        // Handle other auth callback cases
+        // The session should already be set by Supabase auth
+        console.log('Processing general auth callback');
+        navigate('/dashboard');
+      } catch (err) {
+        console.error('Error handling auth callback:', err);
+        setError('Erro ao processar autenticação. Por favor, tente novamente.');
+      } finally {
         setProcessingAuth(false);
-        
-        toast({
-          title: "Erro de autenticação",
-          description: "Ocorreu um erro inesperado durante o processo de autenticação",
-          variant: "destructive"
-        });
-        
-        setTimeout(() => navigate('/login'), 3000);
       }
     };
 
     handleAuthCallback();
   }, [navigate]);
 
-  return (
-    <div className="h-screen flex flex-col items-center justify-center bg-gray-50 p-4">
-      {error ? (
-        <div className="bg-white p-6 rounded-lg shadow-md max-w-md w-full">
-          <h2 className="text-xl font-semibold text-red-600 mb-2">Erro de autenticação</h2>
-          <p className="text-gray-700 mb-4">{error}</p>
-          {errorDetails && (
-            <div className="bg-gray-50 p-3 rounded-md mb-4 text-sm">
-              <p className="text-gray-600">{errorDetails}</p>
-            </div>
-          )}
-          <button 
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-4">
+        <div className="bg-white p-8 rounded-lg shadow-md max-w-md w-full text-center">
+          <h2 className="text-2xl font-bold text-red-600 mb-4">Erro de Autenticação</h2>
+          <p className="text-gray-600 mb-6">{error}</p>
+          <button
             onClick={() => navigate('/login')}
-            className="w-full bg-[#003570] text-white py-2 rounded-lg hover:bg-blue-900 transition-all"
+            className="bg-primary text-white px-4 py-2 rounded hover:bg-primary/80 transition-colors"
           >
             Voltar para o login
           </button>
         </div>
-      ) : (
-        <div className="flex flex-col items-center">
-          <div className="loading-spinner animate-spin mb-4 w-10 h-10 border-4 border-[#003570] border-t-transparent rounded-full"></div>
-          <p className="text-gray-600">Autenticando, por favor aguarde...</p>
-        </div>
-      )}
+      </div>
+    );
+  }
+
+  // Loading state
+  return (
+    <div className="flex items-center justify-center min-h-screen bg-gray-100">
+      <div className="bg-white p-8 rounded-lg shadow-md max-w-md w-full text-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary mx-auto"></div>
+        <p className="text-gray-600 mt-4">Processando autenticação...</p>
+      </div>
     </div>
   );
 };

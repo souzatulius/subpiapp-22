@@ -9,7 +9,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
 const EmailVerified = () => {
-  const { user, signOut, isApproved } = useAuth();
+  const { user, signOut } = useAuth();
   const [checkingStatus, setCheckingStatus] = useState(false);
   const [forceAllowAccess, setForceAllowAccess] = useState(false);
   const [approvalStatus, setApprovalStatus] = useState<string | null>(null);
@@ -24,7 +24,7 @@ const EmailVerified = () => {
         // Verificar diretamente no banco de dados o status do usuário
         const { data, error } = await supabase
           .from('usuarios')
-          .select('status_conta')
+          .select('status_conta, status')
           .eq('id', user.id)
           .single();
         
@@ -33,11 +33,13 @@ const EmailVerified = () => {
           return;
         }
         
-        console.log('Status da conta verificado diretamente:', data?.status_conta);
-        setApprovalStatus(data?.status_conta);
+        console.log('Status da conta verificado diretamente:', data);
+        // Prefer status_conta if available, fall back to status
+        const currentStatus = data?.status_conta || data?.status;
+        setApprovalStatus(currentStatus);
         
         // Agora aceita tanto "aprovado" quanto "ativo" como status válidos
-        if (data?.status_conta === 'aprovado' || data?.status_conta === 'ativo') {
+        if (currentStatus === 'aprovado' || currentStatus === 'ativo') {
           console.log('Usuário realmente aprovado, permitindo acesso ao dashboard');
           setForceAllowAccess(true);
         }
@@ -72,7 +74,10 @@ const EmailVerified = () => {
       // Atualizar o status do usuário para "ativo"
       const { error } = await supabase
         .from('usuarios')
-        .update({ status_conta: 'ativo' })
+        .update({ 
+          status_conta: 'ativo',
+          status: 'ativo'
+        })
         .eq('id', user.id);
       
       if (error) {

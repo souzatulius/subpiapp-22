@@ -13,10 +13,13 @@ export const useUserApproval = (refreshUsers: () => Promise<void>) => {
     try {
       console.log(`Aprovando usuário: ${userName}, ID: ${userId}`);
       
-      // Update user status in the correct 'usuarios' table
+      // Update both status and status_conta to "ativo" in the usuarios table
       const { error: updateError } = await supabase
         .from('usuarios')
-        .update({ status: 'ativo' })
+        .update({ 
+          status: 'ativo',
+          status_conta: 'ativo' 
+        })
         .eq('id', userId);
       
       if (updateError) throw updateError;
@@ -48,6 +51,21 @@ export const useUserApproval = (refreshUsers: () => Promise<void>) => {
         });
       
       if (permissionAssignError) throw permissionAssignError;
+      
+      // Try to send an approval email via the Edge Function if available
+      try {
+        const { error: notificationError } = await fetch(`${window.location.origin}/api/send-approval-email`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId })
+        }).then(res => res.json());
+        
+        if (notificationError) {
+          console.warn('Error sending approval notification:', notificationError);
+        }
+      } catch (emailError) {
+        console.warn('Could not send approval email notification:', emailError);
+      }
       
       // Successfully updated user status and assigned permission
       toast({
