@@ -1,6 +1,7 @@
 
 import { useState, useEffect } from 'react';
-import { ChartConfig, ChartVisibility } from '@/types/ranking';
+import { ChartConfig } from '@/types/ranking';
+import { ChartVisibility } from '@/components/ranking/types';
 
 export const useRankingCharts = () => {
   // Initialize chart visibility state with the correct structure

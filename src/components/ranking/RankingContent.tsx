@@ -5,7 +5,7 @@ import FilterDialog from './FilterDialog';
 import RankingCharts from './RankingCharts';
 import RankingFilters from './RankingFilters';
 import DemoChartsSection from './DemoChartsSection';
-import { ChartVisibility } from './types';
+import { ChartVisibility } from '@/components/ranking/types';
 
 interface RankingContentProps {
   filterDialogOpen: boolean;
@@ -54,7 +54,7 @@ const RankingContent = ({
         <RankingCharts 
           chartData={{}}
           isLoading={isLoading}
-          chartVisibility={chartVisibility}
+          chartVisibility={chartVisibility as ChartVisibility}
           sgzData={sgzData}
           painelData={painelData}
           onSimulateIdealRanking={handleSimulateIdealRanking}
@@ -67,8 +67,8 @@ const RankingContent = ({
       <FilterDialog 
         isOpen={filterDialogOpen}
         onClose={() => setFilterDialogOpen(false)}
-        chartVisibility={chartVisibility}
-        setChartVisibility={setChartVisibility}
+        chartVisibility={chartVisibility as ChartVisibility}
+        setChartVisibility={setChartVisibility as React.Dispatch<React.SetStateAction<ChartVisibility>>}
       />
     </div>
   );

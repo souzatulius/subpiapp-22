@@ -12,7 +12,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Filter, LayoutDashboard, RotateCcw } from 'lucide-react';
-import { ChartVisibility } from './types';
+import { ChartVisibility } from '@/components/ranking/types';
 
 interface FilterDialogProps {
   isOpen: boolean;
