@@ -26,10 +26,10 @@ export const useFetchProcessos = () => {
     try {
       console.log('Fetching esic_processos with options:', options);
       
-      // Build the query with the correct join syntax
+      // Build the query without the problematic join syntax
       let query = supabase
         .from('esic_processos')
-        .select('*, coordenacao:coordenacoes(nome)', { count: 'exact' });
+        .select('*, coordenacao:coordenacao_id(*)', { count: 'exact' });
       
       // Apply filters
       if (options.searchTerm) {
@@ -70,7 +70,7 @@ export const useFetchProcessos = () => {
       }
 
       if (data) {
-        // Transform the data
+        // Transform the data safely
         const processedData = data.map((p: any): ESICProcesso => {
           // Ensure status is one of the valid types
           let status: ESICProcesso['status'] = p.status as ESICProcesso['status'];
@@ -79,6 +79,11 @@ export const useFetchProcessos = () => {
           if (!['aberto', 'em_andamento', 'concluido', 'cancelado', 'aguardando_justificativa', 'aguardando_aprovacao', 'novo_processo'].includes(p.status)) {
             status = 'novo_processo'; // Default to novo_processo if invalid
           }
+          
+          // Safely handle the coordenacao data
+          const coordenacaoInfo = p.coordenacao ? {
+            nome: p.coordenacao.descricao || 'Não informada'
+          } : undefined;
           
           return {
             id: p.id,
@@ -92,11 +97,7 @@ export const useFetchProcessos = () => {
             status: status,
             coordenacao_id: p.coordenacao_id,
             prazo_resposta: p.prazo_resposta,
-            // Fix the coordenacao property to match the expected format in ESICProcesso type
-            coordenacao_id_info: p.coordenacao ? {
-              nome: p.coordenacao.nome
-            } : undefined,
-            // Map the database field names to the interface field names
+            coordenacao_id_info: coordenacaoInfo,
             criado_em: p.criado_em,
             atualizado_em: p.atualizado_em,
             created_at: p.criado_em,

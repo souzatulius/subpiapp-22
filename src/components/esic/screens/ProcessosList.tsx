@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ESICProcesso } from '@/types/esic';
 import ProcessoList from '@/components/esic/ProcessoList';
 import ESICSearchHeader from '@/components/esic/ESICSearchHeader';

@@ -44,10 +44,22 @@ const ESICPage: React.FC = () => {
     fetchProcessos
   } = useESICPageState();
   
-  // Fetch processes when the component mounts and when the screen changes back to list
+  // Fetch processes when the component mounts
   useEffect(() => {
-    console.log('ESICPage useEffect - fetching processos');
+    console.log('ESICPage useEffect - fetching processos inicialmente');
+    fetchProcessos().catch(err => {
+      toast({
+        variant: "destructive",
+        title: "Erro ao carregar processos",
+        description: err.message || "Ocorreu um erro ao carregar os processos"
+      });
+    });
+  }, []); // Buscar apenas na montagem
+  
+  // Outra chamada quando a tela muda para 'list'
+  useEffect(() => {
     if (screen === 'list') {
+      console.log('ESICPage useEffect - fetching processos ao retornar para lista');
       fetchProcessos().catch(err => {
         toast({
           variant: "destructive",
@@ -56,7 +68,7 @@ const ESICPage: React.FC = () => {
         });
       });
     }
-  }, [screen, fetchProcessos]);
+  }, [screen]);
   
   // Handler for adding justification directly from the process list
   const handleAddJustificativaFromList = (processo: ESICProcesso) => {

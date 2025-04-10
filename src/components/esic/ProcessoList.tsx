@@ -45,7 +45,12 @@ const ProcessoList: React.FC<ProcessoListProps> = ({
     return <ProcessoListSkeleton viewMode={viewMode} />;
   }
 
-  if ((filteredProcessos.length === 0 && !showEmptyState) || (showEmptyState && processos.length === 0)) {
+  // Mostrar estado vazio apenas se não houver processos ou se os resultados da pesquisa forem vazios
+  if (processos.length === 0) {
+    return <ProcessoListEmpty searchTerm={''} />;
+  }
+
+  if (filteredProcessos.length === 0 && searchTerm) {
     return <ProcessoListEmpty searchTerm={searchTerm} />;
   }
 
