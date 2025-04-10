@@ -49,19 +49,19 @@ export const getHeightClass = (height?: CardHeight, isMobileView: boolean = fals
     }
   }
 
-  // Regular desktop heights
+  // Regular desktop heights - using row spans instead of fixed heights
   switch (height) {
     case '0.5':
-      return 'h-20'; // Half height
+      return 'row-span-1'; // Half height
     case '2':
-      return 'h-80';
+      return 'row-span-2';
     case '3':
-      return 'h-96';
+      return 'row-span-3';
     case '4':
-      return 'h-120';
+      return 'row-span-4';
     case '1':
     default:
-      return 'h-40';
+      return 'row-span-1';
   }
 };
 

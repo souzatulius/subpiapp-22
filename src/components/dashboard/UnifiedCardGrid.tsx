@@ -180,7 +180,7 @@ const UnifiedCardGrid: React.FC<UnifiedCardGridProps> = ({
       collisionDetection={closestCenter}
       onDragEnd={handleDragEnd}
     >
-      <div className={`w-full grid gap-y-3 gap-x-3 ${isMobileView ? 'grid-cols-2' : 'grid-cols-4 auto-rows-[40px]'}`}>
+      <div className={`w-full grid gap-3 ${isMobileView ? 'grid-cols-2' : 'grid-cols-4 grid-flow-dense'}`}>
         <SortableContext items={processedCards.map(card => card.id)}>
           {processedCards.map(card => {
             const specialContent = getSpecialContent(card);
