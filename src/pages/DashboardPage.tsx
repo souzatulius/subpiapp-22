@@ -110,10 +110,9 @@ const DashboardPage: React.FC = () => {
     if (!cards || cards.length === 0) return;
     
     const searchCardExists = cards.some(card => card.id === 'dashboard-search-card');
-    const originDemandCardExists = cards.some(card => card.id === 'origem-demandas-card' || card.type === 'origin_demand_chart');
     const pendingActivitiesCardExists = cards.some(card => card.id === 'pending-activities-card');
     
-    if (!searchCardExists || !originDemandCardExists || !pendingActivitiesCardExists) {
+    if (!searchCardExists || !pendingActivitiesCardExists) {
       let updatedCards = [...cards];
       let needsUpdate = false;
       
@@ -133,25 +132,6 @@ const DashboardPage: React.FC = () => {
         };
         
         updatedCards = [searchCard, ...updatedCards];
-        needsUpdate = true;
-      }
-      
-      if (!originDemandCardExists) {
-        const originDemandCard: ActionCardItem = {
-          id: 'origem-demandas-card',
-          title: 'Atividades em Andamento',
-          subtitle: 'Demandas da semana por área técnica',
-          iconId: 'BarChart2',
-          path: '',
-          color: 'gray-light',
-          width: isMobile ? '100' : '50',
-          height: '2',
-          type: 'origin_demand_chart',
-          displayMobile: true,
-          mobileOrder: 5
-        };
-        
-        updatedCards = [...updatedCards, originDemandCard];
         needsUpdate = true;
       }
       
@@ -180,13 +160,6 @@ const DashboardPage: React.FC = () => {
   }, [cards, isMobile, handleCardsChange]);
 
   const renderSpecialCardContent = (cardId: string) => {
-    if (cardId === 'origem-demandas-card' || 
-        cardId.includes('origem-demandas') || 
-        cardId.includes('origemDemandas') ||
-        cardId.includes('origin-demand-chart') ||
-        cardId.includes('origin_demand_chart')) {
-      return <OriginsDemandCardWrapper className="w-full h-full" />;
-    }
     return null;
   };
 
