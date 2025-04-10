@@ -1,12 +1,12 @@
 
 import { z } from 'zod';
 import { ReactNode } from 'react';
-import { CardColor } from '@/types/dashboard';
+import { CardColor, CardType } from '@/types/dashboard';
 
 export const formSchema = z.object({
   title: z.string().min(2, "Título deve ter pelo menos 2 caracteres").max(50, "Título deve ter no máximo 50 caracteres"),
   subtitle: z.string().optional(),
-  type: z.enum(["standard", "data_dynamic"]).default("standard"),
+  type: z.enum(["standard", "data_dynamic", "in_progress_demands", "recent_notes", "origin_selection", "smart_search", "origin_demand_chart", "communications", "pending_activities"]).default("standard"),
   path: z.string().optional(),
   color: z.custom<CardColor>(),
   iconId: z.string(),
@@ -26,7 +26,7 @@ export interface CardCustomizationModalProps {
   onClose: () => void;
   onSave: (data: {
     title: string;
-    type?: "standard" | "data_dynamic";
+    type?: CardType;
     icon: ReactNode;
     path?: string;
     color: CardColor;
@@ -43,8 +43,7 @@ export interface CardCustomizationModalProps {
 
 export interface CardFormPreviewProps {
   title: string;
+  subtitle?: string;
   iconId: string;
   color: string;
-  width: string;
-  height: string;
 }

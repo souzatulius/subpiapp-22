@@ -37,6 +37,7 @@ function EditCardModal({ isOpen, onClose, onSave, card }: EditCardModalProps) {
       displayMobile: card.displayMobile !== false,
       mobileOrder: card.mobileOrder || 0,
       allowedDepartments: card.allowedDepartments || [],
+      // Check if allowedRoles exists in the card object, if not, provide an empty array as default
       allowedRoles: card.allowedRoles || []
     }
   });

@@ -74,8 +74,6 @@ export default function CardFormMain({ initialData, onSave, onCancel }: CardForm
                 subtitle={formValues.subtitle}
                 iconId={selectedIconId}
                 color={formValues.color}
-                width={formValues.width}
-                height={formValues.height}
               />
             </div>
           </div>
