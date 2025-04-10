@@ -1,3 +1,4 @@
+
 import React, { useCallback } from 'react';
 import {
   DndContext,
@@ -170,7 +171,7 @@ const UnifiedCardGrid: React.FC<UnifiedCardGridProps> = ({
       />;
     }
     
-    if (card.type === 'pending_activities' || card.id === 'pending-activities-card') {
+    if (card.type === 'pending_actions' || card.isPendingActions) {
       return <PendingActivitiesCard 
         color={card.color}
         title={card.title}
