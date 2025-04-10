@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -12,7 +13,7 @@ import { Label } from '@/components/ui/label';
 
 interface ProcessoViewProps {
   processo: ESICProcesso;
-  justificativas: ESICJustificativa[];
+  justificativas: ESICJustificativa[] | undefined;
   isJustificativasLoading: boolean;
   onEdit: (processo: ESICProcesso) => void;
   onAddJustificativa: () => void;
@@ -24,7 +25,7 @@ interface ProcessoViewProps {
 
 const ProcessoView: React.FC<ProcessoViewProps> = ({
   processo,
-  justificativas,
+  justificativas = [], // Provide a default empty array
   isJustificativasLoading,
   onEdit,
   onAddJustificativa,
@@ -158,7 +159,7 @@ const ProcessoView: React.FC<ProcessoViewProps> = ({
           <div className="py-8 text-center">
             <p className="text-gray-500">Carregando justificativas...</p>
           </div>
-        ) : justificativas.length === 0 ? (
+        ) : !justificativas || justificativas.length === 0 ? (
           <div className="py-8 text-center bg-gray-50 rounded-lg">
             <p className="text-gray-500">Este processo ainda não possui justificativas.</p>
             {processo.status !== 'concluido' && (
