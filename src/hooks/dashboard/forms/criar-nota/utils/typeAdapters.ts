@@ -13,7 +13,8 @@ export const adaptDemandType = (selectedDemanda: Demand): any => {
     problema_id: selectedDemanda.problema_id || null,
     coordenacao_id: selectedDemanda.coordenacao_id || null,
     supervisao_tecnica_id: selectedDemanda.supervisao_tecnica_id || null,
-    bairro_id: selectedDemanda.bairro_id || null,
+    // Fix: Use bairro?.id instead of bairro_id which doesn't exist on Demand type
+    bairro_id: selectedDemanda.bairro?.id || null,
     area_coordenacao: selectedDemanda.area_coordenacao || null,
     supervisao_tecnica: selectedDemanda.supervisao_tecnica || null,
     bairro: selectedDemanda.bairro || null,
