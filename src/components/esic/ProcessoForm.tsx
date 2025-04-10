@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -96,7 +95,6 @@ const ProcessoForm: React.FC<ProcessoFormProps> = ({
     }
   });
 
-  // Watch for coordenação checkbox change
   const semAreaTecnica = form.watch('sem_area_tecnica');
   const semIdentificacao = form.watch('sem_identificacao');
   
@@ -147,7 +145,7 @@ const ProcessoForm: React.FC<ProcessoFormProps> = ({
                       <Button
                         variant="outline"
                         className={cn(
-                          "w-full pl-3 text-left font-normal rounded-md",
+                          "w-full pl-3 text-left font-normal rounded-xl border border-gray-300 shadow-sm",
                           !field.value && "text-muted-foreground"
                         )}
                       >
@@ -160,7 +158,7 @@ const ProcessoForm: React.FC<ProcessoFormProps> = ({
                       </Button>
                     </FormControl>
                   </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
+                  <PopoverContent className="w-auto p-0 rounded-xl shadow-md border border-gray-100" align="start">
                     <Calendar
                       mode="single"
                       selected={new Date(field.value)}
@@ -169,6 +167,7 @@ const ProcessoForm: React.FC<ProcessoFormProps> = ({
                         date > new Date() || date < new Date("1900-01-01")
                       }
                       initialFocus
+                      className="rounded-xl"
                     />
                   </PopoverContent>
                 </Popover>
@@ -266,11 +265,11 @@ const ProcessoForm: React.FC<ProcessoFormProps> = ({
                 <FormLabel>Situação</FormLabel>
                 <Select onValueChange={field.onChange} defaultValue={field.value}>
                   <FormControl>
-                    <SelectTrigger className="rounded-md">
+                    <SelectTrigger className="rounded-xl border border-gray-300 shadow-sm">
                       <SelectValue placeholder="Selecione uma situação" />
                     </SelectTrigger>
                   </FormControl>
-                  <SelectContent>
+                  <SelectContent className="rounded-xl shadow-md border border-gray-100">
                     {Object.entries(situacaoLabels).map(([value, label]) => (
                       <SelectItem key={value} value={value}>
                         {label}
@@ -295,7 +294,7 @@ const ProcessoForm: React.FC<ProcessoFormProps> = ({
                       <Button
                         variant="outline"
                         className={cn(
-                          "w-full pl-3 text-left font-normal rounded-md",
+                          "w-full pl-3 text-left font-normal rounded-xl border border-gray-300 shadow-sm",
                           !field.value && "text-muted-foreground"
                         )}
                       >
@@ -308,7 +307,7 @@ const ProcessoForm: React.FC<ProcessoFormProps> = ({
                       </Button>
                     </FormControl>
                   </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
+                  <PopoverContent className="w-auto p-0 rounded-xl shadow-md border border-gray-100" align="start">
                     <Calendar
                       mode="single"
                       selected={field.value ? new Date(field.value) : undefined}
@@ -317,6 +316,7 @@ const ProcessoForm: React.FC<ProcessoFormProps> = ({
                         date < new Date()
                       }
                       initialFocus
+                      className="rounded-xl"
                     />
                   </PopoverContent>
                 </Popover>
@@ -370,11 +370,11 @@ const ProcessoForm: React.FC<ProcessoFormProps> = ({
                   value={field.value}
                 >
                   <FormControl>
-                    <SelectTrigger className="rounded-md">
+                    <SelectTrigger className="rounded-xl border border-gray-300 shadow-sm">
                       <SelectValue placeholder="Selecione uma coordenação" />
                     </SelectTrigger>
                   </FormControl>
-                  <SelectContent>
+                  <SelectContent className="rounded-xl shadow-md border border-gray-100">
                     {coordenacoes.map((coordenacao) => (
                       <SelectItem key={coordenacao.id} value={coordenacao.id}>
                         {coordenacao.nome}
@@ -389,10 +389,18 @@ const ProcessoForm: React.FC<ProcessoFormProps> = ({
         )}
         
         <div className="pt-4 flex justify-end">
-          <Button type="submit" disabled={isSubmitting}>
+          <Button 
+            type="submit" 
+            disabled={isSubmitting}
+            className="rounded-xl shadow-sm"
+          >
             {isSubmitting ? 'Salvando...' : isEditing ? 'Atualizar Processo' : 'Criar Processo'}
           </Button>
-          <Button variant="outline" onClick={onCancel} className="ml-2">
+          <Button 
+            variant="outline" 
+            onClick={onCancel} 
+            className="ml-2 rounded-xl shadow-sm"
+          >
             Cancelar
           </Button>
         </div>

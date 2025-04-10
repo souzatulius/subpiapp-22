@@ -73,20 +73,22 @@ const ProcessoEdit: React.FC<ProcessoEditProps> = ({
       </div>
       
       {isLoading || isLoadingCoords ? (
-        <div className="text-center">
-          <Loader2 className="h-8 w-8 animate-spin mx-auto" />
+        <div className="flex items-center justify-center p-8 bg-white rounded-xl shadow-sm border border-gray-100">
+          <Loader2 className="h-8 w-8 animate-spin" />
         </div>
       ) : processo ? (
-        <ProcessoForm
-          defaultValues={defaultValues}
-          onSubmit={onSubmit}
-          isSubmitting={isLoading}
-          onCancel={onCancel}
-          coordenacoes={coordenacoes}
-          isEditing={true}
-        />
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+          <ProcessoForm
+            defaultValues={defaultValues}
+            onSubmit={onSubmit}
+            isSubmitting={isLoading}
+            onCancel={onCancel}
+            coordenacoes={coordenacoes}
+            isEditing={true}
+          />
+        </div>
       ) : (
-        <div className="text-center">
+        <div className="text-center bg-white rounded-xl shadow-sm border border-gray-100 p-6">
           <p className="text-red-500">Processo não encontrado</p>
         </div>
       )}

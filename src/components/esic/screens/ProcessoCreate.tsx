@@ -130,16 +130,18 @@ const ProcessoCreate: React.FC = () => {
       </div>
       
       {isLoading ? (
-        <div className="flex items-center justify-center p-8">
+        <div className="flex items-center justify-center p-8 bg-white rounded-xl shadow-sm border border-gray-100">
           <Loader2 className="h-8 w-8 animate-spin" />
         </div>
       ) : (
-        <ProcessoForm
-          onSubmit={handleSubmit}
-          isSubmitting={isSubmitting}
-          onCancel={handleCancel}
-          coordenacoes={coordenacoes}
-        />
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+          <ProcessoForm
+            onSubmit={handleSubmit}
+            isSubmitting={isSubmitting}
+            onCancel={handleCancel}
+            coordenacoes={coordenacoes}
+          />
+        </div>
       )}
     </div>
   );
