@@ -49,4 +49,9 @@ export interface ChartFilter {
   label: string;
   value: string;
   isActive: boolean;
+  dataInicio?: string;
+  dataFim?: string;
+  distritos?: string[];
+  tiposServico?: string[];
+  status?: string[];
 }

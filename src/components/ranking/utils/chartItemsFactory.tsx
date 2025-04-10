@@ -1,7 +1,6 @@
 
 import React from 'react';
-import { ChartVisibility } from '../types';
-import { ChartItem } from '../types';
+import { ChartVisibility, ChartItem } from '../types';
 
 interface CreateChartItemsProps {
   chartData: any;

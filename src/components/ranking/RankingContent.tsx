@@ -5,6 +5,7 @@ import FilterDialog from './FilterDialog';
 import RankingCharts from './RankingCharts';
 import RankingFilters from './RankingFilters';
 import DemoChartsSection from './DemoChartsSection';
+import { ChartVisibility } from './types';
 
 interface RankingContentProps {
   filterDialogOpen: boolean;

@@ -1,9 +1,9 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { ChartFilter } from '@/components/ranking/types';
+import { FilterOptions } from '@/components/ranking/types';
 
-export const useChartData = (filters: ChartFilter) => {
+export const useChartData = (filters: FilterOptions) => {
   const [chartData, setChartData] = useState<any>(null);
   const [rawData, setRawData] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
