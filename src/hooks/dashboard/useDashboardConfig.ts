@@ -2,17 +2,20 @@
 import { useState, useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { ActionCardItem } from '@/types/dashboard';
+import { supabase } from '@/integrations/supabase/client';
 
 export interface DashboardConfigResult {
   actionCards: ActionCardItem[];
+  config: ActionCardItem[]; // Added config property
+  isLoading: boolean; // Added isLoading property
   setActionCards: (cards: ActionCardItem[]) => void;
-  isLoadingDashboard: boolean;
   viewType: 'grid' | 'list';
   setViewType: (viewType: 'grid' | 'list') => void;
   firstName: string;
+  saveConfig: (cards: ActionCardItem[]) => Promise<void>; // Added saveConfig method
 }
 
-export const useDashboardConfig = (): DashboardConfigResult => {
+export const useDashboardConfig = (department?: string, type?: string): DashboardConfigResult => {
   const [actionCards, setActionCards] = useState<ActionCardItem[]>([]);
   const [isLoadingDashboard, setIsLoadingDashboard] = useState(true);
   const [viewType, setViewType] = useState<'grid' | 'list'>('grid');
@@ -60,7 +63,6 @@ export const useDashboardConfig = (): DashboardConfigResult => {
           displayMobile: true,
           mobileOrder: 5
         }
-        // Removed the "Origem das Demandas" card from default cards
       ];
 
       setActionCards(defaultCards);
@@ -82,14 +84,28 @@ export const useDashboardConfig = (): DashboardConfigResult => {
     }, 500);
 
     return () => clearTimeout(loadTimer);
-  }, []);
+  }, [department, type]);
+
+  // Add saveConfig function to match the expected interface
+  const saveConfig = async (cards: ActionCardItem[]): Promise<void> => {
+    try {
+      console.log('Saving cards config:', cards);
+      // This is a placeholder implementation
+      // In a real application, you would save this to a database or localStorage
+      setActionCards(cards);
+    } catch (error) {
+      console.error('Error saving dashboard config:', error);
+    }
+  };
 
   return {
     actionCards,
+    config: actionCards, // Map actionCards to config for compatibility
+    isLoading: isLoadingDashboard, // Map isLoadingDashboard to isLoading for compatibility
     setActionCards,
-    isLoadingDashboard,
     viewType,
     setViewType,
-    firstName
+    firstName,
+    saveConfig
   };
 };
