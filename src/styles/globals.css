@@ -33,7 +33,7 @@
     --input: 214.3 31.8% 91.4%;
     --ring: 222.2 84% 4.9%;
 
-    --radius: 0.5rem;
+    --radius: 1rem;
   }
 
   .dark {
@@ -187,4 +187,23 @@ main,
 .flex-height-container > .flex-1 {
   flex: 1 1 auto;
   min-height: 0;
+}
+
+/* Adicionar bordas arredondadas para todos os inputs e formulários da página ESIC */
+.esic-page input,
+.esic-page textarea,
+.esic-page select {
+  @apply rounded-xl;
+}
+
+/* Adicionar bordas arredondadas para todos os containers, boxes e cards da página ESIC */
+.esic-page .container,
+.esic-page .box,
+.esic-page .card {
+  @apply rounded-xl;
+}
+
+/* Garantir que todas as badges tenham bordas arredondadas */
+.badge {
+  @apply rounded-full;
 }

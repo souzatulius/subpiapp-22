@@ -56,14 +56,14 @@ const ProcessoItem: React.FC<ProcessoItemProps> = ({
   };
 
   return (
-    <div className="bg-white rounded-lg border border-gray-200 p-4 hover:shadow-md transition-shadow">
+    <div className="bg-white rounded-xl border border-gray-200 p-4 hover:shadow-md transition-shadow">
       <div className="flex flex-col sm:flex-row justify-between">
         <div className="space-y-2">
           <div className="flex flex-wrap gap-2 items-center">
-            <Badge variant="outline" className={getStatusBadgeClass(processo.status)}>
+            <Badge variant="outline" className={`rounded-full ${getStatusBadgeClass(processo.status)}`}>
               {statusLabels[processo.status as keyof typeof statusLabels] || processo.status}
             </Badge>
-            <Badge variant="outline" className={getSituacaoBadgeClass(processo.situacao)}>
+            <Badge variant="outline" className={`rounded-full ${getSituacaoBadgeClass(processo.situacao)}`}>
               {situacaoLabels[processo.situacao as keyof typeof situacaoLabels] || processo.situacao}
             </Badge>
             <span className="text-xs text-gray-500">

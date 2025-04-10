@@ -25,7 +25,7 @@ const NovoProcessoButton: React.FC<NovoProcessoButtonProps> = ({
     <Button 
       onClick={handleClick}
       variant={variant}
-      className="items-center"
+      className="items-center rounded-full"
     >
       <FilePlus className="h-5 w-5 mr-2" />
       {buttonText}

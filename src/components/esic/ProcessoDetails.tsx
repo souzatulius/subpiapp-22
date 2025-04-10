@@ -92,7 +92,7 @@ const ProcessoDetails: React.FC<ProcessoDetailsProps> = ({
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <Button variant="ghost" onClick={onBack} className="p-0">
+        <Button variant="ghost" onClick={onBack} className="p-0 rounded-full">
           <ArrowLeft className="h-4 w-4 mr-2" />
           Voltar
         </Button>
@@ -102,6 +102,7 @@ const ProcessoDetails: React.FC<ProcessoDetailsProps> = ({
             variant="outline" 
             size="sm"
             onClick={() => onEdit(processo)}
+            className="rounded-full"
           >
             <Pencil className="h-4 w-4 mr-2" />
             Editar Processo
@@ -112,6 +113,7 @@ const ProcessoDetails: React.FC<ProcessoDetailsProps> = ({
               variant="default" 
               size="sm"
               onClick={onAddJustificativa}
+              className="rounded-full"
             >
               <FileText className="h-4 w-4 mr-2" />
               Adicionar Justificativa
@@ -120,7 +122,7 @@ const ProcessoDetails: React.FC<ProcessoDetailsProps> = ({
         </div>
       </div>
       
-      <Card className="w-full">
+      <Card className="w-full rounded-2xl">
         <CardHeader>
           <div className="flex justify-between items-start">
             <CardTitle>
@@ -130,12 +132,12 @@ const ProcessoDetails: React.FC<ProcessoDetailsProps> = ({
               <AlertDialog open={showStatusDialog} onOpenChange={setShowStatusDialog}>
                 <AlertDialogTrigger asChild>
                   <Badge 
-                    className={`${getStatusColor(processo.status)} cursor-pointer hover:opacity-80`}
+                    className={`${getStatusColor(processo.status)} cursor-pointer hover:opacity-80 rounded-full`}
                   >
                     {statusLabels[processo.status]}
                   </Badge>
                 </AlertDialogTrigger>
-                <AlertDialogContent>
+                <AlertDialogContent className="rounded-2xl">
                   <AlertDialogHeader>
                     <AlertDialogTitle>Alterar Status</AlertDialogTitle>
                     <AlertDialogDescription>
@@ -147,7 +149,7 @@ const ProcessoDetails: React.FC<ProcessoDetailsProps> = ({
                       <Button
                         key={key}
                         variant="outline"
-                        className={key === processo.status ? 'border-2 border-primary' : ''}
+                        className={`rounded-xl ${key === processo.status ? 'border-2 border-primary' : ''}`}
                         onClick={() => {
                           onUpdateStatus(key);
                           setShowStatusDialog(false);
@@ -158,7 +160,7 @@ const ProcessoDetails: React.FC<ProcessoDetailsProps> = ({
                     ))}
                   </div>
                   <AlertDialogFooter>
-                    <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                    <AlertDialogCancel className="rounded-xl">Cancelar</AlertDialogCancel>
                   </AlertDialogFooter>
                 </AlertDialogContent>
               </AlertDialog>
@@ -166,12 +168,12 @@ const ProcessoDetails: React.FC<ProcessoDetailsProps> = ({
               <AlertDialog open={showSituacaoDialog} onOpenChange={setShowSituacaoDialog}>
                 <AlertDialogTrigger asChild>
                   <Badge 
-                    className={`${getSituacaoColor(processo.situacao)} cursor-pointer hover:opacity-80`}
+                    className={`${getSituacaoColor(processo.situacao)} cursor-pointer hover:opacity-80 rounded-full`}
                   >
                     {situacaoLabels[processo.situacao]}
                   </Badge>
                 </AlertDialogTrigger>
-                <AlertDialogContent>
+                <AlertDialogContent className="rounded-2xl">
                   <AlertDialogHeader>
                     <AlertDialogTitle>Alterar Situação</AlertDialogTitle>
                     <AlertDialogDescription>
@@ -183,7 +185,7 @@ const ProcessoDetails: React.FC<ProcessoDetailsProps> = ({
                       <Button
                         key={key}
                         variant="outline"
-                        className={key === processo.situacao ? 'border-2 border-primary' : ''}
+                        className={`rounded-xl ${key === processo.situacao ? 'border-2 border-primary' : ''}`}
                         onClick={() => {
                           onUpdateSituacao(key);
                           setShowSituacaoDialog(false);
@@ -194,7 +196,7 @@ const ProcessoDetails: React.FC<ProcessoDetailsProps> = ({
                     ))}
                   </div>
                   <AlertDialogFooter>
-                    <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                    <AlertDialogCancel className="rounded-xl">Cancelar</AlertDialogCancel>
                   </AlertDialogFooter>
                 </AlertDialogContent>
               </AlertDialog>
@@ -233,7 +235,7 @@ const ProcessoDetails: React.FC<ProcessoDetailsProps> = ({
                 <ScrollArea className="h-[300px] pr-4">
                   <div className="space-y-4">
                     {justificativas.map((justificativa) => (
-                      <Card key={justificativa.id} className="bg-gray-50">
+                      <Card key={justificativa.id} className="bg-gray-50 rounded-xl">
                         <CardHeader className="pb-2">
                           <div className="flex justify-between items-center">
                             <div className="text-sm text-gray-500">
@@ -241,7 +243,7 @@ const ProcessoDetails: React.FC<ProcessoDetailsProps> = ({
                               {format(new Date(justificativa.criado_em), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
                             </div>
                             {justificativa.gerado_por_ia && (
-                              <Badge variant="outline" className="bg-purple-50 border-purple-200 text-purple-700">
+                              <Badge variant="outline" className="bg-purple-50 border-purple-200 text-purple-700 rounded-full">
                                 <Sparkles className="h-3 w-3 mr-1" /> 
                                 Gerado por IA
                               </Badge>
@@ -256,7 +258,7 @@ const ProcessoDetails: React.FC<ProcessoDetailsProps> = ({
                             <Button 
                               variant="outline" 
                               size="sm" 
-                              className="text-green-600 hover:bg-green-50"
+                              className="text-green-600 hover:bg-green-50 rounded-full"
                               onClick={() => {
                                 onUpdateStatus('concluido');
                                 onUpdateSituacao('concluido');
@@ -268,7 +270,7 @@ const ProcessoDetails: React.FC<ProcessoDetailsProps> = ({
                             <Button 
                               variant="outline" 
                               size="sm" 
-                              className="text-red-600 hover:bg-red-50"
+                              className="text-red-600 hover:bg-red-50 rounded-full"
                               onClick={() => onUpdateStatus('aguardando_justificativa')}
                             >
                               <XCircle className="h-4 w-4 mr-2" />
@@ -281,7 +283,7 @@ const ProcessoDetails: React.FC<ProcessoDetailsProps> = ({
                   </div>
                 </ScrollArea>
               ) : (
-                <div className="bg-gray-50 p-4 rounded-md text-center">
+                <div className="bg-gray-50 p-4 rounded-xl text-center">
                   <p className="text-gray-500">
                     Nenhuma justificativa encontrada para este processo.
                   </p>
@@ -289,7 +291,7 @@ const ProcessoDetails: React.FC<ProcessoDetailsProps> = ({
                     <Button 
                       variant="outline" 
                       size="sm" 
-                      className="mt-2"
+                      className="mt-2 rounded-full"
                       onClick={onAddJustificativa}
                     >
                       <FileText className="h-4 w-4 mr-2" />

@@ -52,13 +52,13 @@ const ProcessoCard: React.FC<ProcessoCardProps> = ({
   };
 
   return (
-    <Card className="overflow-hidden transition-all hover:shadow-md">
+    <Card className="overflow-hidden transition-all hover:shadow-md rounded-xl">
       <CardContent className="p-4 pt-4">
         <div className="flex justify-between items-start mb-3">
-          <Badge variant="outline" className={getStatusBadgeClass(processo.status)}>
+          <Badge variant="outline" className={`rounded-full ${getStatusBadgeClass(processo.status)}`}>
             {statusLabels[processo.status as keyof typeof statusLabels] || processo.status}
           </Badge>
-          <Badge variant="outline" className={getSituacaoBadgeClass(processo.situacao)}>
+          <Badge variant="outline" className={`rounded-full ${getSituacaoBadgeClass(processo.situacao)}`}>
             {situacaoLabels[processo.situacao as keyof typeof situacaoLabels] || processo.situacao}
           </Badge>
         </div>
@@ -70,7 +70,7 @@ const ProcessoCard: React.FC<ProcessoCardProps> = ({
         <div className="mt-3 text-xs text-gray-400">{formattedDate}</div>
       </CardContent>
       
-      <CardFooter className="p-3 pt-0 flex justify-end gap-2 bg-gray-50">
+      <CardFooter className="p-3 pt-0 flex justify-end gap-2 bg-gray-50 rounded-b-xl">
         {onAddJustificativa && (
           <Button 
             size="icon" 

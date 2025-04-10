@@ -7,7 +7,7 @@ interface ESICWelcomeCardProps {}
 
 const ESICWelcomeCard: React.FC<ESICWelcomeCardProps> = () => {
   return (
-    <Card className="bg-gradient-to-r from-blue-100 via-orange-300 to-gray-500 text-gray-800 shadow-lg overflow-hidden">
+    <Card className="bg-gradient-to-r from-blue-100 via-orange-300 to-gray-500 text-gray-800 shadow-lg overflow-hidden rounded-2xl">
       <CardContent className="p-4 sm:p-6">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
           <div>

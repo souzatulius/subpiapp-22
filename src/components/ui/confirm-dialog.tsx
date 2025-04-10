@@ -38,7 +38,7 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
 }) => {
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogContent>
+      <AlertDialogContent className="rounded-2xl">
         <AlertDialogHeader>
           <AlertDialogTitle>{title}</AlertDialogTitle>
           <AlertDialogDescription>
@@ -46,7 +46,7 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={isLoading}>
+          <AlertDialogCancel disabled={isLoading} className="rounded-xl">
             {cancelText}
           </AlertDialogCancel>
           <AlertDialogAction
@@ -59,6 +59,7 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
             <Button 
               variant={destructive ? "destructive" : "default"}
               disabled={isLoading}
+              className="rounded-xl"
             >
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               {confirmText}
