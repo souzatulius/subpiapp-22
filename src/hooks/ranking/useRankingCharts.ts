@@ -1,19 +1,32 @@
+
 import { useState, useEffect } from 'react';
 import { ChartConfig, ChartVisibility } from '@/types/ranking';
 
 export const useRankingCharts = () => {
-  // Mock chart visibility state
+  // Initialize chart visibility state with the correct structure
   const [chartVisibility, setChartVisibility] = useState<ChartVisibility>({
-    evServ: true,
-    serviceDistribution: true,
-    executionTime: true,
-    districtsWronglyIncluded: true,
-    compByArea: true,
-    top10OldestPending: true,
-    bottlenecks: true,
-    idealRanking: true,
-    sgzRanking: true,
-    attentionPoints: true
+    districtPerformance: true,
+    serviceTypes: true,
+    resolutionTime: true,
+    responsibility: true,
+    evolution: true,
+    departmentComparison: true,
+    oldestPendingList: true,
+    statusDistribution: true,
+    topCompanies: true,
+    districtDistribution: true,
+    servicesByDepartment: true,
+    servicesByDistrict: true,
+    timeComparison: true,
+    dailyDemands: true,
+    statusTransition: true,
+    closureTime: true,
+    neighborhoodComparison: true,
+    districtEfficiencyRadar: true,
+    externalDistricts: true,
+    efficiencyImpact: true,
+    criticalStatus: true,
+    serviceDiversity: true,
   });
 
   // Mock charts data
@@ -96,12 +109,13 @@ export const useRankingCharts = () => {
   const [planilhaData, setPlanilhaData] = useState<any[]>([]);
   const [painelData, setPainelData] = useState<any[]>([]);
   const [uploadId, setUploadId] = useState<string | undefined>(undefined);
+  const [sgzData, setSgzData] = useState<any[] | null>([]);
 
   // Toggle chart visibility
   const toggleChartVisibility = (chartId: string) => {
     setChartVisibility(prev => ({
       ...prev,
-      [chartId]: !prev[chartId]
+      [chartId]: !prev[chartId as keyof ChartVisibility]
     }));
   };
 
@@ -120,6 +134,7 @@ export const useRankingCharts = () => {
   useEffect(() => {
     setPlanilhaData([{ id: 1, name: 'Mock Data' }]);
     setPainelData([{ id: 1, name: 'Painel Data' }]);
+    setSgzData([{ id: 1, name: 'SGZ Data' }]);
     setUploadId('mock-upload-id');
   }, []);
 
@@ -129,6 +144,7 @@ export const useRankingCharts = () => {
     refreshData,
     chartVisibility,
     toggleChartVisibility,
+    setChartVisibility,
     lastUpdated,
     currentTab,
     setCurrentTab,
@@ -136,6 +152,8 @@ export const useRankingCharts = () => {
     setPlanilhaData,
     painelData,
     setPainelData,
+    sgzData,
+    setSgzData,
     uploadId,
     setUploadId
   };

@@ -1,6 +1,7 @@
 
 import React from 'react';
-import ChartCard from './ChartCard';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { ClockAlert } from 'lucide-react';
 
 interface OldestPendingListProps {
   data: any;
@@ -12,80 +13,29 @@ interface OldestPendingListProps {
 const OldestPendingList: React.FC<OldestPendingListProps> = ({ 
   data, 
   sgzData, 
-  isLoading,
+  isLoading, 
   isSimulationActive 
 }) => {
-  // Generate oldest pending items
-  const generateOldestPendingData = React.useMemo(() => {
-    const companies = [
-      'Enel', 
-      'Sabesp', 
-      'Comgás', 
-      'SPTrans', 
-      'CESP',
-      'CPTM',
-      'CDHU',
-      'Embasa',
-      'CBTU',
-      'Metrô'
-    ];
-    
-    // Generate days pending for each company
-    let daysPending = isSimulationActive ?
-      [45, 42, 38, 35, 32, 30, 28, 25, 22, 20] :
-      [90, 85, 78, 72, 68, 65, 60, 58, 52, 48];
-    
-    return companies.map((company, index) => ({
-      company,
-      days: daysPending[index],
-      protocol: `${Math.floor(Math.random() * 900000) + 100000}/2023`,
-      service: ['Iluminação', 'Buracos', 'Poda', 'Bueiros', 'Lixo'][index % 5]
-    }));
-  }, [isSimulationActive]);
-  
   return (
-    <ChartCard
-      title="Top 10 Pendências Mais Antigas"
-      subtitle="Empresas e Órgãos que não fecham OS"
-      value="5 empresas concentram 30% dos casos"
-      isLoading={isLoading}
-    >
-      {!isLoading && (
-        <div className="h-full overflow-y-auto pr-2">
-          <table className="w-full text-sm">
-            <thead className="text-xs text-gray-700 border-b border-gray-200">
-              <tr>
-                <th className="py-2 text-left">Empresa</th>
-                <th className="py-2 text-left">Dias</th>
-                <th className="py-2 text-left hidden sm:table-cell">Protocolo</th>
-                <th className="py-2 text-left hidden md:table-cell">Serviço</th>
-              </tr>
-            </thead>
-            <tbody>
-              {generateOldestPendingData.map((item, i) => (
-                <tr 
-                  key={i} 
-                  className={`border-b border-gray-100 ${i < 3 ? 'bg-orange-50' : ''}`}
-                >
-                  <td className="py-2 font-medium">
-                    {item.company}
-                  </td>
-                  <td className="py-2 text-orange-600 font-medium">
-                    {item.days}
-                  </td>
-                  <td className="py-2 text-gray-500 hidden sm:table-cell">
-                    {item.protocol}
-                  </td>
-                  <td className="py-2 text-gray-700 hidden md:table-cell">
-                    {item.service}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
-    </ChartCard>
+    <Card className="border-gray-200 shadow-sm h-full">
+      <CardHeader className="pb-2">
+        <CardTitle className="text-base font-medium flex items-center gap-2">
+          <ClockAlert className="h-4 w-4 text-orange-500" />
+          Top Pendências Antigas
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        {isLoading ? (
+          <div className="h-56 flex items-center justify-center">
+            <div className="animate-spin h-8 w-8 border-4 border-orange-500 border-t-transparent rounded-full"></div>
+          </div>
+        ) : (
+          <div className="h-56 flex items-center justify-center bg-gray-50 rounded">
+            <p className="text-gray-500">{isSimulationActive ? 'Simulação de ' : ''}Lista de Pendências Antigas</p>
+          </div>
+        )}
+      </CardContent>
+    </Card>
   );
 };
 

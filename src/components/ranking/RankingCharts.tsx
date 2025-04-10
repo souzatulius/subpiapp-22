@@ -14,21 +14,25 @@ import DepartmentComparisonChart from './charts/DepartmentComparisonChart';
 import OldestPendingList from './charts/OldestPendingList';
 
 interface RankingChartsProps {
+  chartData: any;
   sgzData: any[] | null;
   painelData: any[] | null;
   isLoading: boolean;
   chartVisibility: ChartVisibility;
   isSimulationActive: boolean;
   onSimulateIdealRanking: () => void;
+  disableCardContainers?: boolean;
 }
 
 const RankingCharts: React.FC<RankingChartsProps> = ({
+  chartData,
   sgzData,
   painelData,
   isLoading,
   chartVisibility,
   isSimulationActive,
-  onSimulateIdealRanking
+  onSimulateIdealRanking,
+  disableCardContainers = false
 }) => {
   const [activeTab, setActiveTab] = useState("performance");
 

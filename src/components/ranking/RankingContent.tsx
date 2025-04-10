@@ -48,7 +48,7 @@ const RankingContent = ({
       {/* Demo Charts Section */}
       <DemoChartsSection className="mt-6" />
       
-      {/* Original Charts */}
+      {/* Charts */}
       <div className="mt-6">
         <RankingCharts 
           chartData={{}}

@@ -1,7 +1,7 @@
 
 import React from 'react';
-import { Bar } from 'react-chartjs-2';
-import ChartCard from './ChartCard';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { BarChart } from 'lucide-react';
 
 interface DepartmentComparisonChartProps {
   data: any;
@@ -13,100 +13,29 @@ interface DepartmentComparisonChartProps {
 const DepartmentComparisonChart: React.FC<DepartmentComparisonChartProps> = ({ 
   data, 
   sgzData, 
-  isLoading,
+  isLoading, 
   isSimulationActive 
 }) => {
-  // Generate department comparison chart data
-  const generateDepartmentComparisonData = React.useMemo(() => {
-    const departments = [
-      'CTO',
-      'Fiscalização',
-      'Eng. Tráfego',
-      'COMDEC',
-      'Planejamento'
-    ];
-    
-    // Generate random values
-    let closedValues = [85, 72, 65, 58, 45];
-    let pendingValues = [15, 28, 35, 42, 55];
-    
-    // Apply simulation effects if active
-    if (isSimulationActive) {
-      // Improved closed rates in simulation
-      closedValues = closedValues.map(val => Math.min(val + 10, 100));
-      // Calculate pending as remainder to always sum to 100%
-      pendingValues = closedValues.map(val => 100 - val);
-    }
-    
-    return {
-      labels: departments,
-      datasets: [
-        {
-          label: 'Concluídas',
-          data: closedValues,
-          backgroundColor: '#0066FF',
-          barPercentage: 0.5,
-          categoryPercentage: 0.7,
-        },
-        {
-          label: 'Pendentes',
-          data: pendingValues,
-          backgroundColor: '#F97316',
-          barPercentage: 0.5,
-          categoryPercentage: 0.7,
-        }
-      ]
-    };
-  }, [isSimulationActive]);
-  
   return (
-    <ChartCard
-      title="Comparação por Áreas Técnicas"
-      subtitle="Execução de serviço por coordenação"
-      value="CTO lidera número de demandas"
-      isLoading={isLoading}
-    >
-      {!isLoading && (
-        <Bar
-          data={generateDepartmentComparisonData}
-          options={{
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-              legend: {
-                position: 'top' as const,
-                labels: {
-                  boxWidth: 12,
-                  boxHeight: 12,
-                }
-              },
-              tooltip: {
-                callbacks: {
-                  label: function(context) {
-                    return `${context.dataset.label}: ${context.parsed.y}%`;
-                  }
-                }
-              }
-            },
-            scales: {
-              x: {
-                stacked: false
-              },
-              y: {
-                stacked: false,
-                beginAtZero: true,
-                max: 100,
-                ticks: {
-                  callback: function(value) {
-                    return value + '%';
-                  }
-                }
-              }
-            }
-          }}
-        />
-      )}
-    </ChartCard>
+    <Card className="border-gray-200 shadow-sm h-full">
+      <CardHeader className="pb-2">
+        <CardTitle className="text-base font-medium flex items-center gap-2">
+          <BarChart className="h-4 w-4 text-orange-500" />
+          Comparação Departamental
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        {isLoading ? (
+          <div className="h-56 flex items-center justify-center">
+            <div className="animate-spin h-8 w-8 border-4 border-orange-500 border-t-transparent rounded-full"></div>
+          </div>
+        ) : (
+          <div className="h-56 flex items-center justify-center bg-gray-50 rounded">
+            <p className="text-gray-500">{isSimulationActive ? 'Simulação de ' : ''}Gráfico de Departamentos</p>
+          </div>
+        )}
+      </CardContent>
+    </Card>
   );
 };
 

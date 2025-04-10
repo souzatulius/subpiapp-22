@@ -1,8 +1,7 @@
 
 import React from 'react';
-import { Bar } from 'react-chartjs-2';
-import ChartCard from './ChartCard';
-import { TrendingDown } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Clock } from 'lucide-react';
 
 interface ResolutionTimeChartProps {
   data: any;
@@ -14,89 +13,29 @@ interface ResolutionTimeChartProps {
 const ResolutionTimeChart: React.FC<ResolutionTimeChartProps> = ({ 
   data, 
   sgzData, 
-  isLoading,
+  isLoading, 
   isSimulationActive 
 }) => {
-  // Generate resolution time chart data
-  const generateResolutionTimeData = React.useMemo(() => {
-    const services = [
-      'Tapa-buraco', 
-      'Poda de Árvores', 
-      'Iluminação',
-      'Bueiros',
-      'Coleta de Lixo'
-    ];
-    
-    // Generate resolution time days
-    let days = [16.8, 14.2, 12.5, 10.3, 7.9];
-    
-    // Apply simulation effects if active
-    if (isSimulationActive) {
-      // Reduce resolution times in simulation by ~30%
-      days = days.map(day => day * 0.7);
-    }
-    
-    return {
-      labels: services,
-      datasets: [
-        {
-          label: 'Dias',
-          data: days,
-          backgroundColor: '#0066FF',
-          barPercentage: 0.6,
-        }
-      ]
-    };
-  }, [isSimulationActive]);
-  
-  const trendIndicator = (
-    <div className="flex items-center gap-1 text-xs text-red-500">
-      <span className="font-medium">pior 3%</span>
-      <TrendingDown className="h-3 w-3" />
-    </div>
-  );
-  
   return (
-    <ChartCard
-      title="Prazo de Execução"
-      subtitle="Tempo médio até fechamento das OS"
-      value="13,9 dias"
-      isLoading={isLoading}
-      trendIndicator={trendIndicator}
-    >
-      {!isLoading && (
-        <Bar
-          data={generateResolutionTimeData}
-          options={{
-            indexAxis: 'y' as const,
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-              legend: {
-                display: false
-              },
-              tooltip: {
-                callbacks: {
-                  label: function(context) {
-                    return `${context.parsed.x.toFixed(1)} dias`;
-                  }
-                }
-              }
-            },
-            scales: {
-              x: {
-                beginAtZero: true,
-                ticks: {
-                  callback: function(value) {
-                    return value + ' dias';
-                  }
-                }
-              }
-            }
-          }}
-        />
-      )}
-    </ChartCard>
+    <Card className="border-gray-200 shadow-sm h-full">
+      <CardHeader className="pb-2">
+        <CardTitle className="text-base font-medium flex items-center gap-2">
+          <Clock className="h-4 w-4 text-orange-500" />
+          Tempo Médio de Execução
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        {isLoading ? (
+          <div className="h-56 flex items-center justify-center">
+            <div className="animate-spin h-8 w-8 border-4 border-orange-500 border-t-transparent rounded-full"></div>
+          </div>
+        ) : (
+          <div className="h-56 flex items-center justify-center bg-gray-50 rounded">
+            <p className="text-gray-500">{isSimulationActive ? 'Simulação de ' : ''}Gráfico de Tempo de Execução</p>
+          </div>
+        )}
+      </CardContent>
+    </Card>
   );
 };
 

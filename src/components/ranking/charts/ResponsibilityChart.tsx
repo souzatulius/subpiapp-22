@@ -1,7 +1,7 @@
 
 import React from 'react';
-import { Pie } from 'react-chartjs-2';
-import ChartCard from './ChartCard';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Briefcase } from 'lucide-react';
 
 interface ResponsibilityChartProps {
   data: any;
@@ -14,138 +14,30 @@ interface ResponsibilityChartProps {
 const ResponsibilityChart: React.FC<ResponsibilityChartProps> = ({ 
   data, 
   sgzData, 
-  painelData, 
-  isLoading,
+  painelData,
+  isLoading, 
   isSimulationActive 
 }) => {
-  // Generate responsibility chart data
-  const generateResponsibilityData = React.useMemo(() => {
-    // Create data for internal vs external responsibility
-    let values = [60, 40]; // Base value: 60% subprefeitura, 40% external
-    const labels = ['Subprefeitura', 'Órgãos Externos'];
-    
-    if (isSimulationActive) {
-      // In simulation, show proper categorization with less external ones
-      values = [80, 20];
-    }
-    
-    return {
-      labels: labels,
-      datasets: [
-        {
-          data: values,
-          backgroundColor: [
-            '#0066FF', // Subprefeitura (blue)
-            '#F97316'  // External (orange)
-          ],
-          borderColor: [
-            '#FFFFFF',
-            '#FFFFFF'
-          ],
-          borderWidth: 1,
-        },
-      ],
-    };
-  }, [isSimulationActive]);
-  
-  // Generate external data breakdown
-  const generateExternalBreakdownData = React.useMemo(() => {
-    const companies = ['Enel', 'Sabesp', 'Comgás', 'Outros'];
-    const values = isSimulationActive ? [40, 30, 20, 10] : [50, 40, 5, 5];
-    
-    return {
-      labels: companies,
-      datasets: [
-        {
-          data: values,
-          backgroundColor: [
-            '#F97316', // Enel (Orange)
-            '#EA580C', // Sabesp (Dark Orange)
-            '#FB923C', // Comgás (Light Orange)
-            '#64748B'  // Others (Gray)
-          ],
-          borderColor: ['#FFFFFF', '#FFFFFF', '#FFFFFF', '#FFFFFF'],
-          borderWidth: 1,
-        },
-      ],
-    };
-  }, [isSimulationActive]);
-  
   return (
-    <ChartCard
-      title="Gargalos e Problemas"
-      subtitle="Quem impacta nosso ranking"
-      value="20% Enel e Sabesp"
-      isLoading={isLoading}
-    >
-      {!isLoading && (
-        <div className="grid grid-cols-1 md:grid-cols-2 h-full gap-2">
-          <div>
-            <h4 className="text-xs font-medium text-center text-gray-500 mb-1">Responsabilidade</h4>
-            <Pie 
-              data={generateResponsibilityData} 
-              options={{
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                  legend: {
-                    position: 'bottom' as const,
-                    labels: {
-                      boxWidth: 12,
-                      boxHeight: 12,
-                      font: {
-                        size: 10
-                      }
-                    }
-                  },
-                  tooltip: {
-                    callbacks: {
-                      label: function(context) {
-                        const label = context.label || '';
-                        const value = context.parsed;
-                        const percentage = value + '%';
-                        return `${label}: ${percentage}`;
-                      }
-                    }
-                  },
-                  datalabels: {
-                    formatter: (value: number) => {
-                      return value + '%';
-                    },
-                    color: '#fff',
-                    font: {
-                      weight: 'bold'
-                    }
-                  }
-                }
-              }}
-            />
+    <Card className="border-gray-200 shadow-sm h-full">
+      <CardHeader className="pb-2">
+        <CardTitle className="text-base font-medium flex items-center gap-2">
+          <Briefcase className="h-4 w-4 text-orange-500" />
+          Responsabilidade (Sub vs Externo)
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        {isLoading ? (
+          <div className="h-56 flex items-center justify-center">
+            <div className="animate-spin h-8 w-8 border-4 border-orange-500 border-t-transparent rounded-full"></div>
           </div>
-          <div>
-            <h4 className="text-xs font-medium text-center text-gray-500 mb-1">Detalhamento Externo</h4>
-            <Pie 
-              data={generateExternalBreakdownData} 
-              options={{
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                  legend: {
-                    position: 'bottom' as const,
-                    labels: {
-                      boxWidth: 12,
-                      boxHeight: 12,
-                      font: {
-                        size: 10
-                      }
-                    }
-                  }
-                }
-              }}
-            />
+        ) : (
+          <div className="h-56 flex items-center justify-center bg-gray-50 rounded">
+            <p className="text-gray-500">{isSimulationActive ? 'Simulação de ' : ''}Gráfico de Responsabilidade</p>
           </div>
-        </div>
-      )}
-    </ChartCard>
+        )}
+      </CardContent>
+    </Card>
   );
 };
 
