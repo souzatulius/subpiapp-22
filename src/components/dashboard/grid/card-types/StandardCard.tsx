@@ -25,12 +25,12 @@ const StandardCard: React.FC<StandardCardProps> = ({ card, isMobileView }) => {
     // Try to get the icon from Lucide directly
     const LucideIcon = (LucideIcons as any)[card.iconId];
     if (LucideIcon) {
-      return <LucideIcon className="w-8 h-8 text-white" />;
+      return <LucideIcon className="w-10 h-10 text-white" />; // Changed from w-8 h-8 to w-10 h-10
     }
     
     // Fallback for icon not found
     return (
-      <div className="w-8 h-8 flex items-center justify-center bg-white bg-opacity-20 rounded-full">
+      <div className="w-10 h-10 flex items-center justify-center bg-white bg-opacity-20 rounded-full"> // Changed from w-8 h-8 to w-10 h-10
         <span className="text-white text-xs">{card.iconId.charAt(0)}</span>
       </div>
     );

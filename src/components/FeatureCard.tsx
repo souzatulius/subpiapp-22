@@ -1,13 +1,17 @@
+
 import React from 'react';
 import { ClipboardEdit, Building2, BarChart3, Check } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
+
 interface FeatureCardProps {
   type: 'demandas' | 'acoes' | 'relatorios';
 }
+
 const FeatureCard: React.FC<FeatureCardProps> = ({
   type
 }) => {
   let icon, title, description, items;
+  
   switch (type) {
     case 'demandas':
       icon = <ClipboardEdit className="h-6 w-6 text-[#003570]" />;
@@ -33,6 +37,7 @@ const FeatureCard: React.FC<FeatureCardProps> = ({
       description = 'Recursos disponíveis no sistema.';
       items = ['Item 1', 'Item 2', 'Item 3'];
   }
+
   return <Card className="border border-gray-200 rounded-xl shadow-md hover:shadow-xl transition-all duration-300 hover:scale-105 group h-full overflow-hidden">
       <CardContent className="p-6">
         <div className="flex items-center justify-center w-12 h-12 rounded-full bg-gray-100 mb-4 group-hover:scale-110 transition-transform duration-300">
@@ -51,4 +56,5 @@ const FeatureCard: React.FC<FeatureCardProps> = ({
       </CardContent>
     </Card>;
 };
+
 export default FeatureCard;

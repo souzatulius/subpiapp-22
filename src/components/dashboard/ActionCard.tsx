@@ -37,10 +37,10 @@ export interface ActionCardProps {
 const getIconSize = (size?: 'sm' | 'md' | 'lg' | 'xl'): string => {
   switch (size) {
     case 'sm': return 'w-6 h-6';
-    case 'lg': return 'w-12 h-12';
-    case 'xl': return 'w-16 h-16';
+    case 'lg': return 'w-10 h-10'; // Changed from w-12 h-12 to w-10 h-10
+    case 'xl': return 'w-10 h-10'; // Changed from w-16 h-16 to w-10 h-10
     case 'md':
-    default: return 'w-12 h-12'; // Changed from w-10 h-10 to w-12 h-12
+    default: return 'w-10 h-10'; // Changed from w-12 h-12 to w-10 h-10
   }
 };
 

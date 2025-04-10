@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { PlusCircle, MessageSquare, FileText, CheckCircle } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
@@ -35,7 +34,7 @@ const ActionCards: React.FC<ActionCardsProps> = ({
       subtitle: 'Registre novas solicitações da imprensa',
       iconId: 'PlusCircle',
       path: `${baseUrl ? `/${baseUrl}` : ''}/cadastrar`,
-      color: 'blue-light' as CardColor, // Changed from blue-vivid to blue-light
+      color: 'blue-light' as CardColor,
       width: '25',
       height: '2', 
       type: 'standard',
@@ -48,7 +47,7 @@ const ActionCards: React.FC<ActionCardsProps> = ({
       subtitle: 'Responda às demandas pendentes',
       iconId: 'MessageSquare',
       path: `${baseUrl ? `/${baseUrl}` : ''}/responder`,
-      color: 'gray-medium' as CardColor, // Changed from green-neon to gray-medium
+      color: 'gray-medium' as CardColor,
       width: '25',
       height: '2', 
       type: 'standard',
@@ -61,7 +60,7 @@ const ActionCards: React.FC<ActionCardsProps> = ({
       subtitle: 'Elabore notas oficiais',
       iconId: 'FileText',
       path: `${baseUrl ? `/${baseUrl}` : ''}/criar-nota`,
-      color: 'orange-light' as CardColor, // Changed from orange-dark to orange-light
+      color: 'orange-light' as CardColor,
       width: '25',
       height: '2', 
       type: 'standard',
@@ -74,7 +73,7 @@ const ActionCards: React.FC<ActionCardsProps> = ({
       subtitle: 'Revise e aprove notas oficiais',
       iconId: 'CheckCircle',
       path: `${baseUrl ? `/${baseUrl}` : ''}/aprovar-nota`,
-      color: 'blue-dark' as CardColor, // Changed to blue-dark
+      color: 'blue-dark' as CardColor,
       width: '25',
       height: '2', 
       type: 'standard',
@@ -166,7 +165,7 @@ const ActionCards: React.FC<ActionCardsProps> = ({
     return (
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         {Array.from({ length: 4 }).map((_, index) => (
-          <Card key={index} className="h-[320px] animate-pulse bg-gray-100"> {/* Changed from h-[160px] to h-[320px] */}
+          <Card key={index} className="h-[320px] animate-pulse bg-gray-100">
             <CardContent className="p-4 flex items-center justify-center">
               <div className="text-gray-400">Carregando...</div>
             </CardContent>
@@ -179,7 +178,7 @@ const ActionCards: React.FC<ActionCardsProps> = ({
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
       {cards.filter(card => !card.isHidden).map((card, index) => (
-        <div key={card.id || index} className="h-[320px]"> {/* Changed from h-[160px] to h-[320px] */}
+        <div key={card.id || index} className="h-[320px]">
           {isEditMode ? (
             <UnifiedActionCard
               id={card.id}
@@ -189,7 +188,7 @@ const ActionCards: React.FC<ActionCardsProps> = ({
               path={card.path}
               color={card.color}
               width={card.width || '25'}
-              height={'2'} /* Changed from '1' to '2' to double the height */
+              height={'2'}
               type={card.type || 'standard'} 
               onEdit={handleCardEdit}
               onHide={handleCardHide}
@@ -207,7 +206,7 @@ const ActionCards: React.FC<ActionCardsProps> = ({
                 path={card.path}
                 color={card.color}
                 width={card.width || '25'}
-                height={'2'} /* Changed from '1' to '2' to double the height */
+                height={'2'}
                 type={card.type || 'standard'} 
                 onEdit={handleCardEdit}
                 onHide={handleCardHide}
