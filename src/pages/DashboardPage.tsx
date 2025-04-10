@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Home, RotateCcw } from 'lucide-react';
 import { useDashboardCards } from '@/hooks/dashboard/useDashboardCards';
@@ -21,6 +20,7 @@ import { useCardStorage } from '@/hooks/dashboard/useCardStorage';
 import OriginsDemandChartCompact from '@/components/dashboard/cards/OriginsDemandChartCompact';
 import OriginsDemandCardWrapper from '@/components/dashboard/cards/OriginsDemandCardWrapper';
 import PendingTasksCard from '@/components/dashboard/cards/PendingTasksCard';
+import ComunicadosCard from '@/components/dashboard/cards/ComunicadosCard';
 
 const DashboardPage: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -187,6 +187,17 @@ const DashboardPage: React.FC = () => {
         title={card.title} 
         userDepartmentId={userCoordenaticaoId} 
         isComunicacao={userCoordenaticaoId === 'comunicacao'} 
+      />;
+    }
+
+    if (cardId === 'comunicados-card' ||
+        cardId.includes('comunicados') ||
+        card.isComunicados ||
+        card.type === 'communications') {
+      return <ComunicadosCard
+        id={card.id}
+        title={card.title}
+        className="w-full h-full"
       />;
     }
     

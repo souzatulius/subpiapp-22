@@ -1,3 +1,4 @@
+
 import React, { useCallback } from 'react';
 import {
   DndContext,
@@ -16,6 +17,7 @@ import { useGridOccupancy } from '@/hooks/dashboard/useGridOccupancy';
 import PendingActivitiesCard from './cards/PendingActivitiesCard';
 import OriginsDemandCardWrapper from './cards/OriginsDemandCardWrapper';
 import PendingTasksCard from './cards/PendingTasksCard';
+import ComunicadosCard from './cards/ComunicadosCard';
 
 export interface UnifiedCardGridProps {
   cards: ActionCardItem[];
@@ -185,6 +187,14 @@ const UnifiedCardGrid: React.FC<UnifiedCardGridProps> = ({
         title={card.title}
         userDepartmentId={card.departmentId}
         isComunicacao={card.isComunicacao}
+      />;
+    }
+    
+    if (card.type === 'communications' || card.isComunicados) {
+      return <ComunicadosCard 
+        id={card.id}
+        title={card.title}
+        className="w-full h-full"
       />;
     }
     

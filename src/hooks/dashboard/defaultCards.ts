@@ -21,6 +21,7 @@ export const getIconComponentFromId = (iconId: string) => {
     'pencil': () => import('lucide-react').then(mod => mod.Pencil),
     'pie-chart': () => import('lucide-react').then(mod => mod.PieChart),
     'message-square': () => import('lucide-react').then(mod => mod.MessageSquare),
+    'megaphone': () => import('lucide-react').then(mod => mod.Megaphone),
   };
   
   const LoadedIcon = React.lazy(() => 
@@ -108,6 +109,19 @@ export const getDefaultCards = (): ActionCardItem[] => {
       mobileOrder: 5
     },
     {
+      id: 'comunicados-card',
+      title: 'Comunicados',
+      iconId: 'Megaphone',
+      path: '/dashboard/settings/comunicados',
+      color: 'bg-white',
+      width: '25',
+      height: '2',
+      type: 'communications',
+      isComunicados: true,
+      displayMobile: true,
+      mobileOrder: 6
+    },
+    {
       id: uuidv4(),
       title: 'Ranking da Zeladoria',
       subtitle: 'Produtividade das Subsecretarias',
@@ -118,7 +132,7 @@ export const getDefaultCards = (): ActionCardItem[] => {
       height: '1',
       type: 'standard',
       displayMobile: true,
-      mobileOrder: 6
+      mobileOrder: 7
     },
     {
       id: uuidv4(),
@@ -130,7 +144,7 @@ export const getDefaultCards = (): ActionCardItem[] => {
       height: '1',
       type: 'standard',
       displayMobile: true,
-      mobileOrder: 7
+      mobileOrder: 8
     },
     {
       id: uuidv4(),
@@ -144,7 +158,7 @@ export const getDefaultCards = (): ActionCardItem[] => {
       type: 'standard',
       chartId: 'origemDemandas',
       displayMobile: true,
-      mobileOrder: 8
+      mobileOrder: 9
     },
     {
       id: uuidv4(),
@@ -157,7 +171,7 @@ export const getDefaultCards = (): ActionCardItem[] => {
       height: '1',
       type: 'standard',
       displayMobile: true,
-      mobileOrder: 9
+      mobileOrder: 10
     },
     {
       id: uuidv4(),
@@ -169,7 +183,7 @@ export const getDefaultCards = (): ActionCardItem[] => {
       height: '1',
       type: 'standard',
       displayMobile: true,
-      mobileOrder: 10
+      mobileOrder: 11
     }
   ];
 };
@@ -299,6 +313,33 @@ export const getCommunicationActionCards = (): ActionCardItem[] => {
       isComunicacao: true,
       displayMobile: true,
       mobileOrder: 9
+    },
+    {
+      id: 'comunicados-card',
+      title: 'Comunicados',
+      iconId: 'Megaphone',
+      path: '/dashboard/settings/comunicados',
+      color: 'bg-white',
+      width: '25',
+      height: '2',
+      type: 'communications',
+      isComunicados: true,
+      displayMobile: true,
+      mobileOrder: 10
+    },
+    {
+      id: 'acoes-pendentes-card',
+      title: 'Ações Pendentes',
+      iconId: 'AlertTriangle',
+      path: '/dashboard/comunicacao/responder',
+      color: 'bg-white',
+      width: '25',
+      height: '2',
+      type: 'pending_tasks',
+      isPendingTasks: true,
+      isComunicacao: true,
+      displayMobile: true,
+      mobileOrder: 11
     }
   ];
 };

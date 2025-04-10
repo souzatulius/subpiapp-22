@@ -72,6 +72,19 @@ export const useDashboardConfig = (): DashboardConfigResult => {
           isPendingTasks: true,
           displayMobile: true,
           mobileOrder: 3
+        },
+        {
+          id: 'comunicados-card',
+          title: 'Comunicados',
+          iconId: 'Megaphone',
+          path: '/dashboard/settings/comunicados',
+          color: 'bg-white',
+          width: '25',
+          height: '2',
+          type: 'communications',
+          isComunicados: true,
+          displayMobile: true,
+          mobileOrder: 4
         }
       ];
 

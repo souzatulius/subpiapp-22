@@ -82,4 +82,5 @@ export interface ActionCardItem {
   isPendingTasks?: boolean;
   departmentId?: string;
   isComunicacao?: boolean;
+  isComunicados?: boolean; // Nova flag para identificar o card de Comunicados
 }
