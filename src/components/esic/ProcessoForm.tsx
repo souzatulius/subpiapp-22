@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -92,24 +93,6 @@ const ProcessoForm: React.FC<ProcessoFormProps> = ({
         undefined,
       sem_area_tecnica: defaultValues?.sem_area_tecnica || false,
       sem_identificacao: defaultValues?.sem_identificacao || false
-    }
-  });
-
-  // Query coordenações
-  const { data: coordenacoes = [] } = useQuery({
-    queryKey: ['coordenacoes'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('coordenacoes')
-        .select('*')
-        .order('descricao');
-
-      if (error) {
-        console.error('Error fetching coordenações:', error);
-        throw error;
-      }
-
-      return data || [];
     }
   });
 
@@ -394,7 +377,7 @@ const ProcessoForm: React.FC<ProcessoFormProps> = ({
                   <SelectContent>
                     {coordenacoes.map((coordenacao) => (
                       <SelectItem key={coordenacao.id} value={coordenacao.id}>
-                        {coordenacao.descricao}
+                        {coordenacao.nome}
                       </SelectItem>
                     ))}
                   </SelectContent>

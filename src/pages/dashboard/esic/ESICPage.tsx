@@ -64,17 +64,11 @@ const ESICPage: React.FC = () => {
     handleAddJustificativa();
   };
   
-  return (
-    <div className="container mx-auto py-6 px-2 sm:px-4 md:px-6 space-y-6">
-      <WelcomeCard 
-        title="Sistema e-SIC"
-        description="Gerencie processos e justificativas para as solicitações de munícipes."
-        icon={<FileText className="h-6 w-6 mr-2" />}
-        color="bg-gradient-to-r from-blue-600 to-blue-800"
-      />
-      
-      <main>
-        {screen === 'list' && (
+  // Render appropriate content based on current screen
+  const renderContent = () => {
+    switch(screen) {
+      case 'list':
+        return (
           <ProcessosList 
             processos={processos}
             isLoading={isLoading}
@@ -85,26 +79,22 @@ const ESICPage: React.FC = () => {
             onDeleteProcesso={handleDeleteProcesso}
             onAddJustificativa={handleAddJustificativaFromList}
           />
-        )}
-        
-        {screen === 'create' && (
-          <ProcessoCreate 
-            onSubmit={handleCreateProcesso}
-            isLoading={isCreating}
-            onCancel={() => setScreen('list')}
-          />
-        )}
-        
-        {screen === 'edit' && selectedProcesso && (
+        );
+      case 'create':
+        return (
+          <ProcessoCreate />
+        );
+      case 'edit':
+        return selectedProcesso ? (
           <ProcessoEdit 
             processo={selectedProcesso}
             onSubmit={handleUpdateProcesso}
             isLoading={isUpdating}
             onCancel={() => setScreen('view')}
           />
-        )}
-        
-        {screen === 'view' && selectedProcesso && (
+        ) : null;
+      case 'view':
+        return selectedProcesso ? (
           <ProcessoView 
             processo={selectedProcesso}
             justificativas={justificativas}
@@ -115,9 +105,9 @@ const ESICPage: React.FC = () => {
             onUpdateStatus={handleUpdateStatus}
             onUpdateSituacao={handleUpdateSituacao}
           />
-        )}
-        
-        {screen === 'justify' && selectedProcesso && (
+        ) : null;
+      case 'justify':
+        return selectedProcesso ? (
           <JustificativaCreate 
             processoTexto={selectedProcesso.texto}
             onSubmit={handleCreateJustificativa}
@@ -126,7 +116,23 @@ const ESICPage: React.FC = () => {
             isGenerating={isGenerating}
             onBack={() => setScreen('view')}
           />
-        )}
+        ) : null;
+      default:
+        return null;
+    }
+  };
+  
+  return (
+    <div className="container mx-auto py-6 px-2 sm:px-4 md:px-6 space-y-6">
+      <WelcomeCard 
+        title="Sistema e-SIC"
+        description="Gerencie processos e justificativas para as solicitações de munícipes."
+        icon={<FileText className="h-6 w-6 mr-2" />}
+        color="bg-gradient-to-r from-blue-600 to-blue-800"
+      />
+      
+      <main>
+        {renderContent()}
       </main>
       
       <DeleteProcessoDialog 

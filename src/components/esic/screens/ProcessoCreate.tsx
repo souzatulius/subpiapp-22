@@ -1,8 +1,9 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Loader2 } from 'lucide-react';
-import { ProcessoForm } from '@/components/esic/ProcessoForm';
+import ProcessoForm from '@/components/esic/ProcessoForm';
 import { ESICProcessoFormValues } from '@/types/esic';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
@@ -18,8 +19,8 @@ const ProcessoCreate: React.FC = () => {
       try {
         const { data, error } = await supabase
           .from('coordenacoes')
-          .select('id, nome')
-          .order('nome');
+          .select('id, descricao')
+          .order('descricao');
 
         if (error) {
           console.error('Error fetching coordenacoes:', error);
@@ -32,7 +33,12 @@ const ProcessoCreate: React.FC = () => {
         }
 
         if (data) {
-          setCoordenacoes(data);
+          // Map 'descricao' to 'nome' to match the expected interface
+          const formattedCoords = data.map(coord => ({
+            id: coord.id,
+            nome: coord.descricao
+          }));
+          setCoordenacoes(formattedCoords);
         }
       } catch (error) {
         console.error('Error fetching coordenacoes:', error);
@@ -52,14 +58,33 @@ const ProcessoCreate: React.FC = () => {
   const handleSubmit = async (values: ESICProcessoFormValues) => {
     setIsSubmitting(true);
     try {
+      // Get the current user
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        throw new Error('Usuário não autenticado');
+      }
+      
+      const processoData = {
+        protocolo: values.protocolo,
+        assunto: values.assunto,
+        solicitante: values.sem_identificacao ? 'Sem identificação' : values.solicitante,
+        data_processo: values.data_processo instanceof Date ? 
+          values.data_processo.toISOString().split('T')[0] : 
+          values.data_processo,
+        autor_id: user.id,
+        texto: values.texto,
+        situacao: values.situacao,
+        status: 'novo_processo',
+        coordenacao_id: values.sem_area_tecnica ? null : values.coordenacao_id,
+        prazo_resposta: values.prazo_resposta instanceof Date ?
+          values.prazo_resposta.toISOString().split('T')[0] :
+          values.prazo_resposta
+      };
+      
       const { data, error } = await supabase
         .from('esic_processos')
-        .insert([
-          {
-            ...values,
-            data_processo: new Date(values.data_processo).toISOString(),
-          },
-        ])
+        .insert(processoData)
         .select();
 
       if (error) {
@@ -104,12 +129,18 @@ const ProcessoCreate: React.FC = () => {
         </Button>
       </div>
       
-      <ProcessoForm
-        onSubmit={handleSubmit}
-        isSubmitting={isSubmitting}
-        onCancel={handleCancel}
-        coordenacoes={coordenacoes}
-      />
+      {isLoading ? (
+        <div className="flex items-center justify-center p-8">
+          <Loader2 className="h-8 w-8 animate-spin" />
+        </div>
+      ) : (
+        <ProcessoForm
+          onSubmit={handleSubmit}
+          isSubmitting={isSubmitting}
+          onCancel={handleCancel}
+          coordenacoes={coordenacoes}
+        />
+      )}
     </div>
   );
 };

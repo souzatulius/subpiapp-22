@@ -63,6 +63,63 @@ const ESICPage = () => {
     setSidebarOpen(!sidebarOpen);
   };
 
+  // Render appropriate content based on current screen
+  const renderContent = () => {
+    switch(screen) {
+      case 'list':
+        return (
+          <ProcessosList 
+            processos={processos as ESICProcesso[]}
+            isLoading={isLoading}
+            error={error}
+            onCreateProcesso={() => setScreen('create')}
+            onViewProcesso={handleViewProcesso}
+            onEditProcesso={handleEditProcesso}
+            onDeleteProcesso={handleDeleteProcesso}
+          />
+        );
+      case 'create':
+        return (
+          <ProcessoCreate />
+        );
+      case 'edit':
+        return selectedProcesso ? (
+          <ProcessoEdit 
+            processo={selectedProcesso}
+            onSubmit={handleUpdateProcesso}
+            onCancel={() => setScreen('view')}
+            isLoading={isUpdating}
+          />
+        ) : null;
+      case 'view':
+        return selectedProcesso ? (
+          <ProcessoView 
+            processo={selectedProcesso}
+            justificativas={justificativas}
+            isJustificativasLoading={isJustificativasLoading}
+            onEdit={() => handleEditProcesso(selectedProcesso)}
+            onAddJustificativa={handleAddJustificativa}
+            onBack={() => setScreen('list')}
+            onUpdateStatus={handleUpdateStatus}
+            onUpdateSituacao={handleUpdateSituacao}
+          />
+        ) : null;
+      case 'justify':
+        return selectedProcesso ? (
+          <JustificativaCreate 
+            processoTexto={selectedProcesso.texto}
+            onSubmit={handleCreateJustificativa}
+            onGenerate={handleGenerateJustificativa}
+            onBack={() => setScreen('view')}
+            isLoading={isJustificativaCreating}
+            isGenerating={isGenerating}
+          />
+        ) : null;
+      default:
+        return null;
+    }
+  };
+
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       <Header showControls={true} toggleSidebar={toggleSidebar} />
@@ -71,58 +128,7 @@ const ESICPage = () => {
         {!isMobile && <DashboardSidebar isOpen={sidebarOpen} />}
         
         <main className="flex-1 p-4 md:p-8 pb-24 sm:pb-8">
-          {screen === 'list' && (
-            <ProcessosList 
-              processos={processos as ESICProcesso[]}
-              isLoading={isLoading}
-              error={error}
-              onCreateProcesso={() => setScreen('create')}
-              onViewProcesso={handleViewProcesso}
-              onEditProcesso={handleEditProcesso}
-              onDeleteProcesso={handleDeleteProcesso}
-            />
-          )}
-          
-          {screen === 'create' && (
-            <ProcessoCreate 
-              onSubmit={handleCreateProcesso}
-              onCancel={() => setScreen('list')}
-              isLoading={isCreating}
-            />
-          )}
-          
-          {screen === 'edit' && selectedProcesso && (
-            <ProcessoEdit 
-              processo={selectedProcesso}
-              onSubmit={handleUpdateProcesso}
-              onCancel={() => setScreen('view')}
-              isLoading={isUpdating}
-            />
-          )}
-          
-          {screen === 'view' && selectedProcesso && (
-            <ProcessoView 
-              processo={selectedProcesso}
-              justificativas={justificativas}
-              isJustificativasLoading={isJustificativasLoading}
-              onEdit={() => handleEditProcesso(selectedProcesso)}
-              onAddJustificativa={handleAddJustificativa}
-              onBack={() => setScreen('list')}
-              onUpdateStatus={handleUpdateStatus}
-              onUpdateSituacao={handleUpdateSituacao}
-            />
-          )}
-          
-          {screen === 'justify' && selectedProcesso && (
-            <JustificativaCreate 
-              processoTexto={selectedProcesso.texto}
-              onSubmit={handleCreateJustificativa}
-              onGenerate={handleGenerateJustificativa}
-              onBack={() => setScreen('view')}
-              isLoading={isJustificativaCreating}
-              isGenerating={isGenerating}
-            />
-          )}
+          {renderContent()}
         </main>
       </div>
       

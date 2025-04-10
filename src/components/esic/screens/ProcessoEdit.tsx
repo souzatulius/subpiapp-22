@@ -1,8 +1,10 @@
+
 import React, { useState, useEffect } from 'react';
 import { ESICProcesso, ESICProcessoFormValues } from '@/types/esic';
 import ProcessoForm from '@/components/esic/ProcessoForm';
 import { supabase } from '@/integrations/supabase/client';
-import { Button, ArrowLeft, Loader2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { ArrowLeft, Loader2 } from 'lucide-react';
 
 interface ProcessoEditProps {
   processo: ESICProcesso;
@@ -18,11 +20,13 @@ const ProcessoEdit: React.FC<ProcessoEditProps> = ({
   onCancel
 }) => {
   const [coordenacoes, setCoordenacoes] = useState<{ id: string; nome: string }[]>([]);
+  const [isLoadingCoords, setIsLoadingCoords] = useState(true);
 
   // Convert processo to form values
   const defaultValues: Partial<ESICProcessoFormValues> = {
     data_processo: processo.data_processo ? new Date(processo.data_processo) : new Date(),
     assunto: processo.assunto,
+    protocolo: processo.protocolo,
     solicitante: processo.solicitante,
     texto: processo.texto,
     situacao: processo.situacao,
@@ -51,6 +55,8 @@ const ProcessoEdit: React.FC<ProcessoEditProps> = ({
         }
       } catch (err) {
         console.error('Error fetching coordenações:', err);
+      } finally {
+        setIsLoadingCoords(false);
       }
     };
 
@@ -66,7 +72,7 @@ const ProcessoEdit: React.FC<ProcessoEditProps> = ({
         </Button>
       </div>
       
-      {isLoading ? (
+      {isLoading || isLoadingCoords ? (
         <div className="text-center">
           <Loader2 className="h-8 w-8 animate-spin mx-auto" />
         </div>
