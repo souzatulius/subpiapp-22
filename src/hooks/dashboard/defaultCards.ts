@@ -1,4 +1,3 @@
-
 import { v4 as uuidv4 } from 'uuid';
 import { ActionCardItem } from '@/types/dashboard';
 import React from 'react';
@@ -73,19 +72,6 @@ export const getDefaultCards = (): ActionCardItem[] => {
       type: 'standard',
       displayMobile: true,
       mobileOrder: 2
-    },
-    {
-      id: uuidv4(),
-      title: 'Origem das Demandas',
-      iconId: 'PieChart',
-      path: '/dashboard/comunicacao/relatorios',
-      color: 'orange-light',
-      width: '50', // 2 columns on desktop
-      height: '2',  // 2 rows on desktop
-      type: 'standard',
-      chartId: 'origemDemandas',
-      displayMobile: true,
-      mobileOrder: 7
     },
     {
       id: uuidv4(),

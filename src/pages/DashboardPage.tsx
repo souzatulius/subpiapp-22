@@ -113,69 +113,67 @@ const DashboardPage: React.FC = () => {
     const originDemandCardExists = cards.some(card => card.id === 'origem-demandas-card' || card.type === 'origin_demand_chart');
     const pendingActivitiesCardExists = cards.some(card => card.id === 'pending-activities-card');
     
-    if (!searchCardExists || !originDemandCardExists || !pendingActivitiesCardExists) {
-      let updatedCards = [...cards];
-      let needsUpdate = false;
+    let updatedCards = [...cards];
+    let needsUpdate = false;
+    
+    if (!searchCardExists) {
+      const searchCard: ActionCardItem = {
+        id: 'dashboard-search-card',
+        title: 'Busca Rápida',
+        iconId: 'Search',
+        path: '',
+        color: 'bg-white',
+        width: '100',
+        height: '0.5',
+        type: 'smart_search',
+        isSearch: true,
+        displayMobile: true,
+        mobileOrder: 1
+      };
       
-      if (!searchCardExists) {
-        const searchCard: ActionCardItem = {
-          id: 'dashboard-search-card',
-          title: 'Busca Rápida',
-          iconId: 'Search',
-          path: '',
-          color: 'bg-white',
-          width: '100',
-          height: '0.5',
-          type: 'smart_search',
-          isSearch: true,
-          displayMobile: true,
-          mobileOrder: 1
-        };
-        
-        updatedCards = [searchCard, ...updatedCards];
-        needsUpdate = true;
-      }
+      updatedCards = [searchCard, ...updatedCards];
+      needsUpdate = true;
+    }
+    
+    if (!originDemandCardExists) {
+      const originDemandCard: ActionCardItem = {
+        id: 'origem-demandas-card',
+        title: 'Atividades em Andamento',
+        subtitle: 'Demandas da semana por área técnica',
+        iconId: 'BarChart2',
+        path: '',
+        color: 'gray-light',
+        width: isMobile ? '100' : '50',
+        height: '2',
+        type: 'origin_demand_chart',
+        displayMobile: true,
+        mobileOrder: 5
+      };
       
-      if (!originDemandCardExists) {
-        const originDemandCard: ActionCardItem = {
-          id: 'origem-demandas-card',
-          title: 'Atividades em Andamento',
-          subtitle: 'Demandas da semana por área técnica',
-          iconId: 'BarChart2',
-          path: '',
-          color: 'gray-light',
-          width: isMobile ? '100' : '50',
-          height: '2',
-          type: 'origin_demand_chart',
-          displayMobile: true,
-          mobileOrder: 5
-        };
-        
-        updatedCards = [...updatedCards, originDemandCard];
-        needsUpdate = true;
-      }
+      updatedCards = [...updatedCards, originDemandCard];
+      needsUpdate = true;
+    }
+    
+    if (!pendingActivitiesCardExists) {
+      const pendingActivitiesCard: ActionCardItem = {
+        id: 'pending-activities-card',
+        title: 'Atividades Pendentes',
+        iconId: 'Clock',
+        path: '',
+        color: 'orange-light',
+        width: '25',
+        height: '3',
+        type: 'pending_activities',
+        displayMobile: true,
+        mobileOrder: 7
+      };
       
-      if (!pendingActivitiesCardExists) {
-        const pendingActivitiesCard: ActionCardItem = {
-          id: 'pending-activities-card',
-          title: 'Atividades Pendentes',
-          iconId: 'Clock',
-          path: '',
-          color: 'orange-light',
-          width: '25',
-          height: '3',
-          type: 'pending_activities',
-          displayMobile: true,
-          mobileOrder: 7
-        };
-        
-        updatedCards = [...updatedCards, pendingActivitiesCard];
-        needsUpdate = true;
-      }
-      
-      if (needsUpdate) {
-        handleCardsChange(updatedCards);
-      }
+      updatedCards = [...updatedCards, pendingActivitiesCard];
+      needsUpdate = true;
+    }
+    
+    if (needsUpdate) {
+      handleCardsChange(updatedCards);
     }
   }, [cards, isMobile, handleCardsChange]);
 

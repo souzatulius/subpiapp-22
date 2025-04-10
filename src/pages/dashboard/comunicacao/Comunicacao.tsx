@@ -63,7 +63,8 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
       
       const filteredCards = updatedCards.filter(card => 
         card.id !== 'comunicacao-search-card' && 
-        card.type !== 'smart_search'
+        card.type !== 'smart_search' &&
+        card.title !== 'Origem das Demandas'
       );
       
       const hasOriginSelectionCard = filteredCards.some(card => card.type === 'origin_selection');
@@ -85,15 +86,19 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
         filteredCards.push(originCard);
       }
       
-      const hasOriginDemandChart = filteredCards.some(card => card.type === 'origin_demand_chart');
+      const hasOriginDemandChart = filteredCards.some(card => 
+        card.type === 'origin_demand_chart' || 
+        card.title === 'Atividades em Andamento'
+      );
       
       if (!hasOriginDemandChart) {
         const chartCard: ActionCardItem = {
           id: 'origem-demandas-card',
-          title: 'Origem das Demandas',
-          iconId: 'PieChart',
+          title: 'Atividades em Andamento',
+          subtitle: 'Demandas da semana por área técnica',
+          iconId: 'BarChart2',
           path: '',
-          color: 'bg-white',
+          color: 'gray-light',
           width: '50',
           height: '2',
           type: 'origin_demand_chart',

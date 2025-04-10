@@ -1,146 +1,95 @@
 
-import { useState, useEffect, useCallback } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { useState, useEffect } from 'react';
+import { v4 as uuidv4 } from 'uuid';
 import { ActionCardItem } from '@/types/dashboard';
-import { toast } from '@/hooks/use-toast';
 
 export interface DashboardConfigResult {
-  config: ActionCardItem[];
-  isLoading: boolean;
-  isSaving: boolean;
-  saveConfig: (cards: ActionCardItem[], departmentId?: string) => Promise<boolean>;
+  actionCards: ActionCardItem[];
+  setActionCards: (cards: ActionCardItem[]) => void;
+  isLoadingDashboard: boolean;
+  viewType: 'grid' | 'list';
+  setViewType: (viewType: 'grid' | 'list') => void;
+  firstName: string;
 }
 
-export const useDashboardConfig = (
-  department: string = 'default',
-  viewType: 'dashboard' | 'communication' = 'dashboard'
-): DashboardConfigResult => {
-  const [config, setConfig] = useState<ActionCardItem[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
-
-  const fetchDashboardConfig = useCallback(async () => {
-    setIsLoading(true);
-    try {
-      console.log(`Fetching config for department: ${department}, view type: ${viewType}`);
-      const { data, error } = await supabase
-        .from('department_dashboards')
-        .select('cards_config')
-        .eq('department', department)
-        .eq('view_type', viewType)
-        .maybeSingle();
-
-      if (error && error.code !== 'PGRST116') {
-        console.error('Error fetching dashboard config:', error);
-        setConfig([]);
-      } else if (data && data.cards_config) {
-        try {
-          const parsedCards = JSON.parse(data.cards_config) as ActionCardItem[];
-          console.log('Loaded config:', parsedCards);
-          setConfig(parsedCards);
-        } catch (parseError) {
-          console.error('Error parsing cards config JSON:', parseError);
-          setConfig([]);
-        }
-      } else {
-        console.log('No config found, using empty array');
-        setConfig([]);
-      }
-    } catch (err) {
-      console.error('Failed to fetch dashboard config:', err);
-      setConfig([]);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [department, viewType]);
+export const useDashboardConfig = (): DashboardConfigResult => {
+  const [actionCards, setActionCards] = useState<ActionCardItem[]>([]);
+  const [isLoadingDashboard, setIsLoadingDashboard] = useState(true);
+  const [viewType, setViewType] = useState<'grid' | 'list'>('grid');
+  const [firstName, setFirstName] = useState<string>('Usuário');
 
   useEffect(() => {
-    fetchDashboardConfig();
-  }, [fetchDashboardConfig]);
-
-  const saveConfig = async (cards: ActionCardItem[], departmentId: string = department) => {
-    setIsSaving(true);
-    console.log(`Saving config for department: ${departmentId}, view type: ${viewType}`, cards);
-    
-    try {
-      // First, check if there's an existing config
-      const { data: existingConfig, error: checkError } = await supabase
-        .from('department_dashboards')
-        .select('id')
-        .eq('department', departmentId)
-        .eq('view_type', viewType)
-        .maybeSingle();
-
-      if (checkError && checkError.code !== 'PGRST116') {
-        console.error('Error checking existing dashboard config:', checkError);
-        setIsSaving(false);
-        return false;
-      }
-
-      const cardsJson = JSON.stringify(cards);
-
-      if (existingConfig) {
-        // Update existing config
-        const { error: updateError } = await supabase
-          .from('department_dashboards')
-          .update({ cards_config: cardsJson })
-          .eq('id', existingConfig.id);
-
-        if (updateError) {
-          console.error('Error updating dashboard config:', updateError);
-          toast({
-            title: "Erro ao salvar dashboard",
-            description: "Não foi possível salvar a configuração do dashboard",
-            variant: "destructive"
-          });
-          setIsSaving(false);
-          return false;
+    // Mock loading state
+    const loadTimer = setTimeout(() => {
+      const defaultCards: ActionCardItem[] = [
+        {
+          id: 'dashboard-search-card',
+          title: 'Busca Rápida',
+          iconId: 'Search',
+          path: '',
+          color: 'bg-white',
+          width: '100',
+          height: '0.5',
+          type: 'smart_search',
+          isSearch: true,
+          displayMobile: true,
+          mobileOrder: 1
+        },
+        {
+          id: uuidv4(),
+          title: 'Demandas',
+          iconId: 'FileText',
+          path: '/dashboard/comunicacao/demandas',
+          color: 'deep-blue',
+          width: '25',
+          height: '1',
+          type: 'standard',
+          displayMobile: true,
+          mobileOrder: 2
+        },
+        {
+          id: 'origem-demandas-card',
+          title: 'Atividades em Andamento',
+          subtitle: 'Demandas da semana por área técnica',
+          iconId: 'BarChart2',
+          path: '',
+          color: 'gray-light',
+          width: '50',
+          height: '2',
+          type: 'origin_demand_chart',
+          displayMobile: true,
+          mobileOrder: 5
         }
-      } else {
-        // Insert new config
-        const { error: insertError } = await supabase
-          .from('department_dashboards')
-          .insert({
-            department: departmentId,
-            view_type: viewType,
-            cards_config: cardsJson
-          });
+        // Removed the "Origem das Demandas" card from default cards
+      ];
 
-        if (insertError) {
-          console.error('Error inserting dashboard config:', insertError);
-          toast({
-            title: "Erro ao criar dashboard",
-            description: "Não foi possível criar a configuração do dashboard",
-            variant: "destructive"
-          });
-          setIsSaving(false);
-          return false;
-        }
-      }
-
-      toast({
-        title: "Dashboard salvo",
-        description: "As configurações do dashboard foram salvas com sucesso"
-      });
+      setActionCards(defaultCards);
+      setIsLoadingDashboard(false);
       
-      setIsSaving(false);
-      return true;
-    } catch (err) {
-      console.error('Failed to save dashboard config:', err);
-      toast({
-        title: "Erro ao salvar",
-        description: "Ocorreu um erro ao salvar o dashboard",
-        variant: "destructive"
-      });
-      setIsSaving(false);
-      return false;
-    }
-  };
+      // Try to get user's first name from localStorage or any other source
+      try {
+        const userInfo = localStorage.getItem('userInfo');
+        if (userInfo) {
+          const { name } = JSON.parse(userInfo);
+          if (name) {
+            const parts = name.split(' ');
+            setFirstName(parts[0] || 'Usuário');
+          }
+        }
+      } catch (error) {
+        console.error('Error getting user first name:', error);
+      }
+    }, 500);
+
+    return () => clearTimeout(loadTimer);
+  }, []);
 
   return {
-    config,
-    isLoading,
-    isSaving,
-    saveConfig
+    actionCards,
+    setActionCards,
+    isLoadingDashboard,
+    viewType,
+    setViewType,
+    firstName
   };
 };
