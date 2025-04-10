@@ -2,7 +2,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { ActionCardItem } from '@/types/dashboard';
 import { getCommunicationActionCards } from '@/hooks/dashboard/defaultCards';
-import { useAuth } from '@/hooks/useSupabaseAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useAutosaveDashboard } from '@/hooks/dashboard/useAutosaveDashboard';
 

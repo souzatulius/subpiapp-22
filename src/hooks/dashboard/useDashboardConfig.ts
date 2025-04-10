@@ -30,7 +30,7 @@ export const useDashboardConfig = (
       setIsLoading(true);
       try {
         const { data, error } = await supabase
-          .from(tableName as any)
+          .from(tableName)
           .select('cards_config')
           .eq('department', department)
           .single();
@@ -39,7 +39,7 @@ export const useDashboardConfig = (
           throw error;
         }
 
-        if (data?.cards_config) {
+        if (data && data.cards_config) {
           try {
             const parsedConfig = JSON.parse(data.cards_config);
             setConfig(parsedConfig);
@@ -65,8 +65,8 @@ export const useDashboardConfig = (
   const saveConfig = async (newConfig: ActionCardItem[]): Promise<boolean> => {
     try {
       setIsLoading(true);
-      const { data, error } = await supabase
-        .from(tableName as any)
+      const { error } = await supabase
+        .from(tableName)
         .upsert({
           department,
           cards_config: JSON.stringify(newConfig),

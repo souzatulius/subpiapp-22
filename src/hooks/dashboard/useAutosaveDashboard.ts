@@ -26,17 +26,16 @@ export const useAutosaveDashboard = (
     const loadDashboard = async () => {
       setLoading(true);
       try {
-        // Use any type to bypass TypeScript strict checking since our tables
-        // are dynamically created and not in the TypeScript definitions
+        // Use any type to bypass TypeScript strict checking
         const { data, error } = await supabase
-          .from(tableName as any)
+          .from(tableName)
           .select('cards_config')
           .eq('user_id', userId)
           .single();
 
         if (error) {
           console.error(`Error loading ${dashboardType} dashboard:`, error);
-        } else if (data?.cards_config) {
+        } else if (data && data.cards_config) {
           try {
             // Parse the JSON string from the database
             const parsedCards = JSON.parse(data.cards_config);
@@ -65,8 +64,9 @@ export const useAutosaveDashboard = (
     try {
       const cardsJson = JSON.stringify(cardsToSave);
       
-      const { data, error } = await supabase
-        .from(tableName as any)
+      // Use any type to bypass TypeScript strict checking
+      const { error } = await supabase
+        .from(tableName)
         .upsert(
           { 
             user_id: userId, 
