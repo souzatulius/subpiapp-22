@@ -3,8 +3,8 @@ import React from 'react';
 import { ChevronRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import OriginsDemandChartCompact from './OriginsDemandChartCompact';
 import { getColorClass } from '@/components/dashboard/card-customization/utils';
+import DemandasChart from './DemandasChart';
 
 interface OriginsDemandCardWrapperProps {
   className?: string;
@@ -35,7 +35,9 @@ const OriginsDemandCardWrapper: React.FC<OriginsDemandCardWrapperProps> = ({
       </div>
       
       <div className="flex-grow flex items-center justify-center">
-        <OriginsDemandChartCompact className="w-full max-h-full" />
+        <div className="w-full h-full px-2">
+          <DemandasChart />
+        </div>
       </div>
       
       <div className="mt-3 flex justify-end">
