@@ -30,7 +30,7 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({
 
         {/* Right side - Dynamic content */}
         <div 
-          className={`w-full min-h-[calc(100vh-80px)] md:min-h-0 md:w-1/2 flex flex-col items-center justify-center p-4 md:p-8 md:pl-[50px] relative bg-subpi-blue md:bg-transparent ${!isMobile ? 'md:login-bg-image' : ''}`}
+          className={`w-full min-h-[calc(100vh-80px)] md:min-h-0 md:w-1/2 flex flex-col items-center justify-center p-4 md:p-8 md:pl-[50px] relative ${isMobile ? 'bg-subpi-blue' : 'md:bg-transparent md:login-bg-image'}`}
         >
           <div className="w-full flex justify-center items-center animate-fade-right">
             {children}
@@ -45,4 +45,3 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({
 };
 
 export default AuthLayout;
-
