@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -56,12 +57,33 @@
   }
 }
 
+/* Define a imagem de fundo para a área de login - fora de qualquer media query */
 .login-bg-image {
   background-image: url('/lovable-uploads/f6dc323d-03f9-4186-bb11-0d3ab5718b11.png');
   background-size: cover;
   background-position: left center;
   background-repeat: no-repeat;
   background-color: transparent !important; /* Garante que nenhuma cor de fundo bloqueie a imagem */
+  position: relative; /* Garante contexto para elementos absolutos dentro se necessário */
+}
+
+/* Adiciona uma camada semi-transparente sobre a imagem para melhorar a visibilidade do conteúdo */
+.login-bg-image::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(255, 255, 255, 0.1); /* Camada branca semi-transparente */
+  pointer-events: none; /* Permite cliques passarem através desta camada */
+  z-index: 1;
+}
+
+/* Garante que o conteúdo apareça acima da camada semi-transparente */
+.login-bg-image > div {
+  position: relative;
+  z-index: 2;
 }
 
 .dark {
