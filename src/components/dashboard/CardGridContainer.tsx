@@ -66,7 +66,7 @@ const CardGridContainer: React.FC<CardGridContainerProps> = ({
         }
         
         // Use the default coordinate getter for other elements
-        return args.context.activeNode ? args.context.activeNode.node.getBoundingClientRect() : null;
+        return args.context.activeNode ? args.context.activeNode.getBoundingClientRect() : null;
       }
     })
   );
