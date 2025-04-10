@@ -74,8 +74,13 @@ const SmartSearchCard: React.FC<SmartSearchCardProps> = ({
     setSearchQuery(value);
   };
 
+  // Add a click handler to prevent drag operations from starting when clicking on the search input
+  const handleSearchClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+  };
+
   return (
-    <div className="w-full h-full">
+    <div className="w-full h-full" onClick={handleSearchClick}>
       <SearchInput
         placeholder={placeholder}
         onSearch={handleSearch}

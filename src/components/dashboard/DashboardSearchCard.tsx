@@ -46,6 +46,11 @@ const DashboardSearchCard: React.FC<DashboardSearchCardProps> = ({ isEditMode = 
       }));
   }, [recentSearches, searchQuery]);
 
+  // Add a click handler to prevent drag operations from starting when clicking on the search input
+  const handleSearchClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+  };
+
   if (isEditMode) {
     return (
       <Card className="border border-blue-100 rounded-xl">
@@ -59,7 +64,7 @@ const DashboardSearchCard: React.FC<DashboardSearchCardProps> = ({ isEditMode = 
   }
 
   return (
-    <div ref={containerRef} className="w-full">
+    <div ref={containerRef} className="w-full" onClick={handleSearchClick}>
       <Card className="w-full border border-blue-100 rounded-xl">
         <CardContent className="p-3">
           <SearchInput

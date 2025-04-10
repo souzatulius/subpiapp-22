@@ -67,6 +67,9 @@ const SearchInput: React.FC<SearchInputProps> = ({
   };
   
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    // Stop propagation of keyboard events to prevent DndKit from handling them
+    e.stopPropagation();
+    
     // Only handle the Enter key for form submission
     if (e.key === 'Enter') {
       handleSubmit(e);
