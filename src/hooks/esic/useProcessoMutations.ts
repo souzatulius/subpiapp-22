@@ -24,8 +24,8 @@ export const useProcessoMutations = () => {
     setError(null);
 
     try {
-      // Generate a unique protocol number
-      const protocolo = `ESIC-${new Date().getFullYear()}-${uuidv4().substring(0, 8).toUpperCase()}`;
+      // Use the provided protocol or generate a unique protocol number if not provided
+      const protocolo = formValues.protocolo || `ESIC-${new Date().getFullYear()}-${uuidv4().substring(0, 8).toUpperCase()}`;
 
       // Get user information from Supabase auth
       const { data: { user } } = await supabase.auth.getUser();

@@ -11,10 +11,22 @@ import '@/components/ranking/charts/ChartRegistration';
 import DemoDataProvider from '@/components/ranking/DemoDataProvider';
 import { exportToPDF, printWithStyles } from '@/utils/pdfExport';
 import { useIsMobile } from '@/hooks/use-mobile';
+import UploadSection from '@/components/ranking/UploadSection';
+import { useRankingCharts } from '@/hooks/ranking/useRankingCharts';
 
 const RankingSubs = () => {
   const [filterDialogOpen, setFilterDialogOpen] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
   const isMobile = useIsMobile();
+  
+  const { 
+    uploadId, 
+    setUploadId, 
+    planilhaData, 
+    setPlanilhaData,
+    painelData,
+    setPainelData
+  } = useRankingCharts();
   
   const handlePrint = () => {
     printWithStyles();
@@ -22,6 +34,21 @@ const RankingSubs = () => {
   
   const handleExportPDF = () => {
     exportToPDF('Ranking da Zeladoria');
+  };
+  
+  const handleUploadStart = () => {
+    setIsUploading(true);
+  };
+
+  const handleUploadComplete = (id: string, data: any[]) => {
+    setIsUploading(false);
+    setPlanilhaData(data);
+    setUploadId(id);
+  };
+
+  const handlePainelUploadComplete = (id: string, data: any[]) => {
+    setIsUploading(false);
+    setPainelData(data);
   };
   
   return (
@@ -37,6 +64,18 @@ const RankingSubs = () => {
         icon={<BarChart3 className="h-6 w-6 mr-2 text-white" />}
         color="bg-gradient-to-r from-orange-500 to-orange-700"
       />
+      
+      {/* Upload Section - Restored */}
+      <div className="mt-6 bg-white p-4 rounded-xl border border-gray-100 shadow-sm">
+        <h2 className="text-lg font-medium mb-4">Upload de Planilhas</h2>
+        <UploadSection 
+          onUploadStart={handleUploadStart}
+          onUploadComplete={handleUploadComplete}
+          onPainelUploadComplete={handlePainelUploadComplete}
+          isUploading={isUploading}
+          user={{}} // Pass user info here when authentication is implemented
+        />
+      </div>
       
       <div className="flex justify-end mt-4 space-x-2">
         <Button

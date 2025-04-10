@@ -1,31 +1,11 @@
 
 export interface ProfileData {
-  nome_completo?: string;
+  nome_completo: string;
   whatsapp?: string;
-  aniversario?: Date | string;
-  cargo?: {
-    id: string;
-    descricao: string;
-  } | string;
-  coordenacao?: {
-    id: string;
-    descricao: string;
-  } | string;
+  aniversario?: string | Date | null;
   email?: string;
   foto_perfil_url?: string;
-}
-
-export interface UserProfile {
-  id: string;
-  email: string;
-  nome_completo?: string;
-  whatsapp?: string;
-  aniversario?: Date | string;
-  cargo?: string;
-  cargo_id?: string;
-  coordenacao?: string;
-  coordenacao_id?: string;
+  cargo?: string | { descricao: string };
+  coordenacao?: string | { descricao: string };
   supervisao_tecnica?: string;
-  status?: string;
-  foto_perfil_url?: string;
 }

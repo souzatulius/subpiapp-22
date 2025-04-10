@@ -34,6 +34,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 
 // Define the form schema
 const formSchema = z.object({
+  protocolo: z.string().min(1, 'O protocolo é obrigatório.'),
   data_processo: z.date({
     required_error: 'A data do processo é obrigatória.',
   }),
@@ -69,6 +70,7 @@ const ProcessoForm: React.FC<ProcessoFormProps> = ({
   const form = useForm<ESICProcessoFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      protocolo: defaultValues?.protocolo || '',
       data_processo: defaultValues?.data_processo ? new Date(defaultValues.data_processo) : new Date(),
       assunto: defaultValues?.assunto || '',
       solicitante: defaultValues?.solicitante || '',
@@ -100,6 +102,25 @@ const ProcessoForm: React.FC<ProcessoFormProps> = ({
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Protocolo eSIC */}
+          <FormField
+            control={form.control}
+            name="protocolo"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Protocolo e-SIC</FormLabel>
+                <FormControl>
+                  <Input 
+                    className="bg-white rounded-lg" 
+                    placeholder="Ex: ESIC-2023-001" 
+                    {...field} 
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
           {/* Data do Processo */}
           <FormField
             control={form.control}
@@ -140,6 +161,26 @@ const ProcessoForm: React.FC<ProcessoFormProps> = ({
                     />
                   </PopoverContent>
                 </Popover>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Assunto */}
+          <FormField
+            control={form.control}
+            name="assunto"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Assunto</FormLabel>
+                <FormControl>
+                  <Input 
+                    className="bg-white rounded-lg" 
+                    {...field} 
+                  />
+                </FormControl>
                 <FormMessage />
               </FormItem>
             )}
@@ -193,24 +234,6 @@ const ProcessoForm: React.FC<ProcessoFormProps> = ({
             )}
           />
         </div>
-
-        {/* Assunto */}
-        <FormField
-          control={form.control}
-          name="assunto"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Assunto</FormLabel>
-              <FormControl>
-                <Input 
-                  className="bg-white rounded-lg" 
-                  {...field} 
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
 
         {/* Solicitante */}
         <div className="space-y-4">

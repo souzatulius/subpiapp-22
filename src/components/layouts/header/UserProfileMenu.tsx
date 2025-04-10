@@ -12,10 +12,12 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
-import { ChevronDown, LogOut, User, Settings, Bell } from 'lucide-react';
+import { LogOut, User, Settings, Bell } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/components/ui/use-toast';
 import { useIsMobile } from '@/hooks/use-mobile';
+import ProfileEditModal from '@/components/profile/ProfileEditModal';
+import { ProfileData } from '@/components/profile/types';
 
 const UserProfileMenu = () => {
   const { user, signOut } = useAuth();
@@ -27,8 +29,11 @@ const UserProfileMenu = () => {
     email?: string;
     foto_perfil_url?: string;
     coordenacao?: { descricao: string };
+    whatsapp?: string;
+    aniversario?: string | null;
   } | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
 
   useEffect(() => {
     const fetchUserProfile = async () => {
@@ -43,7 +48,9 @@ const UserProfileMenu = () => {
             nome_completo,
             email,
             foto_perfil_url,
-            coordenacao:coordenacoes(descricao)
+            coordenacao:coordenacoes(descricao),
+            whatsapp,
+            aniversario
           `)
           .eq('id', user.id)
           .single();
@@ -93,6 +100,31 @@ const UserProfileMenu = () => {
     }
   };
 
+  const handleEditProfile = () => {
+    setIsProfileModalOpen(true);
+  };
+  
+  const handleProfileUpdate = (updatedData: Partial<ProfileData>) => {
+    if (userProfile) {
+      setUserProfile({
+        ...userProfile,
+        nome_completo: updatedData.nome_completo || userProfile.nome_completo,
+        whatsapp: updatedData.whatsapp || userProfile.whatsapp,
+        aniversario: updatedData.aniversario ? 
+          (typeof updatedData.aniversario === 'string' ? 
+            updatedData.aniversario : 
+            new Date(updatedData.aniversario).toISOString()) : 
+          userProfile.aniversario
+      });
+    }
+  };
+
+  const profileData: ProfileData = {
+    nome_completo: userProfile?.nome_completo || '',
+    whatsapp: userProfile?.whatsapp || '',
+    aniversario: userProfile?.aniversario || ''
+  };
+
   return (
     <div className="flex items-center">
       {/* Desktop view - Show name and department with reduced font size */}
@@ -137,9 +169,9 @@ const UserProfileMenu = () => {
               <DropdownMenuSeparator />
             </>
           )}
-          <DropdownMenuItem onClick={() => navigate('/profile')}>
+          <DropdownMenuItem onClick={handleEditProfile}>
             <User className="mr-2 h-4 w-4" />
-            <span>Perfil</span>
+            <span>Editar Perfil</span>
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => navigate('/settings')}>
             <Settings className="mr-2 h-4 w-4" />
@@ -152,6 +184,17 @@ const UserProfileMenu = () => {
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
+
+      {/* Edit Profile Modal */}
+      {user && userProfile && (
+        <ProfileEditModal
+          isOpen={isProfileModalOpen}
+          onClose={() => setIsProfileModalOpen(false)}
+          profileData={profileData}
+          userId={user.id}
+          onProfileUpdate={handleProfileUpdate}
+        />
+      )}
     </div>
   );
 };

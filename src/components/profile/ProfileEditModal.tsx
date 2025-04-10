@@ -101,6 +101,7 @@ const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
               value={formData.nome_completo}
               onChange={(e) => setFormData({ ...formData, nome_completo: e.target.value })}
               required
+              className="rounded-lg"
             />
           </div>
 
@@ -111,6 +112,7 @@ const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
               value={formData.whatsapp}
               onChange={(e) => setFormData({ ...formData, whatsapp: e.target.value })}
               placeholder="(11) 99999-9999"
+              className="rounded-lg"
             />
           </div>
 
@@ -121,7 +123,7 @@ const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
                 <Button
                   variant="outline"
                   className={cn(
-                    "w-full justify-start text-left font-normal",
+                    "w-full justify-start text-left font-normal rounded-lg",
                     !formData.aniversario && "text-muted-foreground"
                   )}
                 >
@@ -142,6 +144,7 @@ const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
                   captionLayout="dropdown"
                   fromYear={1940}
                   toYear={new Date().getFullYear()}
+                  className="rounded-lg"
                 />
               </PopoverContent>
             </Popover>
@@ -152,7 +155,7 @@ const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
               type="button" 
               variant="outline" 
               onClick={onClose}
-              className="gap-2"
+              className="gap-2 rounded-lg"
               disabled={isSubmitting}
             >
               <X className="h-4 w-4" />
@@ -161,7 +164,7 @@ const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
             <Button 
               type="submit" 
               disabled={isSubmitting}
-              className="gap-2"
+              className="gap-2 rounded-lg"
             >
               <Save className="h-4 w-4" />
               {isSubmitting ? "Salvando..." : "Salvar"}

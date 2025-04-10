@@ -1,74 +1,48 @@
 
+// If this file doesn't exist, we'll create it with the needed types
 export interface ESICProcesso {
   id: string;
   protocolo: string;
-  assunto: string; 
+  assunto: string;
   solicitante?: string;
-  data_processo: string;
-  criado_em: string;
-  created_at: string;
-  atualizado_em: string;
+  data_processo: string | Date;
   autor_id: string;
-  autor_nome?: string;
   texto: string;
+  status: 'novo_processo' | 'aberto' | 'em_andamento' | 'concluido' | 'cancelado' | 'aguardando_justificativa' | 'aguardando_aprovacao';
   situacao: string;
-  status: "novo_processo" | "aberto" | "em_andamento" | "concluido" | "cancelado" | "respondido" | "aguardando_justificativa" | "aguardando_aprovacao";
-  autor?: {
-    nome_completo: string;
-  };
-  coordenacao_id?: string;
-  prazo_resposta?: string;
-  coordenacao?: {
-    nome: string;
-  };
-  sem_area_tecnica?: boolean;
+  coordenacao_id?: string | null;
+  prazo_resposta?: string | Date | null;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface ESICProcessoFormValues {
+  protocolo: string;
   assunto: string;
   solicitante?: string;
+  data_processo: Date | string;
   texto: string;
-  data_processo: Date;
   situacao: string;
   coordenacao_id?: string;
-  prazo_resposta?: Date;
+  prazo_resposta?: Date | string;
   sem_area_tecnica?: boolean;
   sem_identificacao?: boolean;
 }
 
 export interface ESICJustificativa {
   id: string;
-  texto: string;
   processo_id: string;
-  autor_id: string;
-  autor_nome?: string;
-  criado_em: string;
-  gerado_por_ia: boolean;
-  autor?: {
-    nome_completo: string;
-  };
-}
-
-export interface ESICJustificativaFormValues {
   texto: string;
+  autor_id: string;
   gerado_por_ia: boolean;
+  created_at?: string;
+  updated_at?: string;
 }
 
-export const statusLabels = {
-  aberto: 'Aberto',
-  em_andamento: 'Em andamento',
-  concluido: 'Concluído',
-  cancelado: 'Cancelado',
-  respondido: 'Respondido',
-  novo_processo: 'Novo Processo',
-  aguardando_justificativa: 'Aguardando Justificativa',
-  aguardando_aprovacao: 'Aguardando Aprovação'
-};
-
-export const situacaoLabels = {
-  em_tramitacao: 'Em tramitação',
-  concluido: 'Concluído',
-  cancelado: 'Cancelado',
-  pendente: 'Pendente',
-  prazo_prorrogado: 'Prazo Prorrogado'
+export const situacaoLabels: Record<string, string> = {
+  em_tramitacao: "Em tramitação",
+  deferido: "Deferido",
+  indeferido: "Indeferido",
+  parcialmente_deferido: "Parcialmente deferido",
+  nao_conhecimento: "Não conhecimento"
 };
