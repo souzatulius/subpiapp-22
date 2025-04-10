@@ -47,6 +47,14 @@
     h1 {
       line-height: 1.2; /* Espaçamento normal para desktop */
     }
+    
+    /* Imagem de fundo para a tela de login apenas no desktop */
+    .login-bg-image {
+      background-image: url('/public/lovable-uploads/f6dc323d-03f9-4186-bb11-0d3ab5718b11.png');
+      background-size: cover;
+      background-position: left center;
+      background-repeat: no-repeat;
+    }
   }
   
   /* Removendo o padding-top excessivo no mobile que estava causando espaço em branco */
