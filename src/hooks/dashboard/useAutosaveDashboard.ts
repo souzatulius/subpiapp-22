@@ -26,8 +26,10 @@ export const useAutosaveDashboard = (
     const loadDashboard = async () => {
       setLoading(true);
       try {
+        // Use any type to bypass TypeScript strict checking since our tables
+        // are dynamically created and not in the TypeScript definitions
         const { data, error } = await supabase
-          .from(tableName)
+          .from(tableName as any)
           .select('cards_config')
           .eq('user_id', userId)
           .single();
@@ -64,7 +66,7 @@ export const useAutosaveDashboard = (
       const cardsJson = JSON.stringify(cardsToSave);
       
       const { data, error } = await supabase
-        .from(tableName)
+        .from(tableName as any)
         .upsert(
           { 
             user_id: userId, 

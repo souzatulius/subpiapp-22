@@ -22,6 +22,15 @@ export const useComunicacaoDashboard = (
   const [isEditMode, setIsEditMode] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedCard, setSelectedCard] = useState<ActionCardItem | null>(null);
+  const [specialCardsData, setSpecialCardsData] = useState({
+    overdueCount: 0,
+    overdueItems: [],
+    notesToApprove: 0,
+    responsesToDo: 0,
+    isLoading: true,
+    coordenacaoId: '',
+    usuarioId: ''
+  });
   
   // Use the default config hook for preview mode or when user is not logged in
   const defaultConfig = useDefaultDashboardConfig(department);
@@ -31,6 +40,51 @@ export const useComunicacaoDashboard = (
   
   // Determine if we're loading
   const isLoading = isPreview ? defaultConfig.isLoading : dashboardConfig.isLoading;
+
+  // Fetch special cards data
+  useEffect(() => {
+    // Load special cards data if not in preview mode
+    const loadSpecialCardsData = async () => {
+      if (isPreview || !user) {
+        setSpecialCardsData(prev => ({ ...prev, isLoading: false }));
+        return;
+      }
+
+      try {
+        // Get user's coordenacao
+        const { data: userData, error: userError } = await supabase
+          .from('usuarios')
+          .select('coordenacao_id')
+          .eq('id', user.id)
+          .single();
+
+        if (userError) throw userError;
+
+        const coordenacaoId = userData?.coordenacao_id;
+
+        // Todo: Load other data like overdue demands, notes to approve, etc.
+        const overdueCount = 0; // Placeholder
+        const notesToApprove = 0; // Placeholder
+        const responsesToDo = 0; // Placeholder
+
+        setSpecialCardsData({
+          overdueCount,
+          overdueItems: [],
+          notesToApprove,
+          responsesToDo,
+          isLoading: false,
+          coordenacaoId: coordenacaoId || '',
+          usuarioId: user.id
+        });
+
+      } catch (error) {
+        console.error('Error loading special cards data:', error);
+        setSpecialCardsData(prev => ({ ...prev, isLoading: false }));
+      }
+    };
+
+    loadSpecialCardsData();
+  }, [user, isPreview]);
 
   // Fetch cards based on whether we're in preview mode or not
   useEffect(() => {
@@ -109,6 +163,7 @@ export const useComunicacaoDashboard = (
     isEditModalOpen,
     selectedCard,
     isLoading,
+    specialCardsData,
     handleCardEdit,
     handleCardHide,
     toggleEditMode,

@@ -46,7 +46,7 @@ const DashboardMigrationHelper: React.FC<DashboardMigrationHelperProps> = ({ onC
 
   return (
     <div className="space-y-4 p-4 border rounded-md">
-      <Alert variant={migrationComplete ? "success" : "default"}>
+      <Alert variant={migrationComplete ? "default" : "default"}>
         <AlertTitle className="font-bold">
           {migrationComplete ? 'Migração concluída!' : 'Migração de Dashboards'}
         </AlertTitle>

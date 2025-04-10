@@ -30,7 +30,7 @@ export const useDashboardConfig = (
       setIsLoading(true);
       try {
         const { data, error } = await supabase
-          .from(tableName)
+          .from(tableName as any)
           .select('cards_config')
           .eq('department', department)
           .single();
@@ -66,7 +66,7 @@ export const useDashboardConfig = (
     try {
       setIsLoading(true);
       const { data, error } = await supabase
-        .from(tableName)
+        .from(tableName as any)
         .upsert({
           department,
           cards_config: JSON.stringify(newConfig),

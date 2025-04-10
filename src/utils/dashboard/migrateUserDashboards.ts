@@ -14,7 +14,7 @@ export const migrateUserDashboards = async (): Promise<void> => {
   try {
     // Fetch all existing user dashboards
     const { data: userDashboards, error: fetchError } = await supabase
-      .from('user_dashboard')
+      .from('user_dashboard' as any)
       .select('cards_config, user_id');
 
     if (fetchError) throw fetchError;
@@ -32,7 +32,7 @@ export const migrateUserDashboards = async (): Promise<void> => {
 
     // Insert data into the new user_dashboard_comunicacao table
     const { error: insertError } = await supabase
-      .from('user_dashboard_comunicacao')
+      .from('user_dashboard_comunicacao' as any)
       .upsert(communicationDashboards, { onConflict: 'user_id' });
 
     if (insertError) throw insertError;
@@ -55,7 +55,7 @@ export const migrateDepartmentDashboards = async (): Promise<void> => {
   try {
     // Fetch all existing department dashboards
     const { data: departmentDashboards, error: fetchError } = await supabase
-      .from('department_dashboard')
+      .from('department_dashboard' as any)
       .select('cards_config, department');
 
     if (fetchError) throw fetchError;
@@ -74,7 +74,7 @@ export const migrateDepartmentDashboards = async (): Promise<void> => {
 
     // Insert data into the new department_dashboard_comunicacao table
     const { error: insertError } = await supabase
-      .from('department_dashboard_comunicacao')
+      .from('department_dashboard_comunicacao' as any)
       .upsert(communicationDashboards, { onConflict: 'department' });
 
     if (insertError) throw insertError;
