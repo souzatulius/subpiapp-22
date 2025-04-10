@@ -15,7 +15,7 @@ export const useDndSensors = () => {
           return null;
         }
         
-        return args.context.activeNode ? args.context.activeNode.getBoundingClientRect() : null;
+        return args.context.active?.rect?.current?.translated ?? null;
       }
     })
   );

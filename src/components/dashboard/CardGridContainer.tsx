@@ -1,10 +1,10 @@
 
 import React from 'react';
-import { DndContext, PointerSensor, closestCenter, KeyboardSensor, DragEndEvent } from '@dnd-kit/core';
+import { DndContext, closestCenter, DragEndEvent } from '@dnd-kit/core';
 import { restrictToParentElement } from '@dnd-kit/modifiers';
-import { useSensor, useSensors } from '@dnd-kit/core';
 import { ActionCardItem } from '@/types/dashboard';
 import UnifiedCardGrid from './UnifiedCardGrid';
+import { useDndSensors } from './grid/unified/DndSensors';
 
 interface CardGridContainerProps {
   cards: ActionCardItem[];
@@ -47,29 +47,8 @@ const CardGridContainer: React.FC<CardGridContainerProps> = ({
   },
   renderSpecialCardContent
 }) => {
-  // Create sensors with proper configuration
-  const sensors = useSensors(
-    useSensor(PointerSensor, {
-      activationConstraint: { distance: 8 },
-    }),
-    useSensor(KeyboardSensor, {
-      // Add a custom coordinateGetter to prevent keyboard handling when focus is on input/textarea
-      coordinateGetter: (event, args) => {
-        const target = event.target as HTMLElement;
-        const isInputElement = target.tagName.toLowerCase() === 'input' || 
-                              target.tagName.toLowerCase() === 'textarea' ||
-                              target.isContentEditable;
-
-        if (isInputElement) {
-          // Return null to prevent DnD operation when focus is on input elements
-          return null;
-        }
-        
-        // Use the default coordinate getter for other elements
-        return args.context.activeNode ? args.context.activeNode.getBoundingClientRect() : null;
-      }
-    })
-  );
+  // Use our shared sensors hook
+  const sensors = useDndSensors();
 
   // Function to handle drag end
   const handleDragEnd = (event: DragEndEvent) => {

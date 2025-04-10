@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { DndContext, closestCenter, PointerSensor, useSensor, useSensors, KeyboardSensor } from '@dnd-kit/core';
+import { DndContext, closestCenter } from '@dnd-kit/core';
 import { SortableContext } from '@dnd-kit/sortable';
 import { ChartItem } from '../hooks/useChartItemsState';
 import SortableChartCard from '../chart-components/SortableChartCard';
@@ -38,16 +38,16 @@ const ChartGrid: React.FC<ChartGridProps> = ({
       coordinateGetter: (event, args) => {
         const target = event.target as HTMLElement;
         const isInputElement = target.tagName.toLowerCase() === 'input' || 
-                              target.tagName.toLowerCase() === 'textarea' ||
-                              target.isContentEditable;
+                               target.tagName.toLowerCase() === 'textarea' ||
+                               target.isContentEditable;
 
         if (isInputElement) {
           // Return null to prevent DnD operation when focus is on input elements
           return null;
         }
         
-        // Use the default coordinate getter for other elements
-        return args.context.activeNode ? args.context.activeNode.getBoundingClientRect() : null;
+        // Use the proper accessor for the active node's bounding rectangle
+        return args.context.active?.rect?.current?.translated ?? null;
       }
     })
   );
@@ -81,5 +81,8 @@ const ChartGrid: React.FC<ChartGridProps> = ({
     </DndContext>
   );
 };
+
+// Import the necessary dependencies at the top of the file
+import { useSensors, useSensor, PointerSensor, KeyboardSensor } from '@dnd-kit/core';
 
 export default ChartGrid;
