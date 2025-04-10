@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { ChartConfig, ChartVisibility } from '@/types/ranking';
 
@@ -134,7 +133,10 @@ export const useRankingCharts = () => {
     currentTab,
     setCurrentTab,
     planilhaData,
+    setPlanilhaData,
     painelData,
-    uploadId
+    setPainelData,
+    uploadId,
+    setUploadId
   };
 };

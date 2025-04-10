@@ -86,9 +86,6 @@ export const useFetchProcessos = () => {
             assunto: p.assunto,
             solicitante: p.solicitante,
             data_processo: p.data_processo,
-            criado_em: p.criado_em,
-            created_at: p.criado_em,
-            atualizado_em: p.atualizado_em,
             autor_id: p.autor_id,
             texto: p.texto,
             situacao: p.situacao,
@@ -97,7 +94,13 @@ export const useFetchProcessos = () => {
             prazo_resposta: p.prazo_resposta,
             coordenacao: p.coordenacao ? {
               nome: p.coordenacao.nome
-            } : undefined
+            } : undefined,
+            // Map the database field names to the interface field names
+            criado_em: p.criado_em,
+            atualizado_em: p.atualizado_em,
+            created_at: p.criado_em,
+            updated_at: p.atualizado_em,
+            autor: p.autor
           };
         });
         

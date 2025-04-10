@@ -14,6 +14,12 @@ export interface ESICProcesso {
   prazo_resposta?: string | Date | null;
   created_at?: string;
   updated_at?: string;
+  // Add the missing fields that appear in the errors
+  criado_em?: string;
+  atualizado_em?: string;
+  autor?: {
+    nome_completo?: string;
+  };
 }
 
 export interface ESICProcessoFormValues {
@@ -37,6 +43,18 @@ export interface ESICJustificativa {
   gerado_por_ia: boolean;
   created_at?: string;
   updated_at?: string;
+  // Add the missing fields that appear in the errors
+  criado_em: string;
+  atualizado_em?: string;
+  autor?: {
+    nome_completo?: string;
+  };
+}
+
+// Add the missing ESICJustificativaFormValues interface
+export interface ESICJustificativaFormValues {
+  texto: string;
+  gerado_por_ia: boolean;
 }
 
 export const situacaoLabels: Record<string, string> = {
@@ -45,4 +63,15 @@ export const situacaoLabels: Record<string, string> = {
   indeferido: "Indeferido",
   parcialmente_deferido: "Parcialmente deferido",
   nao_conhecimento: "Não conhecimento"
+};
+
+// Add the missing statusLabels
+export const statusLabels: Record<string, string> = {
+  novo_processo: "Novo",
+  aberto: "Aberto",
+  em_andamento: "Em andamento",
+  concluido: "Concluído",
+  cancelado: "Cancelado",
+  aguardando_justificativa: "Aguardando justificativa",
+  aguardando_aprovacao: "Aguardando aprovação"
 };
