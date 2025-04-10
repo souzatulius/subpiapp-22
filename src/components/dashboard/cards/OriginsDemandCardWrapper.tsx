@@ -28,7 +28,7 @@ const OriginsDemandCardWrapper: React.FC<OriginsDemandCardWrapperProps> = ({
   const bgColorClass = getColorClass(color);
 
   return (
-    <div className={`w-full h-full flex flex-col ${bgColorClass} rounded-xl p-4 ${className}`}>
+    <div className={`w-full h-full flex flex-col ${bgColorClass} rounded-xl border border-gray-200 shadow-md hover:shadow-lg transition-all ${className}`}>
       <div className="mb-2">
         <h3 className="font-semibold text-lg">{title}</h3>
         {subtitle && <p className="text-sm opacity-80">{subtitle}</p>}
