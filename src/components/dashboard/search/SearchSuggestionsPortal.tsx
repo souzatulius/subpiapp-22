@@ -28,16 +28,19 @@ const SearchSuggestionsPortal: React.FC<SearchSuggestionsPortalProps> = ({
     if (!document.getElementById('search-suggestions-portal')) {
       const portalContainer = document.createElement('div');
       portalContainer.id = 'search-suggestions-portal';
-      portalContainer.style.position = 'fixed';
+      portalContainer.style.position = 'absolute'; // Changed from 'fixed' to 'absolute'
       portalContainer.style.zIndex = '9999';
-      portalContainer.style.pointerEvents = 'none';
       document.body.appendChild(portalContainer);
     }
     
     portalRef.current = document.getElementById('search-suggestions-portal') as HTMLDivElement;
     
     return () => {
-      // Cleanup function (optional)
+      // Cleanup function - remove portal container when component unmounts
+      const container = document.getElementById('search-suggestions-portal');
+      if (container && container.childElementCount === 0) {
+        document.body.removeChild(container);
+      }
     };
   }, []);
 
@@ -48,11 +51,12 @@ const SearchSuggestionsPortal: React.FC<SearchSuggestionsPortalProps> = ({
       if (!anchorRef.current || !portalRef.current) return;
       
       const rect = anchorRef.current.getBoundingClientRect();
-      portalRef.current.style.top = '0';
-      portalRef.current.style.left = '0';
-      portalRef.current.style.width = '100%';
-      portalRef.current.style.height = '100%';
-      portalRef.current.style.pointerEvents = isOpen ? 'auto' : 'none';
+      
+      // Position the portal based on the anchor's position
+      portalRef.current.style.top = `${window.scrollY + rect.bottom}px`;
+      portalRef.current.style.left = `${rect.left}px`;
+      portalRef.current.style.width = `${rect.width}px`;
+      // Remove the height and pointer-events style that was blocking interaction
     };
     
     updatePosition();
@@ -68,33 +72,23 @@ const SearchSuggestionsPortal: React.FC<SearchSuggestionsPortalProps> = ({
   if (!isOpen || !portalRef.current) return null;
   
   return createPortal(
-    <div 
-      className="pointer-events-auto"
-      style={{
-        position: 'absolute',
-        top: anchorRef.current?.getBoundingClientRect().bottom + 'px',
-        left: anchorRef.current?.getBoundingClientRect().left + 'px',
-        width: anchorRef.current?.getBoundingClientRect().width + 'px',
-      }}
-    >
-      <div className="mt-1 bg-white border border-gray-200 shadow-lg rounded-xl overflow-hidden">
-        <ul className="py-1 max-h-64 overflow-y-auto">
-          {suggestions.map((suggestion, i) => (
-            <li
-              key={i}
-              className="px-3 py-2 hover:bg-gray-100 cursor-pointer flex items-center text-xl font-medium"
-              onMouseDown={() => onSelect(suggestion)}
-            >
-              <div className="flex-grow">
-                <div className="font-medium text-gray-700">{suggestion.title}</div>
-              </div>
-              <div className="text-gray-400">
-                <Search className="h-6 w-6" />
-              </div>
-            </li>
-          ))}
-        </ul>
-      </div>
+    <div className="mt-1 bg-white border border-gray-200 shadow-lg rounded-xl overflow-hidden max-h-64 overflow-y-auto">
+      <ul className="py-1">
+        {suggestions.map((suggestion, i) => (
+          <li
+            key={i}
+            className="px-3 py-2 hover:bg-gray-100 cursor-pointer flex items-center text-xl font-medium"
+            onMouseDown={() => onSelect(suggestion)}
+          >
+            <div className="flex-grow">
+              <div className="font-medium text-gray-700">{suggestion.title}</div>
+            </div>
+            <div className="text-gray-400">
+              <Search className="h-6 w-6" />
+            </div>
+          </li>
+        ))}
+      </ul>
     </div>,
     portalRef.current
   );

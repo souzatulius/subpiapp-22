@@ -1,128 +1,103 @@
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
+import { Search } from 'lucide-react';
 import SearchSuggestionsPortal from './SearchSuggestionsPortal';
 
-interface SearchSuggestion {
+export interface SearchSuggestion {
   title: string;
   route: string;
 }
 
 interface SearchInputProps {
   placeholder?: string;
-  onSearch?: (query: string) => void;
+  onSearch: (query: string) => void;
   onSelectSuggestion?: (suggestion: SearchSuggestion) => void;
-  onChange?: (value: string) => void;
-  className?: string;
   suggestions?: SearchSuggestion[];
+  className?: string;
+  onChange?: (value: string) => void;
 }
 
 const SearchInput: React.FC<SearchInputProps> = ({
-  placeholder = "O que deseja fazer?",
+  placeholder = 'Pesquisar...',
   onSearch,
   onSelectSuggestion,
-  onChange,
-  className = "",
-  suggestions = []
+  suggestions = [],
+  className = '',
+  onChange
 }) => {
   const [query, setQuery] = useState('');
   const [showSuggestions, setShowSuggestions] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const isMounted = useRef(true);
-
-  useEffect(() => {
-    return () => {
-      isMounted.current = false;
-    };
-  }, []);
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    e.stopPropagation(); // Prevent event from bubbling up to DndKit
-    if (!query.trim()) return;
-
-    if (suggestions.length > 0 && onSelectSuggestion) {
-      onSelectSuggestion(suggestions[0]);
-    } else if (onSearch) {
-      onSearch(query);
-    }
-  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    e.stopPropagation(); // Prevent event from bubbling up to DndKit
-    const newValue = e.target.value;
-    setQuery(newValue);
-    
-    // Call the onChange prop if provided
+    const value = e.target.value;
+    setQuery(value);
     if (onChange) {
-      onChange(newValue);
-    }
-    
-    // Only show suggestions if query is at least 4 characters
-    if (newValue.length >= 4 && suggestions.length > 0) {
-      setShowSuggestions(true);
-    } else {
-      setShowSuggestions(false);
+      onChange(value);
     }
   };
-  
+
+  const handleSubmit = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (query.trim()) {
+      onSearch(query.trim());
+    }
+  };
+
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    // Stop propagation of keyboard events to prevent DndKit from handling them
-    e.stopPropagation();
-    
-    // Only handle the Enter key for form submission
     if (e.key === 'Enter') {
-      handleSubmit(e);
+      handleSubmit();
+    } else if (e.key === 'Escape') {
+      setShowSuggestions(false);
     }
   };
 
   const handleSelectSuggestion = (suggestion: SearchSuggestion) => {
     if (onSelectSuggestion) {
       onSelectSuggestion(suggestion);
+    } else {
+      setQuery(suggestion.title);
+      onSearch(suggestion.title);
     }
-    setQuery('');
     setShowSuggestions(false);
   };
 
-  const handleBlur = () => {
-    // Use a longer delay to ensure we don't interfere with typing
-    setTimeout(() => {
-      if (isMounted.current) {
+  // Close suggestions when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
         setShowSuggestions(false);
       }
-    }, 300);
-  };
+    };
 
-  // Add click handler to stop propagation
-  const handleClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-  };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   return (
-    <div ref={containerRef} className="relative w-full" onClick={handleClick}>
-      <form onSubmit={handleSubmit}>
-        <div className="relative">
-          <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-6 w-6 text-orange-500 z-10" />
-          <Input
-            ref={inputRef}
-            type="text"
-            placeholder={placeholder}
-            value={query}
-            onChange={handleInputChange}
-            onKeyDown={handleKeyDown}
-            onClick={handleClick}
-            onFocus={() => query.length >= 4 && suggestions.length > 0 && setShowSuggestions(true)}
-            onBlur={handleBlur}
-            className={`pl-14 pr-4 py-6 rounded-xl border border-gray-300 w-full bg-white text-xl text-gray-800 placeholder:text-gray-600 ${className}`}
-          />
-        </div>
+    <div ref={containerRef} className={`relative w-full ${className}`}>
+      <form onSubmit={handleSubmit} className="relative">
+        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-500" />
+        <Input
+          ref={inputRef}
+          type="search"
+          placeholder={placeholder}
+          value={query}
+          onChange={handleInputChange}
+          onFocus={() => setShowSuggestions(suggestions.length > 0)}
+          onKeyDown={handleKeyDown}
+          className="pl-10 pr-4 w-full"
+        />
       </form>
 
-      <SearchSuggestionsPortal
+      {/* Use the portal component for suggestions */}
+      <SearchSuggestionsPortal 
         suggestions={suggestions}
-        isOpen={showSuggestions}
+        isOpen={showSuggestions && suggestions.length > 0}
         anchorRef={containerRef}
         onSelect={handleSelectSuggestion}
       />

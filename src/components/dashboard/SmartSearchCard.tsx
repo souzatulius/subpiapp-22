@@ -1,5 +1,4 @@
-
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import SearchInput from './search/SearchInput';
 
@@ -74,13 +73,8 @@ const SmartSearchCard: React.FC<SmartSearchCardProps> = ({
     setSearchQuery(value);
   };
 
-  // Add a click handler to prevent drag operations from starting when clicking on the search input
-  const handleSearchClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-  };
-
   return (
-    <div className="w-full h-full" onClick={handleSearchClick}>
+    <div className="w-full h-full">
       <SearchInput
         placeholder={placeholder}
         onSearch={handleSearch}

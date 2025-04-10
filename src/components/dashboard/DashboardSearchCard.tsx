@@ -13,7 +13,6 @@ interface DashboardSearchCardProps {
 const DashboardSearchCard: React.FC<DashboardSearchCardProps> = ({ isEditMode = false }) => {
   const navigate = useNavigate();
   const { addRecentSearch, recentSearches } = useRecentSearches();
-  const containerRef = useRef<HTMLDivElement>(null);
   const [searchQuery, setSearchQuery] = useState('');
 
   const handleSearch = (query: string) => {
@@ -46,11 +45,6 @@ const DashboardSearchCard: React.FC<DashboardSearchCardProps> = ({ isEditMode = 
       }));
   }, [recentSearches, searchQuery]);
 
-  // Add a click handler to prevent drag operations from starting when clicking on the search input
-  const handleSearchClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-  };
-
   if (isEditMode) {
     return (
       <Card className="border border-blue-100 rounded-xl">
@@ -64,7 +58,7 @@ const DashboardSearchCard: React.FC<DashboardSearchCardProps> = ({ isEditMode = 
   }
 
   return (
-    <div ref={containerRef} className="w-full" onClick={handleSearchClick}>
+    <div className="w-full">
       <Card className="w-full border border-blue-100 rounded-xl">
         <CardContent className="p-3">
           <SearchInput
