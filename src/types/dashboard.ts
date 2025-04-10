@@ -1,3 +1,4 @@
+
 export type CardWidth = '25' | '50' | '75' | '100';
 export type CardHeight = '0.5' | '1' | '2' | '3' | '4';
 export type CardColor = 
@@ -79,4 +80,6 @@ export interface ActionCardItem {
   subtitle?: string;
   chartId?: string;
   isPendingTasks?: boolean;
+  departmentId?: string;
+  isComunicacao?: boolean;
 }

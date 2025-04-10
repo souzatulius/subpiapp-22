@@ -95,6 +95,19 @@ export const getDefaultCards = (): ActionCardItem[] => {
       mobileOrder: 4
     },
     {
+      id: 'acoes-pendentes-card',
+      title: 'Ações Pendentes',
+      iconId: 'AlertTriangle',
+      path: '/dashboard/comunicacao/responder',
+      color: 'bg-white',
+      width: '25',
+      height: '2',
+      type: 'pending_tasks',
+      isPendingTasks: true,
+      displayMobile: true,
+      mobileOrder: 5
+    },
+    {
       id: uuidv4(),
       title: 'Ranking da Zeladoria',
       subtitle: 'Produtividade das Subsecretarias',
@@ -105,7 +118,7 @@ export const getDefaultCards = (): ActionCardItem[] => {
       height: '1',
       type: 'standard',
       displayMobile: true,
-      mobileOrder: 5
+      mobileOrder: 6
     },
     {
       id: uuidv4(),
@@ -117,7 +130,7 @@ export const getDefaultCards = (): ActionCardItem[] => {
       height: '1',
       type: 'standard',
       displayMobile: true,
-      mobileOrder: 6
+      mobileOrder: 7
     },
     {
       id: uuidv4(),
@@ -131,7 +144,7 @@ export const getDefaultCards = (): ActionCardItem[] => {
       type: 'standard',
       chartId: 'origemDemandas',
       displayMobile: true,
-      mobileOrder: 7
+      mobileOrder: 8
     },
     {
       id: uuidv4(),
@@ -270,6 +283,20 @@ export const getCommunicationActionCards = (): ActionCardItem[] => {
       width: '50',
       height: '2',
       type: 'origin_selection',
+      displayMobile: true,
+      mobileOrder: 9
+    },
+    {
+      id: 'acoes-pendentes-card',
+      title: 'Ações Pendentes',
+      iconId: 'AlertTriangle',
+      path: '/dashboard/comunicacao/responder',
+      color: 'bg-white',
+      width: '25',
+      height: '2',
+      type: 'pending_tasks',
+      isPendingTasks: true,
+      isComunicacao: true,
       displayMobile: true,
       mobileOrder: 9
     }

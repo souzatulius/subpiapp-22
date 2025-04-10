@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Home, RotateCcw } from 'lucide-react';
 import { useDashboardCards } from '@/hooks/dashboard/useDashboardCards';
@@ -177,7 +178,10 @@ const DashboardPage: React.FC = () => {
       />;
     }
     
-    if (cardId === 'acoes-pendentes-card' || cardId.includes('acoes-pendentes') || card.isPendingTasks) {
+    if (cardId === 'acoes-pendentes-card' || 
+        cardId.includes('acoes-pendentes') || 
+        card.isPendingTasks || 
+        card.type === 'pending_tasks') {
       return <PendingTasksCard 
         id={card.id} 
         title={card.title} 
