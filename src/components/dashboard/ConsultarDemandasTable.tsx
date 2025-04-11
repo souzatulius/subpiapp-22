@@ -11,6 +11,26 @@ const ConsultarDemandasTable = () => {
   const navigate = useNavigate();
   const [page, setPage] = React.useState(1);
   const [pageSize, setPageSize] = React.useState(10);
+  const [isAdmin, setIsAdmin] = React.useState(false);
+  
+  // Check if user is admin
+  React.useEffect(() => {
+    const checkAdmin = async () => {
+      const { data: session } = await supabase.auth.getSession();
+      if (session?.session?.user) {
+        const { data: permissionsData } = await supabase
+          .from('usuario_permissoes')
+          .select('permissao_id, permissoes:permissao_id(nivel_acesso)')
+          .eq('usuario_id', session.session.user.id)
+          .single();
+
+        const isAdminUser = permissionsData?.permissoes?.nivel_acesso >= 80 || false;
+        setIsAdmin(isAdminUser);
+      }
+    };
+    
+    checkAdmin();
+  }, []);
   
   const { data: demandasRaw = [], isLoading } = useQuery({
     queryKey: ['demandas'],
@@ -108,16 +128,23 @@ const ConsultarDemandasTable = () => {
     navigate(`/dashboard/comunicacao/responder?id=${id}`);
   };
 
+  // Handler for viewNota required by the component
+  const handleViewNota = (demandId: string) => {
+    navigate(`/dashboard/notas/nova?demanda=${demandId}`);
+  };
+
   return (
     <DemandasTable 
       demandas={demandas}
       onViewDemand={handleViewDemand}
+      onViewNota={handleViewNota}
       isLoading={isLoading}
       totalCount={demandas.length}
       page={page}
       pageSize={pageSize}
       setPage={setPage}
       setPageSize={setPageSize}
+      isAdmin={isAdmin}
     />
   );
 };
