@@ -31,13 +31,13 @@ export const useGptNotaSuggestion = () => {
       // Prepare data for generation
       const dados = {
         resumo: selectedDemanda.titulo || '',
-        perguntas: formattedResponses.map(qa => qa.pergunta),
-        respostas: formattedResponses.map(qa => qa.resposta),
+        perguntas: formattedResponses.map(qa => qa.question), // Fixed: using question instead of pergunta
+        respostas: formattedResponses.map(qa => qa.answer),   // Fixed: using answer instead of resposta
         dataAtual: currentDate,
         comentariosAdicionais: selectedDemanda.detalhes_solicitacao || ''
       };
       
-      // Use the new unified edge function
+      // Use the unified edge function
       const { data, error } = await supabase.functions.invoke('generate-with-gpt', {
         body: {
           tipo: 'nota_imprensa',
