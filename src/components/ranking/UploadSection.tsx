@@ -359,7 +359,7 @@ const UploadSection = ({
             <Button
               variant="outline"
               size="sm"
-              className={`cursor-pointer ${isSgzUploading ? 'bg-gray-200' : 'bg-gray-100'} text-gray-700 border-gray-300 hover:bg-gray-200`}
+              className="cursor-pointer bg-white shadow-sm text-gray-700 border-gray-300 hover:bg-gray-50"
               disabled={isSgzUploading || isPainelUploading}
               asChild
             >
@@ -386,7 +386,7 @@ const UploadSection = ({
             <Button
               variant="outline"
               size="sm"
-              className={`cursor-pointer ${isPainelUploading ? 'bg-gray-200' : 'bg-gray-100'} text-gray-700 border-gray-300 hover:bg-gray-200`}
+              className="cursor-pointer bg-white shadow-sm text-gray-700 border-gray-300 hover:bg-gray-50"
               disabled={isSgzUploading || isPainelUploading}
               asChild
             >

@@ -34,12 +34,9 @@ const ChartCard: React.FC<ChartCardProps> = ({
   chartRef,
   className
 }) => {
-  // If a value is provided, add it to the title
-  const displayTitle = value ? `${title}` : title;
-
   return (
     <EnhancedChartCard
-      title={displayTitle}
+      title={title}
       isLoading={isLoading}
       chartRef={chartRef}
       loadingState={loadingState}
