@@ -23,9 +23,9 @@ const DashboardCards: React.FC<DashboardCardsProps> = ({
     uploadId 
   });
   
-  const { indicadores, isLoading, analysisProgress } = useChatGPTInsight(dadosPlanilha, uploadId);
+  const { indicadores, isLoading } = useChatGPTInsight(dadosPlanilha, uploadId);
   
-  console.log("Loaded indicators:", indicadores, "isLoading:", isLoading, "progress:", analysisProgress);
+  console.log("Loaded indicators:", indicadores, "isLoading:", isLoading);
   
   // Apply simulation adjustments to indicators if simulation is active
   const simulatedIndicadores = React.useMemo(() => {
@@ -90,13 +90,6 @@ const DashboardCards: React.FC<DashboardCardsProps> = ({
             Simulação
           </span>
         )}
-        {/* Mostrar status de carregamento se estiver carregando */}
-        {isLoading && (
-          <span className="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full animate-pulse flex items-center">
-            <span className="mr-1 inline-block h-2 w-2 rounded-full bg-blue-500"></span>
-            Analisando dados
-          </span>
-        )}
       </div>
       
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
@@ -104,40 +97,35 @@ const DashboardCards: React.FC<DashboardCardsProps> = ({
           title="OS Fechadas" 
           value={simulatedIndicadores?.fechadas?.valor || '0%'} 
           comment={simulatedIndicadores?.fechadas?.comentario || 'Ordens de serviço finalizadas oficialmente'} 
-          isLoading={isLoading}
-          progress={analysisProgress}
+          isLoading={isLoading} 
           isSimulated={isSimulationActive}
         />
         <InsightCard 
           title="OS Pendentes" 
           value={simulatedIndicadores?.pendentes?.valor || '0%'} 
           comment={simulatedIndicadores?.pendentes?.comentario || 'Ainda em aberto, aguardando solução'} 
-          isLoading={isLoading}
-          progress={analysisProgress} 
+          isLoading={isLoading} 
           isSimulated={isSimulationActive}
         />
         <InsightCard 
           title="OS Canceladas" 
           value={simulatedIndicadores?.canceladas?.valor || '0%'} 
           comment={simulatedIndicadores?.canceladas?.comentario || 'Solicitações encerradas sem execução'} 
-          isLoading={isLoading}
-          progress={analysisProgress}
+          isLoading={isLoading} 
           isSimulated={isSimulationActive}
         />
         <InsightCard 
           title="Tempo de Atendimento" 
           value={simulatedIndicadores?.prazo_medio?.valor || '0 dias'} 
           comment={simulatedIndicadores?.prazo_medio?.comentario || 'Média de dias entre abertura e execução das ordens'} 
-          isLoading={isLoading}
-          progress={analysisProgress}
+          isLoading={isLoading} 
           isSimulated={isSimulationActive}
         />
         <InsightCard 
           title="OS Fora do Prazo" 
           value={simulatedIndicadores?.fora_do_prazo?.valor || '0 OS'} 
           comment={simulatedIndicadores?.fora_do_prazo?.comentario || 'Ultrapassaram o prazo de atendimento'} 
-          isLoading={isLoading}
-          progress={analysisProgress}
+          isLoading={isLoading} 
           isSimulated={isSimulationActive}
         />
       </div>
