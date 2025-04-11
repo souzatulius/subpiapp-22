@@ -2,6 +2,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { useAnimatedFeedback } from '@/hooks/use-animated-feedback';
 
 // Define the context type
 interface RealDataContextType {
@@ -36,6 +37,7 @@ const RealDataProvider: React.FC<RealDataProviderProps> = ({ children }) => {
   const [painelData, setPainelData] = useState<any[] | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+  const { showFeedback } = useAnimatedFeedback();
   
   // Function to load real data from Supabase
   const loadRealData = async () => {
@@ -53,6 +55,7 @@ const RealDataProvider: React.FC<RealDataProviderProps> = ({ children }) => {
       if (sgzError) {
         console.error('Error fetching SGZ data:', sgzError);
         toast.error('Erro ao carregar dados SGZ');
+        showFeedback('error', 'Erro ao carregar dados SGZ');
         throw sgzError;
       }
       
@@ -69,6 +72,7 @@ const RealDataProvider: React.FC<RealDataProviderProps> = ({ children }) => {
       if (painelError) {
         console.error('Error fetching Painel data:', painelError);
         toast.error('Erro ao carregar dados do Painel');
+        showFeedback('error', 'Erro ao carregar dados do Painel');
         throw painelError;
       }
       
@@ -88,6 +92,7 @@ const RealDataProvider: React.FC<RealDataProviderProps> = ({ children }) => {
   const refreshData = async () => {
     await loadRealData();
     toast.success('Dados atualizados com sucesso');
+    showFeedback('success', 'Dados atualizados com sucesso');
   };
   
   // Load real data on mount

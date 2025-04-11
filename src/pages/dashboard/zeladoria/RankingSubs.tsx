@@ -13,6 +13,7 @@ import { exportToPDF, printWithStyles } from '@/utils/pdfExport';
 import { useIsMobile } from '@/hooks/use-mobile';
 import UploadSection from '@/components/ranking/UploadSection';
 import { supabase } from '@/integrations/supabase/client';
+import FeedbackProvider from '@/components/ui/feedback-provider';
 
 const RankingSubs = () => {
   const [filterDialogOpen, setFilterDialogOpen] = useState(false);
@@ -57,20 +58,22 @@ const RankingSubs = () => {
   };
   
   return (
-    <RealDataProvider>
-      <RankingSubsContent 
-        filterDialogOpen={filterDialogOpen}
-        setFilterDialogOpen={setFilterDialogOpen}
-        isUploading={isUploading}
-        handleUploadStart={handleUploadStart}
-        handleUploadComplete={handleUploadComplete}
-        handlePainelUploadComplete={handlePainelUploadComplete}
-        handlePrint={handlePrint}
-        handleExportPDF={handleExportPDF}
-        currentUser={currentUser}
-        isMobile={isMobile}
-      />
-    </RealDataProvider>
+    <FeedbackProvider>
+      <RealDataProvider>
+        <RankingSubsContent 
+          filterDialogOpen={filterDialogOpen}
+          setFilterDialogOpen={setFilterDialogOpen}
+          isUploading={isUploading}
+          handleUploadStart={handleUploadStart}
+          handleUploadComplete={handleUploadComplete}
+          handlePainelUploadComplete={handlePainelUploadComplete}
+          handlePrint={handlePrint}
+          handleExportPDF={handleExportPDF}
+          currentUser={currentUser}
+          isMobile={isMobile}
+        />
+      </RealDataProvider>
+    </FeedbackProvider>
   );
 };
 

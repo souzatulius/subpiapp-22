@@ -1,412 +1,427 @@
-
+// Import any necessary modules
 import { supabase } from '@/integrations/supabase/client';
-import { User } from '@supabase/supabase-js';
-import { toast } from 'sonner';
 import * as XLSX from 'xlsx';
+import { UploadResult } from '@/hooks/ranking/types/uploadTypes';
+import { User } from '@supabase/supabase-js';
 
-export interface UploadResult {
-  success: boolean;
-  recordCount: number;
-  message: string;
-  id?: string;
-  data?: any[];
-}
-
-// Added fetchLastUpload function
-export const fetchLastUpload = async (user: User | null) => {
-  if (!user) {
-    return { lastUpload: null, uploads: [] };
-  }
-
+// Helper function to fetch the last upload
+export const fetchLastUpload = async (user: User) => {
+  // Default values
+  const defaultResult = {
+    lastUpload: null,
+    uploads: []
+  };
+  
+  if (!user) return defaultResult;
+  
   try {
-    // Get last upload
-    const { data: uploads } = await supabase
+    const { data: uploads, error } = await supabase
       .from('sgz_uploads')
       .select('*')
-      .eq('usuario_id', user.id)
-      .order('data_upload', { ascending: false });
+      .order('created_at', { ascending: false });
+      
+    if (error) throw error;
     
-    const lastUpload = uploads && uploads.length > 0 ? {
-      id: uploads[0].id,
-      fileName: uploads[0].nome_arquivo,
-      uploadDate: uploads[0].data_upload,
-      processed: uploads[0].processado
-    } : null;
-
     return {
-      lastUpload,
+      lastUpload: uploads?.[0] || null,
       uploads: uploads || []
     };
-  } catch (error) {
-    console.error('Error fetching last upload:', error);
-    return { lastUpload: null, uploads: [] };
+  } catch (err) {
+    console.error('Error fetching last upload:', err);
+    return defaultResult;
   }
 };
 
-// Added handleDeleteUpload function
-export const handleDeleteUpload = async (uploadId: string, user: User | null): Promise<boolean> => {
+// File upload handler for SGZ files
+export const handleFileUpload = async (
+  file: File, 
+  user: User | null,
+  progressCallback: (progress: number) => void,
+  statsCallback: (stats: any) => void
+): Promise<UploadResult | null> => {
   if (!user) {
-    toast.error('Você precisa estar logado para excluir uploads');
-    return false;
+    return {
+      success: false,
+      recordCount: 0,
+      message: 'Usuário não autenticado'
+    };
   }
-
+  
   try {
-    // Delete records from sgz_ordens_servico first
+    progressCallback(10);
+    statsCallback({ processingStatus: 'processing', message: 'Processando arquivo...' });
+    
+    const reader = new FileReader();
+    
+    return new Promise((resolve, reject) => {
+      reader.onload = async (e) => {
+        try {
+          progressCallback(20);
+          statsCallback({ processingStatus: 'processing', message: 'Lendo dados...' });
+          
+          // Process Excel file
+          const data = new Uint8Array(e.target?.result as ArrayBuffer);
+          const workbook = XLSX.read(data, { type: 'array' });
+          const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+          const jsonData = XLSX.utils.sheet_to_json(worksheet);
+          
+          if (!jsonData || jsonData.length === 0) {
+            reject({
+              success: false,
+              recordCount: 0,
+              message: 'Arquivo vazio ou com formato inválido'
+            });
+            return;
+          }
+          
+          progressCallback(30);
+          statsCallback({ processingStatus: 'processing', message: 'Transformando dados...' });
+          
+          // Process and transform data
+          const processedData = jsonData.map((row: any) => ({
+            sgz_protocolo: row['Protocolo'] || row['SGZ'] || row['Protocolo SGZ'] || '',
+            sgz_status: row['Status'] || '',
+            sgz_area_tecnica: row['Área Técnica'] || row['Area Tecnica'] || '',
+            sgz_coordenacao: row['Coordenação'] || row['Coordenacao'] || '',
+            sgz_tipo_servico: row['Tipo de Serviço'] || row['Tipo Servico'] || row['Serviço'] || '',
+            sgz_distrito: row['Distrito'] || '',
+            sgz_data_abertura: row['Data de Abertura'] || row['Abertura'] || '',
+            sgz_data_fechamento: row['Data de Fechamento'] || row['Fechamento'] || '',
+            sgz_origem: row['Origem'] || row['Canal'] || '',
+            sgz_criado_em: new Date().toISOString(),
+            sgz_upload_id: null  // Will be set after upload record is created
+          }));
+          
+          progressCallback(40);
+          statsCallback({ 
+            processingStatus: 'processing', 
+            message: 'Salvando dados...',
+            recordCount: processedData.length
+          });
+          
+          // Create upload record
+          const { data: uploadData, error: uploadError } = await supabase
+            .from('sgz_uploads')
+            .insert({
+              usuario_email: user.email,
+              nome_arquivo: file.name,
+              registros: processedData.length
+            })
+            .select('id')
+            .single();
+          
+          if (uploadError) throw uploadError;
+          
+          const uploadId = uploadData.id;
+          
+          // Now set the upload ID for all records
+          const dataWithUploadId = processedData.map(item => ({
+            ...item,
+            sgz_upload_id: uploadId
+          }));
+          
+          progressCallback(60);
+          
+          // Get total service orders count before inserting new data
+          const { count: oldCount, error: countError } = await supabase
+            .from('sgz_ordens_servico')
+            .select('*', { count: 'exact', head: true });
+            
+          if (countError) throw countError;
+          
+          // Check for existing records to determine what's new vs. what's updated
+          progressCallback(70);
+          const existingProtocols = new Set();
+          
+          const { data: existingData, error: existingError } = await supabase
+            .from('sgz_ordens_servico')
+            .select('sgz_protocolo')
+            .in('sgz_protocolo', dataWithUploadId.map(item => item.sgz_protocolo));
+            
+          if (existingError) throw existingError;
+          
+          existingData?.forEach(item => existingProtocols.add(item.sgz_protocolo));
+          
+          const newOrders = dataWithUploadId.filter(item => !existingProtocols.has(item.sgz_protocolo)).length;
+          const updatedOrders = dataWithUploadId.filter(item => existingProtocols.has(item.sgz_protocolo)).length;
+          
+          statsCallback({ 
+            processingStatus: 'processing', 
+            newOrders,
+            updatedOrders,
+            totalServiceOrders: oldCount
+          });
+          
+          progressCallback(80);
+          
+          // Insert data into database - upsert to update existing records
+          const { error: insertError } = await supabase
+            .from('sgz_ordens_servico')
+            .upsert(dataWithUploadId, { 
+              onConflict: 'sgz_protocolo',
+              ignoreDuplicates: false
+            });
+          
+          if (insertError) throw insertError;
+          
+          progressCallback(95);
+          
+          // Get new total count after insert
+          const { count: newCount, error: newCountError } = await supabase
+            .from('sgz_ordens_servico')
+            .select('*', { count: 'exact', head: true });
+            
+          if (newCountError) throw newCountError;
+          
+          progressCallback(100);
+          
+          resolve({
+            success: true,
+            id: uploadId,
+            recordCount: processedData.length,
+            data: processedData,
+            newOrders,
+            updatedOrders, 
+            totalServiceOrders: newCount,
+            message: `${newOrders} registros novos, ${updatedOrders} registros atualizados`
+          });
+          
+        } catch (error) {
+          console.error('Error processing upload:', error);
+          reject({
+            success: false,
+            recordCount: 0,
+            message: 'Erro ao processar arquivo'
+          });
+        }
+      };
+      
+      reader.onerror = () => {
+        reject({
+          success: false,
+          recordCount: 0,
+          message: 'Erro ao ler arquivo'
+        });
+      };
+      
+      reader.readAsArrayBuffer(file);
+    });
+  } catch (err) {
+    console.error('Upload error:', err);
+    return {
+      success: false,
+      recordCount: 0,
+      message: 'Erro ao processar upload'
+    };
+  }
+};
+
+// Painel Zeladoria upload handler
+export const handlePainelZeladoriaUpload = async (
+  file: File, 
+  user: User | null,
+  progressCallback: (progress: number) => void,
+  statsCallback: (stats: any) => void
+): Promise<UploadResult | null> => {
+  if (!user) {
+    return {
+      success: false,
+      recordCount: 0,
+      message: 'Usuário não autenticado'
+    };
+  }
+  
+  try {
+    progressCallback(10);
+    statsCallback({ processingStatus: 'processing', message: 'Processando planilha do Painel...' });
+    
+    const reader = new FileReader();
+    
+    return new Promise((resolve, reject) => {
+      reader.onload = async (e) => {
+        try {
+          progressCallback(20);
+          
+          // Process Excel file
+          const data = new Uint8Array(e.target?.result as ArrayBuffer);
+          const workbook = XLSX.read(data, { type: 'array' });
+          const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+          const jsonData = XLSX.utils.sheet_to_json(worksheet);
+          
+          if (!jsonData || jsonData.length === 0) {
+            reject({
+              success: false,
+              recordCount: 0,
+              message: 'Arquivo vazio ou com formato inválido'
+            });
+            return;
+          }
+          
+          progressCallback(40);
+          statsCallback({ 
+            processingStatus: 'processing', 
+            message: 'Transformando dados do Painel...',
+            recordCount: jsonData.length
+          });
+          
+          // Process data for Painel Zeladoria
+          const processedData = jsonData.map((row: any) => {
+            // Extract relevant fields based on the Painel Zeladoria structure
+            const protocolField = row["Ordem de Serviço"] || row["Protocolo"] || "";
+            
+            return {
+              id_os: protocolField,
+              tipo_servico: row["Tipo de Serviço"] || row["Serviço"] || "",
+              status: row["Status"] || "",
+              distrito: row["Distrito"] || "",
+              departamento: row["Departamento"] || row["Setor"] || "",
+              data_abertura: parseExcelDate(row["Data de Abertura"] || ""),
+              data_fechamento: parseExcelDate(row["Data de Fechamento"] || ""),
+              responsavel_real: row["Responsável"] || ""
+            };
+          }).filter((item: any) => item.id_os); // Filter out items without ID
+          
+          progressCallback(60);
+          
+          // Get total count before insert
+          const { count: totalBefore, error: countError } = await supabase
+            .from('painel_zeladoria_dados')
+            .select('*', { count: 'exact', head: true });
+            
+          if (countError) throw countError;
+          
+          progressCallback(70);
+          
+          // Register the upload
+          const { data: uploadData, error: uploadError } = await supabase
+            .from('painel_zeladoria_uploads')
+            .insert({
+              usuario_email: user.email,
+              nome_arquivo: file.name
+            })
+            .select('id')
+            .single();
+    
+          if (uploadError) throw uploadError;
+          
+          const uploadId = uploadData.id;
+          
+          // Add upload ID to records
+          const dataWithUploadId = processedData.map(item => ({
+            ...item,
+            upload_id: uploadId
+          }));
+          
+          progressCallback(80);
+          statsCallback({ 
+            processingStatus: 'processing', 
+            message: 'Salvando dados do Painel...',
+            recordCount: processedData.length,
+            totalRecords: totalBefore
+          });
+          
+          // Insert data into database
+          const { error: insertError } = await supabase
+            .from('painel_zeladoria_dados')
+            .insert(dataWithUploadId);
+            
+          if (insertError) throw insertError;
+          
+          progressCallback(95);
+          
+          // Get new total after insert
+          const { count: totalAfter, error: newCountError } = await supabase
+            .from('painel_zeladoria_dados')
+            .select('*', { count: 'exact', head: true });
+            
+          if (newCountError) throw newCountError;
+          
+          progressCallback(100);
+          
+          resolve({
+            success: true,
+            id: uploadId,
+            recordCount: processedData.length,
+            data: processedData,
+            totalRecords: totalAfter,
+            message: `${processedData.length} registros processados com sucesso`
+          });
+          
+        } catch (error) {
+          console.error('Error processing Painel upload:', error);
+          reject({
+            success: false,
+            recordCount: 0,
+            message: 'Erro ao processar arquivo do Painel'
+          });
+        }
+      };
+      
+      reader.onerror = () => {
+        reject({
+          success: false,
+          recordCount: 0,
+          message: 'Erro ao ler arquivo'
+        });
+      };
+      
+      reader.readAsArrayBuffer(file);
+    });
+  } catch (err) {
+    console.error('Painel upload error:', err);
+    return {
+      success: false,
+      recordCount: 0,
+      message: 'Erro ao processar upload do Painel'
+    };
+  }
+};
+
+// Helper to delete uploads
+export const handleDeleteUpload = async (uploadId: string, user: User | null) => {
+  if (!user) return false;
+  
+  try {
+    // First, delete related service orders
     const { error: deleteOrdersError } = await supabase
       .from('sgz_ordens_servico')
       .delete()
-      .eq('planilha_referencia', uploadId);
+      .eq('sgz_upload_id', uploadId);
+      
+    if (deleteOrdersError) throw deleteOrdersError;
     
-    if (deleteOrdersError) {
-      console.error('Error deleting orders:', deleteOrdersError);
-      toast.error(`Erro ao excluir ordens: ${deleteOrdersError.message}`);
-      return false;
-    }
-    
-    // Now delete the upload record
+    // Then delete the upload record
     const { error: deleteUploadError } = await supabase
       .from('sgz_uploads')
       .delete()
       .eq('id', uploadId);
+      
+    if (deleteUploadError) throw deleteUploadError;
     
-    if (deleteUploadError) {
-      console.error('Error deleting upload:', deleteUploadError);
-      toast.error(`Erro ao excluir upload: ${deleteUploadError.message}`);
-      return false;
-    }
-    
-    toast.success('Upload excluído com sucesso');
     return true;
-  } catch (error: any) {
-    console.error('Error in delete upload operation:', error);
-    toast.error(`Erro ao excluir upload: ${error.message}`);
+  } catch (err) {
+    console.error('Error deleting upload:', err);
     return false;
   }
 };
 
-// Helper function to process Excel file
-export const processExcelFile = async (file: File): Promise<any[]> => {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
+// Helper function to parse Excel dates
+function parseExcelDate(dateString: string) {
+  if (!dateString) return null;
+  
+  try {
+    // Try to convert first as Brazilian date (DD/MM/YYYY)
+    const parts = dateString.split('/');
+    if (parts.length === 3) {
+      const [day, month, year] = parts;
+      return new Date(`${year}-${month}-${day}`).toISOString();
+    }
     
-    reader.onload = (e) => {
-      try {
-        const data = new Uint8Array(e.target?.result as ArrayBuffer);
-        const workbook = XLSX.read(data, { type: 'array' });
-        
-        // Assume first sheet
-        const firstSheetName = workbook.SheetNames[0];
-        const worksheet = workbook.Sheets[firstSheetName];
-        
-        // Convert to JSON
-        const jsonData = XLSX.utils.sheet_to_json(worksheet);
-        resolve(jsonData);
-      } catch (error) {
-        console.error('Error processing Excel file:', error);
-        reject(error);
-      }
-    };
-    
-    reader.onerror = (error) => {
-      reject(error);
-    };
-    
-    reader.readAsArrayBuffer(file);
-  });
-};
-
-// Map Excel row to SGZ structure
-export const mapExcelRowToSGZOrdem = (row: any, uploadId: string) => {
-  return {
-    sgz_status: row.status || 'pendente',
-    sgz_tipo_servico: row.tipo_servico || 'Não informado',
-    sgz_distrito: row.distrito || 'Não informado',
-    sgz_bairro: row.bairro || null,
-    sgz_empresa: row.empresa || null,
-    sgz_criado_em: row.data_criacao ? new Date(row.data_criacao).toISOString() : new Date().toISOString(),
-    sgz_modificado_em: row.data_status ? new Date(row.data_status).toISOString() : new Date().toISOString(),
-    ordem_servico: row.ordem_servico || row.numero_os || `OS-${Math.floor(Math.random() * 100000)}`,
-    planilha_referencia: uploadId,
-    sgz_departamento_tecnico: row.area_tecnica || 'STPO'
-  };
-};
-
-// Handle file upload for SGZ spreadsheet
-export const handleFileUpload = async (
-  file: File, 
-  user: User | null,
-  onProgress: (progress: number) => void,
-  onProcessingStats: (stats: any) => void
-): Promise<UploadResult | null> => {
-  if (!user) {
-    toast.error('Você precisa estar logado para fazer upload');
+    // Otherwise try as ISO or another recognized format
+    const date = new Date(dateString);
+    return !isNaN(date.getTime()) ? date.toISOString() : null;
+  } catch (error) {
+    console.error("Error converting date:", error);
     return null;
   }
-
-  try {
-    onProgress(10);
-    onProcessingStats({
-      newOrders: 0,
-      updatedOrders: 0,
-      processingStatus: 'processing'
-    });
-    
-    if (!file.name.endsWith('.xlsx') && !file.name.endsWith('.xls')) {
-      toast.error('Formato de arquivo inválido. Por favor, carregue um arquivo Excel (.xlsx ou .xls)');
-      onProgress(0);
-      onProcessingStats({...{}, processingStatus: 'error', errorMessage: 'Formato de arquivo inválido'});
-      return null;
-    }
-    
-    onProgress(25);
-    console.log('Processing Excel file...');
-    const excelData = await processExcelFile(file);
-    console.log(`Processed ${excelData.length} rows from Excel file`);
-    
-    const { data: uploadData, error: uploadError } = await supabase
-      .from('sgz_uploads')
-      .insert({
-        nome_arquivo: file.name,
-        usuario_id: user.id,
-        processado: false
-      })
-      .select()
-      .single();
-    
-    if (uploadError) {
-      console.error('Error creating upload record:', uploadError);
-      throw uploadError;
-    }
-    
-    const uploadId = uploadData.id;
-    console.log(`Created upload record with ID: ${uploadId}`);
-    
-    const ordens = [];
-    const ordensParaInserir = [];
-    let ordensAtualizadas = 0;
-    
-    onProgress(50);
-    
-    for (const row of excelData) {
-      const ordem = mapExcelRowToSGZOrdem(row, uploadId);
-      ordens.push(ordem);
-      
-      const { data: existingOrdem, error: checkError } = await supabase
-        .from('sgz_ordens_servico')
-        .select('id, sgz_status')
-        .eq('ordem_servico', ordem.ordem_servico)
-        .maybeSingle();
-      
-      if (checkError) {
-        console.error('Error checking existing order:', checkError);
-        throw checkError;
-      }
-      
-      if (existingOrdem) {
-        if (existingOrdem.sgz_status !== ordem.sgz_status) {
-          const { error: updateError } = await supabase
-            .from('sgz_ordens_servico')
-            .update({
-              sgz_status: ordem.sgz_status,
-              sgz_modificado_em: ordem.sgz_modificado_em,
-              planilha_referencia: uploadId
-            })
-            .eq('id', existingOrdem.id);
-            
-          if (updateError) {
-            console.error('Error updating order:', updateError);
-            throw updateError;
-          }
-          ordensAtualizadas++;
-        }
-      } else {
-        ordensParaInserir.push(ordem);
-      }
-    }
-    
-    onProgress(85); 
-    onProcessingStats({
-      newOrders: ordensParaInserir.length,
-      updatedOrders: ordensAtualizadas,
-      processingStatus: 'processing'
-    });
-    
-    if (ordensParaInserir.length > 0) {
-      console.log(`Inserting ${ordensParaInserir.length} new orders...`);
-      const { error: insertError } = await supabase
-        .from('sgz_ordens_servico')
-        .insert(ordensParaInserir);
-      
-      if (insertError) {
-        console.error('Error inserting orders:', insertError);
-        throw insertError;
-      }
-      
-      console.log(`Inserted ${ordensParaInserir.length} new orders`);
-    }
-    
-    const { error: updateUploadError } = await supabase
-      .from('sgz_uploads')
-      .update({ processado: true })
-      .eq('id', uploadId);
-      
-    if (updateUploadError) {
-      console.error('Error marking upload as processed:', updateUploadError);
-      throw updateUploadError;
-    }
-    console.log(`Marked upload ${uploadId} as processed`);
-    
-    onProgress(100);
-    onProcessingStats({
-      newOrders: ordensParaInserir.length,
-      updatedOrders: ordensAtualizadas,
-      processingStatus: 'success'
-    });
-    
-    toast.success(`Planilha SGZ processada com sucesso! ${ordensParaInserir.length} novas ordens inseridas e ${ordensAtualizadas} atualizadas.`);
-    
-    return {
-      success: true,
-      recordCount: excelData.length,
-      message: 'Upload processado com sucesso',
-      id: uploadId,
-      data: excelData
-    };
-  } catch (error: any) {
-    console.error('Error uploading file:', error);
-    onProgress(0);
-    onProcessingStats({
-      newOrders: 0,
-      updatedOrders: 0,
-      processingStatus: 'error',
-      errorMessage: error.message || 'Falha no processamento'
-    });
-    toast.error(`Erro ao processar a planilha SGZ: ${error.message || 'Falha no processamento'}`);
-    return {
-      success: false,
-      recordCount: 0,
-      message: error.message || 'Falha no processamento'
-    };
-  }
-};
-
-// Map Excel row to Painel structure
-export const mapExcelRowToPainelZeladoria = (row: any, uploadId: string) => {
-  return {
-    id_os: row.id_os || row.numero_os || `OS-${Math.floor(Math.random() * 100000)}`,
-    status: row.status || 'pendente',
-    tipo_servico: row.tipo_servico || 'Não informado',
-    data_abertura: row.data_abertura ? new Date(row.data_abertura).toISOString() : new Date().toISOString(),
-    data_fechamento: row.data_fechamento ? new Date(row.data_fechamento).toISOString() : null,
-    distrito: row.distrito || 'Não informado',
-    departamento: row.departamento || 'Não informado',
-    responsavel_real: row.responsavel || row.responsavel_real || null,
-    upload_id: uploadId
-  };
-};
-
-// Handle file upload for Painel Zeladoria spreadsheet
-export const handlePainelZeladoriaUpload = async (
-  file: File, 
-  user: User | null,
-  onProgress: (progress: number) => void,
-  onProcessingStats: (stats: any) => void
-): Promise<UploadResult | null> => {
-  if (!user) {
-    toast.error('Você precisa estar logado para fazer upload');
-    return null;
-  }
-
-  try {
-    onProgress(10);
-    onProcessingStats({
-      processingStatus: 'processing',
-      message: 'Processando dados do Painel da Zeladoria...',
-      recordCount: 0
-    });
-    
-    if (!file.name.endsWith('.xlsx') && !file.name.endsWith('.xls')) {
-      toast.error('Formato de arquivo inválido. Por favor, carregue um arquivo Excel (.xlsx ou .xls)');
-      onProgress(0);
-      onProcessingStats({
-        processingStatus: 'error',
-        message: 'Formato de arquivo inválido',
-        recordCount: 0
-      });
-      return null;
-    }
-    
-    onProgress(30);
-    console.log('Processing Painel Excel file...');
-    const excelData = await processExcelFile(file);
-    console.log(`Processed ${excelData.length} rows from Painel Excel file`);
-    
-    const { data: uploadData, error: uploadError } = await supabase
-      .from('painel_zeladoria_uploads')
-      .insert({
-        nome_arquivo: file.name,
-        usuario_email: user.email || '',
-      })
-      .select()
-      .single();
-    
-    if (uploadError) {
-      console.error('Error creating painel upload record:', uploadError);
-      throw uploadError;
-    }
-    
-    const uploadId = uploadData.id;
-    console.log(`Created painel upload record with ID: ${uploadId}`);
-    
-    onProgress(60);
-    
-    // Prepare data for insertion
-    const dadosParaInserir = excelData.map(row => mapExcelRowToPainelZeladoria(row, uploadId));
-    
-    onProgress(75);
-    console.log(`Inserting ${dadosParaInserir.length} painel records...`);
-    
-    // Insert each record individually to avoid type issues
-    for (const record of dadosParaInserir) {
-      const { error: insertError } = await supabase
-        .from('painel_zeladoria_dados')
-        .insert(record);
-        
-      if (insertError) {
-        console.error('Error inserting painel record:', insertError);
-        throw insertError;
-      }
-    }
-    
-    onProgress(100);
-    onProcessingStats({
-      processingStatus: 'success',
-      message: 'Dados do Painel processados com sucesso!',
-      recordCount: dadosParaInserir.length
-    });
-    
-    toast.success(`Planilha do Painel processada com sucesso! ${dadosParaInserir.length} registros processados.`);
-    
-    return {
-      success: true,
-      recordCount: dadosParaInserir.length,
-      message: 'Planilha do Painel processada com sucesso',
-      id: uploadId,
-      data: dadosParaInserir
-    };
-  } catch (error: any) {
-    console.error('Erro ao processar planilha do Painel:', error);
-    onProgress(0);
-    onProcessingStats({
-      processingStatus: 'error',
-      message: error.message || 'Falha no processamento',
-      recordCount: 0
-    });
-    toast.error(`Erro ao processar planilha do Painel: ${error.message || 'Falha no processamento'}`);
-    return {
-      success: false,
-      recordCount: 0,
-      message: error.message || 'Falha no processamento'
-    };
-  }
-};
+}
