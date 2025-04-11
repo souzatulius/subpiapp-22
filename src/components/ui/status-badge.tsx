@@ -2,7 +2,7 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
 import { StatusConfig, statusIcons, getDemandaStatusConfig, getNotaStatusConfig } from '@/utils/statusLabels';
-import { FileText, Tag, PriorityHigh } from 'lucide-react';
+import { FileText, Tag, AlertTriangle } from 'lucide-react';
 
 interface StatusBadgeProps {
   status: string;
@@ -246,7 +246,7 @@ export function PrioridadeBadge({
         className
       )}
     >
-      <PriorityHigh size={iconSizes[size]} className="shrink-0" />
+      <AlertTriangle size={iconSizes[size]} className="shrink-0" />
       <span>{formatarPrioridade(prioridade)}</span>
     </span>
   );
