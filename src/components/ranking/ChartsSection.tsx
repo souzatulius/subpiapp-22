@@ -1,6 +1,7 @@
 
 import React from 'react';
-import { ChartVisibility, ChartItem } from '../../types/ranking';
+import { ChartVisibility } from '@/components/ranking/types'; // Import from component types
+import { ChartItem } from '@/components/ranking/types'; // Use the component types definition
 import NoDataMessage from './charts/NoDataMessage';
 import ChartSectionHeader from './chart-section/ChartSectionHeader';
 import ChartGrid from './chart-section/ChartGrid';

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { BarChart3, SlidersHorizontal, Printer, FileText, Trash2, RefreshCw } from 'lucide-react';
 import RankingContent from '@/components/ranking/RankingContent';
@@ -16,6 +15,10 @@ import FeedbackProvider from '@/components/ui/feedback-provider';
 import CleanDataDialog from '@/components/ranking/CleanDataDialog';
 import { Skeleton } from '@/components/ui/skeleton';
 import UploadButton from '@/components/ranking/UploadButton';
+import { useAnimatedFeedback } from '@/hooks/use-animated-feedback';
+import { useUploadState } from '@/hooks/ranking/useUploadState';
+import UploadSection from '@/components/ranking/UploadSection';
+import { toast } from 'sonner';
 
 const RankingSubs = () => {
   const [filterDialogOpen, setFilterDialogOpen] = useState(false);
@@ -25,6 +28,8 @@ const RankingSubs = () => {
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [showUploadSection, setShowUploadSection] = useState(false);
+  const { showFeedback } = useAnimatedFeedback();
+  const { resetProgress } = useUploadState();
   
   // Get current user on component mount
   React.useEffect(() => {
@@ -62,21 +67,30 @@ const RankingSubs = () => {
   
   const handleUploadStart = () => {
     setIsUploading(true);
+    // Reset progress first
+    resetProgress();
+    // Show feedback to user
+    showFeedback('success', 'Iniciando upload da planilha...');
   };
 
   const handleUploadComplete = (id: string, data: any[]) => {
     console.log(`SGZ upload complete, ID: ${id}, Records: ${data.length}`);
+    toast.success(`Upload concluído: ${data.length} registros processados`);
     // Don't reset isUploading immediately to allow for background processing
+    setTimeout(() => setIsUploading(false), 1500);
   };
 
   const handlePainelUploadComplete = (id: string, data: any[]) => {
     console.log(`Painel upload complete, ID: ${id}, Records: ${data.length}`);
+    toast.success(`Upload concluído: ${data.length} registros processados`);
     // Don't reset isUploading immediately to allow for background processing
+    setTimeout(() => setIsUploading(false), 1500);
   };
   
   const handleCleanDataSuccess = () => {
     // We'll reload the data in the child component
     setCleanDataDialogOpen(false);
+    showFeedback('success', 'Dados limpos com sucesso');
   };
   
   return (
@@ -127,6 +141,10 @@ const RankingSubsContent = ({
   setShowUploadSection
 }) => {
   const { refreshData, isLoading, isRefreshing, lastUpdated, formattedLastUpdated } = useRealData();
+  const { sgzProgress, painelProgress } = useUploadState();
+  
+  // Active uploads detection
+  const hasActiveUploads = sgzProgress || painelProgress;
   
   return (
     <motion.div 
@@ -146,7 +164,7 @@ const RankingSubsContent = ({
             size="icon"
             className="bg-white/20 text-white border-white/30 hover:bg-white/30"
             onClick={refreshData}
-            disabled={isRefreshing || isLoading}
+            disabled={isRefreshing || isLoading || isUploading}
             title="Atualizar Dados"
           >
             <RefreshCw className={`h-5 w-5 ${isRefreshing ? 'animate-spin' : ''}`} />
@@ -173,6 +191,7 @@ const RankingSubsContent = ({
           size="icon"
           className="bg-white hover:bg-gray-100 border-gray-200"
           onClick={handlePrint}
+          disabled={isUploading}
         >
           <Printer className="h-5 w-5 text-gray-600" />
         </Button>
@@ -182,6 +201,7 @@ const RankingSubsContent = ({
           size="icon"
           className="bg-white hover:bg-gray-100 border-gray-200"
           onClick={handleExportPDF}
+          disabled={isUploading}
         >
           <FileText className="h-5 w-5 text-gray-600" />
         </Button>
@@ -191,20 +211,25 @@ const RankingSubsContent = ({
           size="icon"
           className="bg-white hover:bg-gray-100 border-gray-200"
           onClick={() => setFilterDialogOpen(true)}
+          disabled={isUploading}
         >
           <SlidersHorizontal className="h-5 w-5 text-gray-600" />
         </Button>
         
-        {/* Toggle upload section button */}
-        <Button
-          variant="outline"
-          size="icon"
-          className="bg-white hover:bg-gray-100 border-gray-200"
-          onClick={() => setShowUploadSection(!showUploadSection)}
+        {/* Upload button with animation */}
+        <motion.div
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
         >
-          {showUploadSection ? (
-            <Trash2 className="h-5 w-5 text-red-600" />
-          ) : (
+          <Button
+            variant={hasActiveUploads ? "default" : "outline"}
+            size="icon"
+            className={hasActiveUploads 
+              ? "bg-orange-500 hover:bg-orange-600 text-white" 
+              : "bg-white hover:bg-gray-100 border-gray-200"}
+            onClick={() => setShowUploadSection(!showUploadSection)}
+            disabled={isUploading && !hasActiveUploads}
+          >
             <UploadButton
               isUploading={isUploading}
               onUploadStart={handleUploadStart}
@@ -213,87 +238,65 @@ const RankingSubsContent = ({
               currentUser={currentUser}
               onRefreshData={refreshData}
             />
-          )}
-        </Button>
+          </Button>
+        </motion.div>
       </div>
       
-      {/* Upload section - now shown below the buttons */}
-      {showUploadSection && (
-        <div className="mt-4 p-4 rounded-xl bg-white border border-gray-200 shadow-sm">
-          <div className="flex justify-between items-center mb-4">
-            <h3 className="text-sm font-medium text-gray-700">Upload de Planilhas</h3>
-            {isAdmin && (
-              <Button
-                variant="outline"
-                size="sm"
-                className="bg-orange-500 text-white hover:bg-orange-600"
-                onClick={() => setCleanDataDialogOpen(true)}
-                disabled={isRefreshing || isLoading}
-              >
-                <Trash2 className="h-4 w-4 mr-1" />
-                Limpar Dados
-              </Button>
-            )}
-          </div>
+      {/* Show progress indicators when uploads are active */}
+      {(sgzProgress || painelProgress) && (
+        <div className="mt-4 p-4 bg-white rounded-lg shadow-sm border border-gray-200 animate-fade-in">
+          <h3 className="text-sm font-medium mb-3">Importação em Andamento</h3>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="p-4 border border-gray-200 bg-gray-50 hover:bg-gray-100 transition-colors rounded-lg flex flex-col items-center">
-              <h4 className="text-sm font-medium text-gray-700 mb-2">Planilha SGZ</h4>
-              <input
-                type="file"
-                id="sgzFile"
-                accept=".xlsx,.xls,.csv"
-                className="hidden"
-                onChange={(e) => {
-                  if (e.target.files && e.target.files[0]) {
-                    handleUploadStart();
-                    handleUploadComplete('mock-id', []);
-                  }
-                }}
-                disabled={isUploading}
-              />
-              <label htmlFor="sgzFile">
+          {sgzProgress && (
+            <div className="mb-3">
+              <UploadProgressDisplay stats={sgzProgress} type="sgz" />
+            </div>
+          )}
+          
+          {painelProgress && (
+            <div>
+              <UploadProgressDisplay stats={painelProgress} type="painel" />
+            </div>
+          )}
+        </div>
+      )}
+      
+      {/* Upload section - now shown below the buttons */}
+      {showUploadSection && !hasActiveUploads && (
+        <motion.div 
+          initial={{ opacity: 0, height: 0 }}
+          animate={{ opacity: 1, height: 'auto' }}
+          exit={{ opacity: 0, height: 0 }}
+          transition={{ duration: 0.3 }}
+          className="mt-4"
+        >
+          <div className="p-4 rounded-xl bg-white border border-gray-200 shadow-sm">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-sm font-medium text-gray-700">Upload de Planilhas</h3>
+              {isAdmin && (
                 <Button
                   variant="outline"
                   size="sm"
-                  className="cursor-pointer bg-white text-gray-700 border-gray-300 hover:bg-gray-100 shadow-sm"
-                  disabled={isUploading}
-                  asChild
+                  className="bg-orange-500 text-white hover:bg-orange-600"
+                  onClick={() => setCleanDataDialogOpen(true)}
+                  disabled={isRefreshing || isLoading}
                 >
-                  <span>Selecionar Arquivo SGZ</span>
+                  <Trash2 className="h-4 w-4 mr-1" />
+                  Limpar Dados
                 </Button>
-              </label>
+              )}
             </div>
             
-            <div className="p-4 border border-gray-200 bg-gray-50 hover:bg-gray-100 transition-colors rounded-lg flex flex-col items-center">
-              <h4 className="text-sm font-medium text-gray-700 mb-2">Painel da Zeladoria</h4>
-              <input
-                type="file"
-                id="painelFile"
-                accept=".xlsx,.xls,.csv"
-                className="hidden"
-                onChange={(e) => {
-                  if (e.target.files && e.target.files[0]) {
-                    handleUploadStart();
-                    handlePainelUploadComplete('mock-id', []);
-                  }
-                }}
-                disabled={isUploading}
-              />
-              <label htmlFor="painelFile">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="cursor-pointer bg-white text-gray-700 border-gray-300 hover:bg-gray-100 shadow-sm"
-                  disabled={isUploading}
-                  asChild
-                >
-                  <span>Selecionar Arquivo Painel</span>
-                </Button>
-              </label>
-            </div>
+            <UploadSection
+              onUploadStart={handleUploadStart}
+              onUploadComplete={handleUploadComplete}
+              onPainelUploadComplete={handlePainelUploadComplete}
+              isUploading={isUploading}
+              user={currentUser}
+              onRefreshData={refreshData}
+            />
           </div>
-        </div>
+        </motion.div>
       )}
       
       <div className="mt-6">
@@ -322,6 +325,21 @@ const RankingSubsContent = ({
               display: grid;
               grid-template-columns: repeat(2, 1fr);
               gap: 8px;
+            }
+          }
+          
+          .animate-fade-in {
+            animation: fadeIn 0.3s ease-in-out;
+          }
+          
+          @keyframes fadeIn {
+            0% {
+              opacity: 0;
+              transform: translateY(-10px);
+            }
+            100% {
+              opacity: 1;
+              transform: translateY(0);
             }
           }
         `}

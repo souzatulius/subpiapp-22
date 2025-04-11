@@ -1,8 +1,11 @@
 
-import React, { useState } from 'react';
-import { Upload, Loader2, RefreshCw } from 'lucide-react';
-import { useAnimatedFeedback } from '@/hooks/use-animated-feedback';
+import React from 'react';
+import { Upload, Loader } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import FileUploadWithProgress from '@/components/shared/FileUploadWithProgress';
+import { usePainelZeladoriaUpload } from '@/hooks/ranking/usePainelZeladoriaUpload';
+import { useToast } from '@/hooks/use-toast';
+import { useUploadState } from '@/hooks/ranking/useUploadState';
 
 interface UploadButtonProps {
   isUploading: boolean;
@@ -21,72 +24,53 @@ const UploadButton: React.FC<UploadButtonProps> = ({
   currentUser,
   onRefreshData
 }) => {
-  const { showFeedback } = useAnimatedFeedback();
-  const [isRefreshing, setIsRefreshing] = useState(false);
-  const [processingProgress, setProcessingProgress] = useState(0);
-  const [isProcessing, setIsProcessing] = useState(false);
+  const { toast } = useToast();
+  const { sgzProgress, painelProgress } = useUploadState();
+  const { handleUploadPainel } = usePainelZeladoriaUpload(currentUser);
   
-  // Handle click with better feedback
-  const handleClick = async () => {
-    if (isUploading) {
-      showFeedback('error', 'Há um upload em andamento, aguarde a conclusão');
-      return;
-    }
-    
-    // Show processing state with animation
-    setIsProcessing(true);
-    setProcessingProgress(0);
-    
-    // Start the progress animation
-    const progressInterval = setInterval(() => {
-      setProcessingProgress(prev => {
-        const newValue = prev + 1;
-        return newValue > 95 ? 95 : newValue;
-      });
-    }, 200);
-    
-    // If not uploading, trigger data refresh with visual feedback
+  const handleFileUpload = async (file: File) => {
+    onUploadStart();
     try {
-      setIsRefreshing(true);
-      await onRefreshData();
-      clearInterval(progressInterval);
-      setProcessingProgress(100);
-      showFeedback('success', 'Dados atualizados com sucesso');
-    } catch (error) {
-      clearInterval(progressInterval);
-      setProcessingProgress(0);
-      showFeedback('error', 'Erro ao atualizar os dados');
-      console.error('Error refreshing data:', error);
-    } finally {
-      setIsRefreshing(false);
-      setTimeout(() => setIsProcessing(false), 500);
+      const result = await handleUploadPainel(file);
+      if (result && result.success) {
+        toast({
+          title: "Upload concluído",
+          description: `${result.recordCount} registros processados com sucesso`,
+          variant: "success",
+        });
+        onPainelUploadComplete(result.id || "", result.data || []);
+        onRefreshData();
+      } else {
+        toast({
+          title: "Erro no upload",
+          description: result?.message || "Não foi possível processar o arquivo",
+          variant: "destructive",
+        });
+      }
+    } catch (err) {
+      console.error("Erro no upload:", err);
+      toast({
+        title: "Erro no upload",
+        description: "Ocorreu um erro ao processar o arquivo",
+        variant: "destructive",
+      });
     }
   };
-
+  
+  // Check if we have any active uploads
+  const isActiveUpload = sgzProgress?.stage === 'uploading' || 
+                         sgzProgress?.stage === 'processing' ||
+                         painelProgress?.stage === 'uploading' ||
+                         painelProgress?.stage === 'processing';
+  
   return (
-    <div className="relative">
-      {isProcessing ? (
-        <div className="flex items-center">
-          <div className="relative w-5 h-5">
-            <Loader2 className="h-5 w-5 text-gray-600 animate-spin" />
-            <div 
-              className="absolute top-0 left-0 w-full h-full rounded-full" 
-              style={{
-                background: `conic-gradient(rgb(234, 88, 12) ${processingProgress}%, transparent ${processingProgress}%)`,
-                opacity: 0.3
-              }}
-            />
-          </div>
-        </div>
-      ) : isRefreshing ? (
-        <RefreshCw className="h-5 w-5 text-gray-600 animate-spin" />
+    <>
+      {isActiveUpload ? (
+        <Loader className="h-5 w-5 animate-spin text-orange-600" />
       ) : (
-        <Upload 
-          className="h-5 w-5 text-gray-600 hover:text-orange-600 transition-colors cursor-pointer" 
-          onClick={handleClick}
-        />
+        <Upload className="h-5 w-5 text-gray-600" />
       )}
-    </div>
+    </>
   );
 };
 

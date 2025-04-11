@@ -1,44 +1,36 @@
 
 import { useState, useCallback } from 'react';
-import { toast } from 'sonner';
-import { useToast } from '@/hooks/use-toast';
+import { FeedbackType } from '@/components/ui/animated-feedback';
 
-export type FeedbackType = 'success' | 'error' | 'warning' | 'info';
-
-export const useAnimatedFeedback = () => {
+export function useAnimatedFeedback() {
   const [isVisible, setIsVisible] = useState(false);
-  const { toast: uiToast } = useToast();
+  const [feedbackType, setFeedbackType] = useState<FeedbackType>('success');
+  const [feedbackMessage, setFeedbackMessage] = useState('');
+  const [options, setOptions] = useState<any>({});
 
-  const showFeedback = useCallback((type: FeedbackType, message: string, options?: any) => {
+  const showFeedback = useCallback((type: FeedbackType, message: string, customOptions = {}) => {
+    setFeedbackType(type);
+    setFeedbackMessage(message);
+    setOptions(customOptions);
     setIsVisible(true);
-
-    // Show toast using sonner (for overlay effects)
-    if (type === 'success') {
-      toast.success(message, options);
-    } else if (type === 'error') {
-      toast.error(message, options);
-    } else if (type === 'warning') {
-      toast.warning(message, options);
-    } else {
-      toast.info(message, options);
-    }
-
-    // Also show shadcn toast for accessibility
-    uiToast({
-      variant: type === 'info' ? 'default' : type,
-      title: type.charAt(0).toUpperCase() + type.slice(1),
-      description: message,
-      ...options
-    });
-
-    // Auto-hide after duration
+    
+    // Auto-hide after duration if specified
+    const duration = customOptions.duration || 2000;
     setTimeout(() => {
       setIsVisible(false);
-    }, options?.duration || 3000);
-  }, [uiToast]);
+    }, duration);
+  }, []);
+
+  const hideFeedback = useCallback(() => {
+    setIsVisible(false);
+  }, []);
 
   return {
-    showFeedback,
     isVisible,
+    feedbackType,
+    feedbackMessage,
+    options,
+    showFeedback,
+    hideFeedback
   };
-};
+}
