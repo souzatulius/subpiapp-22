@@ -3,7 +3,7 @@ import { useState, useCallback } from 'react';
 import { toast } from 'sonner';
 import { useToast } from '@/hooks/use-toast';
 
-type FeedbackType = 'success' | 'error' | 'warning' | 'info';
+export type FeedbackType = 'success' | 'error' | 'warning' | 'info';
 
 export const useAnimatedFeedback = () => {
   const [isVisible, setIsVisible] = useState(false);

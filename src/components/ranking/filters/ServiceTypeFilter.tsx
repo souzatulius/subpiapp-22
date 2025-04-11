@@ -1,6 +1,4 @@
-
 import React from 'react';
-import { Select, SelectContent, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { FilterOptions } from '@/components/ranking/types';
@@ -11,34 +9,49 @@ interface ServiceTypeFilterProps {
 }
 
 const ServiceTypeFilter: React.FC<ServiceTypeFilterProps> = ({ serviceTypes, onServiceTypeChange }) => {
+  const types = ['Todos', 'Iluminação', 'Buraco', 'Entulho', 'Esgoto'];
+  
+  const handleTypeChange = (type: string) => {
+    if (type === 'Todos') {
+      onServiceTypeChange(['Todos']);
+    } else {
+      // Remove 'Todos' if it's in the array and add the new type
+      const currentTypes = serviceTypes || [];
+      const newTypes = currentTypes.includes('Todos')
+        ? [type]
+        : currentTypes.includes(type)
+          ? currentTypes.filter(t => t !== type)
+          : [...currentTypes, type];
+      
+      // If no types are selected, select 'Todos'
+      if (newTypes.length === 0) {
+        onServiceTypeChange(['Todos']);
+      } else {
+        onServiceTypeChange(newTypes);
+      }
+    }
+  };
+
   return (
     <div className="space-y-2">
-      <Label>Tipo de Serviço</Label>
-      <Select>
-        <SelectTrigger className="border-orange-200">
-          <SelectValue placeholder="Filtrar por serviço" />
-        </SelectTrigger>
-        <SelectContent>
-          <div className="space-y-1 p-1">
-            {['Todos', 'Tapa-buraco', 'Poda de árvore', 'Recapeamento', 'Limpeza de boca de lobo', 'Manutenção de calçada'].map((type) => (
-              <div key={type} className="flex items-center space-x-2">
-                <Checkbox 
-                  id={`type-${type}`} 
-                  checked={serviceTypes.includes(type as any)}
-                  onCheckedChange={() => onServiceTypeChange(type)}
-                  className="border-orange-400 data-[state=checked]:bg-orange-600"
-                />
-                <label 
-                  htmlFor={`type-${type}`}
-                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
-                >
-                  {type}
-                </label>
-              </div>
-            ))}
+      <h3 className="text-sm font-medium">Tipos de Serviço</h3>
+      <div className="space-y-1">
+        {types.map((type) => (
+          <div key={type} className="flex items-center space-x-2">
+            <Checkbox 
+              id={`type-${type}`}
+              checked={serviceTypes ? serviceTypes.includes(type) : false}
+              onCheckedChange={() => handleTypeChange(type)}
+            />
+            <Label 
+              htmlFor={`type-${type}`}
+              className="text-sm cursor-pointer"
+            >
+              {type}
+            </Label>
           </div>
-        </SelectContent>
-      </Select>
+        ))}
+      </div>
     </div>
   );
 };

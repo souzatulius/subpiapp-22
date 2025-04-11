@@ -2,6 +2,17 @@
 import { useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
+interface InsightResponse {
+  insights: {
+    fechadas: { valor: string; comentario: string };
+    pendentes: { valor: string; comentario: string };
+    canceladas: { valor: string; comentario: string };
+    prazo_medio: { valor: string; comentario: string };
+    fora_do_prazo: { valor: string; comentario: string };
+    [key: string]: { valor: string; comentario: string };
+  };
+}
+
 export function useChatGPTInsight() {
   const gerarInsights = useCallback(async (dadosPlanilha: any[]) => {
     const total = dadosPlanilha.length;
@@ -35,7 +46,7 @@ export function useChatGPTInsight() {
 
     try {
       // Usar a função supabase.functions.invoke em vez de fetch diretamente
-      const { data, error } = await supabase.functions.invoke('generate-ranking-insights', {
+      const { data, error } = await supabase.functions.invoke<InsightResponse>('generate-ranking-insights', {
         body: { tipo: 'indicadores', dados }
       });
 
@@ -44,32 +55,11 @@ export function useChatGPTInsight() {
         throw new Error(error.message);
       }
 
-      return data.insights;
+      return data?.insights || getDefaultInsights(statusCount, total, prazoMedio, foraDoPrazo);
     } catch (err) {
       console.error('Erro ao gerar insights:', err);
       // Fallback para valores padrão em caso de erro
-      return {
-        fechadas: { 
-          valor: `${Math.round((statusCount.fechadas / total) * 100)}%`, 
-          comentario: "Taxa de conclusão de ordens de serviço." 
-        },
-        pendentes: { 
-          valor: `${Math.round((statusCount.pendentes / total) * 100)}%`, 
-          comentario: "Ordens de serviço ainda não concluídas." 
-        },
-        canceladas: { 
-          valor: `${Math.round((statusCount.canceladas / total) * 100)}%`, 
-          comentario: "Ordens de serviço canceladas." 
-        },
-        prazo_medio: { 
-          valor: `${prazoMedio.toFixed(1)} dias`, 
-          comentario: "Tempo médio para conclusão das ordens de serviço." 
-        },
-        fora_do_prazo: { 
-          valor: `${foraDoPrazo} OS`, 
-          comentario: "Ordens de serviço que ultrapassaram o prazo estabelecido." 
-        }
-      };
+      return getDefaultInsights(statusCount, total, prazoMedio, foraDoPrazo);
     }
   }, []);
 
@@ -86,4 +76,34 @@ function calcularPrazoMedio(planilha: any[]) {
 
   if (dias.length === 0) return 0;
   return dias.reduce((a, b) => a + b, 0) / dias.length;
+}
+
+function getDefaultInsights(
+  statusCount: { fechadas: number; pendentes: number; canceladas: number; conc: number },
+  total: number,
+  prazoMedio: number,
+  foraDoPrazo: number
+) {
+  return {
+    fechadas: { 
+      valor: `${Math.round((statusCount.fechadas / total) * 100)}%`, 
+      comentario: "Taxa de conclusão de ordens de serviço." 
+    },
+    pendentes: { 
+      valor: `${Math.round((statusCount.pendentes / total) * 100)}%`, 
+      comentario: "Ordens de serviço ainda não concluídas." 
+    },
+    canceladas: { 
+      valor: `${Math.round((statusCount.canceladas / total) * 100)}%`, 
+      comentario: "Ordens de serviço canceladas." 
+    },
+    prazo_medio: { 
+      valor: `${prazoMedio.toFixed(1)} dias`, 
+      comentario: "Tempo médio para conclusão das ordens de serviço." 
+    },
+    fora_do_prazo: { 
+      valor: `${foraDoPrazo} OS`, 
+      comentario: "Ordens de serviço que ultrapassaram o prazo estabelecido." 
+    }
+  };
 }

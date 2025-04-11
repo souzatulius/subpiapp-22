@@ -1,4 +1,3 @@
-
 export interface ChartItem {
   id: string;
   title: string;
@@ -6,9 +5,47 @@ export interface ChartItem {
   analysis?: string;
   order: number;
   visible: boolean;
+  description?: string;
+  isVisible?: boolean; // For backward compatibility
+  isAnalysisExpanded?: boolean;
+  showAnalysisOnly?: boolean;
+  subtitle?: string;
+  type?: string;
 }
 
 export interface ChartVisibility {
+  // Performance & Efficiency charts
+  statusDistribution: boolean;
+  statusTransition: boolean;
+  districtEfficiencyRadar: boolean;
+  resolutionTime: boolean;
+  
+  // Territories & Services charts
+  districtPerformance: boolean;
+  serviceTypes: boolean;
+  
+  // Critical Flows charts
+  responsibility: boolean;
+  sgzPainel: boolean;
+  oldestPendingList: boolean;
+  
+  // Keeping other chart visibility flags for backward compatibility
+  evolution: boolean;
+  departmentComparison: boolean;
+  topCompanies: boolean;
+  districtDistribution: boolean;
+  servicesByDepartment: boolean;
+  servicesByDistrict: boolean;
+  timeComparison: boolean;
+  dailyDemands: boolean;
+  closureTime: boolean;
+  neighborhoodComparison: boolean;
+  externalDistricts: boolean;
+  efficiencyImpact: boolean;
+  criticalStatus: boolean;
+  serviceDiversity: boolean;
+  
+  // Index signature to allow any string key
   [key: string]: boolean;
 }
 
@@ -38,4 +75,16 @@ export interface ProcessingStats {
   totalServiceOrders?: number;
   totalRecords?: number;
   recordCount?: number;
+}
+
+export interface FilterOptions {
+  dateRange?: { from: Date | null; to: Date | null };
+  status?: string[];
+  serviceTypes?: string[];
+  distritos?: string[];
+  dataInicio?: string;
+  dataFim?: string;
+  tiposServico?: string[];
+  departamento?: string[];
+  responsavel?: string[]; // Added to filter by responsibility
 }

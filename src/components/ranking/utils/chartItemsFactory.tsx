@@ -23,10 +23,11 @@ export function createChartItems(props: CreateChartItemsProps): ChartItem[] {
       id: 'districtPerformance',
       title: 'Performance por Distrito',
       component: <div>District Performance Chart</div>,
-      isVisible: !hiddenCharts.includes('districtPerformance'),
+      visible: !hiddenCharts.includes('districtPerformance'),
       analysis: 'Análise da performance por distrito',
       isAnalysisExpanded: false,
-      showAnalysisOnly: false
+      showAnalysisOnly: false,
+      order: 1
     });
   }
   
@@ -36,10 +37,11 @@ export function createChartItems(props: CreateChartItemsProps): ChartItem[] {
       id: 'statusDistribution',
       title: 'Distribuição por Status',
       component: <div>Status Distribution Chart</div>,
-      isVisible: !hiddenCharts.includes('statusDistribution'),
+      visible: !hiddenCharts.includes('statusDistribution'),
       analysis: 'Análise da distribuição de status',
       isAnalysisExpanded: false,
-      showAnalysisOnly: false
+      showAnalysisOnly: false,
+      order: 2
     });
   }
   
@@ -49,10 +51,11 @@ export function createChartItems(props: CreateChartItemsProps): ChartItem[] {
       id: 'resolutionTime',
       title: 'Tempo de Resolução',
       component: <div>Resolution Time Chart</div>,
-      isVisible: !hiddenCharts.includes('resolutionTime'),
+      visible: !hiddenCharts.includes('resolutionTime'),
       analysis: 'Análise do tempo de resolução',
       isAnalysisExpanded: false,
-      showAnalysisOnly: false
+      showAnalysisOnly: false,
+      order: 3
     });
   }
   
@@ -62,10 +65,11 @@ export function createChartItems(props: CreateChartItemsProps): ChartItem[] {
       id: 'topCompanies',
       title: 'Top Empresas',
       component: <div>Top Companies Chart</div>,
-      isVisible: !hiddenCharts.includes('topCompanies'),
+      visible: !hiddenCharts.includes('topCompanies'),
       analysis: 'Análise das principais empresas',
       isAnalysisExpanded: false,
-      showAnalysisOnly: false
+      showAnalysisOnly: false,
+      order: 4
     });
   }
   
@@ -75,10 +79,11 @@ export function createChartItems(props: CreateChartItemsProps): ChartItem[] {
       id: 'responsibility',
       title: 'Responsabilidade',
       component: <div>Responsibility Chart</div>,
-      isVisible: !hiddenCharts.includes('responsibility'),
+      visible: !hiddenCharts.includes('responsibility'),
       analysis: 'Análise da responsabilidade',
       isAnalysisExpanded: false,
-      showAnalysisOnly: false
+      showAnalysisOnly: false,
+      order: 5
     });
   }
   
