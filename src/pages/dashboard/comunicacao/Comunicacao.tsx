@@ -14,7 +14,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from '@/hooks/use-toast';
 import OriginsDemandChartCompact from '@/components/dashboard/cards/OriginsDemandChartCompact';
 import PendingTasksCard from '@/components/dashboard/cards/PendingTasksCard';
-import PressRequestQuickStartCard from '@/components/comunicacao/PressRequestQuickStartCard';
+import PressRequestCard from '@/components/dashboard/cards/PressRequestCard';
 import { Button } from '@/components/ui/button';
 import { format } from 'date-fns';
 
@@ -77,7 +77,7 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
     }
     
     if (cardId === 'press-request-card' || cardId.includes('press-request')) {
-      return <PressRequestQuickStartCard />;
+      return <PressRequestCard />;
     }
     
     if (cardId === 'acoes-pendentes-card' || 
@@ -163,10 +163,7 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
         </div>
       )}
       
-      {/* Press Request Quick Start Card */}
-      <div className="px-2">
-        <PressRequestQuickStartCard />
-      </div>
+      {/* Removed the standalone PressRequestQuickStartCard */}
       
       {isLoading ? (
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">

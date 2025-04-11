@@ -7,6 +7,7 @@ import PendingTasksCard from '../../cards/PendingTasksCard';
 import ComunicadosCard from '../../cards/ComunicadosCard';
 import UserProfileCard from '../../cards/UserProfileCard';
 import NotificationSettingsCard from '../../cards/NotificationSettingsCard';
+import PressRequestCard from '../../cards/PressRequestCard';
 
 interface CardSpecialContentProps {
   card: ActionCardItem;
@@ -74,6 +75,10 @@ export const getSpecialContent = ({
       id={card.id}
       title={card.title}
     />;
+  }
+  
+  if (card.type === 'press_request_card') {
+    return <PressRequestCard />;
   }
   
   return null;
