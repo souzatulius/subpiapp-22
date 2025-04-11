@@ -42,6 +42,7 @@ interface UnifiedViewContainerProps<T> {
     md?: number;
     lg?: number;
   };
+  actionMenu?: React.ReactNode;
 }
 
 function UnifiedViewContainer<T>({
@@ -63,25 +64,35 @@ function UnifiedViewContainer<T>({
   hideViewToggle = false,
   defaultViewMode = 'list',
   cardContentClassName = "p-6",
-  gridColumns
+  gridColumns,
+  actionMenu
 }: UnifiedViewContainerProps<T>) {
   const [viewMode, setViewMode] = useState<ViewMode>(defaultViewMode);
 
   return (
     <Card className={`border border-gray-200 shadow-sm rounded-xl overflow-hidden ${className}`}>
       <CardContent className={cardContentClassName}>
-        <UnifiedFilterBar
-          searchTerm={searchTerm}
-          setSearchTerm={setSearchTerm}
-          viewMode={viewMode}
-          setViewMode={setViewMode}
-          filterOptions={filterOptions}
-          searchPlaceholder={searchPlaceholder}
-          showBackButton={showBackButton}
-          onBack={onBack}
-          hideViewToggle={hideViewToggle}
-          className="mb-6"
-        />
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+          <div className="flex-1">
+            <UnifiedFilterBar
+              searchTerm={searchTerm}
+              setSearchTerm={setSearchTerm}
+              viewMode={viewMode}
+              setViewMode={setViewMode}
+              filterOptions={filterOptions}
+              searchPlaceholder={searchPlaceholder}
+              showBackButton={showBackButton}
+              onBack={onBack}
+              hideViewToggle={hideViewToggle}
+            />
+          </div>
+          
+          {actionMenu && (
+            <div className="flex-shrink-0">
+              {actionMenu}
+            </div>
+          )}
+        </div>
         
         {viewMode === 'cards' ? (
           <UnifiedGridView

@@ -54,7 +54,7 @@ function UnifiedListView<T>({
           <div 
             key={id} 
             onClick={() => onItemClick && onItemClick(item)}
-            className={onItemClick ? "cursor-pointer" : ""}
+            className={`rounded-xl transition-all duration-200 ${onItemClick ? "cursor-pointer hover:shadow-md" : ""} ${selectedItemId === id ? "ring-2 ring-blue-500 ring-offset-2" : ""}`}
           >
             {renderItem(item, index)}
           </div>

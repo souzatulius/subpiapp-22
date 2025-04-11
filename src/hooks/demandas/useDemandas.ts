@@ -5,15 +5,17 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
 import { Demand } from '@/types/demand';
 
-export const useDemandas = (filterStatus: string = 'pendente') => {
+export const useDemandas = (filterStatus?: string) => {
   const [selectedDemand, setSelectedDemand] = useState<Demand | null>(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
 
-  const { data: demandas, isLoading, error, refetch } = useQuery({
+  const { data: demandas = [], isLoading, error, refetch } = useQuery({
     queryKey: ['demandas', filterStatus],
     queryFn: async () => {
       try {
-        const { data, error } = await supabase
+        console.log("Fetching demandas with status filter:", filterStatus);
+        
+        let query = supabase
           .from('demandas')
           .select(`
             *,
@@ -29,10 +31,15 @@ export const useDemandas = (filterStatus: string = 'pendente') => {
             tipo_midia:tipo_midia_id (id, descricao),
             bairro:bairro_id (id, nome),
             autor:autor_id (id, nome_completo),
-            servico:servico_id (id, descricao)
-          `)
-          .eq('status', filterStatus)
-          .order('created_at', { ascending: false });
+            servico:servico_id (id, descricao),
+            notas:notas_oficiais (id, titulo, status)
+          `);
+
+        if (filterStatus) {
+          query = query.eq('status', filterStatus);
+        }
+
+        const { data, error } = await query.order('created_at', { ascending: false });
 
         if (error) {
           console.error('Error fetching demandas:', error);
@@ -44,10 +51,21 @@ export const useDemandas = (filterStatus: string = 'pendente') => {
           return [];
         }
 
+        console.log(`Found ${data.length} demandas`);
+        
+        // Count demandas with and without notas for debugging
+        const demandasWithNotas = data.filter(d => d.notas && d.notas.length > 0);
+        const demandasWithoutNotas = data.filter(d => !d.notas || d.notas.length === 0);
+        console.log("All demandas:", data.length);
+        console.log("Demandas with notas:", demandasWithNotas.length);
+        console.log("Demandas without notas:", demandasWithoutNotas.length);
+
         // Transform data to match the expected Demand type
         return (data || []).map(item => {
           return {
             ...item,
+            // Ensure these fields are properly available for the UI
+            title: item.titulo || '', 
             area_coordenacao: {
               descricao: item.coordenacao?.descricao || ''
             },

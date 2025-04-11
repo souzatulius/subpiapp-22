@@ -66,7 +66,7 @@ const UnifiedFilterBar: React.FC<UnifiedFilterBarProps> = ({
             variant="outline" 
             size="sm" 
             onClick={onBack}
-            className="flex items-center gap-2"
+            className="flex items-center gap-2 rounded-xl"
           >
             <ArrowLeft className="h-4 w-4" />
             {!isMobile && "Voltar"}
@@ -142,9 +142,9 @@ const UnifiedFilterBar: React.FC<UnifiedFilterBarProps> = ({
                 <SelectTrigger className="rounded-xl">
                   <SelectValue placeholder={filterOptions.primaryFilter.placeholder || "Filtrar por"} />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="rounded-xl">
                   {filterOptions.primaryFilter.options.map((option) => (
-                    <SelectItem key={option.id} value={option.id}>
+                    <SelectItem key={option.id} value={option.id} className="rounded-lg">
                       {option.label}
                     </SelectItem>
                   ))}
@@ -162,9 +162,9 @@ const UnifiedFilterBar: React.FC<UnifiedFilterBarProps> = ({
                 <SelectTrigger className="rounded-xl">
                   <SelectValue placeholder={filterOptions.secondaryFilter.placeholder || "Filtrar por"} />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="rounded-xl">
                   {filterOptions.secondaryFilter.options.map((option) => (
-                    <SelectItem key={option.id} value={option.id}>
+                    <SelectItem key={option.id} value={option.id} className="rounded-lg">
                       {option.label}
                     </SelectItem>
                   ))}
@@ -176,6 +176,6 @@ const UnifiedFilterBar: React.FC<UnifiedFilterBarProps> = ({
       )}
     </div>
   );
-};
+}
 
 export default UnifiedFilterBar;
