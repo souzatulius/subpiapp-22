@@ -131,7 +131,55 @@ export type Database = {
         }
         Relationships: []
       }
+      backup_user_dashboard_april11: {
+        Row: {
+          cards_config: string | null
+          created_at: string | null
+          id: string | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          cards_config?: string | null
+          created_at?: string | null
+          id?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          cards_config?: string | null
+          created_at?: string | null
+          id?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       backup_user_dashboard_comunicacao: {
+        Row: {
+          cards_config: string | null
+          created_at: string | null
+          id: string | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          cards_config?: string | null
+          created_at?: string | null
+          id?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          cards_config?: string | null
+          created_at?: string | null
+          id?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      backup_user_dashboard_comunicacao_april11: {
         Row: {
           cards_config: string | null
           created_at: string | null

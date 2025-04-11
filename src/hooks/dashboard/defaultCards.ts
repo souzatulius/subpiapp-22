@@ -1,3 +1,4 @@
+
 import { v4 as uuidv4 } from 'uuid';
 import { ActionCardItem } from '@/types/dashboard';
 import React from 'react';
@@ -24,6 +25,8 @@ export const getIconComponentFromId = (iconId: string) => {
     'megaphone': () => import('lucide-react').then(mod => mod.Megaphone),
     'user': () => import('lucide-react').then(mod => mod.User),
     'newspaper': () => import('lucide-react').then(mod => mod.Newspaper),
+    'file-search': () => import('lucide-react').then(mod => mod.FileSearch),
+    'list': () => import('lucide-react').then(mod => mod.List),
   };
   
   const LoadedIcon = React.lazy(() => 
@@ -62,7 +65,7 @@ export const getDefaultCards = (): ActionCardItem[] => {
       mobileOrder: 1
     },
     {
-      id: uuidv4(),
+      id: 'comunicacao-area-card',
       title: 'Área da Comunicação',
       iconId: 'Bell',
       path: '/dashboard/comunicacao',
@@ -100,41 +103,28 @@ export const getDefaultCards = (): ActionCardItem[] => {
       mobileOrder: 4
     },
     {
-      id: 'comunicados-card',
-      title: 'Comunicados',
-      iconId: 'Megaphone',
-      path: '/dashboard/settings/comunicados',
-      color: 'bg-white',
-      width: '25',
-      height: '2',
-      type: 'communications',
-      isComunicados: true,
-      displayMobile: true,
-      mobileOrder: 5
-    },
-    {
-      id: uuidv4(),
+      id: 'aprovar-notas-card',
       title: 'Aprovar Notas de Imprensa',
       iconId: 'FileText',
-      path: 'comunicacao/criar-nota',
+      path: '/dashboard/comunicacao/criar-nota',
       color: 'orange-light',
       width: '25',
       height: '1',
       type: 'standard',
       displayMobile: true,
-      mobileOrder: 6
+      mobileOrder: 5
     },
     {
-      id: uuidv4(),
+      id: 'noticias-site-card',
       title: 'Notícias do Site',
       iconId: 'Newspaper',
-      path: 'comunicacao/releases',
+      path: '/dashboard/comunicacao/releases',
       color: 'blue-light',
       width: '25',
       height: '1',
       type: 'standard',
       displayMobile: true,
-      mobileOrder: 7
+      mobileOrder: 6
     },
     {
       id: 'perfil-usuario-card',
@@ -147,7 +137,7 @@ export const getDefaultCards = (): ActionCardItem[] => {
       type: 'user_profile',
       isUserProfile: true,
       displayMobile: true,
-      mobileOrder: 8
+      mobileOrder: 7
     },
     {
       id: 'ajustes-notificacao-card',
@@ -160,7 +150,7 @@ export const getDefaultCards = (): ActionCardItem[] => {
       type: 'notification_settings',
       isNotificationSettings: true,
       displayMobile: true,
-      mobileOrder: 9
+      mobileOrder: 8
     }
   ];
 };
@@ -184,7 +174,7 @@ export const getCommunicationActionCards = (): ActionCardItem[] => {
       mobileOrder: 1
     },
     {
-      id: uuidv4(),
+      id: 'cadastrar-demanda-card',
       title: 'Cadastrar Demanda',
       iconId: 'PlusCircle',
       path: '/dashboard/comunicacao/cadastrar',
@@ -196,7 +186,7 @@ export const getCommunicationActionCards = (): ActionCardItem[] => {
       mobileOrder: 2
     },
     {
-      id: uuidv4(),
+      id: 'responder-demanda-card',
       title: 'Responder Demanda',
       iconId: 'MessageSquare',
       path: '/dashboard/comunicacao/responder',
@@ -208,7 +198,7 @@ export const getCommunicationActionCards = (): ActionCardItem[] => {
       mobileOrder: 3
     },
     {
-      id: uuidv4(),
+      id: 'criar-nota-card',
       title: 'Criar Nota Oficial',
       iconId: 'FileText',
       path: '/dashboard/comunicacao/criar-nota',
@@ -220,7 +210,7 @@ export const getCommunicationActionCards = (): ActionCardItem[] => {
       mobileOrder: 4
     },
     {
-      id: uuidv4(),
+      id: 'aprovar-notas-card',
       title: 'Aprovar Notas',
       iconId: 'CheckCircle',
       path: '/dashboard/comunicacao/aprovar-nota',
@@ -243,8 +233,67 @@ export const getCommunicationActionCards = (): ActionCardItem[] => {
       type: 'origin_demand_chart',
       displayMobile: true,
       mobileOrder: 6
+    },
+    {
+      id: 'esic-card',
+      title: 'Processos e-SIC',
+      iconId: 'FileSearch',
+      path: '/dashboard/esic',
+      color: 'deep-blue',
+      width: '25',
+      height: '2',
+      type: 'standard',
+      displayMobile: true,
+      mobileOrder: 7
+    },
+    {
+      id: 'releases-card',
+      title: 'Releases e Notícias',
+      iconId: 'Newspaper',
+      path: '/dashboard/comunicacao/releases',
+      color: 'blue-light',
+      width: '25',
+      height: '2',
+      type: 'standard',
+      displayMobile: true,
+      mobileOrder: 8
+    },
+    {
+      id: 'ver-notas-card',
+      title: 'Ver Notas de Imprensa',
+      iconId: 'FileText',
+      path: '/dashboard/comunicacao/notas',
+      color: 'orange-dark',
+      width: '25',
+      height: '2',
+      type: 'standard',
+      displayMobile: true,
+      mobileOrder: 9
+    },
+    {
+      id: 'consultar-demandas-card',
+      title: 'Consultar Demandas',
+      iconId: 'List',
+      path: '/dashboard/comunicacao/demandas',
+      color: 'green-teal',
+      width: '25',
+      height: '2',
+      type: 'standard',
+      displayMobile: true,
+      mobileOrder: 10
+    },
+    {
+      id: 'press-request-card',
+      title: 'Nova Solicitação da Imprensa',
+      iconId: 'Newspaper',
+      path: '',
+      color: 'bg-white',
+      width: '25',
+      height: '2',
+      type: 'press_request_card',
+      displayMobile: true,
+      mobileOrder: 11
     }
-    // Add other communication-specific cards as needed
   ];
 };
 

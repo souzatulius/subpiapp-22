@@ -18,18 +18,6 @@ export const getCommunicationActionCards = (): ActionCardItem[] => {
       mobileOrder: 1
     },
     {
-      id: 'press-request-card',
-      title: 'Nova Solicitação da Imprensa',
-      iconId: 'Newspaper',
-      path: '',
-      color: 'bg-white',
-      width: '50',
-      height: '2',
-      type: 'press_request_card',
-      displayMobile: true,
-      mobileOrder: 2
-    },
-    {
       id: 'cadastrar-demanda-card',
       title: 'Cadastrar Demanda',
       iconId: 'PlusCircle',
@@ -39,7 +27,7 @@ export const getCommunicationActionCards = (): ActionCardItem[] => {
       height: '2',
       type: 'standard',
       displayMobile: true,
-      mobileOrder: 3
+      mobileOrder: 1
     },
     {
       id: 'responder-demanda-card',
@@ -51,7 +39,7 @@ export const getCommunicationActionCards = (): ActionCardItem[] => {
       height: '2',
       type: 'standard',
       displayMobile: true,
-      mobileOrder: 4
+      mobileOrder: 2
     },
     {
       id: 'criar-nota-card',
@@ -63,7 +51,7 @@ export const getCommunicationActionCards = (): ActionCardItem[] => {
       height: '2',
       type: 'standard',
       displayMobile: true,
-      mobileOrder: 5
+      mobileOrder: 3
     },
     {
       id: 'aprovar-notas-card',
@@ -75,7 +63,7 @@ export const getCommunicationActionCards = (): ActionCardItem[] => {
       height: '2',
       type: 'standard',
       displayMobile: true,
-      mobileOrder: 6
+      mobileOrder: 4
     },
     {
       id: 'origem-demandas-card',
@@ -88,7 +76,7 @@ export const getCommunicationActionCards = (): ActionCardItem[] => {
       height: '2',
       type: 'origin_demand_chart',
       displayMobile: true,
-      mobileOrder: 7
+      mobileOrder: 5
     },
     {
       id: 'esic-card',
@@ -100,7 +88,7 @@ export const getCommunicationActionCards = (): ActionCardItem[] => {
       height: '2',
       type: 'standard',
       displayMobile: true,
-      mobileOrder: 8
+      mobileOrder: 6
     },
     {
       id: 'releases-card',
@@ -112,19 +100,7 @@ export const getCommunicationActionCards = (): ActionCardItem[] => {
       height: '2',
       type: 'standard',
       displayMobile: true,
-      mobileOrder: 9
-    },
-    {
-      id: 'consultar-demandas-card',
-      title: 'Consultar Demandas',
-      iconId: 'List',
-      path: '/dashboard/comunicacao/demandas',
-      color: 'green-teal',
-      width: '25',
-      height: '2',
-      type: 'standard',
-      displayMobile: true,
-      mobileOrder: 10
+      mobileOrder: 7
     },
     {
       id: 'ver-notas-card',
@@ -136,7 +112,31 @@ export const getCommunicationActionCards = (): ActionCardItem[] => {
       height: '2',
       type: 'standard',
       displayMobile: true,
-      mobileOrder: 11
+      mobileOrder: 8
+    },
+    {
+      id: 'consultar-demandas-card',
+      title: 'Consultar Demandas',
+      iconId: 'List',
+      path: '/dashboard/comunicacao/demandas',
+      color: 'green-teal',
+      width: '25',
+      height: '2',
+      type: 'standard',
+      displayMobile: true,
+      mobileOrder: 9
+    },
+    {
+      id: 'press-request-card',
+      title: 'Nova Solicitação da Imprensa',
+      iconId: 'Newspaper',
+      path: '',
+      color: 'bg-white',
+      width: '25',
+      height: '2',
+      type: 'press_request_card',
+      displayMobile: true,
+      mobileOrder: 10
     }
   ];
 };
