@@ -1,1 +1,5 @@
+
 project_id = "mapjrbfzurpjmianfnev"
+
+[functions.generate-with-gpt]
+verify_jwt = true

@@ -57,7 +57,7 @@ export const useReleaseForm = () => {
       // Show confirmation dialog to create news
       setShowConfirmDialog(true);
       
-    } catch (error) {
+    } catch (error: any) {
       console.error('Erro ao salvar release:', error);
       toast({
         title: "Erro ao salvar",
@@ -82,23 +82,36 @@ export const useReleaseForm = () => {
     setIsGenerating(true);
     
     try {
-      // Call OpenAI through Supabase Edge Function
-      const { data, error } = await supabase.functions.invoke('generate-news', {
-        body: { releaseContent }
+      // Call the new unified edge function
+      const { data, error } = await supabase.functions.invoke('generate-with-gpt', {
+        body: { 
+          tipo: 'release',
+          dados: { releaseTexto: releaseContent }
+        }
       });
       
       if (error) throw error;
       
-      if (data?.data) {
-        setGeneratedContent(data.data);
-        setEditedTitle(data.data.titulo || '');
-        setEditedContent(data.data.conteudo || '');
+      if (data?.resultado) {
+        // Extract title and content from the generated text
+        const lines = data.resultado.split('\n');
+        const title = lines[0].trim();
+        const content = lines.slice(1).join('\n').trim();
+        
+        const generatedData = {
+          titulo: title,
+          conteudo: content
+        };
+        
+        setGeneratedContent(generatedData);
+        setEditedTitle(generatedData.titulo);
+        setEditedContent(generatedData.conteudo);
         setShowGeneratedContent(true);
       } else {
         throw new Error('Resposta inválida do servidor');
       }
       
-    } catch (error) {
+    } catch (error: any) {
       console.error('Erro ao gerar notícia:', error);
       toast({
         title: "Erro na geração",
@@ -153,7 +166,7 @@ export const useReleaseForm = () => {
         
         // Redirect to releases list
         navigate('/dashboard/comunicacao/releases');
-      } catch (error) {
+      } catch (error: any) {
         console.error('Erro ao criar notícia:', error);
         toast({
           title: "Erro ao criar notícia",
