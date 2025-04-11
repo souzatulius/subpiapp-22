@@ -1,54 +1,75 @@
 
-import {
-  Chart as ChartJS,
+import { 
+  Chart as ChartJS, 
   CategoryScale,
   LinearScale,
+  BarElement,
   PointElement,
   LineElement,
-  BarElement,
   ArcElement,
-  RadialLinearScale,
   Title,
   Tooltip,
-  Filler,
-  Legend
+  Legend,
+  RadialLinearScale,
+  Filler
 } from 'chart.js';
-import { chartColors, lineChartColors, barChartColors, pieChartColors } from '../utils/chartColors';
 
 // Register Chart.js components
 ChartJS.register(
   CategoryScale,
   LinearScale,
+  BarElement,
   PointElement,
   LineElement,
-  BarElement,
   ArcElement,
-  RadialLinearScale,
   Title,
   Tooltip,
-  Filler,
-  Legend
+  Legend,
+  RadialLinearScale,
+  Filler
 );
 
-// Set up chart defaults
-ChartJS.defaults.color = chartColors.darkBlue;
-ChartJS.defaults.font.family = "'Inter', sans-serif";
+// Configure Chart.js defaults
+ChartJS.defaults.font.family = "'Inter', 'Helvetica', 'Arial', sans-serif";
 
-// Configure chart element defaults
-ChartJS.defaults.elements.bar.backgroundColor = chartColors.blue;
-ChartJS.defaults.elements.line.borderColor = chartColors.blue;
-ChartJS.defaults.elements.point.backgroundColor = chartColors.blue;
-ChartJS.defaults.elements.line.borderWidth = 2;
-ChartJS.defaults.elements.point.radius = 3;
-ChartJS.defaults.elements.point.hoverRadius = 5;
+// Configure scales to use integer ticks for Y-axis
+ChartJS.defaults.scale.y = {
+  ...ChartJS.defaults.scale.y,
+  ticks: {
+    precision: 0,
+    callback: function(value) {
+      if (Math.floor(value) === value) {
+        return value;
+      }
+      return null;
+    }
+  }
+};
 
-// Export everything
-export { chartColors, barChartColors, pieChartColors, lineChartColors };
+// Configure tooltips
+ChartJS.defaults.plugins.tooltip = {
+  ...ChartJS.defaults.plugins.tooltip,
+  backgroundColor: 'rgba(255, 255, 255, 0.95)',
+  titleColor: '#1e293b',
+  bodyColor: '#334155',
+  borderColor: '#e2e8f0',
+  borderWidth: 1,
+  padding: 10,
+  cornerRadius: 8,
+  displayColors: true,
+  boxWidth: 8,
+  boxHeight: 8,
+  boxPadding: 4,
+  usePointStyle: true
+};
 
-// Ensure there's a NoDataMessage component for handling no data state
-export const NoDataMessage = () => (
-  <div className="flex flex-col items-center justify-center h-64 bg-gray-50 rounded-lg border border-gray-200">
-    <p className="text-lg text-gray-500 font-medium">Sem dados disponíveis</p>
-    <p className="text-sm text-gray-400 mt-2">Faça o upload de uma planilha SGZ para visualizar as análises</p>
-  </div>
-);
+// Configure legends
+ChartJS.defaults.plugins.legend.labels = {
+  ...ChartJS.defaults.plugins.legend.labels,
+  usePointStyle: true,
+  boxWidth: 8,
+  boxHeight: 8,
+  padding: 15
+};
+
+export default ChartJS;

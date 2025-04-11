@@ -1,8 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Upload, ListStart, CalendarDays } from 'lucide-react';
-import { toast } from 'sonner';
+import { Upload } from 'lucide-react';
 import { handleFileUpload, handlePainelZeladoriaUpload } from '@/hooks/ranking/services/uploadService';
 import { useAnimatedFeedback } from '@/hooks/use-animated-feedback';
 import { UploadProgressStats, UploadStats } from './types';
@@ -187,9 +186,8 @@ const UploadSection = ({
         
         setIsSgzUploading(false);
         showFeedback('error', `Erro no upload: ${result?.message || 'Erro desconhecido'}`);
-        toast.error(`Erro no upload: ${result?.message || 'Erro desconhecido'}`);
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error uploading SGZ file:', err);
       
       setUploadStats(prev => ({
@@ -203,14 +201,13 @@ const UploadSection = ({
       
       setIsSgzUploading(false);
       showFeedback('error', 'Erro ao processar arquivo SGZ');
-      toast.error('Erro ao processar arquivo SGZ');
     } finally {
       // Reset the file input
       event.target.value = '';
     }
   };
 
-  // Handle Painel file upload with similar improvements
+  // Handle Painel file upload
   const handlePainelFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
@@ -304,9 +301,8 @@ const UploadSection = ({
         
         setIsPainelUploading(false);
         showFeedback('error', `Erro no upload: ${result?.message || 'Erro desconhecido'}`);
-        toast.error(`Erro no upload: ${result?.message || 'Erro desconhecido'}`);
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error uploading Painel file:', err);
       
       setUploadStats(prev => ({
@@ -320,7 +316,6 @@ const UploadSection = ({
       
       setIsPainelUploading(false);
       showFeedback('error', 'Erro ao processar arquivo do Painel');
-      toast.error('Erro ao processar arquivo do Painel');
     } finally {
       // Reset the file input
       event.target.value = '';
@@ -351,11 +346,7 @@ const UploadSection = ({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* SGZ Upload */}
         <div className="flex flex-col items-center p-4 border border-gray-200 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors">
-          <ListStart className="h-8 w-8 text-blue-600 mb-2" />
-          <h3 className="text-sm font-medium text-gray-700 mb-1">Planilha SGZ</h3>
-          <p className="text-xs text-gray-500 mb-3 text-center">
-            Upload do arquivo Excel exportado do SGZ
-          </p>
+          <h3 className="text-sm font-medium text-gray-700 mb-3">Planilha SGZ</h3>
           <input
             type="file"
             id="sgzFile"
@@ -382,11 +373,7 @@ const UploadSection = ({
 
         {/* Painel Upload */}
         <div className="flex flex-col items-center p-4 border border-gray-200 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors">
-          <CalendarDays className="h-8 w-8 text-blue-600 mb-2" />
-          <h3 className="text-sm font-medium text-gray-700 mb-1">Painel da Zeladoria</h3>
-          <p className="text-xs text-gray-500 mb-3 text-center">
-            Upload do arquivo Excel do Painel da Zeladoria
-          </p>
+          <h3 className="text-sm font-medium text-gray-700 mb-3">Painel da Zeladoria</h3>
           <input
             type="file"
             id="painelFile"

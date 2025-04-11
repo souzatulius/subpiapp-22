@@ -3,12 +3,13 @@ import React, { useState } from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Eye, EyeOff, Search, GripVertical } from 'lucide-react';
+import { EyeOff, Search, GripVertical } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 
 interface SortableGraphCardProps {
   id: string;
   title: string;
-  value?: string | number; // Added value for the number field
+  value?: string | number;
   description?: string;
   isVisible: boolean;
   showAnalysis: boolean;
@@ -18,13 +19,14 @@ interface SortableGraphCardProps {
   onToggleAnalysis?: () => void;
   onExport?: () => void;
   hideMenuIcon?: boolean;
+  dataSource?: 'SGZ' | 'Painel da Zeladoria' | string;
   children: React.ReactNode;
 }
 
 const SortableGraphCard: React.FC<SortableGraphCardProps> = ({
   id,
   title,
-  value, // Added value for the number field
+  value,
   description,
   isVisible,
   showAnalysis,
@@ -34,6 +36,7 @@ const SortableGraphCard: React.FC<SortableGraphCardProps> = ({
   onToggleAnalysis,
   onExport,
   hideMenuIcon = false,
+  dataSource,
   children
 }) => {
   const [isHovering, setIsHovering] = useState(false);
@@ -58,6 +61,20 @@ const SortableGraphCard: React.FC<SortableGraphCardProps> = ({
     return stringVal.replace('.', ',');
   };
   
+  // Generate badge color based on data source
+  const getBadgeColor = (source?: string) => {
+    if (!source) return 'bg-gray-200 text-gray-700';
+    
+    switch(source?.toLowerCase()) {
+      case 'sgz':
+        return 'bg-blue-100 text-blue-700 border-blue-300';
+      case 'painel da zeladoria':
+        return 'bg-orange-100 text-orange-700 border-orange-300';
+      default:
+        return 'bg-gray-100 text-gray-700 border-gray-300';
+    }
+  };
+  
   return (
     <Card 
       ref={setNodeRef} 
@@ -77,16 +94,12 @@ const SortableGraphCard: React.FC<SortableGraphCardProps> = ({
         </div>
       )}
       
-      {/* Hover controls - only visible on hover */}
-      <div 
-        className={`absolute top-3 right-3 flex space-x-2 transition-opacity duration-200 ${
-          isHovering ? 'opacity-100' : 'opacity-0'
-        }`}
-      >
+      {/* Control buttons */}
+      <div className="absolute top-3 right-3 flex space-x-2">
         {onToggleAnalysis && (
           <button
             onClick={onToggleAnalysis}
-            className="p-1.5 rounded-full hover:bg-gray-100 text-gray-600 transition-colors"
+            className="p-1.5 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600 transition-colors"
             title={showAnalysis ? "Mostrar gráfico" : "Mostrar análise"}
           >
             <Search size={16} />
@@ -96,7 +109,7 @@ const SortableGraphCard: React.FC<SortableGraphCardProps> = ({
         {onToggleVisibility && (
           <button
             onClick={onToggleVisibility}
-            className="p-1.5 rounded-full hover:bg-gray-100 text-gray-600 transition-colors"
+            className="p-1.5 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600 transition-colors"
             title="Ocultar card"
           >
             <EyeOff size={16} />
@@ -105,7 +118,19 @@ const SortableGraphCard: React.FC<SortableGraphCardProps> = ({
       </div>
       
       <CardHeader className="pb-1 pt-3 px-4">
-        <CardTitle className="text-lg font-medium">{title}</CardTitle>
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-lg font-medium">{title}</CardTitle>
+          
+          {dataSource && (
+            <Badge 
+              variant="outline" 
+              className={`text-xs py-0 px-1.5 ml-2 ${getBadgeColor(dataSource)}`}
+            >
+              {dataSource}
+            </Badge>
+          )}
+        </div>
+        
         {value !== undefined && (
           <p className="text-2xl font-bold text-blue-700">{formatDisplayValue(value)}</p>
         )}

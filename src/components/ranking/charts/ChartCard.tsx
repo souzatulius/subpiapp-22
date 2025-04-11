@@ -2,7 +2,8 @@
 import React, { ReactNode, useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Eye, EyeOff, Search } from 'lucide-react';
+import { EyeOff, Search } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 import InsufficientDataMessage from './InsufficientDataMessage';
 
 interface ChartCardProps {
@@ -19,6 +20,7 @@ interface ChartCardProps {
   analysis?: string;
   showAnalysis?: boolean;
   hasData?: boolean;
+  dataSource?: 'SGZ' | 'Painel da Zeladoria' | string;
 }
 
 const ChartCard: React.FC<ChartCardProps> = ({ 
@@ -34,7 +36,8 @@ const ChartCard: React.FC<ChartCardProps> = ({
   trendIndicator,
   analysis,
   showAnalysis = false,
-  hasData = true
+  hasData = true,
+  dataSource
 }) => {
   const [isHovering, setIsHovering] = useState(false);
 
@@ -42,6 +45,20 @@ const ChartCard: React.FC<ChartCardProps> = ({
   const formatDisplayValue = (val: string | number): string => {
     const stringVal = val.toString();
     return stringVal.replace('.', ',');
+  };
+
+  // Generate badge color based on data source
+  const getBadgeColor = (source?: string) => {
+    if (!source) return 'bg-gray-200 text-gray-700';
+    
+    switch(source?.toLowerCase()) {
+      case 'sgz':
+        return 'bg-blue-100 text-blue-700 border-blue-300';
+      case 'painel da zeladoria':
+        return 'bg-orange-100 text-orange-700 border-orange-300';
+      default:
+        return 'bg-gray-100 text-gray-700 border-gray-300';
+    }
   };
 
   return (
@@ -52,11 +69,24 @@ const ChartCard: React.FC<ChartCardProps> = ({
     >
       <CardContent className="p-0">
         <div className="p-4 border-b border-blue-100 bg-gradient-to-r from-blue-50 to-white flex justify-between items-center">
-          <div>
-            <h3 className="text-sm sm:text-base font-medium text-gray-800">{title}</h3>
+          <div className="flex-1">
+            <div className="flex items-center justify-between mb-1">
+              <h3 className="text-sm sm:text-base font-medium text-gray-800">{title}</h3>
+              
+              {dataSource && (
+                <Badge 
+                  variant="outline" 
+                  className={`text-xs py-0 px-1.5 ml-2 ${getBadgeColor(dataSource)}`}
+                >
+                  {dataSource}
+                </Badge>
+              )}
+            </div>
+            
             {subtitle && (
               <p className="text-xs text-gray-500 mt-0.5">{subtitle}</p>
             )}
+            
             {isLoading ? (
               <Skeleton className="h-6 w-28 mt-1 bg-blue-100" />
             ) : (
@@ -69,27 +99,28 @@ const ChartCard: React.FC<ChartCardProps> = ({
             )}
           </div>
           
-          {/* Action buttons that appear on hover */}
-          <div className={`flex space-x-2 transition-opacity duration-200 ${isHovering ? 'opacity-100' : 'opacity-0'}`}>
+          {/* Action buttons moved to header */}
+          <div className="flex space-x-2 ml-2">
             {onToggleAnalysis && (
               <button 
                 onClick={(e) => {
                   e.stopPropagation();
                   onToggleAnalysis();
                 }}
-                className="p-1.5 rounded-full bg-blue-50 hover:bg-blue-100 text-blue-600 transition-colors"
+                className="p-1.5 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600 transition-colors"
                 title="Mostrar análise"
               >
                 <Search size={16} />
               </button>
             )}
+            
             {onToggleVisibility && (
               <button 
                 onClick={(e) => {
                   e.stopPropagation();
                   onToggleVisibility();
                 }}
-                className="p-1.5 rounded-full bg-blue-50 hover:bg-blue-100 text-blue-600 transition-colors"
+                className="p-1.5 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600 transition-colors"
                 title="Ocultar card"
               >
                 <EyeOff size={16} />

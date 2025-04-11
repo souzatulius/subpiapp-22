@@ -4,6 +4,7 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/componen
 import { useDraggable } from '@dnd-kit/core';
 import { ChevronDown, ChevronUp, Eye, EyeOff, BarChart2, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { ChartItem } from '../types';
 
 interface ChartCardProps {
@@ -15,6 +16,7 @@ interface ChartCardProps {
   onToggleAnalysis: () => void;
   onToggleView: () => void;
   disableContainer?: boolean;
+  dataSource?: 'SGZ' | 'Painel da Zeladoria' | string;
 }
 
 const ChartCard: React.FC<ChartCardProps> = ({
@@ -25,7 +27,8 @@ const ChartCard: React.FC<ChartCardProps> = ({
   onToggleVisibility,
   onToggleAnalysis,
   onToggleView,
-  disableContainer = false
+  disableContainer = false,
+  dataSource
 }) => {
   const { attributes, listeners, setNodeRef, transform } = useDraggable({
     id: chart.id,
@@ -34,6 +37,20 @@ const ChartCard: React.FC<ChartCardProps> = ({
   
   const CardComponent = disableContainer ? React.Fragment : Card;
   const cardProps = disableContainer ? {} : { className: "overflow-hidden" };
+  
+  // Generate badge color based on data source
+  const getBadgeColor = (source?: string) => {
+    if (!source) return 'bg-gray-200 text-gray-700';
+    
+    switch(source?.toLowerCase()) {
+      case 'sgz':
+        return 'bg-blue-100 text-blue-700 border-blue-300';
+      case 'painel da zeladoria':
+        return 'bg-orange-100 text-orange-700 border-orange-300';
+      default:
+        return 'bg-gray-100 text-gray-700 border-gray-300';
+    }
+  };
   
   return (
     <div
@@ -50,12 +67,24 @@ const ChartCard: React.FC<ChartCardProps> = ({
           className={`${disableContainer ? 'px-0 pt-0' : ''} cursor-grab`}
         >
           <div className="flex justify-between items-center">
-            <CardTitle className="text-lg">{chart.title}</CardTitle>
-            <div className="flex space-x-1">
+            <div className="flex items-center justify-between flex-1">
+              <CardTitle className="text-lg">{chart.title}</CardTitle>
+              
+              {dataSource && (
+                <Badge 
+                  variant="outline" 
+                  className={`text-xs py-0 px-1.5 ml-2 ${getBadgeColor(dataSource)}`}
+                >
+                  {dataSource}
+                </Badge>
+              )}
+            </div>
+            
+            <div className="flex space-x-1 ml-2">
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-8 w-8"
+                className="h-8 w-8 bg-gray-100 hover:bg-gray-200 text-gray-600"
                 onClick={onToggleView}
                 title={showAnalysisOnly ? "Mostrar gráfico" : "Mostrar análise"}
               >
@@ -70,7 +99,7 @@ const ChartCard: React.FC<ChartCardProps> = ({
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-8 w-8"
+                  className="h-8 w-8 bg-gray-100 hover:bg-gray-200 text-gray-600"
                   onClick={onToggleAnalysis}
                   title={isAnalysisExpanded ? "Esconder análise" : "Mostrar análise"}
                 >
@@ -85,7 +114,7 @@ const ChartCard: React.FC<ChartCardProps> = ({
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-8 w-8"
+                className="h-8 w-8 bg-gray-100 hover:bg-gray-200 text-gray-600"
                 onClick={onToggleVisibility}
                 title="Esconder gráfico"
               >
