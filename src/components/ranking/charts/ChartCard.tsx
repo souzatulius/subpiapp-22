@@ -1,10 +1,10 @@
 
 import React, { ReactNode, useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
-import { Skeleton } from '@/components/ui/skeleton';
 import { EyeOff, Search } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import InsufficientDataMessage from './InsufficientDataMessage';
+import ChartLoadingOverlay, { LoadingState } from './ChartLoadingOverlay';
 
 interface ChartCardProps {
   title: string;
@@ -21,6 +21,9 @@ interface ChartCardProps {
   showAnalysis?: boolean;
   hasData?: boolean;
   dataSource?: 'SGZ' | 'Painel da Zeladoria' | string;
+  loadingState?: LoadingState;
+  loadingMessage?: string;
+  errorMessage?: string;
 }
 
 const ChartCard: React.FC<ChartCardProps> = ({ 
@@ -37,7 +40,10 @@ const ChartCard: React.FC<ChartCardProps> = ({
   analysis,
   showAnalysis = false,
   hasData = true,
-  dataSource
+  dataSource,
+  loadingState = 'idle',
+  loadingMessage,
+  errorMessage
 }) => {
   const [isHovering, setIsHovering] = useState(false);
 
@@ -60,6 +66,11 @@ const ChartCard: React.FC<ChartCardProps> = ({
         return 'bg-gray-100 text-gray-700 border-gray-300';
     }
   };
+
+  // Determine the actual loading state
+  const actualLoadingState: LoadingState = loadingState !== 'idle' 
+    ? loadingState 
+    : isLoading ? 'loading' : !hasData ? 'empty' : 'idle';
 
   return (
     <Card 
@@ -88,7 +99,9 @@ const ChartCard: React.FC<ChartCardProps> = ({
             )}
             
             {isLoading ? (
-              <Skeleton className="h-6 w-28 mt-1 bg-blue-100" />
+              <div className="h-6 flex items-center animate-pulse">
+                <div className="h-5 w-28 bg-blue-100 rounded"></div>
+              </div>
             ) : (
               <div className="flex items-center gap-2">
                 <p className="text-lg sm:text-xl font-semibold text-blue-700">
@@ -128,20 +141,21 @@ const ChartCard: React.FC<ChartCardProps> = ({
             )}
           </div>
         </div>
-        <div className="p-4 h-[250px] flex items-center justify-center">
-          {isLoading ? (
-            <div className="flex flex-col items-center">
-              <Skeleton className="h-[200px] w-full rounded-md bg-blue-50" />
-              <div className="mt-2 text-blue-400 text-sm animate-pulse">
-                Carregando dados...
-              </div>
-            </div>
-          ) : showAnalysis && analysis ? (
+        <div className="p-4 h-[250px] flex items-center justify-center relative">
+          {actualLoadingState !== 'idle' && (
+            <ChartLoadingOverlay 
+              state={actualLoadingState}
+              message={loadingMessage}
+              errorMessage={errorMessage}
+              className="rounded-md"
+            />
+          )}
+          {showAnalysis && analysis ? (
             <div className="w-full h-full overflow-auto bg-gray-50 rounded-lg p-4">
               <h4 className="font-medium text-blue-700 mb-2">Análise de dados</h4>
               <p className="text-sm text-gray-700">{analysis}</p>
             </div>
-          ) : !hasData ? (
+          ) : !hasData && actualLoadingState === 'idle' ? (
             <InsufficientDataMessage />
           ) : (
             <div className="w-full h-full overflow-hidden flex items-center justify-center">

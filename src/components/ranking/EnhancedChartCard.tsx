@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Loader2 } from 'lucide-react';
 import { setLoading } from './charts/ChartRegistration';
+import ChartLoadingOverlay, { LoadingState } from './charts/ChartLoadingOverlay';
 
 interface EnhancedChartCardProps {
   title: string;
@@ -9,6 +10,9 @@ interface EnhancedChartCardProps {
   isLoading?: boolean;
   className?: string;
   chartRef?: React.RefObject<any>;
+  loadingState?: LoadingState;
+  loadingMessage?: string;
+  errorMessage?: string;
 }
 
 const EnhancedChartCard: React.FC<EnhancedChartCardProps> = ({ 
@@ -16,7 +20,10 @@ const EnhancedChartCard: React.FC<EnhancedChartCardProps> = ({
   children, 
   isLoading = false,
   className = '',
-  chartRef
+  chartRef,
+  loadingState = 'idle',
+  loadingMessage,
+  errorMessage
 }) => {
   const [showLoading, setShowLoading] = useState<boolean>(isLoading);
   
@@ -30,6 +37,11 @@ const EnhancedChartCard: React.FC<EnhancedChartCardProps> = ({
     
   }, [isLoading, chartRef]);
 
+  // Determine the loading state
+  const actualLoadingState: LoadingState = loadingState !== 'idle' 
+    ? loadingState 
+    : showLoading ? 'loading' : 'idle';
+
   return (
     <div className={`bg-white p-4 rounded-xl shadow-sm border border-gray-100 relative ${className}`}>
       <div className="flex items-center justify-between mb-3">
@@ -41,7 +53,16 @@ const EnhancedChartCard: React.FC<EnhancedChartCardProps> = ({
           </div>
         )}
       </div>
-      {children}
+      <div className="relative">
+        {actualLoadingState !== 'idle' && (
+          <ChartLoadingOverlay 
+            state={actualLoadingState} 
+            message={loadingMessage}
+            errorMessage={errorMessage}
+          />
+        )}
+        {children}
+      </div>
     </div>
   );
 };
