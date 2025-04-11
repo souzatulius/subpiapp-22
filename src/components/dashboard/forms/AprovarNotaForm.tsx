@@ -1,18 +1,21 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import NotaDetail from './components/NotaDetail';
 import NotaEditForm from './components/NotaEditForm';
-import NotasListView from './components/NotasListView';
 import { NotaOficial } from '@/types/nota';
 import { useApprovalForm } from '@/hooks/consultar-notas/useApprovalForm';
 import { useAuth } from '@/hooks/useSupabaseAuth';
+import UnifiedViewContainer from '@/components/shared/unified-view/UnifiedViewContainer';
+import NotaCard from './components/NotaCard';
 
 interface AprovarNotaFormProps {}
 
 const AprovarNotaForm: React.FC<AprovarNotaFormProps> = () => {
   const { session, user } = useAuth();
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState('pendente');
 
   const { data: notas, isLoading, refetch } = useQuery({
     queryKey: ['notas-pendentes'],
@@ -71,6 +74,28 @@ const AprovarNotaForm: React.FC<AprovarNotaFormProps> = () => {
     setEditedText
   } = useApprovalForm(refetch);
 
+  // Filter notas based on search term
+  const filteredNotas = React.useMemo(() => {
+    if (!notas) return [];
+    
+    return notas.filter(nota => {
+      const searchLower = searchTerm.toLowerCase();
+      return (
+        nota.titulo.toLowerCase().includes(searchLower) ||
+        (nota.autor?.nome_completo?.toLowerCase() || '').includes(searchLower) ||
+        (nota.problema?.coordenacao?.descricao?.toLowerCase() || '').includes(searchLower) ||
+        (nota.texto?.toLowerCase() || '').includes(searchLower)
+      );
+    });
+  }, [notas, searchTerm]);
+
+  const statusOptions = [
+    { id: 'pendente', label: 'Pendentes' },
+    { id: 'aprovada', label: 'Aprovadas' },
+    { id: 'rejeitada', label: 'Rejeitadas' },
+    { id: 'todos', label: 'Todas' }
+  ];
+
   if (!session || !user) {
     return (
       <div className="p-6 text-center">
@@ -108,14 +133,42 @@ const AprovarNotaForm: React.FC<AprovarNotaFormProps> = () => {
     );
   }
 
-  // Render list view UI
+  // Render unified list/grid view UI
   return (
-    <NotasListView 
-      notas={notas || []} 
+    <UnifiedViewContainer
+      items={filteredNotas || []}
       isLoading={isLoading}
-      onSelectNota={handleSelectNota}
-      selectedNota={selectedNota}
-      hideHeaderButton={true}
+      renderListItem={(nota) => (
+        <NotaCard
+          nota={nota}
+          isSelected={false}
+          onClick={() => {}}
+        />
+      )}
+      renderGridItem={(nota) => (
+        <NotaCard
+          nota={nota}
+          isSelected={false}
+          onClick={() => {}}
+        />
+      )}
+      idExtractor={(nota) => nota.id}
+      searchTerm={searchTerm}
+      setSearchTerm={setSearchTerm}
+      onItemClick={handleSelectNota}
+      selectedItemId={selectedNota?.id}
+      filterOptions={{
+        primaryFilter: {
+          value: statusFilter,
+          onChange: setStatusFilter,
+          options: statusOptions,
+          placeholder: 'Status'
+        }
+      }}
+      emptyStateMessage="Nenhuma nota pendente de aprovação no momento."
+      searchPlaceholder="Buscar notas..."
+      defaultViewMode="list"
+      gridColumns={{ sm: 1, md: 2, lg: 3 }}
     />
   );
 };
