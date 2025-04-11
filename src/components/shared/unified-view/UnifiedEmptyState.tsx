@@ -1,33 +1,28 @@
 
 import React from 'react';
-import { SearchX } from 'lucide-react';
+import { Search, FileX, AlertCircle } from 'lucide-react';
 
 interface UnifiedEmptyStateProps {
-  message?: string;
-  description?: string;
+  message: string;
   icon?: React.ReactNode;
-  action?: React.ReactNode;
-  className?: string;
+  description?: string;
 }
 
 const UnifiedEmptyState: React.FC<UnifiedEmptyStateProps> = ({
-  message = "Nenhum resultado encontrado",
-  description,
+  message,
   icon,
-  action,
-  className = ""
+  description
 }) => {
+  const defaultIcon = icon || <Search className="h-12 w-12 text-gray-300" />;
+  
   return (
-    <div className={`flex flex-col items-center justify-center text-center p-8 ${className}`}>
-      <div className="bg-gray-100 p-4 rounded-full mb-4">
-        {icon || <SearchX className="h-8 w-8 text-gray-500" />}
+    <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
+      <div className="mb-4">
+        {defaultIcon}
       </div>
-      <h3 className="text-lg font-medium text-gray-800 mb-1">{message}</h3>
+      <h3 className="text-lg font-medium text-gray-700 mb-1">{message}</h3>
       {description && (
-        <p className="text-sm text-gray-500 max-w-md mb-4">{description}</p>
-      )}
-      {action && (
-        <div className="mt-4">{action}</div>
+        <p className="text-sm text-gray-500 max-w-md">{description}</p>
       )}
     </div>
   );

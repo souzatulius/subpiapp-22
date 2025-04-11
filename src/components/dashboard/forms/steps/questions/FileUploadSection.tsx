@@ -45,14 +45,25 @@ const FileUploadSection: React.FC<FileUploadSectionProps> = ({ anexos, onAnexosC
       return fileUrl; // It's already a blob URL
     }
     
+    // Handle Supabase Storage URLs
+    if (fileUrl.includes('storage.googleapis.com') || fileUrl.includes('supabase.co/storage/v1')) {
+      // Make sure URL is properly encoded for Supabase storage
+      try {
+        return fileUrl; // Return the Supabase URL as is
+      } catch (e) {
+        console.error('Error with Supabase URL:', e);
+        return fileUrl; // Return original even if there's an error
+      }
+    }
+    
     try {
       // Test if it's a valid URL
       new URL(fileUrl);
       return fileUrl;
     } catch (e) {
       // If it's not a valid URL, it might be a relative path
-      // We'll return it as is
-      return fileUrl;
+      // Add a base URL if needed
+      return fileUrl.startsWith('/') ? fileUrl : `/${fileUrl}`;
     }
   };
 
@@ -103,12 +114,22 @@ const FileUploadSection: React.FC<FileUploadSectionProps> = ({ anexos, onAnexosC
                   alt="preview" 
                   className="h-full w-full object-cover"
                   onError={(e) => {
+                    // Handle image loading error
                     e.currentTarget.onerror = null; 
-                    e.currentTarget.src = ''; 
-                    e.currentTarget.parentElement?.classList.add('bg-gray-200');
-                    e.currentTarget.parentElement?.appendChild(
-                      document.createElementNS('http://www.w3.org/2000/svg', 'svg')
-                    );
+                    e.currentTarget.style.display = 'none';
+                    
+                    // Add a fallback icon if the image fails to load
+                    const parent = e.currentTarget.parentElement;
+                    if (parent) {
+                      parent.classList.add('bg-gray-200');
+                      const fallbackIcon = document.createElement('div');
+                      fallbackIcon.innerHTML = `
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                      `;
+                      parent.appendChild(fallbackIcon);
+                    }
                   }}
                 />
               </div>
