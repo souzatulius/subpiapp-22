@@ -1,14 +1,6 @@
 
 import { useState } from 'react';
-
-export interface ChartItem {
-  id: string;
-  title: string;
-  description: string;
-  type: string;
-  isVisible: boolean;
-  order: number;
-}
+import { ChartItem } from '../../types/ranking';
 
 export const useChartItems = () => {
   const [chartItems, setChartItems] = useState<ChartItem[]>([
