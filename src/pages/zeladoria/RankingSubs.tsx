@@ -55,6 +55,13 @@ const RankingSubs = () => {
   };
   
   const [isUploading, setIsUploading] = useState(false);
+
+  // Create a dummy refresh function for now
+  const handleRefreshData = async () => {
+    console.log('Refreshing data...');
+    // This would typically call an API or update data
+    return Promise.resolve();
+  };
   
   return (
     <motion.div 
@@ -79,6 +86,7 @@ const RankingSubs = () => {
           onPainelUploadComplete={handlePainelUploadComplete}
           isUploading={isUploading}
           user={{}} // Pass user info here when authentication is implemented
+          onRefreshData={handleRefreshData} // Added missing prop
         />
       </div>
       

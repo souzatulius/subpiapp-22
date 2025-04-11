@@ -103,8 +103,9 @@ const ConsultarDemandasTable = () => {
     };
   });
 
-  const handleViewDemand = (demand: Demand) => {
-    navigate(`/dashboard/comunicacao/responder?id=${demand.id}`);
+  // Updated handleViewDemand to match expected function signature (string instead of Demand)
+  const handleViewDemand = (id: string) => {
+    navigate(`/dashboard/comunicacao/responder?id=${id}`);
   };
 
   return (

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useCallback } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -15,7 +16,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { toast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { useRouter } from 'next/navigation';
+import { useNavigate } from 'react-router-dom'; // Changed from next/navigation to react-router-dom
 import DemandasTable from './DemandasTable';
 import AttentionBox from '@/components/ui/attention-box';
 import { Loader2 } from 'lucide-react';
@@ -31,7 +32,7 @@ const ConsultarDemandasContent = () => {
   const [pageSize, setPageSize] = useState(10);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [demandToDelete, setDemandToDelete] = useState<{ id: string; title: string; hasNotes: boolean } | null>(null);
-  const router = useRouter();
+  const navigate = useNavigate();
   const [isAdmin, setIsAdmin] = useState(false);
   const [origens, setOrigens] = useState<any[]>([]);
 
@@ -112,20 +113,16 @@ const ConsultarDemandasContent = () => {
     const checkAdmin = async () => {
       const { data, error } = await supabase.auth.getSession();
       if (data?.session?.user) {
-        const { data: profileData, error: profileError } = await supabase
-          .from('profiles')
+        const { data: profileData } = await supabase
+          .from('usuarios')  // Changed from profiles to usuarios
           .select('is_admin')
           .eq('id', data.session.user.id)
           .single();
 
-        if (profileError) {
-          console.error('Erro ao buscar perfil:', profileError);
-        } else {
-          setIsAdmin(profileData?.is_admin || false);
-        }
+        setIsAdmin(profileData?.is_admin || false);
       }
     };
-
+    
     checkAdmin();
   }, []);
 
@@ -136,25 +133,20 @@ const ConsultarDemandasContent = () => {
 
   // Handle navigation to view demanda
   const handleViewDemanda = (id: string) => {
-    router.push(`/dashboard/demandas/${id}`);
+    navigate(`/dashboard/demandas/${id}`);
   };
 
   // Handle navigation to view nota
   const handleViewNota = (demandId: string) => {
-    router.push(`/dashboard/notas/nova?demanda=${demandId}`);
+    navigate(`/dashboard/notas/nova?demanda=${demandId}`);
   };
 
   // Check if demand has notes
   const checkIfDemandHasNotes = async (demandId: string): Promise<boolean> => {
-    const { data, error } = await supabase
-      .from('notas')
+    const { data } = await supabase
+      .from('notas_oficiais')  // Changed from notas to notas_oficiais
       .select('*', { count: 'exact' })
       .eq('demanda_id', demandId);
-
-    if (error) {
-      console.error('Erro ao verificar notas:', error);
-      return false;
-    }
 
     return (data?.length || 0) > 0;
   };

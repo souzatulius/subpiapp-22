@@ -12,6 +12,78 @@ export interface UploadResult {
   data?: any[];
 }
 
+// Added fetchLastUpload function
+export const fetchLastUpload = async (user: User | null) => {
+  if (!user) {
+    return { lastUpload: null, uploads: [] };
+  }
+
+  try {
+    // Get last upload
+    const { data: uploads } = await supabase
+      .from('sgz_uploads')
+      .select('*')
+      .eq('usuario_id', user.id)
+      .order('data_upload', { ascending: false });
+    
+    const lastUpload = uploads && uploads.length > 0 ? {
+      id: uploads[0].id,
+      fileName: uploads[0].nome_arquivo,
+      uploadDate: uploads[0].data_upload,
+      processed: uploads[0].processado
+    } : null;
+
+    return {
+      lastUpload,
+      uploads: uploads || []
+    };
+  } catch (error) {
+    console.error('Error fetching last upload:', error);
+    return { lastUpload: null, uploads: [] };
+  }
+};
+
+// Added handleDeleteUpload function
+export const handleDeleteUpload = async (uploadId: string, user: User | null): Promise<boolean> => {
+  if (!user) {
+    toast.error('Você precisa estar logado para excluir uploads');
+    return false;
+  }
+
+  try {
+    // Delete records from sgz_ordens_servico first
+    const { error: deleteOrdersError } = await supabase
+      .from('sgz_ordens_servico')
+      .delete()
+      .eq('planilha_referencia', uploadId);
+    
+    if (deleteOrdersError) {
+      console.error('Error deleting orders:', deleteOrdersError);
+      toast.error(`Erro ao excluir ordens: ${deleteOrdersError.message}`);
+      return false;
+    }
+    
+    // Now delete the upload record
+    const { error: deleteUploadError } = await supabase
+      .from('sgz_uploads')
+      .delete()
+      .eq('id', uploadId);
+    
+    if (deleteUploadError) {
+      console.error('Error deleting upload:', deleteUploadError);
+      toast.error(`Erro ao excluir upload: ${deleteUploadError.message}`);
+      return false;
+    }
+    
+    toast.success('Upload excluído com sucesso');
+    return true;
+  } catch (error: any) {
+    console.error('Error in delete upload operation:', error);
+    toast.error(`Erro ao excluir upload: ${error.message}`);
+    return false;
+  }
+};
+
 // Helper function to process Excel file
 export const processExcelFile = async (file: File): Promise<any[]> => {
   return new Promise((resolve, reject) => {
@@ -51,8 +123,8 @@ export const mapExcelRowToSGZOrdem = (row: any, uploadId: string) => {
     sgz_distrito: row.distrito || 'Não informado',
     sgz_bairro: row.bairro || null,
     sgz_empresa: row.empresa || null,
-    sgz_criado_em: row.data_criacao ? new Date(row.data_criacao) : new Date(),
-    sgz_modificado_em: row.data_status ? new Date(row.data_status) : new Date(),
+    sgz_criado_em: row.data_criacao ? new Date(row.data_criacao).toISOString() : new Date().toISOString(),
+    sgz_modificado_em: row.data_status ? new Date(row.data_status).toISOString() : new Date().toISOString(),
     ordem_servico: row.ordem_servico || row.numero_os || `OS-${Math.floor(Math.random() * 100000)}`,
     planilha_referencia: uploadId,
     sgz_departamento_tecnico: row.area_tecnica || 'STPO'
@@ -224,8 +296,8 @@ export const mapExcelRowToPainelZeladoria = (row: any, uploadId: string) => {
     id_os: row.id_os || row.numero_os || `OS-${Math.floor(Math.random() * 100000)}`,
     status: row.status || 'pendente',
     tipo_servico: row.tipo_servico || 'Não informado',
-    data_abertura: row.data_abertura ? new Date(row.data_abertura) : new Date(),
-    data_fechamento: row.data_fechamento ? new Date(row.data_fechamento) : null,
+    data_abertura: row.data_abertura ? new Date(row.data_abertura).toISOString() : new Date().toISOString(),
+    data_fechamento: row.data_fechamento ? new Date(row.data_fechamento).toISOString() : null,
     distrito: row.distrito || 'Não informado',
     departamento: row.departamento || 'Não informado',
     responsavel_real: row.responsavel || row.responsavel_real || null,
@@ -294,13 +366,16 @@ export const handlePainelZeladoriaUpload = async (
     onProgress(75);
     console.log(`Inserting ${dadosParaInserir.length} painel records...`);
     
-    const { error: insertError } = await supabase
-      .from('painel_zeladoria_dados')
-      .insert(dadosParaInserir);
-    
-    if (insertError) {
-      console.error('Error inserting painel data:', insertError);
-      throw insertError;
+    // Insert each record individually to avoid type issues
+    for (const record of dadosParaInserir) {
+      const { error: insertError } = await supabase
+        .from('painel_zeladoria_dados')
+        .insert(record);
+        
+      if (insertError) {
+        console.error('Error inserting painel record:', insertError);
+        throw insertError;
+      }
     }
     
     onProgress(100);
