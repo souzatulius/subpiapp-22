@@ -33,7 +33,7 @@ export const useDashboardConfig = (
           .from(tableName)
           .select('cards_config')
           .eq('department', department === 'default' ? 'main' : department)
-          .single();
+          .maybeSingle();
 
         if (error && error.code !== 'PGRST116') {
           throw error;
@@ -53,7 +53,7 @@ export const useDashboardConfig = (
             .from(tableName)
             .select('cards_config')
             .eq('department', dashboardType === 'main' ? 'main' : 'comunicacao')
-            .single();
+            .maybeSingle();
 
           if (defaultError && defaultError.code !== 'PGRST116') {
             console.error('Error fetching default dashboard config:', defaultError);
@@ -86,7 +86,7 @@ export const useDashboardConfig = (
     try {
       setIsLoading(true);
       
-      // Check if a record already exists
+      // Check if a record already exists - now uses the UNIQUE constraint
       const { data: existingData, error: checkError } = await supabase
         .from(tableName)
         .select('id')
@@ -98,7 +98,7 @@ export const useDashboardConfig = (
       }
 
       if (existingData) {
-        // Update existing record
+        // Update existing record - will work with the UNIQUE constraint
         const { error: updateError } = await supabase
           .from(tableName)
           .update({
@@ -109,7 +109,7 @@ export const useDashboardConfig = (
 
         if (updateError) throw updateError;
       } else {
-        // Insert new record
+        // Insert new record - will work with the UNIQUE constraint
         const { error: insertError } = await supabase
           .from(tableName)
           .insert({

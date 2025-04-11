@@ -45,7 +45,7 @@ export const useComunicacaoDashboard = (
     try {
       console.log(`Saving comunicacao dashboard config - trigger: ${triggerType}`);
       
-      // Use dashboardConfig's save method
+      // Use dashboardConfig's save method - now the database has UNIQUE constraint
       await dashboardConfig.saveConfig(cards);
       
       // Only show toast for manual saves
@@ -74,7 +74,7 @@ export const useComunicacaoDashboard = (
     }
   };
 
-  // Use the autosave hook
+  // Use the autosave hook with longer debounce to reduce frequency of saves
   const { 
     isSaving, 
     lastSaved,
@@ -83,7 +83,7 @@ export const useComunicacaoDashboard = (
     saveNow 
   } = useAutosave({
     onSave: saveCardConfiguration,
-    debounceMs: 3000,
+    debounceMs: 5000, // Increased to 5000ms to reduce saving frequency
     saveOnUnmount: true,
     saveOnVisibilityChange: true,
     enabled: !isPreview && !!user
@@ -177,14 +177,14 @@ export const useComunicacaoDashboard = (
     setUnsaved(); // Mark as having unsaved changes
   };
 
-  // Handle cards reorder
-  const handleCardsReorder = (updatedCards: ActionCardItem[]) => {
+  // Handle cards reorder - memoized to prevent unnecessary re-renders
+  const handleCardsReorder = useCallback((updatedCards: ActionCardItem[]) => {
     setCards(updatedCards);
     setUnsaved(); // Mark as having unsaved changes
-  };
+  }, [setUnsaved]);
 
   // Reset dashboard to default configuration
-  const resetDashboard = () => {
+  const resetDashboard = useCallback(() => {
     setCards(defaultConfig.config);
     setUnsaved(); // Mark as having unsaved changes
     
@@ -193,7 +193,7 @@ export const useComunicacaoDashboard = (
       description: "O dashboard foi restaurado para a configuração padrão.",
       variant: "default"
     });
-  };
+  }, [defaultConfig.config, setUnsaved]);
 
   return {
     cards,

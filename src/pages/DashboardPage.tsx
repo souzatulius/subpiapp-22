@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Home, RotateCcw } from 'lucide-react';
 import { useDashboardCards } from '@/hooks/dashboard/useDashboardCards';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -160,7 +160,7 @@ const DashboardPage: React.FC = () => {
     }
   }, [cards, isMobile, handleCardsChange]);
 
-  const renderSpecialCardContent = (cardId: string) => {
+  const renderSpecialCardContent = useCallback((cardId: string) => {
     const card = cards.find(c => c.id === cardId);
     
     if (!card) return null;
@@ -202,7 +202,11 @@ const DashboardPage: React.FC = () => {
     }
     
     return null;
-  };
+  }, [cards, userCoordenaticaoId]);
+
+  const filteredCards = useMemo(() => {
+    return cards ? cards.filter(card => !card.isHidden) : [];
+  }, [cards]);
 
   if (!user) {
     return <LoadingIndicator message="Carregando..." />;
@@ -261,16 +265,17 @@ const DashboardPage: React.FC = () => {
                         <Skeleton key={index} className="h-32 w-full rounded-lg" />
                       ))}
                     </div>
-                  ) : cards && cards.length > 0 ? (
+                  ) : filteredCards.length > 0 ? (
                     <div className="px-2 py-2">
                       <CardGridContainer 
-                        cards={cards.filter(card => !card.isHidden)} 
+                        cards={filteredCards}
                         onCardsChange={handleCardsChange}
                         onEditCard={handleCardEdit}
                         onHideCard={handleHideCard}
                         isMobileView={isMobile}
                         isEditMode={isEditMode}
                         renderSpecialCardContent={renderSpecialCardContent}
+                        disableWiggleEffect={true}
                         showSpecialFeatures={true}
                       />
                     </div>

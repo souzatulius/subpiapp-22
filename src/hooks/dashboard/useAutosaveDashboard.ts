@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { ActionCardItem } from '@/types/dashboard';
@@ -36,7 +35,7 @@ export const useAutosaveDashboard = (
         .from(userTableName)
         .select('id, cards_config')
         .eq('user_id', userId)
-        .single();
+        .maybeSingle();
         
       if (checkError && checkError.code !== 'PGRST116') {
         console.error('Error checking for existing record:', checkError);
@@ -115,7 +114,7 @@ export const useAutosaveDashboard = (
     saveNow
   } = useAutosave({
     onSave: saveCardConfiguration,
-    debounceMs: 5000, // Increased from 3000 to 5000
+    debounceMs: 5000, // Increased to 5000ms to reduce savings and flickering
     saveOnUnmount: true,
     saveOnVisibilityChange: true,
     enabled: !!userId
@@ -198,6 +197,7 @@ export const useAutosaveDashboard = (
     fetchCards();
   }, [userId, departmentId, userTableName, departmentTableName, defaultCards, dashboardType]);
 
+  // Memoize card handling functions to prevent unnecessary re-renders
   const handleCardsReorder = useCallback((updatedCards: ActionCardItem[]) => {
     setCards(updatedCards);
     setUnsaved(); // Mark as having unsaved changes
@@ -279,7 +279,7 @@ export const useAutosaveDashboard = (
     handleCardsReorder,
     handleSaveCardEdit,
     handleCardHide,
-    resetDashboard: resetDashboard,
+    resetDashboard,
     saveNow
   };
 };
