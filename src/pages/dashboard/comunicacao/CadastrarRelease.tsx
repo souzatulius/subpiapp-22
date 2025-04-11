@@ -8,12 +8,12 @@ import ConfirmDialog from '@/components/comunicacao/release/ConfirmDialog';
 import GeneratedContentDialog from '@/components/comunicacao/release/GeneratedContentDialog';
 import { useReleaseForm } from '@/hooks/comunicacao/useReleaseForm';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/components/ui/use-toast';
+import { useAnimatedFeedback } from '@/hooks/use-animated-feedback';
 
 const CadastrarRelease = () => {
   const [searchParams] = useSearchParams();
   const releaseId = searchParams.get('releaseId');
-  const { toast } = useToast();
+  const { showFeedback } = useAnimatedFeedback();
   
   const {
     releaseContent,
@@ -58,11 +58,7 @@ const CadastrarRelease = () => {
         }
       } catch (error: any) {
         console.error('Error fetching release:', error);
-        toast({
-          title: "Erro ao carregar release",
-          description: error.message || "Não foi possível carregar o conteúdo do release.",
-          variant: "destructive"
-        });
+        showFeedback('error', 'Não foi possível carregar o conteúdo do release');
       }
     };
     

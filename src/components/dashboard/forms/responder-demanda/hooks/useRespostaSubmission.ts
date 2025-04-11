@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useSupabaseAuth';
-import { toast } from '@/components/ui/use-toast';
+import { useAnimatedFeedback } from '@/hooks/use-animated-feedback';
 import { Demanda } from '../types';
 import { useRespostaFormatter } from './useRespostaFormatter';
 import { useRespostaValidation } from './useRespostaValidation';
@@ -10,7 +10,7 @@ import { useRespostaValidation } from './useRespostaValidation';
 interface SubmissionOptions {
   onSuccess?: () => void;
   onError?: (error: any) => void;
-  showSuccessToast?: boolean; // Option to control toast display
+  showSuccessToast?: boolean; // Option is kept for backward compatibility
 }
 
 export const useRespostaSubmission = (options?: SubmissionOptions) => {
@@ -18,7 +18,7 @@ export const useRespostaSubmission = (options?: SubmissionOptions) => {
   const { user } = useAuth();
   const { formatRespostaText } = useRespostaFormatter();
   const { validateResposta } = useRespostaValidation();
-  const showSuccessToast = options?.showSuccessToast !== false; // Default to true
+  const { showFeedback } = useAnimatedFeedback();
 
   /**
    * Submits the response to the database
@@ -33,11 +33,7 @@ export const useRespostaSubmission = (options?: SubmissionOptions) => {
     // Validate the response
     const validation = validateResposta(selectedDemanda, resposta);
     if (!validation.isValid) {
-      toast({
-        title: "Validação falhou",
-        description: validation.message,
-        variant: "destructive"
-      });
+      showFeedback('error', validation.message);
       return false;
     }
 
@@ -87,13 +83,8 @@ export const useRespostaSubmission = (options?: SubmissionOptions) => {
         // We continue anyway since the response is saved
       }
       
-      // Only show toast if the option is enabled
-      if (showSuccessToast) {
-        toast({
-          title: "Resposta enviada com sucesso!",
-          description: "A demanda foi respondida."
-        });
-      }
+      // Show animated feedback instead of toast
+      showFeedback('success', 'Resposta enviada com sucesso!');
 
       if (options?.onSuccess) {
         console.log("Calling onSuccess callback");
@@ -104,11 +95,7 @@ export const useRespostaSubmission = (options?: SubmissionOptions) => {
     } catch (error: any) {
       console.error('Erro ao enviar resposta:', error);
       
-      toast({
-        title: "Erro ao enviar resposta",
-        description: error.message || "Ocorreu um erro ao processar sua solicitação.",
-        variant: "destructive"
-      });
+      showFeedback('error', error.message || "Ocorreu um erro ao processar sua solicitação");
       
       if (options?.onError) {
         options.onError(error);

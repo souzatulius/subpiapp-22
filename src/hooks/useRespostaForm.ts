@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useSupabaseAuth';
-import { toast } from '@/components/ui/use-toast';
+import { useAnimatedFeedback } from '@/hooks/use-animated-feedback';
 import { Demanda } from '@/components/dashboard/forms/responder-demanda/types';
 import { useRespostaSubmission } from '@/components/dashboard/forms/responder-demanda/hooks/useRespostaSubmission';
 
@@ -17,9 +17,10 @@ export const useRespostaForm = (
   const { user } = useAuth();
   const [resposta, setResposta] = useState<Record<string, string>>({});
   const [comentarios, setComentarios] = useState<string>('');
+  const { showFeedback } = useAnimatedFeedback();
   
   // Initialize useRespostaSubmission hook with showSuccessToast=false
-  // to prevent duplicate toasts as we'll show our own toast here
+  // to prevent duplicate toasts as we'll show our own feedback here
   const { isSubmitting, submitResposta } = useRespostaSubmission({
     showSuccessToast: false
   });
@@ -33,11 +34,7 @@ export const useRespostaForm = (
 
   const handleSubmitResposta = async () => {
     if (!selectedDemanda || Object.keys(resposta).length === 0) {
-      toast({
-        title: "Resposta não pode ser vazia",
-        description: "Por favor, responda todas as perguntas da demanda.",
-        variant: "destructive"
-      });
+      showFeedback('error', 'Por favor, responda todas as perguntas da demanda');
       return;
     }
     
@@ -46,11 +43,8 @@ export const useRespostaForm = (
       const success = await submitResposta(selectedDemanda, resposta, comentarios);
       
       if (success) {
-        // Only show toast here since we disabled it in the submission hook
-        toast({
-          title: "Resposta enviada com sucesso!",
-          description: "A demanda foi respondida."
-        });
+        // Only show feedback here since we disabled it in the submission hook
+        showFeedback('success', 'Demanda respondida com sucesso');
         
         // Update local state
         setDemandas(demandas.filter(d => d.id !== selectedDemanda.id));
@@ -61,11 +55,7 @@ export const useRespostaForm = (
       }
     } catch (error: any) {
       console.error('Erro ao enviar resposta:', error);
-      toast({
-        title: "Erro ao enviar resposta",
-        description: error.message || "Ocorreu um erro ao processar sua solicitação.",
-        variant: "destructive"
-      });
+      showFeedback('error', error.message || "Ocorreu um erro ao processar sua solicitação");
     }
   };
 

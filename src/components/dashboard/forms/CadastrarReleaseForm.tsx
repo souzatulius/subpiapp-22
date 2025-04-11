@@ -15,11 +15,11 @@ import {
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { toast } from '@/components/ui/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { ChevronLeft, Save } from 'lucide-react';
 import { Loader2 } from 'lucide-react';
 import { cadastrarRelease } from '@/services/comunicacaoService';
+import { useAnimatedFeedback } from '@/hooks/use-animated-feedback';
 
 const releaseFormSchema = z.object({
   titulo: z.string().min(5, 'O título deve ter pelo menos 5 caracteres'),
@@ -36,6 +36,7 @@ interface CadastrarReleaseFormProps {
 const CadastrarReleaseForm: React.FC<CadastrarReleaseFormProps> = ({ onClose }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
+  const { showFeedback } = useAnimatedFeedback();
 
   const form = useForm<ReleaseFormValues>({
     resolver: zodResolver(releaseFormSchema),
@@ -55,19 +56,12 @@ const CadastrarReleaseForm: React.FC<CadastrarReleaseFormProps> = ({ onClose }) 
         tags: values.tags ? values.tags.split(',').map(tag => tag.trim()) : [],
       });
       
-      toast({
-        title: 'Release cadastrado com sucesso',
-        description: 'O release foi enviado para processamento.',
-      });
+      showFeedback('success', 'Release cadastrado com sucesso');
       
       navigate('/dashboard/comunicacao/releases');
     } catch (error: any) {
       console.error('Erro ao cadastrar release:', error);
-      toast({
-        title: 'Erro ao cadastrar release',
-        description: error.message || 'Ocorreu um erro ao processar sua solicitação',
-        variant: 'destructive',
-      });
+      showFeedback('error', error.message || 'Ocorreu um erro ao processar sua solicitação');
     } finally {
       setIsSubmitting(false);
     }

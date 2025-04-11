@@ -8,6 +8,7 @@ import BreadcrumbBar from '@/components/layouts/BreadcrumbBar';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useScrollFade } from '@/hooks/useScrollFade';
 import { motion } from 'framer-motion';
+import FeedbackProvider from '@/components/ui/feedback-provider';
 
 const DashboardLayout: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -32,44 +33,46 @@ const DashboardLayout: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-[#FFFAFA]">
-      <Header 
-        showControls={true} 
-        toggleSidebar={toggleSidebar} 
-        className="flex-shrink-0 z-10"
-      />
-      
-      {/* Flex container for remaining space */}
-      <div className="flex flex-1 overflow-hidden">
-        {/* Sidebar container with full height */}
-        {!isMobile && (
-          <div className="sidebar-full-height">
-            <DashboardSidebar isOpen={sidebarOpen} />
-          </div>
-        )}
+    <FeedbackProvider>
+      <div className="flex flex-col min-h-screen bg-[#FFFAFA]">
+        <Header 
+          showControls={true} 
+          toggleSidebar={toggleSidebar} 
+          className="flex-shrink-0 z-10"
+        />
         
-        <main className="flex-1 flex flex-col overflow-hidden">
-          {!isMobile && <BreadcrumbBar className="flex-shrink-0" />}
+        {/* Flex container for remaining space */}
+        <div className="flex flex-1 overflow-hidden">
+          {/* Sidebar container with full height */}
+          {!isMobile && (
+            <div className="sidebar-full-height">
+              <DashboardSidebar isOpen={sidebarOpen} />
+            </div>
+          )}
           
-          <div className="flex-1 w-full max-w-7xl mx-auto overflow-y-auto">
-            <motion.div 
-              className={`p-4 ${isMobile ? 'pb-40' : 'pb-32'} h-full`}
-              initial={{ opacity: 1, y: 20 }} 
-              animate={{ opacity: 1, y: 0 }} 
-              transition={{ duration: 0.5 }}
-            >
-              {isMobile && <BreadcrumbBar className="mb-4 sticky top-0 z-10 bg-white flex-shrink-0" />}
-              
-              <div className="h-full">
-                <Outlet />
-              </div>
-            </motion.div>
-          </div>
-        </main>
+          <main className="flex-1 flex flex-col overflow-hidden">
+            {!isMobile && <BreadcrumbBar className="flex-shrink-0" />}
+            
+            <div className="flex-1 w-full max-w-7xl mx-auto overflow-y-auto">
+              <motion.div 
+                className={`p-4 ${isMobile ? 'pb-40' : 'pb-32'} h-full`}
+                initial={{ opacity: 1, y: 20 }} 
+                animate={{ opacity: 1, y: 0 }} 
+                transition={{ duration: 0.5 }}
+              >
+                {isMobile && <BreadcrumbBar className="mb-4 sticky top-0 z-10 bg-white flex-shrink-0" />}
+                
+                <div className="h-full">
+                  <Outlet />
+                </div>
+              </motion.div>
+            </div>
+          </main>
+        </div>
+        
+        {isMobile && <MobileBottomNav />}
       </div>
-      
-      {isMobile && <MobileBottomNav />}
-    </div>
+    </FeedbackProvider>
   );
 };
 

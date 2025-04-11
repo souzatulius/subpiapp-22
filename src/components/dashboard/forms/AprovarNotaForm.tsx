@@ -9,6 +9,7 @@ import { useApprovalForm } from '@/hooks/consultar-notas/useApprovalForm';
 import { useAuth } from '@/hooks/useSupabaseAuth';
 import UnifiedViewContainer from '@/components/shared/unified-view/UnifiedViewContainer';
 import NotaCard from './components/NotaCard';
+import { useAnimatedFeedback } from '@/hooks/use-animated-feedback';
 
 interface AprovarNotaFormProps {}
 
@@ -16,6 +17,7 @@ const AprovarNotaForm: React.FC<AprovarNotaFormProps> = () => {
   const { session, user } = useAuth();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('pendente');
+  const { showFeedback } = useAnimatedFeedback();
 
   const { data: notas, isLoading, refetch } = useQuery({
     queryKey: ['notas-pendentes'],
@@ -68,11 +70,30 @@ const AprovarNotaForm: React.FC<AprovarNotaFormProps> = () => {
     handleBackToList,
     handleEditMode,
     handleSaveEdit,
-    handleAprovarNota,
-    handleRejeitarNota,
+    handleAprovarNota: originalHandleAprovarNota,
+    handleRejeitarNota: originalHandleRejeitarNota,
     setEditedTitle,
     setEditedText
   } = useApprovalForm(refetch);
+
+  // Wrap the approval handlers to show animated feedback instead of toast
+  const handleAprovarNota = async () => {
+    try {
+      await originalHandleAprovarNota();
+      showFeedback('success', 'Nota aprovada com sucesso');
+    } catch (error: any) {
+      showFeedback('error', error.message || 'Erro ao aprovar nota');
+    }
+  };
+
+  const handleRejeitarNota = async () => {
+    try {
+      await originalHandleRejeitarNota();
+      showFeedback('success', 'Nota rejeitada com sucesso');
+    } catch (error: any) {
+      showFeedback('error', error.message || 'Erro ao rejeitar nota');
+    }
+  };
 
   // Filter notas based on search term
   const filteredNotas = React.useMemo(() => {

@@ -1,8 +1,8 @@
 
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { toast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { useAnimatedFeedback } from '@/hooks/use-animated-feedback';
 
 interface NotaGerada {
   titulo: string;
@@ -19,14 +19,11 @@ export const useReleaseForm = () => {
   const [generatedContent, setGeneratedContent] = useState<NotaGerada | null>(null);
   const [editedTitle, setEditedTitle] = useState('');
   const [editedContent, setEditedContent] = useState('');
+  const { showFeedback } = useAnimatedFeedback();
   
   const handleSaveRelease = async () => {
     if (!releaseContent.trim()) {
-      toast({
-        title: "Campo obrigatório",
-        description: "Insira o conteúdo do release para continuar",
-        variant: "destructive"
-      });
+      showFeedback('error', 'Insira o conteúdo do release para continuar');
       return;
     }
 
@@ -49,21 +46,14 @@ export const useReleaseForm = () => {
       
       if (error) throw error;
       
-      toast({
-        title: "Release salvo",
-        description: "O conteúdo do release foi salvo com sucesso!"
-      });
+      showFeedback('success', 'Release salvo com sucesso!');
       
       // Show confirmation dialog to create news
       setShowConfirmDialog(true);
       
     } catch (error: any) {
       console.error('Erro ao salvar release:', error);
-      toast({
-        title: "Erro ao salvar",
-        description: "Não foi possível salvar o release. Tente novamente.",
-        variant: "destructive"
-      });
+      showFeedback('error', 'Não foi possível salvar o release');
     } finally {
       setIsSubmitting(false);
     }
@@ -71,11 +61,7 @@ export const useReleaseForm = () => {
   
   const handleGenerateNews = async () => {
     if (!releaseContent.trim()) {
-      toast({
-        title: "Campo obrigatório",
-        description: "Insira o conteúdo do release para gerar a notícia",
-        variant: "destructive"
-      });
+      showFeedback('error', 'Insira o conteúdo do release para gerar a notícia');
       return;
     }
     
@@ -113,11 +99,7 @@ export const useReleaseForm = () => {
       
     } catch (error: any) {
       console.error('Erro ao gerar notícia:', error);
-      toast({
-        title: "Erro na geração",
-        description: "Não foi possível gerar a notícia. Tente novamente.",
-        variant: "destructive"
-      });
+      showFeedback('error', 'Não foi possível gerar a notícia');
     } finally {
       setIsGenerating(false);
       setShowConfirmDialog(false);
@@ -159,20 +141,13 @@ export const useReleaseForm = () => {
           
         if (newsError) throw newsError;
         
-        toast({
-          title: "Notícia criada",
-          description: "A notícia foi criada com sucesso!"
-        });
+        showFeedback('success', 'Notícia criada com sucesso!');
         
         // Redirect to releases list
         navigate('/dashboard/comunicacao/releases');
       } catch (error: any) {
         console.error('Erro ao criar notícia:', error);
-        toast({
-          title: "Erro ao criar notícia",
-          description: "Não foi possível criar a notícia. Tente novamente.",
-          variant: "destructive"
-        });
+        showFeedback('error', 'Não foi possível criar a notícia');
       }
     }
     
