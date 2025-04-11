@@ -1,3 +1,4 @@
+
 import { DemandFormData } from '@/hooks/demandForm';
 
 export interface ValidationError {
@@ -27,7 +28,7 @@ const fieldNames: Record<string, string> = {
 // Validação por etapa do formulário
 const stepValidations: Record<number, string[]> = {
   0: ["origem_id", "prazo_resposta"], // Origem, Protocolo, Prazo
-  1: ["tipo_midia_id"], // Mídia, Solicitante (fields are now optional)
+  1: ["tipo_midia_id"], // Mídia, Solicitante (these fields are now optional)
   2: ["problema_id", "detalhes_solicitacao", "bairro_id"], // Tema, Serviço, Detalhes, Localização
   3: ["titulo"], // Título, Perguntas, Anexos
   4: ["titulo", "problema_id", "origem_id", "prazo_resposta", "bairro_id", "detalhes_solicitacao"] // Revisão (campos obrigatórios)
@@ -133,6 +134,9 @@ export const validateDemandForm = (formData: DemandFormData, step: number): Vali
       message: "Informe o número do protocolo 156"
     });
   }
+
+  // Note: nome_solicitante, telefone_solicitante, and email_solicitante are now optional
+  // so we removed them from the validation
 
   return errors;
 };

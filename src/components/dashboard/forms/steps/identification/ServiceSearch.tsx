@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Search, X } from 'lucide-react';
 import { ValidationError } from '@/lib/formValidationUtils';
 import { hasFieldError, getFieldErrorMessage } from './ValidationUtils';
+import UnifiedServiceTagsView from '@/components/shared/unified-view/UnifiedServiceTagsView';
 
 export interface ServiceSearchProps {
   servicos: any[];
@@ -135,6 +136,24 @@ const ServiceSearch: React.FC<ServiceSearchProps> = ({
       
       {hasFieldError('servico_id', errors) && (
         <p className="text-orange-500 text-sm mt-1">{getFieldErrorMessage('servico_id', errors)}</p>
+      )}
+      
+      {/* Add service tags below search/checkbox */}
+      {!selectedServiceObj && !naoSabeServico && filteredServicos.length > 0 && (
+        <div className="mt-4">
+          <div className="text-sm text-gray-600 mb-2">Serviços disponíveis:</div>
+          <UnifiedServiceTagsView 
+            services={filteredServicos.slice(0, 10)} 
+            onServiceSelect={handleSelectService}
+            variant="theme"
+            className="mt-2"
+          />
+          {filteredServicos.length > 10 && (
+            <p className="text-xs text-gray-500 mt-2">
+              Mostrando 10 de {filteredServicos.length} serviços. Use a busca para filtrar mais opções.
+            </p>
+          )}
+        </div>
       )}
     </div>
   );

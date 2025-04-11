@@ -43,7 +43,7 @@ export const useChartItems = () => {
       analysis: 'O departamento de Manutenção lidera com 35% dos serviços, seguido por Infraestrutura com 28%.',
       isAnalysisExpanded: false,
       showAnalysisOnly: false
-    },
+    }
     // Just include a few items for now as examples
   ]);
 
