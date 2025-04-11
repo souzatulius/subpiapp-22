@@ -1,29 +1,20 @@
 
 import React from 'react';
-import { BarChart3, FileUp, Info } from 'lucide-react';
+import { FileSpreadsheet, UploadCloud } from 'lucide-react';
 
-const NoDataMessage: React.FC = () => {
+const NoDataMessage = () => {
   return (
-    <div className="bg-white rounded-lg border border-orange-200 p-8 flex flex-col items-center justify-center space-y-4 text-center">
-      <div className="bg-orange-50 rounded-full p-4">
-        <BarChart3 className="h-12 w-12 text-orange-400" />
+    <div className="flex flex-col items-center justify-center h-96 bg-white p-8 rounded-xl border border-gray-200 text-center">
+      <div className="relative mb-6">
+        <FileSpreadsheet className="h-16 w-16 text-gray-300" />
+        <UploadCloud className="h-6 w-6 text-orange-500 absolute -top-2 -right-2" />
       </div>
-      <h3 className="text-xl font-semibold text-gray-800">Sem dados para visualização</h3>
-      <p className="text-gray-600 max-w-md">
-        Para visualizar os gráficos e análises, faça o upload das planilhas SGZ e do Painel da Zeladoria na seção acima.
+      
+      <h3 className="text-xl font-medium text-gray-800 mb-2">Nenhum dado disponível</h3>
+      
+      <p className="text-gray-500 max-w-md mb-6">
+        Faça o upload de uma planilha do SGZ ou do Painel da Zeladoria para visualizar os dados dos gráficos.
       </p>
-      <div className="bg-orange-50 p-4 rounded-md border border-orange-100 max-w-md">
-        <div className="flex items-start">
-          <Info className="h-5 w-5 text-orange-500 mr-2 mt-0.5 flex-shrink-0" />
-          <p className="text-sm text-orange-800">
-            Após o upload, os dados serão processados automaticamente e os gráficos serão atualizados para mostrar as análises e comparações entre as bases.
-          </p>
-        </div>
-      </div>
-      <div className="flex items-center text-orange-600 mt-2">
-        <FileUp className="h-4 w-4 mr-2" />
-        <span className="text-sm font-medium">Clique em "Selecionar Planilha SGZ" para começar</span>
-      </div>
     </div>
   );
 };

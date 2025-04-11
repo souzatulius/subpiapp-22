@@ -1,19 +1,18 @@
 
 import React from 'react';
-import { DndContext, closestCenter } from '@dnd-kit/core';
-import { SortableContext } from '@dnd-kit/sortable';
-import { ChartItem } from '../hooks/useChartItemsState';
-import SortableChartCard from '../chart-components/SortableChartCard';
+import { DragDropContext, Droppable } from 'react-beautiful-dnd';
+import ChartCard from './ChartCard';
+import { ChartItem } from '../types';
 
 interface ChartGridProps {
   chartItems: ChartItem[];
   hiddenCharts: string[];
   expandedAnalyses: string[];
   analysisOnlyCharts: string[];
-  handleDragEnd: (event: any) => void;
-  handleToggleVisibility: (id: string) => void;
-  handleToggleAnalysis: (id: string) => void;
-  handleToggleView: (id: string) => void;
+  handleDragEnd: (result: any) => void;
+  handleToggleVisibility: (chartId: string) => void;
+  handleToggleAnalysis: (chartId: string) => void;
+  handleToggleView: (chartId: string) => void;
   disableCardContainers?: boolean;
 }
 
@@ -28,63 +27,37 @@ const ChartGrid: React.FC<ChartGridProps> = ({
   handleToggleView,
   disableCardContainers = false
 }) => {
-  // Set up DnD sensors with proper configuration
-  const sensors = useSensors(
-    useSensor(PointerSensor, {
-      activationConstraint: { distance: 5 },
-    }),
-    useSensor(KeyboardSensor, {
-      // Add a custom coordinateGetter to prevent keyboard handling when focus is on input/textarea
-      coordinateGetter: (event, args) => {
-        const target = event.target as HTMLElement;
-        const isInputElement = target.tagName.toLowerCase() === 'input' || 
-                               target.tagName.toLowerCase() === 'textarea' ||
-                               target.isContentEditable;
-
-        if (isInputElement) {
-          // Return null to prevent DnD operation when focus is on input elements
-          return null;
-        }
-        
-        // Use the proper accessor for the active node's coordinates
-        // Return coordinates in the correct format (x, y) instead of ClientRect
-        const rect = args.context.active?.rect?.current?.translated;
-        return rect ? { x: rect.left, y: rect.top } : null;
-      }
-    })
-  );
+  // Filter visible charts
+  const visibleCharts = chartItems.filter(chart => !hiddenCharts.includes(chart.id));
   
   return (
-    <DndContext 
-      sensors={sensors}
-      collisionDetection={closestCenter}
-      onDragEnd={handleDragEnd}
-    >
-      <SortableContext items={chartItems.map(item => item.id)}>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
-          {chartItems.map((item) => (
-            <SortableChartCard
-              key={item.id}
-              id={item.id}
-              component={item.component}
-              isVisible={!hiddenCharts.includes(item.id)}
-              isAnalysisExpanded={expandedAnalyses.includes(item.id)}
-              showAnalysisOnly={analysisOnlyCharts.includes(item.id)}
-              title={disableCardContainers ? "" : item.title} // Don't show title if containers are disabled
-              analysis={item.analysis}
-              onToggleVisibility={() => handleToggleVisibility(item.id)}
-              onToggleAnalysis={() => handleToggleAnalysis(item.id)}
-              onToggleView={() => handleToggleView(item.id)}
-              disableCardContainer={disableCardContainers} 
-            />
-          ))}
-        </div>
-      </SortableContext>
-    </DndContext>
+    <DragDropContext onDragEnd={handleDragEnd}>
+      <Droppable droppableId="chart-grid" direction="horizontal">
+        {(provided) => (
+          <div 
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+            ref={provided.innerRef}
+            {...provided.droppableProps}
+          >
+            {visibleCharts.map((chart, index) => (
+              <ChartCard 
+                key={chart.id}
+                chart={chart}
+                index={index}
+                isAnalysisExpanded={expandedAnalyses.includes(chart.id)}
+                showAnalysisOnly={analysisOnlyCharts.includes(chart.id)}
+                onToggleVisibility={() => handleToggleVisibility(chart.id)}
+                onToggleAnalysis={() => handleToggleAnalysis(chart.id)}
+                onToggleView={() => handleToggleView(chart.id)}
+                disableContainer={disableCardContainers}
+              />
+            ))}
+            {provided.placeholder}
+          </div>
+        )}
+      </Droppable>
+    </DragDropContext>
   );
 };
-
-// Import the necessary dependencies at the top of the file
-import { useSensors, useSensor, PointerSensor, KeyboardSensor } from '@dnd-kit/core';
 
 export default ChartGrid;

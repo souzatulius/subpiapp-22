@@ -1,45 +1,59 @@
 
 import React from 'react';
 import { Bar } from 'react-chartjs-2';
-import ChartCard from './ChartCard';
+import { Loader2 } from 'lucide-react';
+import { chartColors } from './ChartRegistration';
 
 interface ServiceDiversityChartProps {
   data: any;
+  sgzData: any[] | null;
   isLoading: boolean;
+  isSimulationActive: boolean;
 }
 
-const ServiceDiversityChart: React.FC<ServiceDiversityChartProps> = ({ data, isLoading }) => {
-  // Safely check if data exists and has the required properties
-  const hasValidData = !isLoading && data && data.datasets && Array.isArray(data.datasets);
+const ServiceDiversityChart: React.FC<ServiceDiversityChartProps> = ({
+  data,
+  sgzData,
+  isLoading,
+  isSimulationActive
+}) => {
+  // Basic implementation for now
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <Loader2 className="h-8 w-8 text-orange-500 animate-spin" />
+      </div>
+    );
+  }
+  
+  if (!sgzData || sgzData.length === 0) {
+    return (
+      <div className="flex items-center justify-center h-64 text-gray-500">
+        Sem dados disponíveis para exibir
+      </div>
+    );
+  }
+  
+  // Sample data for now
+  const sampleData = {
+    labels: ['Serviço A', 'Serviço B', 'Serviço C', 'Serviço D', 'Serviço E'],
+    datasets: [{
+      label: 'Quantidade',
+      data: [65, 59, 80, 81, 56],
+      backgroundColor: chartColors[0]
+    }]
+  };
   
   return (
-    <ChartCard
-      title="Diversidade de serviços por departamento"
-      value={isLoading ? '' : 'Total: 52'}
-      isLoading={isLoading}
-    >
-      {hasValidData && (
-        <Bar 
-          data={{
-            labels: data.labels || [],
-            datasets: data.datasets
-          }}
-          options={{
-            maintainAspectRatio: false,
-            plugins: {
-              legend: {
-                position: 'top' as const,
-              },
-            },
-            scales: {
-              y: {
-                beginAtZero: true,
-              },
-            },
-          }}
-        />
-      )}
-    </ChartCard>
+    <div className="h-64">
+      <Bar 
+        data={sampleData} 
+        options={{
+          responsive: true,
+          maintainAspectRatio: false,
+        }} 
+      />
+    </div>
   );
 };
 

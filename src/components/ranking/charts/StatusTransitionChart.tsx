@@ -1,81 +1,77 @@
 
 import React from 'react';
 import { Line } from 'react-chartjs-2';
-import ChartCard from './ChartCard';
+import { Loader2 } from 'lucide-react';
+import { chartColors } from './ChartRegistration';
 
 interface StatusTransitionChartProps {
   data: any;
+  sgzData: any[] | null;
   isLoading: boolean;
+  isSimulationActive: boolean;
 }
 
-const StatusTransitionChart: React.FC<StatusTransitionChartProps> = ({ data, isLoading }) => {
-  // Safely check if data exists and has the required properties
-  const hasValidData = !isLoading && data && data.datasets && Array.isArray(data.datasets);
+const StatusTransitionChart: React.FC<StatusTransitionChartProps> = ({
+  data,
+  sgzData,
+  isLoading,
+  isSimulationActive
+}) => {
+  // Basic implementation for now
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <Loader2 className="h-8 w-8 text-orange-500 animate-spin" />
+      </div>
+    );
+  }
   
-  // Default text value
-  const statusText = isLoading ? '' : 'Evolução temporal';
+  if (!sgzData || sgzData.length === 0) {
+    return (
+      <div className="flex items-center justify-center h-64 text-gray-500">
+        Sem dados disponíveis para exibir
+      </div>
+    );
+  }
+  
+  // Sample data for now
+  const sampleData = {
+    labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun'],
+    datasets: [
+      {
+        label: 'Aberto',
+        data: [12, 19, 3, 5, 2, 3],
+        borderColor: chartColors[0],
+        backgroundColor: `${chartColors[0]}20`,
+        tension: 0.4
+      },
+      {
+        label: 'Em Andamento',
+        data: [5, 15, 10, 12, 15, 10],
+        borderColor: chartColors[1],
+        backgroundColor: `${chartColors[1]}20`,
+        tension: 0.4
+      },
+      {
+        label: 'Concluído',
+        data: [2, 8, 12, 5, 10, 15],
+        borderColor: chartColors[2],
+        backgroundColor: `${chartColors[2]}20`,
+        tension: 0.4
+      }
+    ]
+  };
   
   return (
-    <ChartCard
-      title="Transição de status ao longo dos dias"
-      value={statusText}
-      isLoading={isLoading}
-    >
-      {hasValidData && (
-        <Line
-          data={{
-            labels: data.labels || [],
-            datasets: data.datasets.map((dataset: any, index: number) => ({
-              ...dataset,
-              borderColor: index === 0 ? '#f97316' : // orange-500
-                           index === 1 ? '#fb923c' : // orange-400
-                           index === 2 ? '#fdba74' : // orange-300
-                           index === 3 ? '#fed7aa' : // orange-200
-                           index === 4 ? '#ffedd5' : // orange-100
-                           '#71717a', // gray-500 for any additional datasets
-              backgroundColor: index === 0 ? 'rgba(249, 115, 22, 0.2)' : // orange-500
-                              index === 1 ? 'rgba(251, 146, 60, 0.2)' : // orange-400
-                              index === 2 ? 'rgba(253, 186, 116, 0.2)' : // orange-300
-                              index === 3 ? 'rgba(254, 215, 170, 0.2)' : // orange-200
-                              index === 4 ? 'rgba(255, 237, 213, 0.2)' : // orange-100
-                              'rgba(113, 113, 122, 0.2)', // gray-500 for any additional datasets
-              borderWidth: 2,
-              tension: 0.3,
-              pointBackgroundColor: index === 0 ? '#f97316' : // orange-500
-                                   index === 1 ? '#fb923c' : // orange-400
-                                   index === 2 ? '#fdba74' : // orange-300
-                                   index === 3 ? '#fed7aa' : // orange-200
-                                   index === 4 ? '#ffedd5' : // orange-100
-                                   '#71717a', // gray-500 for any additional datasets
-            }))
-          }}
-          options={{
-            maintainAspectRatio: false,
-            plugins: {
-              legend: {
-                position: 'top' as const,
-              },
-              tooltip: {
-                mode: 'index' as const,
-                intersect: false,
-              }
-            },
-            scales: {
-              y: {
-                beginAtZero: true,
-                stacked: false,
-                ticks: {
-                  precision: 0
-                }
-              },
-            },
-            animation: {
-              duration: 1000,
-            },
-          }}
-        />
-      )}
-    </ChartCard>
+    <div className="h-64">
+      <Line 
+        data={sampleData} 
+        options={{
+          responsive: true,
+          maintainAspectRatio: false,
+        }} 
+      />
+    </div>
   );
 };
 

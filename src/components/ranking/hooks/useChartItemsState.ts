@@ -1,70 +1,48 @@
 
 import { useState, useCallback } from 'react';
-import { DragEndEvent } from '@dnd-kit/core';
-import { arrayMove } from '@dnd-kit/sortable';
+import { ChartItem } from '../types';
 
-export interface ChartItem {
-  id: string;
-  title: string;
-  component: React.ReactNode;
-  isVisible: boolean;
-  analysis: string;
-  isAnalysisExpanded: boolean;
-  showAnalysisOnly: boolean;
-}
-
-export const useChartItemsState = (initialItems: ChartItem[]) => {
-  const [items, setItems] = useState<ChartItem[]>(initialItems);
+export const useChartItemsState = (chartItems: ChartItem[]) => {
+  // State for tracking hidden charts
   const [hiddenCharts, setHiddenCharts] = useState<string[]>([]);
+  
+  // State for tracking expanded analyses
   const [expandedAnalyses, setExpandedAnalyses] = useState<string[]>([]);
+  
+  // State for tracking charts shown in analysis-only mode
   const [analysisOnlyCharts, setAnalysisOnlyCharts] = useState<string[]>([]);
-
-  const handleDragEnd = useCallback((event: DragEndEvent) => {
-    const { active, over } = event;
-    
-    if (over && active.id !== over.id) {
-      setItems((items) => {
-        const oldIndex = items.findIndex((item) => item.id === active.id);
-        const newIndex = items.findIndex((item) => item.id === over.id);
-        
-        return arrayMove(items, oldIndex, newIndex);
-      });
-    }
-  }, []);
-
-  const handleToggleVisibility = useCallback((id: string) => {
-    setHiddenCharts((prev) => {
-      if (prev.includes(id)) {
-        return prev.filter((chartId) => chartId !== id);
-      } else {
-        return [...prev, id];
-      }
-    });
-  }, []);
-
-  const handleToggleAnalysis = useCallback((id: string) => {
-    setExpandedAnalyses((prev) => {
-      if (prev.includes(id)) {
-        return prev.filter((chartId) => chartId !== id);
-      } else {
-        return [...prev, id];
-      }
-    });
+  
+  // Handle drag end to reorder charts
+  const handleDragEnd = useCallback((result: any) => {
+    if (!result.destination) return;
+    // Here you would implement logic to reorder the chart items
+    console.log('Chart reordered:', result);
   }, []);
   
-  const handleToggleView = useCallback((id: string) => {
-    setAnalysisOnlyCharts((prev) => {
-      if (prev.includes(id)) {
-        return prev.filter((chartId) => chartId !== id);
-      } else {
-        return [...prev, id];
-      }
-    });
+  // Toggle chart visibility
+  const handleToggleVisibility = useCallback((chartId: string) => {
+    setHiddenCharts(prev => [...prev, chartId]);
   }, []);
-
+  
+  // Toggle chart analysis expanded state
+  const handleToggleAnalysis = useCallback((chartId: string) => {
+    setExpandedAnalyses(prev => 
+      prev.includes(chartId) 
+        ? prev.filter(id => id !== chartId) 
+        : [...prev, chartId]
+    );
+  }, []);
+  
+  // Toggle between chart view and analysis-only view
+  const handleToggleView = useCallback((chartId: string) => {
+    setAnalysisOnlyCharts(prev => 
+      prev.includes(chartId) 
+        ? prev.filter(id => id !== chartId) 
+        : [...prev, chartId]
+    );
+  }, []);
+  
   return {
-    items,
-    setItems,
     hiddenCharts,
     expandedAnalyses,
     analysisOnlyCharts,

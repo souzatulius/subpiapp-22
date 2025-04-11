@@ -1,7 +1,8 @@
 
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Briefcase } from 'lucide-react';
+import { Radar } from 'react-chartjs-2';
+import { Loader2 } from 'lucide-react';
+import { chartColors } from './ChartRegistration';
 
 interface ResponsibilityChartProps {
   data: any;
@@ -11,33 +12,99 @@ interface ResponsibilityChartProps {
   isSimulationActive: boolean;
 }
 
-const ResponsibilityChart: React.FC<ResponsibilityChartProps> = ({ 
-  data, 
-  sgzData, 
+const ResponsibilityChart: React.FC<ResponsibilityChartProps> = ({
+  data,
+  sgzData,
   painelData,
-  isLoading, 
-  isSimulationActive 
+  isLoading,
+  isSimulationActive
 }) => {
+  // Process data to get responsibility distribution
+  const chartData = React.useMemo(() => {
+    if (!sgzData || sgzData.length === 0) return null;
+    
+    // Count by department/coordenação
+    const deptCount = {};
+    
+    sgzData.forEach(order => {
+      const department = order.sgz_coordenacao || order.sgz_area_tecnica || 'Não informado';
+      deptCount[department] = (deptCount[department] || 0) + 1;
+    });
+    
+    // Convert to array format
+    return Object.entries(deptCount)
+      .map(([name, count]) => ({ name, count }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 6); // Top 6 departments
+  }, [sgzData]);
+  
+  // Prepare radar chart data
+  const radarChartData = React.useMemo(() => {
+    if (!chartData) return null;
+    
+    // Apply simulation factor if active
+    const simulationFactor = isSimulationActive ? 1.2 : 1;
+    
+    return {
+      labels: chartData.map(d => d.name),
+      datasets: [
+        {
+          label: 'Demandas Atribuídas',
+          data: chartData.map(d => isSimulationActive 
+            ? Math.floor(d.count * simulationFactor * Math.random() * 0.4 + 0.8)
+            : d.count
+          ),
+          backgroundColor: `${chartColors[3]}60`,
+          borderColor: chartColors[3],
+          borderWidth: 2,
+          pointBackgroundColor: chartColors[3],
+          pointBorderColor: '#fff',
+          pointHoverBackgroundColor: '#fff',
+          pointHoverBorderColor: chartColors[3]
+        }
+      ]
+    };
+  }, [chartData, isSimulationActive]);
+  
+  // Chart options
+  const options = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        position: 'top' as const,
+      }
+    },
+    scales: {
+      r: {
+        angleLines: {
+          display: true
+        },
+        suggestedMin: 0
+      }
+    }
+  };
+  
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <Loader2 className="h-8 w-8 text-orange-500 animate-spin" />
+      </div>
+    );
+  }
+  
+  if (!chartData || chartData.length === 0) {
+    return (
+      <div className="flex items-center justify-center h-64 text-gray-500">
+        Sem dados disponíveis para exibir
+      </div>
+    );
+  }
+  
   return (
-    <Card className="border-gray-200 shadow-sm h-full">
-      <CardHeader className="pb-2">
-        <CardTitle className="text-base font-medium flex items-center gap-2">
-          <Briefcase className="h-4 w-4 text-orange-500" />
-          Responsabilidade (Sub vs Externo)
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        {isLoading ? (
-          <div className="h-56 flex items-center justify-center">
-            <div className="animate-spin h-8 w-8 border-4 border-orange-500 border-t-transparent rounded-full"></div>
-          </div>
-        ) : (
-          <div className="h-56 flex items-center justify-center bg-gray-50 rounded">
-            <p className="text-gray-500">{isSimulationActive ? 'Simulação de ' : ''}Gráfico de Responsabilidade</p>
-          </div>
-        )}
-      </CardContent>
-    </Card>
+    <div className="h-64">
+      {radarChartData && <Radar data={radarChartData} options={options} />}
+    </div>
   );
 };
 

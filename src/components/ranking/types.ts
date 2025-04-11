@@ -1,4 +1,14 @@
 
+import React from 'react';
+
+export interface ChartItem {
+  id: string;
+  title: string;
+  component: React.ReactNode;
+  analysis?: string;
+  isVisible: boolean;
+}
+
 export interface ChartVisibility {
   districtPerformance: boolean;
   serviceTypes: boolean;
@@ -25,33 +35,15 @@ export interface ChartVisibility {
 }
 
 export interface FilterOptions {
+  dateRange?: {
+    from: Date | null;
+    to: Date | null;
+  };
+  status?: string[];
+  serviceTypes?: string[];
+  distritos?: string[];
   dataInicio?: string;
   dataFim?: string;
-  status?: string[];
-  distritos?: string[];
   tiposServico?: string[];
   departamento?: string[];
-  [key: string]: any;
-}
-
-export interface ChartItem {
-  id: string;
-  title: string;
-  component: React.ReactNode;
-  isVisible: boolean;
-  analysis?: string;
-  isAnalysisExpanded?: boolean;
-  showAnalysisOnly?: boolean;
-}
-
-export interface ChartFilter {
-  id: string;
-  label: string;
-  value: string;
-  isActive: boolean;
-  dataInicio?: string;
-  dataFim?: string;
-  distritos?: string[];
-  tiposServico?: string[];
-  status?: string[];
 }

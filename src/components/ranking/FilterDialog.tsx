@@ -67,70 +67,127 @@ const FilterDialog: React.FC<FilterDialogProps> = ({
             <div className="grid grid-cols-1 gap-3">
               <h3 className="font-medium text-gray-700">Visibilidade de gráficos</h3>
               <div className="bg-orange-50 p-4 rounded-md text-orange-800 text-sm">
-                Ative ou desative a exibição dos gráficos no painel. Você poderá reativá-los a qualquer momento.
+                Ative ou desative a exibição de gráficos conforme suas necessidades de análise.
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
-                {Object.keys(chartVisibility).map((chartName) => (
-                  <div key={chartName} className="flex items-center justify-between p-3 border rounded-md">
-                    <Label htmlFor={`chart-${chartName}`} className="font-medium cursor-pointer text-sm">
-                      {getChartDisplayName(chartName)}
-                    </Label>
-                    <Switch
-                      id={`chart-${chartName}`}
-                      checked={chartVisibility[chartName as keyof ChartVisibility]}
-                      onCheckedChange={() => handleToggleChart(chartName as keyof ChartVisibility)}
-                      className="data-[state=checked]:bg-orange-500"
-                    />
-                  </div>
-                ))}
+                <div className="flex items-center space-x-2">
+                  <Switch
+                    id="district-performance"
+                    checked={chartVisibility.districtPerformance}
+                    onCheckedChange={() => handleToggleChart('districtPerformance')}
+                  />
+                  <Label htmlFor="district-performance">Performance por Distrito</Label>
+                </div>
+                
+                <div className="flex items-center space-x-2">
+                  <Switch
+                    id="service-types"
+                    checked={chartVisibility.serviceTypes}
+                    onCheckedChange={() => handleToggleChart('serviceTypes')}
+                  />
+                  <Label htmlFor="service-types">Tipos de Serviço</Label>
+                </div>
+                
+                <div className="flex items-center space-x-2">
+                  <Switch
+                    id="resolution-time"
+                    checked={chartVisibility.resolutionTime}
+                    onCheckedChange={() => handleToggleChart('resolutionTime')}
+                  />
+                  <Label htmlFor="resolution-time">Tempo de Resolução</Label>
+                </div>
+                
+                <div className="flex items-center space-x-2">
+                  <Switch
+                    id="responsibility"
+                    checked={chartVisibility.responsibility}
+                    onCheckedChange={() => handleToggleChart('responsibility')}
+                  />
+                  <Label htmlFor="responsibility">Responsabilidade</Label>
+                </div>
+                
+                <div className="flex items-center space-x-2">
+                  <Switch
+                    id="evolution"
+                    checked={chartVisibility.evolution}
+                    onCheckedChange={() => handleToggleChart('evolution')}
+                  />
+                  <Label htmlFor="evolution">Evolução de Demandas</Label>
+                </div>
+                
+                <div className="flex items-center space-x-2">
+                  <Switch
+                    id="department-comparison"
+                    checked={chartVisibility.departmentComparison}
+                    onCheckedChange={() => handleToggleChart('departmentComparison')}
+                  />
+                  <Label htmlFor="department-comparison">Comparativo de Departamentos</Label>
+                </div>
+                
+                <div className="flex items-center space-x-2">
+                  <Switch
+                    id="oldest-pending"
+                    checked={chartVisibility.oldestPendingList}
+                    onCheckedChange={() => handleToggleChart('oldestPendingList')}
+                  />
+                  <Label htmlFor="oldest-pending">Demandas Mais Antigas</Label>
+                </div>
+                
+                <div className="flex items-center space-x-2">
+                  <Switch
+                    id="status-distribution"
+                    checked={chartVisibility.statusDistribution}
+                    onCheckedChange={() => handleToggleChart('statusDistribution')}
+                  />
+                  <Label htmlFor="status-distribution">Distribuição por Status</Label>
+                </div>
+                
+                <div className="flex items-center space-x-2">
+                  <Switch
+                    id="service-diversity"
+                    checked={chartVisibility.serviceDiversity}
+                    onCheckedChange={() => handleToggleChart('serviceDiversity')}
+                  />
+                  <Label htmlFor="service-diversity">Diversidade de Serviços</Label>
+                </div>
+                
+                <div className="flex items-center space-x-2">
+                  <Switch
+                    id="time-comparison"
+                    checked={chartVisibility.timeComparison}
+                    onCheckedChange={() => handleToggleChart('timeComparison')}
+                  />
+                  <Label htmlFor="time-comparison">Comparativo de Tempo</Label>
+                </div>
+                
+                <div className="flex items-center space-x-2">
+                  <Switch
+                    id="status-transition"
+                    checked={chartVisibility.statusTransition}
+                    onCheckedChange={() => handleToggleChart('statusTransition')}
+                  />
+                  <Label htmlFor="status-transition">Transição de Status</Label>
+                </div>
               </div>
             </div>
           </TabsContent>
         </Tabs>
 
-        <DialogFooter className="mt-6">
-          <div className="flex items-center gap-2">
-            <Button variant="outline" onClick={resetVisibility} className="gap-2">
-              <RotateCcw className="h-4 w-4" />
-              Resetar
-            </Button>
-            <Button onClick={onClose} className="bg-orange-500 hover:bg-orange-600">
-              Aplicar
-            </Button>
-          </div>
+        <DialogFooter className="flex items-center justify-between pt-4 border-t">
+          <Button 
+            variant="outline" 
+            onClick={resetVisibility}
+            className="flex items-center gap-2"
+          >
+            <RotateCcw className="h-4 w-4" />
+            Restaurar Padrão
+          </Button>
+          <Button onClick={onClose}>Aplicar</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
   );
 };
-
-// Helper function to convert camelCase chart keys to display names
-function getChartDisplayName(chartName: string): string {
-  switch (chartName) {
-    case 'districtPerformance':
-      return 'Performance por Distrito';
-    case 'serviceTypes':
-      return 'Distribuição por Tipo de Serviço';
-    case 'resolutionTime':
-      return 'Tempo Médio de Execução';
-    case 'responsibility':
-      return 'Responsabilidade (Sub vs Externo)';
-    case 'evolution':
-      return 'Evolução de Status';
-    case 'departmentComparison':
-      return 'Comparação Departamental';
-    case 'oldestPendingList':
-      return 'Top Pendências Antigas';
-    case 'statusDistribution':
-      return 'Distribuição de Status';
-    case 'topCompanies':
-      return 'Top Empresas';
-    case 'districtDistribution':
-      return 'Distribuição por Distrito';
-    default:
-      return chartName.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
-  }
-}
 
 export default FilterDialog;
