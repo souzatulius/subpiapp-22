@@ -28,18 +28,19 @@ const DemandaCard: React.FC<DemandaCardProps> = ({ demanda, isSelected, onClick 
     }
   };
   
-  // Extraindo a sigla da coordenação associada ao problema ou do coordenacao_id da demanda
-  const coordenacaoSigla = demanda.coordenacao?.sigla || 
-                          (demanda.coordenacao_id ? 'Coord.' : 'Interna');
+  // Extraindo a sigla da coordenação associada ao tema/problema
+  const coordenacaoSigla = demanda.tema?.coordenacao?.sigla || 
+                           demanda.problema?.coordenacao?.sigla || 
+                           (demanda.coordenacao_id ? 'Coord.' : '');
   
   // Format relative time
   const relativeTime = demanda.horario_publicacao ? 
     formatDistanceToNow(new Date(demanda.horario_publicacao), { addSuffix: true, locale: ptBR }) : 
     'Data não disponível';
 
-  // Format deadline
+  // Format deadline with 2-digit year
   const prazoFormatado = demanda.prazo_resposta ? 
-    format(new Date(demanda.prazo_resposta), 'dd/MM/yyyy HH:mm', { locale: ptBR }) : 
+    format(new Date(demanda.prazo_resposta), "dd/MM/yy HH:mm", { locale: ptBR }) : 
     'Sem prazo definido';
 
   return (
@@ -55,11 +56,6 @@ const DemandaCard: React.FC<DemandaCardProps> = ({ demanda, isSelected, onClick 
         <div className="flex flex-col gap-3">
           <div className="flex justify-between items-start">
             <h3 className="font-medium text-gray-900 line-clamp-2">{demanda.titulo || "Sem título"}</h3>
-            <Badge 
-              className={`${coordenacaoSigla ? 'bg-gray-100 text-gray-700 px-2.5 py-1' : 'hidden'}`}
-            >
-              {coordenacaoSigla}
-            </Badge>
           </div>
           
           <div className="flex flex-wrap gap-2 items-center">
@@ -75,6 +71,14 @@ const DemandaCard: React.FC<DemandaCardProps> = ({ demanda, isSelected, onClick 
               size="sm"
               className="px-2.5 py-1"
             />
+            
+            {coordenacaoSigla && (
+              <Badge 
+                className="bg-gray-100 text-gray-700 px-2.5 py-1"
+              >
+                {coordenacaoSigla}
+              </Badge>
+            )}
           </div>
           
           <div className="flex flex-col gap-1">
@@ -84,7 +88,7 @@ const DemandaCard: React.FC<DemandaCardProps> = ({ demanda, isSelected, onClick 
                 {relativeTime}
               </div>
               {demanda.prazo_resposta && (
-                <div className="text-sm text-blue-600 font-medium">
+                <div className="text-xs text-orange-600 font-medium">
                   Prazo: {prazoFormatado}
                 </div>
               )}

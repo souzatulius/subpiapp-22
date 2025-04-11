@@ -26,6 +26,11 @@ export interface Demanda {
         id: string;
         descricao: string;
         icone?: string;
+        coordenacao?: {
+            id: string;
+            sigla: string;
+            descricao: string;
+        };
     } | null;
     areas_coordenacao?: {
         id: string;
@@ -49,6 +54,11 @@ export interface Demanda {
         nome: string;
     };
     coordenacao_id?: string;
+    coordenacao?: {
+        id: string;
+        descricao: string;
+        sigla: string;
+    };
     anexos?: string[] | null;
     autor?: {
         id: string;
@@ -62,6 +72,11 @@ export interface Demanda {
         id: string;
         descricao: string;
         icone?: string;
+        coordenacao?: {
+            id: string;
+            descricao: string;
+            sigla?: string;
+        };
     };
 }
 

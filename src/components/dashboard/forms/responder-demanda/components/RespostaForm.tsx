@@ -68,69 +68,80 @@ const RespostaForm: React.FC<RespostaFormProps> = ({
     const extension = filename.split('.').pop()?.toLowerCase();
     
     if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'].includes(extension || '')) {
-      return <FileImage className="h-4 w-4" />;
+      return <FileImage className="h-12 w-12 text-orange-500" />;
     } else if (['mp3', 'wav', 'ogg'].includes(extension || '')) {
-      return <FileAudio className="h-4 w-4" />;
+      return <FileAudio className="h-12 w-12 text-orange-500" />;
     } else if (['mp4', 'avi', 'mov', 'webm'].includes(extension || '')) {
-      return <FileVideo className="h-4 w-4" />;
+      return <FileVideo className="h-12 w-12 text-orange-500" />;
     } else if (['zip', 'rar', '7z'].includes(extension || '')) {
-      return <FileArchive className="h-4 w-4" />;
+      return <FileArchive className="h-12 w-12 text-orange-500" />;
     } else if (['pdf', 'doc', 'docx', 'txt', 'xls', 'xlsx'].includes(extension || '')) {
-      return <FileText className="h-4 w-4" />;
+      return <FileText className="h-12 w-12 text-orange-500" />;
     } else {
-      return <FileIcon className="h-4 w-4" />;
+      return <FileIcon className="h-12 w-12 text-orange-500" />;
     }
   };
   
+  // Get coordenacao sigla
+  const coordenacaoSigla = selectedDemanda.tema?.coordenacao?.sigla || 
+                           selectedDemanda.problema?.coordenacao?.sigla || 
+                           (selectedDemanda.coordenacao?.sigla || '');
+  
   return (
     <div className="space-y-6">
-      {/* Back button (only if not hidden) */}
-      {!hideBackButton && (
-        <div className="flex justify-between items-center">
+      {/* Header row with back button, title, and tags */}
+      <div className="flex items-center justify-between mb-6">
+        {!hideBackButton && (
           <Button 
-            variant="ghost"
+            variant="outline"
             onClick={onBack} 
-            className="flex items-center space-x-2"
+            className="flex items-center space-x-2 shadow-sm border border-gray-200"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
             Voltar
           </Button>
-        </div>
-      )}
-      
-      <div className="p-6 space-y-8 bg-white rounded-xl border border-gray-200 shadow-sm">
-        {/* Tags e informações iniciais */}
-        <div className="space-y-4">
-          <h2 className="text-xl font-semibold text-subpi-blue">{selectedDemanda.titulo || 'Sem título definido'}</h2>
-          
-          <div className="flex flex-wrap items-center gap-3 mb-4">
-            {selectedDemanda.tema && (
-              <Badge className="px-4 py-1.5 flex items-center gap-2 bg-blue-50 text-blue-700 border border-blue-200 rounded-full">
-                {selectedDemanda.tema.descricao || 'Tema não definido'}
-              </Badge>
-            )}
-            
-            <Badge className={`px-4 py-1.5 rounded-full ${
-              selectedDemanda.prioridade === 'alta' 
-                ? 'bg-orange-50 text-orange-700 border border-orange-200' 
-                : selectedDemanda.prioridade === 'media' 
-                  ? 'bg-yellow-50 text-yellow-700 border border-yellow-200' 
-                  : 'bg-green-50 text-green-700 border border-green-200'}`}
-            >
-              Prioridade: {formatarPrioridade(selectedDemanda.prioridade)}
+        )}
+        
+        <h2 className="text-2xl font-semibold text-subpi-blue text-center flex-grow">
+          {selectedDemanda.titulo || 'Sem título definido'}
+        </h2>
+        
+        <div className="flex items-center gap-2">
+          {selectedDemanda.tema && (
+            <Badge size="sm" className="px-3 py-1 flex items-center gap-1 bg-blue-50 text-blue-700 border border-blue-200 rounded-full">
+              {selectedDemanda.tema.descricao || 'Tema não definido'}
             </Badge>
-            
-            <DemandaStatusBadge 
-              status={selectedDemanda.status} 
-              className="px-4 py-1.5"
-              showIcon={true} 
-            />
-          </div>
+          )}
           
-          <div className="text-sm text-gray-600">
-            Criado por <span className="font-medium">{selectedDemanda.autor?.nome_completo}</span> em {' '}
-            {format(new Date(selectedDemanda.horario_publicacao), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
-          </div>
+          <Badge size="sm" className={`px-3 py-1 rounded-full ${
+            selectedDemanda.prioridade === 'alta' 
+              ? 'bg-orange-50 text-orange-700 border border-orange-200' 
+              : selectedDemanda.prioridade === 'media' 
+                ? 'bg-yellow-50 text-yellow-700 border border-yellow-200' 
+                : 'bg-green-50 text-green-700 border border-green-200'}`}
+          >
+            {formatarPrioridade(selectedDemanda.prioridade)}
+          </Badge>
+          
+          <DemandaStatusBadge 
+            status={selectedDemanda.status} 
+            size="sm"
+            className="px-2.5 py-0.5"
+            showIcon={true} 
+          />
+          
+          {coordenacaoSigla && (
+            <Badge size="sm" className="bg-gray-100 text-gray-700 border border-gray-200 px-2.5 py-0.5 rounded-full">
+              {coordenacaoSigla}
+            </Badge>
+          )}
+        </div>
+      </div>
+      
+      <div className="p-6 space-y-8 bg-white rounded-xl border border-gray-200 shadow-sm">        
+        <div className="text-sm text-gray-600">
+          Criado por <span className="font-medium">{selectedDemanda.autor?.nome_completo}</span> em {' '}
+          {format(new Date(selectedDemanda.horario_publicacao), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
         </div>
         
         <Separator />
@@ -142,28 +153,25 @@ const RespostaForm: React.FC<RespostaFormProps> = ({
         
         {/* Seção de anexos */}
         {selectedDemanda.anexos && selectedDemanda.anexos.length > 0 && (
-          <div className="space-y-4">
-            <h3 className="text-lg font-medium text-subpi-blue">Anexos</h3>
-            <div className="flex flex-wrap gap-3">
-              {selectedDemanda.anexos.map((anexo, index) => {
-                const filename = typeof anexo === 'string' 
-                  ? anexo.split('/').pop() || `Anexo ${index + 1}` 
-                  : `Anexo ${index + 1}`;
-                
-                return (
-                  <a 
-                    key={index} 
-                    href={typeof anexo === 'string' ? anexo : '#'} 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-2 bg-gray-50 hover:bg-gray-100 transition-colors p-2 rounded-md border border-gray-200 text-sm"
-                  >
-                    {renderAttachmentIcon(filename)}
-                    <span className="max-w-[150px] truncate">{filename}</span>
-                  </a>
-                );
-              })}
-            </div>
+          <div className="flex flex-wrap gap-6 justify-center">
+            {selectedDemanda.anexos.map((anexo, index) => {
+              const filename = typeof anexo === 'string' 
+                ? anexo.split('/').pop() || `Anexo ${index + 1}` 
+                : `Anexo ${index + 1}`;
+              
+              return (
+                <a 
+                  key={index} 
+                  href={typeof anexo === 'string' ? anexo : '#'} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="flex flex-col items-center gap-2 transition-transform hover:scale-105"
+                >
+                  {renderAttachmentIcon(filename)}
+                  <span className="max-w-[150px] truncate text-sm text-gray-600">{filename}</span>
+                </a>
+              );
+            })}
           </div>
         )}
         
@@ -171,7 +179,7 @@ const RespostaForm: React.FC<RespostaFormProps> = ({
         {selectedDemanda.detalhes_solicitacao && (
           <div className="space-y-4">
             <h3 className="text-lg font-medium text-subpi-blue">Resumo</h3>
-            <div className="bg-gray-50 p-4 rounded-md border border-gray-200">
+            <div className="bg-gray-50 p-4 rounded-xl border border-gray-200">
               <p className="text-sm text-gray-700 whitespace-pre-line">
                 {selectedDemanda.detalhes_solicitacao}
               </p>
