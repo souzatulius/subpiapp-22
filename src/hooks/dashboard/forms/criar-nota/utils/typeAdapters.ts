@@ -14,7 +14,8 @@ export const adaptDemandType = (selectedDemanda: Demand): any => {
     coordenacao_id: selectedDemanda.coordenacao_id || null,
     supervisao_tecnica_id: selectedDemanda.supervisao_tecnica_id || null,
     // Fix: Handle the bairro object which might have different structures
-    bairro_id: selectedDemanda.bairro && typeof selectedDemanda.bairro === 'object' ? 
+    // Check if bairro has an id property before accessing it
+    bairro_id: selectedDemanda.bairro && typeof selectedDemanda.bairro === 'object' && 'id' in selectedDemanda.bairro ? 
               (selectedDemanda.bairro.id || null) : 
               (selectedDemanda.bairro || null),
     area_coordenacao: selectedDemanda.area_coordenacao || null,
