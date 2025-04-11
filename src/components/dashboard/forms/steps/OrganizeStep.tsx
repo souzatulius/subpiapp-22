@@ -27,6 +27,7 @@ interface OrganizeStepProps {
   filteredBairros: any[];
   errors: ValidationError[];
   onGenerateAIContent?: () => Promise<void>;
+  isGenerating?: boolean; // Added this prop to match what's passed in FormContent.tsx
 }
 
 const OrganizeStep: React.FC<OrganizeStepProps> = ({
@@ -38,10 +39,9 @@ const OrganizeStep: React.FC<OrganizeStepProps> = ({
   servicos,
   filteredBairros,
   errors,
-  onGenerateAIContent
+  onGenerateAIContent,
+  isGenerating = false // Added default value
 }) => {
-  const [isGenerating, setIsGenerating] = useState(false);
-
   // Find the problem and service descriptions
   const selectedProblem = problemas.find(p => p.id === formData.problema_id);
   const selectedService = servicos.find(s => s.id === formData.servico_id);
@@ -56,17 +56,18 @@ const OrganizeStep: React.FC<OrganizeStepProps> = ({
         onGenerateAIContent &&
         (!formData.titulo || !formData.resumo_situacao)
       ) {
-        setIsGenerating(true);
         try {
           await onGenerateAIContent();
-        } finally {
-          setIsGenerating(false);
+        } catch (error) {
+          console.error("Error generating AI content:", error);
         }
       }
     };
     
-    generateContent();
-  }, [formData.problema_id, formData.detalhes_solicitacao, onGenerateAIContent]);
+    if (!isGenerating) {
+      generateContent();
+    }
+  }, [formData.problema_id, formData.detalhes_solicitacao, onGenerateAIContent, isGenerating]);
 
   return (
     <div className="space-y-6">

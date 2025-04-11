@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { Card } from '@/components/ui/card';
 import { useAuth } from '@/hooks/useSupabaseAuth';
@@ -22,6 +23,7 @@ const CadastrarDemandaForm: React.FC<CadastrarDemandaFormProps> = ({
   const { user } = useAuth();
   const [validationErrors, setValidationErrors] = useState<ValidationError[]>([]);
   const [showValidationAlert, setShowValidationAlert] = useState(false);
+  const [isGeneratingAI, setIsGeneratingAI] = useState(false); // Added state for AI generation
   const location = useLocation();
   const formRef = useRef<HTMLDivElement>(null);
   
@@ -75,6 +77,7 @@ const CadastrarDemandaForm: React.FC<CadastrarDemandaFormProps> = ({
 
   const generateAIContentWithToast = async () => {
     try {
+      setIsGeneratingAI(true);
       await generateAIContent();
     } catch (error) {
       console.error('Error generating AI content:', error);
@@ -83,6 +86,8 @@ const CadastrarDemandaForm: React.FC<CadastrarDemandaFormProps> = ({
         description: "Não foi possível gerar o conteúdo sugerido. Tente novamente.",
         variant: "destructive"
       });
+    } finally {
+      setIsGeneratingAI(false);
     }
   };
 
@@ -198,6 +203,7 @@ const CadastrarDemandaForm: React.FC<CadastrarDemandaFormProps> = ({
             nextStep={nextStep}
             onNavigateToStep={setActiveStep}
             onGenerateAIContent={generateAIContentWithToast}
+            isGenerating={isGeneratingAI}
           />
           
           <FormActions 
