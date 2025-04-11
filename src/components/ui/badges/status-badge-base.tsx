@@ -21,8 +21,10 @@ export function StatusBadge({
   size = 'md',
 }: StatusBadgeProps) {
   // Get the icon component dynamically from lucide-react
-  // Fix: Check if the icon name exists in Icons and use proper type assertion
-  const IconComponent = config.iconName && (Icons[config.iconName as keyof typeof Icons]);
+  // Fix: Use proper type checking and casting for icon components
+  const IconComponent = config.iconName ? 
+    (Icons[config.iconName as keyof typeof Icons] as React.ElementType) : 
+    undefined;
   
   return (
     <span
@@ -35,10 +37,9 @@ export function StatusBadge({
         className
       )}
     >
-      {showIcon && IconComponent && React.createElement(IconComponent, { 
-        size: getIconSize(size),
-        className: "shrink-0"
-      })}
+      {showIcon && IconComponent && (
+        <IconComponent size={getIconSize(size)} className="shrink-0" />
+      )}
       <span>{config.label}</span>
     </span>
   );
