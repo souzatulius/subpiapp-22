@@ -32,7 +32,7 @@ export const useDashboardConfig = (
         const { data, error } = await supabase
           .from(tableName)
           .select('cards_config')
-          .eq('department', department)
+          .eq('department', department === 'default' ? 'main' : department)
           .single();
 
         if (error && error.code !== 'PGRST116') {
@@ -48,7 +48,27 @@ export const useDashboardConfig = (
             setConfig([]);
           }
         } else {
-          setConfig([]);
+          // If no config found for specific department, try to get the default one
+          const { data: defaultData, error: defaultError } = await supabase
+            .from(tableName)
+            .select('cards_config')
+            .eq('department', dashboardType === 'main' ? 'main' : 'comunicacao')
+            .single();
+
+          if (defaultError && defaultError.code !== 'PGRST116') {
+            console.error('Error fetching default dashboard config:', defaultError);
+            setConfig([]);
+          } else if (defaultData && defaultData.cards_config) {
+            try {
+              const parsedConfig = JSON.parse(defaultData.cards_config);
+              setConfig(parsedConfig);
+            } catch (err) {
+              console.error('Failed to parse default dashboard config:', err);
+              setConfig([]);
+            }
+          } else {
+            setConfig([]);
+          }
         }
       } catch (err) {
         console.error(`Error fetching ${dashboardType} dashboard config:`, err);

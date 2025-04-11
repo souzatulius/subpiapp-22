@@ -13,8 +13,10 @@ export const adaptDemandType = (selectedDemanda: Demand): any => {
     problema_id: selectedDemanda.problema_id || null,
     coordenacao_id: selectedDemanda.coordenacao_id || null,
     supervisao_tecnica_id: selectedDemanda.supervisao_tecnica_id || null,
-    // Fix: Access the id from bairro safely with optional chaining
-    bairro_id: selectedDemanda.bairro?.id || null,
+    // Fix: Handle the bairro object which might have different structures
+    bairro_id: selectedDemanda.bairro && typeof selectedDemanda.bairro === 'object' ? 
+              (selectedDemanda.bairro.id || null) : 
+              (selectedDemanda.bairro || null),
     area_coordenacao: selectedDemanda.area_coordenacao || null,
     supervisao_tecnica: selectedDemanda.supervisao_tecnica || null,
     bairro: selectedDemanda.bairro || null,

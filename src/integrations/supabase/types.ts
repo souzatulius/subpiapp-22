@@ -47,6 +47,114 @@ export type Database = {
           },
         ]
       }
+      backup_department_dashboard: {
+        Row: {
+          cards_config: string | null
+          created_at: string | null
+          department: string | null
+          id: string | null
+          updated_at: string | null
+          updated_by: string | null
+          view_type: string | null
+        }
+        Insert: {
+          cards_config?: string | null
+          created_at?: string | null
+          department?: string | null
+          id?: string | null
+          updated_at?: string | null
+          updated_by?: string | null
+          view_type?: string | null
+        }
+        Update: {
+          cards_config?: string | null
+          created_at?: string | null
+          department?: string | null
+          id?: string | null
+          updated_at?: string | null
+          updated_by?: string | null
+          view_type?: string | null
+        }
+        Relationships: []
+      }
+      backup_department_dashboard_comunicacao: {
+        Row: {
+          cards_config: string | null
+          created_at: string | null
+          department: string | null
+          id: string | null
+          updated_at: string | null
+          updated_by: string | null
+          view_type: string | null
+        }
+        Insert: {
+          cards_config?: string | null
+          created_at?: string | null
+          department?: string | null
+          id?: string | null
+          updated_at?: string | null
+          updated_by?: string | null
+          view_type?: string | null
+        }
+        Update: {
+          cards_config?: string | null
+          created_at?: string | null
+          department?: string | null
+          id?: string | null
+          updated_at?: string | null
+          updated_by?: string | null
+          view_type?: string | null
+        }
+        Relationships: []
+      }
+      backup_user_dashboard: {
+        Row: {
+          cards_config: string | null
+          created_at: string | null
+          id: string | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          cards_config?: string | null
+          created_at?: string | null
+          id?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          cards_config?: string | null
+          created_at?: string | null
+          id?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      backup_user_dashboard_comunicacao: {
+        Row: {
+          cards_config: string | null
+          created_at: string | null
+          id: string | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          cards_config?: string | null
+          created_at?: string | null
+          id?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          cards_config?: string | null
+          created_at?: string | null
+          id?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       bairros: {
         Row: {
           criado_em: string
