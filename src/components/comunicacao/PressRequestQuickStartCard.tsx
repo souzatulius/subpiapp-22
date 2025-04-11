@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { supabase } from '@/integrations/supabase/client';
 import { Loader2, Newspaper } from 'lucide-react';
@@ -44,7 +44,7 @@ const PressRequestQuickStartCard: React.FC = () => {
     fetchOrigens();
   }, []);
 
-  const handleOriginClick = useCallback((originId: string) => {
+  const handleOriginClick = React.useCallback((originId: string) => {
     setSelectedId(originId);
     
     // Clear any existing form data in local storage
@@ -77,8 +77,7 @@ const PressRequestQuickStartCard: React.FC = () => {
     return (
       <div className="flex flex-wrap gap-2 justify-start">
         {origens.map((origem) => {
-          // Move the icon rendering inside the map function to avoid hook rule violations
-          const originIcon = useOriginIcon(origem);
+          const Icon = useOriginIcon(origem);
           
           return (
             <motion.button
@@ -94,7 +93,7 @@ const PressRequestQuickStartCard: React.FC = () => {
               layout
             >
               <span className="flex justify-center items-center w-8 h-8 rounded-full bg-blue-100 text-blue-600 mr-2">
-                {originIcon}
+                {Icon}
               </span>
               <span className="text-sm font-medium text-blue-700 truncate">
                 {origem.descricao}
