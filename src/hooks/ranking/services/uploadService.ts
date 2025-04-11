@@ -1,47 +1,65 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { User } from '@supabase/supabase-js';
-import { processExcelFile, mapExcelRowToSGZOrdem } from '../utils/excelUtils';
-import { UploadResult } from '../types/uploadTypes';
 import { toast } from 'sonner';
-import { compararBases, salvarComparacaoNaBase } from '../utils/compararBases';
+import * as XLSX from 'xlsx';
 
-export const fetchLastUpload = async (user: User | null) => {
-  if (!user) return { lastUpload: null, uploads: [] };
-  
-  try {
-    const { data, error } = await supabase
-      .from('sgz_uploads')
-      .select('*')
-      .order('data_upload', { ascending: false })
-      .limit(1);
+export interface UploadResult {
+  success: boolean;
+  recordCount: number;
+  message: string;
+  id?: string;
+  data?: any[];
+}
+
+// Helper function to process Excel file
+export const processExcelFile = async (file: File): Promise<any[]> => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
     
-    if (error) throw error;
-    
-    const lastUpload = data && data.length > 0 ? {
-      id: data[0].id,
-      fileName: data[0].nome_arquivo,
-      uploadDate: new Date(data[0].data_upload).toLocaleString('pt-BR'),
-      processed: data[0].processado
-    } : null;
-    
-    const { data: allUploads, error: uploadsError } = await supabase
-      .from('sgz_uploads')
-      .select('*')
-      .order('data_upload', { ascending: false });
-    
-    if (uploadsError) throw uploadsError;
-    
-    return {
-      lastUpload,
-      uploads: allUploads || []
+    reader.onload = (e) => {
+      try {
+        const data = new Uint8Array(e.target?.result as ArrayBuffer);
+        const workbook = XLSX.read(data, { type: 'array' });
+        
+        // Assume first sheet
+        const firstSheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[firstSheetName];
+        
+        // Convert to JSON
+        const jsonData = XLSX.utils.sheet_to_json(worksheet);
+        resolve(jsonData);
+      } catch (error) {
+        console.error('Error processing Excel file:', error);
+        reject(error);
+      }
     };
-  } catch (error) {
-    console.error('Error fetching last upload:', error);
-    toast.error('Erro ao buscar o último upload');
-    return { lastUpload: null, uploads: [] };
-  }
+    
+    reader.onerror = (error) => {
+      reject(error);
+    };
+    
+    reader.readAsArrayBuffer(file);
+  });
 };
 
+// Map Excel row to SGZ structure
+export const mapExcelRowToSGZOrdem = (row: any, uploadId: string) => {
+  return {
+    sgz_status: row.status || 'pendente',
+    sgz_tipo_servico: row.tipo_servico || 'Não informado',
+    sgz_distrito: row.distrito || 'Não informado',
+    sgz_bairro: row.bairro || null,
+    sgz_empresa: row.empresa || null,
+    sgz_criado_em: row.data_criacao ? new Date(row.data_criacao) : new Date(),
+    sgz_modificado_em: row.data_status ? new Date(row.data_status) : new Date(),
+    ordem_servico: row.ordem_servico || row.numero_os || `OS-${Math.floor(Math.random() * 100000)}`,
+    planilha_referencia: uploadId,
+    sgz_departamento_tecnico: row.area_tecnica || 'STPO'
+  };
+};
+
+// Handle file upload for SGZ spreadsheet
 export const handleFileUpload = async (
   file: File, 
   user: User | null,
@@ -64,11 +82,12 @@ export const handleFileUpload = async (
     if (!file.name.endsWith('.xlsx') && !file.name.endsWith('.xls')) {
       toast.error('Formato de arquivo inválido. Por favor, carregue um arquivo Excel (.xlsx ou .xls)');
       onProgress(0);
-      onProcessingStats(prev => ({...prev, processingStatus: 'error', errorMessage: 'Formato de arquivo inválido'}));
+      onProcessingStats({...{}, processingStatus: 'error', errorMessage: 'Formato de arquivo inválido'});
       return null;
     }
     
     onProgress(25);
+    console.log('Processing Excel file...');
     const excelData = await processExcelFile(file);
     console.log(`Processed ${excelData.length} rows from Excel file`);
     
@@ -82,7 +101,10 @@ export const handleFileUpload = async (
       .select()
       .single();
     
-    if (uploadError) throw uploadError;
+    if (uploadError) {
+      console.error('Error creating upload record:', uploadError);
+      throw uploadError;
+    }
     
     const uploadId = uploadData.id;
     console.log(`Created upload record with ID: ${uploadId}`);
@@ -103,7 +125,10 @@ export const handleFileUpload = async (
         .eq('ordem_servico', ordem.ordem_servico)
         .maybeSingle();
       
-      if (checkError) throw checkError;
+      if (checkError) {
+        console.error('Error checking existing order:', checkError);
+        throw checkError;
+      }
       
       if (existingOrdem) {
         if (existingOrdem.sgz_status !== ordem.sgz_status) {
@@ -116,7 +141,10 @@ export const handleFileUpload = async (
             })
             .eq('id', existingOrdem.id);
             
-          if (updateError) throw updateError;
+          if (updateError) {
+            console.error('Error updating order:', updateError);
+            throw updateError;
+          }
           ordensAtualizadas++;
         }
       } else {
@@ -132,11 +160,15 @@ export const handleFileUpload = async (
     });
     
     if (ordensParaInserir.length > 0) {
+      console.log(`Inserting ${ordensParaInserir.length} new orders...`);
       const { error: insertError } = await supabase
         .from('sgz_ordens_servico')
         .insert(ordensParaInserir);
       
-      if (insertError) throw insertError;
+      if (insertError) {
+        console.error('Error inserting orders:', insertError);
+        throw insertError;
+      }
       
       console.log(`Inserted ${ordensParaInserir.length} new orders`);
     }
@@ -146,7 +178,10 @@ export const handleFileUpload = async (
       .update({ processado: true })
       .eq('id', uploadId);
       
-    if (updateUploadError) throw updateUploadError;
+    if (updateUploadError) {
+      console.error('Error marking upload as processed:', updateUploadError);
+      throw updateUploadError;
+    }
     console.log(`Marked upload ${uploadId} as processed`);
     
     onProgress(100);
@@ -183,33 +218,22 @@ export const handleFileUpload = async (
   }
 };
 
-export const handleDeleteUpload = async (uploadId: string, user: User | null) => {
-  if (!user) return;
-
-  try {
-    const { error: deleteOrdensError } = await supabase
-      .from('sgz_ordens_servico')
-      .delete()
-      .eq('planilha_referencia', uploadId);
-    
-    if (deleteOrdensError) throw deleteOrdensError;
-    
-    const { error: deleteUploadError } = await supabase
-      .from('sgz_uploads')
-      .delete()
-      .eq('id', uploadId);
-    
-    if (deleteUploadError) throw deleteUploadError;
-    
-    toast.success('Upload e dados relacionados excluídos com sucesso');
-    return true;
-  } catch (error) {
-    console.error('Error deleting upload:', error);
-    toast.error('Erro ao excluir o upload');
-    return false;
-  }
+// Map Excel row to Painel structure
+export const mapExcelRowToPainelZeladoria = (row: any, uploadId: string) => {
+  return {
+    id_os: row.id_os || row.numero_os || `OS-${Math.floor(Math.random() * 100000)}`,
+    status: row.status || 'pendente',
+    tipo_servico: row.tipo_servico || 'Não informado',
+    data_abertura: row.data_abertura ? new Date(row.data_abertura) : new Date(),
+    data_fechamento: row.data_fechamento ? new Date(row.data_fechamento) : null,
+    distrito: row.distrito || 'Não informado',
+    departamento: row.departamento || 'Não informado',
+    responsavel_real: row.responsavel || row.responsavel_real || null,
+    upload_id: uploadId
+  };
 };
 
+// Handle file upload for Painel Zeladoria spreadsheet
 export const handlePainelZeladoriaUpload = async (
   file: File, 
   user: User | null,
@@ -229,14 +253,21 @@ export const handlePainelZeladoriaUpload = async (
       recordCount: 0
     });
     
-    const dadosPainel = await processExcelFile(file);
-    onProgress(50);
+    if (!file.name.endsWith('.xlsx') && !file.name.endsWith('.xls')) {
+      toast.error('Formato de arquivo inválido. Por favor, carregue um arquivo Excel (.xlsx ou .xls)');
+      onProgress(0);
+      onProcessingStats({
+        processingStatus: 'error',
+        message: 'Formato de arquivo inválido',
+        recordCount: 0
+      });
+      return null;
+    }
     
-    const { data: sgzData, error: sgzError } = await supabase
-      .from('sgz_ordens_servico')
-      .select('*');
-    
-    if (sgzError) throw sgzError;
+    onProgress(30);
+    console.log('Processing Painel Excel file...');
+    const excelData = await processExcelFile(file);
+    console.log(`Processed ${excelData.length} rows from Painel Excel file`);
     
     const { data: uploadData, error: uploadError } = await supabase
       .from('painel_zeladoria_uploads')
@@ -247,42 +278,39 @@ export const handlePainelZeladoriaUpload = async (
       .select()
       .single();
     
-    if (uploadError) throw uploadError;
+    if (uploadError) {
+      console.error('Error creating painel upload record:', uploadError);
+      throw uploadError;
+    }
     
     const uploadId = uploadData.id;
+    console.log(`Created painel upload record with ID: ${uploadId}`);
     
-    const resultadoComparacao = compararBases(sgzData, dadosPainel);
-    const comparacaoSalva = await salvarComparacaoNaBase(resultadoComparacao, uploadId);
+    onProgress(60);
     
-    const dadosParaInserir = dadosPainel.map(row => ({
-      id_os: row.id_os,
-      status: row.status,
-      tipo_servico: row.tipo_servico,
-      data_abertura: row.data_abertura,
-      data_fechamento: row.data_fechamento,
-      distrito: row.distrito,
-      departamento: row.departamento,
-      responsavel_real: row.responsavel_real,
-      upload_id: uploadId
-    }));
+    // Prepare data for insertion
+    const dadosParaInserir = excelData.map(row => mapExcelRowToPainelZeladoria(row, uploadId));
+    
+    onProgress(75);
+    console.log(`Inserting ${dadosParaInserir.length} painel records...`);
     
     const { error: insertError } = await supabase
       .from('painel_zeladoria_dados')
       .insert(dadosParaInserir);
     
-    if (insertError) throw insertError;
+    if (insertError) {
+      console.error('Error inserting painel data:', insertError);
+      throw insertError;
+    }
     
     onProgress(100);
     onProcessingStats({
       processingStatus: 'success',
       message: 'Dados do Painel processados com sucesso!',
-      recordCount: dadosParaInserir.length,
-      comparacaoStats: comparacaoSalva
+      recordCount: dadosParaInserir.length
     });
     
-    toast.success(
-      `Planilha do Painel processada com ${comparacaoSalva.totalDivergencias} divergências encontradas.`
-    );
+    toast.success(`Planilha do Painel processada com sucesso! ${dadosParaInserir.length} registros processados.`);
     
     return {
       success: true,

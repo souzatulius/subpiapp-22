@@ -2,6 +2,8 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Upload, ListStart, CalendarDays } from 'lucide-react';
+import { toast } from 'sonner';
+import { handleFileUpload, handlePainelZeladoriaUpload } from '@/hooks/ranking/services/uploadService';
 
 interface UploadSectionProps {
   onUploadStart: () => void;
@@ -9,6 +11,7 @@ interface UploadSectionProps {
   onPainelUploadComplete: (id: string, data: any[]) => void;
   isUploading: boolean;
   user: any;
+  onRefreshData: () => Promise<void>;
 }
 
 const UploadSection = ({
@@ -16,34 +19,72 @@ const UploadSection = ({
   onUploadComplete,
   onPainelUploadComplete,
   isUploading,
-  user
+  user,
+  onRefreshData
 }: UploadSectionProps) => {
-  // Simulate file upload logic
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>, type: 'sgz' | 'painel') => {
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [uploadStats, setUploadStats] = useState<any>({});
+
+  // Handle SGZ file upload
+  const handleSGZFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
     onUploadStart();
-
-    // Simulate processing delay
-    setTimeout(() => {
-      const mockId = `upload-${Date.now()}`;
-      const mockData = Array(50).fill(0).map((_, i) => ({
-        id: i,
-        status: ['concluido', 'pendente', 'cancelado'][Math.floor(Math.random() * 3)],
-        data: new Date().toISOString(),
-        servico: ['Poda de Árvore', 'Tapa Buraco', 'Limpeza de Bueiro'][Math.floor(Math.random() * 3)]
-      }));
+    try {
+      const result = await handleFileUpload(
+        file, 
+        user, 
+        (progress) => setUploadProgress(progress),
+        (stats) => setUploadStats(stats)
+      );
       
-      if (type === 'sgz') {
-        onUploadComplete(mockId, mockData);
+      if (result && result.success) {
+        toast.success(`Upload da planilha SGZ concluído: ${result.recordCount} registros processados`);
+        onUploadComplete(result.id, result.data || []);
+        // Refresh the data to show the new uploads
+        await onRefreshData();
       } else {
-        onPainelUploadComplete(mockId, mockData);
+        toast.error(`Erro no upload: ${result?.message || 'Erro desconhecido'}`);
       }
-      
+    } catch (err) {
+      console.error('Error uploading SGZ file:', err);
+      toast.error('Erro ao processar arquivo SGZ');
+    } finally {
       // Reset the file input
       event.target.value = '';
-    }, 1500);
+    }
+  };
+
+  // Handle Painel file upload
+  const handlePainelFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    onUploadStart();
+    try {
+      const result = await handlePainelZeladoriaUpload(
+        file, 
+        user, 
+        (progress) => setUploadProgress(progress),
+        (stats) => setUploadStats(stats)
+      );
+      
+      if (result && result.success) {
+        toast.success(`Upload da planilha do Painel concluído: ${result.recordCount} registros processados`);
+        onPainelUploadComplete(result.id, result.data || []);
+        // Refresh the data to show the new uploads
+        await onRefreshData();
+      } else {
+        toast.error(`Erro no upload: ${result?.message || 'Erro desconhecido'}`);
+      }
+    } catch (err) {
+      console.error('Error uploading Painel file:', err);
+      toast.error('Erro ao processar arquivo do Painel');
+    } finally {
+      // Reset the file input
+      event.target.value = '';
+    }
   };
 
   return (
@@ -60,23 +101,30 @@ const UploadSection = ({
           id="sgzFile"
           accept=".xlsx,.xls,.csv"
           className="hidden"
-          onChange={(e) => handleFileUpload(e, 'sgz')}
+          onChange={handleSGZFileUpload}
           disabled={isUploading}
         />
         <label htmlFor="sgzFile">
           <Button
             variant="outline"
             size="sm"
-            className="cursor-pointer bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200"
+            className={`cursor-pointer ${isUploading ? 'bg-gray-200' : 'bg-gray-100'} text-gray-700 border-gray-300 hover:bg-gray-200`}
             disabled={isUploading}
             asChild
           >
             <span>
               <Upload className="h-4 w-4 mr-2" />
-              {isUploading ? 'Carregando...' : 'Selecionar Arquivo'}
+              {isUploading ? `Carregando... ${uploadProgress}%` : 'Selecionar Arquivo'}
             </span>
           </Button>
         </label>
+        
+        {isUploading && uploadStats.processingStatus === 'processing' && uploadStats.newOrders !== undefined && (
+          <div className="mt-2 text-xs text-gray-600">
+            <p>Novas ordens: {uploadStats.newOrders}</p>
+            <p>Ordens atualizadas: {uploadStats.updatedOrders}</p>
+          </div>
+        )}
       </div>
 
       {/* Painel Upload */}
@@ -91,23 +139,30 @@ const UploadSection = ({
           id="painelFile"
           accept=".xlsx,.xls,.csv"
           className="hidden"
-          onChange={(e) => handleFileUpload(e, 'painel')}
+          onChange={handlePainelFileUpload}
           disabled={isUploading}
         />
         <label htmlFor="painelFile">
           <Button
             variant="outline"
             size="sm"
-            className="cursor-pointer bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200"
+            className={`cursor-pointer ${isUploading ? 'bg-gray-200' : 'bg-gray-100'} text-gray-700 border-gray-300 hover:bg-gray-200`}
             disabled={isUploading}
             asChild
           >
             <span>
               <Upload className="h-4 w-4 mr-2" />
-              {isUploading ? 'Carregando...' : 'Selecionar Arquivo'}
+              {isUploading ? `Carregando... ${uploadProgress}%` : 'Selecionar Arquivo'}
             </span>
           </Button>
         </label>
+        
+        {isUploading && uploadStats.processingStatus === 'processing' && uploadStats.message && (
+          <div className="mt-2 text-xs text-gray-600">
+            <p>{uploadStats.message}</p>
+            {uploadStats.recordCount > 0 && <p>Registros: {uploadStats.recordCount}</p>}
+          </div>
+        )}
       </div>
     </div>
   );

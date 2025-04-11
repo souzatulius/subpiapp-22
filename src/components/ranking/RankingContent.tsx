@@ -1,10 +1,9 @@
 
 import React, { useState } from 'react';
-import { useRankingCharts } from '@/hooks/ranking/useRankingCharts';
+import { useRealData } from './RealDataProvider';
 import FilterDialog from './FilterDialog';
 import RankingCharts from './RankingCharts';
 import RankingFilters from './RankingFilters';
-import DemoChartsSection from './DemoChartsSection';
 import { ChartVisibility } from '@/components/ranking/types';
 
 interface RankingContentProps {
@@ -29,12 +28,42 @@ const RankingContent = ({
     isLoading, 
     sgzData, 
     painelData,
-    chartVisibility,
-    setChartVisibility
-  } = useRankingCharts();
+    refreshData,
+    lastUpdated,
+    hasData
+  } = useRealData();
+  
+  const [chartVisibility, setChartVisibility] = useState<ChartVisibility>({
+    districtPerformance: true,
+    serviceTypes: true,
+    resolutionTime: true,
+    responsibility: true,
+    evolution: true,
+    departmentComparison: true,
+    oldestPendingList: true,
+    statusDistribution: true,
+    topCompanies: true,
+    districtDistribution: true,
+    servicesByDepartment: true,
+    servicesByDistrict: true,
+    timeComparison: true,
+    dailyDemands: true,
+    statusTransition: true,
+    closureTime: true,
+    neighborhoodComparison: true,
+    districtEfficiencyRadar: true,
+    externalDistricts: true,
+    efficiencyImpact: true,
+    criticalStatus: true,
+    serviceDiversity: true,
+  });
 
   const handleSimulateIdealRanking = () => {
     setIsSimulationActive(prev => !prev);
+  };
+
+  const handleRefresh = () => {
+    refreshData();
   };
 
   return (
@@ -44,10 +73,9 @@ const RankingContent = ({
         onOpenFilterDialog={() => setFilterDialogOpen(true)}
         buttonText={buttonText}
         lastUpdateText={lastUpdateText}
+        lastUpdated={lastUpdated}
+        onRefresh={handleRefresh}
       />
-      
-      {/* Demo Charts Section */}
-      <DemoChartsSection className="mt-6" />
       
       {/* Charts */}
       <div className="mt-6">

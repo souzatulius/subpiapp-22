@@ -1,228 +1,323 @@
-
-import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import DemandasTable from './DemandasTable';
-import DemandasSearchBar from './DemandasSearchBar';
-import { LoadingState } from './LoadingState';
-import DeleteDemandDialog from './DeleteDemandDialog';
-import { useDemandasData } from '@/hooks/consultar-demandas/useDemandasData';
-import { usePermissions } from '@/hooks/permissions';
-import DemandDetail from '@/components/demandas/DemandDetail';
-import { Demand } from '@/hooks/consultar-demandas/types';
-import DemandaCards from './DemandaCards';
-import FilterBar from './FilterBar';
-import { DateRange } from 'react-day-picker';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { ChevronDown, ChevronUp, Filter, LayoutGrid, LayoutList } from 'lucide-react';
+import { Search } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { toast } from '@/components/ui/use-toast';
+import { supabase } from '@/integrations/supabase/client';
+import { useRouter } from 'next/navigation';
+import DemandasTable from './DemandasTable';
+import AttentionBox from '@/components/ui/attention-box';
+import { Loader2 } from 'lucide-react';
 
 const ConsultarDemandasContent = () => {
-  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedDemand, setSelectedDemand] = useState<Demand | null>(null);
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [isDetailOpen, setIsDetailOpen] = useState(false);
-  const { isAdmin } = usePermissions();
-  const [viewMode, setViewMode] = useState<'cards' | 'list'>('cards');
-  const [showFilters, setShowFilters] = useState(true);
-  
-  const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
-  const [coordenacao, setCoordenacao] = useState<string>('todos');
-  const [tema, setTema] = useState<string>('todos');
-  const [status, setStatus] = useState<string>('todos');
-  const [prioridade, setPrioridade] = useState<string>('todas');
-
-  const {
-    filteredDemandas: demandas,
-    isLoading,
-    error,
-    refetch,
-    setSearchTerm: updateSearchTerm,
-    handleDeleteConfirm,
-    selectedDemand: hookSelectedDemand,
-    setSelectedDemand: hookSetSelectedDemand,
-    applyFilters,
-  } = useDemandasData();
-
+  const [statusFilter, setStatusFilter] = useState('');
+  const [origemFilter, setOrigemFilter] = useState('');
+  const [demandas, setDemandas] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [totalCount, setTotalCount] = useState(0);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
-  const totalCount = demandas ? demandas.length : 0;
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [demandToDelete, setDemandToDelete] = useState<{ id: string; title: string; hasNotes: boolean } | null>(null);
+  const router = useRouter();
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [origens, setOrigens] = useState<any[]>([]);
 
+  // Fetch origens on mount
   useEffect(() => {
-    refetch();
-  }, [refetch]);
+    const fetchOrigens = async () => {
+      const { data, error } = await supabase
+        .from('origens_demandas')
+        .select('id, descricao');
 
+      if (error) {
+        console.error('Erro ao buscar origens:', error);
+        toast({
+          title: 'Erro ao buscar origens',
+          description: error.message,
+          variant: 'destructive'
+        });
+      } else {
+        setOrigens(data || []);
+      }
+    };
+
+    fetchOrigens();
+  }, []);
+
+  // Fetch demands from Supabase
+  const fetchDemandas = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      let query = supabase
+        .from('demandas')
+        .select(`*, 
+          problemas ( descricao ), 
+          origens_demandas ( descricao )`,
+          { count: 'exact' }
+        )
+        .range((page - 1) * pageSize, page * pageSize - 1)
+        .order('criado_em', { ascending: false });
+
+      if (searchTerm) {
+        query = query.ilike('titulo', `%${searchTerm}%`);
+      }
+
+      if (statusFilter) {
+        query = query.eq('status', statusFilter);
+      }
+
+      if (origemFilter) {
+        query = query.eq('origem_id', origemFilter);
+      }
+
+      const { data, error, count } = await query;
+
+      if (error) {
+        console.error('Erro ao buscar demandas:', error);
+        toast({
+          title: 'Erro ao buscar demandas',
+          description: error.message,
+          variant: 'destructive'
+        });
+      } else {
+        setDemandas(
+          data?.map((item: any) => ({
+            ...item,
+            problema_descricao: item.problemas?.descricao,
+            origem_descricao: item.origens_demandas?.descricao,
+          })) || []
+        );
+        setTotalCount(count || 0);
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  }, [searchTerm, statusFilter, origemFilter, page, pageSize]);
+
+  // Check if user is admin
   useEffect(() => {
-    applyFilters({
-      searchTerm,
-      dateRange,
-      coordenacao,
-      tema,
-      status,
-      prioridade
+    const checkAdmin = async () => {
+      const { data, error } = await supabase.auth.getSession();
+      if (data?.session?.user) {
+        const { data: profileData, error: profileError } = await supabase
+          .from('profiles')
+          .select('is_admin')
+          .eq('id', data.session.user.id)
+          .single();
+
+        if (profileError) {
+          console.error('Erro ao buscar perfil:', profileError);
+        } else {
+          setIsAdmin(profileData?.is_admin || false);
+        }
+      }
+    };
+
+    checkAdmin();
+  }, []);
+
+  // Fetch demands on mount and when filters change
+  useEffect(() => {
+    fetchDemandas();
+  }, [fetchDemandas]);
+
+  // Handle navigation to view demanda
+  const handleViewDemanda = (id: string) => {
+    router.push(`/dashboard/demandas/${id}`);
+  };
+
+  // Handle navigation to view nota
+  const handleViewNota = (demandId: string) => {
+    router.push(`/dashboard/notas/nova?demanda=${demandId}`);
+  };
+
+  // Check if demand has notes
+  const checkIfDemandHasNotes = async (demandId: string): Promise<boolean> => {
+    const { data, error } = await supabase
+      .from('notas')
+      .select('*', { count: 'exact' })
+      .eq('demanda_id', demandId);
+
+    if (error) {
+      console.error('Erro ao verificar notas:', error);
+      return false;
+    }
+
+    return (data?.length || 0) > 0;
+  };
+
+  // Handle deletion of demand
+  const handleDeleteDemand = async (id: string, title: string) => {
+    setDemandToDelete({
+      id,
+      title,
+      hasNotes: await checkIfDemandHasNotes(id)
     });
-  }, [searchTerm, dateRange, coordenacao, tema, status, prioridade, applyFilters]);
-
-  const handleSearch = (term: string) => {
-    updateSearchTerm(term);
-    setPage(1);
+    setIsDeleteDialogOpen(true);
   };
 
-  const handleViewDemand = (demand: Demand) => {
-    setSelectedDemand(demand);
-    setIsDetailOpen(true);
-  };
+  // Confirm deletion of demand
+  const confirmDeleteDemand = async () => {
+    if (!demandToDelete) return;
 
-  const handleCloseDetail = () => {
-    setIsDetailOpen(false);
-    setSelectedDemand(null);
-  };
+    setIsLoading(true);
+    try {
+      const { error } = await supabase
+        .from('demandas')
+        .delete()
+        .eq('id', demandToDelete.id);
 
-  const handleEdit = (id: string) => {
-    navigate(`/dashboard/comunicacao/responder?id=${id}`);
-  };
-
-  const handleDelete = (demand: Demand) => {
-    setSelectedDemand(demand);
-    setIsDeleteModalOpen(true);
-  };
-
-  const confirmDelete = async () => {
-    if (selectedDemand) {
-      await handleDeleteConfirm();
-      setIsDeleteModalOpen(false);
-      setSelectedDemand(null);
-      refetch();
+      if (error) {
+        console.error('Erro ao excluir demanda:', error);
+        toast({
+          title: 'Erro ao excluir demanda',
+          description: error.message,
+          variant: 'destructive'
+        });
+      } else {
+        toast({
+          title: 'Demanda excluída com sucesso!',
+        });
+        fetchDemandas();
+      }
+    } finally {
+      setIsLoading(false);
+      setIsDeleteDialogOpen(false);
+      setDemandToDelete(null);
     }
   };
 
-  const cancelDelete = () => {
-    setIsDeleteModalOpen(false);
-    setSelectedDemand(null);
-  };
-
-  const resetFilters = () => {
-    setDateRange(undefined);
-    setCoordenacao('todos');
-    setTema('todos');
-    setStatus('todos');
-    setPrioridade('todas');
-    setSearchTerm('');
-    updateSearchTerm('');
-  };
-
-  const toggleFilters = () => {
-    setShowFilters(!showFilters);
-  };
-
-  const handleViewNota = (demandId: string) => {
-    navigate(`/dashboard/comunicacao/notas/editar?demanda_id=${demandId}`);
-  };
-
-  if (isLoading) {
-    return <LoadingState />;
-  }
-
-  if (error) {
-    return <div className="text-red-500">Error: {error.message}</div>;
-  }
-
   return (
-    <div className="w-full px-0">
-      <div className="w-full flex flex-col md:flex-row gap-4 items-center mb-4">
-        <div className="w-full">
-          <DemandasSearchBar
-            searchTerm={searchTerm}
-            setSearchTerm={setSearchTerm}
-            onSearch={handleSearch}
+    <div className="space-y-4">
+      {/* Search and Filters */}
+      <div className="flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-4">
+        <div className="flex items-center w-full md:w-1/3">
+          <Input
+            type="search"
+            placeholder="Buscar por título..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="rounded-r-none"
           />
+          <Button onClick={fetchDemandas} className="rounded-l-none">
+            <Search className="h-4 w-4" />
+          </Button>
         </div>
-        <div className="flex shrink-0 space-x-2">
-          <Button 
-            variant="outline" 
-            className="rounded-xl flex items-center gap-2"
-            onClick={() => setViewMode(viewMode === 'cards' ? 'list' : 'cards')}
-          >
-            {viewMode === 'cards' ? (
-              <>
-                <LayoutList className="h-4 w-4" />
-                <span className="hidden sm:inline">Lista</span>
-              </>
-            ) : (
-              <>
-                <LayoutGrid className="h-4 w-4" />
-                <span className="hidden sm:inline">Cards</span>
-              </>
-            )}
-          </Button>
-          <Button 
-            variant="outline" 
-            className="rounded-xl"
-            onClick={toggleFilters}
-          >
-            <Filter className="h-4 w-4 mr-2" />
-            <span className="hidden sm:inline">Filtros</span>
-            {showFilters ? <ChevronUp className="h-4 w-4 ml-2" /> : <ChevronDown className="h-4 w-4 ml-2" />}
-          </Button>
+
+        <div className="flex space-x-2 w-full md:w-2/3">
+          <Select onValueChange={setStatusFilter}>
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Filtrar por status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="">Todos os status</SelectItem>
+              <SelectItem value="pendente">Pendente</SelectItem>
+              <SelectItem value="em-andamento">Em Andamento</SelectItem>
+              <SelectItem value="concluido">Concluído</SelectItem>
+              <SelectItem value="cancelado">Cancelado</SelectItem>
+              <SelectItem value="aguardando-nota">Aguardando Nota</SelectItem>
+            </SelectContent>
+          </Select>
+
+          <Select onValueChange={setOrigemFilter}>
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Filtrar por origem" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="">Todas as origens</SelectItem>
+              {origens.map((origem) => (
+                <SelectItem key={origem.id} value={origem.id}>
+                  {origem.descricao}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       </div>
       
-      {showFilters && (
-        <FilterBar
-          viewMode={viewMode}
-          setViewMode={setViewMode}
-          dateRange={dateRange}
-          onDateRangeChange={setDateRange}
-          coordenacao={coordenacao}
-          onCoordenacaoChange={setCoordenacao}
-          tema={tema}
-          onTemaChange={setTema}
-          status={status}
-          onStatusChange={setStatus}
-          prioridade={prioridade}
-          onPrioridadeChange={setPrioridade}
-          onResetFilters={resetFilters}
-        />
-      )}
-      
-      <div className="w-full mt-4">
-        {viewMode === 'cards' ? (
-          <DemandaCards
-            demandas={demandas as any}
-            isLoading={isLoading}
-            onSelectDemand={handleViewDemand as any}
-          />
+      {/* Demands Table */}
+      <div className="bg-white rounded-lg shadow">
+        <div className="p-4 border-b border-gray-100">
+          <h2 className="text-lg font-medium text-gray-900">Demandas</h2>
+          <p className="text-sm text-gray-500">Listagem de todas as demandas do sistema</p>
+        </div>
+        
+        {isLoading ? (
+          <div className="flex justify-center items-center p-8">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500" />
+          </div>
         ) : (
-          <DemandasTable
-            demandas={demandas as any}
-            onViewDemand={handleViewDemand as any}
-            onDelete={handleDelete as any}
-            onViewNota={handleViewNota}
-            totalCount={totalCount}
-            page={page}
-            pageSize={pageSize}
-            setPage={setPage}
-            setPageSize={setPageSize}
-            isAdmin={isAdmin}
-          />
+          <div className="p-4">
+            <DemandasTable 
+              demandas={demandas} 
+              onViewDemand={handleViewDemanda} 
+              onDelete={handleDeleteDemand}
+              onViewNota={handleViewNota}
+              totalCount={totalCount}
+              page={page}
+              pageSize={pageSize}
+              setPage={setPage}
+              setPageSize={setPageSize}
+              isAdmin={isAdmin}
+            />
+          </div>
         )}
       </div>
       
-      {selectedDemand && (
-        <DemandDetail 
-          demand={selectedDemand as any} 
-          isOpen={isDetailOpen} 
-          onClose={handleCloseDetail}
-        />
-      )}
-      
-      {selectedDemand && (
-        <DeleteDemandDialog
-          isOpen={isDeleteModalOpen}
-          demandId={selectedDemand.id}
-          onConfirm={confirmDelete}
-          onCancel={cancelDelete}
-        />
-      )}
+      {/* Delete Demand Dialog */}
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={() => setIsDeleteDialogOpen(false)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Excluir Demanda</AlertDialogTitle>
+            <AlertDialogDescription className="text-gray-700">
+              <p className="mb-4">
+                Tem certeza que deseja excluir a demanda <strong>"{demandToDelete?.title}"</strong>?
+              </p>
+              
+              {demandToDelete?.hasNotes && (
+                <AttentionBox title="Atenção:" className="mb-4">
+                  Esta demanda tem notas vinculadas a ela.
+                  Ao excluir esta demanda, todas as notas associadas também serão excluídas permanentemente.
+                </AttentionBox>
+              )}
+              
+              <p>Esta ação é permanente e não pode ser desfeita.</p>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setIsDeleteDialogOpen(false)} disabled={isLoading}>
+              Cancelar
+            </AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={confirmDeleteDemand} 
+              disabled={isLoading}
+              className="bg-red-600 hover:bg-red-700 text-white"
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Excluindo...
+                </>
+              ) : (
+                "Excluir"
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

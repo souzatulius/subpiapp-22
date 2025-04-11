@@ -1,39 +1,62 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Calendar, RefreshCcw } from 'lucide-react';
-import { format } from 'date-fns';
+import { SlidersHorizontal, RefreshCw } from 'lucide-react';
+import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
 interface RankingFiltersProps {
   onOpenFilterDialog: () => void;
   buttonText?: string;
   lastUpdateText?: string;
+  lastUpdated?: Date | null;
+  onRefresh?: () => void;
 }
 
-const RankingFilters: React.FC<RankingFiltersProps> = ({ 
-  onOpenFilterDialog, 
+const RankingFilters: React.FC<RankingFiltersProps> = ({
+  onOpenFilterDialog,
   buttonText = 'Filtrar',
-  lastUpdateText = 'Última atualização'
+  lastUpdateText = 'Última atualização',
+  lastUpdated,
+  onRefresh
 }) => {
-  const lastUpdate = new Date();
-  
+  const formatLastUpdated = () => {
+    if (!lastUpdated) return 'Nunca';
+    
+    return formatDistanceToNow(lastUpdated, {
+      addSuffix: true,
+      locale: ptBR
+    });
+  };
+
   return (
-    <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
-      <div className="flex items-center text-sm text-gray-500">
-        <Calendar className="h-4 w-4 mr-2" />
-        {lastUpdateText}: {format(lastUpdate, "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
-      </div>
-      
-      <div className="flex gap-2">
-        <Button 
-          variant="outline" 
-          className="flex items-center gap-2 border-orange-200 hover:border-orange-300 hover:bg-orange-50"
+    <div className="flex flex-wrap items-center justify-between gap-2 bg-white p-3 rounded-lg border border-gray-200">
+      <div className="flex items-center gap-2">
+        <Button
           onClick={onOpenFilterDialog}
+          variant="outline"
+          size="sm"
+          className="bg-white border-gray-200 text-gray-700 hover:bg-gray-100"
         >
-          <RefreshCcw className="h-4 w-4" />
+          <SlidersHorizontal className="h-4 w-4 mr-2" />
           {buttonText}
         </Button>
+        
+        {onRefresh && (
+          <Button
+            onClick={onRefresh}
+            variant="outline"
+            size="sm"
+            className="bg-white border-gray-200 text-gray-700 hover:bg-gray-100"
+          >
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Atualizar
+          </Button>
+        )}
+      </div>
+      
+      <div className="text-sm text-gray-500">
+        {lastUpdateText}: <span className="font-medium">{formatLastUpdated()}</span>
       </div>
     </div>
   );
