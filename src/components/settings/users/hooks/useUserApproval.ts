@@ -3,9 +3,11 @@ import { useState } from 'react';
 import { toast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { User } from '../types';
+import { useAnimatedFeedback } from '@/hooks/use-animated-feedback';
 
 export const useUserApproval = (refreshUsers: () => Promise<void>) => {
   const [approving, setApproving] = useState(false);
+  const { showFeedback } = useAnimatedFeedback();
 
   const approveUser = async (userId: string, userName: string, userEmail: string) => {
     setApproving(true);
@@ -73,6 +75,9 @@ export const useUserApproval = (refreshUsers: () => Promise<void>) => {
         description: `${userName} (${userEmail}) agora tem acesso ao sistema com permissão de Administrador.`
       });
       
+      // Show animated feedback
+      showFeedback('success', 'Usuário aprovado com sucesso!');
+      
       // Refresh the users list
       await refreshUsers();
     } catch (error) {
@@ -82,6 +87,9 @@ export const useUserApproval = (refreshUsers: () => Promise<void>) => {
         description: error.message || "Não foi possível aprovar o usuário. Tente novamente.",
         variant: "destructive"
       });
+      
+      // Show error feedback
+      showFeedback('error', 'Não foi possível aprovar o usuário');
     } finally {
       setApproving(false);
     }

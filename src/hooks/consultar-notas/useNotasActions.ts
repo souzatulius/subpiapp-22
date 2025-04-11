@@ -4,12 +4,14 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
 import { useNotaStatusValues } from './useNotaStatusValues';
 import { useAuth } from '@/hooks/useSupabaseAuth';
+import { useAnimatedFeedback } from '@/hooks/use-animated-feedback';
 
 export const useNotasActions = (refetch: () => Promise<any>) => {
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [statusLoading, setStatusLoading] = useState(false);
   const { statusValues } = useNotaStatusValues();
   const { user, session } = useAuth();
+  const { showFeedback } = useAnimatedFeedback();
 
   const updateNotaStatus = async (notaId: string, newStatus: string) => {
     setStatusLoading(true);
@@ -71,6 +73,13 @@ export const useNotasActions = (refetch: () => Promise<any>) => {
         variant: 'default',
       });
       
+      // Show animated feedback
+      if (dbStatus === 'aprovada') {
+        showFeedback('success', 'Nota aprovada com sucesso!');
+      } else if (dbStatus === 'rejeitada') {
+        showFeedback('error', 'Nota rejeitada');
+      }
+      
       // Atualizar lista de notas
       await refetch();
       
@@ -82,6 +91,10 @@ export const useNotasActions = (refetch: () => Promise<any>) => {
         description: `Não foi possível atualizar a nota: ${error.message || 'Erro desconhecido'}`,
         variant: 'destructive',
       });
+      
+      // Show error feedback
+      showFeedback('error', 'Falha ao atualizar nota');
+      
       return false;
     } finally {
       setStatusLoading(false);
@@ -117,7 +130,14 @@ export const useNotasActions = (refetch: () => Promise<any>) => {
       }
 
       // Atualizar status para 'excluida' (feminino)
-      return await updateNotaStatus(notaId, 'excluido');
+      const result = await updateNotaStatus(notaId, 'excluido');
+      
+      if (result) {
+        // Show animated feedback
+        showFeedback('success', 'Nota excluída com sucesso');
+      }
+      
+      return result;
     } catch (error: any) {
       console.error('Erro ao excluir nota:', error);
       toast({
@@ -125,6 +145,10 @@ export const useNotasActions = (refetch: () => Promise<any>) => {
         description: 'Não foi possível excluir a nota',
         variant: 'destructive',
       });
+      
+      // Show error feedback
+      showFeedback('error', 'Falha ao excluir nota');
+      
       return false;
     } finally {
       setDeleteLoading(false);

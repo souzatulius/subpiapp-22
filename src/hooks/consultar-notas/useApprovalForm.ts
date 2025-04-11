@@ -5,6 +5,7 @@ import { toast } from '@/components/ui/use-toast';
 import { NotaOficial } from '@/types/nota';
 import { useNotasActions } from './useNotasActions';
 import { useAuth } from '@/hooks/useSupabaseAuth';
+import { useAnimatedFeedback } from '@/hooks/use-animated-feedback';
 
 export const useApprovalForm = (refetch: () => Promise<any>) => {
   const [selectedNota, setSelectedNota] = useState<NotaOficial | null>(null);
@@ -15,6 +16,7 @@ export const useApprovalForm = (refetch: () => Promise<any>) => {
   
   const { user, session } = useAuth();
   const { updateNotaStatus, statusLoading } = useNotasActions(refetch);
+  const { showFeedback } = useAnimatedFeedback();
 
   const handleSelectNota = (nota: NotaOficial) => {
     setSelectedNota(nota);
@@ -42,6 +44,7 @@ export const useApprovalForm = (refetch: () => Promise<any>) => {
         description: "Usuário não autenticado ou nota não selecionada.",
         variant: "destructive"
       });
+      showFeedback('error', 'Erro ao salvar edições');
       return;
     }
     
@@ -84,6 +87,9 @@ export const useApprovalForm = (refetch: () => Promise<any>) => {
         description: "As alterações foram salvas com sucesso.",
       });
       
+      // Show animated feedback
+      showFeedback('success', 'Nota atualizada com sucesso!');
+      
       await refetch();
       setEditMode(false);
       
@@ -103,6 +109,9 @@ export const useApprovalForm = (refetch: () => Promise<any>) => {
         description: `Não foi possível salvar as alterações: ${error.message || 'Erro desconhecido'}`,
         variant: "destructive"
       });
+      
+      // Show error feedback
+      showFeedback('error', 'Falha ao salvar edições');
     } finally {
       setIsSubmitting(false);
     }
@@ -116,6 +125,7 @@ export const useApprovalForm = (refetch: () => Promise<any>) => {
         description: "Usuário não autenticado ou nota não selecionada.",
         variant: "destructive"
       });
+      showFeedback('error', 'Não foi possível aprovar a nota');
       return;
     }
     
@@ -127,6 +137,8 @@ export const useApprovalForm = (refetch: () => Promise<any>) => {
       const result = await updateNotaStatus(selectedNota.id, 'aprovado');
       
       if (result) {
+        // Show animated feedback
+        showFeedback('success', 'Nota aprovada com sucesso!');
         setSelectedNota(null);
       }
     } catch (error: any) {
@@ -136,6 +148,9 @@ export const useApprovalForm = (refetch: () => Promise<any>) => {
         description: `Não foi possível aprovar a nota oficial: ${error.message || 'Erro desconhecido'}`,
         variant: "destructive"
       });
+      
+      // Show error feedback
+      showFeedback('error', 'Falha ao aprovar nota');
     } finally {
       setIsSubmitting(false);
     }
@@ -149,6 +164,7 @@ export const useApprovalForm = (refetch: () => Promise<any>) => {
         description: "Usuário não autenticado ou nota não selecionada.",
         variant: "destructive"
       });
+      showFeedback('error', 'Não foi possível rejeitar a nota');
       return;
     }
     
@@ -160,6 +176,8 @@ export const useApprovalForm = (refetch: () => Promise<any>) => {
       const result = await updateNotaStatus(selectedNota.id, 'rejeitado');
       
       if (result) {
+        // Show animated feedback
+        showFeedback('error', 'Nota rejeitada');
         setSelectedNota(null);
       }
     } catch (error: any) {
@@ -169,6 +187,9 @@ export const useApprovalForm = (refetch: () => Promise<any>) => {
         description: `Não foi possível rejeitar a nota oficial: ${error.message || 'Erro desconhecido'}`,
         variant: "destructive"
       });
+      
+      // Show error feedback
+      showFeedback('error', 'Falha ao rejeitar nota');
     } finally {
       setIsSubmitting(false);
     }

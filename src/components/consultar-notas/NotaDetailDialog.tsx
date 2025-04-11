@@ -15,6 +15,7 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
 import { useAuth } from '@/hooks/useSupabaseAuth';
+import { useAnimatedFeedback } from '@/hooks/use-animated-feedback';
 
 interface NotaDetailDialogProps {
   nota: NotaOficial;
@@ -34,6 +35,7 @@ const NotaDetailDialog: React.FC<NotaDetailDialogProps> = ({
   const navigate = useNavigate();
   const { user } = useAuth();
   const [isUpdating, setIsUpdating] = useState(false);
+  const { showFeedback } = useAnimatedFeedback();
 
   if (!nota) return null;
 
@@ -63,6 +65,13 @@ const NotaDetailDialog: React.FC<NotaDetailDialogProps> = ({
           ? "A nota foi aprovada e está pronta para publicação."
           : "A nota foi rejeitada e o autor será notificado."
       });
+      
+      // Show animated feedback based on status
+      if (status === 'aprovada') {
+        showFeedback('success', 'Nota aprovada com sucesso!');
+      } else {
+        showFeedback('error', 'Nota rejeitada');
+      }
 
       // Update the demand status based on note status
       if (nota.demanda_id) {
@@ -90,6 +99,9 @@ const NotaDetailDialog: React.FC<NotaDetailDialogProps> = ({
         description: error.message || "Ocorreu um erro ao processar sua solicitação.",
         variant: "destructive"
       });
+      
+      // Show error feedback
+      showFeedback('error', 'Falha ao atualizar nota');
     } finally {
       setIsUpdating(false);
     }
