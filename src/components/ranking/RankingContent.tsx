@@ -14,6 +14,7 @@ interface RankingContentProps {
   className?: string;
   buttonText?: string;
   lastUpdateText?: string;
+  onRefreshData?: () => Promise<void>;
 }
 
 const RankingContent: React.FC<RankingContentProps> = ({
@@ -22,12 +23,14 @@ const RankingContent: React.FC<RankingContentProps> = ({
   disableCardContainers = false,
   className = "",
   buttonText = "Filtrar",
-  lastUpdateText = "Última Atualização"
+  lastUpdateText = "Última Atualização",
+  onRefreshData
 }) => {
   const [isSimulationActive, setIsSimulationActive] = useState(false);
   const { 
     chartVisibility, toggleChartVisibility, setChartVisibility,
-    planilhaData, sgzData, painelData, isLoading, setIsInsightsLoading
+    planilhaData, sgzData, painelData, isLoading, setIsInsightsLoading,
+    refreshChartData
   } = useRankingCharts();
 
   const { showFeedback } = useAnimatedFeedback();
@@ -54,6 +57,13 @@ const RankingContent: React.FC<RankingContentProps> = ({
     }
   }, [isLoading, showFeedback]);
 
+  // Refresh data when component mounts
+  useEffect(() => {
+    if (onRefreshData) {
+      onRefreshData();
+    }
+  }, [onRefreshData]);
+
   return (
     <div className="space-y-6">
       <DashboardCards 
@@ -72,6 +82,7 @@ const RankingContent: React.FC<RankingContentProps> = ({
         onSimulateIdealRanking={handleSimulateIdealRanking}
         disableCardContainers={disableCardContainers}
         onToggleChartVisibility={toggleChartVisibility}
+        onRefreshData={refreshChartData}
       />
 
       <RankingFilterDialog 

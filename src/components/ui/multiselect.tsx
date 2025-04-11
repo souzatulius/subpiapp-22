@@ -1,10 +1,12 @@
+
 import React from 'react';
 
-interface MultiSelectProps {
+export interface MultiSelectProps {
   selected: string[];
   onChange: (value: string[]) => void;
   options: { label: string; value: string }[];
   placeholder?: string;
+  className?: string; // Added className property
 }
 
 export const MultiSelect: React.FC<MultiSelectProps> = ({
@@ -12,6 +14,7 @@ export const MultiSelect: React.FC<MultiSelectProps> = ({
   onChange,
   options,
   placeholder = 'Selecione...',
+  className = '',
 }) => {
   const toggleOption = (value: string) => {
     if (selected.includes(value)) {
@@ -22,7 +25,7 @@ export const MultiSelect: React.FC<MultiSelectProps> = ({
   };
 
   return (
-    <div className="border rounded-md p-2 bg-white">
+    <div className={`border rounded-md p-2 bg-white ${className}`}>
       <p className="text-sm mb-1 text-gray-600">{placeholder}</p>
       <div className="flex flex-wrap gap-2">
         {options.map((opt) => (

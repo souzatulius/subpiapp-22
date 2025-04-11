@@ -112,7 +112,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({
       </div>
       
       <StatusFilter 
-        status={status} 
+        statuses={status} 
         onStatusChange={handleStatusChange}
       />
       

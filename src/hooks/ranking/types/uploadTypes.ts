@@ -1,38 +1,27 @@
 
 export interface UploadResult {
   success: boolean;
-  id?: string;
+  message?: string;
   recordCount: number;
+  id?: string;
+  data?: any[];
   newOrders?: number;
   updatedOrders?: number;
-  message: string;
-  data?: any[];
 }
 
 export interface UploadProgressStats {
+  stage: 'idle' | 'uploading' | 'processing' | 'complete' | 'error';
   totalRows: number;
   processedRows: number;
-  updatedRows: number;
-  newRows: number;
-  stage: 'idle' | 'uploading' | 'processing' | 'complete' | 'error';
   message?: string;
+  newRows?: number;
+  updatedRows?: number;
   estimatedTimeRemaining?: string;
+  processingStatus?: string;
 }
 
-export interface UploadStats {
-  sgz?: UploadProgressStats;
-  painel?: UploadProgressStats;
-  lastRefreshed?: Date;
-}
-
-export interface ProcessingStats {
-  newOrders?: number;
-  updatedOrders?: number;
-  processingStatus: 'idle' | 'processing' | 'success' | 'error';
-  errorMessage?: string;
-  totalRows?: number;
-  message?: string;
-  totalServiceOrders?: number;
-  totalRecords?: number;
-  recordCount?: number;
+export interface RankingUploadState {
+  sgzProgress: UploadProgressStats | null;
+  painelProgress: UploadProgressStats | null;
+  lastRefreshTime: Date | null;
 }
