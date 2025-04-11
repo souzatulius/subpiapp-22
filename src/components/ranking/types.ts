@@ -55,3 +55,16 @@ export interface UploadStats {
   painel?: UploadProgressStats;
   lastRefreshed?: Date;
 }
+
+// Adding the missing FilterOptions interface
+export interface FilterOptions {
+  dateRange?: { from: Date | null; to: Date | null };
+  status?: string[];
+  serviceTypes?: string[];
+  distritos?: string[];
+  dataInicio?: string;
+  dataFim?: string;
+  tiposServico?: string[];
+  departamento?: string[];
+  responsavel?: string[];
+}

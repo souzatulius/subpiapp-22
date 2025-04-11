@@ -128,7 +128,7 @@ const ResponsibilityChart: React.FC<ResponsibilityChartProps> = ({
                 formatter={(value, name) => {
                   return [
                     `${value} (${Math.round((Number(value) / total) * 100)}%)`,
-                    <ResponsabilidadeBadge key={name} responsavel={name} />
+                    <ResponsabilidadeBadge key={name.toString()} responsavel={name.toString()} />
                   ];
                 }}
               />
