@@ -4,7 +4,7 @@ import { useAuth } from '@/hooks/useSupabaseAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
 import { DemandFormData } from './types';
-import { formatQuestionsToObject, isValidPublicUrl } from '@/utils/questionFormatUtils';
+import { formatQuestionsToObject, isValidPublicUrl, processFileUrls } from '@/utils/questionFormatUtils';
 import { validateDemandForm, getErrorSummary } from '@/lib/formValidationUtils';
 
 export const useDemandFormSubmit = (resetForm: () => void, onClose: () => void) => {
@@ -34,21 +34,26 @@ export const useDemandFormSubmit = (resetForm: () => void, onClose: () => void) 
       // Format perguntas as an object with proper structure
       const formattedPerguntas = formatQuestionsToObject(formData.perguntas);
       
-      // Make sure anexos has valid URLs
-      const validAnexos = formData.anexos.filter(url => isValidPublicUrl(url));
+      // Process anexos to ensure they are all valid URLs
+      const processedAnexos = processFileUrls(formData.anexos);
       
       // Validate arquivo_url
       const arquivo_url = formData.arquivo_url && isValidPublicUrl(formData.arquivo_url) 
         ? formData.arquivo_url 
         : null;
       
+      console.log('Submitting demand with attachments:', {
+        arquivo_url,
+        anexos: processedAnexos,
+        anexosCount: processedAnexos.length
+      });
+      
       // Ensure prioridade is a valid value that matches database constraints
       const validPrioridade = ['alta', 'media', 'baixa'].includes(formData.prioridade) 
         ? formData.prioridade
         : 'media'; // Default to 'media' if the value is not valid
       
-      // Prepare the payload - remove fields that don't exist in the demandas table
-      // and ensure all UUID fields have valid values (not empty strings)
+      // Prepare the payload
       const payload = {
         titulo: formData.titulo,
         problema_id: formData.problema_id || null,
@@ -65,7 +70,7 @@ export const useDemandFormSubmit = (resetForm: () => void, onClose: () => void) 
         perguntas: formattedPerguntas,
         detalhes_solicitacao: formData.detalhes_solicitacao,
         arquivo_url,
-        anexos: validAnexos,
+        anexos: processedAnexos,
         servico_id: formData.servico_id ? formData.servico_id : null,
         autor_id: user.id,
         status: 'pendente'

@@ -1,10 +1,10 @@
-
 import React, { useCallback, useRef, useState } from 'react';
 import { Label } from '@/components/ui/label';
-import { Upload, X, FileText, ImageIcon } from 'lucide-react';
+import { Upload, X, FileText } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { v4 as uuidv4 } from 'uuid';
+import { normalizeFileUrl } from '@/utils/questionFormatUtils';
 
 interface FileUploadProps {
   onChange: (url: string) => void;
@@ -30,6 +30,21 @@ const FileUpload: React.FC<FileUploadProps> = ({ onChange, value }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [fileName, setFileName] = useState('');
+
+  useState(() => {
+    if (value) {
+      try {
+        const urlObj = new URL(value);
+        const pathParts = urlObj.pathname.split('/');
+        const extractedName = pathParts[pathParts.length - 1];
+        if (extractedName) {
+          setFileName(decodeURIComponent(extractedName));
+        }
+      } catch (e) {
+        // Silent fail - keep empty filename
+      }
+    }
+  }, [value]);
 
   const handleDrop = useCallback(
     async (event: React.DragEvent<HTMLDivElement>) => {
@@ -63,10 +78,11 @@ const FileUpload: React.FC<FileUploadProps> = ({ onChange, value }) => {
     setIsUploading(true);
     setFileName(file.name);
 
+    const fileId = uuidv4();
     const ext = file.name.split('.').pop();
-    const filePath = `uploads/${uuidv4()}.${ext}`;
+    const filePath = `uploads/${fileId}.${ext}`;
 
-    const { error } = await supabase.storage.from('demandas').upload(filePath, file);
+    const { error, data: uploadData } = await supabase.storage.from('demandas').upload(filePath, file);
 
     if (error) {
       console.error('Erro ao fazer upload:', error);
@@ -80,7 +96,15 @@ const FileUpload: React.FC<FileUploadProps> = ({ onChange, value }) => {
     }
 
     const { data } = supabase.storage.from('demandas').getPublicUrl(filePath);
-    onChange(data.publicUrl);
+    const normalizedUrl = normalizeFileUrl(data.publicUrl);
+    
+    console.log('File uploaded successfully:', {
+      originalUrl: data.publicUrl,
+      normalizedUrl,
+      filePath
+    });
+    
+    onChange(normalizedUrl);
     toast({ title: 'Arquivo anexado com sucesso!' });
     setIsUploading(false);
   };

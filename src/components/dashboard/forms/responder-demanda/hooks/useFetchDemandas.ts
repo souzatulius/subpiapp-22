@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Demanda } from '../types';
 import { toast } from '@/components/ui/use-toast';
-import { normalizeQuestions } from '@/utils/questionFormatUtils';
+import { normalizeQuestions, processFileUrls } from '@/utils/questionFormatUtils';
 
 export const useFetchDemandas = () => {
   const [demandas, setDemandas] = useState<Demanda[]>([]);
@@ -99,23 +99,23 @@ export const useFetchDemandas = () => {
         
         // Transform the data to match the Demanda type
         const transformedData: Demanda[] = (filteredData || []).map(item => {
-          // Handle perguntas type conversion: ensure it's string[] or null
+          // Process perguntas from different formats
           let perguntasArray = normalizeQuestions(item.perguntas);
           
-          // Process anexos to ensure it's always an array
-          let anexosArray: string[] | null = null;
-          if (item.anexos) {
-            if (Array.isArray(item.anexos)) {
-              anexosArray = item.anexos.filter(a => a && typeof a === 'string');
-            } else if (typeof item.anexos === 'string') {
-              try {
-                const parsed = JSON.parse(item.anexos);
-                anexosArray = Array.isArray(parsed) ? parsed : [item.anexos];
-              } catch {
-                anexosArray = [item.anexos];
-              }
-            }
-          }
+          // Process anexos to ensure it's always a valid array of URLs
+          const processedAnexos = processFileUrls(item.anexos);
+          
+          // Process arquivo_url
+          const arquivo_url = item.arquivo_url ? 
+            processFileUrls([item.arquivo_url])[0] || null : 
+            null;
+            
+          console.log(`Processing demanda ${item.id} for response:`, {
+            originalAnexos: item.anexos,
+            processedAnexos,
+            originalArquivoUrl: item.arquivo_url,
+            processedArquivoUrl: arquivo_url
+          });
           
           // Extract distrito data from the nested structure
           const distritoData = item.bairros?.distritos || null;
@@ -134,8 +134,8 @@ export const useFetchDemandas = () => {
             email_solicitante: item.email_solicitante,
             telefone_solicitante: item.telefone_solicitante,
             veiculo_imprensa: item.veiculo_imprensa,
-            arquivo_url: item.arquivo_url,
-            anexos: anexosArray,
+            arquivo_url,
+            anexos: processedAnexos,
             coordenacao_id: item.coordenacao_id,
             supervisao_tecnica_id: null, // Add this field with null value for backward compatibility
             bairro_id: item.bairro_id,
@@ -150,7 +150,7 @@ export const useFetchDemandas = () => {
               descricao: item.problemas.descricao,
               icone: item.problemas.icone
             } : null,
-            areas_coordenacao: null, // Atualizando para usar o relacionamento problema-coordenacao
+            areas_coordenacao: null,
             origens_demandas: item.origens_demandas,
             tipos_midia: item.tipos_midia,
             bairros: item.bairros,
@@ -161,7 +161,7 @@ export const useFetchDemandas = () => {
           };
         });
         
-        console.log('Transformed demandas:', transformedData);
+        console.log('Transformed demandas for responding:', transformedData);
         setDemandas(transformedData);
       } catch (error) {
         console.error('Error in fetchDemandas:', error);

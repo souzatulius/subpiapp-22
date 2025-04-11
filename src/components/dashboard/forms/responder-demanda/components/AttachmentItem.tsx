@@ -16,19 +16,27 @@ const AttachmentItem: React.FC<AttachmentItemProps> = ({
   onDownload,
   index
 }) => {
+  // Improved filename extraction with better error handling
   const getFileName = (url: string) => {
     try {
       const urlObj = new URL(url);
       const pathname = urlObj.pathname;
       const segments = pathname.split('/');
-      const fileName = segments[segments.length - 1];
+      let fileName = segments[segments.length - 1];
       
       // Try to decode URI component (handle special characters)
       try {
-        return decodeURIComponent(fileName);
+        fileName = decodeURIComponent(fileName);
       } catch {
         return fileName;
       }
+      
+      // If the filename is a UUID or looks like one, try to get a more readable name
+      if (fileName.length > 30 && fileName.includes('-')) {
+        return `Arquivo ${index !== undefined ? index + 1 : ''}`;
+      }
+      
+      return fileName;
     } catch {
       return `Arquivo ${index !== undefined ? index + 1 : ''}`;
     }

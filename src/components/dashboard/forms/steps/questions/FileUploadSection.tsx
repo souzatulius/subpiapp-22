@@ -2,18 +2,33 @@
 import React, { useState, useCallback } from 'react';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { Upload, FileText, Trash2, X, ImageIcon, File, FileImage } from 'lucide-react';
+import { Upload, FileText, Trash2, ImageIcon } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { v4 as uuidv4 } from 'uuid';
 import { toast } from '@/components/ui/use-toast';
+import { normalizeFileUrl } from '@/utils/questionFormatUtils';
 
 interface FileUploadSectionProps {
   anexos: string[];
   onAnexosChange: (files: string[]) => void;
 }
 
-const FileUploadSection: React.FC<FileUploadSectionProps> = ({ 
-  anexos, 
+const ACCEPTED_TYPES = [
+  'image/png',
+  'image/jpeg',
+  'image/jpg',
+  'image/heic',
+  'application/pdf',
+  'application/msword',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  'application/vnd.ms-excel',
+  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+];
+
+const MAX_SIZE_MB = 10;
+
+const FileUploadSection: React.FC<FileUploadSectionProps> = ({
+  anexos,
   onAnexosChange 
 }) => {
   const [uploading, setUploading] = useState(false);
@@ -38,7 +53,7 @@ const FileUploadSection: React.FC<FileUploadSectionProps> = ({
     try {
       for (const file of files) {
         // Check file size (max 10MB)
-        if (file.size > 10 * 1024 * 1024) {
+        if (file.size > MAX_SIZE_MB * 1024 * 1024) {
           toast({
             title: 'Arquivo muito grande',
             description: `O arquivo ${file.name} excede o limite de 10MB.`,
@@ -47,9 +62,10 @@ const FileUploadSection: React.FC<FileUploadSectionProps> = ({
           continue;
         }
         
+        // Generate unique ID for the file
+        const fileId = uuidv4();
         const fileExt = file.name.split('.').pop();
-        const fileName = `${uuidv4()}.${fileExt}`;
-        const filePath = `uploads/${fileName}`;
+        const filePath = `uploads/${fileId}.${fileExt}`;
         
         const { error: uploadError } = await supabase.storage
           .from('demandas')
@@ -70,9 +86,17 @@ const FileUploadSection: React.FC<FileUploadSectionProps> = ({
           .from('demandas')
           .getPublicUrl(filePath);
         
-        // Store original filename with the URL
-        const urlWithMeta = data.publicUrl;
-        newUrls.push(urlWithMeta);
+        // Normalize URL before storing
+        const normalizedUrl = normalizeFileUrl(data.publicUrl);
+        
+        console.log('File uploaded successfully:', {
+          fileName: file.name,
+          filePath,
+          publicUrl: data.publicUrl,
+          normalizedUrl
+        });
+        
+        newUrls.push(normalizedUrl);
       }
       
       if (newUrls.length > 0) {
@@ -114,18 +138,39 @@ const FileUploadSection: React.FC<FileUploadSectionProps> = ({
 
   // Helper function to get shortened file name
   const getShortenedFileName = (url: string) => {
-    const fileName = url.split('/').pop() || '';
-    const fileExt = fileName.split('.').pop() || '';
-    
-    if (fileName.length <= 12) return fileName;
-    
-    return `${fileName.substring(0, 8)}...${fileExt ? `.${fileExt}` : ''}`;
+    try {
+      const urlObj = new URL(url);
+      const fileName = urlObj.pathname.split('/').pop() || '';
+      const fileExt = fileName.split('.').pop() || '';
+      
+      try {
+        const decoded = decodeURIComponent(fileName);
+        
+        if (decoded.length <= 12) return decoded;
+        return `${decoded.substring(0, 8)}...${fileExt ? `.${fileExt}` : ''}`;
+      } catch {
+        if (fileName.length <= 12) return fileName;
+        return `${fileName.substring(0, 8)}...${fileExt ? `.${fileExt}` : ''}`;
+      }
+    } catch {
+      return 'Arquivo';
+    }
   };
 
-  // Determine file type and return appropriate icon
-  const getFileIcon = (url: string) => {
+  // Determine file type and return appropriate icon/preview
+  const getFileComponent = (url: string) => {
     if (isImageFile(url)) {
-      return <img src={url} alt="thumbnail" className="h-full w-full object-contain" />;
+      return (
+        <img 
+          src={url} 
+          alt="thumbnail" 
+          className="h-full w-full object-contain"
+          onError={(e) => {
+            e.currentTarget.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJNMTIgMjJDMTcuNTIyOCAyMiAyMiAxNy41MjI4IDIyIDEyQzIyIDYuNDc3MTUgMTcuNTIyOCAyIDEyIDJDNi40NzcxNSAyIDIgNi40NzcxNSAyIDEyQzIgMTcuNTIyOCA2LjQ3NzE1IDIyIDEyIDIyWiIgc3Ryb2tlPSIjZTc0YzNjIiBzdHJva2Utd2lkdGg9IjEuNSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+PHBhdGggZD0iTTE1IDlMOSAxNSIgc3Ryb2tlPSIjZTc0YzNjIiBzdHJva2Utd2lkdGg9IjEuNSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+PHBhdGggZD0iTTkgOUwxNSAxNSIgc3Ryb2tlPSIjZTc0YzNjIiBzdHJva2Utd2lkdGg9IjEuNSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+PC9zdmc+';
+            e.currentTarget.classList.add('p-8');
+          }}
+        />
+      );
     } else if (url.toLowerCase().endsWith('.pdf')) {
       return <FileText className="h-12 w-12 text-red-500" />;
     } else if (url.toLowerCase().match(/\.(docx?|rtf)$/)) {
@@ -133,7 +178,7 @@ const FileUploadSection: React.FC<FileUploadSectionProps> = ({
     } else if (url.toLowerCase().match(/\.(xlsx?|csv)$/)) {
       return <FileText className="h-12 w-12 text-green-500" />;
     } else {
-      return <File className="h-12 w-12 text-gray-500" />;
+      return <ImageIcon className="h-12 w-12 text-gray-500" />;
     }
   };
 
@@ -174,38 +219,6 @@ const FileUploadSection: React.FC<FileUploadSectionProps> = ({
             disabled={uploading}
           />
           
-          {/* Files Preview inside the upload area */}
-          {anexos.length > 0 && (
-            <div className="mt-4 border-t pt-4 border-gray-200">
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-                {anexos.map((fileUrl, index) => (
-                  <div 
-                    key={index} 
-                    className="flex flex-col bg-gray-50 rounded-lg border border-gray-200 overflow-hidden hover:shadow-md transition"
-                  >
-                    <div className="relative h-28 bg-gray-100 flex items-center justify-center p-2">
-                      {getFileIcon(fileUrl)}
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => removeFile(index)}
-                        className="absolute top-0 right-0 text-red-500 hover:text-red-700 p-1"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                    <div className="p-2 text-center">
-                      <p className="text-xs font-medium text-gray-700 truncate" title={fileUrl.split('/').pop()}>
-                        {getShortenedFileName(fileUrl)}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
           <Button 
             type="button" 
             variant="outline" 
@@ -218,6 +231,36 @@ const FileUploadSection: React.FC<FileUploadSectionProps> = ({
           </Button>
         </div>
       </div>
+      
+      {/* Files Preview */}
+      {anexos.length > 0 && (
+        <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+          {anexos.map((fileUrl, index) => (
+            <div 
+              key={index} 
+              className="flex flex-col bg-gray-50 rounded-lg border border-gray-200 overflow-hidden hover:shadow-md transition"
+            >
+              <div className="relative h-28 bg-gray-100 flex items-center justify-center p-2">
+                {getFileComponent(fileUrl)}
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => removeFile(index)}
+                  className="absolute top-0 right-0 text-red-500 hover:text-red-700 p-1"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </div>
+              <div className="p-2 text-center">
+                <p className="text-xs font-medium text-gray-700 truncate" title={fileUrl}>
+                  {getShortenedFileName(fileUrl)}
+                </p>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 };

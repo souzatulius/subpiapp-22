@@ -2,6 +2,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Demand } from './types';
+import { normalizeQuestions, processFileUrls } from '@/utils/questionFormatUtils';
 
 export const useDemandasQuery = () => {
   return useQuery({
@@ -50,12 +51,11 @@ export const useDemandasQuery = () => {
           email_solicitante,
           telefone_solicitante,
           veiculo_imprensa,
+          arquivo_url,
           anexos
         `);
       
       query = query.order('horario_publicacao', { ascending: false });
-      
-      // Remove any filtering based on coordination or supervision
       
       const { data, error } = await query;
       
@@ -127,12 +127,29 @@ export const useDemandasQuery = () => {
           }
         }
         
+        // Process anexos 
+        const processedAnexos = processFileUrls(item.anexos);
+        
+        // Process arquivo_url
+        const arquivo_url = item.arquivo_url ? 
+          processFileUrls([item.arquivo_url])[0] || null : 
+          null;
+        
+        console.log(`Processing demanda ${item.id}:`, {
+          originalAnexos: item.anexos,
+          processedAnexos,
+          originalArquivoUrl: item.arquivo_url,
+          processedArquivoUrl: arquivo_url
+        });
+        
         const result = {
           ...item,
           // Set default values for potentially missing fields
           servico: item.servico || { descricao: '' },
           area_coordenacao: item.area_coordenacao || { descricao: '' },
           perguntas: perguntasObj,
+          anexos: processedAnexos,
+          arquivo_url,
           // Add response data if available
           resposta: respostasMap[item.id] || null,
           // Add notas data if available

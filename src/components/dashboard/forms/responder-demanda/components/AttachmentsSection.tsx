@@ -1,9 +1,8 @@
 
 import React, { useMemo } from 'react';
-import { FileIcon, ExternalLink, Download, Image, FileText, File, FileSpreadsheet as FileSS, Archive } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { FileIcon, ExternalLink, Download } from 'lucide-react';
 import AttachmentItem from './AttachmentItem';
-import { isValidPublicUrl } from '@/utils/questionFormatUtils';
+import { isValidPublicUrl, processFileUrls } from '@/utils/questionFormatUtils';
 
 interface AttachmentsSectionProps {
   arquivo_url: string | null;
@@ -29,71 +28,14 @@ const AttachmentsSection: React.FC<AttachmentsSectionProps> = ({
       validUrls.push(arquivo_url);
     }
 
-    // Process anexos based on type
-    if (anexos) {
-      if (Array.isArray(anexos)) {
-        validUrls.push(...anexos.filter(anexo => 
-          anexo && typeof anexo === 'string' && isValidPublicUrl(anexo)
-        ));
-      } else if (typeof anexos === 'string') {
-        try {
-          const parsed = JSON.parse(anexos);
-          if (Array.isArray(parsed)) {
-            validUrls.push(...parsed.filter(anexo => 
-              anexo && typeof anexo === 'string' && isValidPublicUrl(anexo)
-            ));
-          } else if (isValidPublicUrl(anexos)) {
-            validUrls.push(anexos);
-          }
-        } catch (e) {
-          // If not valid JSON but a valid URL, use as single attachment
-          if (isValidPublicUrl(anexos)) {
-            validUrls.push(anexos);
-          }
-        }
-      }
+    // Process anexos array
+    const processedAnexos = processFileUrls(anexos);
+    if (processedAnexos.length > 0) {
+      validUrls.push(...processedAnexos);
     }
     
-    // Fix URLs by ensuring correct structure for Supabase storage URLs
-    const fixedUrls = validUrls.map(url => {
-      if (!url) return url;
-      
-      // Corrigir URLs que possuem formatação incorreta
-      try {
-        // Se é uma URL completa do Supabase
-        if (url.includes('supabase.co') && url.includes('/storage/v1/object/public/')) {
-          // Garantir que a URL use HTTPS
-          if (url.startsWith('http://')) {
-            url = url.replace('http://', 'https://');
-          }
-          return url;
-        }
-        
-        // Se a URL começa com /storage
-        if (url.startsWith('/storage/')) {
-          return `https://mapjrbfzurpjmianfnev.supabase.co${url}`;
-        }
-        
-        // Se é apenas o caminho do arquivo no bucket
-        const supabasePrefix = 'https://mapjrbfzurpjmianfnev.supabase.co/storage/v1/object/public/';
-        if (!url.startsWith('http')) {
-          // Tentar determinar o bucket (padrão: demandas)
-          const bucket = 'demandas';
-          
-          // Certificar-se de que não tem barras duplicadas
-          const cleanPath = url.startsWith('/') ? url.substring(1) : url;
-          return `${supabasePrefix}${bucket}/${cleanPath}`;
-        }
-        
-        return url;
-      } catch (e) {
-        console.error("Erro ao processar URL:", e, url);
-        return url;
-      }
-    });
-    
-    console.log('Normalized attachments:', fixedUrls);
-    return fixedUrls;
+    console.log('Normalized attachments:', validUrls);
+    return validUrls;
   }, [arquivo_url, anexos]);
   
   // Check if we have any valid attachments
