@@ -1,7 +1,5 @@
-
 import { useCallback, useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { useOfflineStorage } from '../useOfflineStorage';
 import { FilterOptions } from '@/components/ranking/types';
 
 export const useChartData = (filters: FilterOptions) => {

@@ -4,6 +4,12 @@ import { supabase } from '@/integrations/supabase/client';
 import { useOpenAIWithRetry } from '@/hooks/useOpenAIWithRetry';
 import { toast } from 'sonner';
 
+// Add a type for the API response
+interface InsightResponse {
+  indicadores: Record<string, { valor: string; comentario: string }>;
+  error?: string;
+}
+
 // Add a cache for OpenAI results
 const insightsCache = new Map<string, any>();
 
@@ -53,25 +59,25 @@ export const useChatGPTInsight = (dadosPlanilha: any[] | null, uploadId?: string
         }
 
         // Generate new insights using edge function with retry mechanism
-        const data = await callWithRetry(
+        const response = await callWithRetry<InsightResponse>(
           'generate-sgz-insights', 
           { dados_sgz: dadosPlanilha, upload_id: uploadId },
           { maxRetries: 2, timeoutMs: 20000 }
         );
         
-        if (!data) {
+        if (!response) {
           throw new Error('Failed to generate insights');
         }
         
-        if (data.error) {
-          throw new Error(`Erro na análise: ${data.error}`);
+        if (response.error) {
+          throw new Error(`Erro na análise: ${response.error}`);
         }
         
-        setIndicadores(data.indicadores);
+        setIndicadores(response.indicadores);
         
         // Update cache
         if (uploadId) {
-          insightsCache.set(uploadId, data.indicadores);
+          insightsCache.set(uploadId, response.indicadores);
         }
         
         // Notify user of success

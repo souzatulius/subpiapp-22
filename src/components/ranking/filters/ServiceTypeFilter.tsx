@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
@@ -5,7 +6,7 @@ import { FilterOptions } from '@/components/ranking/types';
 
 interface ServiceTypeFilterProps {
   serviceTypes: FilterOptions['serviceTypes'];
-  onServiceTypeChange: (type: string) => void;
+  onServiceTypeChange: (types: string[]) => void;
 }
 
 const ServiceTypeFilter: React.FC<ServiceTypeFilterProps> = ({ serviceTypes, onServiceTypeChange }) => {

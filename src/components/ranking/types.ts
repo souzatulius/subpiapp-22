@@ -1,3 +1,4 @@
+
 export interface ChartItem {
   id: string;
   title: string;
@@ -49,6 +50,18 @@ export interface ChartVisibility {
   [key: string]: boolean;
 }
 
+export interface FilterOptions {
+  dateRange?: { from: Date | null; to: Date | null };
+  status?: string[];
+  serviceTypes?: string[];
+  distritos?: string[];
+  dataInicio?: string;
+  dataFim?: string;
+  tiposServico?: string[];
+  departamento?: string[];
+  responsavel?: string[]; // Added to filter by responsibility
+}
+
 export interface UploadProgressStats {
   totalRows: number;
   processedRows: number;
@@ -75,16 +88,4 @@ export interface ProcessingStats {
   totalServiceOrders?: number;
   totalRecords?: number;
   recordCount?: number;
-}
-
-export interface FilterOptions {
-  dateRange?: { from: Date | null; to: Date | null };
-  status?: string[];
-  serviceTypes?: string[];
-  distritos?: string[];
-  dataInicio?: string;
-  dataFim?: string;
-  tiposServico?: string[];
-  departamento?: string[];
-  responsavel?: string[]; // Added to filter by responsibility
 }
