@@ -51,26 +51,8 @@ const FilterSection: React.FC<FilterSectionProps> = ({
     onFiltersChange({ status: newStatuses });
   };
   
-  const handleServiceTypeChange = (type: string) => {
-    let newTypes = [...(filters.serviceTypes || [])];
-    
-    if (type === 'Todos') {
-      newTypes = ['Todos'];
-    } else {
-      newTypes = newTypes.filter(t => t !== 'Todos');
-      
-      if (newTypes.includes(type)) {
-        newTypes = newTypes.filter(t => t !== type);
-      } else {
-        newTypes.push(type);
-      }
-      
-      if (newTypes.length === 0) {
-        newTypes = ['Todos'];
-      }
-    }
-    
-    onFiltersChange({ serviceTypes: newTypes });
+  const handleServiceTypeChange = (types: string[]) => {
+    onFiltersChange({ serviceTypes: types });
   };
   
   const handleDistrictChange = (district: string) => {

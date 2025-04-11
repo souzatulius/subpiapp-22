@@ -9,6 +9,9 @@ export interface ChartItem {
   isAnalysisExpanded: boolean;
   showAnalysisOnly: boolean;
   order?: number;
+  visible: boolean; // Added to match the one in ranking/types.ts
+  subtitle?: string;
+  type?: string;
 }
 
 export interface ChartVisibility {
