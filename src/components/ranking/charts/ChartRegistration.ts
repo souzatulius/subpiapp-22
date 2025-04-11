@@ -1,93 +1,92 @@
 
-import { 
-  Chart as ChartJS, 
-  CategoryScale, 
-  LinearScale, 
-  BarElement, 
-  PointElement, 
-  LineElement, 
-  Title, 
-  Tooltip, 
-  Legend, 
-  ArcElement, 
-  RadialLinearScale, 
-  Filler 
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+  PointElement,
+  LineElement,
+  ArcElement,
+  RadialLinearScale,
 } from 'chart.js';
-import { chartColors } from '../utils/chartColors';
 
-// Register the chart components to make them available globally
+// Register Chart.js components
 ChartJS.register(
   CategoryScale,
   LinearScale,
   BarElement,
   PointElement,
   LineElement,
-  Title,
-  Tooltip,
-  Legend,
   ArcElement,
   RadialLinearScale,
-  Filler
+  Title,
+  Tooltip,
+  Legend
 );
 
-// Configure default settings for all charts with our custom colors
-ChartJS.defaults.color = chartColors.darkBlue;
-ChartJS.defaults.font.family = "'Inter', sans-serif";
-ChartJS.defaults.elements.bar.backgroundColor = chartColors.blue;
-ChartJS.defaults.elements.line.borderColor = chartColors.blue;
-ChartJS.defaults.elements.point.backgroundColor = chartColors.blue;
+// Export chart colors for consistent use
+export const chartColors = [
+  '#0066FF', // Blue
+  '#F97316', // Orange
+  '#10B981', // Green
+  '#6366F1', // Indigo
+  '#EC4899', // Pink
+  '#8B5CF6', // Purple
+  '#F59E0B', // Amber
+  '#EF4444', // Red
+  '#64748B', // Slate
+  '#0EA5E9', // Sky
+];
 
-// Configure additional global chart options
-ChartJS.defaults.elements.line.borderWidth = 2;
-ChartJS.defaults.elements.point.radius = 3;
-ChartJS.defaults.elements.point.hoverRadius = 5;
+export const pieChartColors = [
+  '#0066FF', // Blue
+  '#F97316', // Orange
+  '#10B981', // Green
+  '#6366F1', // Indigo
+  '#EC4899', // Pink
+  '#8B5CF6', // Purple
+  '#F59E0B', // Amber
+  '#EF4444', // Red
+  '#64748B', // Slate
+  '#0EA5E9', // Sky
+];
 
-// Add custom plugin for loading indicator
-const loadingIndicatorPlugin = {
-  id: 'loadingIndicator',
-  beforeDraw: (chart, args, options) => {
-    const { ctx, width, height } = chart;
-    if (options?.loading) {
-      ctx.save();
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
-      ctx.fillRect(0, 0, width, height);
-      
-      ctx.font = '16px Arial';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillStyle = '#F97316'; // Orange color
-      ctx.fillText('Carregando...', width / 2, height / 2);
-      
-      // Draw spinner
-      const spinnerSize = 30;
-      const centerX = width / 2;
-      const centerY = height / 2 - 30;
-      const angle = Date.now() / 300 % (2 * Math.PI);
-      
-      ctx.strokeStyle = '#F97316';
-      ctx.lineWidth = 3;
-      ctx.beginPath();
-      ctx.arc(centerX, centerY, spinnerSize / 2, angle, angle + 1.5);
-      ctx.stroke();
-      
-      ctx.restore();
-    }
-  }
-};
+export const barChartColors = [
+  '#0066FF', // Blue
+  '#F97316', // Orange
+  '#10B981', // Green
+  '#6366F1', // Indigo
+  '#EC4899', // Pink
+];
 
-// Register the plugin
-ChartJS.register(loadingIndicatorPlugin);
+export const lineChartColors = [
+  '#0066FF', // Blue
+  '#F97316', // Orange
+  '#10B981', // Green
+  '#6366F1', // Indigo
+  '#EC4899', // Pink
+];
 
-// Helper function to set loading state
-export const setLoading = function(chartInstance, loading) {
+// Helper to set loading state on charts
+export const setLoading = (chartInstance: any, isLoading: boolean) => {
   if (!chartInstance) return;
   
-  chartInstance.options.plugins = chartInstance.options.plugins || {};
-  chartInstance.options.plugins.loadingIndicator = chartInstance.options.plugins.loadingIndicator || {};
-  chartInstance.options.plugins.loadingIndicator.loading = loading;
-  chartInstance.update();
+  if (isLoading) {
+    chartInstance.options = {
+      ...chartInstance.options,
+      animation: false
+    };
+    chartInstance.update();
+  } else {
+    chartInstance.options = {
+      ...chartInstance.options,
+      animation: {
+        duration: 600
+      }
+    };
+    chartInstance.update();
+  }
 };
-
-// Export chart colors for consistent use across components
-export { chartColors, ChartJS };
-export { barChartColors, pieChartColors, lineChartColors } from '../utils/chartColors';

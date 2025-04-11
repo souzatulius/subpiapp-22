@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Pie } from 'react-chartjs-2';
 import { pieChartColors } from '../utils/chartColors';
-import ChartCard from '../ChartCard';
+import ChartCard from './ChartCard';
 import { useOpenAIChartData } from '@/hooks/ranking/useOpenAIChartData';
 
 interface StatusDistributionChartProps {
@@ -128,44 +128,28 @@ const StatusDistributionChart: React.FC<StatusDistributionChartProps> = ({
   };
 
   return (
-    <ChartCard
-      chart={{
-        id: 'statusDistribution',
-        title: 'Distribuição de Status',
-        component: (
-          <div className="h-[250px] flex items-center justify-center">
-            {isProcessing || isGenerating ? (
-              <div className="text-center">
-                <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
-                <p className="mt-2 text-sm text-orange-600">Gerando dados...</p>
-              </div>
-            ) : error ? (
-              <div className="text-center text-red-500">
-                <p>{error}</p>
-              </div>
-            ) : chartData ? (
-              <Pie 
-                data={chartData} 
-                options={chartOptions}
-                ref={chartRef} 
-              />
-            ) : (
-              <div className="text-center text-gray-500">
-                <p>Sem dados disponíveis</p>
-              </div>
-            )}
-          </div>
-        ),
-        analysis: analysis
-      }}
-      index={0}
-      isAnalysisExpanded={showAnalysis}
-      showAnalysisOnly={false}
-      onToggleVisibility={onToggleVisibility}
-      onToggleAnalysis={onToggleAnalysis}
-      onToggleView={() => {}}
-      dataSource="SGZ"
-    />
+    <div className="h-[250px]">
+      {isProcessing || isGenerating ? (
+        <div className="text-center h-full flex flex-col items-center justify-center">
+          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
+          <p className="mt-2 text-sm text-orange-600">Gerando dados...</p>
+        </div>
+      ) : error ? (
+        <div className="text-center h-full flex flex-col items-center justify-center text-red-500">
+          <p>{error}</p>
+        </div>
+      ) : chartData ? (
+        <Pie 
+          data={chartData} 
+          options={chartOptions}
+          ref={chartRef} 
+        />
+      ) : (
+        <div className="text-center h-full flex flex-col items-center justify-center text-gray-500">
+          <p>Sem dados disponíveis</p>
+        </div>
+      )}
+    </div>
   );
 };
 

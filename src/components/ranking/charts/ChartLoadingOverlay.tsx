@@ -1,63 +1,51 @@
 
 import React from 'react';
-import { Loader2, RefreshCcw, AlertTriangle } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 
-export type LoadingState = 'loading' | 'refreshing' | 'error' | 'empty' | 'idle';
+export type LoadingState = 'idle' | 'loading' | 'error' | 'empty';
 
 interface ChartLoadingOverlayProps {
   state: LoadingState;
   message?: string;
   errorMessage?: string;
-  className?: string;
-  isTransparent?: boolean;
 }
 
-const ChartLoadingOverlay: React.FC<ChartLoadingOverlayProps> = ({
-  state,
-  message,
-  errorMessage = 'Ocorreu um erro ao carregar os dados',
-  className = '',
-  isTransparent = true
+const ChartLoadingOverlay: React.FC<ChartLoadingOverlayProps> = ({ 
+  state, 
+  message = 'Carregando dados...',
+  errorMessage = 'Erro ao carregar dados'
 }) => {
-  if (state === 'idle') return null;
-  
-  const defaultMessages = {
-    loading: 'Carregando dados...',
-    refreshing: 'Atualizando gráfico...',
-    error: errorMessage,
-    empty: 'Sem dados para exibir'
-  };
-  
-  const displayMessage = message || defaultMessages[state];
-  
-  const renderIcon = () => {
-    switch (state) {
-      case 'loading':
-        return <Loader2 className="h-6 w-6 text-orange-500 animate-spin" />;
-      case 'refreshing':
-        return <RefreshCcw className="h-6 w-6 text-orange-500 animate-spin" />;
-      case 'error':
-        return <AlertTriangle className="h-6 w-6 text-red-500" />;
-      case 'empty':
-        return <div className="h-6 w-6 rounded-full border-2 border-gray-300" />;
-      default:
-        return null;
-    }
-  };
-  
-  const getBgColor = () => {
-    if (!isTransparent) return 'bg-white';
-    return state === 'error' ? 'bg-red-50/90' : 'bg-white/80';
-  };
-  
+  if (state === 'idle') {
+    return null;
+  }
+
   return (
-    <div className={`absolute inset-0 flex flex-col items-center justify-center ${getBgColor()} z-10 ${className}`}>
-      <div className="flex flex-col items-center space-y-3">
-        {renderIcon()}
-        <p className={`text-sm font-medium ${state === 'error' ? 'text-red-600' : 'text-gray-600'}`}>
-          {displayMessage}
-        </p>
-      </div>
+    <div className="absolute inset-0 flex items-center justify-center bg-white/80 z-10">
+      {state === 'loading' && (
+        <div className="flex flex-col items-center">
+          <Loader2 size={24} className="text-orange-500 animate-spin mb-2" />
+          <p className="text-sm text-orange-600">{message}</p>
+        </div>
+      )}
+
+      {state === 'error' && (
+        <div className="flex flex-col items-center">
+          <div className="rounded-full bg-red-100 p-2 mb-2">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-red-600">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="12" y1="8" x2="12" y2="12"/>
+              <line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+          </div>
+          <p className="text-sm text-red-600">{errorMessage}</p>
+        </div>
+      )}
+
+      {state === 'empty' && (
+        <div className="flex flex-col items-center">
+          <p className="text-sm text-gray-500">Sem dados disponíveis</p>
+        </div>
+      )}
     </div>
   );
 };
