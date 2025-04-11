@@ -1,9 +1,10 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Search } from 'lucide-react';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Loader2 } from 'lucide-react';
+import { toast } from '@/components/ui/use-toast';
+import { supabase } from '@/integrations/supabase/client';
+import { useNavigate } from 'react-router-dom';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -14,17 +15,16 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { toast } from '@/components/ui/use-toast';
-import { supabase } from '@/integrations/supabase/client';
-import { useNavigate } from 'react-router-dom';
-import DemandasTable from './DemandasTable';
 import AttentionBox from '@/components/ui/attention-box';
-import { Loader2 } from 'lucide-react';
+import UnifiedViewContainer from '@/components/shared/unified-view/UnifiedViewContainer';
+import LabelBadge from '@/components/ui/label-badge';
+import { format } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
 
 const ConsultarDemandasContent = () => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState('');
-  const [origemFilter, setOrigemFilter] = useState('');
+  const [statusFilter, setStatusFilter] = useState('todos');
+  const [origemFilter, setOrigemFilter] = useState('todas');
   const [demandas, setDemandas] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [totalCount, setTotalCount] = useState(0);
@@ -35,6 +35,7 @@ const ConsultarDemandasContent = () => {
   const navigate = useNavigate();
   const [isAdmin, setIsAdmin] = useState(false);
   const [origens, setOrigens] = useState<any[]>([]);
+  const [viewMode, setViewMode] = useState<'cards' | 'list'>('list');
 
   // Fetch origens on mount
   useEffect(() => {
@@ -101,11 +102,11 @@ const ConsultarDemandasContent = () => {
         query = query.ilike('titulo', `%${searchTerm}%`);
       }
 
-      if (statusFilter) {
+      if (statusFilter && statusFilter !== 'todos') {
         query = query.eq('status', statusFilter);
       }
 
-      if (origemFilter) {
+      if (origemFilter && origemFilter !== 'todas') {
         query = query.eq('origem_id', origemFilter);
       }
 
@@ -139,8 +140,8 @@ const ConsultarDemandasContent = () => {
   }, [fetchDemandas]);
 
   // Handle navigation to view demanda
-  const handleViewDemanda = (id: string) => {
-    navigate(`/dashboard/demandas/${id}`);
+  const handleViewDemanda = (demanda: any) => {
+    navigate(`/dashboard/demandas/${demanda.id}`);
   };
 
   // Handle navigation to view nota
@@ -159,11 +160,11 @@ const ConsultarDemandasContent = () => {
   };
 
   // Handle deletion of demand
-  const handleDeleteDemand = async (id: string, title: string) => {
+  const handleDeleteDemand = async (demanda: any) => {
     setDemandToDelete({
-      id,
-      title,
-      hasNotes: await checkIfDemandHasNotes(id)
+      id: demanda.id,
+      title: demanda.titulo || 'Sem título',
+      hasNotes: await checkIfDemandHasNotes(demanda.id)
     });
     setIsDeleteDialogOpen(true);
   };
@@ -199,87 +200,134 @@ const ConsultarDemandasContent = () => {
     }
   };
 
-  return (
-    <div className="space-y-4">
-      {/* Search and Filters */}
-      <div className="flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-4">
-        <div className="flex items-center w-full md:w-1/3">
-          <Input
-            type="search"
-            placeholder="Buscar por título..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="rounded-r-none"
-          />
-          <Button onClick={fetchDemandas} className="rounded-l-none">
-            <Search className="h-4 w-4" />
-          </Button>
-        </div>
+  const statusOptions = [
+    { id: 'todos', label: 'Todos os status' },
+    { id: 'pendente', label: 'Pendente' },
+    { id: 'em-andamento', label: 'Em Andamento' },
+    { id: 'concluido', label: 'Concluído' },
+    { id: 'cancelado', label: 'Cancelado' },
+    { id: 'aguardando-nota', label: 'Aguardando Nota' }
+  ];
 
-        <div className="flex space-x-2 w-full md:w-2/3">
-          <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder="Filtrar por status" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="todos">Todos os status</SelectItem>
-              <SelectItem value="pendente">Pendente</SelectItem>
-              <SelectItem value="em-andamento">Em Andamento</SelectItem>
-              <SelectItem value="concluido">Concluído</SelectItem>
-              <SelectItem value="cancelado">Cancelado</SelectItem>
-              <SelectItem value="aguardando-nota">Aguardando Nota</SelectItem>
-            </SelectContent>
-          </Select>
+  const origensOptions = [
+    { id: 'todas', label: 'Todas as origens' },
+    ...origens.map(origem => ({
+      id: origem.id,
+      label: origem.descricao
+    }))
+  ];
 
-          <Select value={origemFilter} onValueChange={setOrigemFilter}>
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder="Filtrar por origem" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="todas">Todas as origens</SelectItem>
-              {origens.map((origem) => (
-                <SelectItem key={origem.id} value={origem.id}>
-                  {origem.descricao}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
-      
-      {/* Demands Table */}
-      <div className="bg-white rounded-lg shadow">
-        <div className="p-4 border-b border-gray-100">
-          <h2 className="text-lg font-medium text-gray-900">Demandas</h2>
-          <p className="text-sm text-gray-500">Listagem de todas as demandas do sistema</p>
+  // Render demanda card
+  const renderDemandaCard = (demanda: any) => {
+    return (
+      <div className="border border-gray-200 rounded-xl p-4 bg-white hover:shadow-md transition-shadow">
+        <div className="flex justify-between items-start mb-3">
+          <div className="flex-1">
+            <h3 className="font-medium text-lg mb-1">{demanda.titulo || 'Sem título'}</h3>
+            <div className="flex flex-wrap gap-2 mt-2">
+              <LabelBadge 
+                label="Status" 
+                value={demanda.status} 
+                variant="status" 
+                size="sm"
+              />
+              {demanda.prioridade && (
+                <LabelBadge 
+                  label="Prioridade" 
+                  value={demanda.prioridade} 
+                  variant="priority" 
+                  size="sm"
+                />
+              )}
+            </div>
+          </div>
         </div>
         
-        {isLoading ? (
-          <div className="flex justify-center items-center p-8">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500" />
-          </div>
-        ) : (
-          <div className="p-4">
-            <DemandasTable 
-              demandas={demandas} 
-              onViewDemand={handleViewDemanda} 
-              onDelete={handleDeleteDemand}
-              onViewNota={handleViewNota}
-              totalCount={totalCount}
-              page={page}
-              pageSize={pageSize}
-              setPage={setPage}
-              setPageSize={setPageSize}
-              isAdmin={isAdmin}
-              isLoading={isLoading}
-            />
-          </div>
-        )}
+        <div className="text-sm text-gray-600 space-y-1">
+          <p className="flex items-center">
+            <span className="font-medium mr-1">Origem:</span> 
+            {demanda.origem_descricao || 'Não especificada'}
+          </p>
+          {demanda.criado_em && (
+            <p>
+              <span className="font-medium mr-1">Data:</span>
+              {format(new Date(demanda.criado_em), "dd/MM/yyyy", { locale: ptBR })}
+            </p>
+          )}
+          {demanda.problema_descricao && (
+            <p>
+              <span className="font-medium mr-1">Problema:</span>
+              {demanda.problema_descricao}
+            </p>
+          )}
+        </div>
+        
+        <div className="mt-4 flex justify-end space-x-2">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={(e) => {
+              e.stopPropagation();
+              handleViewNota(demanda.id);
+            }}
+            className="rounded-xl"
+          >
+            Ver Nota
+          </Button>
+          
+          {isAdmin && (
+            <Button 
+              variant="destructive" 
+              size="sm" 
+              onClick={(e) => {
+                e.stopPropagation();
+                handleDeleteDemand(demanda);
+              }}
+              className="rounded-xl"
+            >
+              Excluir
+            </Button>
+          )}
+        </div>
       </div>
+    );
+  };
+
+  return (
+    <div className="space-y-4">
+      <UnifiedViewContainer
+        items={demandas}
+        isLoading={isLoading}
+        renderListItem={renderDemandaCard}
+        renderGridItem={renderDemandaCard}
+        idExtractor={(demanda) => demanda.id}
+        searchTerm={searchTerm}
+        setSearchTerm={setSearchTerm}
+        onItemClick={handleViewDemanda}
+        filterOptions={{
+          primaryFilter: {
+            value: statusFilter,
+            onChange: setStatusFilter,
+            options: statusOptions,
+            placeholder: 'Status'
+          },
+          secondaryFilter: {
+            value: origemFilter,
+            onChange: setOrigemFilter,
+            options: origensOptions,
+            placeholder: 'Origem'
+          }
+        }}
+        emptyStateMessage="Nenhuma demanda encontrada"
+        searchPlaceholder="Buscar demandas..."
+        defaultViewMode={viewMode}
+        gridColumns={{ sm: 1, md: 2, lg: 3 }}
+        className="bg-white rounded-xl border border-gray-200"
+      />
       
       {/* Delete Demand Dialog */}
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={() => setIsDeleteDialogOpen(false)}>
-        <AlertDialogContent>
+        <AlertDialogContent className="rounded-xl">
           <AlertDialogHeader>
             <AlertDialogTitle>Excluir Demanda</AlertDialogTitle>
             <AlertDialogDescription className="text-gray-700">
@@ -298,13 +346,13 @@ const ConsultarDemandasContent = () => {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => setIsDeleteDialogOpen(false)} disabled={isLoading}>
+            <AlertDialogCancel onClick={() => setIsDeleteDialogOpen(false)} disabled={isLoading} className="rounded-xl">
               Cancelar
             </AlertDialogCancel>
             <AlertDialogAction 
               onClick={confirmDeleteDemand} 
               disabled={isLoading}
-              className="bg-red-600 hover:bg-red-700 text-white"
+              className="bg-red-600 hover:bg-red-700 text-white rounded-xl"
             >
               {isLoading ? (
                 <>
