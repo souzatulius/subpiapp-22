@@ -11,11 +11,17 @@ interface IdentificationStepProps {
     detalhes_solicitacao: string;
     tem_protocolo_156?: boolean;
     numero_protocolo_156?: string;
+    servico_id?: string;
+    nao_sabe_servico?: boolean;
   };
   handleChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
   handleSelectChange: (name: string, value: string | boolean) => void;
   problemas: any[];
   errors?: ValidationError[];
+  servicos?: any[];
+  filteredServicos?: any[];
+  serviceSearch?: string;
+  handleServiceSearch?: (value: string) => void;
 }
 
 const IdentificationStep: React.FC<IdentificationStepProps> = ({
@@ -23,14 +29,26 @@ const IdentificationStep: React.FC<IdentificationStepProps> = ({
   handleChange,
   handleSelectChange,
   problemas,
-  errors = []
+  errors = [],
+  servicos = [],
+  filteredServicos = [],
+  serviceSearch = '',
+  handleServiceSearch = () => {}
 }) => {
   return (
     <div className="space-y-6">
       <TemaSelector
         problemas={problemas}
-        selectedProblemId={formData.problema_id}
-        onChange={(id) => handleSelectChange('problema_id', id)}
+        servicos={servicos}
+        filteredServicos={filteredServicos}
+        formData={{
+          problema_id: formData.problema_id,
+          servico_id: formData.servico_id || '',
+          nao_sabe_servico: formData.nao_sabe_servico || false
+        }}
+        handleSelectChange={handleSelectChange}
+        handleServiceSearch={handleServiceSearch}
+        serviceSearch={serviceSearch}
         errors={errors}
       />
       

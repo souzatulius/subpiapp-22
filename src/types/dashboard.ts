@@ -1,3 +1,4 @@
+
 export type CardWidth = '25' | '50' | '75' | '100';
 export type CardHeight = '0.5' | '1' | '2' | '3' | '4';
 export type CardColor = 
@@ -87,4 +88,5 @@ export interface ActionCardItem {
   isComunicados?: boolean;
   isUserProfile?: boolean;
   isNotificationSettings?: boolean;
+  isVisible?: boolean; // Added isVisible property
 }

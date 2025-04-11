@@ -21,7 +21,7 @@ interface TemaSelectorProps {
     servico_id: string;
     nao_sabe_servico: boolean;
   };
-  handleSelectChange: (name: string, value: string) => void;
+  handleSelectChange: (name: string, value: string | boolean) => void;
   handleServiceSearch: (value: string) => void;
   serviceSearch: string;
   errors: ValidationError[];

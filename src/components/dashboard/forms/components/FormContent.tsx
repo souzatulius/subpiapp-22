@@ -54,7 +54,7 @@ interface FormContentProps {
   handleServiceSearch?: (value: string) => void;
   nextStep?: () => void;
   onNavigateToStep?: (step: number) => void;
-  onGenerateAIContent?: () => void;
+  onGenerateAIContent?: () => Promise<void>; // Change to Promise<void>
   isGenerating?: boolean;
 }
 

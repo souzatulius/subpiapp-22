@@ -32,6 +32,7 @@ export interface ChartItem {
   isAnalysisExpanded: boolean;
   showAnalysisOnly: boolean;
   subtitle?: string;
+  type?: string; // Added type property to match useChartItems usage
 }
 
 // Types for upload service
