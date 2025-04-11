@@ -18,6 +18,7 @@ export interface DemandasTableProps {
   setPage: React.Dispatch<React.SetStateAction<number>>;
   setPageSize: React.Dispatch<React.SetStateAction<number>>;
   isAdmin: boolean;
+  isLoading?: boolean; // Added isLoading property as optional
 }
 
 const DemandasTable: React.FC<DemandasTableProps> = ({
@@ -30,7 +31,8 @@ const DemandasTable: React.FC<DemandasTableProps> = ({
   pageSize,
   setPage,
   setPageSize,
-  isAdmin
+  isAdmin,
+  isLoading = false // Default to false
 }) => {
   const getStatusColor = (status: string) => {
     switch (status) {

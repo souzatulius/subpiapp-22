@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -16,7 +15,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { toast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { useNavigate } from 'react-router-dom'; // Changed from next/navigation to react-router-dom
+import { useNavigate } from 'react-router-dom';
 import DemandasTable from './DemandasTable';
 import AttentionBox from '@/components/ui/attention-box';
 import { Loader2 } from 'lucide-react';
@@ -56,6 +55,31 @@ const ConsultarDemandasContent = () => {
     };
 
     fetchOrigens();
+  }, []);
+
+  // Check if user is admin
+  useEffect(() => {
+    const checkAdmin = async () => {
+      const { data, error } = await supabase.auth.getSession();
+      if (data?.session?.user) {
+        const { data: profileData } = await supabase
+          .from('usuarios')  
+          .select('status')
+          .eq('id', data.session.user.id)
+          .single();
+
+        const { data: permissionsData } = await supabase
+          .from('usuario_permissoes')
+          .select('permissao_id, permissoes:permissao_id(nivel_acesso)')
+          .eq('usuario_id', data.session.user.id)
+          .single();
+
+        const isAdminUser = permissionsData?.permissoes?.nivel_acesso >= 80 || false;
+        setIsAdmin(isAdminUser);
+      }
+    };
+    
+    checkAdmin();
   }, []);
 
   // Fetch demands from Supabase
@@ -108,24 +132,6 @@ const ConsultarDemandasContent = () => {
     }
   }, [searchTerm, statusFilter, origemFilter, page, pageSize]);
 
-  // Check if user is admin
-  useEffect(() => {
-    const checkAdmin = async () => {
-      const { data, error } = await supabase.auth.getSession();
-      if (data?.session?.user) {
-        const { data: profileData } = await supabase
-          .from('usuarios')  // Changed from profiles to usuarios
-          .select('is_admin')
-          .eq('id', data.session.user.id)
-          .single();
-
-        setIsAdmin(profileData?.is_admin || false);
-      }
-    };
-    
-    checkAdmin();
-  }, []);
-
   // Fetch demands on mount and when filters change
   useEffect(() => {
     fetchDemandas();
@@ -144,7 +150,7 @@ const ConsultarDemandasContent = () => {
   // Check if demand has notes
   const checkIfDemandHasNotes = async (demandId: string): Promise<boolean> => {
     const { data } = await supabase
-      .from('notas_oficiais')  // Changed from notas to notas_oficiais
+      .from('notas_oficiais')  
       .select('*', { count: 'exact' })
       .eq('demanda_id', demandId);
 
@@ -264,6 +270,7 @@ const ConsultarDemandasContent = () => {
               setPage={setPage}
               setPageSize={setPageSize}
               isAdmin={isAdmin}
+              isLoading={isLoading}
             />
           </div>
         )}
