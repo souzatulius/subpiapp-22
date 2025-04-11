@@ -2,6 +2,7 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
 import { StatusConfig, statusIcons, getDemandaStatusConfig, getNotaStatusConfig } from '@/utils/statusLabels';
+import { FileText, Tag, PriorityHigh } from 'lucide-react';
 
 interface StatusBadgeProps {
   status: string;
@@ -118,5 +119,135 @@ export function NotaStatusBadge({
       className={className}
       size={size}
     />
+  );
+}
+
+// We're using these icons for creating our themed badges
+export function TemaBadge({
+  texto,
+  className,
+  size = 'sm',
+}: {
+  texto: string;
+  className?: string;
+  size?: 'sm' | 'md' | 'lg';
+}) {
+  const sizeClasses = {
+    sm: 'text-xs py-0.5 px-2 h-5',
+    md: 'text-sm py-1 px-2.5 h-6',
+    lg: 'text-sm py-1.5 px-3 h-7',
+  };
+
+  const iconSizes = {
+    sm: 12,
+    md: 14,
+    lg: 16,
+  };
+
+  return (
+    <span
+      className={cn(
+        'inline-flex items-center gap-1.5 font-medium rounded-full border',
+        'bg-blue-50 text-blue-700 border-blue-200',
+        sizeClasses[size],
+        className
+      )}
+    >
+      <FileText size={iconSizes[size]} className="shrink-0" />
+      <span>{texto}</span>
+    </span>
+  );
+}
+
+export function CoordenacaoBadge({
+  texto,
+  className,
+  size = 'sm',
+}: {
+  texto: string;
+  className?: string;
+  size?: 'sm' | 'md' | 'lg';
+}) {
+  const sizeClasses = {
+    sm: 'text-xs py-0.5 px-2 h-5',
+    md: 'text-sm py-1 px-2.5 h-6',
+    lg: 'text-sm py-1.5 px-3 h-7',
+  };
+
+  const iconSizes = {
+    sm: 12,
+    md: 14,
+    lg: 16,
+  };
+
+  return (
+    <span
+      className={cn(
+        'inline-flex items-center gap-1.5 font-medium rounded-full border',
+        'bg-gray-100 text-gray-700 border-gray-200',
+        sizeClasses[size],
+        className
+      )}
+    >
+      <Tag size={iconSizes[size]} className="shrink-0" />
+      <span>{texto}</span>
+    </span>
+  );
+}
+
+export function PrioridadeBadge({
+  prioridade,
+  className,
+  size = 'sm',
+}: {
+  prioridade: string;
+  className?: string;
+  size?: 'sm' | 'md' | 'lg';
+}) {
+  const sizeClasses = {
+    sm: 'text-xs py-0.5 px-2 h-5',
+    md: 'text-sm py-1 px-2.5 h-6',
+    lg: 'text-sm py-1.5 px-3 h-7',
+  };
+
+  const iconSizes = {
+    sm: 12,
+    md: 14,
+    lg: 16,
+  };
+
+  // Formatação correta da prioridade
+  const formatarPrioridade = (prioridade: string) => {
+    switch (prioridade.toLowerCase()) {
+      case 'alta': return 'Alta';
+      case 'media': return 'Média';
+      case 'baixa': return 'Baixa';
+      default: return prioridade;
+    }
+  };
+
+  const getBadgeColors = () => {
+    switch (prioridade.toLowerCase()) {
+      case 'alta':
+        return 'bg-orange-50 text-orange-700 border border-orange-200';
+      case 'media':
+        return 'bg-yellow-50 text-yellow-700 border border-yellow-200';
+      default:
+        return 'bg-green-50 text-green-700 border border-green-200';
+    }
+  };
+  
+  return (
+    <span
+      className={cn(
+        'inline-flex items-center gap-1.5 font-medium rounded-full',
+        getBadgeColors(),
+        sizeClasses[size],
+        className
+      )}
+    >
+      <PriorityHigh size={iconSizes[size]} className="shrink-0" />
+      <span>{formatarPrioridade(prioridade)}</span>
+    </span>
   );
 }

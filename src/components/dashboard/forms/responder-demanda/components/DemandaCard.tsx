@@ -7,7 +7,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Demanda } from '../types';
 import { getPriorityColor } from '@/utils/priorityUtils';
-import { DemandaStatusBadge } from '@/components/ui/status-badge';
+import { DemandaStatusBadge, PrioridadeBadge, CoordenacaoBadge } from '@/components/ui/status-badge';
 
 interface DemandaCardProps {
   demanda: Demanda;
@@ -18,20 +18,10 @@ interface DemandaCardProps {
 const DemandaCard: React.FC<DemandaCardProps> = ({ demanda, isSelected, onClick }) => {
   const priorityColors = getPriorityColor(demanda.prioridade);
   
-  // Formatação correta da prioridade
-  const formatarPrioridade = (prioridade: string) => {
-    switch (prioridade.toLowerCase()) {
-      case 'alta': return 'Alta';
-      case 'media': return 'Média';
-      case 'baixa': return 'Baixa';
-      default: return prioridade;
-    }
-  };
-  
   // Extraindo a sigla da coordenação associada ao tema/problema
   const coordenacaoSigla = demanda.tema?.coordenacao?.sigla || 
                            demanda.problema?.coordenacao?.sigla || 
-                           (demanda.coordenacao_id ? 'Coord.' : '');
+                           (demanda.coordenacao?.sigla || '');
   
   // Format relative time
   const relativeTime = demanda.horario_publicacao ? 
@@ -59,25 +49,23 @@ const DemandaCard: React.FC<DemandaCardProps> = ({ demanda, isSelected, onClick 
           </div>
           
           <div className="flex flex-wrap gap-2 items-center">
-            <Badge 
-              variant="outline" 
-              className={`${priorityColors.bg} ${priorityColors.text} px-2.5 py-1`}
-            >
-              {formatarPrioridade(demanda.prioridade)}
-            </Badge>
+            <PrioridadeBadge 
+              prioridade={demanda.prioridade}
+              size="sm"
+            />
             
             <DemandaStatusBadge 
               status={demanda.status} 
               size="sm"
               className="px-2.5 py-1"
+              showIcon={true}
             />
             
             {coordenacaoSigla && (
-              <Badge 
-                className="bg-gray-100 text-gray-700 px-2.5 py-1"
-              >
-                {coordenacaoSigla}
-              </Badge>
+              <CoordenacaoBadge 
+                texto={coordenacaoSigla}
+                size="sm"
+              />
             )}
           </div>
           

@@ -79,11 +79,11 @@ const UnifiedFilterBar: React.FC<UnifiedFilterBarProps> = ({
             placeholder={searchPlaceholder}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-9 rounded-xl w-full"
+            className="pl-9 rounded-xl w-full h-9" /* Reduced height to match buttons */
           />
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            className="absolute left-1/2 top-1/2 h-4 w-4 text-gray-500 -translate-x-[6rem] -translate-y-1/2"
+            className="absolute left-3 top-1/2 h-4 w-4 text-gray-500 -translate-y-1/2"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -102,7 +102,7 @@ const UnifiedFilterBar: React.FC<UnifiedFilterBarProps> = ({
             variant="outline"
             size="icon"
             onClick={toggleFilter}
-            className={`rounded-xl ${isFilterOpen ? 'bg-blue-50 text-blue-600' : ''}`}
+            className={`rounded-xl h-9 w-9 ${isFilterOpen ? 'bg-blue-50 text-blue-600' : ''}`}
           >
             <Filter className="h-4 w-4" />
           </Button>
@@ -114,7 +114,7 @@ const UnifiedFilterBar: React.FC<UnifiedFilterBarProps> = ({
               variant="outline"
               size="icon"
               onClick={() => setViewMode('list')}
-              className={`rounded-xl ${viewMode === 'list' ? 'bg-blue-50 text-blue-600' : ''}`}
+              className={`rounded-xl h-9 w-9 ${viewMode === 'list' ? 'bg-blue-50 text-blue-600' : ''}`}
             >
               <List className="h-4 w-4" />
             </Button>
@@ -123,7 +123,7 @@ const UnifiedFilterBar: React.FC<UnifiedFilterBarProps> = ({
               variant="outline"
               size="icon"
               onClick={() => setViewMode('cards')}
-              className={`rounded-xl ${viewMode === 'cards' ? 'bg-blue-50 text-blue-600' : ''}`}
+              className={`rounded-xl h-9 w-9 ${viewMode === 'cards' ? 'bg-blue-50 text-blue-600' : ''}`}
             >
               <Grid className="h-4 w-4" />
             </Button>

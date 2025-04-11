@@ -1,14 +1,13 @@
 
 import React, { useMemo } from 'react';
-import { FileIcon, ExternalLink, Download } from 'lucide-react';
-import AttachmentItem from './AttachmentItem';
+import { FileIcon, FileText, FileImage, FileArchive, FileAudio, FileVideo } from 'lucide-react';
 import { isValidPublicUrl, processFileUrls } from '@/utils/questionFormatUtils';
 
 interface AttachmentsSectionProps {
   arquivo_url: string | null;
   anexos: string[] | null;
-  onViewAttachment: (url: string) => void;
-  onDownloadAttachment: (url: string) => void;
+  onViewAttachment?: (url: string) => void;
+  onDownloadAttachment?: (url: string) => void;
 }
 
 const AttachmentsSection: React.FC<AttachmentsSectionProps> = ({
@@ -49,22 +48,52 @@ const AttachmentsSection: React.FC<AttachmentsSectionProps> = ({
     );
   }
 
+  const renderAttachmentIcon = (filename: string) => {
+    const extension = filename.split('.').pop()?.toLowerCase();
+    
+    if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'].includes(extension || '')) {
+      return <FileImage className="h-12 w-12 text-orange-500" />;
+    } else if (['mp3', 'wav', 'ogg'].includes(extension || '')) {
+      return <FileAudio className="h-12 w-12 text-orange-500" />;
+    } else if (['mp4', 'avi', 'mov', 'webm'].includes(extension || '')) {
+      return <FileVideo className="h-12 w-12 text-orange-500" />;
+    } else if (['zip', 'rar', '7z'].includes(extension || '')) {
+      return <FileArchive className="h-12 w-12 text-orange-500" />;
+    } else if (['pdf', 'doc', 'docx', 'txt', 'xls', 'xlsx'].includes(extension || '')) {
+      return <FileText className="h-12 w-12 text-orange-500" />;
+    } else {
+      return <FileIcon className="h-12 w-12 text-orange-500" />;
+    }
+  };
+
   return (
     <div className="space-y-3 animate-fade-in">
       <div className="mb-2 text-sm text-gray-600 font-medium">
-        {normalizedAttachments.length} {normalizedAttachments.length === 1 ? 'arquivo anexado' : 'arquivos anexados'}
+        Anexos
       </div>
       
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-        {normalizedAttachments.map((url: string, index: number) => (
-          <AttachmentItem 
-            key={`attachment-${index}`}
-            url={url} 
-            onView={onViewAttachment} 
-            onDownload={onDownloadAttachment}
-            index={index} 
-          />
-        ))}
+      <div className="flex flex-wrap gap-6">
+        {normalizedAttachments.map((url: string, index: number) => {
+          const filename = url.split('/').pop() || `Anexo ${index + 1}`;
+          
+          return (
+            <a 
+              key={`attachment-${index}`}
+              href={url}
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="flex flex-col items-center transition-transform hover:scale-105"
+              onClick={(e) => {
+                if (onViewAttachment) {
+                  e.preventDefault();
+                  onViewAttachment(url);
+                }
+              }}
+            >
+              {renderAttachmentIcon(filename)}
+            </a>
+          );
+        })}
       </div>
     </div>
   );
