@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
 import { ResponsabilidadeBadge } from '@/components/ui/status-badge';
+import { EyeOff, Search } from 'lucide-react';
 
 interface ResponsibilityChartProps {
   data: any;
@@ -11,6 +12,8 @@ interface ResponsibilityChartProps {
   painelData: any[] | null;
   isLoading: boolean;
   isSimulationActive: boolean;
+  onToggleVisibility?: () => void;
+  onToggleAnalysis?: () => void;
 }
 
 const RESPONSIBILITY_COLORS = {
@@ -26,12 +29,15 @@ const ResponsibilityChart: React.FC<ResponsibilityChartProps> = ({
   sgzData,
   painelData,
   isLoading,
-  isSimulationActive
+  isSimulationActive,
+  onToggleVisibility,
+  onToggleAnalysis
 }) => {
   // Process data from sgzData to get responsibility counts
   const [chartData, setChartData] = React.useState<any[]>([]);
   const [total, setTotal] = React.useState<number>(0);
   const [subprefeituraPercentage, setSubprefeituraPercentage] = React.useState<number>(0);
+  const [isHovering, setIsHovering] = React.useState(false);
   
   React.useEffect(() => {
     if (!isLoading && sgzData) {
@@ -63,7 +69,7 @@ const ResponsibilityChart: React.FC<ResponsibilityChartProps> = ({
 
   if (isLoading) {
     return (
-      <Card>
+      <Card className="border border-orange-200 shadow-sm hover:shadow-md transition-all">
         <CardHeader>
           <CardTitle className="text-sm font-medium">Responsabilidade de Ordens</CardTitle>
         </CardHeader>
@@ -78,7 +84,7 @@ const ResponsibilityChart: React.FC<ResponsibilityChartProps> = ({
 
   if (!sgzData?.length) {
     return (
-      <Card>
+      <Card className="border border-orange-200 shadow-sm hover:shadow-md transition-all">
         <CardHeader>
           <CardTitle className="text-sm font-medium">Responsabilidade de Ordens</CardTitle>
         </CardHeader>
@@ -94,7 +100,11 @@ const ResponsibilityChart: React.FC<ResponsibilityChartProps> = ({
   }
 
   return (
-    <Card>
+    <Card 
+      className="border border-orange-200 shadow-sm hover:shadow-md transition-all relative"
+      onMouseEnter={() => setIsHovering(true)}
+      onMouseLeave={() => setIsHovering(false)}
+    >
       <CardHeader>
         <CardTitle className="text-sm font-medium flex items-center justify-between">
           <span>Responsabilidade de Ordens</span>
@@ -104,6 +114,39 @@ const ResponsibilityChart: React.FC<ResponsibilityChartProps> = ({
         </CardTitle>
       </CardHeader>
       <CardContent>
+        {/* Action buttons that appear on hover */}
+        <div 
+          className={`absolute top-3 right-3 flex space-x-2 transition-opacity duration-200 ${
+            isHovering ? 'opacity-100' : 'opacity-0'
+          }`}
+        >
+          {onToggleAnalysis && (
+            <button 
+              onClick={(e) => {
+                e.stopPropagation();
+                onToggleAnalysis();
+              }}
+              className="p-1.5 rounded-full bg-blue-50 hover:bg-blue-100 text-blue-600 transition-colors"
+              title="Mostrar análise"
+            >
+              <Search size={16} />
+            </button>
+          )}
+          
+          {onToggleVisibility && (
+            <button 
+              onClick={(e) => {
+                e.stopPropagation();
+                onToggleVisibility();
+              }}
+              className="p-1.5 rounded-full bg-blue-50 hover:bg-blue-100 text-blue-600 transition-colors"
+              title="Ocultar card"
+            >
+              <EyeOff size={16} />
+            </button>
+          )}
+        </div>
+
         <div className="h-[220px]">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
@@ -120,7 +163,7 @@ const ResponsibilityChart: React.FC<ResponsibilityChartProps> = ({
                 {chartData.map((entry, index) => (
                   <Cell 
                     key={`cell-${index}`} 
-                    fill={RESPONSIBILITY_COLORS[entry.name] || RESPONSIBILITY_COLORS.outros} 
+                    fill={RESPONSIBILITY_COLORS[entry.name as keyof typeof RESPONSIBILITY_COLORS] || RESPONSIBILITY_COLORS.outros} 
                   />
                 ))}
               </Pie>
@@ -128,13 +171,13 @@ const ResponsibilityChart: React.FC<ResponsibilityChartProps> = ({
                 formatter={(value, name) => {
                   return [
                     `${value} (${Math.round((Number(value) / total) * 100)}%)`,
-                    <ResponsabilidadeBadge key={name.toString()} responsavel={name.toString()} />
+                    <ResponsabilidadeBadge key={String(name)} responsavel={String(name)} />
                   ];
                 }}
               />
               <Legend 
                 formatter={(value) => {
-                  return <ResponsabilidadeBadge responsavel={value} />;
+                  return <ResponsabilidadeBadge responsavel={String(value)} />;
                 }}
               />
             </PieChart>

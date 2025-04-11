@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { ChartConfig } from '@/types/ranking';
 import { ChartVisibility } from '@/components/ranking/types';
@@ -116,7 +115,7 @@ export const useRankingCharts = () => {
   const toggleChartVisibility = (chartId: string) => {
     setChartVisibility(prev => ({
       ...prev,
-      [chartId]: !prev[chartId as keyof ChartVisibility]
+      [chartId]: !prev[chartId]
     }));
   };
 

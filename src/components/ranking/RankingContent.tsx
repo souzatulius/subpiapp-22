@@ -1,10 +1,10 @@
 
-import React, { useState } from 'react';
-import { useRealData } from './RealDataProvider';
-import FilterDialog from './FilterDialog';
+import React, { useState, useEffect } from 'react';
+import RankingFilterDialog from './filters/FilterDialog';
 import RankingCharts from './RankingCharts';
-import RankingFilters from './RankingFilters';
-import { ChartVisibility } from '@/components/ranking/types';
+import { ChartVisibility } from './types';
+import { useRankingCharts } from '@/hooks/ranking/useRankingCharts';
+import DashboardCards from './insights/DashboardCards';
 
 interface RankingContentProps {
   filterDialogOpen: boolean;
@@ -15,91 +15,130 @@ interface RankingContentProps {
   lastUpdateText?: string;
 }
 
-const RankingContent = ({
+const RankingContent: React.FC<RankingContentProps> = ({
   filterDialogOpen,
   setFilterDialogOpen,
   disableCardContainers = false,
-  className = '',
-  buttonText = 'Filtrar',
-  lastUpdateText = 'Última atualização'
-}: RankingContentProps) => {
+  className = "",
+  buttonText = "Filtrar",
+  lastUpdateText = "Última Atualização"
+}) => {
   const [isSimulationActive, setIsSimulationActive] = useState(false);
   const { 
-    isLoading, 
-    sgzData, 
-    painelData,
-    refreshData,
-    lastUpdated,
-    hasData
-  } = useRealData();
-  
-  const [chartVisibility, setChartVisibility] = useState<ChartVisibility>({
-    districtPerformance: true,
-    serviceTypes: true,
-    resolutionTime: true,
-    responsibility: true,
-    evolution: true,
-    departmentComparison: true,
-    oldestPendingList: true,
-    statusDistribution: true,
-    topCompanies: true,
-    districtDistribution: true,
-    servicesByDepartment: true,
-    servicesByDistrict: true,
-    timeComparison: true,
-    dailyDemands: true,
-    statusTransition: true,
-    closureTime: true,
-    neighborhoodComparison: true,
-    districtEfficiencyRadar: true,
-    externalDistricts: true,
-    efficiencyImpact: true,
-    criticalStatus: true,
-    serviceDiversity: true,
-  });
+    chartVisibility, toggleChartVisibility, setChartVisibility,
+    planilhaData, sgzData, painelData, isLoading
+  } = useRankingCharts();
 
   const handleSimulateIdealRanking = () => {
-    setIsSimulationActive(prev => !prev);
-  };
-
-  const handleRefresh = () => {
-    refreshData();
+    setIsSimulationActive(!isSimulationActive);
   };
 
   return (
-    <div className={className}>
-      {/* Filters */}
-      <RankingFilters
-        onOpenFilterDialog={() => setFilterDialogOpen(true)}
-        buttonText={buttonText}
-        lastUpdateText={lastUpdateText}
-        lastUpdated={lastUpdated}
-        onRefresh={handleRefresh}
+    <div className="space-y-6">
+      <DashboardCards 
+        dadosPlanilha={planilhaData} 
+        dadosPainel={painelData} 
+        isSimulationActive={isSimulationActive}
       />
-      
-      {/* Charts */}
-      <div className="mt-6">
-        <RankingCharts 
-          chartData={{}}
-          isLoading={isLoading}
-          chartVisibility={chartVisibility as ChartVisibility}
-          sgzData={sgzData}
-          painelData={painelData}
-          onSimulateIdealRanking={handleSimulateIdealRanking}
-          isSimulationActive={isSimulationActive}
-          disableCardContainers={disableCardContainers}
-        />
-      </div>
-      
-      {/* Filter Dialog */}
-      <FilterDialog 
-        isOpen={filterDialogOpen}
-        onClose={() => setFilterDialogOpen(false)}
-        chartVisibility={chartVisibility as ChartVisibility}
-        setChartVisibility={setChartVisibility as React.Dispatch<React.SetStateAction<ChartVisibility>>}
+
+      <RankingCharts
+        chartData={{}}
+        sgzData={planilhaData}
+        painelData={painelData}
+        isLoading={isLoading}
+        chartVisibility={chartVisibility}
+        isSimulationActive={isSimulationActive}
+        onSimulateIdealRanking={handleSimulateIdealRanking}
+        disableCardContainers={disableCardContainers}
+        onToggleChartVisibility={toggleChartVisibility}
+      />
+
+      {/* Hidden charts container for charts that were removed but can be restored */}
+      <HiddenChartsContainer 
+        chartVisibility={chartVisibility} 
+        setChartVisibility={setChartVisibility}
+      />
+
+      <RankingFilterDialog 
+        open={filterDialogOpen} 
+        onOpenChange={setFilterDialogOpen} 
+        onApply={() => {
+          // Apply filter logic would go here
+          setFilterDialogOpen(false);
+        }}
       />
     </div>
   );
+};
+
+// Component to show hidden charts that can be restored
+const HiddenChartsContainer: React.FC<{
+  chartVisibility: ChartVisibility;
+  setChartVisibility: (vis: ChartVisibility) => void;
+}> = ({ chartVisibility, setChartVisibility }) => {
+  const hiddenCharts = Object.entries(chartVisibility).filter(([_, visible]) => !visible);
+  
+  if (hiddenCharts.length === 0) {
+    return null;
+  }
+  
+  const handleRestoreAll = () => {
+    const updatedVisibility = { ...chartVisibility };
+    Object.keys(updatedVisibility).forEach(key => {
+      updatedVisibility[key] = true;
+    });
+    setChartVisibility(updatedVisibility);
+  };
+  
+  const handleRestore = (chartId: string) => {
+    setChartVisibility({
+      ...chartVisibility,
+      [chartId]: true
+    });
+  };
+  
+  return (
+    <div className="mt-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
+      <div className="flex justify-between items-center mb-3">
+        <h3 className="text-sm font-medium text-gray-700">Gráficos Ocultos</h3>
+        <button 
+          className="text-xs text-blue-600 hover:text-blue-800"
+          onClick={handleRestoreAll}
+        >
+          Restaurar todos
+        </button>
+      </div>
+      <div className="flex flex-wrap gap-2">
+        {hiddenCharts.map(([chartId]) => (
+          <button
+            key={chartId}
+            className="px-3 py-1 bg-white text-sm rounded-full border border-gray-300 hover:bg-gray-100"
+            onClick={() => handleRestore(chartId)}
+          >
+            {getChartName(chartId)}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+// Helper function to get a human-readable name for chart IDs
+const getChartName = (chartId: string): string => {
+  const names: Record<string, string> = {
+    districtPerformance: "Desempenho por Distrito",
+    serviceTypes: "Tipos de Serviço",
+    resolutionTime: "Tempo de Resolução",
+    responsibility: "Responsabilidade",
+    evolution: "Evolução",
+    departmentComparison: "Comparação entre Departamentos",
+    oldestPendingList: "Pendências Mais Antigas",
+    statusDistribution: "Distribuição de Status",
+    topCompanies: "Principais Empresas",
+    districtDistribution: "Distribuição por Distrito"
+  };
+  
+  return names[chartId] || chartId;
 };
 
 export default RankingContent;

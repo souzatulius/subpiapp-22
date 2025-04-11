@@ -22,6 +22,7 @@ interface RankingChartsProps {
   isSimulationActive: boolean;
   onSimulateIdealRanking: () => void;
   disableCardContainers?: boolean;
+  onToggleChartVisibility?: (chartId: string) => void;
 }
 
 const RankingCharts: React.FC<RankingChartsProps> = ({
@@ -32,10 +33,12 @@ const RankingCharts: React.FC<RankingChartsProps> = ({
   chartVisibility,
   isSimulationActive,
   onSimulateIdealRanking,
-  disableCardContainers = false
+  disableCardContainers = false,
+  onToggleChartVisibility
 }) => {
   const [activeTab, setActiveTab] = useState("performance");
   const [showOnlySubprefeitura, setShowOnlySubprefeitura] = useState(false);
+  const [showingAnalysis, setShowingAnalysis] = useState<Record<string, boolean>>({});
 
   // Filter data if showOnlySubprefeitura is true
   const filteredSgzData = React.useMemo(() => {
@@ -54,6 +57,14 @@ const RankingCharts: React.FC<RankingChartsProps> = ({
     }
     return painelData;
   }, [painelData, showOnlySubprefeitura]);
+
+  // Toggle analysis view for a specific chart
+  const toggleAnalysis = (chartId: string) => {
+    setShowingAnalysis(prev => ({
+      ...prev,
+      [chartId]: !prev[chartId]
+    }));
+  };
 
   // Sample empty data object for charts
   const emptyData = {};
@@ -119,6 +130,8 @@ const RankingCharts: React.FC<RankingChartsProps> = ({
                 sgzData={filteredSgzData} 
                 isLoading={isLoading} 
                 isSimulationActive={isSimulationActive} 
+                onToggleVisibility={() => onToggleChartVisibility?.('districtPerformance')}
+                onToggleAnalysis={() => toggleAnalysis('districtPerformance')}
               />
             )}
             {chartVisibility.evolution && (
@@ -128,6 +141,8 @@ const RankingCharts: React.FC<RankingChartsProps> = ({
                 painelData={filteredPainelData} 
                 isLoading={isLoading} 
                 isSimulationActive={isSimulationActive} 
+                onToggleVisibility={() => onToggleChartVisibility?.('evolution')}
+                onToggleAnalysis={() => toggleAnalysis('evolution')}
               />
             )}
           </div>
@@ -138,6 +153,8 @@ const RankingCharts: React.FC<RankingChartsProps> = ({
                 sgzData={filteredSgzData} 
                 isLoading={isLoading} 
                 isSimulationActive={isSimulationActive} 
+                onToggleVisibility={() => onToggleChartVisibility?.('resolutionTime')}
+                onToggleAnalysis={() => toggleAnalysis('resolutionTime')}
               />
             )}
             {chartVisibility.oldestPendingList && (
@@ -146,6 +163,8 @@ const RankingCharts: React.FC<RankingChartsProps> = ({
                 sgzData={filteredSgzData} 
                 isLoading={isLoading} 
                 isSimulationActive={isSimulationActive} 
+                onToggleVisibility={() => onToggleChartVisibility?.('oldestPendingList')}
+                onToggleAnalysis={() => toggleAnalysis('oldestPendingList')}
               />
             )}
           </div>
@@ -158,7 +177,9 @@ const RankingCharts: React.FC<RankingChartsProps> = ({
                 data={emptyData} 
                 sgzData={filteredSgzData} 
                 isLoading={isLoading} 
-                isSimulationActive={isSimulationActive} 
+                isSimulationActive={isSimulationActive}
+                onToggleVisibility={() => onToggleChartVisibility?.('serviceTypes')}
+                onToggleAnalysis={() => toggleAnalysis('serviceTypes')}
               />
             )}
             {chartVisibility.responsibility && (
@@ -167,7 +188,9 @@ const RankingCharts: React.FC<RankingChartsProps> = ({
                 sgzData={filteredSgzData} 
                 painelData={filteredPainelData} 
                 isLoading={isLoading} 
-                isSimulationActive={isSimulationActive} 
+                isSimulationActive={isSimulationActive}
+                onToggleVisibility={() => onToggleChartVisibility?.('responsibility')}
+                onToggleAnalysis={() => toggleAnalysis('responsibility')}
               />
             )}
           </div>
@@ -180,7 +203,9 @@ const RankingCharts: React.FC<RankingChartsProps> = ({
                 data={emptyData} 
                 sgzData={filteredSgzData} 
                 isLoading={isLoading} 
-                isSimulationActive={isSimulationActive} 
+                isSimulationActive={isSimulationActive}
+                onToggleVisibility={() => onToggleChartVisibility?.('departmentComparison')}
+                onToggleAnalysis={() => toggleAnalysis('departmentComparison')}
               />
             )}
             {/* We can add more department-specific charts here */}
