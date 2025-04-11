@@ -79,11 +79,11 @@ const UnifiedFilterBar: React.FC<UnifiedFilterBarProps> = ({
             placeholder={searchPlaceholder}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-8 rounded-xl w-full"
+            className="pl-9 rounded-xl w-full"
           />
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500"
+            className="absolute left-1/2 top-1/2 h-4 w-4 text-gray-500 -translate-x-[6rem] -translate-y-1/2"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"

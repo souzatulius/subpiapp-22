@@ -1,27 +1,32 @@
 
 import React from 'react';
 import { Textarea } from '@/components/ui/textarea';
+import { FormDescription } from '@/components/ui/form';
 
 interface CommentsSectionProps {
   comentarios: string;
-  onChange: (value: string) => void;
+  onChange: (comentarios: string) => void;
+  showHelpText?: boolean;
 }
 
-const CommentsSection: React.FC<CommentsSectionProps> = ({
-  comentarios,
-  onChange
+const CommentsSection: React.FC<CommentsSectionProps> = ({ 
+  comentarios, 
+  onChange,
+  showHelpText = true
 }) => {
   return (
     <div className="space-y-2">
-      <Textarea
-        placeholder="Adicione comentários internos que serão visíveis apenas para a equipe (opcional)"
+      <Textarea 
+        className="min-h-[120px] w-full"
         value={comentarios}
         onChange={(e) => onChange(e.target.value)}
-        className="min-h-[100px] resize-y rounded-xl"
       />
-      <p className="text-xs text-gray-500 italic">
-        Esses comentários são apenas para uso interno e não serão enviados ao solicitante.
-      </p>
+      
+      {showHelpText && (
+        <FormDescription className="text-xs text-gray-500">
+          Estes comentários são apenas para uso interno e não serão visíveis ao solicitante.
+        </FormDescription>
+      )}
     </div>
   );
 };

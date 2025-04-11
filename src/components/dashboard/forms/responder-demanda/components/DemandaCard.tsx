@@ -1,12 +1,13 @@
 
 import React from 'react';
-import { formatDistanceToNow } from 'date-fns';
+import { formatDistanceToNow, format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { CalendarClock, MapPin } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Demanda } from '../types';
 import { getPriorityColor } from '@/utils/priorityUtils';
+import { DemandaStatusBadge } from '@/components/ui/status-badge';
 
 interface DemandaCardProps {
   demanda: Demanda;
@@ -17,18 +18,29 @@ interface DemandaCardProps {
 const DemandaCard: React.FC<DemandaCardProps> = ({ demanda, isSelected, onClick }) => {
   const priorityColors = getPriorityColor(demanda.prioridade);
   
-  // Calculate days past deadline
-  const daysPastDeadline = demanda.prazo_resposta ? 
-    Math.ceil((new Date().getTime() - new Date(demanda.prazo_resposta).getTime()) / (1000 * 3600 * 24)) : 
-    null;
+  // Formatação correta da prioridade
+  const formatarPrioridade = (prioridade: string) => {
+    switch (prioridade.toLowerCase()) {
+      case 'alta': return 'Alta';
+      case 'media': return 'Média';
+      case 'baixa': return 'Baixa';
+      default: return prioridade;
+    }
+  };
   
-  // Determine if the deadline is in the past
-  const isOverdue = daysPastDeadline && daysPastDeadline > 0;
+  // Extraindo a sigla da coordenação associada ao problema
+  const coordenacaoSigla = demanda.problema?.coordenacao?.sigla || 
+                          (demanda.coordenacao_id ? 'Coord.' : 'Interna');
   
   // Format relative time
   const relativeTime = demanda.horario_publicacao ? 
     formatDistanceToNow(new Date(demanda.horario_publicacao), { addSuffix: true, locale: ptBR }) : 
     'Data não disponível';
+
+  // Format deadline
+  const prazoFormatado = demanda.prazo_resposta ? 
+    format(new Date(demanda.prazo_resposta), 'dd/MM/yyyy HH:mm', { locale: ptBR }) : 
+    'Sem prazo definido';
 
   return (
     <Card 
@@ -44,30 +56,40 @@ const DemandaCard: React.FC<DemandaCardProps> = ({ demanda, isSelected, onClick 
           <div className="flex justify-between items-start">
             <h3 className="font-medium text-gray-900 line-clamp-2">{demanda.titulo || "Sem título"}</h3>
             <Badge 
-              variant="outline" 
-              className={`${priorityColors.bg} ${priorityColors.text} whitespace-nowrap ml-2`}
+              className={`${coordenacaoSigla ? 'bg-gray-100 text-gray-700 px-2.5 py-1' : 'hidden'}`}
             >
-              {demanda.prioridade}
+              {coordenacaoSigla}
             </Badge>
           </div>
           
-          <div className="text-sm flex items-center text-gray-600">
-            <CalendarClock className="h-4 w-4 mr-1 flex-shrink-0" /> 
-            {relativeTime}
-            {isOverdue && (
-              <span className="ml-2 text-blue-600 font-medium">
-                Vence há {daysPastDeadline} dia{daysPastDeadline > 1 ? 's' : ''}
-              </span>
-            )}
+          <div className="flex flex-wrap gap-2 items-center">
+            <Badge 
+              variant="outline" 
+              className={`${priorityColors.bg} ${priorityColors.text} px-2.5 py-1`}
+            >
+              {formatarPrioridade(demanda.prioridade)}
+            </Badge>
+            
+            <DemandaStatusBadge 
+              status={demanda.status} 
+              size="sm"
+              className="px-2.5 py-1"
+            />
           </div>
           
-          {demanda.origem_id && demanda.origens_demandas && (
-            <div className="flex flex-wrap gap-1">
-              <Badge variant="secondary" className="bg-gray-100 text-gray-700">
-                {demanda.origens_demandas.descricao || "Origem não especificada"}
-              </Badge>
+          <div className="flex flex-col gap-1">
+            <div className="text-sm flex items-center text-gray-600 justify-between">
+              <div className="flex items-center gap-1">
+                <CalendarClock className="h-4 w-4 flex-shrink-0" /> 
+                {relativeTime}
+              </div>
+              {demanda.prazo_resposta && (
+                <div className="text-sm text-blue-600 font-medium">
+                  Prazo: {prazoFormatado}
+                </div>
+              )}
             </div>
-          )}
+          </div>
           
           {(demanda.endereco || (demanda.bairros && demanda.bairros.nome)) && (
             <div className="text-sm flex items-start text-gray-600">

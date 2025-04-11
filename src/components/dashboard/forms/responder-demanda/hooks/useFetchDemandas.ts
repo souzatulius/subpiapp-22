@@ -45,7 +45,17 @@ export const useFetchDemandas = () => {
               id, 
               descricao,
               icone,
-              coordenacao_id
+              coordenacao_id,
+              coordenacao:coordenacao_id (
+                id,
+                descricao,
+                sigla
+              )
+            ),
+            coordenacoes:coordenacao_id (
+              id,
+              descricao,
+              sigla
             ),
             origens_demandas:origem_id (id, descricao),
             tipos_midia:tipo_midia_id (id, descricao),
@@ -137,6 +147,7 @@ export const useFetchDemandas = () => {
             arquivo_url,
             anexos: processedAnexos,
             coordenacao_id: item.coordenacao_id,
+            coordenacao: item.coordenacoes || null,
             supervisao_tecnica_id: null, // Add this field with null value for backward compatibility
             bairro_id: item.bairro_id,
             autor_id: item.autor_id,
@@ -148,7 +159,8 @@ export const useFetchDemandas = () => {
             tema: item.problemas ? {
               id: item.problemas.id,
               descricao: item.problemas.descricao,
-              icone: item.problemas.icone
+              icone: item.problemas.icone,
+              coordenacao: item.problemas.coordenacao
             } : null,
             areas_coordenacao: null,
             origens_demandas: item.origens_demandas,

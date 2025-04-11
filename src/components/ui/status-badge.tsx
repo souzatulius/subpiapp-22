@@ -60,12 +60,24 @@ export function DemandaStatusBadge({
   showIcon?: boolean;
   size?: 'sm' | 'md' | 'lg';
 }) {
+  // Formatação para primeira letra maiúscula
+  const formatStatus = (status: string) => {
+    // Se o status contém underscores, substitui por espaços e formata cada palavra
+    if (status.includes('_')) {
+      return status
+        .split('_')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ');
+    }
+    
+    // Caso contrário, apenas capitaliza a primeira letra
+    return status.charAt(0).toUpperCase() + status.slice(1);
+  };
+  
   const config = getDemandaStatusConfig(status);
   
-  // Special override for "Em análise" to ensure consistent height
-  if (status.toLowerCase() === 'em_analise' || status.toLowerCase() === 'em análise') {
-    config.label = "Em análise";
-  }
+  // Atualiza o label para ter primeira letra maiúscula
+  config.label = formatStatus(config.label);
   
   return (
     <StatusBadge
