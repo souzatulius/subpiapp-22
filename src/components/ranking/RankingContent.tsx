@@ -1,5 +1,6 @@
+
 import React, { useState, useEffect } from 'react';
-import RankingFilterDialog from './filters/FilterDialog';
+import RankingFilterDialog from './filters/RankingFilterDialog';
 import RankingCharts from './RankingCharts';
 import { ChartVisibility } from './types';
 import { useRankingCharts } from '@/hooks/ranking/useRankingCharts';
@@ -60,7 +61,9 @@ const RankingContent: React.FC<RankingContentProps> = ({
 
       <RankingFilterDialog 
         open={filterDialogOpen} 
-        onOpenChange={setFilterDialogOpen} 
+        onOpenChange={setFilterDialogOpen}
+        chartVisibility={chartVisibility}
+        onToggleChartVisibility={toggleChartVisibility}
       />
     </div>
   );
@@ -121,16 +124,15 @@ const HiddenChartsContainer: React.FC<{
 // Helper function to get a human-readable name for chart IDs
 const getChartName = (chartId: string): string => {
   const names: Record<string, string> = {
-    districtPerformance: "Desempenho por Distrito",
-    serviceTypes: "Tipos de Serviço",
-    resolutionTime: "Tempo de Resolução",
-    responsibility: "Responsabilidade",
-    evolution: "Evolução",
-    departmentComparison: "Comparação entre Departamentos",
-    oldestPendingList: "Pendências Mais Antigas",
-    statusDistribution: "Distribuição de Status",
-    topCompanies: "Principais Empresas",
-    districtDistribution: "Distribuição por Distrito"
+    districtPerformance: "Ordens por Distrito (SGZ)",
+    serviceTypes: "Tipos de Serviço Mais Frequentes",
+    resolutionTime: "Tempo Médio por Status",
+    responsibility: "Impacto dos Terceiros",
+    statusDistribution: "Distribuição por Status",
+    statusTransition: "Status de Atendimento",
+    districtEfficiencyRadar: "Radar de Eficiência por Distrito",
+    sgzPainel: "Comparativo SGZ vs Painel",
+    oldestPendingList: "Tempo de Abertura das OS"
   };
   
   return names[chartId] || chartId;

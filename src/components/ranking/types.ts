@@ -1,4 +1,3 @@
-
 export interface ChartItem {
   id: string;
   title: string;
@@ -12,24 +11,32 @@ export interface ChartItem {
 }
 
 export interface ChartVisibility {
+  // Performance & Efficiency charts
+  statusDistribution: boolean;
+  statusTransition: boolean;
+  districtEfficiencyRadar: boolean;
+  resolutionTime: boolean;
+  
+  // Territories & Services charts
   districtPerformance: boolean;
   serviceTypes: boolean;
-  resolutionTime: boolean;
+  
+  // Critical Flows charts
   responsibility: boolean;
+  sgzPainel: boolean;  // Adding the missing property
+  oldestPendingList: boolean;
+  
+  // Keeping other chart visibility flags for backward compatibility
   evolution: boolean;
   departmentComparison: boolean;
-  oldestPendingList: boolean;
-  statusDistribution: boolean;
   topCompanies: boolean;
   districtDistribution: boolean;
   servicesByDepartment: boolean;
   servicesByDistrict: boolean;
   timeComparison: boolean;
   dailyDemands: boolean;
-  statusTransition: boolean;
   closureTime: boolean;
   neighborhoodComparison: boolean;
-  districtEfficiencyRadar: boolean;
   externalDistricts: boolean;
   efficiencyImpact: boolean;
   criticalStatus: boolean;

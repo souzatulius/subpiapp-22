@@ -5,26 +5,20 @@ import { ChartVisibility } from '@/components/ranking/types';
 export const useRankingCharts = () => {
   // Initialize chart visibility state with the correct structure
   const [chartVisibility, setChartVisibility] = useState<ChartVisibility>({
-    // Status related charts
+    // Performance & Efficiency charts
     statusDistribution: true,
     statusTransition: true,
+    districtEfficiencyRadar: true,
+    resolutionTime: true,
     
-    // District related charts
+    // Territories & Services charts
     districtPerformance: true,
-    districtEfficiencyRadar: true, // New radar chart
-    
-    // Service related charts
     serviceTypes: true,
     
-    // Time related charts
-    resolutionTime: true,
-    oldestPendingList: true,
-    
-    // External/Responsibility related charts
+    // Critical Flows charts
     responsibility: true,
-    
-    // Comparison charts
-    sgzPainel: true, // New comparison chart
+    sgzPainel: true,
+    oldestPendingList: true,
     
     // Keeping other chart visibility flags for backward compatibility
     evolution: false,
@@ -40,6 +34,7 @@ export const useRankingCharts = () => {
     efficiencyImpact: false,
     criticalStatus: false,
     serviceDiversity: false,
+    externalDistricts: false,
   });
 
   // Mock charts data for potential future use
@@ -47,7 +42,7 @@ export const useRankingCharts = () => {
 
   const [isLoading, setIsLoading] = useState(false);
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
-  const [currentTab, setCurrentTab] = useState('status');
+  const [currentTab, setCurrentTab] = useState('performance');
   const [planilhaData, setPlanilhaData] = useState<any[]>([]);
   const [painelData, setPainelData] = useState<any[]>([]);
   const [uploadId, setUploadId] = useState<string | undefined>(undefined);

@@ -3,7 +3,10 @@ import React, { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
-import { BarChart3, Briefcase, TrendingUp, PieChart, RefreshCw, Building2, Clock, ListFilter, FileCheck } from 'lucide-react';
+import { 
+  BarChart3, Briefcase, TrendingUp, PieChart, RefreshCw, Building2, 
+  Clock, ListFilter, FileCheck, ActivitySquare, MapPin, Network
+} from 'lucide-react';
 import { ChartVisibility } from './types';
 import ResponsibilityChart from './charts/ResponsibilityChart';
 import ServiceTypesChart from './charts/ServiceTypesChart';
@@ -38,7 +41,7 @@ const RankingCharts: React.FC<RankingChartsProps> = ({
   disableCardContainers = false,
   onToggleChartVisibility
 }) => {
-  const [activeTab, setActiveTab] = useState("status");
+  const [activeTab, setActiveTab] = useState("performance");
   const [showOnlySubprefeitura, setShowOnlySubprefeitura] = useState(false);
   const [showingAnalysis, setShowingAnalysis] = useState<Record<string, boolean>>({});
 
@@ -105,53 +108,33 @@ const RankingCharts: React.FC<RankingChartsProps> = ({
         </div>
       </div>
 
-      <Tabs defaultValue="status" className="w-full" onValueChange={setActiveTab}>
+      <Tabs defaultValue="performance" className="w-full" onValueChange={setActiveTab}>
         <TabsList className="w-full mb-6 bg-orange-50 p-1 border border-orange-100">
           <TabsTrigger 
-            value="status" 
+            value="performance" 
             className="flex-1 data-[state=active]:bg-orange-500 data-[state=active]:text-white"
           >
-            <ListFilter className="h-4 w-4 mr-2" /> 
-            Status
+            <ActivitySquare className="h-4 w-4 mr-2" /> 
+            Performance e Eficiência
           </TabsTrigger>
           <TabsTrigger 
-            value="districts" 
+            value="territories" 
             className="flex-1 data-[state=active]:bg-orange-500 data-[state=active]:text-white"
           >
-            <TrendingUp className="h-4 w-4 mr-2" /> 
-            Distritos
+            <MapPin className="h-4 w-4 mr-2" /> 
+            Territórios e Serviços
           </TabsTrigger>
           <TabsTrigger 
-            value="services" 
+            value="critical" 
             className="flex-1 data-[state=active]:bg-orange-500 data-[state=active]:text-white"
           >
-            <PieChart className="h-4 w-4 mr-2" /> 
-            Serviços
-          </TabsTrigger>
-          <TabsTrigger 
-            value="times" 
-            className="flex-1 data-[state=active]:bg-orange-500 data-[state=active]:text-white"
-          >
-            <Clock className="h-4 w-4 mr-2" /> 
-            Tempos
-          </TabsTrigger>
-          <TabsTrigger 
-            value="external" 
-            className="flex-1 data-[state=active]:bg-orange-500 data-[state=active]:text-white"
-          >
-            <Briefcase className="h-4 w-4 mr-2" /> 
-            Externos
-          </TabsTrigger>
-          <TabsTrigger 
-            value="comparison" 
-            className="flex-1 data-[state=active]:bg-orange-500 data-[state=active]:text-white"
-          >
-            <FileCheck className="h-4 w-4 mr-2" /> 
-            Comparativo
+            <Network className="h-4 w-4 mr-2" /> 
+            Fluxos Críticos
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="status" className="mt-0">
+        {/* Performance & Efficiency Tab */}
+        <TabsContent value="performance" className="mt-0">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
             {chartVisibility.statusDistribution && (
               <StatusDistributionChart 
@@ -173,10 +156,31 @@ const RankingCharts: React.FC<RankingChartsProps> = ({
                 onToggleAnalysis={() => toggleAnalysis('statusTransition')}
               />
             )}
+            {chartVisibility.districtEfficiencyRadar && (
+              <DistrictEfficiencyRadarChart 
+                data={emptyData} 
+                sgzData={filteredSgzData} 
+                isLoading={isLoading} 
+                isSimulationActive={isSimulationActive} 
+                onToggleVisibility={() => onToggleChartVisibility?.('districtEfficiencyRadar')}
+                onToggleAnalysis={() => toggleAnalysis('districtEfficiencyRadar')}
+              />
+            )}
+            {chartVisibility.resolutionTime && (
+              <ResolutionTimeChart 
+                data={emptyData} 
+                sgzData={filteredSgzData} 
+                isLoading={isLoading} 
+                isSimulationActive={isSimulationActive} 
+                onToggleVisibility={() => onToggleChartVisibility?.('resolutionTime')}
+                onToggleAnalysis={() => toggleAnalysis('resolutionTime')}
+              />
+            )}
           </div>
         </TabsContent>
 
-        <TabsContent value="districts" className="mt-0">
+        {/* Territories & Services Tab */}
+        <TabsContent value="territories" className="mt-0">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {chartVisibility.districtPerformance && (
               <DistrictPerformanceChart 
@@ -188,21 +192,6 @@ const RankingCharts: React.FC<RankingChartsProps> = ({
                 onToggleAnalysis={() => toggleAnalysis('districtPerformance')}
               />
             )}
-            {chartVisibility.districtEfficiencyRadar && (
-              <DistrictEfficiencyRadarChart 
-                data={emptyData} 
-                sgzData={filteredSgzData} 
-                isLoading={isLoading} 
-                isSimulationActive={isSimulationActive} 
-                onToggleVisibility={() => onToggleChartVisibility?.('districtEfficiencyRadar')}
-                onToggleAnalysis={() => toggleAnalysis('districtEfficiencyRadar')}
-              />
-            )}
-          </div>
-        </TabsContent>
-
-        <TabsContent value="services" className="mt-0">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {chartVisibility.serviceTypes && (
               <ServiceTypesChart 
                 data={emptyData} 
@@ -211,21 +200,6 @@ const RankingCharts: React.FC<RankingChartsProps> = ({
                 isSimulationActive={isSimulationActive}
                 onToggleVisibility={() => onToggleChartVisibility?.('serviceTypes')}
                 onToggleAnalysis={() => toggleAnalysis('serviceTypes')}
-              />
-            )}
-          </div>
-        </TabsContent>
-        
-        <TabsContent value="times" className="mt-0">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {chartVisibility.resolutionTime && (
-              <ResolutionTimeChart 
-                data={emptyData} 
-                sgzData={filteredSgzData} 
-                isLoading={isLoading} 
-                isSimulationActive={isSimulationActive} 
-                onToggleVisibility={() => onToggleChartVisibility?.('resolutionTime')}
-                onToggleAnalysis={() => toggleAnalysis('resolutionTime')}
               />
             )}
             {chartVisibility.oldestPendingList && (
@@ -241,7 +215,8 @@ const RankingCharts: React.FC<RankingChartsProps> = ({
           </div>
         </TabsContent>
 
-        <TabsContent value="external" className="mt-0">
+        {/* Critical Flows Tab */}
+        <TabsContent value="critical" className="mt-0">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {chartVisibility.responsibility && (
               <ResponsibilityChart 
@@ -254,11 +229,6 @@ const RankingCharts: React.FC<RankingChartsProps> = ({
                 onToggleAnalysis={() => toggleAnalysis('responsibility')}
               />
             )}
-          </div>
-        </TabsContent>
-        
-        <TabsContent value="comparison" className="mt-0">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {chartVisibility.sgzPainel && (
               <ComparativoSGZPainelChart 
                 data={emptyData} 
