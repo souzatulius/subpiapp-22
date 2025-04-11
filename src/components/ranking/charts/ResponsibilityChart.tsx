@@ -2,6 +2,7 @@
 import React from 'react';
 import { Pie } from 'react-chartjs-2';
 import EnhancedChartCard from './EnhancedChartCard';
+import { pieChartColors } from '../utils/chartColors';
 
 interface ResponsibilityChartProps {
   data: any;
@@ -23,43 +24,102 @@ const ResponsibilityChart: React.FC<ResponsibilityChartProps> = ({
   onToggleAnalysis
 }) => {
   const chartData = React.useMemo(() => {
-    // Mock data for responsibility distribution
-    const labels = ['Subprefeitura', 'Terceirizado', 'Outra Secretaria', 'Concessionária', 'Cidadão'];
-    const values = [40, 30, 15, 10, 5];
+    if (!sgzData || sgzData.length === 0) {
+      return {
+        labels: [],
+        datasets: [{
+          data: [],
+          backgroundColor: [],
+          borderWidth: 1,
+          borderColor: '#fff'
+        }],
+        externalPercentage: 0
+      };
+    }
     
-    // In simulation mode, adjust the distribution to show more handled by Subprefeitura
-    const simulatedValues = isSimulationActive ? 
-      [50, 25, 12, 8, 5] : values;
+    // Count orders by responsibility
+    const responsibilityCounts: Record<string, number> = {};
+    let totalOrders = 0;
+    
+    sgzData.forEach(order => {
+      const responsibility = order.sgz_responsavel || order.responsavel_classificado || 'Não informado';
+      // Normalize responsibility names
+      let normalizedResp = responsibility.toLowerCase();
+      
+      if (normalizedResp.includes('subpref')) {
+        normalizedResp = 'Subprefeitura';
+      } else if (normalizedResp.includes('ilume') || normalizedResp.includes('lume')) {
+        normalizedResp = 'ILUME';
+      } else if (normalizedResp.includes('enel') || normalizedResp.includes('eletr')) {
+        normalizedResp = 'ENEL';
+      } else if (normalizedResp.includes('sabesp') || normalizedResp.includes('água')) {
+        normalizedResp = 'SABESP';
+      } else if (normalizedResp.includes('amlurb') || normalizedResp.includes('limp')) {
+        normalizedResp = 'AMLURB';
+      } else if (normalizedResp === 'não informado') {
+        normalizedResp = 'Não Classificado';
+      } else if (!['Subprefeitura', 'ILUME', 'ENEL', 'SABESP', 'AMLURB', 'Não Classificado'].includes(normalizedResp)) {
+        normalizedResp = 'Outros';
+      }
+      
+      responsibilityCounts[normalizedResp] = (responsibilityCounts[normalizedResp] || 0) + 1;
+      totalOrders++;
+    });
+    
+    // Sort by count
+    const sortedResponsibilities = Object.entries(responsibilityCounts)
+      .sort(([, countA], [, countB]) => (countB as number) - (countA as number));
+    
+    const labels = sortedResponsibilities.map(([resp]) => resp);
+    const values = sortedResponsibilities.map(([, count]) => count);
+    
+    // Calculate percentage of external (non-subprefeitura) orders
+    const subprefeituraCount = responsibilityCounts['Subprefeitura'] || 0;
+    const externalCount = totalOrders - subprefeituraCount;
+    const externalPercentage = totalOrders > 0 ? Math.round((externalCount / totalOrders) * 100) : 0;
+    
+    // Apply simulation effect if active
+    let simulatedValues = values;
+    if (isSimulationActive) {
+      simulatedValues = values.map((value, index) => {
+        const respName = labels[index];
+        // In simulation, slightly increase subprefeitura proportion
+        if (respName === 'Subprefeitura') {
+          return Math.round(value * 1.1);
+        }
+        return value;
+      });
+    }
     
     return {
       labels,
       datasets: [{
         data: simulatedValues,
-        backgroundColor: [
-          '#F97316', // Orange (Subprefeitura)
-          '#FB923C', // Light Orange (Terceirizado)
-          '#FFA94D', // Very Light Orange (Outra Secretaria)
-          '#0EA5E9', // Light Blue (Concessionária)
-          '#38BDF8'  // Very Light Blue (Cidadão)
-        ],
+        backgroundColor: pieChartColors.slice(0, labels.length),
         borderWidth: 1,
         borderColor: '#fff'
-      }]
+      }],
+      externalPercentage
     };
-  }, [sgzData, painelData, isSimulationActive]);
+  }, [sgzData, isSimulationActive]);
 
   return (
     <EnhancedChartCard
-      title="Responsabilidade"
-      subtitle="Distribuição por órgão responsável"
-      value="Diversidade"
+      title="Gráfico de Impacto dos Terceiros"
+      subtitle="Mostra o impacto dos serviços externos na performance da Subprefeitura"
+      value={`Externos: ${chartData.externalPercentage}%`}
       isLoading={isLoading}
       onToggleVisibility={onToggleVisibility}
       onToggleAnalysis={onToggleAnalysis}
+      dataSource="SGZ"
+      analysis="Avalie como os serviços de responsabilidade externa afetam os indicadores internos e recomende ações para melhor gestão."
     >
-      {!isLoading && (
+      {!isLoading && chartData.labels.length > 0 && (
         <Pie
-          data={chartData}
+          data={{
+            labels: chartData.labels,
+            datasets: chartData.datasets
+          }}
           options={{
             responsive: true,
             maintainAspectRatio: false,
@@ -80,7 +140,7 @@ const ResponsibilityChart: React.FC<ResponsibilityChartProps> = ({
                     const value = context.parsed || 0;
                     const total = context.dataset.data.reduce((a: number, b: number) => a + b, 0);
                     const percentage = Math.round((value * 100) / total) + '%';
-                    return `${label}: ${percentage}`;
+                    return `${label}: ${value} (${percentage})`;
                   }
                 }
               }

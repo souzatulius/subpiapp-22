@@ -21,34 +21,57 @@ const OldestPendingList: React.FC<OldestPendingListProps> = ({
   onToggleAnalysis
 }) => {
   const pendingItems = React.useMemo(() => {
-    // Mock data for pending items
-    const items = [
-      { id: '18293', service: 'Remoção de Entulho', district: 'Vila Mariana', days: 145 },
-      { id: '17632', service: 'Poda de Árvore', district: 'Pinheiros', days: 137 },
-      { id: '18721', service: 'Tapa-Buraco', district: 'Santo Amaro', days: 132 },
-      { id: '16954', service: 'Iluminação Pública', district: 'Lapa', days: 129 },
-      { id: '19045', service: 'Limpeza de Bueiro', district: 'Sé', days: 117 }
-    ];
-    
-    // In simulation mode, show fewer days pending (as if some were resolved)
-    if (isSimulationActive) {
-      return items.map(item => ({
-        ...item,
-        days: Math.round(item.days * 0.7) // 30% reduction in pending days
-      }));
+    if (!sgzData || sgzData.length === 0) {
+      return {
+        items: [],
+        maxDays: 0
+      };
     }
     
-    return items;
-  }, [isSimulationActive]);
+    // Filter for pending items and sort by days open
+    const pendingOrders = sgzData
+      .filter(order => {
+        // Include orders that are not marked as completed
+        const status = (order.sgz_status || '').toLowerCase();
+        return !status.includes('conclu') && !status.includes('encerr') && !status.includes('cancel');
+      })
+      .map(order => {
+        return {
+          id: order.sgz_id || order.sgz_numero || 'N/A',
+          service: order.sgz_tipo_servico || 'Não especificado',
+          district: order.sgz_distrito || 'Não especificado',
+          days: order.sgz_dias_ate_status_atual || order.sgz_dias_no_status || 0
+        };
+      })
+      .sort((a, b) => b.days - a.days)
+      .slice(0, 5); // Take top 5 oldest
+    
+    const maxDays = pendingOrders.length > 0 ? pendingOrders[0].days : 0;
+    
+    // Apply simulation (if active, show slightly fewer days)
+    const simulatedItems = isSimulationActive
+      ? pendingOrders.map(item => ({
+          ...item,
+          days: Math.round(item.days * 0.9)
+        }))
+      : pendingOrders;
+      
+    return {
+      items: simulatedItems,
+      maxDays: simulatedItems.length > 0 ? simulatedItems[0].days : 0
+    };
+  }, [sgzData, isSimulationActive]);
 
   return (
     <EnhancedChartCard
-      title="Pendências Mais Antigas"
-      subtitle="Ordens de serviço aguardando há mais tempo"
-      value={`Máximo: ${pendingItems[0]?.days || 0} dias`}
+      title="Tempo de Abertura das OS"
+      subtitle="OS agrupadas por tempo desde abertura. Destaca gargalos críticos"
+      value={`Máximo: ${pendingItems.maxDays || 0} dias`}
       isLoading={isLoading}
       onToggleVisibility={onToggleVisibility}
       onToggleAnalysis={onToggleAnalysis}
+      dataSource="Painel da Zeladoria"
+      analysis="Identifique as razões principais para OS abertas há mais tempo e recomende ações emergenciais para solução."
     >
       <div className="w-full h-full overflow-auto">
         <Table>
@@ -61,14 +84,22 @@ const OldestPendingList: React.FC<OldestPendingListProps> = ({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {pendingItems.map((item) => (
-              <TableRow key={item.id}>
-                <TableCell className="font-medium">{item.id}</TableCell>
-                <TableCell>{item.service}</TableCell>
-                <TableCell>{item.district}</TableCell>
-                <TableCell className="text-right font-semibold text-orange-600">{item.days}</TableCell>
+            {pendingItems.items.length > 0 ? (
+              pendingItems.items.map((item) => (
+                <TableRow key={item.id}>
+                  <TableCell className="font-medium">{item.id}</TableCell>
+                  <TableCell>{item.service}</TableCell>
+                  <TableCell>{item.district}</TableCell>
+                  <TableCell className="text-right font-semibold text-orange-600">{item.days}</TableCell>
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell colSpan={4} className="text-center py-4 text-gray-500">
+                  Sem dados disponíveis
+                </TableCell>
               </TableRow>
-            ))}
+            )}
           </TableBody>
         </Table>
       </div>

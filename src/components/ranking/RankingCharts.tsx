@@ -3,15 +3,15 @@ import React, { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
-import { BarChart3, Briefcase, TrendingUp, PieChart, RefreshCw, Building2 } from 'lucide-react';
+import { BarChart3, Briefcase, TrendingUp, PieChart, RefreshCw, Building2, Clock, ListFilter } from 'lucide-react';
 import { ChartVisibility } from './types';
 import ResponsibilityChart from './charts/ResponsibilityChart';
 import ServiceTypesChart from './charts/ServiceTypesChart';
 import DistrictPerformanceChart from './charts/DistrictPerformanceChart';
 import ResolutionTimeChart from './charts/ResolutionTimeChart';
-import EvolutionChart from './charts/EvolutionChart';
-import DepartmentComparisonChart from './charts/DepartmentComparisonChart';
 import OldestPendingList from './charts/OldestPendingList';
+import StatusDistributionChart from './charts/StatusDistributionChart';
+import StatusTransitionChart from './charts/StatusTransitionChart';
 
 interface RankingChartsProps {
   chartData: any;
@@ -36,7 +36,7 @@ const RankingCharts: React.FC<RankingChartsProps> = ({
   disableCardContainers = false,
   onToggleChartVisibility
 }) => {
-  const [activeTab, setActiveTab] = useState("performance");
+  const [activeTab, setActiveTab] = useState("status");
   const [showOnlySubprefeitura, setShowOnlySubprefeitura] = useState(false);
   const [showingAnalysis, setShowingAnalysis] = useState<Record<string, boolean>>({});
 
@@ -44,7 +44,10 @@ const RankingCharts: React.FC<RankingChartsProps> = ({
   const filteredSgzData = React.useMemo(() => {
     if (!sgzData) return null;
     if (showOnlySubprefeitura) {
-      return sgzData.filter(item => (item.servico_responsavel || '').toLowerCase() === 'subprefeitura');
+      return sgzData.filter(item => {
+        const responsavel = (item.sgz_responsavel || '').toLowerCase();
+        return responsavel.includes('subpref');
+      });
     }
     return sgzData;
   }, [sgzData, showOnlySubprefeitura]);
@@ -53,7 +56,10 @@ const RankingCharts: React.FC<RankingChartsProps> = ({
   const filteredPainelData = React.useMemo(() => {
     if (!painelData) return null;
     if (showOnlySubprefeitura) {
-      return painelData.filter(item => (item.responsavel_classificado || '').toLowerCase() === 'subprefeitura');
+      return painelData.filter(item => {
+        const responsavel = (item.responsavel_classificado || '').toLowerCase();
+        return responsavel.includes('subpref');
+      });
     }
     return painelData;
   }, [painelData, showOnlySubprefeitura]);
@@ -97,33 +103,72 @@ const RankingCharts: React.FC<RankingChartsProps> = ({
         </div>
       </div>
 
-      <Tabs defaultValue="performance" className="w-full" onValueChange={setActiveTab}>
+      <Tabs defaultValue="status" className="w-full" onValueChange={setActiveTab}>
         <TabsList className="w-full mb-6 bg-orange-50 p-1 border border-orange-100">
           <TabsTrigger 
-            value="performance" 
+            value="status" 
+            className="flex-1 data-[state=active]:bg-orange-500 data-[state=active]:text-white"
+          >
+            <ListFilter className="h-4 w-4 mr-2" /> 
+            Status
+          </TabsTrigger>
+          <TabsTrigger 
+            value="districts" 
             className="flex-1 data-[state=active]:bg-orange-500 data-[state=active]:text-white"
           >
             <TrendingUp className="h-4 w-4 mr-2" /> 
-            Performance
+            Distritos
           </TabsTrigger>
           <TabsTrigger 
-            value="distribution" 
+            value="services" 
             className="flex-1 data-[state=active]:bg-orange-500 data-[state=active]:text-white"
           >
             <PieChart className="h-4 w-4 mr-2" /> 
-            Distribuição
+            Serviços
           </TabsTrigger>
           <TabsTrigger 
-            value="departments" 
+            value="times" 
+            className="flex-1 data-[state=active]:bg-orange-500 data-[state=active]:text-white"
+          >
+            <Clock className="h-4 w-4 mr-2" /> 
+            Tempos
+          </TabsTrigger>
+          <TabsTrigger 
+            value="external" 
             className="flex-1 data-[state=active]:bg-orange-500 data-[state=active]:text-white"
           >
             <Briefcase className="h-4 w-4 mr-2" /> 
-            Departamentos
+            Externos
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="performance" className="mt-0">
+        <TabsContent value="status" className="mt-0">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            {chartVisibility.statusDistribution && (
+              <StatusDistributionChart 
+                data={emptyData} 
+                sgzData={filteredSgzData} 
+                isLoading={isLoading} 
+                isSimulationActive={isSimulationActive} 
+                onToggleVisibility={() => onToggleChartVisibility?.('statusDistribution')}
+                onToggleAnalysis={() => toggleAnalysis('statusDistribution')}
+              />
+            )}
+            {chartVisibility.statusTransition && (
+              <StatusTransitionChart 
+                data={emptyData} 
+                sgzData={filteredSgzData} 
+                isLoading={isLoading} 
+                isSimulationActive={isSimulationActive}
+                onToggleVisibility={() => onToggleChartVisibility?.('statusTransition')}
+                onToggleAnalysis={() => toggleAnalysis('statusTransition')}
+              />
+            )}
+          </div>
+        </TabsContent>
+
+        <TabsContent value="districts" className="mt-0">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {chartVisibility.districtPerformance && (
               <DistrictPerformanceChart 
                 data={emptyData} 
@@ -134,18 +179,25 @@ const RankingCharts: React.FC<RankingChartsProps> = ({
                 onToggleAnalysis={() => toggleAnalysis('districtPerformance')}
               />
             )}
-            {chartVisibility.evolution && (
-              <EvolutionChart 
+          </div>
+        </TabsContent>
+
+        <TabsContent value="services" className="mt-0">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {chartVisibility.serviceTypes && (
+              <ServiceTypesChart 
                 data={emptyData} 
                 sgzData={filteredSgzData} 
-                painelData={filteredPainelData} 
                 isLoading={isLoading} 
-                isSimulationActive={isSimulationActive} 
-                onToggleVisibility={() => onToggleChartVisibility?.('evolution')}
-                onToggleAnalysis={() => toggleAnalysis('evolution')}
+                isSimulationActive={isSimulationActive}
+                onToggleVisibility={() => onToggleChartVisibility?.('serviceTypes')}
+                onToggleAnalysis={() => toggleAnalysis('serviceTypes')}
               />
             )}
           </div>
+        </TabsContent>
+        
+        <TabsContent value="times" className="mt-0">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {chartVisibility.resolutionTime && (
               <ResolutionTimeChart 
@@ -170,18 +222,8 @@ const RankingCharts: React.FC<RankingChartsProps> = ({
           </div>
         </TabsContent>
 
-        <TabsContent value="distribution" className="mt-0">
+        <TabsContent value="external" className="mt-0">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {chartVisibility.serviceTypes && (
-              <ServiceTypesChart 
-                data={emptyData} 
-                sgzData={filteredSgzData} 
-                isLoading={isLoading} 
-                isSimulationActive={isSimulationActive}
-                onToggleVisibility={() => onToggleChartVisibility?.('serviceTypes')}
-                onToggleAnalysis={() => toggleAnalysis('serviceTypes')}
-              />
-            )}
             {chartVisibility.responsibility && (
               <ResponsibilityChart 
                 data={emptyData} 
@@ -193,22 +235,6 @@ const RankingCharts: React.FC<RankingChartsProps> = ({
                 onToggleAnalysis={() => toggleAnalysis('responsibility')}
               />
             )}
-          </div>
-        </TabsContent>
-
-        <TabsContent value="departments" className="mt-0">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {chartVisibility.departmentComparison && (
-              <DepartmentComparisonChart 
-                data={emptyData} 
-                sgzData={filteredSgzData} 
-                isLoading={isLoading} 
-                isSimulationActive={isSimulationActive}
-                onToggleVisibility={() => onToggleChartVisibility?.('departmentComparison')}
-                onToggleAnalysis={() => toggleAnalysis('departmentComparison')}
-              />
-            )}
-            {/* We can add more department-specific charts here */}
           </div>
         </TabsContent>
       </Tabs>

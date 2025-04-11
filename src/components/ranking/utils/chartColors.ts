@@ -1,34 +1,43 @@
 
-// Custom color palette for charts
+// Custom color palette for charts based on requirements
 export const chartColors = {
-  primary: '#0368fe',    // Blue primary
-  secondary: '#f26812',  // Orange secondary
-  tertiary: '#1e40af',   // Dark blue
-  neutral: '#64748e',    // Gray
-  accent: '#c2410c',     // Dark orange/brown
+  blue: '#095dff',      // Azul 
+  green: '#01e30e',     // Verde
+  lightGray: '#f4f4f4', // Cinza claro
+  darkOrange: '#ea580d', // Laranja escuro
+  mediumOrange: '#f4a100', // Laranja médio
+  mediumBlue: '#174ba9',  // Azul médio
+  darkBlue: '#051b2c',   // Azul escuro
 };
 
 // Color arrays for different chart types
 export const barChartColors = [
-  chartColors.primary,
-  chartColors.secondary,
-  chartColors.tertiary,
-  chartColors.neutral,
-  chartColors.accent,
+  chartColors.blue,
+  chartColors.darkOrange,
+  chartColors.mediumBlue,
+  chartColors.green,
+  chartColors.mediumOrange,
+  chartColors.darkBlue,
 ];
 
 export const pieChartColors = [
-  chartColors.secondary,
-  chartColors.primary,
-  chartColors.neutral,
-  chartColors.tertiary,
-  chartColors.accent,
+  chartColors.darkOrange,
+  chartColors.blue,
+  chartColors.mediumOrange,
+  chartColors.mediumBlue,
+  chartColors.green,
+  chartColors.darkBlue,
+  chartColors.lightGray,
 ];
 
-export const lineChartColors = [
-  chartColors.primary,
-  chartColors.secondary,
-  chartColors.tertiary,
-  chartColors.neutral,
-  chartColors.accent,
-];
+// Function to get colors with opacity
+export const getColorWithOpacity = (color: string, opacity: number): string => {
+  // Convert hex to rgba
+  if (color.startsWith('#')) {
+    const r = parseInt(color.slice(1, 3), 16);
+    const g = parseInt(color.slice(3, 5), 16);
+    const b = parseInt(color.slice(5, 7), 16);
+    return `rgba(${r}, ${g}, ${b}, ${opacity})`;
+  }
+  return color;
+};

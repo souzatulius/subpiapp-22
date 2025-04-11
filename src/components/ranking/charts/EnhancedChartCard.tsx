@@ -2,7 +2,14 @@
 import React, { ReactNode, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { EyeOff, Search } from 'lucide-react';
+import { EyeOff, Search, Info } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { 
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 
 interface EnhancedChartCardProps {
   title: string;
@@ -15,6 +22,8 @@ interface EnhancedChartCardProps {
   className?: string;
   headerContent?: ReactNode;
   footerContent?: ReactNode;
+  dataSource?: 'SGZ' | 'Painel da Zeladoria' | string;
+  analysis?: string;
 }
 
 const EnhancedChartCard: React.FC<EnhancedChartCardProps> = ({ 
@@ -27,9 +36,25 @@ const EnhancedChartCard: React.FC<EnhancedChartCardProps> = ({
   onToggleAnalysis,
   className = '',
   headerContent,
-  footerContent
+  footerContent,
+  dataSource,
+  analysis
 }) => {
   const [isHovering, setIsHovering] = useState(false);
+
+  // Generate badge color based on data source
+  const getBadgeColor = (source?: string) => {
+    if (!source) return 'bg-gray-200 text-gray-700';
+    
+    switch(source.toLowerCase()) {
+      case 'sgz':
+        return 'bg-blue-100 text-blue-700 border-blue-300';
+      case 'painel da zeladoria':
+        return 'bg-orange-100 text-orange-700 border-orange-300';
+      default:
+        return 'bg-gray-100 text-gray-700 border-gray-300';
+    }
+  };
 
   return (
     <Card 
@@ -40,7 +65,34 @@ const EnhancedChartCard: React.FC<EnhancedChartCardProps> = ({
       <CardHeader>
         <div className="flex items-center justify-between">
           <div>
-            <CardTitle className="text-sm font-medium">{title}</CardTitle>
+            <div className="flex items-center gap-2 mb-1">
+              <CardTitle className="text-sm font-medium">{title}</CardTitle>
+              
+              {dataSource && (
+                <Badge 
+                  variant="outline" 
+                  className={`text-xs py-0 px-1.5 ${getBadgeColor(dataSource)}`}
+                >
+                  {dataSource}
+                </Badge>
+              )}
+              
+              {analysis && (
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <span className="cursor-help text-gray-400 hover:text-gray-600">
+                        <Info size={14} />
+                      </span>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p className="text-xs max-w-60">Análise disponível</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              )}
+            </div>
+            
             {subtitle && <p className="text-xs text-gray-500">{subtitle}</p>}
             {value !== undefined && (
               <p className="text-lg font-semibold text-blue-700 mt-1">{value}</p>

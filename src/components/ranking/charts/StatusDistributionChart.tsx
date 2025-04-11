@@ -1,30 +1,40 @@
 
 import React, { useMemo } from 'react';
-import { Pie } from 'react-chartjs-2';
-import { Loader2 } from 'lucide-react';
-import { chartColors } from './ChartRegistration';
-
-interface StatusCount {
-  name: string;
-  count: number;
-}
+import { Bar } from 'react-chartjs-2';
+import EnhancedChartCard from './EnhancedChartCard';
+import { barChartColors } from '../utils/chartColors';
 
 interface StatusDistributionChartProps {
   data: any;
   sgzData: any[] | null;
   isLoading: boolean;
   isSimulationActive: boolean;
+  onToggleVisibility?: () => void;
+  onToggleAnalysis?: () => void;
 }
 
 const StatusDistributionChart: React.FC<StatusDistributionChartProps> = ({
   data,
   sgzData,
   isLoading,
-  isSimulationActive
+  isSimulationActive,
+  onToggleVisibility,
+  onToggleAnalysis
 }) => {
   // Process SGZ data to get status distribution
   const chartData = useMemo(() => {
-    if (!sgzData || sgzData.length === 0) return null;
+    if (!sgzData || sgzData.length === 0) {
+      return {
+        labels: [],
+        datasets: [{
+          label: 'Quantidade de OS',
+          data: [],
+          backgroundColor: barChartColors,
+          barPercentage: 0.7,
+        }],
+        totalOrders: 0
+      };
+    }
     
     // Count by status
     const statusCount: Record<string, number> = {};
@@ -35,95 +45,97 @@ const StatusDistributionChart: React.FC<StatusDistributionChartProps> = ({
     });
     
     // Convert to array format and sort
-    const statusItems: StatusCount[] = Object.entries(statusCount)
+    const statusItems = Object.entries(statusCount)
       .map(([name, count]) => ({ name, count }))
       .sort((a, b) => (b.count as number) - (a.count as number));
     
-    return statusItems;
-  }, [sgzData]);
-  
-  // Prepare pie chart data
-  const pieChartData = useMemo(() => {
-    if (!chartData) return null;
+    const labels = statusItems.map(item => item.name);
+    const values = statusItems.map(item => item.count);
     
     // Apply simulation effects if active
-    const simulationFactor = isSimulationActive ? 1.2 : 1;
-    
-    // When simulating, increase completed percentage and decrease pending percentage
-    const modifiedData = chartData.map(item => {
-      let count = item.count as number;
-      
-      if (isSimulationActive) {
-        if (item.name.toLowerCase().includes('conclu')) {
-          count = Math.floor(count * simulationFactor);
-        } else if (item.name.toLowerCase().includes('pend')) {
-          count = Math.floor(count / simulationFactor);
+    let simulatedValues = values;
+    if (isSimulationActive) {
+      simulatedValues = values.map((value, index) => {
+        const statusName = labels[index].toLowerCase();
+        // Increase completed and decrease pending in simulation
+        if (statusName.includes('conclu') || statusName.includes('encerr')) {
+          return Math.round(value * 1.2);
+        } else if (statusName.includes('pend') || statusName.includes('abert')) {
+          return Math.round(value * 0.8);
         }
-      }
-      
-      return {
-        name: item.name,
-        count
-      };
-    });
+        return value;
+      });
+    }
+    
+    // Calculate total orders
+    const totalOrders = values.reduce((sum, val) => sum + (val as number), 0);
     
     return {
-      labels: modifiedData.map(d => d.name),
-      datasets: [
-        {
-          data: modifiedData.map(d => d.count),
-          backgroundColor: chartColors.slice(0, modifiedData.length),
-          borderColor: '#FFFFFF',
-          borderWidth: 1,
-        }
-      ]
+      labels,
+      datasets: [{
+        label: 'Quantidade de OS',
+        data: simulatedValues,
+        backgroundColor: barChartColors,
+        barPercentage: 0.7,
+      }],
+      totalOrders
     };
-  }, [chartData, isSimulationActive]);
-  
-  // Chart options
-  const options = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: {
-        position: 'right' as const,
-        labels: {
-          boxWidth: 12
-        }
-      },
-      tooltip: {
-        callbacks: {
-          label: function(context: any) {
-            const value = context.raw;
-            const total = context.dataset.data.reduce((sum: number, val: number) => sum + val, 0);
-            const percentage = ((value / total) * 100).toFixed(1);
-            return `${context.label}: ${value} (${percentage}%)`;
-          }
-        }
-      }
-    }
-  };
-  
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <Loader2 className="h-8 w-8 text-orange-500 animate-spin" />
-      </div>
-    );
-  }
-  
-  if (!chartData || chartData.length === 0) {
-    return (
-      <div className="flex items-center justify-center h-64 text-gray-500">
-        Sem dados disponíveis para exibir
-      </div>
-    );
-  }
+  }, [sgzData, isSimulationActive]);
   
   return (
-    <div className="h-64">
-      {pieChartData && <Pie data={pieChartData} options={options} />}
-    </div>
+    <EnhancedChartCard
+      title="Distribuição por Status"
+      subtitle="Barras verticais mostrando quantidade por status. Permite identificar gargalos operacionais"
+      value={`Total: ${chartData.totalOrders}`}
+      isLoading={isLoading}
+      onToggleVisibility={onToggleVisibility}
+      onToggleAnalysis={onToggleAnalysis}
+      dataSource="SGZ"
+      analysis="Identifique quais status estão acumulando mais ordens e sugira possíveis ações para reduzir os gargalos."
+    >
+      {!isLoading && chartData.labels.length > 0 && (
+        <Bar
+          data={{
+            labels: chartData.labels,
+            datasets: chartData.datasets
+          }}
+          options={{
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                display: false
+              },
+              tooltip: {
+                callbacks: {
+                  label: function(context) {
+                    const value = context.parsed.y;
+                    const total = chartData.totalOrders;
+                    const percentage = total > 0 ? Math.round((value * 100) / total) + '%' : '0%';
+                    return `${value} OS (${percentage})`;
+                  }
+                }
+              }
+            },
+            scales: {
+              y: {
+                beginAtZero: true,
+                title: {
+                  display: true,
+                  text: 'Quantidade de OS'
+                }
+              },
+              x: {
+                ticks: {
+                  maxRotation: 45,
+                  minRotation: 45
+                }
+              }
+            }
+          }}
+        />
+      )}
+    </EnhancedChartCard>
   );
 };
 
