@@ -40,9 +40,9 @@ const NotasTable: React.FC<NotasTableProps> = ({
 
   const filteredNotas = notas.filter(nota => {
     const matchesSearch = searchTerm === '' || 
-      nota.titulo?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      nota.conteudo?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      nota.autor?.toLowerCase().includes(searchTerm.toLowerCase());
+      (nota.titulo?.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (nota.conteudo?.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (nota.autor?.nome_completo?.toLowerCase().includes(searchTerm.toLowerCase()));
     
     const matchesStatus = statusFilter === 'todos' || nota.status === statusFilter;
     
@@ -79,7 +79,7 @@ const NotasTable: React.FC<NotasTableProps> = ({
           {nota.autor && (
             <p>
               <span className="font-medium mr-1">Autor:</span>
-              {nota.autor}
+              {nota.autor.nome_completo}
             </p>
           )}
         </div>

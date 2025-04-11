@@ -102,7 +102,7 @@ const FileUploadSection: React.FC<FileUploadSectionProps> = ({ anexos, onAnexosC
     if (isImageFile(path)) {
       try {
         return (
-          <div className="h-10 w-10 bg-gray-100 rounded-md flex items-center justify-center overflow-hidden">
+          <div className="h-10 w-10 bg-gray-100 rounded-xl flex items-center justify-center overflow-hidden">
             <img 
               src={path} 
               alt="preview" 
