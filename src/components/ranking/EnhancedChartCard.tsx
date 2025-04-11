@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Loader2 } from 'lucide-react';
-import ChartJS from './charts/ChartRegistration';
+import * as ChartJS from './charts/ChartRegistration';
 
 interface EnhancedChartCardProps {
   title: string;
