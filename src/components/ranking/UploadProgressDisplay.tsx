@@ -2,7 +2,8 @@
 import React from 'react';
 import { Progress } from '@/components/ui/progress';
 import { UploadProgressStats } from './types';
-import { CheckCircle, Clock, AlertCircle } from 'lucide-react';
+import { CheckCircle, Clock, AlertCircle, Loader2 } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 interface UploadProgressDisplayProps {
   stats: UploadProgressStats;
@@ -26,7 +27,7 @@ const UploadProgressDisplay: React.FC<UploadProgressDisplayProps> = ({ stats, ty
         };
       case 'uploading':
         return { 
-          icon: <Clock className="h-4 w-4 text-blue-600 animate-spin" />, 
+          icon: <Loader2 className="h-4 w-4 text-blue-600 animate-spin" />, 
           textColor: 'text-blue-700',
           text: 'Enviando'
         };
@@ -54,18 +55,34 @@ const UploadProgressDisplay: React.FC<UploadProgressDisplayProps> = ({ stats, ty
   const stageDisplay = getStageDisplay();
   
   return (
-    <div className="space-y-2">
+    <motion.div 
+      className="space-y-2"
+      initial={{ opacity: 0, height: 0 }}
+      animate={{ opacity: 1, height: 'auto' }}
+      transition={{ duration: 0.3 }}
+    >
       <div className="flex justify-between items-center">
         <div className="flex items-center gap-1 text-xs">
-          {stageDisplay.icon}
+          <motion.div
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ type: "spring", stiffness: 260, damping: 20 }}
+          >
+            {stageDisplay.icon}
+          </motion.div>
           <span className={stageDisplay.textColor}>
             {stageDisplay.text}: {progressPercent}%
           </span>
         </div>
         {stats.estimatedTimeRemaining && stats.stage === 'processing' && (
-          <span className="text-xs text-gray-500">
+          <motion.span 
+            className="text-xs text-gray-500"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.2 }}
+          >
             Tempo restante: {stats.estimatedTimeRemaining}
-          </span>
+          </motion.span>
         )}
       </div>
       
@@ -83,18 +100,28 @@ const UploadProgressDisplay: React.FC<UploadProgressDisplayProps> = ({ stats, ty
         <span>
           {stats.processedRows} / {stats.totalRows} linhas
         </span>
-        <div className="space-x-2">
+        <motion.div 
+          className="space-x-2"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.3 }}
+        >
           <span className="text-green-600">+{stats.newRows} novas</span>
           <span className="text-amber-600">~{stats.updatedRows} atualizadas</span>
-        </div>
+        </motion.div>
       </div>
       
       {stats.message && (
-        <p className={`text-xs ${stats.stage === 'error' ? 'text-red-600' : 'text-gray-600'}`}>
+        <motion.p 
+          className={`text-xs ${stats.stage === 'error' ? 'text-red-600' : 'text-gray-600'}`}
+          initial={{ opacity: 0, y: -5 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+        >
           {stats.message}
-        </p>
+        </motion.p>
       )}
-    </div>
+    </motion.div>
   );
 };
 

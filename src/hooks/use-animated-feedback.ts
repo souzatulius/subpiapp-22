@@ -1,25 +1,44 @@
 
-import { create } from 'zustand';
-import { FeedbackType } from '@/components/ui/animated-feedback';
+import { useState, useCallback } from 'react';
+import { toast } from 'sonner';
+import { useToast } from '@/hooks/use-toast';
 
-interface FeedbackState {
-  visible: boolean;
-  type: FeedbackType;
-  message: string;
-  showFeedback: (type: FeedbackType, message: string) => void;
-  hideFeedback: () => void;
-}
+type FeedbackType = 'success' | 'error' | 'warning' | 'info';
 
-export const useAnimatedFeedback = create<FeedbackState>((set) => ({
-  visible: false,
-  type: 'success',
-  message: '',
-  
-  showFeedback: (type, message) => set({
-    visible: true,
-    type,
-    message
-  }),
-  
-  hideFeedback: () => set({ visible: false })
-}));
+export const useAnimatedFeedback = () => {
+  const [isVisible, setIsVisible] = useState(false);
+  const { toast: uiToast } = useToast();
+
+  const showFeedback = useCallback((type: FeedbackType, message: string, options?: any) => {
+    setIsVisible(true);
+
+    // Show toast using sonner (for overlay effects)
+    if (type === 'success') {
+      toast.success(message, options);
+    } else if (type === 'error') {
+      toast.error(message, options);
+    } else if (type === 'warning') {
+      toast.warning(message, options);
+    } else {
+      toast.info(message, options);
+    }
+
+    // Also show shadcn toast for accessibility
+    uiToast({
+      variant: type === 'info' ? 'default' : type,
+      title: type.charAt(0).toUpperCase() + type.slice(1),
+      description: message,
+      ...options
+    });
+
+    // Auto-hide after duration
+    setTimeout(() => {
+      setIsVisible(false);
+    }, options?.duration || 3000);
+  }, [uiToast]);
+
+  return {
+    showFeedback,
+    isVisible,
+  };
+};

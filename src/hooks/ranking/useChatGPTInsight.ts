@@ -1,11 +1,17 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { useOpenAIWithRetry } from '@/hooks/useOpenAIWithRetry';
+import { toast } from 'sonner';
+
+// Add a cache for OpenAI results
+const insightsCache = new Map<string, any>();
 
 export const useChatGPTInsight = (dadosPlanilha: any[] | null, uploadId?: string) => {
   const [indicadores, setIndicadores] = useState<any>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const { callWithRetry, isLoading: isApiLoading } = useOpenAIWithRetry();
 
   useEffect(() => {
     const fetchOrGenerateInsights = async () => {
@@ -17,28 +23,44 @@ export const useChatGPTInsight = (dadosPlanilha: any[] | null, uploadId?: string
       setIsLoading(true);
       
       try {
-        // Verificar se existem insights previamente gerados para este upload
+        // Check cache first if we have a cache key (uploadId)
+        if (uploadId && insightsCache.has(uploadId)) {
+          console.log('Using cached insights for upload', uploadId);
+          setIndicadores(insightsCache.get(uploadId));
+          setIsLoading(false);
+          return;
+        }
+        
+        // Check for existing insights in database
         if (uploadId) {
-          const { data: existingInsights } = await supabase
+          const { data: existingInsights, error: fetchError } = await supabase
             .from('painel_zeladoria_insights')
             .select('*')
             .eq('painel_id', uploadId)
-            .single();
+            .maybeSingle();
+
+          if (fetchError) {
+            console.warn('Error fetching insights:', fetchError);
+          }
 
           if (existingInsights) {
             setIndicadores(existingInsights.indicadores);
+            // Update cache
+            insightsCache.set(uploadId, existingInsights.indicadores);
             setIsLoading(false);
             return;
           }
         }
 
-        // Se não houver insights salvos, gerar novos com nossa edge function
-        const { data, error: insightError } = await supabase.functions.invoke('generate-sgz-insights', {
-          body: { dados_sgz: dadosPlanilha, upload_id: uploadId }
-        });
+        // Generate new insights using edge function with retry mechanism
+        const data = await callWithRetry(
+          'generate-sgz-insights', 
+          { dados_sgz: dadosPlanilha, upload_id: uploadId },
+          { maxRetries: 2, timeoutMs: 20000 }
+        );
         
-        if (insightError) {
-          throw new Error(`Erro ao gerar insights: ${insightError.message}`);
+        if (!data) {
+          throw new Error('Failed to generate insights');
         }
         
         if (data.error) {
@@ -46,23 +68,33 @@ export const useChatGPTInsight = (dadosPlanilha: any[] | null, uploadId?: string
         }
         
         setIndicadores(data.indicadores);
-      } catch (err) {
+        
+        // Update cache
+        if (uploadId) {
+          insightsCache.set(uploadId, data.indicadores);
+        }
+        
+        // Notify user of success
+        toast.success('Análise inteligente gerada com sucesso');
+      } catch (err: any) {
         console.error('Erro ao buscar ou gerar insights:', err);
-        setError('Falha ao gerar indicadores');
-        // Fallback para indicadores gerados estatisticamente
-        setIndicadores(gerarInsightsEstatisticos(dadosPlanilha));
+        setError(err.message || 'Falha ao gerar indicadores');
+        // Fallback to static insights
+        const fallbackInsights = gerarInsightsEstatisticos(dadosPlanilha);
+        setIndicadores(fallbackInsights);
+        toast.error('Usando análise estatística devido a erro na IA');
       } finally {
         setIsLoading(false);
       }
     };
 
     fetchOrGenerateInsights();
-  }, [dadosPlanilha, uploadId]);
+  }, [dadosPlanilha, uploadId, callWithRetry]);
 
   return { indicadores, isLoading, error };
 };
 
-// Função para gerar insights estatísticos sem depender de IA
+// Function to generate statistical insights without AI dependency
 function gerarInsightsEstatisticos(dados: any[]) {
   if (!dados || dados.length === 0) {
     return null;
