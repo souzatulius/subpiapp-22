@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { ActionCardItem } from '@/types/dashboard';
 import { DashboardType } from './useDashboardType';
+import { useAutosave } from './useAutosave';
 import { toast } from '@/components/ui/use-toast';
 
 export const useAutosaveDashboard = (
@@ -12,8 +13,6 @@ export const useAutosaveDashboard = (
   dashboardType: DashboardType = 'main'
 ) => {
   const [cards, setCards] = useState<ActionCardItem[]>([]);
-  const [isSaving, setIsSaving] = useState(false);
-  const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   // Determine which tables to use based on dashboard type
@@ -24,6 +23,64 @@ export const useAutosaveDashboard = (
   const departmentTableName = dashboardType === 'main'
     ? 'department_dashboard'
     : 'department_dashboard_comunicacao';
+
+  // Function to save cards configuration
+  const saveCardConfiguration = async (triggerType: 'navigation' | 'timeout' | 'visibility' | 'manual'): Promise<boolean> => {
+    if (!userId) return false;
+    
+    try {
+      console.log(`[${dashboardType}] Saving dashboard config - trigger: ${triggerType}`);
+      
+      const { error } = await supabase
+        .from(userTableName)
+        .upsert({
+          user_id: userId,
+          cards_config: JSON.stringify(cards),
+          updated_at: new Date().toISOString()
+        }, { onConflict: 'user_id' });
+      
+      if (error) throw error;
+      
+      // Only show success toast for manual saves
+      if (triggerType === 'manual') {
+        toast({
+          title: "Configurações salvas",
+          description: "As personalizações do dashboard foram salvas com sucesso.",
+          variant: "default"
+        });
+      }
+      
+      return true;
+    } catch (error) {
+      console.error(`Error saving ${dashboardType} dashboard config:`, error);
+      
+      // Only show error toast for manual saves
+      if (triggerType === 'manual') {
+        toast({
+          title: "Erro ao salvar configurações",
+          description: "Não foi possível salvar as personalizações do dashboard.",
+          variant: "destructive"
+        });
+      }
+      
+      return false;
+    }
+  };
+
+  // Use the autosave hook
+  const { 
+    isSaving,
+    lastSaved,
+    hasUnsavedChanges,
+    setUnsaved,
+    saveNow
+  } = useAutosave({
+    onSave: saveCardConfiguration,
+    debounceMs: 3000,
+    saveOnUnmount: true,
+    saveOnVisibilityChange: true,
+    enabled: !!userId
+  });
 
   // Load cards - first from user config, then from department config, then defaults
   useEffect(() => {
@@ -46,11 +103,10 @@ export const useAutosaveDashboard = (
         if (!userError && userData) {
           try {
             setCards(JSON.parse(userData.cards_config));
-            setLastSaved(new Date(userData.updated_at));
-            console.log('Loaded user dashboard config');
+            console.log(`Loaded user ${dashboardType} dashboard config`);
             return;
           } catch (parseError) {
-            console.error('Error parsing user dashboard config:', parseError);
+            console.error(`Error parsing user ${dashboardType} dashboard config:`, parseError);
           }
         }
 
@@ -64,11 +120,10 @@ export const useAutosaveDashboard = (
         if (!deptError && deptData) {
           try {
             setCards(JSON.parse(deptData.cards_config));
-            setLastSaved(new Date(deptData.updated_at));
-            console.log('Loaded department dashboard config');
+            console.log(`Loaded department ${dashboardType} dashboard config`);
             return;
           } catch (parseError) {
-            console.error('Error parsing department dashboard config:', parseError);
+            console.error(`Error parsing department ${dashboardType} dashboard config:`, parseError);
           }
         }
 
@@ -82,19 +137,19 @@ export const useAutosaveDashboard = (
         if (!defaultError && defaultData) {
           try {
             setCards(JSON.parse(defaultData.cards_config));
-            console.log('Loaded default dashboard config');
+            console.log(`Loaded default ${dashboardType} dashboard config`);
             return;
           } catch (parseError) {
-            console.error('Error parsing default dashboard config:', parseError);
+            console.error(`Error parsing default ${dashboardType} dashboard config:`, parseError);
           }
         }
 
         // Step 4: Fall back to hardcoded defaults
-        console.log('Using default hardcoded dashboard config');
+        console.log(`Using default hardcoded ${dashboardType} dashboard config`);
         setCards(defaultCards);
         
       } catch (error) {
-        console.error('Error loading dashboard config:', error);
+        console.error(`Error loading ${dashboardType} dashboard config:`, error);
         setCards(defaultCards);
       } finally {
         setIsLoading(false);
@@ -104,40 +159,10 @@ export const useAutosaveDashboard = (
     fetchCards();
   }, [userId, departmentId, userTableName, departmentTableName, defaultCards, dashboardType]);
 
-  const saveUserCards = useCallback(async (updatedCards: ActionCardItem[]) => {
-    if (!userId) return false;
-    
-    setIsSaving(true);
-    try {
-      const { error } = await supabase
-        .from(userTableName)
-        .upsert({
-          user_id: userId,
-          cards_config: JSON.stringify(updatedCards),
-          updated_at: new Date().toISOString()
-        }, { onConflict: 'user_id' });
-      
-      if (error) throw error;
-      
-      setLastSaved(new Date());
-      return true;
-    } catch (error) {
-      console.error('Error saving dashboard config:', error);
-      toast({
-        title: "Erro ao salvar o dashboard",
-        description: "Não foi possível salvar suas alterações. Tente novamente mais tarde.",
-        variant: "destructive"
-      });
-      return false;
-    } finally {
-      setIsSaving(false);
-    }
-  }, [userId, userTableName]);
-
   const handleCardsReorder = useCallback((updatedCards: ActionCardItem[]) => {
     setCards(updatedCards);
-    saveUserCards(updatedCards);
-  }, [saveUserCards]);
+    setUnsaved(); // Mark as having unsaved changes
+  }, [setUnsaved]);
 
   const handleSaveCardEdit = useCallback((updatedCard: ActionCardItem) => {
     const updatedCards = cards.map(card => 
@@ -145,8 +170,8 @@ export const useAutosaveDashboard = (
     );
     
     setCards(updatedCards);
-    saveUserCards(updatedCards);
-  }, [cards, saveUserCards]);
+    setUnsaved(); // Mark as having unsaved changes
+  }, [cards, setUnsaved]);
 
   const handleCardHide = useCallback((cardId: string) => {
     const updatedCards = cards.map(card => 
@@ -154,8 +179,8 @@ export const useAutosaveDashboard = (
     );
     
     setCards(updatedCards);
-    saveUserCards(updatedCards);
-  }, [cards, saveUserCards]);
+    setUnsaved(); // Mark as having unsaved changes
+  }, [cards, setUnsaved]);
 
   const resetDashboard = useCallback(() => {
     if (userId) {
@@ -170,10 +195,10 @@ export const useAutosaveDashboard = (
             try {
               const parsedConfig = JSON.parse(data.cards_config);
               setCards(parsedConfig);
-              saveUserCards(parsedConfig);
+              setUnsaved(); // Mark as having unsaved changes
               return;
             } catch (parseError) {
-              console.error('Error parsing department config during reset:', parseError);
+              console.error(`Error parsing department config during reset (${dashboardType}):`, parseError);
             }
           }
           
@@ -188,15 +213,15 @@ export const useAutosaveDashboard = (
                 try {
                   const parsedConfig = JSON.parse(defaultData.cards_config);
                   setCards(parsedConfig);
-                  saveUserCards(parsedConfig);
+                  setUnsaved(); // Mark as having unsaved changes
                 } catch (parseError) {
-                  console.error('Error parsing default config during reset:', parseError);
+                  console.error(`Error parsing default config during reset (${dashboardType}):`, parseError);
                   setCards(defaultCards);
-                  saveUserCards(defaultCards);
+                  setUnsaved(); // Mark as having unsaved changes
                 }
               } else {
                 setCards(defaultCards);
-                saveUserCards(defaultCards);
+                setUnsaved(); // Mark as having unsaved changes
               }
             });
         });
@@ -205,16 +230,18 @@ export const useAutosaveDashboard = (
     }
     
     return defaultCards;
-  }, [userId, departmentId, departmentTableName, defaultCards, dashboardType, saveUserCards]);
+  }, [userId, departmentId, departmentTableName, defaultCards, dashboardType, setUnsaved]);
 
   return {
     cards,
     isLoading,
     isSaving,
     lastSaved,
+    hasUnsavedChanges,
     handleCardsReorder,
     handleSaveCardEdit,
     handleCardHide,
-    resetDashboard
+    resetDashboard,
+    saveNow
   };
 };

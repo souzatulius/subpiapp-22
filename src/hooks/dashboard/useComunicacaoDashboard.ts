@@ -5,13 +5,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
 import { useDefaultDashboardConfig } from './useDefaultDashboardConfig';
 import { useDashboardConfig } from './useDashboardConfig';
-
-interface DashboardConfig {
-  id: string;
-  user_id: string;
-  cards_config: string;
-  created_at: string;
-}
+import { useAutosave } from './useAutosave';
+import { useNavigate } from 'react-router-dom';
 
 export const useComunicacaoDashboard = (
   user: any = null, 
@@ -32,6 +27,8 @@ export const useComunicacaoDashboard = (
     usuarioId: ''
   });
   
+  const navigate = useNavigate();
+  
   // Use the default config hook for preview mode or when user is not logged in
   const defaultConfig = useDefaultDashboardConfig(department);
   
@@ -40,6 +37,57 @@ export const useComunicacaoDashboard = (
   
   // Determine if we're loading
   const isLoading = isPreview ? defaultConfig.isLoading : dashboardConfig.isLoading;
+
+  // Function to save the current card configuration
+  const saveCardConfiguration = async (triggerType: 'navigation' | 'timeout' | 'visibility' | 'manual'): Promise<boolean> => {
+    if (isPreview || !user) return false;
+    
+    try {
+      console.log(`Saving comunicacao dashboard config - trigger: ${triggerType}`);
+      
+      // Use dashboardConfig's save method
+      await dashboardConfig.saveConfig(cards);
+      
+      // Only show toast for manual saves
+      if (triggerType === 'manual') {
+        toast({
+          title: "Configurações salvas",
+          description: "As personalizações do dashboard foram salvas com sucesso.",
+          variant: "default"
+        });
+      }
+      
+      return true;
+    } catch (error) {
+      console.error('Error saving dashboard config:', error);
+      
+      // Only show error toast for manual saves
+      if (triggerType === 'manual') {
+        toast({
+          title: "Erro ao salvar configurações",
+          description: "Não foi possível salvar as personalizações do dashboard.",
+          variant: "destructive"
+        });
+      }
+      
+      return false;
+    }
+  };
+
+  // Use the autosave hook
+  const { 
+    isSaving, 
+    lastSaved,
+    hasUnsavedChanges,
+    setUnsaved,
+    saveNow 
+  } = useAutosave({
+    onSave: saveCardConfiguration,
+    debounceMs: 3000,
+    saveOnUnmount: true,
+    saveOnVisibilityChange: true,
+    enabled: !isPreview && !!user
+  });
 
   // Fetch special cards data
   useEffect(() => {
@@ -116,11 +164,7 @@ export const useComunicacaoDashboard = (
     
     setCards(updatedCards);
     setIsEditModalOpen(false);
-    
-    // Save changes if not in preview mode
-    if (!isPreview && user) {
-      dashboardConfig.saveConfig(updatedCards);
-    }
+    setUnsaved(); // Mark as having unsaved changes
   };
 
   // Handle card hide
@@ -130,31 +174,25 @@ export const useComunicacaoDashboard = (
     );
     
     setCards(updatedCards);
-    
-    // Save changes if not in preview mode
-    if (!isPreview && user) {
-      dashboardConfig.saveConfig(updatedCards);
-    }
+    setUnsaved(); // Mark as having unsaved changes
   };
 
   // Handle cards reorder
   const handleCardsReorder = (updatedCards: ActionCardItem[]) => {
     setCards(updatedCards);
-    
-    // Save changes if not in preview mode
-    if (!isPreview && user) {
-      dashboardConfig.saveConfig(updatedCards);
-    }
+    setUnsaved(); // Mark as having unsaved changes
   };
 
   // Reset dashboard to default configuration
   const resetDashboard = () => {
     setCards(defaultConfig.config);
+    setUnsaved(); // Mark as having unsaved changes
     
-    // Save changes if not in preview mode
-    if (!isPreview && user) {
-      dashboardConfig.saveConfig(defaultConfig.config);
-    }
+    toast({
+      title: "Dashboard resetado",
+      description: "O dashboard foi restaurado para a configuração padrão.",
+      variant: "default"
+    });
   };
 
   return {
@@ -163,6 +201,9 @@ export const useComunicacaoDashboard = (
     isEditModalOpen,
     selectedCard,
     isLoading,
+    isSaving,
+    lastSaved,
+    hasUnsavedChanges,
     specialCardsData,
     handleCardEdit,
     handleCardHide,
@@ -170,6 +211,7 @@ export const useComunicacaoDashboard = (
     handleSaveCardEdit,
     setIsEditModalOpen,
     handleCardsReorder,
-    resetDashboard
+    resetDashboard,
+    saveNow
   };
 };

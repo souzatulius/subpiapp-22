@@ -1,7 +1,7 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useAuth } from '@/hooks/useSupabaseAuth';
-import { MessageSquareReply, RotateCcw } from 'lucide-react';
+import { MessageSquareReply, RotateCcw, Save } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import MobileBottomNav from '@/components/layouts/MobileBottomNav';
 import WelcomeCard from '@/components/shared/WelcomeCard';
@@ -16,6 +16,8 @@ import OriginsDemandChartCompact from '@/components/dashboard/cards/OriginsDeman
 import PendingTasksCard from '@/components/dashboard/cards/PendingTasksCard';
 import PressRequestQuickStartCard from '@/components/comunicacao/PressRequestQuickStartCard';
 import { ActionCardItem } from '@/types/dashboard';
+import { Button } from '@/components/ui/button';
+import { format } from 'date-fns';
 
 interface ComunicacaoDashboardProps {
   isPreview?: boolean;
@@ -36,6 +38,9 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
     isEditModalOpen,
     selectedCard,
     isLoading,
+    isSaving,
+    lastSaved,
+    hasUnsavedChanges,
     handleCardEdit,
     handleCardHide,
     toggleEditMode,
@@ -43,8 +48,14 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
     setIsEditModalOpen,
     handleCardsReorder,
     resetDashboard,
+    saveNow,
     specialCardsData
   } = useComunicacaoDashboard(user, isPreview, department);
+
+  // Format last saved date for display
+  const formattedLastSaved = lastSaved 
+    ? format(lastSaved, 'dd/MM/yyyy HH:mm:ss')
+    : null;
 
   React.useEffect(() => {
     if (cards.length > 0) {
@@ -168,6 +179,10 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
       variant: "default"
     });
   };
+  
+  const handleManualSave = async () => {
+    await saveNow();
+  };
 
   if (!isPreview && !user) {
     return <LoadingIndicator />;
@@ -218,6 +233,35 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
           onResetClick={handleResetDashboard}
         />
       </div>
+      
+      {/* Save status indicator */}
+      {!isPreview && user && (
+        <div className="flex items-center justify-between px-4 py-2 bg-white rounded-md shadow-sm">
+          <div className="text-sm text-gray-600">
+            {isSaving ? (
+              <span className="flex items-center">
+                <span className="h-2 w-2 bg-blue-500 rounded-full animate-pulse mr-2"></span>
+                Salvando alterações...
+              </span>
+            ) : lastSaved ? (
+              <span>
+                Última alteração salva: {formattedLastSaved}
+              </span>
+            ) : (
+              <span>Dashboard carregado</span>
+            )}
+          </div>
+          {hasUnsavedChanges && (
+            <Button 
+              size="sm" 
+              className="bg-blue-600 hover:bg-blue-700 text-white"
+              onClick={handleManualSave}
+            >
+              <Save className="h-4 w-4 mr-1" /> Salvar alterações
+            </Button>
+          )}
+        </div>
+      )}
       
       {/* Press Request Quick Start Card - Always visible */}
       <div className="px-2">
