@@ -1,6 +1,7 @@
 
 import { useState, useCallback } from 'react';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 
 interface OpenAIOptions {
   maxRetries?: number;
