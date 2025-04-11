@@ -1,5 +1,38 @@
 
-project_id = "mapjrbfzurpjmianfnev"
+project_id = "subpi-project"
 
-[functions.generate-with-gpt]
+[api]
+enabled = true
+port = 54321
+schemas = ["public", "storage", "graphql_public"]
+
+[db]
+port = 54322
+shadow_port = 54320
+major_version = 15
+
+[studio]
+enabled = true
+port = 54323
+api_url = "http://localhost"
+
+[inbucket]
+enabled = true
+port = 54324
+
+[auth]
+enabled = true
+site_url = "http://localhost:3000"
+
+[storage]
+enabled = true
+
+[analytics]
+enabled = false
+
+[realtime]
+enabled = true
+
+[[functions]]
+name = "generate-chart-data"
 verify_jwt = true

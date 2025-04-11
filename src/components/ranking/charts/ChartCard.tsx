@@ -1,58 +1,45 @@
 
-import React, { ReactNode, useState } from 'react';
-import { Card, CardContent } from '@/components/ui/card';
-import { EyeOff, Search } from 'lucide-react';
+import React from 'react';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { useDraggable } from '@dnd-kit/core';
+import { ChevronDown, ChevronUp, Eye, EyeOff, BarChart2, FileText } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import InsufficientDataMessage from './InsufficientDataMessage';
-import ChartLoadingOverlay, { LoadingState } from './ChartLoadingOverlay';
+import { ChartItem } from '../types';
 
 interface ChartCardProps {
-  title: string;
-  subtitle?: string;
-  value: string | number;
-  isLoading: boolean;
-  children: ReactNode;
-  onToggleVisibility?: () => void;
-  onToggleAnalysis?: () => void;
-  className?: string;
-  isDraggable?: boolean;
-  trendIndicator?: ReactNode;
-  analysis?: string;
-  showAnalysis?: boolean;
-  hasData?: boolean;
+  chart: ChartItem;
+  index: number;
+  isAnalysisExpanded: boolean;
+  showAnalysisOnly: boolean;
+  onToggleVisibility: () => void;
+  onToggleAnalysis: () => void;
+  onToggleView: () => void;
+  disableContainer?: boolean;
   dataSource?: 'SGZ' | 'Painel da Zeladoria' | string;
-  loadingState?: LoadingState;
-  loadingMessage?: string;
-  errorMessage?: string;
 }
 
-const ChartCard: React.FC<ChartCardProps> = ({ 
-  title, 
-  subtitle,
-  value, 
-  isLoading, 
-  children,
+const ChartCard: React.FC<ChartCardProps> = ({
+  chart,
+  index,
+  isAnalysisExpanded,
+  showAnalysisOnly,
   onToggleVisibility,
   onToggleAnalysis,
-  className = '',
-  isDraggable = true,
-  trendIndicator,
-  analysis,
-  showAnalysis = false,
-  hasData = true,
-  dataSource,
-  loadingState = 'idle',
-  loadingMessage,
-  errorMessage
+  onToggleView,
+  disableContainer = false,
+  dataSource
 }) => {
-  const [isHovering, setIsHovering] = useState(false);
-
-  // Format value - replace dot with comma for decimal numbers
-  const formatDisplayValue = (val: string | number): string => {
-    const stringVal = val.toString();
-    return stringVal.replace('.', ',');
+  const { attributes, listeners, setNodeRef, transform } = useDraggable({
+    id: chart.id,
+    data: { index }
+  });
+  
+  const CardComponent = disableContainer ? React.Fragment : Card;
+  const cardProps = disableContainer ? {} : { 
+    className: "overflow-hidden hover:shadow-md hover:bg-orange-50 transition-all duration-200" 
   };
-
+  
   // Generate badge color based on data source
   const getBadgeColor = (source?: string) => {
     if (!source) return 'bg-gray-200 text-gray-700';
@@ -66,105 +53,98 @@ const ChartCard: React.FC<ChartCardProps> = ({
         return 'bg-gray-100 text-gray-700 border-gray-300';
     }
   };
-
-  // Determine the actual loading state
-  const actualLoadingState: LoadingState = loadingState !== 'idle' 
-    ? loadingState 
-    : isLoading ? 'loading' : !hasData ? 'empty' : 'idle';
-
+  
   return (
-    <Card 
-      className={`overflow-hidden border border-blue-200 hover:shadow-md transition-all bg-white rounded-xl ${className} ${isDraggable ? 'cursor-grab active:cursor-grabbing' : ''}`}
-      onMouseEnter={() => setIsHovering(true)}
-      onMouseLeave={() => setIsHovering(false)}
+    <div
+      ref={setNodeRef}
+      style={{
+        transform: transform ? `translate3d(${transform.x}px, ${transform.y}px, 0)` : undefined,
+      }}
+      className="h-full"
     >
-      <CardContent className="p-0">
-        <div className="p-4 border-b border-blue-100 bg-gradient-to-r from-blue-50 to-white flex justify-between items-center">
-          <div className="flex-1">
-            <div className="flex items-center justify-between mb-1">
-              <h3 className="text-sm sm:text-base font-medium text-gray-800">{title}</h3>
+      <CardComponent {...cardProps}>
+        <CardHeader 
+          {...attributes}
+          {...listeners}
+          className={`${disableContainer ? 'px-0 pt-0' : ''} cursor-grab`}
+        >
+          <div className="flex justify-between items-center">
+            <div className="flex items-center justify-between flex-1">
+              <CardTitle className="text-lg">{chart.title}</CardTitle>
               
-              {dataSource && (
-                <Badge 
-                  variant="outline" 
-                  className={`text-xs py-0 px-1.5 ml-2 ${getBadgeColor(dataSource)}`}
-                >
-                  {dataSource}
-                </Badge>
-              )}
+              <div className="flex items-center space-x-2">
+                {dataSource && (
+                  <Badge 
+                    variant="outline" 
+                    className={`text-xs py-0 px-1.5 ${getBadgeColor(dataSource)}`}
+                  >
+                    {dataSource}
+                  </Badge>
+                )}
+                
+                {/* Control buttons moved here to always be visible next to the badge */}
+                <div className="flex space-x-1">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-7 w-7 bg-gray-100 hover:bg-gray-200 text-gray-600"
+                    onClick={onToggleView}
+                    title={showAnalysisOnly ? "Mostrar gráfico" : "Mostrar análise"}
+                  >
+                    {showAnalysisOnly ? (
+                      <BarChart2 className="h-3.5 w-3.5" />
+                    ) : (
+                      <FileText className="h-3.5 w-3.5" />
+                    )}
+                  </Button>
+                  
+                  {chart.analysis && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-7 w-7 bg-gray-100 hover:bg-gray-200 text-gray-600"
+                      onClick={onToggleAnalysis}
+                      title={isAnalysisExpanded ? "Esconder análise" : "Mostrar análise"}
+                    >
+                      {isAnalysisExpanded ? (
+                        <ChevronUp className="h-3.5 w-3.5" />
+                      ) : (
+                        <ChevronDown className="h-3.5 w-3.5" />
+                      )}
+                    </Button>
+                  )}
+                  
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-7 w-7 bg-gray-100 hover:bg-gray-200 text-gray-600"
+                    onClick={onToggleVisibility}
+                    title="Esconder gráfico"
+                  >
+                    <EyeOff className="h-3.5 w-3.5" />
+                  </Button>
+                </div>
+              </div>
             </div>
-            
-            {subtitle && (
-              <p className="text-xs text-gray-500 mt-0.5">{subtitle}</p>
-            )}
-            
-            {isLoading ? (
-              <div className="h-6 flex items-center animate-pulse">
-                <div className="h-5 w-28 bg-blue-100 rounded"></div>
-              </div>
-            ) : (
-              <div className="flex items-center gap-2">
-                <p className="text-lg sm:text-xl font-semibold text-blue-700">
-                  {formatDisplayValue(value)}
-                </p>
-                {trendIndicator && trendIndicator}
-              </div>
-            )}
           </div>
+        </CardHeader>
+        
+        <CardContent className={`${disableContainer ? 'px-0' : ''}`}>
+          {!showAnalysisOnly && (
+            <div className="min-h-[250px]">
+              {chart.component}
+            </div>
+          )}
           
-          {/* Action buttons moved to header */}
-          <div className="flex space-x-2 ml-2">
-            {onToggleAnalysis && (
-              <button 
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onToggleAnalysis();
-                }}
-                className="p-1.5 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600 transition-colors"
-                title="Mostrar análise"
-              >
-                <Search size={16} />
-              </button>
-            )}
-            
-            {onToggleVisibility && (
-              <button 
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onToggleVisibility();
-                }}
-                className="p-1.5 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600 transition-colors"
-                title="Ocultar card"
-              >
-                <EyeOff size={16} />
-              </button>
-            )}
-          </div>
-        </div>
-        <div className="p-4 h-[250px] flex items-center justify-center relative">
-          {actualLoadingState !== 'idle' && (
-            <ChartLoadingOverlay 
-              state={actualLoadingState}
-              message={loadingMessage}
-              errorMessage={errorMessage}
-              className="rounded-md"
-            />
-          )}
-          {showAnalysis && analysis ? (
-            <div className="w-full h-full overflow-auto bg-gray-50 rounded-lg p-4">
-              <h4 className="font-medium text-blue-700 mb-2">Análise de dados</h4>
-              <p className="text-sm text-gray-700">{analysis}</p>
-            </div>
-          ) : !hasData && actualLoadingState === 'idle' ? (
-            <InsufficientDataMessage />
-          ) : (
-            <div className="w-full h-full overflow-hidden flex items-center justify-center">
-              {typeof children === 'string' ? children : children}
+          {(isAnalysisExpanded || showAnalysisOnly) && chart.analysis && (
+            <div className={`${!showAnalysisOnly ? 'mt-4' : ''} bg-orange-50 p-4 rounded-md text-sm text-gray-700`}>
+              <p className="font-medium mb-1">Análise:</p>
+              <p>{chart.analysis}</p>
             </div>
           )}
-        </div>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </CardComponent>
+    </div>
   );
 };
 
