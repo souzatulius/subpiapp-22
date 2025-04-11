@@ -137,7 +137,7 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
         />
       </div>
       
-      {/* Save status indicator */}
+      {/* Save status indicator - Modified to remove "Dashboard carregado" message */}
       {!isPreview && user && (
         <div className="flex items-center justify-between px-4 py-2 bg-white rounded-xl shadow-sm">
           <div className="text-sm text-gray-600">
@@ -150,9 +150,7 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
               <span>
                 Última alteração salva: {formattedLastSaved}
               </span>
-            ) : (
-              <span>Dashboard carregado</span>
-            )}
+            ) : null} {/* Removed the "Dashboard carregado" message */}
           </div>
           {hasUnsavedChanges && (
             <Button 
@@ -166,10 +164,7 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
         </div>
       )}
       
-      {/* Press Request Quick Start Card */}
-      <div className="px-2">
-        <PressRequestQuickStartCard />
-      </div>
+      {/* Removed the standalone Press Request Quick Start Card */}
       
       {isLoading ? (
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
