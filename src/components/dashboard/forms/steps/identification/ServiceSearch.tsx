@@ -90,20 +90,20 @@ const ServiceSearch: React.FC<ServiceSearchProps> = ({
                 value={searchQuery}
                 onChange={handleInputChange}
                 onFocus={() => setShowResults(true)}
-                className={`pr-10 ${hasFieldError('servico_id', errors) ? 'border-orange-500' : ''}`}
+                className={`pr-10 rounded-xl ${hasFieldError('servico_id', errors) ? 'border-orange-500' : ''}`}
                 disabled={naoSabeServico}
               />
               <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
             </div>
             
             {showResults && searchQuery && (
-              <div className="absolute z-10 mt-1 w-full bg-white border border-gray-200 rounded-md shadow-lg max-h-60 overflow-auto">
+              <div className="absolute z-10 mt-1 w-full bg-white border border-gray-200 rounded-xl shadow-lg max-h-60 overflow-auto">
                 {filteredServicos.length > 0 ? (
                   filteredServicos.map(service => (
                     <Button
                       key={service.id}
                       variant="ghost"
-                      className="w-full justify-start text-left px-3 py-2 text-sm hover:bg-orange-100"
+                      className="w-full justify-start text-left px-3 py-2 text-sm hover:bg-orange-100 rounded-xl"
                       onClick={() => handleSelectService(service.id)}
                     >
                       {service.descricao}
@@ -125,7 +125,7 @@ const ServiceSearch: React.FC<ServiceSearchProps> = ({
                 variant="ghost"
                 size="sm"
                 onClick={handleRemoveService}
-                className="text-gray-500 hover:text-red-500"
+                className="text-gray-500 hover:text-red-500 rounded-xl"
               >
                 <X size={16} />
               </Button>

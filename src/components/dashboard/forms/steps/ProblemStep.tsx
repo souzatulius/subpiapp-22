@@ -5,6 +5,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { ValidationError } from '@/lib/formValidationUtils';
 import { getProblemIcon } from '@/components/settings/problems/renderIcon';
 import ServiceSearch from './identification/ServiceSearch';
+import ServiceTagSelector from './ServiceTagSelector';
 import { Button } from '@/components/ui/button';
 
 interface ProblemStepProps {
@@ -112,6 +113,17 @@ const ProblemStep: React.FC<ProblemStepProps> = ({
               Não sei qual serviço selecionar
             </Label>
           </div>
+
+          {!formData.servico_id && !formData.nao_sabe_servico && filteredServicos.length > 0 && (
+            <div className="mt-4 animate-fadeIn">
+              <Label className="text-sm text-gray-600 mb-2">Serviços disponíveis:</Label>
+              <ServiceTagSelector 
+                services={filteredServicos} 
+                selectedServiceId={formData.servico_id}
+                onServiceSelect={handleServiceSelect}
+              />
+            </div>
+          )}
         </div>
       )}
     </div>
