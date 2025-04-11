@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { ActionCardItem } from '@/types/dashboard';
@@ -24,22 +23,49 @@ export const useAutosaveDashboard = (
     ? 'department_dashboard'
     : 'department_dashboard_comunicacao';
 
-  // Function to save cards configuration
+  // Function to save cards configuration - with check-before-save logic
   const saveCardConfiguration = async (triggerType: 'navigation' | 'timeout' | 'visibility' | 'manual'): Promise<boolean> => {
     if (!userId) return false;
     
     try {
       console.log(`[${dashboardType}] Saving dashboard config - trigger: ${triggerType}`);
       
-      const { error } = await supabase
+      // First check if a record exists
+      const { data: existingRecord, error: checkError } = await supabase
         .from(userTableName)
-        .upsert({
-          user_id: userId,
-          cards_config: JSON.stringify(cards),
-          updated_at: new Date().toISOString()
-        }, { onConflict: 'user_id' });
+        .select('id')
+        .eq('user_id', userId)
+        .single();
+        
+      if (checkError && checkError.code !== 'PGRST116') {
+        // PGRST116 means no rows returned, which is expected if no record exists yet
+        console.error('Error checking for existing record:', checkError);
+      }
       
-      if (error) throw error;
+      let result;
+      
+      if (existingRecord) {
+        // Record exists, use UPDATE
+        result = await supabase
+          .from(userTableName)
+          .update({
+            cards_config: JSON.stringify(cards),
+            updated_at: new Date().toISOString()
+          })
+          .eq('user_id', userId);
+      } else {
+        // No record exists, use INSERT
+        result = await supabase
+          .from(userTableName)
+          .insert({
+            user_id: userId,
+            cards_config: JSON.stringify(cards),
+            updated_at: new Date().toISOString(),
+            created_at: new Date().toISOString()
+          });
+      }
+      
+      if (result.error) throw result.error;
       
       // Only show success toast for manual saves
       if (triggerType === 'manual') {
@@ -98,9 +124,9 @@ export const useAutosaveDashboard = (
           .from(userTableName)
           .select('cards_config, updated_at')
           .eq('user_id', userId)
-          .single();
+          .maybeSingle(); // Using maybeSingle instead of single to avoid errors
 
-        if (!userError && userData) {
+        if (!userError && userData && userData.cards_config) {
           try {
             setCards(JSON.parse(userData.cards_config));
             console.log(`Loaded user ${dashboardType} dashboard config`);
@@ -115,9 +141,9 @@ export const useAutosaveDashboard = (
           .from(departmentTableName)
           .select('cards_config, updated_at')
           .eq('department', departmentId)
-          .single();
+          .maybeSingle(); // Using maybeSingle instead of single
 
-        if (!deptError && deptData) {
+        if (!deptError && deptData && deptData.cards_config) {
           try {
             setCards(JSON.parse(deptData.cards_config));
             console.log(`Loaded department ${dashboardType} dashboard config`);
@@ -132,9 +158,9 @@ export const useAutosaveDashboard = (
           .from(departmentTableName)
           .select('cards_config')
           .eq('department', dashboardType === 'main' ? 'main' : 'comunicacao')
-          .single();
+          .maybeSingle(); // Using maybeSingle instead of single
 
-        if (!defaultError && defaultData) {
+        if (!defaultError && defaultData && defaultData.cards_config) {
           try {
             setCards(JSON.parse(defaultData.cards_config));
             console.log(`Loaded default ${dashboardType} dashboard config`);

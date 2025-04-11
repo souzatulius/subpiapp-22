@@ -1,8 +1,8 @@
 
 import React from 'react';
-import { SortableContext } from '@dnd-kit/sortable';
 import { ActionCardItem } from '@/types/dashboard';
-import CardRenderer from './CardRenderer';
+import { SortableContext } from '@dnd-kit/sortable';
+import { CardRenderer } from './CardRenderer';
 
 interface UnifiedCardGridContentProps {
   processedCards: ActionCardItem[];
@@ -21,7 +21,7 @@ interface UnifiedCardGridContentProps {
   renderSpecialCardContent?: (cardId: string) => React.ReactNode | null;
 }
 
-export const UnifiedCardGridContent: React.FC<UnifiedCardGridContentProps> = ({
+const UnifiedCardGridContent: React.FC<UnifiedCardGridContentProps> = ({
   processedCards,
   isEditMode,
   isMobileView,
@@ -37,10 +37,12 @@ export const UnifiedCardGridContent: React.FC<UnifiedCardGridContentProps> = ({
   specialCardsData,
   renderSpecialCardContent
 }) => {
+  const cardIds = processedCards.map(card => card.id);
+
   return (
-    <SortableContext items={processedCards.map(card => card.id)}>
-      <div className={`w-full grid gap-3 ${isMobileView ? 'grid-cols-2' : 'grid-cols-4 grid-flow-dense'}`}>
-        {processedCards.map(card => (
+    <SortableContext items={cardIds}>
+      <div className={`grid grid-cols-4 gap-4 ${isMobileView ? 'grid-cols-1' : ''}`}>
+        {processedCards.map((card) => (
           <CardRenderer
             key={card.id}
             card={card}

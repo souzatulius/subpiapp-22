@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { ActionCardItem } from '@/types/dashboard';
-import { getCommunicationActionCards } from '@/hooks/dashboard/defaultCards';
+import { getCommunicationActionCards } from '@/hooks/dashboard/getCommunicationActionCards';
 import { supabase } from '@/integrations/supabase/client';
 import { useAutosaveDashboard } from '@/hooks/dashboard/useAutosaveDashboard';
 
@@ -33,10 +33,12 @@ export const useComunicacaoDashboard = (
     cards,
     isSaving,
     lastSaved,
+    hasUnsavedChanges,
     handleCardsReorder,
     handleSaveCardEdit,
     handleCardHide,
-    resetDashboard
+    resetDashboard,
+    saveNow
   } = useAutosaveDashboard(userId, department, defaultCards, 'communication');
 
   const toggleEditMode = useCallback(() => {
@@ -62,7 +64,7 @@ export const useComunicacaoDashboard = (
           .from('usuarios')
           .select('coordenacao_id')
           .eq('id', userId)
-          .single();
+          .maybeSingle();
 
         if (userError) throw userError;
 
@@ -103,6 +105,7 @@ export const useComunicacaoDashboard = (
     isLoading,
     isSaving,
     lastSaved,
+    hasUnsavedChanges,
     specialCardsData,
     handleCardEdit,
     handleCardHide,
@@ -110,6 +113,7 @@ export const useComunicacaoDashboard = (
     handleSaveCardEdit,
     setIsEditModalOpen,
     handleCardsReorder,
-    resetDashboard
+    resetDashboard,
+    saveNow
   };
 };

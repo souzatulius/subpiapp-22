@@ -50,17 +50,11 @@ const CardGridContainer: React.FC<CardGridContainerProps> = ({
   // Use our shared sensors hook
   const sensors = useDndSensors();
 
-  // Function to handle drag end
-  const handleDragEnd = (event: DragEndEvent) => {
-    // This is now handled by UnifiedCardGrid
-  };
-
   return (
     <DndContext 
       sensors={sensors} 
       modifiers={[restrictToParentElement]} 
       collisionDetection={closestCenter}
-      onDragEnd={handleDragEnd}
     >
       <UnifiedCardGrid
         cards={cards}
