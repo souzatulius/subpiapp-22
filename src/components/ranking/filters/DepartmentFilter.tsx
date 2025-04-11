@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { MultiSelect } from '@/components/ui/multi-select';
+import { MultiSelect } from '@/components/ui/multiselect';
 
 interface DepartmentFilterProps {
   departamentos: string[];

@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { FilterOptions, ChartVisibility } from './types';
@@ -29,28 +30,12 @@ const FilterSection: React.FC<FilterSectionProps> = ({
     onFiltersChange({ dateRange: range });
   };
   
-  const handleStatusChange = (status: string) => {
-    let newStatuses = [...(filters.status || [])];
-    
-    if (status === 'Todos') {
-      newStatuses = ['Todos'];
-    } else {
-      newStatuses = newStatuses.filter(s => s !== 'Todos');
-      
-      if (newStatuses.includes(status)) {
-        newStatuses = newStatuses.filter(s => s !== status);
-      } else {
-        newStatuses.push(status);
-      }
-      
-      if (newStatuses.length === 0) {
-        newStatuses = ['Todos'];
-      }
-    }
-    
-    onFiltersChange({ status: newStatuses });
+  // Updated to handle array of statuses
+  const handleStatusChange = (statuses: string[]) => {
+    onFiltersChange({ status: statuses });
   };
   
+  // Already expects array, no change needed
   const handleServiceTypeChange = (types: string[]) => {
     onFiltersChange({ serviceTypes: types });
   };

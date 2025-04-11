@@ -1,13 +1,13 @@
 
 import React from 'react';
-import { MultiSelect } from '@/components/ui/multi-select';
+import { MultiSelect } from '@/components/ui/multiselect';
 
 interface StatusFilterProps {
-  status: string[];
-  onStatusChange: (status: string[]) => void;
+  statuses: string[];
+  onStatusChange: (statuses: string[]) => void;
 }
 
-const StatusFilter: React.FC<StatusFilterProps> = ({ status, onStatusChange }) => {
+const StatusFilter: React.FC<StatusFilterProps> = ({ statuses, onStatusChange }) => {
   const statusOptions = [
     { value: 'Todos', label: 'Todos os status' },
     { value: 'Aberto', label: 'Aberto' },
@@ -23,7 +23,7 @@ const StatusFilter: React.FC<StatusFilterProps> = ({ status, onStatusChange }) =
       <MultiSelect
         placeholder="Selecionar status"
         options={statusOptions}
-        selected={status}
+        selected={statuses}
         onChange={onStatusChange}
         className="max-w-full"
       />
