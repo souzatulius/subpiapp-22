@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { X, FileText, Image, File, FilePdf, FileSpreadsheet, FileCode, Paperclip } from 'lucide-react';
+import { X, FileText, Image, File, FileSpreadsheet, FileCode, Paperclip } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface FileUploadSectionProps {
@@ -21,7 +21,7 @@ const FileUploadSection: React.FC<FileUploadSectionProps> = ({ anexos, onAnexosC
     if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'svg'].includes(extension)) {
       return <Image className="h-8 w-8 text-blue-600" />;
     } else if (['pdf'].includes(extension)) {
-      return <FilePdf className="h-8 w-8 text-red-600" />;
+      return <File className="h-8 w-8 text-red-600" />; // Changed from FilePdf to File
     } else if (['xls', 'xlsx', 'csv'].includes(extension)) {
       return <FileSpreadsheet className="h-8 w-8 text-green-600" />;
     } else if (['doc', 'docx', 'txt', 'rtf'].includes(extension)) {

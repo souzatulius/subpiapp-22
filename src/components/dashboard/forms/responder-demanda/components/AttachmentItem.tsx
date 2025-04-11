@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { FileIcon, ExternalLink, Download, Image, FileText, File, FileSpreadsheet as FileSS, Music, Video, Archive } from 'lucide-react';
 import { Button } from '@/components/ui/button';
