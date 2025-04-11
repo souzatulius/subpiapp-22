@@ -118,6 +118,7 @@ export const useNotasActions = (refetch: () => Promise<any>) => {
 
       if (notaError) throw notaError;
 
+      // If nota is linked to a demand, update the demand status to allow creating new notes
       if (nota.demanda_id) {
         const { error: demandaError } = await supabase
           .from('demandas')
@@ -129,15 +130,24 @@ export const useNotasActions = (refetch: () => Promise<any>) => {
         if (demandaError) throw demandaError;
       }
 
-      // Atualizar status para 'excluida' (feminino)
-      const result = await updateNotaStatus(notaId, 'excluido');
+      // Actually DELETE the note (not just update status)
+      const { error: deleteError } = await supabase
+        .from('notas_oficiais')
+        .delete()
+        .eq('id', notaId);
       
-      if (result) {
-        // Show animated feedback
-        showFeedback('success', 'Nota excluída com sucesso');
-      }
+      if (deleteError) throw deleteError;
       
-      return result;
+      toast({
+        title: 'Nota excluída com sucesso',
+        description: 'A nota foi permanentemente removida do sistema.',
+      });
+      
+      // Show animated feedback for successful deletion
+      showFeedback('success', 'Nota excluída com sucesso');
+      
+      await refetch();
+      return true;
     } catch (error: any) {
       console.error('Erro ao excluir nota:', error);
       toast({

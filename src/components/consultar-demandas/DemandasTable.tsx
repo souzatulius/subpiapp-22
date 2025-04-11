@@ -11,7 +11,7 @@ import { Card } from '@/components/ui/card';
 export interface DemandasTableProps {
   demandas: Demand[];
   onViewDemand: (demand: Demand) => void;
-  onDelete?: (demand: Demand) => void;
+  onDeleteDemand?: (demand: Demand) => void;
   onViewNota?: (demandId: string) => void;
   totalCount: number;
   page: number;
@@ -25,7 +25,7 @@ export interface DemandasTableProps {
 const DemandasTable: React.FC<DemandasTableProps> = ({
   demandas,
   onViewDemand,
-  onDelete,
+  onDeleteDemand,
   onViewNota,
   totalCount,
   page,
@@ -108,8 +108,8 @@ const DemandasTable: React.FC<DemandasTableProps> = ({
                   <Button variant="ghost" size="icon" onClick={() => onViewDemand(demanda)} className="rounded-full">
                     <Eye className="h-4 w-4" />
                   </Button>
-                  {isAdmin && onDelete && (
-                    <Button variant="ghost" size="icon" onClick={() => onDelete(demanda)} className="rounded-full">
+                  {onDeleteDemand && (
+                    <Button variant="ghost" size="icon" onClick={() => onDeleteDemand(demanda)} className="rounded-full text-red-500 hover:text-red-700 hover:bg-red-50">
                       <Trash2 className="h-4 w-4" />
                     </Button>
                   )}

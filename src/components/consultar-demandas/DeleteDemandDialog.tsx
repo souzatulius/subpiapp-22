@@ -11,29 +11,45 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Loader2 } from "lucide-react";
+import AttentionBox from "@/components/ui/attention-box";
 
 export interface DeleteDemandDialogProps {
   isOpen: boolean;
   demandId: string;
+  demandTitle?: string;
+  hasNotes?: boolean;
   onConfirm: () => Promise<void> | void;
-  onCancel: () => void; // Added missing prop
+  onCancel: () => void;
   isDeleting?: boolean;
 }
 
 const DeleteDemandDialog: React.FC<DeleteDemandDialogProps> = ({
   isOpen,
   demandId,
+  demandTitle = "esta demanda",
+  hasNotes = false,
   onConfirm,
   onCancel,
   isDeleting = false
 }) => {
   return (
-    <AlertDialog open={isOpen} onOpenChange={(open) => !open && onCancel()}>
+    <AlertDialog open={isOpen} onOpenChange={(open) => !open && !isDeleting && onCancel()}>
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>Excluir Demanda</AlertDialogTitle>
-          <AlertDialogDescription>
-            Tem certeza que deseja excluir esta demanda? Esta ação não pode ser desfeita.
+          <AlertDialogDescription className="text-gray-700">
+            <p className="mb-4">
+              Tem certeza que deseja excluir a demanda <strong>"{demandTitle}"</strong>?
+            </p>
+            
+            {hasNotes && (
+              <AttentionBox title="Atenção:" className="mb-4">
+                Esta demanda tem notas vinculadas a ela.
+                Ao excluir esta demanda, todas as notas associadas também serão excluídas permanentemente.
+              </AttentionBox>
+            )}
+            
+            <p>Esta ação é permanente e não pode ser desfeita.</p>
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>

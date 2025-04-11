@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
 import { NotaOficial, UseNotasDataReturn } from '@/types/nota';
 import { useNotasQuery } from './useNotasQuery';
+import { useAnimatedFeedback } from '@/hooks/use-animated-feedback';
 
 export const useNotasData = (): UseNotasDataReturn => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -14,6 +15,7 @@ export const useNotasData = (): UseNotasDataReturn => {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [selectedNotaId, setSelectedNotaId] = useState<string | null>(null);
+  const { showFeedback } = useAnimatedFeedback();
 
   // Use the query hook to fetch notas
   const { data: notas, isLoading: loading, error, refetch } = useNotasQuery();
@@ -52,17 +54,40 @@ export const useNotasData = (): UseNotasDataReturn => {
   const handleDelete = async (id: string) => {
     try {
       setDeleteLoading(true);
-      const { error } = await supabase
+      
+      // Get note details to check if it's linked to a demand
+      const { data: nota, error: fetchError } = await supabase
         .from('notas_oficiais')
-        .update({ status: 'excluida' })
+        .select('demanda_id, titulo')
+        .eq('id', id)
+        .single();
+        
+      if (fetchError) throw fetchError;
+      
+      // If note is linked to a demand, update demand status
+      if (nota && nota.demanda_id) {
+        const { error: updateDemandError } = await supabase
+          .from('demandas')
+          .update({ status: 'aguardando_nota' })
+          .eq('id', nota.demanda_id);
+          
+        if (updateDemandError) throw updateDemandError;
+      }
+      
+      // Now actually delete the note (not just update status)
+      const { error: deleteError } = await supabase
+        .from('notas_oficiais')
+        .delete()
         .eq('id', id);
 
-      if (error) throw error;
+      if (deleteError) throw deleteError;
 
       toast({
         title: "Nota excluída com sucesso",
-        description: "A nota foi marcada como excluída."
+        description: "A nota foi permanentemente removida do sistema."
       });
+      
+      showFeedback('success', 'Nota excluída com sucesso!');
 
       refetch();
       setIsDeleteDialogOpen(false);
@@ -74,6 +99,8 @@ export const useNotasData = (): UseNotasDataReturn => {
         description: error.message || "Ocorreu um erro ao excluir a nota.",
         variant: "destructive"
       });
+      
+      showFeedback('error', 'Falha ao excluir a nota');
     } finally {
       setDeleteLoading(false);
     }

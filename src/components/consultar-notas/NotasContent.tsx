@@ -26,6 +26,7 @@ const NotasContent = () => {
     setIsDeleteDialogOpen,
     selectedNotaId,
     setSelectedNotaId,
+    deleteLoading,
     refetch
   } = useNotasData();
   
@@ -54,6 +55,7 @@ const NotasContent = () => {
   };
   
   const handleDeleteClick = (nota: NotaOficial) => {
+    setSelectedNota(nota);
     setSelectedNotaId(nota.id);
     setIsDeleteDialogOpen(true);
   };
@@ -67,6 +69,7 @@ const NotasContent = () => {
   const cancelDelete = () => {
     setIsDeleteDialogOpen(false);
     setSelectedNotaId(null);
+    setSelectedNota(null);
   };
   
   const formatDate = (dateString: string) => {
@@ -137,6 +140,8 @@ const NotasContent = () => {
         onClose={cancelDelete}
         onConfirm={confirmDelete}
         notaTitle={selectedNota?.titulo || "esta nota"}
+        hasDemanda={!!selectedNota?.demanda_id}
+        isLoading={deleteLoading}
       />
     </div>
   );

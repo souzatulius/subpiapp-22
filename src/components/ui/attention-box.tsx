@@ -1,51 +1,30 @@
 
-import React from "react";
-import { cn } from "@/lib/utils";
-import { AlertCircle, Info } from "lucide-react";
+import React from 'react';
+import { AlertTriangle } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface AttentionBoxProps {
-  title?: string;
   children: React.ReactNode;
-  variant?: "warning" | "info";
-  icon?: boolean;
+  title?: string;
   className?: string;
 }
 
-const AttentionBox = ({
-  title,
+const AttentionBox: React.FC<AttentionBoxProps> = ({
   children,
-  variant = "warning",
-  icon = true,
-  className,
-}: AttentionBoxProps) => {
-  const Icon = variant === "warning" ? AlertCircle : Info;
-  
+  title = "Atenção",
+  className = ""
+}) => {
   return (
-    <div 
-      className={cn(
-        "p-4 rounded-md text-sm border",
-        variant === "warning" 
-          ? "bg-orange-50 border-orange-200" 
-          : "bg-blue-50 border-blue-200",
-        className
-      )}
-    >
-      <div className="flex gap-2">
-        {icon && (
-          <Icon 
-            className={variant === "warning" ? "h-5 w-5 text-subpi-orange flex-shrink-0" : "h-5 w-5 text-blue-500 flex-shrink-0"} 
-          />
-        )}
-        <div className="flex-1">
-          {title && (
-            <p className={variant === "warning" ? "font-medium text-subpi-orange" : "font-medium text-blue-700"}>
-              {title}
-            </p>
-          )}
-          <div className="text-gray-600">
-            {children}
-          </div>
-        </div>
+    <div className={cn(
+      "bg-amber-50 border-l-4 border-amber-500 p-4 rounded-md",
+      className
+    )}>
+      <div className="flex items-center mb-2">
+        <AlertTriangle className="h-5 w-5 text-amber-500 mr-2" />
+        <h3 className="text-sm font-medium text-amber-800">{title}</h3>
+      </div>
+      <div className="text-sm text-amber-700">
+        {children}
       </div>
     </div>
   );

@@ -2,6 +2,7 @@
 import React from 'react';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import AttentionBox from '@/components/ui/attention-box';
+import { Loader2 } from 'lucide-react';
 
 interface DeleteNotaDialogProps {
   isOpen: boolean;
@@ -10,6 +11,7 @@ interface DeleteNotaDialogProps {
   onCancel?: () => void;
   notaTitle?: string;
   hasDemanda?: boolean;
+  isLoading?: boolean;
 }
 
 const DeleteNotaDialog: React.FC<DeleteNotaDialogProps> = ({
@@ -18,14 +20,18 @@ const DeleteNotaDialog: React.FC<DeleteNotaDialogProps> = ({
   onConfirm,
   onCancel = () => {},
   notaTitle = "esta nota",
-  hasDemanda = false
+  hasDemanda = false,
+  isLoading = false
 }) => {
   const handleClose = () => {
-    if (onClose) onClose();
-    if (onCancel) onCancel();
+    if (!isLoading) {
+      if (onClose) onClose();
+      if (onCancel) onCancel();
+    }
   };
 
-  return <AlertDialog open={isOpen} onOpenChange={handleClose}>
+  return (
+    <AlertDialog open={isOpen} onOpenChange={handleClose}>
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>Excluir Nota</AlertDialogTitle>
@@ -37,21 +43,35 @@ const DeleteNotaDialog: React.FC<DeleteNotaDialogProps> = ({
             {hasDemanda && (
               <AttentionBox title="Atenção:" className="mb-4">
                 Esta nota está vinculada a uma demanda. 
-                Ao excluir esta nota, a demanda retornará para o status de "Pendente".
+                Ao excluir esta nota, a demanda retornará para o status de "Aguardando Nota".
               </AttentionBox>
             )}
             
-            <p>Esta ação não pode ser desfeita.</p>
+            <p>Esta ação é permanente e não pode ser desfeita.</p>
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel onClick={onCancel}>Cancelar</AlertDialogCancel>
-          <AlertDialogAction onClick={onConfirm} className="bg-red-600 hover:bg-red-700 text-white">
-            Excluir
+          <AlertDialogCancel onClick={onCancel} disabled={isLoading}>
+            Cancelar
+          </AlertDialogCancel>
+          <AlertDialogAction 
+            onClick={onConfirm} 
+            disabled={isLoading} 
+            className="bg-red-600 hover:bg-red-700 text-white"
+          >
+            {isLoading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Excluindo...
+              </>
+            ) : (
+              "Excluir"
+            )}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
-    </AlertDialog>;
+    </AlertDialog>
+  );
 };
 
 export default DeleteNotaDialog;
