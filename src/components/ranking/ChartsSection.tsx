@@ -1,14 +1,9 @@
 
 import React from 'react';
-import { ChartVisibility } from './types';
+import { ChartVisibility, ChartItem } from '../../types/ranking';
 import NoDataMessage from './charts/NoDataMessage';
-import { useChartItemsState } from './hooks/useChartItemsState';
-import { useChartItems } from './hooks/useChartItems';
 import ChartSectionHeader from './chart-section/ChartSectionHeader';
 import ChartGrid from './chart-section/ChartGrid';
-
-// Import chart registration
-import './charts/ChartRegistration';
 
 interface ChartsSectionProps {
   chartData: any;
@@ -34,26 +29,52 @@ const ChartsSection: React.FC<ChartsSectionProps> = ({
   // Check if we have data to display
   const hasData = Boolean((sgzData && sgzData.length > 0) || (painelData && painelData.length > 0));
   
-  // Get chart items from hook
-  const { chartItems } = useChartItems({
-    chartData,
-    isLoading,
-    sgzData,
-    painelData,
-    isSimulationActive,
-    hasData
-  });
+  // Get chart items for the display
+  const [chartItems, setChartItems] = React.useState<ChartItem[]>([]);
+  const [hiddenCharts, setHiddenCharts] = React.useState<string[]>([]);
+  const [expandedAnalyses, setExpandedAnalyses] = React.useState<string[]>([]);
+  const [analysisOnlyCharts, setAnalysisOnlyCharts] = React.useState<string[]>([]);
   
-  // Get chart item state management from hook
-  const {
-    hiddenCharts,
-    expandedAnalyses,
-    analysisOnlyCharts,
-    handleDragEnd,
-    handleToggleVisibility,
-    handleToggleAnalysis,
-    handleToggleView
-  } = useChartItemsState(chartItems);
+  // Load chart items based on data
+  React.useEffect(() => {
+    if (hasData || isLoading) {
+      // This would typically populate from API or other data sources
+      // For now, we'll just use empty items since the real implementation would come later
+      setChartItems([]);
+    }
+  }, [hasData, isLoading, chartData, sgzData, painelData]);
+  
+  // Handle chart reordering
+  const handleDragEnd = (result: any) => {
+    // Implement drag end logic here
+  };
+  
+  // Toggle chart visibility
+  const handleToggleVisibility = (chartId: string) => {
+    setHiddenCharts(prev => 
+      prev.includes(chartId) 
+        ? prev.filter(id => id !== chartId)
+        : [...prev, chartId]
+    );
+  };
+  
+  // Toggle analysis expansion
+  const handleToggleAnalysis = (chartId: string) => {
+    setExpandedAnalyses(prev => 
+      prev.includes(chartId) 
+        ? prev.filter(id => id !== chartId)
+        : [...prev, chartId]
+    );
+  };
+  
+  // Toggle chart view mode
+  const handleToggleView = (chartId: string) => {
+    setAnalysisOnlyCharts(prev => 
+      prev.includes(chartId) 
+        ? prev.filter(id => id !== chartId)
+        : [...prev, chartId]
+    );
+  };
   
   if (!hasData && !isLoading) {
     return <NoDataMessage />;

@@ -1,7 +1,7 @@
 
 import React from 'react';
-import useChartItemsState from './useChartItemsState';
-import { ChartItem } from '../types';
+import { useChartItemsState } from './useChartItemsState';
+import { ChartItem } from '../../../types/ranking';
 
 interface ChartItemsContextType {
   chartItems: ChartItem[];
@@ -28,8 +28,8 @@ export const ChartItemsProvider: React.FC<{
   initialItems?: ChartItem[];
 }> = ({ children, initialItems = [] }) => {
   const {
-    items,
-    setItems,
+    items: chartItems,
+    setItems: setChartItems,
     hiddenCharts,
     expandedAnalyses,
     analysisOnlyCharts,
@@ -41,15 +41,15 @@ export const ChartItemsProvider: React.FC<{
 
   // Add the missing properties required by the interface
   const [visibleChartIds, setVisibleChartIds] = React.useState<string[]>(
-    items.map(item => item.id)
+    chartItems.map(item => item.id)
   );
   const [activeCategory, setActiveCategory] = React.useState<string>("all");
   const categories = ["all", "performance", "distribution", "efficiency"];
-  const visibleChartItems = items.filter(item => !hiddenCharts.includes(item.id));
+  const visibleChartItems = chartItems.filter(item => !hiddenCharts.includes(item.id));
 
   const contextValue: ChartItemsContextType = {
-    chartItems: items,
-    setChartItems: setItems,
+    chartItems,
+    setChartItems,
     hiddenCharts,
     expandedAnalyses,
     analysisOnlyCharts,

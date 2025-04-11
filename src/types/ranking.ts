@@ -21,3 +21,37 @@ export interface FilterOptions {
   tiposServico?: string[];
   departamento?: string[];
 }
+
+export interface ChartItem {
+  id: string;
+  title: string;
+  description?: string;
+  component: React.ReactNode;
+  isVisible: boolean;
+  analysis?: string;
+  isAnalysisExpanded: boolean;
+  showAnalysisOnly: boolean;
+  subtitle?: string;
+}
+
+// Types for upload service
+export interface ProcessingStats {
+  newOrders?: number;
+  updatedOrders?: number;
+  processingStatus: 'idle' | 'processing' | 'success' | 'error';
+  errorMessage?: string;
+  totalRecords?: number;
+  recordCount?: number;
+  message?: string;
+}
+
+export interface UploadResult {
+  success: boolean;
+  recordCount: number;
+  message: string;
+  id?: string;
+  data?: any[];
+  newOrders?: number;
+  updatedOrders?: number;
+  totalRecords?: number;
+}

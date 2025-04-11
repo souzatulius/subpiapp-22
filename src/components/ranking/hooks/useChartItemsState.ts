@@ -1,30 +1,39 @@
 
 import { useState, useCallback } from 'react';
-import { ChartItem } from '../types';
+import { ChartItem } from '../../../types/ranking';
 
-export const useChartItemsState = (chartItems: ChartItem[]) => {
-  // State for tracking hidden charts
+// Helper function to generate fake analysis text
+export const generateFakeAnalysis = (title: string): string => {
+  return `Análise de ${title}: Os dados indicam uma tendência de melhoria na performance geral, com destaque para redução de tempo médio de resolução.`;
+};
+
+export const useChartItemsState = (initialItems: ChartItem[] = []) => {
+  const [items, setItems] = useState<ChartItem[]>(initialItems);
   const [hiddenCharts, setHiddenCharts] = useState<string[]>([]);
-  
-  // State for tracking expanded analyses
   const [expandedAnalyses, setExpandedAnalyses] = useState<string[]>([]);
-  
-  // State for tracking charts shown in analysis-only mode
   const [analysisOnlyCharts, setAnalysisOnlyCharts] = useState<string[]>([]);
-  
-  // Handle drag end to reorder charts
+
+  // Handle chart reordering after drag and drop
   const handleDragEnd = useCallback((result: any) => {
     if (!result.destination) return;
-    // Here you would implement logic to reorder the chart items
-    console.log('Chart reordered:', result);
-  }, []);
-  
+    
+    const reorderedItems = [...items];
+    const [movedItem] = reorderedItems.splice(result.source.index, 1);
+    reorderedItems.splice(result.destination.index, 0, movedItem);
+    
+    setItems(reorderedItems);
+  }, [items]);
+
   // Toggle chart visibility
   const handleToggleVisibility = useCallback((chartId: string) => {
-    setHiddenCharts(prev => [...prev, chartId]);
+    setHiddenCharts(prev => 
+      prev.includes(chartId) 
+        ? prev.filter(id => id !== chartId) 
+        : [...prev, chartId]
+    );
   }, []);
-  
-  // Toggle chart analysis expanded state
+
+  // Toggle analysis expansion
   const handleToggleAnalysis = useCallback((chartId: string) => {
     setExpandedAnalyses(prev => 
       prev.includes(chartId) 
@@ -32,8 +41,8 @@ export const useChartItemsState = (chartItems: ChartItem[]) => {
         : [...prev, chartId]
     );
   }, []);
-  
-  // Toggle between chart view and analysis-only view
+
+  // Toggle chart view mode (chart or analysis only)
   const handleToggleView = useCallback((chartId: string) => {
     setAnalysisOnlyCharts(prev => 
       prev.includes(chartId) 
@@ -41,8 +50,10 @@ export const useChartItemsState = (chartItems: ChartItem[]) => {
         : [...prev, chartId]
     );
   }, []);
-  
+
   return {
+    items,
+    setItems,
     hiddenCharts,
     expandedAnalyses,
     analysisOnlyCharts,
