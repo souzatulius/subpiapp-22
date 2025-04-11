@@ -7,6 +7,7 @@ import { MoveIcon } from 'lucide-react';
 import * as LucideIcons from 'lucide-react';
 import { getColorClasses, getTextColorClass } from './utils/cardColorUtils';
 import ChartPreview from './charts/ChartPreview';
+import { memo } from 'react';
 
 export interface ActionCardProps {
   id: string;
@@ -37,14 +38,15 @@ export interface ActionCardProps {
 const getIconSize = (size?: 'sm' | 'md' | 'lg' | 'xl'): string => {
   switch (size) {
     case 'sm': return 'w-6 h-6';
-    case 'lg': return 'w-10 h-10'; // Changed from w-12 h-12 to w-10 h-10
-    case 'xl': return 'w-10 h-10'; // Changed from w-16 h-16 to w-10 h-10
+    case 'lg': return 'w-10 h-10';
+    case 'xl': return 'w-10 h-10';
     case 'md':
-    default: return 'w-10 h-10'; // Changed from w-12 h-12 to w-10 h-10
+    default: return 'w-10 h-10';
   }
 };
 
-const ActionCard = ({
+// Memoize the component to prevent unnecessary re-renders
+const ActionCard = memo(({
   id,
   title,
   subtitle,
@@ -81,12 +83,13 @@ const ActionCard = ({
     return FallbackIcon ? <FallbackIcon className={getIconSize(iconSize)} /> : null;
   };
 
+  // Removed the animation classes causing flashing: hover:-translate-y-1, active:scale-95
+  // Kept shadow and cursor effects which are less likely to cause flashing
   return (
     <div 
       className={`w-full h-full rounded-xl shadow-md overflow-hidden 
         ${!isDraggable ? 'cursor-pointer' : 'cursor-grab'} 
-        transition-all duration-300 hover:shadow-lg hover:-translate-y-1 
-        active:scale-95 ${colorClasses} group relative`}
+        hover:shadow-lg ${colorClasses} group relative`}
     >
       {isDraggable && (
         <div className="absolute top-2 left-2 z-10 opacity-0 group-hover:opacity-80 transition-opacity duration-200">
@@ -135,6 +138,8 @@ const ActionCard = ({
       </div>
     </div>
   );
-};
+});
+
+ActionCard.displayName = 'ActionCard';
 
 export default ActionCard;

@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { supabase } from '@/integrations/supabase/client';
 import { Loader2, Newspaper } from 'lucide-react';
@@ -55,6 +55,51 @@ const PressRequestQuickStartCard: React.FC = () => {
       navigate(`/dashboard/comunicacao/cadastrar?origem_id=${originId}`);
     }, 300);
   };
+  
+  // Use memo to prevent re-renders of the origins list
+  const originsList = useMemo(() => {
+    if (isLoading) {
+      return (
+        <div className="flex justify-center items-center p-6">
+          <Loader2 className="h-6 w-6 animate-spin text-blue-500" />
+        </div>
+      );
+    }
+    
+    if (origens.length === 0) {
+      return (
+        <div className="flex justify-center items-center p-6">
+          <p className="text-gray-500">Nenhuma origem encontrada</p>
+        </div>
+      );
+    }
+    
+    return (
+      <div className="flex flex-wrap gap-2 justify-start">
+        {origens.map((origem) => (
+          <motion.button
+            key={origem.id}
+            onClick={() => handleOriginClick(origem.id)}
+            className={`flex items-center p-2 rounded-lg transition-colors ${
+              selectedId === origem.id 
+                ? "bg-blue-100 border-2 border-blue-500" 
+                : "bg-blue-50 hover:bg-blue-100 border-2 border-transparent"
+            }`}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            layout
+          >
+            <span className="flex justify-center items-center w-8 h-8 rounded-full bg-blue-100 text-blue-600 mr-2">
+              {useOriginIcon(origem)}
+            </span>
+            <span className="text-sm font-medium text-blue-700 truncate">
+              {origem.descricao}
+            </span>
+          </motion.button>
+        ))}
+      </div>
+    );
+  }, [origens, isLoading, selectedId]);
 
   return (
     <Card className="h-full">
@@ -66,37 +111,10 @@ const PressRequestQuickStartCard: React.FC = () => {
       </CardHeader>
       
       <CardContent>
-        {isLoading ? (
-          <div className="flex justify-center items-center p-6">
-            <Loader2 className="h-6 w-6 animate-spin text-blue-500" />
-          </div>
-        ) : (
-          <div className="flex flex-wrap gap-2">
-            {origens.map((origem) => (
-              <motion.button
-                key={origem.id}
-                onClick={() => handleOriginClick(origem.id)}
-                className={`flex items-center p-2 rounded-lg transition-colors ${
-                  selectedId === origem.id 
-                    ? "bg-blue-100 border-2 border-blue-500" 
-                    : "bg-blue-50 hover:bg-blue-100 border-2 border-transparent"
-                }`}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-              >
-                <span className="flex justify-center items-center w-8 h-8 rounded-full bg-blue-100 text-blue-600 mr-2">
-                  {useOriginIcon(origem)}
-                </span>
-                <span className="text-sm font-medium text-blue-700 truncate">
-                  {origem.descricao}
-                </span>
-              </motion.button>
-            ))}
-          </div>
-        )}
+        {originsList}
       </CardContent>
     </Card>
   );
 };
 
-export default PressRequestQuickStartCard;
+export default React.memo(PressRequestQuickStartCard);

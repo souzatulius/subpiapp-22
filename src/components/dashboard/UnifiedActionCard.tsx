@@ -1,4 +1,3 @@
-
 import { useNavigate } from 'react-router-dom';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
@@ -105,18 +104,17 @@ export function SortableUnifiedActionCard(props: UnifiedActionCardProps) {
   } = useSortable({ id });
 
   const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-    animation: disableWiggleEffect ? 'none' : undefined,
+    transform: isDragging ? CSS.Transform.toString(transform) : undefined,
+    transition: isDragging ? transition : undefined,
     zIndex: isDragging ? 10 : 'auto',
-    boxShadow: isDragging ? '0 5px 15px rgba(0,0,0,0.2)' : 'none',
+    opacity: isDragging ? 0.8 : 1,
   };
 
   return (
     <div 
       ref={setNodeRef} 
       style={style} 
-      className={`h-full ${isDragging ? 'opacity-80' : ''}`}
+      className="h-full"
       {...attributes}
       {...listeners}
     >
@@ -181,9 +179,7 @@ export function UnifiedActionCard({
     }
   };
   
-  // Determina o conteúdo do card com base nas propriedades
   const renderCardContent = () => {
-    // Se há conteúdo especial (como OriginsDemandChartCompact), renderiza-o
     if (specialContent) {
       return (
         <div className="w-full h-full p-2">
@@ -192,12 +188,10 @@ export function UnifiedActionCard({
       );
     }
 
-    // Se há children diretamente passados ao componente
     if (children) {
       return children;
     }
 
-    // Se é um card de KPI dinâmico
     if (type === 'data_dynamic' && specialCardsData?.kpis) {
       const kpis = specialCardsData.kpis;
       
@@ -237,7 +231,6 @@ export function UnifiedActionCard({
       }
     }
     
-    // Tipos especiais de cards
     if (type === 'in_progress_demands' && specialCardsData?.lists) {
       return (
         <DynamicListCard 
@@ -282,7 +275,6 @@ export function UnifiedActionCard({
       );
     }
     
-    // Card padrão dentro do ActionCard
     return (
       <div className="h-full" onClick={handleCardClick}>
         <ActionCard

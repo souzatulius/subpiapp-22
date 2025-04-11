@@ -1,4 +1,5 @@
-import { useState, useEffect, useCallback } from 'react';
+
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { ActionCardItem } from '@/types/dashboard';
 import { DashboardType } from './useDashboardType';
@@ -23,8 +24,8 @@ export const useAutosaveDashboard = (
     ? 'department_dashboard'
     : 'department_dashboard_comunicacao';
 
-  // Function to save cards configuration - with check-before-save logic
-  const saveCardConfiguration = async (triggerType: 'navigation' | 'timeout' | 'visibility' | 'manual'): Promise<boolean> => {
+  // Function to save cards configuration with optimized check-before-save logic
+  const saveCardConfiguration = useCallback(async (triggerType: 'navigation' | 'timeout' | 'visibility' | 'manual'): Promise<boolean> => {
     if (!userId) return false;
     
     try {
@@ -33,13 +34,25 @@ export const useAutosaveDashboard = (
       // First check if a record exists
       const { data: existingRecord, error: checkError } = await supabase
         .from(userTableName)
-        .select('id')
+        .select('id, cards_config')
         .eq('user_id', userId)
         .single();
         
       if (checkError && checkError.code !== 'PGRST116') {
-        // PGRST116 means no rows returned, which is expected if no record exists yet
         console.error('Error checking for existing record:', checkError);
+      }
+      
+      // Skip save if content is the same
+      if (existingRecord?.cards_config) {
+        try {
+          const existingCards = JSON.parse(existingRecord.cards_config);
+          if (JSON.stringify(existingCards) === JSON.stringify(cards)) {
+            console.log('Dashboard config unchanged, skipping save');
+            return true;
+          }
+        } catch (err) {
+          // Continue with save if parse fails
+        }
       }
       
       let result;
@@ -91,9 +104,9 @@ export const useAutosaveDashboard = (
       
       return false;
     }
-  };
+  }, [userId, userTableName, cards, dashboardType]);
 
-  // Use the autosave hook
+  // Use the autosave hook with increased debounce to prevent frequent saves
   const { 
     isSaving,
     lastSaved,
@@ -102,7 +115,7 @@ export const useAutosaveDashboard = (
     saveNow
   } = useAutosave({
     onSave: saveCardConfiguration,
-    debounceMs: 3000,
+    debounceMs: 5000, // Increased from 3000 to 5000
     saveOnUnmount: true,
     saveOnVisibilityChange: true,
     enabled: !!userId
@@ -124,7 +137,7 @@ export const useAutosaveDashboard = (
           .from(userTableName)
           .select('cards_config, updated_at')
           .eq('user_id', userId)
-          .maybeSingle(); // Using maybeSingle instead of single to avoid errors
+          .maybeSingle();
 
         if (!userError && userData && userData.cards_config) {
           try {
@@ -260,14 +273,13 @@ export const useAutosaveDashboard = (
 
   return {
     cards,
-    isLoading,
     isSaving,
     lastSaved,
     hasUnsavedChanges,
     handleCardsReorder,
     handleSaveCardEdit,
     handleCardHide,
-    resetDashboard,
+    resetDashboard: resetDashboard,
     saveNow
   };
 };

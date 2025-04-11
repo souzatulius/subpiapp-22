@@ -1,5 +1,4 @@
-
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { useAuth } from '@/hooks/useSupabaseAuth';
 import { MessageSquareReply, RotateCcw, Save } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -57,119 +56,127 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
     ? format(lastSaved, 'dd/MM/yyyy HH:mm:ss')
     : null;
 
-  React.useEffect(() => {
-    if (cards.length > 0) {
-      const updatedCards = cards.map(card => {
-        if (card.title === 'Notícias' && card.color === 'bg-yellow-500') {
-          return { ...card, title: 'Cadastrar Release' };
-        }
-        if (card.title === 'Notícias' && card.color === 'bg-gray-500') {
-          return { ...card, title: 'Releases e Notícias' };
-        }
-        if (card.title === 'Criar Nota') {
-          return { ...card, title: 'Criar Nota de Imprensa' };
-        }
-        return card;
-      });
-      
-      const filteredCards = updatedCards.filter(card => 
-        card.id !== 'comunicacao-search-card' && 
-        card.type !== 'smart_search' &&
-        card.title !== 'Origem das Demandas' &&
-        !card.isPendingActions
-      );
-      
-      const hasESICCard = filteredCards.some(card => 
-        card.title === 'Processos e-SIC' || 
-        card.path.includes('/esic')
-      );
-      
-      if (!hasESICCard) {
-        const esicCard: ActionCardItem = {
-          id: 'esic-card',
-          title: 'Processos e-SIC',
-          iconId: 'FileSearch',
-          path: '/dashboard/esic',
-          color: 'deep-blue',
-          width: '25',
-          height: '2',
-          type: 'standard',
-          displayMobile: true,
-          mobileOrder: filteredCards.length
-        };
-        
-        filteredCards.push(esicCard);
+  // Use useMemo for card processing to prevent unnecessary re-renders
+  const processedCards = useMemo(() => {
+    if (cards.length === 0) return [];
+    
+    const updatedCards = cards.map(card => {
+      if (card.title === 'Notícias' && card.color === 'bg-yellow-500') {
+        return { ...card, title: 'Cadastrar Release' };
       }
-      
-      const hasReleasesCard = filteredCards.some(card => 
-        card.title === 'Releases e Notícias' || 
-        card.path.includes('/releases')
-      );
-      
-      if (!hasReleasesCard) {
-        const releasesCard: ActionCardItem = {
-          id: 'releases-card',
-          title: 'Releases e Notícias',
-          iconId: 'Newspaper',
-          path: '/dashboard/comunicacao/releases',
-          color: 'blue-light',
-          width: '25',
-          height: '2',
-          type: 'standard',
-          displayMobile: true,
-          mobileOrder: filteredCards.length + 1
-        };
-        
-        filteredCards.push(releasesCard);
+      if (card.title === 'Notícias' && card.color === 'bg-gray-500') {
+        return { ...card, title: 'Releases e Notícias' };
       }
-      
-      const hasOriginSelectionCard = filteredCards.some(card => card.type === 'origin_selection');
-      
-      if (!hasOriginSelectionCard) {
-        const originCard: ActionCardItem = {
-          id: 'origin-selection-card',
-          title: 'Cadastro de nova solicitação de imprensa',
-          iconId: 'Newspaper',
-          path: '',
-          color: 'bg-white',
-          width: '50',
-          height: '2',
-          type: 'origin_selection',
-          displayMobile: true,
-          mobileOrder: filteredCards.length
-        };
-        
-        filteredCards.push(originCard);
+      if (card.title === 'Criar Nota') {
+        return { ...card, title: 'Criar Nota de Imprensa' };
       }
+      return card;
+    });
+    
+    const filteredCards = updatedCards.filter(card => 
+      card.id !== 'comunicacao-search-card' && 
+      card.type !== 'smart_search' &&
+      card.title !== 'Origem das Demandas' &&
+      !card.isPendingActions
+    );
+    
+    // Add required cards if they don't exist
+    const hasESICCard = filteredCards.some(card => 
+      card.title === 'Processos e-SIC' || 
+      card.path.includes('/esic')
+    );
+    
+    if (!hasESICCard) {
+      const esicCard: ActionCardItem = {
+        id: 'esic-card',
+        title: 'Processos e-SIC',
+        iconId: 'FileSearch',
+        path: '/dashboard/esic',
+        color: 'deep-blue',
+        width: '25',
+        height: '2',
+        type: 'standard',
+        displayMobile: true,
+        mobileOrder: filteredCards.length
+      };
       
-      const hasOriginDemandChart = filteredCards.some(card => 
-        card.type === 'origin_demand_chart' || 
-        card.title === 'Atividades em Andamento'
-      );
-      
-      if (!hasOriginDemandChart) {
-        const chartCard: ActionCardItem = {
-          id: 'origem-demandas-card',
-          title: 'Atividades em Andamento',
-          subtitle: 'Demandas da semana por área técnica',
-          iconId: 'BarChart2',
-          path: '',
-          color: 'gray-light',
-          width: '50',
-          height: '2',
-          type: 'origin_demand_chart',
-          displayMobile: true,
-          mobileOrder: filteredCards.length + 1
-        };
-        
-        filteredCards.push(chartCard);
-      }
-      
-      if (JSON.stringify(filteredCards) !== JSON.stringify(cards)) {
-        handleCardsReorder(filteredCards);
-      }
+      filteredCards.push(esicCard);
     }
+    
+    const hasReleasesCard = filteredCards.some(card => 
+      card.title === 'Releases e Notícias' || 
+      card.path.includes('/releases')
+    );
+    
+    if (!hasReleasesCard) {
+      const releasesCard: ActionCardItem = {
+        id: 'releases-card',
+        title: 'Releases e Notícias',
+        iconId: 'Newspaper',
+        path: '/dashboard/comunicacao/releases',
+        color: 'blue-light',
+        width: '25',
+        height: '2',
+        type: 'standard',
+        displayMobile: true,
+        mobileOrder: filteredCards.length + 1
+      };
+      
+      filteredCards.push(releasesCard);
+    }
+    
+    const hasOriginSelectionCard = filteredCards.some(card => card.type === 'origin_selection');
+    
+    if (!hasOriginSelectionCard) {
+      const originCard: ActionCardItem = {
+        id: 'origin-selection-card',
+        title: 'Cadastro de nova solicitação de imprensa',
+        iconId: 'Newspaper',
+        path: '',
+        color: 'bg-white',
+        width: '50',
+        height: '2',
+        type: 'origin_selection',
+        displayMobile: true,
+        mobileOrder: filteredCards.length
+      };
+      
+      filteredCards.push(originCard);
+    }
+    
+    const hasOriginDemandChart = filteredCards.some(card => 
+      card.type === 'origin_demand_chart' || 
+      card.title === 'Atividades em Andamento'
+    );
+    
+    if (!hasOriginDemandChart) {
+      const chartCard: ActionCardItem = {
+        id: 'origem-demandas-card',
+        title: 'Atividades em Andamento',
+        subtitle: 'Demandas da semana por área técnica',
+        iconId: 'BarChart2',
+        path: '',
+        color: 'gray-light',
+        width: '50',
+        height: '2',
+        type: 'origin_demand_chart',
+        displayMobile: true,
+        mobileOrder: filteredCards.length + 1
+      };
+      
+      filteredCards.push(chartCard);
+    }
+    
+    return filteredCards;
   }, [cards]);
+
+  // Use useEffect with proper dependency tracking
+  useEffect(() => {
+    if (cards.length > 0 && processedCards.length > 0 && 
+        JSON.stringify(processedCards) !== JSON.stringify(cards)) {
+      handleCardsReorder(processedCards);
+    }
+  }, [cards, processedCards, handleCardsReorder]);
 
   const handleResetDashboard = () => {
     resetDashboard();
@@ -188,7 +195,8 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
     return <LoadingIndicator />;
   }
 
-  const renderSpecialCardContent = (card: string | ActionCardItem) => {
+  // Memoize the special content renderer function to prevent unnecessary re-renders
+  const renderSpecialCardContent = useMemo(() => (card: string | ActionCardItem) => {
     if (typeof card === 'string') {
       const foundCard = cards.find(c => c.id === card);
       
@@ -202,7 +210,6 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
         />;
       }
       
-      // Add new press request card renderer
       if (card === 'press-request-card' || card.includes('press-request')) {
         return <PressRequestQuickStartCard />;
       }
@@ -218,7 +225,7 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
     }
     
     return null;
-  };
+  }, [cards]);
 
   return (
     <div className="space-y-6 bg-[#FFFAFA]">
@@ -263,7 +270,7 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
         </div>
       )}
       
-      {/* Press Request Quick Start Card - Always visible */}
+      {/* Press Request Quick Start Card - Always visible, but memoized to prevent re-renders */}
       <div className="px-2">
         <PressRequestQuickStartCard />
       </div>
