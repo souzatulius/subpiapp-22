@@ -11,7 +11,7 @@ export const useUserApproval = (refreshUsers: () => Promise<void>) => {
     setApproving(true);
     
     try {
-      console.log(`Aprovando usuário: ${userName}, ID: ${userId}`);
+      console.log(`Iniciando aprovação do usuário: ${userName}, ID: ${userId}`);
       
       // Update both status and status_conta to "ativo" in the usuarios table
       const { error: updateError } = await supabase
@@ -22,7 +22,12 @@ export const useUserApproval = (refreshUsers: () => Promise<void>) => {
         })
         .eq('id', userId);
       
-      if (updateError) throw updateError;
+      if (updateError) {
+        console.error('Erro ao atualizar status do usuário:', updateError);
+        throw updateError;
+      }
+      
+      console.log('Status do usuário atualizado com sucesso');
       
       // Admin permission ID (fixed value)
       const adminPermissionId = '213c5690-ed4a-4b77-b565-39465b0a4247';
@@ -35,18 +40,28 @@ export const useUserApproval = (refreshUsers: () => Promise<void>) => {
           permissao_id: adminPermissionId
         });
       
-      if (permissionAssignError) throw permissionAssignError;
+      if (permissionAssignError) {
+        console.error('Erro ao atribuir permissão de admin:', permissionAssignError);
+        throw permissionAssignError;
+      }
+      
+      console.log('Permissão de admin atribuída com sucesso');
       
       // Try to send an approval email via the Edge Function if available
       try {
-        const { error: notificationError } = await fetch(`${window.location.origin}/api/send-approval-email`, {
+        console.log('Tentando enviar notificação por email...');
+        const response = await fetch(`${window.location.origin}/api/send-approval-email`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ userId })
-        }).then(res => res.json());
+        });
+        
+        const { error: notificationError } = await response.json();
         
         if (notificationError) {
           console.warn('Error sending approval notification:', notificationError);
+        } else {
+          console.log('Email de notificação enviado com sucesso');
         }
       } catch (emailError) {
         console.warn('Could not send approval email notification:', emailError);

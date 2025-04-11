@@ -86,6 +86,7 @@ const UsersManagement = () => {
   const { removeAccess, removing } = useUserAccessRemoval(fetchData);
 
   const openApprovalDialog = (user: User) => {
+    console.log('Opening approval dialog for user:', user);
     setUserToApprove(user);
     setIsApprovalDialogOpen(true);
   };
@@ -99,10 +100,9 @@ const UsersManagement = () => {
     setIsDeleteDialogOpen(true);
   };
 
-  // Modificar para não passar o parâmetro roleName
+  // Modified to use openApprovalDialog instead of direct approving
   const handleApprove = (user: User) => {
-    // Aprovação direta sem roleName
-    approveUser(user.id, user.nome_completo, user.email);
+    openApprovalDialog(user);
   };
 
   const handleRemoveAccess = (user: User) => {
@@ -123,7 +123,7 @@ const UsersManagement = () => {
     setIsDeleteDialogOpen,
     setUserToDelete: handleDelete,
     resetPassword: handleResetPassword,
-    approveUser: openApprovalDialog, // Abrir diálogo sempre
+    approveUser: handleApprove, // Make sure this uses the handleApprove function
     removeAccess: handleRemoveAccess
   });
 

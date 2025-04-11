@@ -28,15 +28,19 @@ const UserApprovalDialog: React.FC<UserApprovalDialogProps> = ({
   approving
 }) => {
   if (!user) return null;
+  
+  console.log("Approval dialog rendered with user:", user);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    console.log("Approve button clicked, calling onApprove with:", user.id, user.nome_completo, user.email);
     onApprove(user.id, user.nome_completo, user.email);
-    onOpenChange(false);
+    // Don't close the dialog immediately to allow the approval process to complete with visual feedback
+    // The dialog will be closed by the parent component after the approval process is completed
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={approving ? undefined : onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Aprovar Acesso de Usuário</DialogTitle>
@@ -72,6 +76,7 @@ const UserApprovalDialog: React.FC<UserApprovalDialogProps> = ({
             <Button 
               type="submit"
               disabled={approving}
+              className="bg-green-600 hover:bg-green-700"
             >
               {approving ? (
                 <>

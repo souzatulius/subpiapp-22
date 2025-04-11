@@ -14,6 +14,7 @@ export const useUsersData = () => {
   const fetchUsers = async () => {
     try {
       setIsLoading(true);
+      console.log('Fetching users data...');
       
       // Fetch users with basic columns from the correct 'usuarios' table
       const { data: usersData, error: usersError } = await supabase
@@ -29,7 +30,8 @@ export const useUsersData = () => {
           supervisao_tecnica_id,
           coordenacao_id,
           criado_em,
-          status
+          status,
+          status_conta
         `)
         .not('status', 'eq', 'excluido')
         .order('nome_completo');
@@ -38,6 +40,8 @@ export const useUsersData = () => {
         console.error('Error fetching users:', usersError);
         throw usersError;
       }
+      
+      console.log(`Fetched ${usersData?.length || 0} users`);
       
       // Process to add related data
       const processedUsers = await Promise.all((usersData || []).map(async (user: any) => {
@@ -102,26 +106,18 @@ export const useUsersData = () => {
         
         let permissoes = [];
         if (!permissionsError && permissionsData) {
-          permissoes = permissionsData.map((p: any) => p.permissoes);
+          permissoes = permissionsData.map((p: any) => p.permissoes).filter(Boolean);
+          console.log(`User ${user.id} has ${permissoes.length} permissions`);
         }
 
-        // If user has permissions but status is not set or is 'pendente', update it to 'ativo'
-        if (permissoes.length > 0 && (!user.status || user.status === 'pendente')) {
-          const { error: updateError } = await supabase
-            .from('usuarios')
-            .update({ status: 'ativo' })
-            .eq('id', user.id);
-            
-          if (updateError) {
-            console.error('Error updating user status:', updateError);
-          } else {
-            // Update was successful
-            user.status = 'ativo';
-          }
-        }
+        // If user has permissions but status is not set to 'ativo', we'll fix it in the backend
+        // but still show the correct status in the frontend
+        const hasPermissions = permissoes.length > 0;
+        const displayStatus = hasPermissions ? 'ativo' : user.status || 'pendente';
         
         return { 
           ...user, 
+          status: displayStatus,
           cargos: cargoInfo,
           supervisao_tecnica: supervisaoTecnica,
           coordenacao: coordenacao,

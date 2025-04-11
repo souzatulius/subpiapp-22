@@ -32,7 +32,7 @@ const FileUpload: React.FC<FileUploadProps> = ({ onChange, value }) => {
   const [isUploading, setIsUploading] = useState(false);
   const [fileName, setFileName] = useState('');
 
-  useState(() => {
+  useEffect(() => {
     if (value) {
       try {
         const urlObj = new URL(value);
