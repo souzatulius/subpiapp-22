@@ -38,7 +38,7 @@ ChartJS.defaults.elements.line.borderColor = chartColors.blue;
 ChartJS.defaults.elements.point.backgroundColor = chartColors.blue;
 
 // Export chart colors for consistent use across components
-export { chartColors, barChartColors, pieChartColors } from '../utils/chartColors';
+export { chartColors, barChartColors, pieChartColors, lineChartColors } from '../utils/chartColors';
 
 // Configure additional global chart options
 ChartJS.defaults.elements.line.borderWidth = 2;

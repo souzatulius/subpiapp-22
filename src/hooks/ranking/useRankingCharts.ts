@@ -11,6 +11,7 @@ export const useRankingCharts = () => {
     
     // District related charts
     districtPerformance: true,
+    districtEfficiencyRadar: true, // New radar chart
     
     // Service related charts
     serviceTypes: true,
@@ -21,6 +22,9 @@ export const useRankingCharts = () => {
     
     // External/Responsibility related charts
     responsibility: true,
+    
+    // Comparison charts
+    sgzPainel: true, // New comparison chart
     
     // Keeping other chart visibility flags for backward compatibility
     evolution: false,
@@ -33,8 +37,6 @@ export const useRankingCharts = () => {
     dailyDemands: false,
     closureTime: false,
     neighborhoodComparison: false,
-    districtEfficiencyRadar: false,
-    externalDistricts: false,
     efficiencyImpact: false,
     criticalStatus: false,
     serviceDiversity: false,

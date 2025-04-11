@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
-import { BarChart3, Briefcase, TrendingUp, PieChart, RefreshCw, Building2, Clock, ListFilter } from 'lucide-react';
+import { BarChart3, Briefcase, TrendingUp, PieChart, RefreshCw, Building2, Clock, ListFilter, FileCheck } from 'lucide-react';
 import { ChartVisibility } from './types';
 import ResponsibilityChart from './charts/ResponsibilityChart';
 import ServiceTypesChart from './charts/ServiceTypesChart';
@@ -12,6 +12,8 @@ import ResolutionTimeChart from './charts/ResolutionTimeChart';
 import OldestPendingList from './charts/OldestPendingList';
 import StatusDistributionChart from './charts/StatusDistributionChart';
 import StatusTransitionChart from './charts/StatusTransitionChart';
+import DistrictEfficiencyRadarChart from './charts/DistrictEfficiencyRadarChart';
+import ComparativoSGZPainelChart from './charts/ComparativoSGZPainelChart';
 
 interface RankingChartsProps {
   chartData: any;
@@ -140,6 +142,13 @@ const RankingCharts: React.FC<RankingChartsProps> = ({
             <Briefcase className="h-4 w-4 mr-2" /> 
             Externos
           </TabsTrigger>
+          <TabsTrigger 
+            value="comparison" 
+            className="flex-1 data-[state=active]:bg-orange-500 data-[state=active]:text-white"
+          >
+            <FileCheck className="h-4 w-4 mr-2" /> 
+            Comparativo
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="status" className="mt-0">
@@ -177,6 +186,16 @@ const RankingCharts: React.FC<RankingChartsProps> = ({
                 isSimulationActive={isSimulationActive} 
                 onToggleVisibility={() => onToggleChartVisibility?.('districtPerformance')}
                 onToggleAnalysis={() => toggleAnalysis('districtPerformance')}
+              />
+            )}
+            {chartVisibility.districtEfficiencyRadar && (
+              <DistrictEfficiencyRadarChart 
+                data={emptyData} 
+                sgzData={filteredSgzData} 
+                isLoading={isLoading} 
+                isSimulationActive={isSimulationActive} 
+                onToggleVisibility={() => onToggleChartVisibility?.('districtEfficiencyRadar')}
+                onToggleAnalysis={() => toggleAnalysis('districtEfficiencyRadar')}
               />
             )}
           </div>
@@ -233,6 +252,22 @@ const RankingCharts: React.FC<RankingChartsProps> = ({
                 isSimulationActive={isSimulationActive}
                 onToggleVisibility={() => onToggleChartVisibility?.('responsibility')}
                 onToggleAnalysis={() => toggleAnalysis('responsibility')}
+              />
+            )}
+          </div>
+        </TabsContent>
+        
+        <TabsContent value="comparison" className="mt-0">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {chartVisibility.sgzPainel && (
+              <ComparativoSGZPainelChart 
+                data={emptyData} 
+                sgzData={sgzData} 
+                painelData={painelData} 
+                isLoading={isLoading} 
+                isSimulationActive={isSimulationActive}
+                onToggleVisibility={() => onToggleChartVisibility?.('sgzPainel')}
+                onToggleAnalysis={() => toggleAnalysis('sgzPainel')}
               />
             )}
           </div>

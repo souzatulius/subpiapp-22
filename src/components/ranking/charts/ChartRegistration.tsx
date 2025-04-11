@@ -13,6 +13,7 @@ import {
   Filler,
   Legend
 } from 'chart.js';
+import { chartColors, lineChartColors, barChartColors, pieChartColors } from '../utils/chartColors';
 
 // Register Chart.js components
 ChartJS.register(
@@ -29,18 +30,20 @@ ChartJS.register(
   Legend
 );
 
-// Export colors for consistent chart styling
-export const chartColors = [
-  '#0066FF', // Blue
-  '#FF6B00', // Orange
-  '#00C49A', // Teal
-  '#FF5252', // Red
-  '#6366F1', // Purple
-  '#10B981', // Green
-  '#F97316', // Dark orange
-  '#8B5CF6', // Violet
-  '#64748B', // Slate
-];
+// Set up chart defaults
+ChartJS.defaults.color = chartColors.darkBlue;
+ChartJS.defaults.font.family = "'Inter', sans-serif";
+
+// Configure chart element defaults
+ChartJS.defaults.elements.bar.backgroundColor = chartColors.blue;
+ChartJS.defaults.elements.line.borderColor = chartColors.blue;
+ChartJS.defaults.elements.point.backgroundColor = chartColors.blue;
+ChartJS.defaults.elements.line.borderWidth = 2;
+ChartJS.defaults.elements.point.radius = 3;
+ChartJS.defaults.elements.point.hoverRadius = 5;
+
+// Export everything
+export { chartColors, barChartColors, pieChartColors, lineChartColors };
 
 // Ensure there's a NoDataMessage component for handling no data state
 export const NoDataMessage = () => (

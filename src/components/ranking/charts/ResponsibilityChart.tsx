@@ -2,7 +2,8 @@
 import React from 'react';
 import { Pie } from 'react-chartjs-2';
 import EnhancedChartCard from './EnhancedChartCard';
-import { pieChartColors } from '../utils/chartColors';
+import { pieChartColors, getServiceResponsibility } from '../utils/chartColors';
+import { Briefcase } from 'lucide-react';
 
 interface ResponsibilityChartProps {
   data: any;
@@ -23,131 +24,132 @@ const ResponsibilityChart: React.FC<ResponsibilityChartProps> = ({
   onToggleVisibility,
   onToggleAnalysis
 }) => {
+  // Process data to show service responsibility distribution
   const chartData = React.useMemo(() => {
-    if (!sgzData || sgzData.length === 0) {
-      return {
-        labels: [],
-        datasets: [{
-          data: [],
-          backgroundColor: [],
-          borderWidth: 1,
-          borderColor: '#fff'
-        }],
-        externalPercentage: 0
-      };
-    }
+    if (!sgzData || sgzData.length === 0) return null;
     
     // Count orders by responsibility
-    const responsibilityCounts: Record<string, number> = {};
-    let totalOrders = 0;
+    const responsibilityCounts: Record<string, number> = {
+      'subprefeitura': 0,
+      'dzu': 0,
+      'enel': 0,
+      'sabesp': 0,
+      'selimp': 0,
+      'outros': 0
+    };
     
-    sgzData.forEach(order => {
-      const responsibility = order.sgz_responsavel || order.responsavel_classificado || 'Não informado';
-      // Normalize responsibility names
-      let normalizedResp = responsibility.toLowerCase();
-      
-      if (normalizedResp.includes('subpref')) {
-        normalizedResp = 'Subprefeitura';
-      } else if (normalizedResp.includes('ilume') || normalizedResp.includes('lume')) {
-        normalizedResp = 'ILUME';
-      } else if (normalizedResp.includes('enel') || normalizedResp.includes('eletr')) {
-        normalizedResp = 'ENEL';
-      } else if (normalizedResp.includes('sabesp') || normalizedResp.includes('água')) {
-        normalizedResp = 'SABESP';
-      } else if (normalizedResp.includes('amlurb') || normalizedResp.includes('limp')) {
-        normalizedResp = 'AMLURB';
-      } else if (normalizedResp === 'não informado') {
-        normalizedResp = 'Não Classificado';
-      } else if (!['Subprefeitura', 'ILUME', 'ENEL', 'SABESP', 'AMLURB', 'Não Classificado'].includes(normalizedResp)) {
-        normalizedResp = 'Outros';
-      }
-      
-      responsibilityCounts[normalizedResp] = (responsibilityCounts[normalizedResp] || 0) + 1;
-      totalOrders++;
+    // Use the service type to classify responsibility
+    sgzData.forEach(item => {
+      const serviceType = item.sgz_tipo_servico || '';
+      const responsibility = getServiceResponsibility(serviceType) || 'outros';
+      responsibilityCounts[responsibility] = (responsibilityCounts[responsibility] || 0) + 1;
     });
     
-    // Sort by count
-    const sortedResponsibilities = Object.entries(responsibilityCounts)
-      .sort(([, countA], [, countB]) => (countB as number) - (countA as number));
+    // Prepare data for the chart
+    const labels = [];
+    const data = [];
+    const backgroundColors = [];
     
-    const labels = sortedResponsibilities.map(([resp]) => resp);
-    const values = sortedResponsibilities.map(([, count]) => count);
-    
-    // Calculate percentage of external (non-subprefeitura) orders
-    const subprefeituraCount = responsibilityCounts['Subprefeitura'] || 0;
-    const externalCount = totalOrders - subprefeituraCount;
-    const externalPercentage = totalOrders > 0 ? Math.round((externalCount / totalOrders) * 100) : 0;
-    
-    // Apply simulation effect if active
-    let simulatedValues = values;
-    if (isSimulationActive) {
-      simulatedValues = values.map((value, index) => {
-        const respName = labels[index];
-        // In simulation, slightly increase subprefeitura proportion
-        if (respName === 'Subprefeitura') {
-          return Math.round(value * 1.1);
-        }
-        return value;
-      });
-    }
-    
+    Object.entries(responsibilityCounts).forEach(([key, value], index) => {
+      if (value > 0) {
+        // Format label for display
+        let label = key.charAt(0).toUpperCase() + key.slice(1);
+        if (key === 'dzu') label = 'DZU';
+        if (key === 'enel') label = 'ENEL';
+        if (key === 'sabesp') label = 'SABESP';
+        if (key === 'selimp') label = 'SELIMP';
+        if (key === 'subprefeitura') label = 'Subprefeitura';
+        if (key === 'outros') label = 'Outros';
+        
+        labels.push(label);
+        data.push(value);
+        backgroundColors.push(pieChartColors[index % pieChartColors.length]);
+      }
+    });
+
     return {
       labels,
-      datasets: [{
-        data: simulatedValues,
-        backgroundColor: pieChartColors.slice(0, labels.length),
-        borderWidth: 1,
-        borderColor: '#fff'
-      }],
-      externalPercentage
+      datasets: [
+        {
+          data,
+          backgroundColor: backgroundColors,
+          borderWidth: 1,
+          borderColor: '#fff'
+        }
+      ]
     };
-  }, [sgzData, isSimulationActive]);
+  }, [sgzData]);
+
+  // Calculate the percentage of OS that are not subprefeitura's responsibility
+  const externalPercentage = React.useMemo(() => {
+    if (!chartData || !chartData.datasets || chartData.datasets[0].data.length === 0) {
+      return "Sem dados";
+    }
+
+    const total = chartData.datasets[0].data.reduce((sum: number, val: number) => sum + val, 0);
+    if (total === 0) return "0%";
+    
+    let subprefeituraIndex = chartData.labels.findIndex((label: string) => label === "Subprefeitura");
+    if (subprefeituraIndex === -1) subprefeituraIndex = 0;
+    
+    const subprefeituraCount = chartData.datasets[0].data[subprefeituraIndex] || 0;
+    const externalCount = total - subprefeituraCount;
+    const percentage = Math.round((externalCount / total) * 100);
+    
+    return `${percentage}%`;
+  }, [chartData]);
 
   return (
     <EnhancedChartCard
-      title="Gráfico de Impacto dos Terceiros"
-      subtitle="Mostra o impacto dos serviços externos na performance da Subprefeitura"
-      value={`Externos: ${chartData.externalPercentage}%`}
+      title="Impacto dos Terceiros"
+      subtitle="Mostra o impacto dos serviços externos (DZU, ENEL, SABESP, SELIMP) na performance da Subprefeitura"
+      value={externalPercentage}
       isLoading={isLoading}
       onToggleVisibility={onToggleVisibility}
       onToggleAnalysis={onToggleAnalysis}
       dataSource="SGZ"
       analysis="Avalie como os serviços de responsabilidade externa afetam os indicadores internos e recomende ações para melhor gestão."
     >
-      {!isLoading && chartData.labels.length > 0 && (
-        <Pie
-          data={{
-            labels: chartData.labels,
-            datasets: chartData.datasets
-          }}
-          options={{
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-              legend: {
-                position: 'right',
-                labels: {
-                  boxWidth: 12,
-                  font: {
-                    size: 11
+      {!isLoading && (!chartData ? (
+        <div className="flex items-center justify-center h-full">
+          <div className="flex flex-col items-center text-center">
+            <Briefcase className="w-12 h-12 text-gray-300 mb-2" />
+            <div className="text-sm text-gray-500">
+              Sem dados suficientes para classificar responsabilidades
+            </div>
+          </div>
+        </div>
+      ) : (
+        <div className="h-full flex flex-col justify-center">
+          <Pie
+            data={chartData}
+            options={{
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: {
+                legend: {
+                  position: 'right',
+                  labels: {
+                    boxWidth: 12,
+                    font: { size: 11 }
                   }
-                }
-              },
-              tooltip: {
-                callbacks: {
-                  label: function(context) {
-                    const label = context.label || '';
-                    const value = context.parsed || 0;
-                    const total = context.dataset.data.reduce((a: number, b: number) => a + b, 0);
-                    const percentage = Math.round((value * 100) / total) + '%';
-                    return `${label}: ${value} (${percentage})`;
+                },
+                tooltip: {
+                  callbacks: {
+                    label: function(context) {
+                      const label = context.label || '';
+                      const value = context.raw as number;
+                      const total = context.dataset.data.reduce((a: number, b: number) => a + b, 0) as number;
+                      const percentage = Math.round((value / total) * 100);
+                      return `${label}: ${value} (${percentage}%)`;
+                    }
                   }
                 }
               }
-            }
-          }}
-        />
-      )}
+            }}
+          />
+        </div>
+      ))}
     </EnhancedChartCard>
   );
 };
