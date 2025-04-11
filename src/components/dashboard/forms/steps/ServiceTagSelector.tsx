@@ -1,45 +1,51 @@
 
 import React from 'react';
-import { LabelBadge } from '@/components/ui/label-badge';
+import { Badge } from '@/components/ui/badge';
+import { cn } from '@/lib/utils';
 
 interface ServiceTagSelectorProps {
   services: { id: string; descricao: string }[];
   selectedServiceId: string;
-  onServiceSelect: (id: string) => void;
+  onServiceSelect: (serviceId: string) => void;
   className?: string;
+  variant?: 'default' | 'theme';
 }
 
 const ServiceTagSelector: React.FC<ServiceTagSelectorProps> = ({
   services,
   selectedServiceId,
   onServiceSelect,
-  className = '',
+  className,
+  variant = 'default'
 }) => {
-  if (!services.length) {
-    return <p className="text-gray-500 italic">Nenhum serviço disponível para este tema</p>;
+  if (!services || services.length === 0) {
+    return null;
   }
 
   return (
-    <div className={`flex flex-wrap gap-2 mt-3 ${className}`}>
-      {services.map((service) => (
-        <div 
-          key={service.id}
-          onClick={() => onServiceSelect(service.id)}
-          className={`cursor-pointer transition-all duration-200 transform hover:scale-105 ${
-            selectedServiceId === service.id ? 'ring-2 ring-blue-500 ring-offset-1' : ''
-          }`}
-        >
-          <LabelBadge 
-            label="Serviço"
-            value={service.descricao}
-            variant="theme"
-            size="lg"
-            className={`py-2 px-4 ${
-              selectedServiceId === service.id ? 'bg-blue-100 border-blue-300' : ''
-            }`}
-          />
-        </div>
-      ))}
+    <div className={cn('flex flex-wrap gap-2', className)}>
+      {services.map((service) => {
+        const isSelected = service.id === selectedServiceId;
+        
+        return (
+          <Badge
+            key={service.id}
+            variant={isSelected ? 'default' : 'outline'}
+            className={cn(
+              'px-3 py-1 cursor-pointer hover:bg-orange-50 hover:text-orange-700 transition-colors rounded-xl',
+              isSelected
+                ? 'bg-orange-500 hover:bg-orange-600 text-white'
+                : variant === 'theme'
+                  ? 'border-gray-200 text-gray-700'
+                  : 'border-orange-200 text-orange-700',
+              className
+            )}
+            onClick={() => onServiceSelect(service.id)}
+          >
+            {service.descricao}
+          </Badge>
+        );
+      })}
     </div>
   );
 };

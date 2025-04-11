@@ -71,7 +71,7 @@ const ProblemStep: React.FC<ProblemStepProps> = ({
               key={problema.id} 
               type="button" 
               variant={formData.problema_id === problema.id ? "default" : "outline"} 
-              className={`h-auto py-3 px-2 flex flex-col items-center justify-center gap-2 selection-button ${
+              className={`h-auto py-3 px-2 flex flex-col items-center justify-center gap-2 selection-button rounded-xl ${
                 formData.problema_id === problema.id ? "bg-orange-500 hover:bg-orange-600 text-white" : ""
               } ${
                 hasError('problema_id') ? 'border-orange-500' : ''
@@ -113,17 +113,6 @@ const ProblemStep: React.FC<ProblemStepProps> = ({
               Não sei qual serviço selecionar
             </Label>
           </div>
-
-          {!formData.servico_id && !formData.nao_sabe_servico && filteredServicos.length > 0 && (
-            <div className="mt-4 animate-fadeIn">
-              <Label className="text-sm text-gray-600 mb-2">Serviços disponíveis:</Label>
-              <ServiceTagSelector 
-                services={filteredServicos} 
-                selectedServiceId={formData.servico_id}
-                onServiceSelect={handleServiceSelect}
-              />
-            </div>
-          )}
         </div>
       )}
     </div>

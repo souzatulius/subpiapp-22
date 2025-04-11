@@ -50,51 +50,52 @@ export const useComunicacaoDashboard = (
     setIsEditModalOpen(true);
   }, []);
 
-  useEffect(() => {
-    // Focus on loading special cards data (pending demands, notes to approve, etc.)
-    const loadSpecialCardsData = async () => {
-      if (isPreview || !userId) {
-        setIsLoading(false);
-        return;
-      }
-
-      try {
-        // Get user's coordenacao
-        const { data: userData, error: userError } = await supabase
-          .from('usuarios')
-          .select('coordenacao_id')
-          .eq('id', userId)
-          .maybeSingle();
-
-        if (userError) throw userError;
-
-        const coordenacaoId = userData?.coordenacao_id;
-
-        // Todo: Load other data like overdue demands, notes to approve, etc.
-        const overdueCount = 0; // Placeholder
-        const notesToApprove = 0; // Placeholder
-        const responsesToDo = 0; // Placeholder
-
-        setSpecialCardsData({
-          overdueCount,
-          overdueItems: [],
-          notesToApprove,
-          responsesToDo,
-          isLoading: false,
-          coordenacaoId: coordenacaoId || '',
-          usuarioId: userId
-        });
-
-      } catch (error) {
-        console.error('Error loading special cards data:', error);
-        setSpecialCardsData(prev => ({ ...prev, isLoading: false }));
-      }
-
+  // Use useCallback for expensive operations to avoid unnecessary re-renders
+  const loadSpecialCardsData = useCallback(async () => {
+    if (isPreview || !userId) {
       setIsLoading(false);
-    };
+      return;
+    }
 
-    loadSpecialCardsData();
+    try {
+      // Get user's coordenacao
+      const { data: userData, error: userError } = await supabase
+        .from('usuarios')
+        .select('coordenacao_id')
+        .eq('id', userId)
+        .maybeSingle();
+
+      if (userError) throw userError;
+
+      const coordenacaoId = userData?.coordenacao_id;
+
+      // Todo: Load other data like overdue demands, notes to approve, etc.
+      // For now we'll use placeholder data
+      const overdueCount = 0; 
+      const notesToApprove = 0;
+      const responsesToDo = 0;
+
+      setSpecialCardsData({
+        overdueCount,
+        overdueItems: [],
+        notesToApprove,
+        responsesToDo,
+        isLoading: false,
+        coordenacaoId: coordenacaoId || '',
+        usuarioId: userId
+      });
+
+    } catch (error) {
+      console.error('Error loading special cards data:', error);
+      setSpecialCardsData(prev => ({ ...prev, isLoading: false }));
+    }
+
+    setIsLoading(false);
   }, [userId, isPreview]);
+
+  useEffect(() => {
+    loadSpecialCardsData();
+  }, [loadSpecialCardsData]);
 
   // Return everything the dashboard needs
   return {

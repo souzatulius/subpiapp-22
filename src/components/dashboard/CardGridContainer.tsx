@@ -36,7 +36,7 @@ const CardGridContainer: React.FC<CardGridContainerProps> = ({
   onQuickDemandTitleChange,
   onQuickDemandSubmit,
   onSearchSubmit,
-  disableWiggleEffect = false,
+  disableWiggleEffect = true, // Default to true to fix flickering
   showSpecialFeatures = true,
   specialCardsData = {
     overdueCount: 0,

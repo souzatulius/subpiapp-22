@@ -53,167 +53,56 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
   } = useComunicacaoDashboard(user, isPreview, department);
 
   // Format last saved date for display
-  const formattedLastSaved = lastSaved 
-    ? format(lastSaved, 'dd/MM/yyyy HH:mm:ss')
-    : null;
+  const formattedLastSaved = useMemo(() => {
+    return lastSaved 
+      ? format(lastSaved, 'dd/MM/yyyy HH:mm:ss')
+      : null;
+  }, [lastSaved]);
 
-  // Define all rendering functions outside of the render logic
-  const renderSpecialCardContent = useCallback((card: string | ActionCardItem) => {
-    if (typeof card === 'string') {
-      const foundCard = cards.find(c => c.id === card);
-      
-      if (card === 'origem-demandas-card' || card.includes('origem-demandas') || 
-          card.includes('origemDemandas') || card.includes('origin-demand-chart')) {
-        return <OriginsDemandChartCompact 
-          className="w-full h-full" 
-          color={foundCard?.color} 
-          title={foundCard?.title} 
-          subtitle={foundCard?.subtitle} 
-        />;
-      }
-      
-      if (card === 'press-request-card' || card.includes('press-request')) {
-        return <PressRequestQuickStartCard />;
-      }
-    } else if (card.type === 'origin_demand_chart') {
+  // Define all rendering functions outside of the render logic with useCallback
+  const renderSpecialCardContent = useCallback((cardId: string) => {
+    if (typeof cardId !== 'string') return null;
+    
+    const foundCard = cards.find(c => c.id === cardId);
+    
+    if (cardId === 'origem-demandas-card' || 
+        cardId.includes('origem-demandas') || 
+        cardId.includes('origemDemandas') || 
+        cardId.includes('origin-demand-chart')) {
       return <OriginsDemandChartCompact 
         className="w-full h-full" 
-        color={card.color} 
-        title={card.title} 
-        subtitle={card.subtitle} 
+        color={foundCard?.color} 
+        title={foundCard?.title} 
+        subtitle={foundCard?.subtitle} 
       />;
-    } else if (card.type === 'press_request_card') {
+    }
+    
+    if (cardId === 'press-request-card' || cardId.includes('press-request')) {
       return <PressRequestQuickStartCard />;
     }
     
+    if (cardId === 'acoes-pendentes-card' || 
+        cardId.includes('acoes-pendentes') || 
+        (foundCard && foundCard.isPendingTasks) || 
+        (foundCard && foundCard.type === 'pending_tasks')) {
+      return <PendingTasksCard 
+        id={cardId} 
+        title={foundCard?.title || 'Ações Pendentes'} 
+        userDepartmentId={specialCardsData.coordenacaoId} 
+        isComunicacao={true} 
+      />;
+    }
+    
     return null;
-  }, [cards]);
+  }, [cards, specialCardsData.coordenacaoId]);
 
   // Use useMemo for card processing to prevent unnecessary re-renders
   const processedCards = useMemo(() => {
-    if (cards.length === 0) return [];
+    if (!cards || cards.length === 0) return [];
     
-    const updatedCards = cards.map(card => {
-      if (card.title === 'Notícias' && card.color === 'bg-yellow-500') {
-        return { ...card, title: 'Cadastrar Release' };
-      }
-      if (card.title === 'Notícias' && card.color === 'bg-gray-500') {
-        return { ...card, title: 'Releases e Notícias' };
-      }
-      if (card.title === 'Criar Nota') {
-        return { ...card, title: 'Criar Nota de Imprensa' };
-      }
-      return card;
-    });
-    
-    const filteredCards = updatedCards.filter(card => 
-      card.id !== 'comunicacao-search-card' && 
-      card.type !== 'smart_search' &&
-      card.title !== 'Origem das Demandas' &&
-      !card.isPendingActions
-    );
-    
-    // Add required cards if they don't exist
-    const hasESICCard = filteredCards.some(card => 
-      card.title === 'Processos e-SIC' || 
-      card.path?.includes('/esic')
-    );
-    
-    if (!hasESICCard) {
-      const esicCard: ActionCardItem = {
-        id: 'esic-card',
-        title: 'Processos e-SIC',
-        iconId: 'FileSearch',
-        path: '/dashboard/esic',
-        color: 'deep-blue',
-        width: '25',
-        height: '2',
-        type: 'standard',
-        displayMobile: true,
-        mobileOrder: filteredCards.length,
-        isVisible: true
-      };
-      
-      filteredCards.push(esicCard);
-    }
-    
-    const hasReleasesCard = filteredCards.some(card => 
-      card.title === 'Releases e Notícias' || 
-      card.path?.includes('/releases')
-    );
-    
-    if (!hasReleasesCard) {
-      const releasesCard: ActionCardItem = {
-        id: 'releases-card',
-        title: 'Releases e Notícias',
-        iconId: 'Newspaper',
-        path: '/dashboard/comunicacao/releases',
-        color: 'blue-light',
-        width: '25',
-        height: '2',
-        type: 'standard',
-        displayMobile: true,
-        mobileOrder: filteredCards.length + 1,
-        isVisible: true
-      };
-      
-      filteredCards.push(releasesCard);
-    }
-    
-    const hasOriginSelectionCard = filteredCards.some(card => card.type === 'origin_selection');
-    
-    if (!hasOriginSelectionCard) {
-      const originCard: ActionCardItem = {
-        id: 'origin-selection-card',
-        title: 'Cadastro de nova solicitação de imprensa',
-        iconId: 'Newspaper',
-        path: '',
-        color: 'bg-white',
-        width: '50',
-        height: '2',
-        type: 'origin_selection',
-        displayMobile: true,
-        mobileOrder: filteredCards.length,
-        isVisible: true
-      };
-      
-      filteredCards.push(originCard);
-    }
-    
-    const hasOriginDemandChart = filteredCards.some(card => 
-      card.type === 'origin_demand_chart' || 
-      card.title === 'Atividades em Andamento'
-    );
-    
-    if (!hasOriginDemandChart) {
-      const chartCard: ActionCardItem = {
-        id: 'origem-demandas-card',
-        title: 'Atividades em Andamento',
-        subtitle: 'Demandas da semana por área técnica',
-        iconId: 'BarChart2',
-        path: '',
-        color: 'gray-light',
-        width: '50',
-        height: '2',
-        type: 'origin_demand_chart',
-        displayMobile: true,
-        mobileOrder: filteredCards.length + 1,
-        isVisible: true
-      };
-      
-      filteredCards.push(chartCard);
-    }
-    
-    return filteredCards;
+    const visibleCards = cards.filter(card => !card.isHidden);
+    return visibleCards;
   }, [cards]);
-
-  // Fix the Hook Error: Use useEffect with proper dependency tracking
-  useEffect(() => {
-    if (cards.length > 0 && processedCards.length > 0 && 
-        JSON.stringify(processedCards) !== JSON.stringify(cards)) {
-      handleCardsReorder(processedCards);
-    }
-  }, [cards, processedCards, handleCardsReorder]);
 
   // Creating a memoized function to handle reset dashboard
   const handleResetDashboard = useCallback(() => {
@@ -250,7 +139,7 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
       
       {/* Save status indicator */}
       {!isPreview && user && (
-        <div className="flex items-center justify-between px-4 py-2 bg-white rounded-md shadow-sm">
+        <div className="flex items-center justify-between px-4 py-2 bg-white rounded-xl shadow-sm">
           <div className="text-sm text-gray-600">
             {isSaving ? (
               <span className="flex items-center">
@@ -268,7 +157,7 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
           {hasUnsavedChanges && (
             <Button 
               size="sm" 
-              className="bg-blue-600 hover:bg-blue-700 text-white"
+              className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl"
               onClick={handleManualSave}
             >
               <Save className="h-4 w-4 mr-1" /> Salvar alterações
@@ -277,7 +166,7 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
         </div>
       )}
       
-      {/* Press Request Quick Start Card - Always visible, but memoized to prevent re-renders */}
+      {/* Press Request Quick Start Card */}
       <div className="px-2">
         <PressRequestQuickStartCard />
       </div>
@@ -285,14 +174,14 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
       {isLoading ? (
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           {Array.from({ length: 8 }).map((_, index) => (
-            <Skeleton key={index} className="h-32 w-full rounded-lg" />
+            <Skeleton key={index} className="h-32 w-full rounded-xl" />
           ))}
         </div>
       ) : (
-        cards && cards.length > 0 ? (
+        processedCards.length > 0 ? (
           <div className="px-2 py-2">
             <CardGridContainer
-              cards={cards}
+              cards={processedCards}
               onCardsChange={handleCardsReorder}
               onEditCard={handleCardEdit}
               onHideCard={handleCardHide}
@@ -326,4 +215,3 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
 };
 
 export default ComunicacaoDashboard;
-

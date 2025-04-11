@@ -138,7 +138,7 @@ const ServiceSearch: React.FC<ServiceSearchProps> = ({
         <p className="text-orange-500 text-sm mt-1">{getFieldErrorMessage('servico_id', errors)}</p>
       )}
       
-      {/* Add service tags below search/checkbox */}
+      {/* Display service tags below search/checkbox when appropriate */}
       {!selectedServiceObj && !naoSabeServico && filteredServicos.length > 0 && (
         <div className="mt-4">
           <div className="text-sm text-gray-600 mb-2">Serviços disponíveis:</div>

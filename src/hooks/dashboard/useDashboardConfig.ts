@@ -85,15 +85,41 @@ export const useDashboardConfig = (
   const saveConfig = async (newConfig: ActionCardItem[]): Promise<boolean> => {
     try {
       setIsLoading(true);
-      const { error } = await supabase
+      
+      // Check if a record already exists
+      const { data: existingData, error: checkError } = await supabase
         .from(tableName)
-        .upsert({
-          department,
-          cards_config: JSON.stringify(newConfig),
-          updated_at: new Date().toISOString()
-        }, { onConflict: 'department' });
+        .select('id')
+        .eq('department', department)
+        .maybeSingle();
 
-      if (error) throw error;
+      if (checkError && checkError.code !== 'PGRST116') {
+        throw checkError;
+      }
+
+      if (existingData) {
+        // Update existing record
+        const { error: updateError } = await supabase
+          .from(tableName)
+          .update({
+            cards_config: JSON.stringify(newConfig),
+            updated_at: new Date().toISOString()
+          })
+          .eq('department', department);
+
+        if (updateError) throw updateError;
+      } else {
+        // Insert new record
+        const { error: insertError } = await supabase
+          .from(tableName)
+          .insert({
+            department,
+            cards_config: JSON.stringify(newConfig),
+            updated_at: new Date().toISOString()
+          });
+
+        if (insertError) throw insertError;
+      }
       
       setConfig(newConfig);
       return true;
