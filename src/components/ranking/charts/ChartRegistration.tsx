@@ -1,51 +1,51 @@
 
-import { 
+import {
   Chart as ChartJS,
   CategoryScale,
   LinearScale,
   PointElement,
   LineElement,
   BarElement,
-  Title,
-  Tooltip,
-  Legend,
   ArcElement,
   RadialLinearScale,
-  Filler
+  Title,
+  Tooltip,
+  Filler,
+  Legend
 } from 'chart.js';
 
-// Register Chart.js components to ensure they're available throughout the app
+// Register Chart.js components
 ChartJS.register(
   CategoryScale,
   LinearScale,
   PointElement,
   LineElement,
   BarElement,
-  Title,
-  Tooltip,
-  Legend,
   ArcElement,
   RadialLinearScale,
-  Filler
+  Title,
+  Tooltip,
+  Filler,
+  Legend
 );
 
-// Configure default settings for all charts
-ChartJS.defaults.font.family = "'Inter', sans-serif";
-ChartJS.defaults.color = '#6B7280';
-ChartJS.defaults.elements.line.borderWidth = 2;
-ChartJS.defaults.elements.point.radius = 3;
-ChartJS.defaults.elements.point.hoverRadius = 5;
-
-// Export the same chart colors to maintain consistency
+// Export colors for consistent chart styling
 export const chartColors = [
-  '#F97316', // orange-500
-  '#3B82F6', // blue-500
-  '#10B981', // emerald-500
-  '#8B5CF6', // violet-500
-  '#EF4444', // red-500
-  '#F59E0B', // amber-500
-  '#EC4899', // pink-500
-  '#14B8A6', // teal-500
-  '#6366F1', // indigo-500
-  '#84CC16'  // lime-500
+  '#0066FF', // Blue
+  '#FF6B00', // Orange
+  '#00C49A', // Teal
+  '#FF5252', // Red
+  '#6366F1', // Purple
+  '#10B981', // Green
+  '#F97316', // Dark orange
+  '#8B5CF6', // Violet
+  '#64748B', // Slate
 ];
+
+// Ensure there's a NoDataMessage component for handling no data state
+export const NoDataMessage = () => (
+  <div className="flex flex-col items-center justify-center h-64 bg-gray-50 rounded-lg border border-gray-200">
+    <p className="text-lg text-gray-500 font-medium">Sem dados disponíveis</p>
+    <p className="text-sm text-gray-400 mt-2">Faça o upload de uma planilha SGZ para visualizar as análises</p>
+  </div>
+);

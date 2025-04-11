@@ -1,23 +1,23 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { RefreshCw } from 'lucide-react';
+import { BarChart3, RefreshCw } from 'lucide-react';
 
 interface ChartSectionHeaderProps {
   onSimulateIdealRanking: () => void;
   isSimulationActive: boolean;
 }
 
-const ChartSectionHeader: React.FC<ChartSectionHeaderProps> = ({
-  onSimulateIdealRanking,
-  isSimulationActive
+const ChartSectionHeader: React.FC<ChartSectionHeaderProps> = ({ 
+  onSimulateIdealRanking, 
+  isSimulationActive 
 }) => {
   return (
     <div className="flex justify-between items-center mb-6">
-      <h2 className="text-lg font-semibold text-orange-700">
+      <h2 className="text-lg font-semibold text-orange-700 flex items-center">
+        <BarChart3 className="h-5 w-5 mr-2 text-orange-500" />
         Análise de Desempenho
       </h2>
-      
       <Button 
         variant="outline" 
         className={`flex items-center gap-2 border ${isSimulationActive ? 'bg-orange-100 text-orange-700 border-orange-300' : 'text-gray-600'}`}

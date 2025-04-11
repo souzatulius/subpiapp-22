@@ -7,6 +7,9 @@ export interface ChartItem {
   component: React.ReactNode;
   analysis?: string;
   isVisible: boolean;
+  isAnalysisExpanded: boolean;
+  showAnalysisOnly: boolean;
+  description?: string; // Added to support existing usages
 }
 
 export interface ChartVisibility {
@@ -46,4 +49,19 @@ export interface FilterOptions {
   dataFim?: string;
   tiposServico?: string[];
   departamento?: string[];
+}
+
+// Add react-beautiful-dnd types/interfaces for our components
+export interface DragEndResult {
+  draggableId: string;
+  type: string;
+  source: {
+    index: number;
+    droppableId: string;
+  };
+  destination: {
+    index: number;
+    droppableId: string;
+  } | null;
+  reason: 'DROP' | 'CANCEL';
 }

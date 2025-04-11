@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { ChartItem } from './useChartItemsState';
+import { ChartItem } from '../types';
 import EvolutionChart from '../charts/EvolutionChart';
 import ServiceTypesChart from '../charts/ServiceTypesChart';
 import ResolutionTimeChart from '../charts/ResolutionTimeChart';
@@ -11,6 +11,7 @@ import ResponsibilityChart from '../charts/ResponsibilityChart';
 import RankingSimulationChart from '../charts/RankingSimulationChart';
 import SgzRankingComparisonChart from '../charts/SgzRankingComparisonChart';
 import AttentionPointsChart from '../charts/AttentionPointsChart';
+import { generateFakeAnalysis } from './useChartItemsState';
 
 interface UseChartItemsProps {
   chartData: any;

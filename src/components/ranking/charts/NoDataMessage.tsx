@@ -1,20 +1,13 @@
 
 import React from 'react';
-import { FileSpreadsheet, UploadCloud } from 'lucide-react';
+import { UploadCloud } from 'lucide-react';
 
-const NoDataMessage = () => {
+const NoDataMessage: React.FC = () => {
   return (
-    <div className="flex flex-col items-center justify-center h-96 bg-white p-8 rounded-xl border border-gray-200 text-center">
-      <div className="relative mb-6">
-        <FileSpreadsheet className="h-16 w-16 text-gray-300" />
-        <UploadCloud className="h-6 w-6 text-orange-500 absolute -top-2 -right-2" />
-      </div>
-      
-      <h3 className="text-xl font-medium text-gray-800 mb-2">Nenhum dado disponível</h3>
-      
-      <p className="text-gray-500 max-w-md mb-6">
-        Faça o upload de uma planilha do SGZ ou do Painel da Zeladoria para visualizar os dados dos gráficos.
-      </p>
+    <div className="flex flex-col items-center justify-center h-64 bg-gray-50 rounded-lg border border-gray-200 p-6 text-center">
+      <UploadCloud className="h-12 w-12 text-gray-400 mb-4" />
+      <p className="text-lg text-gray-500 font-medium">Sem dados disponíveis</p>
+      <p className="text-sm text-gray-400 mt-2">Faça o upload de uma planilha SGZ para visualizar as análises</p>
     </div>
   );
 };

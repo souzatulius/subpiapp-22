@@ -1,8 +1,13 @@
 
-import React from 'react';
-import { Doughnut } from 'react-chartjs-2';
+import React, { useMemo } from 'react';
+import { Pie } from 'react-chartjs-2';
 import { Loader2 } from 'lucide-react';
 import { chartColors } from './ChartRegistration';
+
+interface StatusCount {
+  name: string;
+  count: number;
+}
 
 interface StatusDistributionChartProps {
   data: any;
@@ -18,68 +23,62 @@ const StatusDistributionChart: React.FC<StatusDistributionChartProps> = ({
   isSimulationActive
 }) => {
   // Process SGZ data to get status distribution
-  const chartData = React.useMemo(() => {
+  const chartData = useMemo(() => {
     if (!sgzData || sgzData.length === 0) return null;
     
-    // Count occurrences of each status
-    const statusCount = {};
+    // Count by status
+    const statusCount: Record<string, number> = {};
     
     sgzData.forEach(order => {
       const status = order.sgz_status || 'Não informado';
       statusCount[status] = (statusCount[status] || 0) + 1;
     });
     
-    // Format status labels for display
-    const formattedStatusLabels = {
-      'pendente': 'Pendente',
-      'em-andamento': 'Em andamento',
-      'concluido': 'Concluído',
-      'cancelado': 'Cancelado'
-    };
+    // Convert to array format and sort
+    const statusItems: StatusCount[] = Object.entries(statusCount)
+      .map(([name, count]) => ({ name, count }))
+      .sort((a, b) => (b.count as number) - (a.count as number));
     
-    // Convert to array format for chart
-    return Object.entries(statusCount).map(([key, value]) => ({
-      name: formattedStatusLabels[key] || key,
-      count: value
-    }));
+    return statusItems;
   }, [sgzData]);
   
-  // Apply simulation effect if enabled
-  const simulatedChartData = React.useMemo(() => {
-    if (!chartData || !isSimulationActive) return chartData;
+  // Prepare pie chart data
+  const pieChartData = useMemo(() => {
+    if (!chartData) return null;
     
-    // In simulation, show more completed and fewer pending
-    return chartData.map(item => {
-      if (item.name === 'Concluído') {
-        return { ...item, count: Math.floor(item.count * 1.3) };
-      } else if (item.name === 'Pendente') {
-        return { ...item, count: Math.floor(item.count * 0.7) };
+    // Apply simulation effects if active
+    const simulationFactor = isSimulationActive ? 1.2 : 1;
+    
+    // When simulating, increase completed percentage and decrease pending percentage
+    const modifiedData = chartData.map(item => {
+      let count = item.count as number;
+      
+      if (isSimulationActive) {
+        if (item.name.toLowerCase().includes('conclu')) {
+          count = Math.floor(count * simulationFactor);
+        } else if (item.name.toLowerCase().includes('pend')) {
+          count = Math.floor(count / simulationFactor);
+        }
       }
-      return item;
+      
+      return {
+        name: item.name,
+        count
+      };
     });
-  }, [chartData, isSimulationActive]);
-  
-  // Prepare doughnut chart data
-  const doughnutData = React.useMemo(() => {
-    if (!simulatedChartData) return null;
     
     return {
-      labels: simulatedChartData.map(d => d.name),
+      labels: modifiedData.map(d => d.name),
       datasets: [
         {
-          data: simulatedChartData.map(d => d.count),
-          backgroundColor: [
-            '#10B981', // emerald for completed
-            '#F59E0B', // amber for in progress
-            '#EF4444', // red for pending
-            '#6B7280', // gray for canceled
-          ],
-          borderColor: 'white',
-          borderWidth: 1
+          data: modifiedData.map(d => d.count),
+          backgroundColor: chartColors.slice(0, modifiedData.length),
+          borderColor: '#FFFFFF',
+          borderWidth: 1,
         }
       ]
     };
-  }, [simulatedChartData]);
+  }, [chartData, isSimulationActive]);
   
   // Chart options
   const options = {
@@ -88,15 +87,17 @@ const StatusDistributionChart: React.FC<StatusDistributionChartProps> = ({
     plugins: {
       legend: {
         position: 'right' as const,
+        labels: {
+          boxWidth: 12
+        }
       },
       tooltip: {
         callbacks: {
           label: function(context: any) {
-            const label = context.label || '';
-            const value = context.raw || 0;
-            const total = context.chart.data.datasets[0].data.reduce((a: number, b: number) => a + b, 0);
-            const percentage = Math.round((value / total) * 100);
-            return `${label}: ${value} (${percentage}%)`;
+            const value = context.raw;
+            const total = context.dataset.data.reduce((sum: number, val: number) => sum + val, 0);
+            const percentage = ((value / total) * 100).toFixed(1);
+            return `${context.label}: ${value} (${percentage}%)`;
           }
         }
       }
@@ -121,7 +122,7 @@ const StatusDistributionChart: React.FC<StatusDistributionChartProps> = ({
   
   return (
     <div className="h-64">
-      {doughnutData && <Doughnut data={doughnutData} options={options} />}
+      {pieChartData && <Pie data={pieChartData} options={options} />}
     </div>
   );
 };

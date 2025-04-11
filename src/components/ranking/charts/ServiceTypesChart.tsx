@@ -1,8 +1,13 @@
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Pie } from 'react-chartjs-2';
 import { Loader2 } from 'lucide-react';
 import { chartColors } from './ChartRegistration';
+
+interface ServiceTypeCount {
+  name: string;
+  count: number;
+}
 
 interface ServiceTypesChartProps {
   data: any;
@@ -17,41 +22,40 @@ const ServiceTypesChart: React.FC<ServiceTypesChartProps> = ({
   isLoading,
   isSimulationActive
 }) => {
-  // Process SGZ data to get service types distribution
-  const chartData = React.useMemo(() => {
+  // Process SGZ data to get service type distribution
+  const chartData = useMemo(() => {
     if (!sgzData || sgzData.length === 0) return null;
     
-    // Count occurrences of each service type
-    const serviceTypesCount = {};
+    // Count by service type
+    const serviceTypeCount: Record<string, number> = {};
     
     sgzData.forEach(order => {
       const serviceType = order.sgz_tipo_servico || 'Não informado';
-      serviceTypesCount[serviceType] = (serviceTypesCount[serviceType] || 0) + 1;
+      serviceTypeCount[serviceType] = (serviceTypeCount[serviceType] || 0) + 1;
     });
     
-    // Convert to array and sort by count
-    const serviceTypes = Object.entries(serviceTypesCount)
+    // Convert to array format and sort
+    let serviceTypes: ServiceTypeCount[] = Object.entries(serviceTypeCount)
       .map(([name, count]) => ({ name, count }))
-      .sort((a, b) => b.count - a.count);
+      .sort((a, b) => (b.count as number) - (a.count as number));
     
-    // Take top 5 + group others
-    const topServices = serviceTypes.slice(0, 5);
-    const otherServices = serviceTypes.slice(5);
+    // Get top N service types and group the rest as "Others"
+    const topN = 5;
+    const topServiceTypes = serviceTypes.slice(0, topN);
     
-    const otherCount = otherServices.reduce((sum, service) => sum + service.count, 0);
-    
-    if (otherCount > 0) {
-      topServices.push({
-        name: 'Outros',
-        count: otherCount
-      });
+    if (serviceTypes.length > topN) {
+      const othersCount = serviceTypes
+        .slice(topN)
+        .reduce((sum, item) => sum + (item.count as number), 0);
+      
+      topServiceTypes.push({ name: 'Outros', count: othersCount });
     }
     
-    return topServices;
+    return topServiceTypes;
   }, [sgzData]);
   
   // Prepare pie chart data
-  const pieChartData = React.useMemo(() => {
+  const pieChartData = useMemo(() => {
     if (!chartData) return null;
     
     return {
@@ -60,8 +64,8 @@ const ServiceTypesChart: React.FC<ServiceTypesChartProps> = ({
         {
           data: chartData.map(d => d.count),
           backgroundColor: chartColors.slice(0, chartData.length),
-          borderColor: 'white',
-          borderWidth: 1
+          borderColor: '#FFFFFF',
+          borderWidth: 1,
         }
       ]
     };
@@ -75,18 +79,19 @@ const ServiceTypesChart: React.FC<ServiceTypesChartProps> = ({
       legend: {
         position: 'right' as const,
         labels: {
-          boxWidth: 15,
-          padding: 15
+          boxWidth: 12,
+          font: {
+            size: 10
+          }
         }
       },
       tooltip: {
         callbacks: {
           label: function(context: any) {
-            const label = context.label || '';
-            const value = context.raw || 0;
-            const total = context.chart.data.datasets[0].data.reduce((a: number, b: number) => a + b, 0);
-            const percentage = Math.round((value / total) * 100);
-            return `${label}: ${value} (${percentage}%)`;
+            const value = context.raw;
+            const total = context.dataset.data.reduce((sum: number, val: number) => sum + val, 0);
+            const percentage = ((value / total) * 100).toFixed(1);
+            return `${context.label}: ${value} (${percentage}%)`;
           }
         }
       }

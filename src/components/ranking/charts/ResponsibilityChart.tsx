@@ -4,6 +4,11 @@ import { Radar } from 'react-chartjs-2';
 import { Loader2 } from 'lucide-react';
 import { chartColors } from './ChartRegistration';
 
+interface DepartmentCount {
+  name: string;
+  count: number;
+}
+
 interface ResponsibilityChartProps {
   data: any;
   sgzData: any[] | null;
@@ -24,7 +29,7 @@ const ResponsibilityChart: React.FC<ResponsibilityChartProps> = ({
     if (!sgzData || sgzData.length === 0) return null;
     
     // Count by department/coordenação
-    const deptCount = {};
+    const deptCount: Record<string, number> = {};
     
     sgzData.forEach(order => {
       const department = order.sgz_coordenacao || order.sgz_area_tecnica || 'Não informado';
@@ -34,7 +39,7 @@ const ResponsibilityChart: React.FC<ResponsibilityChartProps> = ({
     // Convert to array format
     return Object.entries(deptCount)
       .map(([name, count]) => ({ name, count }))
-      .sort((a, b) => b.count - a.count)
+      .sort((a, b) => (b.count as number) - (a.count as number))
       .slice(0, 6); // Top 6 departments
   }, [sgzData]);
   
@@ -50,10 +55,12 @@ const ResponsibilityChart: React.FC<ResponsibilityChartProps> = ({
       datasets: [
         {
           label: 'Demandas Atribuídas',
-          data: chartData.map(d => isSimulationActive 
-            ? Math.floor(d.count * simulationFactor * Math.random() * 0.4 + 0.8)
-            : d.count
-          ),
+          data: chartData.map(d => {
+            const baseCount = d.count as number;
+            return isSimulationActive 
+              ? Math.floor(baseCount * simulationFactor * (Math.random() * 0.4 + 0.8))
+              : baseCount;
+          }),
           backgroundColor: `${chartColors[3]}60`,
           borderColor: chartColors[3],
           borderWidth: 2,

@@ -1,7 +1,7 @@
 
 import React from 'react';
-import { DragEndEvent } from '@dnd-kit/core';
-import { useChartItemsState, ChartItem } from './useChartItemsState';
+import useChartItemsState from './useChartItemsState';
+import { ChartItem } from '../types';
 
 interface ChartItemsContextType {
   chartItems: ChartItem[];
@@ -15,7 +15,7 @@ interface ChartItemsContextType {
   setActiveCategory: React.Dispatch<React.SetStateAction<string>>;
   categories: string[];
   visibleChartItems: ChartItem[];
-  handleDragEnd: (event: DragEndEvent) => void;
+  handleDragEnd: (event: any) => void;
   handleToggleVisibility: (id: string) => void;
   handleToggleAnalysis: (id: string) => void;
   handleToggleView: (id: string) => void;

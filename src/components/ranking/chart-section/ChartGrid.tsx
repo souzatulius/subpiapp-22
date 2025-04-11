@@ -1,6 +1,7 @@
 
 import React from 'react';
-import { DragDropContext, Droppable } from 'react-beautiful-dnd';
+import { DndContext, closestCenter } from '@dnd-kit/core';
+import { SortableContext, rectSortingStrategy } from '@dnd-kit/sortable';
 import ChartCard from './ChartCard';
 import { ChartItem } from '../types';
 
@@ -29,34 +30,28 @@ const ChartGrid: React.FC<ChartGridProps> = ({
 }) => {
   // Filter visible charts
   const visibleCharts = chartItems.filter(chart => !hiddenCharts.includes(chart.id));
+  const itemIds = visibleCharts.map(item => item.id);
   
   return (
-    <DragDropContext onDragEnd={handleDragEnd}>
-      <Droppable droppableId="chart-grid" direction="horizontal">
-        {(provided) => (
-          <div 
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-            ref={provided.innerRef}
-            {...provided.droppableProps}
-          >
-            {visibleCharts.map((chart, index) => (
-              <ChartCard 
-                key={chart.id}
-                chart={chart}
-                index={index}
-                isAnalysisExpanded={expandedAnalyses.includes(chart.id)}
-                showAnalysisOnly={analysisOnlyCharts.includes(chart.id)}
-                onToggleVisibility={() => handleToggleVisibility(chart.id)}
-                onToggleAnalysis={() => handleToggleAnalysis(chart.id)}
-                onToggleView={() => handleToggleView(chart.id)}
-                disableContainer={disableCardContainers}
-              />
-            ))}
-            {provided.placeholder}
-          </div>
-        )}
-      </Droppable>
-    </DragDropContext>
+    <DndContext onDragEnd={handleDragEnd} collisionDetection={closestCenter}>
+      <SortableContext items={itemIds} strategy={rectSortingStrategy}>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {visibleCharts.map((chart, index) => (
+            <ChartCard 
+              key={chart.id}
+              chart={chart}
+              index={index}
+              isAnalysisExpanded={expandedAnalyses.includes(chart.id)}
+              showAnalysisOnly={analysisOnlyCharts.includes(chart.id)}
+              onToggleVisibility={() => handleToggleVisibility(chart.id)}
+              onToggleAnalysis={() => handleToggleAnalysis(chart.id)}
+              onToggleView={() => handleToggleView(chart.id)}
+              disableContainer={disableCardContainers}
+            />
+          ))}
+        </div>
+      </SortableContext>
+    </DndContext>
   );
 };
 

@@ -1,33 +1,19 @@
 
 import React, { useState, useCallback } from 'react';
-import { DragEndEvent } from '@dnd-kit/core';
 import { arrayMove } from '@dnd-kit/sortable';
+import { ChartItem } from '../types';
 
-export interface ChartItem {
-  id: string;
-  title: string;
-  component: React.ReactNode;
-  isVisible: boolean;
-  analysis: string;
-  isAnalysisExpanded: boolean;
-  showAnalysisOnly: boolean;
-}
+export { ChartItem };
 
 export const useChartItemsState = (initialItems: ChartItem[]) => {
-  const [items, setItems] = useState<ChartItem[]>(initialItems.map(item => ({
-    ...item,
-    analysis: item.analysis || generateFakeAnalysis(item.title),
-    isVisible: true,
-    isAnalysisExpanded: false,
-    showAnalysisOnly: false
-  })));
+  const [items, setItems] = useState<ChartItem[]>(initialItems);
   
   const [hiddenCharts, setHiddenCharts] = useState<string[]>([]);
   const [expandedAnalyses, setExpandedAnalyses] = useState<string[]>([]);
   const [analysisOnlyCharts, setAnalysisOnlyCharts] = useState<string[]>([]);
   
   // Handle drag end event for chart reordering
-  const handleDragEnd = useCallback((event: DragEndEvent) => {
+  const handleDragEnd = useCallback((event: any) => {
     const { active, over } = event;
     
     if (!over || active.id === over.id) return;
@@ -49,15 +35,7 @@ export const useChartItemsState = (initialItems: ChartItem[]) => {
         return [...prevHidden, id];
       }
     });
-    
-    setItems(prevItems => 
-      prevItems.map(item => 
-        item.id === id 
-          ? { ...item, isVisible: !hiddenCharts.includes(id) } 
-          : item
-      )
-    );
-  }, [hiddenCharts]);
+  }, []);
   
   // Toggle analysis expanded state
   const handleToggleAnalysis = useCallback((id: string) => {
@@ -68,35 +46,18 @@ export const useChartItemsState = (initialItems: ChartItem[]) => {
         return [...prevExpanded, id];
       }
     });
-    
-    setItems(prevItems => 
-      prevItems.map(item => 
-        item.id === id 
-          ? { ...item, isAnalysisExpanded: !expandedAnalyses.includes(id) } 
-          : item
-      )
-    );
-  }, [expandedAnalyses]);
+  }, []);
   
   // Toggle between chart and analysis view
   const handleToggleView = useCallback((id: string) => {
     setAnalysisOnlyCharts(prevAnalysisOnly => {
-      const willShowAnalysis = !prevAnalysisOnly.includes(id);
-      if (willShowAnalysis) {
-        return [...prevAnalysisOnly, id];
-      } else {
+      if (prevAnalysisOnly.includes(id)) {
         return prevAnalysisOnly.filter(itemId => itemId !== id);
+      } else {
+        return [...prevAnalysisOnly, id];
       }
     });
-    
-    setItems(prevItems => 
-      prevItems.map(item => 
-        item.id === id 
-          ? { ...item, showAnalysisOnly: !analysisOnlyCharts.includes(id) } 
-          : item
-      )
-    );
-  }, [analysisOnlyCharts]);
+  }, []);
   
   return {
     items, 
@@ -112,7 +73,7 @@ export const useChartItemsState = (initialItems: ChartItem[]) => {
 };
 
 // Helper function to generate random analysis text based on chart title
-function generateFakeAnalysis(chartTitle: string): string {
+export function generateFakeAnalysis(chartTitle: string): string {
   const insights = [
     "Os dados apresentam uma tendência de crescimento constante ao longo do período analisado.",
     "Observa-se uma redução significativa nos valores comparados ao trimestre anterior.",

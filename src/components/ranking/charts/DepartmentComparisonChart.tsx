@@ -1,8 +1,15 @@
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Bar } from 'react-chartjs-2';
 import { Loader2 } from 'lucide-react';
 import { chartColors } from './ChartRegistration';
+
+interface DepartmentData {
+  name: string;
+  efficiency: number;
+  total: number;
+  completed: number;
+}
 
 interface DepartmentComparisonChartProps {
   data: any;
@@ -17,81 +24,83 @@ const DepartmentComparisonChart: React.FC<DepartmentComparisonChartProps> = ({
   isLoading,
   isSimulationActive
 }) => {
-  // Process data to compare departments
-  const chartData = React.useMemo(() => {
-    if (!sgzData || sgzData.length === 0) return null;
+  // Process data for department comparison
+  const departmentData = useMemo(() => {
+    if (!sgzData || sgzData.length === 0) return [];
     
-    // Group by department and status
-    const deptStats = {};
+    // Count by department
+    const deptMap = new Map<string, DepartmentData>();
     
     sgzData.forEach(order => {
-      const department = order.sgz_coordenacao || order.sgz_area_tecnica || 'Não informado';
-      const status = order.sgz_status || 'Não informado';
+      const dept = order.sgz_area_tecnica || order.sgz_coordenacao || 'Não informado';
+      const isCompleted = order.sgz_status === 'concluido' || order.sgz_status === 'concluído';
       
-      if (!deptStats[department]) {
-        deptStats[department] = {
-          name: department,
+      if (!deptMap.has(dept)) {
+        deptMap.set(dept, {
+          name: dept,
+          efficiency: 0,
           total: 0,
-          completed: 0,
-          pending: 0,
-          inProgress: 0
-        };
+          completed: 0
+        });
       }
       
-      deptStats[department].total += 1;
-      
-      if (status === 'concluido') {
-        deptStats[department].completed += 1;
-      } else if (status === 'pendente') {
-        deptStats[department].pending += 1;
-      } else if (status === 'em-andamento') {
-        deptStats[department].inProgress += 1;
+      const deptData = deptMap.get(dept);
+      if (deptData) {
+        deptData.total += 1;
+        if (isCompleted) {
+          deptData.completed += 1;
+        }
+        // Update efficiency - percentage of completed orders
+        deptData.efficiency = deptData.completed / deptData.total * 100;
       }
     });
     
-    // Calculate efficiency
-    Object.values(deptStats).forEach(dept => {
-      dept.efficiency = dept.total > 0 ? (dept.completed / dept.total) * 100 : 0;
-    });
+    // Convert to array and sort by efficiency
+    const departments: DepartmentData[] = Array.from(deptMap.values())
+      .filter(d => d.total > 10) // Only show departments with enough data
+      .sort((a, b) => b.efficiency - a.efficiency)
+      .slice(0, 5); // Show top 5 departments
     
-    // Sort by efficiency
-    return Object.values(deptStats)
-      .sort((a: any, b: any) => b.efficiency - a.efficiency)
-      .slice(0, 5); // Top 5 departments
+    return departments;
   }, [sgzData]);
   
-  // Prepare bar chart data
-  const barChartData = React.useMemo(() => {
-    if (!chartData) return null;
+  // Prepare chart data
+  const barChartData = useMemo(() => {
+    if (!departmentData || departmentData.length === 0) return null;
     
-    // Apply simulation effect if enabled
+    // Apply simulation factor if active
     const simulationFactor = isSimulationActive ? 1.15 : 1;
     
     return {
-      labels: chartData.map(d => d.name),
+      labels: departmentData.map(d => d.name),
       datasets: [
         {
           label: 'Eficiência (%)',
-          data: chartData.map(d => isSimulationActive 
-            ? Math.min(100, d.efficiency * simulationFactor) 
+          data: departmentData.map(d => isSimulationActive 
+            ? Math.min(d.efficiency * simulationFactor, 100) 
             : d.efficiency
           ),
-          backgroundColor: chartColors[4],
-          borderColor: chartColors[4],
+          backgroundColor: chartColors[0],
+          borderColor: chartColors[0],
           borderWidth: 1,
-          yAxisID: 'y'
+          borderRadius: 4,
+          barPercentage: 0.7,
+          categoryPercentage: 0.8
         },
         {
-          label: 'Total de Demandas',
-          data: chartData.map(d => d.total),
-          backgroundColor: chartColors[5],
-          borderColor: chartColors[5],
+          label: 'Total de Ordens',
+          data: departmentData.map(d => d.total),
+          backgroundColor: chartColors[2],
+          borderColor: chartColors[2],
           borderWidth: 1,
+          borderRadius: 4,
+          barPercentage: 0.7,
+          categoryPercentage: 0.8,
           yAxisID: 'y1'
         }
       ]
     };
-  }, [chartData, isSimulationActive]);
+  }, [departmentData, isSimulationActive]);
   
   // Chart options
   const options = {
@@ -100,40 +109,41 @@ const DepartmentComparisonChart: React.FC<DepartmentComparisonChartProps> = ({
     plugins: {
       legend: {
         position: 'top' as const,
+        align: 'end' as const,
+        labels: {
+          boxWidth: 12,
+          boxHeight: 12,
+        }
       },
       tooltip: {
         callbacks: {
           label: function(context: any) {
-            const label = context.dataset.label || '';
-            const value = context.raw || 0;
-            return `${label}: ${value}${context.datasetIndex === 0 ? '%' : ''}`;
+            const value = context.parsed.y;
+            return context.dataset.label === 'Eficiência (%)' 
+              ? `${context.dataset.label}: ${value.toFixed(1)}%`
+              : `${context.dataset.label}: ${value}`;
           }
         }
       }
     },
     scales: {
       y: {
-        type: 'linear' as const,
-        display: true,
-        position: 'left' as const,
+        beginAtZero: true,
         title: {
           display: true,
           text: 'Eficiência (%)'
         },
-        beginAtZero: true,
-        max: 100
+        suggestedMax: 100
       },
       y1: {
-        type: 'linear' as const,
-        display: true,
-        position: 'right' as const,
-        title: {
-          display: true,
-          text: 'Total'
-        },
         beginAtZero: true,
+        position: 'right' as const,
         grid: {
           drawOnChartArea: false,
+        },
+        title: {
+          display: true,
+          text: 'Total de Ordens'
         }
       }
     }
@@ -147,7 +157,7 @@ const DepartmentComparisonChart: React.FC<DepartmentComparisonChartProps> = ({
     );
   }
   
-  if (!chartData || chartData.length === 0) {
+  if (!departmentData || departmentData.length === 0) {
     return (
       <div className="flex items-center justify-center h-64 text-gray-500">
         Sem dados disponíveis para exibir
