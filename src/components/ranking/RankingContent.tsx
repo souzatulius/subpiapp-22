@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import RankingFilterDialog from './filters/FilterDialog';
 import RankingCharts from './RankingCharts';
@@ -62,10 +61,6 @@ const RankingContent: React.FC<RankingContentProps> = ({
       <RankingFilterDialog 
         open={filterDialogOpen} 
         onOpenChange={setFilterDialogOpen} 
-        onApply={() => {
-          // Apply filter logic would go here
-          setFilterDialogOpen(false);
-        }}
       />
     </div>
   );

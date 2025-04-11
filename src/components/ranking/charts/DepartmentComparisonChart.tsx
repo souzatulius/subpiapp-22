@@ -1,28 +1,30 @@
-
 import React from 'react';
 import { Bar } from 'react-chartjs-2';
 import { Loader2 } from 'lucide-react';
 import { chartColors } from './ChartRegistration';
 import InsufficientDataMessage from './InsufficientDataMessage';
+import EnhancedChartCard from './EnhancedChartCard';
 
 interface DepartmentComparisonChartProps {
   data: any;
   sgzData: any[] | null;
   isLoading: boolean;
   isSimulationActive: boolean;
+  onToggleVisibility?: () => void;
+  onToggleAnalysis?: () => void;
 }
 
 const DepartmentComparisonChart: React.FC<DepartmentComparisonChartProps> = ({
   data,
   sgzData,
   isLoading,
-  isSimulationActive
+  isSimulationActive,
+  onToggleVisibility,
+  onToggleAnalysis
 }) => {
-  // Process data to get department comparison metrics
   const chartData = React.useMemo(() => {
     if (!sgzData || sgzData.length === 0) return null;
     
-    // Group by department and calculate metrics
     const deptMap: Record<string, {
       total: number,
       completed: number,
@@ -51,7 +53,6 @@ const DepartmentComparisonChart: React.FC<DepartmentComparisonChartProps> = ({
       if (isCompleted) {
         deptMap[dept].completed += 1;
         
-        // Calculate resolution time if both dates are available
         if (order.sgz_criado_em && order.sgz_modificado_em) {
           const createdDate = new Date(order.sgz_criado_em);
           const modifiedDate = new Date(order.sgz_modificado_em);
@@ -67,7 +68,6 @@ const DepartmentComparisonChart: React.FC<DepartmentComparisonChartProps> = ({
       }
     });
     
-    // Calculate average resolution time for each department
     Object.keys(deptMap).forEach(dept => {
       const times = deptMap[dept].resolutionTimes;
       if (times.length > 0) {
@@ -75,35 +75,31 @@ const DepartmentComparisonChart: React.FC<DepartmentComparisonChartProps> = ({
       }
     });
     
-    // Convert to array and sort by completion rate
     return Object.entries(deptMap)
       .map(([name, stats]) => ({
         name,
         ...stats,
         completionRate: stats.total > 0 ? (stats.completed / stats.total) * 100 : 0
       }))
-      .filter(dept => dept.total >= 5) // Only include departments with at least 5 orders
+      .filter(dept => dept.total >= 5)
       .sort((a, b) => b.completionRate - a.completionRate)
-      .slice(0, 6); // Top 6 departments
+      .slice(0, 6);
   }, [sgzData]);
   
-  // Apply simulation effects if active
   const simulatedData = React.useMemo(() => {
     if (!chartData) return null;
     
     if (isSimulationActive) {
-      // In simulation mode, improve completion rates and resolution times
       return chartData.map(dept => ({
         ...dept,
-        completionRate: Math.min(dept.completionRate * 1.2, 100), // 20% improvement, cap at 100%
-        avgResolutionTime: dept.avgResolutionTime * 0.75 // 25% faster resolution
+        completionRate: Math.min(dept.completionRate * 1.2, 100),
+        avgResolutionTime: dept.avgResolutionTime * 0.75
       }));
     }
     
     return chartData;
   }, [chartData, isSimulationActive]);
   
-  // Prepare bar chart data
   const barData = React.useMemo(() => {
     if (!simulatedData) return null;
     
@@ -126,7 +122,6 @@ const DepartmentComparisonChart: React.FC<DepartmentComparisonChartProps> = ({
     };
   }, [simulatedData]);
   
-  // Chart options
   const options = {
     responsive: true,
     maintainAspectRatio: false,
@@ -181,27 +176,28 @@ const DepartmentComparisonChart: React.FC<DepartmentComparisonChartProps> = ({
       }
     }
   };
-  
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <Loader2 className="h-8 w-8 text-orange-500 animate-spin" />
-      </div>
-    );
-  }
-  
-  if (!chartData || !barData) {
-    return (
-      <div className="h-64">
-        <InsufficientDataMessage message="Dados insuficientes para comparação entre departamentos" />
-      </div>
-    );
-  }
-  
+
   return (
-    <div className="h-64">
-      {barData && <Bar data={barData} options={options} />}
-    </div>
+    <EnhancedChartCard
+      title="Comparativo entre Departamentos"
+      subtitle="Taxa de conclusão vs. Tempo médio"
+      value={simulatedData ? `${simulatedData.length} departamentos` : '-'}
+      isLoading={isLoading}
+      onToggleVisibility={onToggleVisibility}
+      onToggleAnalysis={onToggleAnalysis}
+    >
+      {isLoading ? (
+        <div className="flex items-center justify-center h-full">
+          <Loader2 className="h-8 w-8 text-orange-500 animate-spin" />
+        </div>
+      ) : !chartData || !barData ? (
+        <div className="h-full flex items-center">
+          <InsufficientDataMessage message="Dados insuficientes para comparação entre departamentos" />
+        </div>
+      ) : (
+        <Bar data={barData} options={options} />
+      )}
+    </EnhancedChartCard>
   );
 };
 
