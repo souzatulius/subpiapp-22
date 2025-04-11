@@ -1,4 +1,5 @@
-import React, { useCallback, useRef, useState } from 'react';
+
+import React, { useCallback, useRef, useState, useEffect } from 'react';
 import { Label } from '@/components/ui/label';
 import { Upload, X, FileText } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
