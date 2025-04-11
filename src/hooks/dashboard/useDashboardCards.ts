@@ -18,6 +18,27 @@ export const useDashboardCards = () => {
     fetchCards();
   }, []);
 
+  // Helper function to ensure required cards exist
+  const ensureRequiredCards = (cardsList: ActionCardItem[], defaultCardsList: ActionCardItem[]) => {
+    const essentialCardIds = ['press-request-card', 'origem-demandas-card', 'acoes-pendentes-card'];
+    const updatedCards = [...cardsList];
+    
+    // For each essential card, check if it exists in the user's cards
+    essentialCardIds.forEach(cardId => {
+      const cardExists = cardsList.some(card => card.id === cardId);
+      
+      // If it doesn't exist, find it in the default cards and add it
+      if (!cardExists) {
+        const defaultCard = defaultCardsList.find(card => card.id === cardId);
+        if (defaultCard) {
+          updatedCards.push(defaultCard);
+        }
+      }
+    });
+    
+    return updatedCards;
+  };
+
   // Main function to fetch cards from the database
   const fetchCards = async () => {
     setIsLoading(true);
@@ -36,8 +57,10 @@ export const useDashboardCards = () => {
 
         if (!userDashboardError && userDashboard?.cards_config) {
           try {
+            const defaultCardsList = getDefaultCards();
             const parsedCards = JSON.parse(userDashboard.cards_config);
-            setCards(parsedCards);
+            const updatedCards = ensureRequiredCards(parsedCards, defaultCardsList);
+            setCards(updatedCards);
             setIsLoading(false);
             return;
           } catch (parseError) {
@@ -55,8 +78,10 @@ export const useDashboardCards = () => {
         
       if (!deptError && deptDashboard?.cards_config) {
         try {
+          const defaultCardsList = getDefaultCards();
           const parsedCards = JSON.parse(deptDashboard.cards_config);
-          setCards(parsedCards);
+          const updatedCards = ensureRequiredCards(parsedCards, defaultCardsList);
+          setCards(updatedCards);
           setIsLoading(false);
           return;
         } catch (parseError) {
