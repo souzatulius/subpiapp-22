@@ -32,7 +32,7 @@ ChartJS.register(
 // Configure Chart.js defaults
 ChartJS.defaults.font.family = "'Inter', 'Helvetica', 'Arial', sans-serif";
 
-// Configure scales to use integer ticks for Y-axis
+// Configure scales to use integer ticks for Y-axis - Ensure this works properly
 ChartJS.defaults.scale.y = {
   ...ChartJS.defaults.scale.y,
   ticks: {

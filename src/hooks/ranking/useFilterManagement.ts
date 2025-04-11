@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { ChartVisibility, FilterOptions } from '@/components/ranking/types';
 
@@ -16,6 +15,7 @@ export const useFilterManagement = () => {
   });
 
   // Initialize chart visibility with all charts visible by default
+  // Ensure these IDs match exactly what's used in components
   const [chartVisibility, setChartVisibility] = useState<ChartVisibility>({
     // Performance & Efficiency charts
     statusDistribution: true,
@@ -26,11 +26,11 @@ export const useFilterManagement = () => {
     // Territories & Services charts
     districtPerformance: true,
     serviceTypes: true,
+    oldestPendingList: true,
     
     // Critical Flows charts
     responsibility: true,
     sgzPainel: true,
-    oldestPendingList: true,
     
     // Keeping other chart visibility flags for backward compatibility
     evolution: true,
@@ -53,6 +53,13 @@ export const useFilterManagement = () => {
     setFilters({ ...filters, ...newFilters });
   };
 
+  const toggleChartVisibility = (chartId: keyof ChartVisibility) => {
+    setChartVisibility(prev => ({
+      ...prev,
+      [chartId]: !prev[chartId]
+    }));
+  };
+  
   const handleChartVisibilityChange = (chartId: keyof ChartVisibility, isVisible: boolean) => {
     setChartVisibility({
       ...chartVisibility,
@@ -72,12 +79,23 @@ export const useFilterManagement = () => {
       departamento: []
     });
   };
+  
+  const showAllCharts = () => {
+    const allVisible = Object.keys(chartVisibility).reduce((acc, key) => {
+      acc[key as keyof ChartVisibility] = true;
+      return acc;
+    }, {} as ChartVisibility);
+    
+    setChartVisibility(allVisible);
+  };
 
   return {
     filters,
     chartVisibility,
     handleFiltersChange,
     handleChartVisibilityChange,
-    resetFilters
+    toggleChartVisibility,
+    resetFilters,
+    showAllCharts
   };
 };

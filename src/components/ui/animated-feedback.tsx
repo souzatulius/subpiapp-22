@@ -2,9 +2,9 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
-import { CheckCircle, AlertTriangle } from 'lucide-react';
+import { CheckCircle, AlertTriangle, XCircle } from 'lucide-react';
 
-export type FeedbackType = 'success' | 'error';
+export type FeedbackType = 'success' | 'error' | 'warning';
 
 interface AnimatedFeedbackProps {
   type: FeedbackType;
@@ -52,7 +52,8 @@ export const AnimatedFeedback: React.FC<AnimatedFeedbackProps> = ({
           <div className={cn(
             "rounded-xl shadow-lg px-6 py-4 flex items-center gap-3",
             type === 'success' ? "bg-green-100 text-green-800 border border-green-200" : 
-            "bg-orange-100 text-orange-800 border border-orange-200"
+            type === 'warning' ? "bg-orange-100 text-orange-800 border border-orange-200" :
+            "bg-red-100 text-red-800 border border-red-200"
           )}>
             {type === 'success' ? (
               <motion.div
@@ -67,7 +68,7 @@ export const AnimatedFeedback: React.FC<AnimatedFeedbackProps> = ({
               >
                 <CheckCircle className="h-6 w-6 text-green-600" />
               </motion.div>
-            ) : (
+            ) : type === 'warning' ? (
               <motion.div
                 animate={{ 
                   rotate: [-2, 2, -2], 
@@ -78,6 +79,18 @@ export const AnimatedFeedback: React.FC<AnimatedFeedbackProps> = ({
                 }}
               >
                 <AlertTriangle className="h-6 w-6 text-orange-500" />
+              </motion.div>
+            ) : (
+              <motion.div
+                animate={{ 
+                  rotate: [-3, 3, -3], 
+                  transition: { 
+                    repeat: 2, 
+                    duration: 0.2
+                  } 
+                }}
+              >
+                <XCircle className="h-6 w-6 text-red-600" />
               </motion.div>
             )}
             <p className="text-base font-medium">{message}</p>

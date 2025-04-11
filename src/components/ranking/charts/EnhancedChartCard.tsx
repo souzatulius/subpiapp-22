@@ -62,6 +62,7 @@ const EnhancedChartCard: React.FC<EnhancedChartCardProps> = ({
             <div className="flex items-center justify-between mb-1">
               <CardTitle className="text-sm font-medium">{title}</CardTitle>
               
+              {/* Data source badge moved to right side */}
               {dataSource && (
                 <Badge 
                   variant="outline" 
@@ -78,8 +79,8 @@ const EnhancedChartCard: React.FC<EnhancedChartCardProps> = ({
             )}
           </div>
           
-          {/* Action buttons on header - moved from body */}
-          <div className="flex space-x-2 ml-2">
+          {/* Action buttons on header with updated styling */}
+          <div className="flex space-x-1 ml-2">
             {onToggleAnalysis && (
               <button 
                 onClick={(e) => {
