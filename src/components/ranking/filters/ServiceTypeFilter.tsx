@@ -1,58 +1,33 @@
 
 import React from 'react';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Label } from '@/components/ui/label';
-import { FilterOptions } from '@/components/ranking/types';
+import { MultiSelect } from '@/components/ui/multi-select';
 
 interface ServiceTypeFilterProps {
-  serviceTypes: FilterOptions['serviceTypes'];
-  onServiceTypeChange: (types: string[]) => void; // Changed to accept an array of strings
+  serviceTypes: string[];
+  onServiceTypeChange: (types: string[]) => void;
 }
 
 const ServiceTypeFilter: React.FC<ServiceTypeFilterProps> = ({ serviceTypes, onServiceTypeChange }) => {
-  const types = ['Todos', 'Iluminação', 'Buraco', 'Entulho', 'Esgoto'];
-  
-  const handleTypeChange = (type: string) => {
-    if (type === 'Todos') {
-      onServiceTypeChange(['Todos']);
-    } else {
-      // Remove 'Todos' if it's in the array and add the new type
-      const currentTypes = serviceTypes || [];
-      const newTypes = currentTypes.includes('Todos')
-        ? [type]
-        : currentTypes.includes(type)
-          ? currentTypes.filter(t => t !== type)
-          : [...currentTypes, type];
-      
-      // If no types are selected, select 'Todos'
-      if (newTypes.length === 0) {
-        onServiceTypeChange(['Todos']);
-      } else {
-        onServiceTypeChange(newTypes);
-      }
-    }
-  };
+  const typeOptions = [
+    { value: 'Todos', label: 'Todos os tipos' },
+    { value: 'Tapa-Buraco', label: 'Tapa-Buraco' },
+    { value: 'Poda de Árvore', label: 'Poda de Árvore' },
+    { value: 'Limpeza de Bueiros', label: 'Limpeza de Bueiros' },
+    { value: 'Remoção de Entulho', label: 'Remoção de Entulho' },
+    { value: 'Iluminação Pública', label: 'Iluminação Pública' },
+    { value: 'Manutenção de Calçada', label: 'Manutenção de Calçada' }
+  ];
 
   return (
-    <div className="space-y-2">
-      <h3 className="text-sm font-medium">Tipos de Serviço</h3>
-      <div className="space-y-1">
-        {types.map((type) => (
-          <div key={type} className="flex items-center space-x-2">
-            <Checkbox 
-              id={`type-${type}`}
-              checked={serviceTypes ? serviceTypes.includes(type) : false}
-              onCheckedChange={() => handleTypeChange(type)}
-            />
-            <Label 
-              htmlFor={`type-${type}`}
-              className="text-sm cursor-pointer"
-            >
-              {type}
-            </Label>
-          </div>
-        ))}
-      </div>
+    <div>
+      <h3 className="text-sm font-medium mb-2">Tipo de Serviço</h3>
+      <MultiSelect
+        placeholder="Selecionar tipos de serviço"
+        options={typeOptions}
+        selected={serviceTypes}
+        onChange={onServiceTypeChange}
+        className="max-w-full"
+      />
     </div>
   );
 };

@@ -107,7 +107,6 @@ const FilterSection: React.FC<FilterSectionProps> = ({
         <DateRangePicker
           value={dateRange}
           onChange={handleDateRangeChange}
-          calendarClassName="z-50"
           placeholder="Selecione o período"
         />
       </div>

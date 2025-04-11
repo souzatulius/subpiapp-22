@@ -1,5 +1,11 @@
+
 import { create } from 'zustand';
-import { ChartData, ChartVisibility } from '@/components/ranking/types';
+import { ChartVisibility } from '@/components/ranking/types';
+
+// Define ChartData directly since it's not exported from the types file
+interface ChartData {
+  [key: string]: any;
+}
 
 interface RankingChartsState {
   chartVisibility: ChartVisibility;
