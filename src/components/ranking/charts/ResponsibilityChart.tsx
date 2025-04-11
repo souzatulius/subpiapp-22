@@ -1,14 +1,9 @@
 
 import React from 'react';
-import { Radar } from 'react-chartjs-2';
-import { Loader2 } from 'lucide-react';
-import { chartColors } from './ChartRegistration';
-import InsufficientDataMessage from './InsufficientDataMessage';
-
-interface DepartmentCount {
-  name: string;
-  count: number;
-}
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
+import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
+import { ResponsabilidadeBadge } from '@/components/ui/status-badge';
 
 interface ResponsibilityChartProps {
   data: any;
@@ -18,6 +13,14 @@ interface ResponsibilityChartProps {
   isSimulationActive: boolean;
 }
 
+const RESPONSIBILITY_COLORS = {
+  subprefeitura: '#10b981', // green
+  dzu: '#f59e0b',          // amber
+  enel: '#3b82f6',         // blue
+  sabesp: '#06b6d4',       // cyan
+  outros: '#9ca3af'        // gray
+};
+
 const ResponsibilityChart: React.FC<ResponsibilityChartProps> = ({
   data,
   sgzData,
@@ -25,94 +28,126 @@ const ResponsibilityChart: React.FC<ResponsibilityChartProps> = ({
   isLoading,
   isSimulationActive
 }) => {
-  // Process data to get responsibility distribution
-  const chartData = React.useMemo(() => {
-    if (!sgzData || sgzData.length === 0) return null;
-    
-    // Count by department/coordenação
-    const deptCount: Record<string, number> = {};
-    
-    sgzData.forEach(order => {
-      const department = order.sgz_coordenacao || order.sgz_area_tecnica || 'Não informado';
-      deptCount[department] = (deptCount[department] || 0) + 1;
-    });
-    
-    // Convert to array format
-    return Object.entries(deptCount)
-      .map(([name, count]) => ({ name, count }))
-      .sort((a, b) => (b.count as number) - (a.count as number))
-      .slice(0, 6); // Top 6 departments
-  }, [sgzData]);
+  // Process data from sgzData to get responsibility counts
+  const [chartData, setChartData] = React.useState<any[]>([]);
+  const [total, setTotal] = React.useState<number>(0);
+  const [subprefeituraPercentage, setSubprefeituraPercentage] = React.useState<number>(0);
   
-  // Prepare radar chart data
-  const radarChartData = React.useMemo(() => {
-    if (!chartData) return null;
-    
-    // Apply simulation factor if active
-    const simulationFactor = isSimulationActive ? 1.2 : 1;
-    
-    return {
-      labels: chartData.map(d => d.name),
-      datasets: [
-        {
-          label: 'Demandas Atribuídas',
-          data: chartData.map(d => {
-            const baseCount = d.count as number;
-            return isSimulationActive 
-              ? Math.floor(baseCount * simulationFactor * (Math.random() * 0.4 + 0.8))
-              : baseCount;
-          }),
-          backgroundColor: `${chartColors[3]}60`,
-          borderColor: chartColors[3],
-          borderWidth: 2,
-          pointBackgroundColor: chartColors[3],
-          pointBorderColor: '#fff',
-          pointHoverBackgroundColor: '#fff',
-          pointHoverBorderColor: chartColors[3]
-        }
-      ]
-    };
-  }, [chartData, isSimulationActive]);
-  
-  // Chart options
-  const options = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: {
-        position: 'top' as const,
-      }
-    },
-    scales: {
-      r: {
-        angleLines: {
-          display: true
-        },
-        suggestedMin: 0
-      }
+  React.useEffect(() => {
+    if (!isLoading && sgzData) {
+      // Count records by responsibility
+      const counter: Record<string, number> = {};
+      
+      sgzData.forEach(item => {
+        const resp = (item.servico_responsavel || 'outros').toLowerCase();
+        counter[resp] = (counter[resp] || 0) + 1;
+      });
+      
+      // Convert to chart data format
+      const transformedData = Object.entries(counter).map(([name, value]) => ({
+        name,
+        value
+      }));
+      
+      setChartData(transformedData);
+      
+      // Calculate totals
+      const totalCount = transformedData.reduce((sum, item) => sum + item.value, 0);
+      setTotal(totalCount);
+      
+      // Calculate subprefeitura percentage
+      const subCount = counter['subprefeitura'] || 0;
+      setSubprefeituraPercentage(totalCount > 0 ? Math.round((subCount / totalCount) * 100) : 0);
     }
-  };
-  
+  }, [sgzData, isLoading]);
+
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <Loader2 className="h-8 w-8 text-orange-500 animate-spin" />
-      </div>
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-sm font-medium">Responsabilidade de Ordens</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center justify-center h-[220px]">
+            <Skeleton className="h-[200px] w-[200px] rounded-full" />
+          </div>
+        </CardContent>
+      </Card>
     );
   }
-  
-  if (!chartData || chartData.length === 0) {
+
+  if (!sgzData?.length) {
     return (
-      <div className="h-64">
-        <InsufficientDataMessage message="Dados insuficientes para mostrar distribuição de responsabilidades" />
-      </div>
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-sm font-medium">Responsabilidade de Ordens</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-col items-center justify-center h-[220px] p-4">
+            <p className="text-muted-foreground text-center">
+              Sem dados para exibir. Faça upload de planilhas SGZ para visualizar informações.
+            </p>
+          </div>
+        </CardContent>
+      </Card>
     );
   }
-  
+
   return (
-    <div className="h-64">
-      {radarChartData && <Radar data={radarChartData} options={options} />}
-    </div>
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-sm font-medium flex items-center justify-between">
+          <span>Responsabilidade de Ordens</span>
+          <span className="text-green-600 font-bold text-xs px-2 py-1 bg-green-50 rounded-full">
+            {subprefeituraPercentage}% Subprefeitura
+          </span>
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="h-[220px]">
+          <ResponsiveContainer width="100%" height="100%">
+            <PieChart>
+              <Pie
+                data={chartData}
+                cx="50%"
+                cy="50%"
+                labelLine={false}
+                outerRadius={80}
+                fill="#8884d8"
+                dataKey="value"
+                nameKey="name"
+              >
+                {chartData.map((entry, index) => (
+                  <Cell 
+                    key={`cell-${index}`} 
+                    fill={RESPONSIBILITY_COLORS[entry.name] || RESPONSIBILITY_COLORS.outros} 
+                  />
+                ))}
+              </Pie>
+              <Tooltip 
+                formatter={(value, name) => {
+                  return [
+                    `${value} (${Math.round((Number(value) / total) * 100)}%)`,
+                    <ResponsabilidadeBadge key={name} responsavel={name} />
+                  ];
+                }}
+              />
+              <Legend 
+                formatter={(value) => {
+                  return <ResponsabilidadeBadge responsavel={value} />;
+                }}
+              />
+            </PieChart>
+          </ResponsiveContainer>
+        </div>
+        
+        {isSimulationActive && (
+          <div className="mt-3 text-sm text-orange-700 bg-orange-50 p-2 rounded-md">
+            <p>Simulação: Remoção das OSs de terceiros melhoraria os indicadores em até 35%.</p>
+          </div>
+        )}
+      </CardContent>
+    </Card>
   );
 };
 

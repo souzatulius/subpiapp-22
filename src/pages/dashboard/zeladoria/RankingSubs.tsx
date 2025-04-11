@@ -1,25 +1,28 @@
 
 import React, { useState } from 'react';
-import { BarChart3, SlidersHorizontal, Printer, FileText } from 'lucide-react';
+import { BarChart3, SlidersHorizontal, Printer, FileText, Trash2, RefreshCw } from 'lucide-react';
 import RankingContent from '@/components/ranking/RankingContent';
 import { motion } from 'framer-motion';
 import WelcomeCard from '@/components/shared/WelcomeCard';
 import { Button } from '@/components/ui/button';
 // Import Chart registration to ensure scales are registered
 import '@/components/ranking/charts/ChartRegistration';
-// Import our new real data provider
+// Import our real data provider
 import RealDataProvider, { useRealData } from '@/components/ranking/RealDataProvider';
 import { exportToPDF, printWithStyles } from '@/utils/pdfExport';
 import { useIsMobile } from '@/hooks/use-mobile';
 import UploadSection from '@/components/ranking/UploadSection';
 import { supabase } from '@/integrations/supabase/client';
 import FeedbackProvider from '@/components/ui/feedback-provider';
+import CleanDataDialog from '@/components/ranking/CleanDataDialog';
 
 const RankingSubs = () => {
   const [filterDialogOpen, setFilterDialogOpen] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [cleanDataDialogOpen, setCleanDataDialogOpen] = useState(false);
   const isMobile = useIsMobile();
   const [currentUser, setCurrentUser] = useState<any>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
   
   // Get current user on component mount
   React.useEffect(() => {
@@ -27,6 +30,13 @@ const RankingSubs = () => {
       const { data } = await supabase.auth.getSession();
       if (data?.session?.user) {
         setCurrentUser(data.session.user);
+        
+        // Check if user is admin
+        const { data: isAdminData } = await supabase.rpc('is_admin', {
+          user_id: data.session.user.id
+        });
+        
+        setIsAdmin(Boolean(isAdminData));
       } else {
         console.log('No authenticated user found');
       }
@@ -57,6 +67,10 @@ const RankingSubs = () => {
     setIsUploading(false);
   };
   
+  const handleCleanDataSuccess = () => {
+    // We'll reload the data in the child component
+  };
+  
   return (
     <FeedbackProvider>
       <RealDataProvider>
@@ -71,6 +85,10 @@ const RankingSubs = () => {
           handleExportPDF={handleExportPDF}
           currentUser={currentUser}
           isMobile={isMobile}
+          isAdmin={isAdmin}
+          cleanDataDialogOpen={cleanDataDialogOpen}
+          setCleanDataDialogOpen={setCleanDataDialogOpen}
+          handleCleanDataSuccess={handleCleanDataSuccess}
         />
       </RealDataProvider>
     </FeedbackProvider>
@@ -88,13 +106,17 @@ const RankingSubsContent = ({
   handlePrint,
   handleExportPDF,
   currentUser,
-  isMobile
+  isMobile,
+  isAdmin,
+  cleanDataDialogOpen,
+  setCleanDataDialogOpen,
+  handleCleanDataSuccess
 }) => {
   const { refreshData } = useRealData();
   
   return (
     <motion.div 
-      className="max-w-full mx-auto pdf-content h-full" 
+      className="max-w-full mx-auto pdf-content h-full pb-6" 
       initial={{ opacity: 0, y: 20 }} 
       animate={{ opacity: 1, y: 0 }} 
       transition={{ duration: 0.5 }}
@@ -108,7 +130,33 @@ const RankingSubsContent = ({
       
       {/* Upload Section */}
       <div className="mt-6 bg-white p-4 rounded-xl border border-gray-100 shadow-sm">
-        <h2 className="text-lg font-medium mb-4">Upload de Planilhas</h2>
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-lg font-medium">Upload de Planilhas</h2>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              className="bg-blue-50 text-blue-600 border-blue-200 hover:bg-blue-100"
+              onClick={refreshData}
+            >
+              <RefreshCw className="h-4 w-4 mr-1" />
+              Atualizar Dados
+            </Button>
+            
+            {isAdmin && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="bg-red-50 text-red-600 border-red-200 hover:bg-red-100"
+                onClick={() => setCleanDataDialogOpen(true)}
+              >
+                <Trash2 className="h-4 w-4 mr-1" />
+                Limpar Dados
+              </Button>
+            )}
+          </div>
+        </div>
+        
         <UploadSection 
           onUploadStart={handleUploadStart}
           onUploadComplete={handleUploadComplete}
@@ -158,6 +206,13 @@ const RankingSubsContent = ({
           lastUpdateText="Atualização"
         />
       </div>
+
+      {/* Clean Data Dialog */}
+      <CleanDataDialog
+        isOpen={cleanDataDialogOpen}
+        onClose={() => setCleanDataDialogOpen(false)}
+        onSuccess={handleCleanDataSuccess}
+      />
 
       {/* Add CSS for mobile KPI grid */}
       <style>

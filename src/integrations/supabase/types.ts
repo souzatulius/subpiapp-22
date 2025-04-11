@@ -1362,6 +1362,7 @@ export type Database = {
           distrito: string | null
           id: string
           id_os: string
+          responsavel_classificado: string | null
           responsavel_real: string | null
           status: string | null
           tipo_servico: string | null
@@ -1375,6 +1376,7 @@ export type Database = {
           distrito?: string | null
           id?: string
           id_os: string
+          responsavel_classificado?: string | null
           responsavel_real?: string | null
           status?: string | null
           tipo_servico?: string | null
@@ -1388,6 +1390,7 @@ export type Database = {
           distrito?: string | null
           id?: string
           id_os?: string
+          responsavel_classificado?: string | null
           responsavel_real?: string | null
           status?: string | null
           tipo_servico?: string | null
@@ -1903,6 +1906,7 @@ export type Database = {
           id: string
           ordem_servico: string
           planilha_referencia: string | null
+          servico_responsavel: string | null
           sgz_bairro: string | null
           sgz_criado_em: string
           sgz_departamento_tecnico: string
@@ -1917,6 +1921,7 @@ export type Database = {
           id?: string
           ordem_servico: string
           planilha_referencia?: string | null
+          servico_responsavel?: string | null
           sgz_bairro?: string | null
           sgz_criado_em: string
           sgz_departamento_tecnico: string
@@ -1931,6 +1936,7 @@ export type Database = {
           id?: string
           ordem_servico?: string
           planilha_referencia?: string | null
+          servico_responsavel?: string | null
           sgz_bairro?: string | null
           sgz_criado_em?: string
           sgz_departamento_tecnico?: string
@@ -2529,6 +2535,10 @@ export type Database = {
       can_approve_notes: {
         Args: { note_id: string; new_status: string; user_id: string }
         Returns: boolean
+      }
+      classify_service_responsibility: {
+        Args: { service_type: string }
+        Returns: string
       }
       create_default_permissions: {
         Args: Record<PropertyKey, never>

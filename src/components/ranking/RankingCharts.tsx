@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
-import { BarChart3, Briefcase, TrendingUp, PieChart, RefreshCw } from 'lucide-react';
+import { BarChart3, Briefcase, TrendingUp, PieChart, RefreshCw, Building2 } from 'lucide-react';
 import { ChartVisibility } from './types';
 import ResponsibilityChart from './charts/ResponsibilityChart';
 import ServiceTypesChart from './charts/ServiceTypesChart';
@@ -35,6 +35,25 @@ const RankingCharts: React.FC<RankingChartsProps> = ({
   disableCardContainers = false
 }) => {
   const [activeTab, setActiveTab] = useState("performance");
+  const [showOnlySubprefeitura, setShowOnlySubprefeitura] = useState(false);
+
+  // Filter data if showOnlySubprefeitura is true
+  const filteredSgzData = React.useMemo(() => {
+    if (!sgzData) return null;
+    if (showOnlySubprefeitura) {
+      return sgzData.filter(item => (item.servico_responsavel || '').toLowerCase() === 'subprefeitura');
+    }
+    return sgzData;
+  }, [sgzData, showOnlySubprefeitura]);
+
+  // Filter painelData if showOnlySubprefeitura is true
+  const filteredPainelData = React.useMemo(() => {
+    if (!painelData) return null;
+    if (showOnlySubprefeitura) {
+      return painelData.filter(item => (item.responsavel_classificado || '').toLowerCase() === 'subprefeitura');
+    }
+    return painelData;
+  }, [painelData, showOnlySubprefeitura]);
 
   // Sample empty data object for charts
   const emptyData = {};
@@ -46,14 +65,25 @@ const RankingCharts: React.FC<RankingChartsProps> = ({
           <BarChart3 className="h-5 w-5 mr-2 text-orange-500" />
           Análise de Desempenho
         </h2>
-        <Button 
-          variant="outline" 
-          className={`flex items-center gap-2 border ${isSimulationActive ? 'bg-orange-100 text-orange-700 border-orange-300' : 'text-gray-600'}`}
-          onClick={onSimulateIdealRanking}
-        >
-          <RefreshCw className="h-4 w-4" />
-          {isSimulationActive ? 'Desativar Simulação' : 'Simular Ranking Ideal'}
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button 
+            variant={showOnlySubprefeitura ? "default" : "outline"}
+            className={`flex items-center gap-2 ${showOnlySubprefeitura ? 'bg-green-600 hover:bg-green-700' : 'border-green-300 text-green-700 hover:bg-green-50'}`}
+            onClick={() => setShowOnlySubprefeitura(!showOnlySubprefeitura)}
+          >
+            <Building2 className="h-4 w-4" />
+            {showOnlySubprefeitura ? 'Mostrando Apenas Subprefeitura' : 'Mostrar Apenas Subprefeitura'}
+          </Button>
+          
+          <Button 
+            variant="outline" 
+            className={`flex items-center gap-2 border ${isSimulationActive ? 'bg-orange-100 text-orange-700 border-orange-300' : 'text-gray-600'}`}
+            onClick={onSimulateIdealRanking}
+          >
+            <RefreshCw className="h-4 w-4" />
+            {isSimulationActive ? 'Desativar Simulação' : 'Simular Ranking Ideal'}
+          </Button>
+        </div>
       </div>
 
       <Tabs defaultValue="performance" className="w-full" onValueChange={setActiveTab}>
@@ -86,7 +116,7 @@ const RankingCharts: React.FC<RankingChartsProps> = ({
             {chartVisibility.districtPerformance && (
               <DistrictPerformanceChart 
                 data={emptyData} 
-                sgzData={sgzData} 
+                sgzData={filteredSgzData} 
                 isLoading={isLoading} 
                 isSimulationActive={isSimulationActive} 
               />
@@ -94,8 +124,8 @@ const RankingCharts: React.FC<RankingChartsProps> = ({
             {chartVisibility.evolution && (
               <EvolutionChart 
                 data={emptyData} 
-                sgzData={sgzData} 
-                painelData={painelData} 
+                sgzData={filteredSgzData} 
+                painelData={filteredPainelData} 
                 isLoading={isLoading} 
                 isSimulationActive={isSimulationActive} 
               />
@@ -105,7 +135,7 @@ const RankingCharts: React.FC<RankingChartsProps> = ({
             {chartVisibility.resolutionTime && (
               <ResolutionTimeChart 
                 data={emptyData} 
-                sgzData={sgzData} 
+                sgzData={filteredSgzData} 
                 isLoading={isLoading} 
                 isSimulationActive={isSimulationActive} 
               />
@@ -113,7 +143,7 @@ const RankingCharts: React.FC<RankingChartsProps> = ({
             {chartVisibility.oldestPendingList && (
               <OldestPendingList 
                 data={emptyData} 
-                sgzData={sgzData} 
+                sgzData={filteredSgzData} 
                 isLoading={isLoading} 
                 isSimulationActive={isSimulationActive} 
               />
@@ -126,7 +156,7 @@ const RankingCharts: React.FC<RankingChartsProps> = ({
             {chartVisibility.serviceTypes && (
               <ServiceTypesChart 
                 data={emptyData} 
-                sgzData={sgzData} 
+                sgzData={filteredSgzData} 
                 isLoading={isLoading} 
                 isSimulationActive={isSimulationActive} 
               />
@@ -134,8 +164,8 @@ const RankingCharts: React.FC<RankingChartsProps> = ({
             {chartVisibility.responsibility && (
               <ResponsibilityChart 
                 data={emptyData} 
-                sgzData={sgzData} 
-                painelData={painelData} 
+                sgzData={filteredSgzData} 
+                painelData={filteredPainelData} 
                 isLoading={isLoading} 
                 isSimulationActive={isSimulationActive} 
               />
@@ -148,7 +178,7 @@ const RankingCharts: React.FC<RankingChartsProps> = ({
             {chartVisibility.departmentComparison && (
               <DepartmentComparisonChart 
                 data={emptyData} 
-                sgzData={sgzData} 
+                sgzData={filteredSgzData} 
                 isLoading={isLoading} 
                 isSimulationActive={isSimulationActive} 
               />
@@ -165,6 +195,22 @@ const RankingCharts: React.FC<RankingChartsProps> = ({
             <span>
               <strong>Modo Simulação Ativo:</strong> Os dados exibidos representam projeções de um cenário ideal 
               após implementação das recomendações de melhoria.
+            </span>
+          </p>
+        </div>
+      )}
+      
+      {showOnlySubprefeitura && (
+        <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg">
+          <p className="text-sm text-green-700 flex items-center">
+            <Building2 className="h-4 w-4 mr-2 text-green-500" />
+            <span>
+              <strong>Filtro Ativo:</strong> Mostrando apenas ordens de serviço de responsabilidade direta da Subprefeitura.
+              {filteredSgzData && (
+                <span className="ml-1">
+                  ({filteredSgzData.length} ordens de {sgzData?.length || 0} total)
+                </span>
+              )}
             </span>
           </p>
         </div>

@@ -1,42 +1,55 @@
 
 import React from 'react';
 import { cn } from '@/lib/utils';
-import { AlertCircle, Zap, Clock } from 'lucide-react';
+import { Building2, HardHat, Lightbulb, Droplet } from 'lucide-react';
 import { BadgeSize, getSizeClasses, getIconSize } from './badge-utils';
 
-interface PrioridadeBadgeProps {
-  prioridade: string;
+interface ResponsabilidadeBadgeProps {
+  responsavel: string;
   className?: string;
   size?: BadgeSize;
+  showText?: boolean;
 }
 
-export function PrioridadeBadge({
-  prioridade,
+export function ResponsabilidadeBadge({
+  responsavel,
   className,
   size = 'sm',
-}: PrioridadeBadgeProps) {
-  // Determine styling based on priority level
+  showText = true,
+}: ResponsabilidadeBadgeProps) {
+  // Determine styling and text based on responsibility
   const config = {
-    alta: {
-      icon: Zap,
-      bg: 'bg-red-50',
-      text: 'text-red-700',
-      border: 'border-red-200'
-    },
-    media: {
-      icon: AlertCircle,
+    dzu: {
+      icon: HardHat,
+      label: 'DZU',
       bg: 'bg-amber-50',
       text: 'text-amber-700',
       border: 'border-amber-200'
     },
-    baixa: {
-      icon: Clock,
+    enel: {
+      icon: Lightbulb,
+      label: 'ENEL',
+      bg: 'bg-blue-50',
+      text: 'text-blue-700',
+      border: 'border-blue-200'
+    },
+    sabesp: {
+      icon: Droplet,
+      label: 'SABESP',
+      bg: 'bg-cyan-50',
+      text: 'text-cyan-700',
+      border: 'border-cyan-200'
+    },
+    subprefeitura: {
+      icon: Building2,
+      label: 'Subprefeitura',
       bg: 'bg-green-50',
       text: 'text-green-700',
       border: 'border-green-200'
     }
-  }[prioridade.toLowerCase()] || {
-    icon: Clock,
+  }[responsavel.toLowerCase()] || {
+    icon: Building2,
+    label: 'Outro',
     bg: 'bg-gray-50',
     text: 'text-gray-700',
     border: 'border-gray-200'
@@ -56,7 +69,7 @@ export function PrioridadeBadge({
       )}
     >
       <IconComponent size={getIconSize(size)} className="shrink-0" />
-      <span>{prioridade}</span>
+      {showText && <span>{config.label}</span>}
     </span>
   );
 }
