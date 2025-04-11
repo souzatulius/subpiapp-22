@@ -32,24 +32,20 @@ export const useChatGPTInsight = (dadosPlanilha: any[] | null, uploadId?: string
           }
         }
 
-        // Se não houver insights salvos, gerar novos (sem usar IA por enquanto)
-        const insightsGerados = gerarInsightsEstatisticos(dadosPlanilha);
+        // Se não houver insights salvos, gerar novos com nossa edge function
+        const { data, error: insightError } = await supabase.functions.invoke('generate-sgz-insights', {
+          body: { dados_sgz: dadosPlanilha, upload_id: uploadId }
+        });
         
-        // Salvar insights gerados no banco de dados se houver uploadId
-        if (uploadId) {
-          const { error: saveError } = await supabase
-            .from('painel_zeladoria_insights')
-            .insert({
-              painel_id: uploadId,
-              indicadores: insightsGerados
-            });
-            
-          if (saveError) {
-            console.error('Erro ao salvar insights:', saveError);
-          }
+        if (insightError) {
+          throw new Error(`Erro ao gerar insights: ${insightError.message}`);
         }
         
-        setIndicadores(insightsGerados);
+        if (data.error) {
+          throw new Error(`Erro na análise: ${data.error}`);
+        }
+        
+        setIndicadores(data.indicadores);
       } catch (err) {
         console.error('Erro ao buscar ou gerar insights:', err);
         setError('Falha ao gerar indicadores');
