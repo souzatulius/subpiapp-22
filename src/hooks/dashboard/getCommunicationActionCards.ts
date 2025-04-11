@@ -1,4 +1,3 @@
-
 import { v4 as uuidv4 } from 'uuid';
 import { ActionCardItem } from '@/types/dashboard';
 
@@ -18,6 +17,18 @@ export const getCommunicationActionCards = (): ActionCardItem[] => {
       mobileOrder: 1
     },
     {
+      id: 'press-request-card',
+      title: 'Nova Solicitação da Imprensa',
+      iconId: 'Newspaper',
+      path: '',
+      color: 'bg-white',
+      width: '50',
+      height: '2',
+      type: 'press_request_card',
+      displayMobile: true,
+      mobileOrder: 2
+    },
+    {
       id: uuidv4(),
       title: 'Cadastrar Demanda',
       iconId: 'PlusCircle',
@@ -27,7 +38,7 @@ export const getCommunicationActionCards = (): ActionCardItem[] => {
       height: '2',
       type: 'standard',
       displayMobile: true,
-      mobileOrder: 2
+      mobileOrder: 3
     },
     {
       id: uuidv4(),
@@ -39,7 +50,7 @@ export const getCommunicationActionCards = (): ActionCardItem[] => {
       height: '2',
       type: 'standard',
       displayMobile: true,
-      mobileOrder: 3
+      mobileOrder: 4
     },
     {
       id: uuidv4(),
@@ -51,7 +62,7 @@ export const getCommunicationActionCards = (): ActionCardItem[] => {
       height: '2',
       type: 'standard',
       displayMobile: true,
-      mobileOrder: 4
+      mobileOrder: 5
     },
     {
       id: uuidv4(),
@@ -63,7 +74,7 @@ export const getCommunicationActionCards = (): ActionCardItem[] => {
       height: '2',
       type: 'standard',
       displayMobile: true,
-      mobileOrder: 5
+      mobileOrder: 6
     },
     {
       id: 'origem-demandas-card',
@@ -76,7 +87,7 @@ export const getCommunicationActionCards = (): ActionCardItem[] => {
       height: '2',
       type: 'origin_demand_chart',
       displayMobile: true,
-      mobileOrder: 6
+      mobileOrder: 7
     },
     {
       id: uuidv4(),
@@ -88,7 +99,7 @@ export const getCommunicationActionCards = (): ActionCardItem[] => {
       height: '2',
       type: 'standard',
       displayMobile: true,
-      mobileOrder: 7
+      mobileOrder: 8
     },
     {
       id: uuidv4(),
@@ -100,7 +111,28 @@ export const getCommunicationActionCards = (): ActionCardItem[] => {
       height: '2',
       type: 'standard',
       displayMobile: true,
-      mobileOrder: 8
+      mobileOrder: 9
     }
   ];
+};
+
+// Helper function to get background color from card color
+export const getBgColor = (color: string): string => {
+  if (color.startsWith('bg-')) return color;
+  
+  // Color mapping for custom colors
+  switch (color) {
+    case 'deep-blue': return 'bg-blue-600';
+    case 'blue-light': return 'bg-blue-400';
+    case 'blue-dark': return 'bg-blue-800';
+    case 'blue-vivid': return 'bg-blue-500';
+    case 'gray-light': return 'bg-gray-200';
+    case 'gray-medium': return 'bg-gray-400';
+    case 'orange-light': return 'bg-orange-300';
+    case 'orange-dark': return 'bg-orange-700';
+    case 'green-teal': return 'bg-teal-500';
+    case 'green-neon': return 'bg-green-400';
+    case 'green-dark': return 'bg-green-700';
+    default: return 'bg-gray-200';
+  }
 };

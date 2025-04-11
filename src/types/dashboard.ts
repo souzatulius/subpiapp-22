@@ -1,4 +1,3 @@
-
 export type CardWidth = '25' | '50' | '75' | '100';
 export type CardHeight = '0.5' | '1' | '2' | '3' | '4';
 export type CardColor = 
@@ -37,7 +36,8 @@ export type CardType =
   | 'pending_actions'
   | 'pending_tasks'
   | 'user_profile'
-  | 'notification_settings';
+  | 'notification_settings'
+  | 'press_request_card';
 
 export type DataSourceKey = 
   | 'pendencias_por_coordenacao' 
@@ -46,7 +46,7 @@ export type DataSourceKey =
   | 'demandas_aguardando_nota' 
   | 'ultimas_acoes_coordenacao'
   | 'comunicados_por_cargo'
-  | string; // Adicionando string como tipo válido para DataSourceKey
+  | string;
 
 export interface OriginOption {
   id: string;

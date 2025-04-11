@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useAuth } from '@/hooks/useSupabaseAuth';
 import { MessageSquareReply, RotateCcw } from 'lucide-react';
@@ -13,6 +14,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from '@/hooks/use-toast';
 import OriginsDemandChartCompact from '@/components/dashboard/cards/OriginsDemandChartCompact';
 import PendingTasksCard from '@/components/dashboard/cards/PendingTasksCard';
+import PressRequestQuickStartCard from '@/components/comunicacao/PressRequestQuickStartCard';
 import { ActionCardItem } from '@/types/dashboard';
 
 interface ComunicacaoDashboardProps {
@@ -184,6 +186,11 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
           subtitle={foundCard?.subtitle} 
         />;
       }
+      
+      // Add new press request card renderer
+      if (card === 'press-request-card' || card.includes('press-request')) {
+        return <PressRequestQuickStartCard />;
+      }
     } else if (card.type === 'origin_demand_chart') {
       return <OriginsDemandChartCompact 
         className="w-full h-full" 
@@ -191,6 +198,8 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
         title={card.title} 
         subtitle={card.subtitle} 
       />;
+    } else if (card.type === 'press_request_card') {
+      return <PressRequestQuickStartCard />;
     }
     
     return null;
@@ -208,6 +217,11 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
           resetButtonIcon={<RotateCcw className="h-4 w-4" />}
           onResetClick={handleResetDashboard}
         />
+      </div>
+      
+      {/* Press Request Quick Start Card - Always visible */}
+      <div className="px-2">
+        <PressRequestQuickStartCard />
       </div>
       
       {isLoading ? (
