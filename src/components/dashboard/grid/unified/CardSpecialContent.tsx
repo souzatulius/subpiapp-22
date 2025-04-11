@@ -77,7 +77,7 @@ export const getSpecialContent = ({
     />;
   }
   
-  if (card.type === 'press_request_card') {
+  if (card.type === 'press_request_card' || card.id === 'press-request-card') {
     return <PressRequestCard />;
   }
   

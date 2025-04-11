@@ -30,7 +30,7 @@ export const getCommunicationActionCards = (): ActionCardItem[] => {
       mobileOrder: 2
     },
     {
-      id: uuidv4(),
+      id: 'cadastrar-demanda-card',
       title: 'Cadastrar Demanda',
       iconId: 'PlusCircle',
       path: '/dashboard/comunicacao/cadastrar',
@@ -42,7 +42,7 @@ export const getCommunicationActionCards = (): ActionCardItem[] => {
       mobileOrder: 3
     },
     {
-      id: uuidv4(),
+      id: 'responder-demanda-card',
       title: 'Responder Demanda',
       iconId: 'MessageSquare',
       path: '/dashboard/comunicacao/responder',
@@ -54,7 +54,7 @@ export const getCommunicationActionCards = (): ActionCardItem[] => {
       mobileOrder: 4
     },
     {
-      id: uuidv4(),
+      id: 'criar-nota-card',
       title: 'Criar Nota Oficial',
       iconId: 'FileText',
       path: '/dashboard/comunicacao/criar-nota',
@@ -66,7 +66,7 @@ export const getCommunicationActionCards = (): ActionCardItem[] => {
       mobileOrder: 5
     },
     {
-      id: uuidv4(),
+      id: 'aprovar-notas-card',
       title: 'Aprovar Notas',
       iconId: 'CheckCircle',
       path: '/dashboard/comunicacao/aprovar-nota',
@@ -91,7 +91,7 @@ export const getCommunicationActionCards = (): ActionCardItem[] => {
       mobileOrder: 7
     },
     {
-      id: uuidv4(),
+      id: 'esic-card',
       title: 'Processos e-SIC',
       iconId: 'FileSearch',
       path: '/dashboard/esic',
@@ -103,7 +103,7 @@ export const getCommunicationActionCards = (): ActionCardItem[] => {
       mobileOrder: 8
     },
     {
-      id: uuidv4(),
+      id: 'releases-card',
       title: 'Releases e Notícias',
       iconId: 'Newspaper',
       path: '/dashboard/comunicacao/releases',
@@ -113,6 +113,30 @@ export const getCommunicationActionCards = (): ActionCardItem[] => {
       type: 'standard',
       displayMobile: true,
       mobileOrder: 9
+    },
+    {
+      id: 'consultar-demandas-card',
+      title: 'Consultar Demandas',
+      iconId: 'List',
+      path: '/dashboard/comunicacao/demandas',
+      color: 'green-teal',
+      width: '25',
+      height: '2',
+      type: 'standard',
+      displayMobile: true,
+      mobileOrder: 10
+    },
+    {
+      id: 'ver-notas-card',
+      title: 'Ver Notas de Imprensa',
+      iconId: 'FileText',
+      path: '/dashboard/comunicacao/notas',
+      color: 'orange-dark',
+      width: '25',
+      height: '2',
+      type: 'standard',
+      displayMobile: true,
+      mobileOrder: 11
     }
   ];
 };

@@ -163,8 +163,6 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
         </div>
       )}
       
-      {/* Removed the standalone PressRequestQuickStartCard */}
-      
       {isLoading ? (
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           {Array.from({ length: 8 }).map((_, index) => (
