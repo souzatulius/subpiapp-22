@@ -1,4 +1,5 @@
-import React, { useEffect, useMemo } from 'react';
+
+import React, { useEffect, useMemo, useCallback } from 'react';
 import { useAuth } from '@/hooks/useSupabaseAuth';
 import { MessageSquareReply, RotateCcw, Save } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -170,7 +171,7 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
     return filteredCards;
   }, [cards]);
 
-  // Use useEffect with proper dependency tracking
+  // Fix the Hook Error: Use useEffect with proper dependency tracking
   useEffect(() => {
     if (cards.length > 0 && processedCards.length > 0 && 
         JSON.stringify(processedCards) !== JSON.stringify(cards)) {
@@ -178,25 +179,27 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
     }
   }, [cards, processedCards, handleCardsReorder]);
 
-  const handleResetDashboard = () => {
+  // Creating a memoized function to handle reset dashboard
+  const handleResetDashboard = useCallback(() => {
     resetDashboard();
     toast({
       title: "Dashboard resetado",
       description: "O dashboard de comunicação foi restaurado para a configuração padrão.",
       variant: "default"
     });
-  };
+  }, [resetDashboard]);
   
-  const handleManualSave = async () => {
+  // Creating a memoized function to handle manual save
+  const handleManualSave = useCallback(async () => {
     await saveNow();
-  };
+  }, [saveNow]);
 
   if (!isPreview && !user) {
     return <LoadingIndicator />;
   }
 
   // Memoize the special content renderer function to prevent unnecessary re-renders
-  const renderSpecialCardContent = useMemo(() => (card: string | ActionCardItem) => {
+  const renderSpecialCardContent = useCallback((card: string | ActionCardItem) => {
     if (typeof card === 'string') {
       const foundCard = cards.find(c => c.id === card);
       

@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { supabase } from '@/integrations/supabase/client';
 import { Loader2, Newspaper } from 'lucide-react';
@@ -44,7 +44,7 @@ const PressRequestQuickStartCard: React.FC = () => {
     fetchOrigens();
   }, []);
 
-  const handleOriginClick = (originId: string) => {
+  const handleOriginClick = useCallback((originId: string) => {
     setSelectedId(originId);
     
     // Clear any existing form data in local storage
@@ -54,7 +54,7 @@ const PressRequestQuickStartCard: React.FC = () => {
     setTimeout(() => {
       navigate(`/dashboard/comunicacao/cadastrar?origem_id=${originId}`);
     }, 300);
-  };
+  }, [navigate]);
   
   // Use memo to prevent re-renders of the origins list
   const originsList = useMemo(() => {
@@ -76,30 +76,35 @@ const PressRequestQuickStartCard: React.FC = () => {
     
     return (
       <div className="flex flex-wrap gap-2 justify-start">
-        {origens.map((origem) => (
-          <motion.button
-            key={origem.id}
-            onClick={() => handleOriginClick(origem.id)}
-            className={`flex items-center p-2 rounded-lg transition-colors ${
-              selectedId === origem.id 
-                ? "bg-blue-100 border-2 border-blue-500" 
-                : "bg-blue-50 hover:bg-blue-100 border-2 border-transparent"
-            }`}
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            layout
-          >
-            <span className="flex justify-center items-center w-8 h-8 rounded-full bg-blue-100 text-blue-600 mr-2">
-              {useOriginIcon(origem)}
-            </span>
-            <span className="text-sm font-medium text-blue-700 truncate">
-              {origem.descricao}
-            </span>
-          </motion.button>
-        ))}
+        {origens.map((origem) => {
+          // Move the icon rendering inside the map function to avoid hook rule violations
+          const originIcon = useOriginIcon(origem);
+          
+          return (
+            <motion.button
+              key={origem.id}
+              onClick={() => handleOriginClick(origem.id)}
+              className={`flex items-center p-2 rounded-lg transition-colors ${
+                selectedId === origem.id 
+                  ? "bg-blue-100 border-2 border-blue-500" 
+                  : "bg-blue-50 hover:bg-blue-100 border-2 border-transparent"
+              }`}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              layout
+            >
+              <span className="flex justify-center items-center w-8 h-8 rounded-full bg-blue-100 text-blue-600 mr-2">
+                {originIcon}
+              </span>
+              <span className="text-sm font-medium text-blue-700 truncate">
+                {origem.descricao}
+              </span>
+            </motion.button>
+          );
+        })}
       </div>
     );
-  }, [origens, isLoading, selectedId]);
+  }, [origens, isLoading, selectedId, handleOriginClick]);
 
   return (
     <Card className="h-full">
