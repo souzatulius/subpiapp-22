@@ -1,9 +1,8 @@
 
 import React from 'react';
-import { Card, CardContent } from '@/components/ui/card';
-import { Loader2, AlertCircle, Clock } from 'lucide-react';
-import { formatDistanceToNow } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Loader2, Clock } from 'lucide-react';
+import InsufficientDataMessage from './InsufficientDataMessage';
 
 interface OldestPendingListProps {
   data: any;
@@ -18,44 +17,57 @@ const OldestPendingList: React.FC<OldestPendingListProps> = ({
   isLoading,
   isSimulationActive
 }) => {
-  // Process SGZ data to find oldest pending demands
-  const pendingDemands = React.useMemo(() => {
+  // Process data to get oldest pending orders
+  const pendingOrders = React.useMemo(() => {
     if (!sgzData || sgzData.length === 0) return null;
     
-    // Filter for pending/in-progress demands
-    const pendingOrders = sgzData
-      .filter(order => ['pendente', 'em-andamento'].includes(order.sgz_status))
-      .map(order => ({
-        id: order.sgz_ordem_servico || order.ordem_servico || order.id || 'N/A',
-        title: order.sgz_descricao || order.sgz_tipo_servico || 'Sem descrição',
-        type: order.sgz_tipo_servico || 'Não informado',
-        district: order.sgz_distrito || 'Não informado',
-        createdAt: order.sgz_criado_em ? new Date(order.sgz_criado_em) : new Date(),
-        days: order.sgz_dias_ate_status_atual || 0
-      }))
-      .sort((a, b) => b.days - a.days);
+    // Filter for pending orders with valid creation date
+    const pendingList = sgzData.filter(order => {
+      const status = order.sgz_status?.toLowerCase() || '';
+      const isPending = !status.includes('conclu') && !status.includes('finaliz') && 
+                        !status.includes('cancel');
+      
+      return isPending && order.sgz_criado_em;
+    });
     
-    // Apply simulation if active
+    if (pendingList.length < 3) return null; // Not enough data
+    
+    // Calculate the age of each pending order
+    const today = new Date();
+    const ordersWithAge = pendingList.map(order => {
+      const createdDate = new Date(order.sgz_criado_em);
+      const timeDiff = today.getTime() - createdDate.getTime();
+      const daysDiff = Math.ceil(timeDiff / (1000 * 3600 * 24));
+      
+      return {
+        ...order,
+        age: daysDiff,
+        formattedDate: createdDate.toLocaleDateString('pt-BR')
+      };
+    });
+    
+    // Sort by age (descending) and get top 10
+    return ordersWithAge
+      .sort((a, b) => b.age - a.age)
+      .slice(0, 10);
+  }, [sgzData]);
+  
+  // Apply simulation effects if active
+  const simulatedList = React.useMemo(() => {
+    if (!pendingOrders) return null;
+    
     if (isSimulationActive) {
+      // In simulation mode, we want to show fewer very old items
       return pendingOrders
-        .filter((_, index) => index % 2 !== 0) // Remove every other item to simulate fewer pending
         .map(order => ({
           ...order,
-          days: Math.floor(order.days * 0.7) // Reduce age in simulation
-        }));
+          age: Math.floor(order.age * 0.7) // 30% reduction in age
+        }))
+        .sort((a, b) => b.age - a.age);
     }
     
-    return pendingOrders.slice(0, 5); // Top 5 oldest
-  }, [sgzData, isSimulationActive]);
-  
-  // Format relative time
-  const formatRelativeTime = (date: Date) => {
-    try {
-      return formatDistanceToNow(date, { addSuffix: true, locale: ptBR });
-    } catch (e) {
-      return 'Data inválida';
-    }
-  };
+    return pendingOrders;
+  }, [pendingOrders, isSimulationActive]);
   
   if (isLoading) {
     return (
@@ -65,42 +77,49 @@ const OldestPendingList: React.FC<OldestPendingListProps> = ({
     );
   }
   
-  if (!pendingDemands || pendingDemands.length === 0) {
+  if (!simulatedList || simulatedList.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center h-64 text-gray-500">
-        <AlertCircle className="h-8 w-8 mb-2" />
-        <p>Sem demandas pendentes</p>
+      <div className="h-64">
+        <InsufficientDataMessage message="Dados insuficientes para listar pendências antigas" />
       </div>
     );
   }
   
   return (
-    <div className="h-64 overflow-auto">
-      <div className="space-y-2">
-        {pendingDemands.map(demand => (
-          <Card key={demand.id} className="border-l-4 border-l-amber-500">
-            <CardContent className="p-3">
-              <div className="flex justify-between items-start">
-                <div className="flex-1">
-                  <p className="text-sm font-medium truncate" title={demand.title}>
-                    {demand.title}
+    <div className="h-64 p-2">
+      <h3 className="text-sm font-medium text-gray-700 mb-3">Pendências mais antigas</h3>
+      <ScrollArea className="h-[200px]">
+        <div className="space-y-2">
+          {simulatedList.map((order, index) => (
+            <div 
+              key={index} 
+              className="flex items-center p-2 bg-orange-50 rounded-md border border-orange-100"
+            >
+              <div className="flex items-center justify-center h-8 w-8 rounded-full bg-orange-100 text-orange-600 mr-3">
+                <Clock size={16} />
+              </div>
+              <div className="flex-1">
+                <div className="flex justify-between">
+                  <p className="text-sm font-medium text-gray-800">
+                    {order.sgz_tipo_servico || 'Serviço não especificado'}
+                  </p>
+                  <span className="text-xs font-bold bg-orange-200 text-orange-800 px-2 py-0.5 rounded-full">
+                    {order.age} dias
+                  </span>
+                </div>
+                <div className="flex justify-between mt-1">
+                  <p className="text-xs text-gray-600">
+                    {order.sgz_distrito || 'Distrito não especificado'}
                   </p>
                   <p className="text-xs text-gray-500">
-                    {demand.district} - {demand.type}
+                    Aberto em: {order.formattedDate}
                   </p>
                 </div>
-                <div className="flex items-center text-amber-500 text-xs font-medium">
-                  <Clock className="h-3 w-3 mr-1" />
-                  <span>{demand.days} dias</span>
-                </div>
               </div>
-              <p className="text-xs text-gray-400 mt-1">
-                Criado {formatRelativeTime(demand.createdAt)}
-              </p>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+            </div>
+          ))}
+        </div>
+      </ScrollArea>
     </div>
   );
 };

@@ -3,6 +3,7 @@ import React from 'react';
 import { Radar } from 'react-chartjs-2';
 import { Loader2 } from 'lucide-react';
 import { chartColors } from './ChartRegistration';
+import InsufficientDataMessage from './InsufficientDataMessage';
 
 interface DepartmentCount {
   name: string;
@@ -102,8 +103,8 @@ const ResponsibilityChart: React.FC<ResponsibilityChartProps> = ({
   
   if (!chartData || chartData.length === 0) {
     return (
-      <div className="flex items-center justify-center h-64 text-gray-500">
-        Sem dados disponíveis para exibir
+      <div className="h-64">
+        <InsufficientDataMessage message="Dados insuficientes para mostrar distribuição de responsabilidades" />
       </div>
     );
   }

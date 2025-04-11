@@ -1,15 +1,9 @@
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { Bar } from 'react-chartjs-2';
 import { Loader2 } from 'lucide-react';
 import { chartColors } from './ChartRegistration';
-
-interface DepartmentData {
-  name: string;
-  efficiency: number;
-  total: number;
-  completed: number;
-}
+import InsufficientDataMessage from './InsufficientDataMessage';
 
 interface DepartmentComparisonChartProps {
   data: any;
@@ -24,83 +18,113 @@ const DepartmentComparisonChart: React.FC<DepartmentComparisonChartProps> = ({
   isLoading,
   isSimulationActive
 }) => {
-  // Process data for department comparison
-  const departmentData = useMemo(() => {
-    if (!sgzData || sgzData.length === 0) return [];
+  // Process data to get department comparison metrics
+  const chartData = React.useMemo(() => {
+    if (!sgzData || sgzData.length === 0) return null;
     
-    // Count by department
-    const deptMap = new Map<string, DepartmentData>();
+    // Group by department and calculate metrics
+    const deptMap: Record<string, {
+      total: number,
+      completed: number,
+      pending: number,
+      avgResolutionTime: number,
+      resolutionTimes: number[]
+    }> = {};
     
     sgzData.forEach(order => {
-      const dept = order.sgz_area_tecnica || order.sgz_coordenacao || 'Não informado';
-      const isCompleted = order.sgz_status === 'concluido' || order.sgz_status === 'concluído';
+      const dept = order.sgz_area_tecnica || 'Não especificado';
+      const status = order.sgz_status?.toLowerCase() || '';
+      const isCompleted = status.includes('conclu') || status.includes('finaliz');
       
-      if (!deptMap.has(dept)) {
-        deptMap.set(dept, {
-          name: dept,
-          efficiency: 0,
-          total: 0,
-          completed: 0
-        });
+      if (!deptMap[dept]) {
+        deptMap[dept] = { 
+          total: 0, 
+          completed: 0, 
+          pending: 0, 
+          avgResolutionTime: 0,
+          resolutionTimes: []
+        };
       }
       
-      const deptData = deptMap.get(dept);
-      if (deptData) {
-        deptData.total += 1;
-        if (isCompleted) {
-          deptData.completed += 1;
+      deptMap[dept].total += 1;
+      
+      if (isCompleted) {
+        deptMap[dept].completed += 1;
+        
+        // Calculate resolution time if both dates are available
+        if (order.sgz_criado_em && order.sgz_modificado_em) {
+          const createdDate = new Date(order.sgz_criado_em);
+          const modifiedDate = new Date(order.sgz_modificado_em);
+          const timeDiff = modifiedDate.getTime() - createdDate.getTime();
+          const daysDiff = Math.ceil(timeDiff / (1000 * 3600 * 24));
+          
+          if (daysDiff >= 0) {
+            deptMap[dept].resolutionTimes.push(daysDiff);
+          }
         }
-        // Update efficiency - percentage of completed orders
-        deptData.efficiency = deptData.completed / deptData.total * 100;
+      } else {
+        deptMap[dept].pending += 1;
       }
     });
     
-    // Convert to array and sort by efficiency
-    const departments: DepartmentData[] = Array.from(deptMap.values())
-      .filter(d => d.total > 10) // Only show departments with enough data
-      .sort((a, b) => b.efficiency - a.efficiency)
-      .slice(0, 5); // Show top 5 departments
+    // Calculate average resolution time for each department
+    Object.keys(deptMap).forEach(dept => {
+      const times = deptMap[dept].resolutionTimes;
+      if (times.length > 0) {
+        deptMap[dept].avgResolutionTime = times.reduce((sum, time) => sum + time, 0) / times.length;
+      }
+    });
     
-    return departments;
+    // Convert to array and sort by completion rate
+    return Object.entries(deptMap)
+      .map(([name, stats]) => ({
+        name,
+        ...stats,
+        completionRate: stats.total > 0 ? (stats.completed / stats.total) * 100 : 0
+      }))
+      .filter(dept => dept.total >= 5) // Only include departments with at least 5 orders
+      .sort((a, b) => b.completionRate - a.completionRate)
+      .slice(0, 6); // Top 6 departments
   }, [sgzData]);
   
-  // Prepare chart data
-  const barChartData = useMemo(() => {
-    if (!departmentData || departmentData.length === 0) return null;
+  // Apply simulation effects if active
+  const simulatedData = React.useMemo(() => {
+    if (!chartData) return null;
     
-    // Apply simulation factor if active
-    const simulationFactor = isSimulationActive ? 1.15 : 1;
+    if (isSimulationActive) {
+      // In simulation mode, improve completion rates and resolution times
+      return chartData.map(dept => ({
+        ...dept,
+        completionRate: Math.min(dept.completionRate * 1.2, 100), // 20% improvement, cap at 100%
+        avgResolutionTime: dept.avgResolutionTime * 0.75 // 25% faster resolution
+      }));
+    }
+    
+    return chartData;
+  }, [chartData, isSimulationActive]);
+  
+  // Prepare bar chart data
+  const barData = React.useMemo(() => {
+    if (!simulatedData) return null;
     
     return {
-      labels: departmentData.map(d => d.name),
+      labels: simulatedData.map(d => d.name),
       datasets: [
         {
-          label: 'Eficiência (%)',
-          data: departmentData.map(d => isSimulationActive 
-            ? Math.min(d.efficiency * simulationFactor, 100) 
-            : d.efficiency
-          ),
+          label: 'Taxa de Conclusão (%)',
+          data: simulatedData.map(d => d.completionRate.toFixed(1)),
           backgroundColor: chartColors[0],
-          borderColor: chartColors[0],
-          borderWidth: 1,
-          borderRadius: 4,
-          barPercentage: 0.7,
-          categoryPercentage: 0.8
+          yAxisID: 'y'
         },
         {
-          label: 'Total de Ordens',
-          data: departmentData.map(d => d.total),
-          backgroundColor: chartColors[2],
-          borderColor: chartColors[2],
-          borderWidth: 1,
-          borderRadius: 4,
-          barPercentage: 0.7,
-          categoryPercentage: 0.8,
+          label: 'Tempo Médio (dias)',
+          data: simulatedData.map(d => d.avgResolutionTime.toFixed(1)),
+          backgroundColor: chartColors[4],
           yAxisID: 'y1'
         }
       ]
     };
-  }, [departmentData, isSimulationActive]);
+  }, [simulatedData]);
   
   // Chart options
   const options = {
@@ -109,41 +133,50 @@ const DepartmentComparisonChart: React.FC<DepartmentComparisonChartProps> = ({
     plugins: {
       legend: {
         position: 'top' as const,
-        align: 'end' as const,
-        labels: {
-          boxWidth: 12,
-          boxHeight: 12,
-        }
       },
       tooltip: {
         callbacks: {
           label: function(context: any) {
-            const value = context.parsed.y;
-            return context.dataset.label === 'Eficiência (%)' 
-              ? `${context.dataset.label}: ${value.toFixed(1)}%`
-              : `${context.dataset.label}: ${value}`;
+            const datasetLabel = context.dataset.label || '';
+            if (datasetLabel.includes('Taxa')) {
+              return `${datasetLabel}: ${context.raw}%`;
+            } else {
+              return `${datasetLabel}: ${context.raw} dias`;
+            }
+          },
+          afterLabel: function(context: any) {
+            const index = context.dataIndex;
+            const dept = simulatedData![index];
+            return [
+              `Total: ${dept.total} ordens`,
+              `Concluídas: ${dept.completed} ordens`,
+              `Pendentes: ${dept.pending} ordens`
+            ];
           }
         }
       }
     },
     scales: {
       y: {
-        beginAtZero: true,
+        type: 'linear' as const,
+        display: true,
+        position: 'left' as const,
         title: {
           display: true,
-          text: 'Eficiência (%)'
+          text: 'Taxa de Conclusão (%)'
         },
-        suggestedMax: 100
+        max: 100
       },
       y1: {
-        beginAtZero: true,
+        type: 'linear' as const,
+        display: true,
         position: 'right' as const,
         grid: {
-          drawOnChartArea: false,
+          drawOnChartArea: false
         },
         title: {
           display: true,
-          text: 'Total de Ordens'
+          text: 'Tempo Médio (dias)'
         }
       }
     }
@@ -157,17 +190,17 @@ const DepartmentComparisonChart: React.FC<DepartmentComparisonChartProps> = ({
     );
   }
   
-  if (!departmentData || departmentData.length === 0) {
+  if (!chartData || !barData) {
     return (
-      <div className="flex items-center justify-center h-64 text-gray-500">
-        Sem dados disponíveis para exibir
+      <div className="h-64">
+        <InsufficientDataMessage message="Dados insuficientes para comparação entre departamentos" />
       </div>
     );
   }
   
   return (
     <div className="h-64">
-      {barChartData && <Bar data={barChartData} options={options} />}
+      {barData && <Bar data={barData} options={options} />}
     </div>
   );
 };

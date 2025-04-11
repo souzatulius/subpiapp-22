@@ -3,6 +3,7 @@ import React from 'react';
 import { Bar } from 'react-chartjs-2';
 import { Loader2 } from 'lucide-react';
 import { chartColors } from './ChartRegistration';
+import InsufficientDataMessage from './InsufficientDataMessage';
 
 interface ResolutionTimeChartProps {
   data: any;
@@ -17,74 +18,90 @@ const ResolutionTimeChart: React.FC<ResolutionTimeChartProps> = ({
   isLoading,
   isSimulationActive
 }) => {
-  // Process SGZ data to get resolution time by service type
+  // Process data to get resolution time by service type
   const chartData = React.useMemo(() => {
     if (!sgzData || sgzData.length === 0) return null;
     
-    // Group by service type and calculate average resolution time
-    const serviceTypeMap = new Map();
-    
-    sgzData.forEach(order => {
-      if (order.sgz_status !== 'concluido') return;
+    // Filter for completed orders with valid dates
+    const completedOrders = sgzData.filter(order => {
+      const status = order.sgz_status?.toLowerCase() || '';
+      const isCompleted = status.includes('conclu') || status.includes('finaliz');
       
-      const serviceType = order.sgz_tipo_servico || 'Não informado';
-      const resolutionTime = order.sgz_dias_ate_status_atual || 0;
-      
-      if (!serviceTypeMap.has(serviceType)) {
-        serviceTypeMap.set(serviceType, {
-          name: serviceType,
-          totalTime: 0,
-          count: 0
-        });
-      }
-      
-      const serviceData = serviceTypeMap.get(serviceType);
-      serviceData.totalTime += resolutionTime;
-      serviceData.count += 1;
+      return isCompleted && order.sgz_criado_em && order.sgz_modificado_em;
     });
     
-    // Calculate average times
-    const serviceTypes = Array.from(serviceTypeMap.values())
-      .filter(service => service.count > 0)
-      .map(service => ({
-        name: service.name,
-        avgTime: service.totalTime / service.count
-      }))
-      .sort((a, b) => b.avgTime - a.avgTime);
+    if (completedOrders.length < 3) return null; // Not enough data
     
-    // Take top 10 service types
-    return serviceTypes.slice(0, 10);
+    // Calculate resolution time by service type
+    const serviceTimeMap: Record<string, number[]> = {};
+    
+    completedOrders.forEach(order => {
+      const serviceType = order.sgz_tipo_servico || 'Não informado';
+      const createdDate = new Date(order.sgz_criado_em);
+      const modifiedDate = new Date(order.sgz_modificado_em);
+      
+      // Calculate days difference
+      const timeDiff = modifiedDate.getTime() - createdDate.getTime();
+      const daysDiff = Math.ceil(timeDiff / (1000 * 3600 * 24));
+      
+      if (!serviceTimeMap[serviceType]) {
+        serviceTimeMap[serviceType] = [];
+      }
+      
+      serviceTimeMap[serviceType].push(daysDiff);
+    });
+    
+    // Calculate average resolution time for each service type
+    const serviceTimeAvg = Object.entries(serviceTimeMap)
+      .map(([type, times]) => ({
+        type,
+        avgTime: times.reduce((sum, time) => sum + time, 0) / times.length
+      }))
+      .filter(item => !isNaN(item.avgTime))
+      .sort((a, b) => b.avgTime - a.avgTime)
+      .slice(0, 7); // Top 7 service types by average time
+    
+    if (serviceTimeAvg.length === 0) return null;
+    
+    return serviceTimeAvg;
   }, [sgzData]);
   
-  // Prepare bar chart data
-  const barChartData = React.useMemo(() => {
+  // Apply simulation effects if active
+  const simulatedData = React.useMemo(() => {
     if (!chartData) return null;
     
-    // Apply simulation factor if active
-    const simulationFactor = isSimulationActive ? 0.7 : 1;
+    if (isSimulationActive) {
+      // In simulation mode, we want to show improved metrics (reduced resolution times)
+      return chartData.map(item => ({
+        ...item,
+        avgTime: item.avgTime * 0.7 // 30% improvement
+      }));
+    }
+    
+    return chartData;
+  }, [chartData, isSimulationActive]);
+  
+  // Prepare bar chart data
+  const barData = React.useMemo(() => {
+    if (!simulatedData) return null;
     
     return {
-      labels: chartData.map(d => d.name),
+      labels: simulatedData.map(d => d.type),
       datasets: [
         {
-          label: 'Tempo Médio (dias)',
-          data: chartData.map(d => isSimulationActive 
-            ? d.avgTime * simulationFactor 
-            : d.avgTime
-          ),
-          backgroundColor: chartColors[2],
-          borderColor: chartColors[2],
-          borderWidth: 1
+          label: 'Dias até resolução (média)',
+          data: simulatedData.map(d => d.avgTime.toFixed(1)),
+          backgroundColor: chartColors[3],
+          borderWidth: 0
         }
       ]
     };
-  }, [chartData, isSimulationActive]);
+  }, [simulatedData]);
   
   // Chart options
   const options = {
     responsive: true,
     maintainAspectRatio: false,
-    indexAxis: 'y' as const,
     plugins: {
       legend: {
         position: 'top' as const,
@@ -92,19 +109,17 @@ const ResolutionTimeChart: React.FC<ResolutionTimeChartProps> = ({
       tooltip: {
         callbacks: {
           label: function(context: any) {
-            const label = context.dataset.label || '';
-            const value = context.raw.toFixed(1) || 0;
-            return `${label}: ${value} dias`;
+            return `Média: ${context.raw} dias`;
           }
         }
       }
     },
     scales: {
-      x: {
+      y: {
         beginAtZero: true,
         title: {
           display: true,
-          text: 'Dias'
+          text: 'Dias (média)'
         }
       }
     }
@@ -118,17 +133,17 @@ const ResolutionTimeChart: React.FC<ResolutionTimeChartProps> = ({
     );
   }
   
-  if (!chartData || chartData.length === 0) {
+  if (!chartData || !barData) {
     return (
-      <div className="flex items-center justify-center h-64 text-gray-500">
-        Sem dados disponíveis para exibir
+      <div className="h-64">
+        <InsufficientDataMessage message="Dados insuficientes para calcular tempos de resolução" />
       </div>
     );
   }
   
   return (
     <div className="h-64">
-      {barChartData && <Bar data={barChartData} options={options} />}
+      {barData && <Bar data={barData} options={options} />}
     </div>
   );
 };

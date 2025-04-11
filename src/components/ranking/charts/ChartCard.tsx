@@ -3,6 +3,7 @@ import React, { ReactNode, useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Eye, EyeOff, Search } from 'lucide-react';
+import InsufficientDataMessage from './InsufficientDataMessage';
 
 interface ChartCardProps {
   title: string;
@@ -17,6 +18,7 @@ interface ChartCardProps {
   trendIndicator?: ReactNode;
   analysis?: string;
   showAnalysis?: boolean;
+  hasData?: boolean;
 }
 
 const ChartCard: React.FC<ChartCardProps> = ({ 
@@ -31,7 +33,8 @@ const ChartCard: React.FC<ChartCardProps> = ({
   isDraggable = true,
   trendIndicator,
   analysis,
-  showAnalysis = false
+  showAnalysis = false,
+  hasData = true
 }) => {
   const [isHovering, setIsHovering] = useState(false);
 
@@ -107,6 +110,8 @@ const ChartCard: React.FC<ChartCardProps> = ({
               <h4 className="font-medium text-blue-700 mb-2">Análise de dados</h4>
               <p className="text-sm text-gray-700">{analysis}</p>
             </div>
+          ) : !hasData ? (
+            <InsufficientDataMessage />
           ) : (
             <div className="w-full h-full overflow-hidden flex items-center justify-center">
               {typeof children === 'string' ? children : children}

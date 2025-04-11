@@ -3,6 +3,7 @@ import React, { useMemo } from 'react';
 import { Pie } from 'react-chartjs-2';
 import { Loader2 } from 'lucide-react';
 import { chartColors } from './ChartRegistration';
+import InsufficientDataMessage from './InsufficientDataMessage';
 
 interface ServiceTypeCount {
   name: string;
@@ -108,8 +109,8 @@ const ServiceTypesChart: React.FC<ServiceTypesChartProps> = ({
   
   if (!chartData || chartData.length === 0) {
     return (
-      <div className="flex items-center justify-center h-64 text-gray-500">
-        Sem dados disponíveis para exibir
+      <div className="h-64">
+        <InsufficientDataMessage message="Dados insuficientes para mostrar tipos de serviço" />
       </div>
     );
   }
