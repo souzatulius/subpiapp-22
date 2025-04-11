@@ -14,7 +14,7 @@ export const useDemandFormState = (
     problema_id: '',
     origem_id: '',
     tipo_midia_id: '',
-    prioridade: '',  // Inicializar como string vazia para que não tenha valor default
+    prioridade: '',
     prazo_resposta: '',
     nome_solicitante: '',
     telefone_solicitante: '',
@@ -24,11 +24,12 @@ export const useDemandFormState = (
     bairro_id: '',
     perguntas: ['', '', '', '', ''],
     detalhes_solicitacao: '',
+    resumo_situacao: '',
     arquivo_url: '',
     anexos: [],
     servico_id: '',
     nao_sabe_servico: false,
-    tem_protocolo_156: undefined, // Inicializar como undefined para que nenhuma opção esteja selecionada
+    tem_protocolo_156: undefined,
     numero_protocolo_156: '',
     coordenacao_id: ''
   };
@@ -254,6 +255,87 @@ export const useDemandFormState = (
     localStorage.removeItem(FORM_STORAGE_KEY);
   };
 
+  const generateAIContent = async () => {
+    if (!formData.problema_id || !formData.detalhes_solicitacao) {
+      console.error('Missing required data for AI content generation');
+      return;
+    }
+
+    try {
+      const selectedProblem = problemas.find(p => p.id === formData.problema_id);
+      let serviceName = '';
+      if (formData.servico_id) {
+        const service = servicos.find(s => s.id === formData.servico_id);
+        if (service) {
+          serviceName = service.descricao;
+        }
+      }
+
+      let bairroName = '';
+      if (formData.bairro_id) {
+        const bairro = filteredBairros.find(b => b.id === formData.bairro_id);
+        if (bairro) {
+          bairroName = bairro.nome;
+        }
+      }
+
+      const prompt = `
+      Com base nas informações abaixo, gere um título conciso, um resumo da situação, e 3 perguntas pertinentes para uma área técnica:
+      
+      Problema: ${selectedProblem?.descricao || ''}
+      ${serviceName ? `Serviço: ${serviceName}` : ''}
+      ${bairroName ? `Bairro: ${bairroName}` : ''}
+      ${formData.endereco ? `Endereço: ${formData.endereco}` : ''}
+      
+      Detalhes da solicitação: ${formData.detalhes_solicitacao}
+      
+      Por favor, formate a resposta da seguinte maneira:
+      Título: [título curto e objetivo]
+      
+      Resumo: [resumo conciso da situação em até 4 linhas]
+      
+      Perguntas:
+      1. [primeira pergunta]
+      2. [segunda pergunta]
+      3. [terceira pergunta]
+      `;
+
+      console.log("AI Prompt:", prompt);
+      
+      setTimeout(() => {
+        const aiTitle = `Solicitação: ${selectedProblem?.descricao || ''} ${serviceName ? `- ${serviceName}` : ''} ${bairroName ? `em ${bairroName}` : ''}`;
+        
+        const aiResumo = `Análise técnica solicitada para ${selectedProblem?.descricao || ''} ${
+          serviceName ? `relacionado a ${serviceName}` : ''
+        } ${bairroName ? `na região de ${bairroName}` : ''}. ${
+          formData.detalhes_solicitacao.substring(0, 100)
+        }${formData.detalhes_solicitacao.length > 100 ? '...' : ''}`;
+        
+        const aiPerguntas = [
+          `Qual é o prazo estimado para resolução deste problema de ${selectedProblem?.descricao || ''}?`,
+          `Quais são os procedimentos técnicos necessários para esta situação?`,
+          `Existe algum histórico similar para este tipo de ocorrência ${bairroName ? `em ${bairroName}` : ''}?`
+        ];
+        
+        setFormData(prev => ({
+          ...prev,
+          titulo: aiTitle,
+          resumo_situacao: aiResumo,
+          perguntas: [
+            aiPerguntas[0],
+            aiPerguntas[1],
+            aiPerguntas[2],
+            '',
+            ''
+          ]
+        }));
+      }, 1500);
+      
+    } catch (error) {
+      console.error('Error generating AI content:', error);
+    }
+  };
+
   return {
     formData,
     serviceSearch,
@@ -271,6 +353,7 @@ export const useDemandFormState = (
     setActiveStep,
     servicos,
     filteredServicos,
-    handleServiceSearch
+    handleServiceSearch,
+    generateAIContent
   };
 };

@@ -53,7 +53,9 @@ interface FormContentProps {
   filteredServicos?: any[];
   handleServiceSearch?: (value: string) => void;
   nextStep?: () => void;
-  onNavigateToStep?: (step: number) => void; // Added to navigate between steps
+  onNavigateToStep?: (step: number) => void;
+  onGenerateAIContent?: () => void;
+  isGenerating?: boolean;
 }
 
 const FormContent: React.FC<FormContentProps> = ({
@@ -77,7 +79,9 @@ const FormContent: React.FC<FormContentProps> = ({
   filteredServicos = [],
   handleServiceSearch,
   nextStep,
-  onNavigateToStep
+  onNavigateToStep,
+  onGenerateAIContent,
+  isGenerating = false
 }) => {
   switch (activeStep) {
     case 0:
@@ -133,6 +137,8 @@ const FormContent: React.FC<FormContentProps> = ({
           servicos={servicos}
           filteredBairros={filteredBairros}
           errors={errors}
+          onGenerateAIContent={onGenerateAIContent}
+          isGenerating={isGenerating}
         />
       );
     case 4:

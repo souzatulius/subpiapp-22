@@ -23,6 +23,7 @@ const CadastrarDemandaForm: React.FC<CadastrarDemandaFormProps> = ({
   const { user } = useAuth();
   const [validationErrors, setValidationErrors] = useState<ValidationError[]>([]);
   const [showValidationAlert, setShowValidationAlert] = useState(false);
+  const [isGeneratingAI, setIsGeneratingAI] = useState(false);
   const location = useLocation();
   const formRef = useRef<HTMLDivElement>(null);
   
@@ -51,7 +52,8 @@ const CadastrarDemandaForm: React.FC<CadastrarDemandaFormProps> = ({
     setActiveStep,
     servicos,
     filteredServicos,
-    handleServiceSearch
+    handleServiceSearch,
+    generateAIContent
   } = useDemandForm(user?.id, onClose);
 
   useEffect(() => {
@@ -71,6 +73,26 @@ const CadastrarDemandaForm: React.FC<CadastrarDemandaFormProps> = ({
 
   const handleStepClick = (stepIndex: number) => {
     setActiveStep(stepIndex);
+  };
+
+  const handleGenerateAIContent = async () => {
+    setIsGeneratingAI(true);
+    try {
+      await generateAIContent();
+      toast({
+        title: "Conteúdo gerado com sucesso",
+        description: "Sugestões de texto foram geradas com base nas informações fornecidas.",
+      });
+    } catch (error) {
+      console.error('Error generating AI content:', error);
+      toast({
+        title: "Erro ao gerar conteúdo",
+        description: "Não foi possível gerar o conteúdo sugerido. Tente novamente.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsGeneratingAI(false);
+    }
   };
 
   const validateFormBeforeSubmit = () => {
@@ -184,6 +206,8 @@ const CadastrarDemandaForm: React.FC<CadastrarDemandaFormProps> = ({
             handleServiceSearch={handleServiceSearch}
             nextStep={nextStep}
             onNavigateToStep={setActiveStep}
+            onGenerateAIContent={handleGenerateAIContent}
+            isGenerating={isGeneratingAI}
           />
           
           <FormActions 

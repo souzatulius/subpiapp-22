@@ -32,7 +32,8 @@ export const useDemandForm = (userId: string | undefined, onClose: () => void) =
     setActiveStep,
     servicos,
     filteredServicos,
-    handleServiceSearch
+    handleServiceSearch,
+    generateAIContent
   } = useDemandFormState(bairros, problemas);
 
   // Fixed by passing only the resetForm and onClose parameters
@@ -66,6 +67,7 @@ export const useDemandForm = (userId: string | undefined, onClose: () => void) =
     setActiveStep,
     servicos,
     filteredServicos,
-    handleServiceSearch
+    handleServiceSearch,
+    generateAIContent
   };
 };

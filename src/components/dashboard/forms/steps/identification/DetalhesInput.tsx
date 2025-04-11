@@ -1,42 +1,39 @@
 
 import React from 'react';
 import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
-import { ValidationError } from '@/lib/formValidationUtils';
-import { hasFieldError, getFieldErrorMessage } from './ValidationUtils';
+import { ValidationError, hasFieldError, getFieldErrorMessage } from '@/lib/formValidationUtils';
 
 interface DetalhesInputProps {
   value: string;
   onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
-  errors?: ValidationError[];
+  errors: ValidationError[];
+  label?: string;
 }
 
-const DetalhesInput: React.FC<DetalhesInputProps> = ({ 
-  value, 
-  onChange, 
-  errors = [] 
+const DetalhesInput: React.FC<DetalhesInputProps> = ({
+  value,
+  onChange,
+  errors,
+  label = "Detalhes da solicitação"
 }) => {
   return (
-    <div className="space-y-2">
-      <Label 
+    <div>
+      <label 
         htmlFor="detalhes_solicitacao" 
-        className={`block text-base font-semibold ${hasFieldError('detalhes_solicitacao', errors) ? 'text-orange-500' : ''}`}
+        className={`form-question-title ${hasFieldError('detalhes_solicitacao', errors) ? 'text-orange-500 font-semibold' : ''}`}
       >
-        Descreva a situação {hasFieldError('detalhes_solicitacao', errors) && <span className="text-orange-500">*</span>}
-      </Label>
-      
-      <Textarea
-        id="detalhes_solicitacao"
-        name="detalhes_solicitacao"
-        value={value}
+        {label} {hasFieldError('detalhes_solicitacao', errors) && <span className="text-orange-500">*</span>}
+      </label>
+      <Textarea 
+        id="detalhes_solicitacao" 
+        name="detalhes_solicitacao" 
+        value={value || ''}
         onChange={onChange}
-        rows={5}
-        placeholder="Inclua aqui o contexto ou cole o e-mail recebido"
-        className={`resize-none ${hasFieldError('detalhes_solicitacao', errors) ? 'border-orange-500' : ''}`}
+        placeholder="Forneça mais detalhes sobre a solicitação..."
+        className={`min-h-[150px] ${hasFieldError('detalhes_solicitacao', errors) ? 'border-orange-500' : ''}`}
       />
-      
       {hasFieldError('detalhes_solicitacao', errors) && (
-        <p className="text-orange-500 text-sm">{getFieldErrorMessage('detalhes_solicitacao', errors)}</p>
+        <p className="text-orange-500 text-sm mt-1">{getFieldErrorMessage('detalhes_solicitacao', errors)}</p>
       )}
     </div>
   );

@@ -4,6 +4,7 @@ import OriginStep from './OriginStep';
 import Protocolo156 from './identification/Protocolo156';
 import PriorityDeadlineStep from './PriorityDeadlineStep';
 import { ValidationError } from '@/lib/formValidationUtils';
+import DetalhesInput from './identification/DetalhesInput';
 
 interface ProtocolStepProps {
   formData: {
@@ -14,6 +15,7 @@ interface ProtocolStepProps {
     prioridade: string;
     tem_protocolo_156?: boolean;
     numero_protocolo_156?: string;
+    detalhes_solicitacao: string;
   };
   handleChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
   handleSelectChange: (name: string, value: string | boolean) => void;
@@ -42,36 +44,49 @@ const ProtocolStep: React.FC<ProtocolStepProps> = ({
   );
 
   return (
-    <div className="space-y-6">
-      <OriginStep
-        formData={formData}
-        handleChange={handleChange}
-        handleSelectChange={handleSelectChange}
-        origens={origens}
-        errors={errors}
-      />
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      {/* Left Column */}
+      <div className="space-y-6">
+        <OriginStep
+          formData={formData}
+          handleChange={handleChange}
+          handleSelectChange={handleSelectChange}
+          origens={origens}
+          errors={errors}
+        />
+        
+        {showProtocolField && (
+          <div className="animate-fadeIn">
+            <Protocolo156
+              temProtocolo156={formData.tem_protocolo_156}
+              numeroProtocolo156={formData.numero_protocolo_156}
+              handleSelectChange={(value) => handleSelectChange('tem_protocolo_156', value)}
+              handleChange={handleChange}
+              errors={errors}
+            />
+          </div>
+        )}
+        
+        {showPrioritySection && (
+          <div className="mt-6 animate-fadeIn">
+            <PriorityDeadlineStep
+              formData={formData}
+              handleSelectChange={handleSelectChange}
+              errors={errors}
+            />
+          </div>
+        )}
+      </div>
       
-      {showProtocolField && (
-        <div className="animate-fadeIn">
-          <Protocolo156
-            temProtocolo156={formData.tem_protocolo_156}
-            numeroProtocolo156={formData.numero_protocolo_156}
-            handleSelectChange={(value) => handleSelectChange('tem_protocolo_156', value)}
-            handleChange={handleChange}
-            errors={errors}
-          />
-        </div>
-      )}
-      
-      {showPrioritySection && (
-        <div className="mt-6 animate-fadeIn">
-          <PriorityDeadlineStep
-            formData={formData}
-            handleSelectChange={handleSelectChange}
-            errors={errors}
-          />
-        </div>
-      )}
+      {/* Right Column - Details field moved from step 4 */}
+      <div className="space-y-6">
+        <DetalhesInput
+          value={formData.detalhes_solicitacao}
+          onChange={handleChange}
+          errors={errors}
+          label="Descrição detalhada da solicitação"
+        />
+      </div>
     </div>
   );
 };

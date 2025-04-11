@@ -2,9 +2,10 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { supabase } from '@/integrations/supabase/client';
-import { Loader2, MessageSquare, Newspaper, Mail, Phone, Users, Building2 } from 'lucide-react';
+import { Loader2, Newspaper } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { useOriginIcon } from '@/hooks/useOriginIcon';
 
 interface OrigemDemanda {
   id: string;
@@ -54,32 +55,6 @@ const PressRequestQuickStartCard: React.FC = () => {
       navigate(`/dashboard/comunicacao/cadastrar?origem_id=${originId}`);
     }, 300);
   };
-  
-  // Function to get the appropriate icon for each type of origin
-  const getOriginIcon = (origem: OrigemDemanda) => {
-    const iconMap: Record<string, React.ReactNode> = {
-      'imprensa': <Newspaper className="h-5 w-5" />,
-      'email': <Mail className="h-5 w-5" />,
-      'telefone': <Phone className="h-5 w-5" />,
-      'cidadao': <Users className="h-5 w-5" />,
-      'gabinete': <Building2 className="h-5 w-5" />,
-      // Default icon if nothing matches
-      'default': <MessageSquare className="h-5 w-5" />
-    };
-    
-    // Check if we have a matching icon based on the description or icon field
-    const descLowercase = origem.descricao?.toLowerCase() || '';
-    const iconeName = origem.icone?.toLowerCase() || '';
-    
-    // Try to match by icon field first, then by description
-    for (const [key, value] of Object.entries(iconMap)) {
-      if (iconeName.includes(key) || descLowercase.includes(key)) {
-        return value;
-      }
-    }
-    
-    return iconMap.default;
-  };
 
   return (
     <Card className="h-full">
@@ -96,7 +71,7 @@ const PressRequestQuickStartCard: React.FC = () => {
             <Loader2 className="h-6 w-6 animate-spin text-blue-500" />
           </div>
         ) : (
-          <div className="grid grid-cols-2 gap-2">
+          <div className="flex flex-wrap gap-2">
             {origens.map((origem) => (
               <motion.button
                 key={origem.id}
@@ -110,9 +85,9 @@ const PressRequestQuickStartCard: React.FC = () => {
                 whileTap={{ scale: 0.98 }}
               >
                 <span className="flex justify-center items-center w-8 h-8 rounded-full bg-blue-100 text-blue-600 mr-2">
-                  {getOriginIcon(origem)}
+                  {useOriginIcon(origem)}
                 </span>
-                <span className="text-sm font-medium text-blue-700 truncate flex-1 text-left">
+                <span className="text-sm font-medium text-blue-700 truncate">
                   {origem.descricao}
                 </span>
               </motion.button>
