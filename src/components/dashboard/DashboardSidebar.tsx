@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { getNavigationSections } from '@/components/dashboard/sidebar/navigationConfig';
@@ -121,7 +120,7 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ isOpen }) => {
   
   return (
     <aside
-      className={`${sidebarWidth} ${sidebarPadding} py-6 flex-shrink-0 border-r border-[#00357033] bg-[#051b2c] h-full overflow-y-auto flex flex-col transition-all duration-300 ease-in-out`}
+      className={`${sidebarWidth} ${sidebarPadding} py-6 flex-shrink-0 border-r border-[#00357033] bg-[#051b2c] h-full min-h-screen flex flex-col transition-all duration-300 ease-in-out`}
     >
       <nav className="flex-1 flex flex-col">
         <div className="space-y-4 flex-1">

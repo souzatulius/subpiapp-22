@@ -1,4 +1,3 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -224,4 +223,31 @@ main,
 .min-h-screen {
   min-height: 100vh;
   min-height: 100dvh;
+}
+
+/* Sidebar full-height utility class */
+.sidebar-full-height {
+  height: 100vh;
+  height: 100dvh;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+/* Ensure min-h-screen works consistently */
+.min-h-screen {
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+/* Bottom spacing for main content areas */
+.main-content-area {
+  padding-bottom: 8rem; /* 32px */
+}
+
+/* Ensure content area has proper spacing on mobile */
+@media (max-width: 640px) {
+  .main-content-area {
+    padding-bottom: 10rem; /* 40px */
+  }
 }

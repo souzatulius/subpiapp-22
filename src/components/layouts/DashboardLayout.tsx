@@ -43,7 +43,7 @@ const DashboardLayout: React.FC = () => {
       <div className="flex flex-1 overflow-hidden">
         {/* Sidebar container with full height */}
         {!isMobile && (
-          <div className="h-full flex-shrink-0">
+          <div className="sidebar-full-height">
             <DashboardSidebar isOpen={sidebarOpen} />
           </div>
         )}
@@ -53,7 +53,7 @@ const DashboardLayout: React.FC = () => {
           
           <div className="flex-1 w-full max-w-7xl mx-auto overflow-y-auto">
             <motion.div 
-              className={`p-4 ${isMobile ? 'pb-24' : 'pb-16'} h-full`}
+              className={`p-4 ${isMobile ? 'pb-40' : 'pb-32'} h-full`}
               initial={{ opacity: 1, y: 20 }} 
               animate={{ opacity: 1, y: 0 }} 
               transition={{ duration: 0.5 }}

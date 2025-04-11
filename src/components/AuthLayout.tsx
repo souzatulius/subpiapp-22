@@ -20,7 +20,7 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({
       <Header showControls={false} hideUserMenu={true} />
 
       {/* Main content */}
-      <div className="flex flex-1 flex-col md:flex-row pb-8">
+      <div className="flex flex-1 flex-col md:flex-row pb-16">
         {/* Left side - Fixed content - Mostrar apenas no desktop */}
         {!isMobile && (
           <div className="hidden md:flex md:w-1/2 bg-white px-6 md:px-16 py-12 flex-col justify-center lg:px-[20px] h-full min-h-full">

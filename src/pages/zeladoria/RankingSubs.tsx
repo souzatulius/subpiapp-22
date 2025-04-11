@@ -65,7 +65,7 @@ const RankingSubs = () => {
   
   return (
     <motion.div 
-      className="max-w-full mx-auto pdf-content h-full" 
+      className="max-w-full mx-auto pdf-content h-full pb-32" 
       initial={{ opacity: 0, y: 20 }} 
       animate={{ opacity: 1, y: 0 }} 
       transition={{ duration: 0.5 }}
