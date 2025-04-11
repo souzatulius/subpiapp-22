@@ -83,50 +83,49 @@ const ResponderDemandaContent: React.FC = () => {
     );
   }
 
-  // Render the unified list/grid view
+  // Render the unified list/grid view - removendo a div container externa desnecessária
   return (
-    <div className="animate-fade-in container mx-auto">
-      <UnifiedViewContainer
-        items={filteredDemandas}
-        isLoading={isLoadingDemandas}
-        renderListItem={(demanda) => (
-          <DemandaCard
-            demanda={demanda}
-            isSelected={false}
-            onClick={() => {}}
-          />
-        )}
-        renderGridItem={(demanda) => (
-          <DemandaCard
-            demanda={demanda}
-            isSelected={false}
-            onClick={() => {}}
-          />
-        )}
-        idExtractor={(demanda) => demanda.id}
-        searchTerm={searchTerm}
-        setSearchTerm={setSearchTerm}
-        onItemClick={handleSelectDemanda}
-        selectedItemId={selectedDemanda?.id}
-        filterOptions={{
-          primaryFilter: {
-            value: areaFilter,
-            onChange: setAreaFilter,
-            options: areaOptions,
-            placeholder: 'Coordenação'
-          },
-          secondaryFilter: {
-            value: prioridadeFilter,
-            onChange: setPrioridadeFilter,
-            options: prioridadeOptions,
-            placeholder: 'Prioridade'
-          }
-        }}
-        emptyStateMessage="Nenhuma demanda encontrada com os filtros selecionados"
-        searchPlaceholder="Buscar demanda..."
-        defaultViewMode={viewMode as ViewMode}
-      />
-    </div>
+    <UnifiedViewContainer
+      items={filteredDemandas}
+      isLoading={isLoadingDemandas}
+      renderListItem={(demanda) => (
+        <DemandaCard
+          demanda={demanda}
+          isSelected={false}
+          onClick={() => {}}
+        />
+      )}
+      renderGridItem={(demanda) => (
+        <DemandaCard
+          demanda={demanda}
+          isSelected={false}
+          onClick={() => {}}
+        />
+      )}
+      idExtractor={(demanda) => demanda.id}
+      searchTerm={searchTerm}
+      setSearchTerm={setSearchTerm}
+      onItemClick={handleSelectDemanda}
+      selectedItemId={selectedDemanda?.id}
+      filterOptions={{
+        primaryFilter: {
+          value: areaFilter,
+          onChange: setAreaFilter,
+          options: areaOptions,
+          placeholder: 'Coordenação'
+        },
+        secondaryFilter: {
+          value: prioridadeFilter,
+          onChange: setPrioridadeFilter,
+          options: prioridadeOptions,
+          placeholder: 'Prioridade'
+        }
+      }}
+      emptyStateMessage="Nenhuma demanda encontrada com os filtros selecionados"
+      searchPlaceholder="Buscar demanda..."
+      defaultViewMode={viewMode as ViewMode}
+      className="animate-fade-in" // Mantendo a animação diretamente na classe do UnifiedViewContainer
+    />
   );
 };
 

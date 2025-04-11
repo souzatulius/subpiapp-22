@@ -17,7 +17,7 @@ const ResponderDemandas = () => {
         color="bg-gradient-to-r from-blue-700 to-blue-800"
       />
       
-      <div className="mt-6 rounded-xl overflow-hidden">
+      <div className="mt-6">
         <ResponderDemandaForm />
       </div>
     </div>
