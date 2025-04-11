@@ -1,11 +1,12 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Upload, ListStart, CalendarDays } from 'lucide-react';
 import { toast } from 'sonner';
 import { handleFileUpload, handlePainelZeladoriaUpload } from '@/hooks/ranking/services/uploadService';
-import { Progress } from '@/components/ui/progress';
 import { useAnimatedFeedback } from '@/hooks/use-animated-feedback';
+import { UploadProgressStats, UploadStats } from './types';
+import UploadProgressDisplay from './UploadProgressDisplay';
 
 interface UploadSectionProps {
   onUploadStart: () => void;
@@ -16,6 +17,14 @@ interface UploadSectionProps {
   onRefreshData: () => Promise<void>;
 }
 
+const initialProgressState: UploadProgressStats = {
+  totalRows: 0,
+  processedRows: 0,
+  updatedRows: 0,
+  newRows: 0,
+  stage: 'uploading',
+};
+
 const UploadSection = ({
   onUploadStart,
   onUploadComplete,
@@ -24,9 +33,53 @@ const UploadSection = ({
   user,
   onRefreshData
 }: UploadSectionProps) => {
-  const [uploadProgress, setUploadProgress] = useState(0);
-  const [uploadStats, setUploadStats] = useState<any>({});
+  const [uploadStats, setUploadStats] = useState<UploadStats>({});
   const { showFeedback } = useAnimatedFeedback();
+
+  // Auto refresh data when uploads are complete
+  useEffect(() => {
+    const sgzComplete = uploadStats.sgz?.stage === 'complete';
+    const painelComplete = uploadStats.painel?.stage === 'complete';
+    
+    if ((sgzComplete || painelComplete) && !uploadStats.lastRefreshed) {
+      // Set a small delay before refreshing to ensure all data is committed
+      const timer = setTimeout(() => {
+        onRefreshData().then(() => {
+          setUploadStats(prev => ({ 
+            ...prev, 
+            lastRefreshed: new Date() 
+          }));
+          
+          showFeedback('success', 'Dados atualizados com sucesso');
+        });
+      }, 1500);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [uploadStats, onRefreshData, showFeedback]);
+
+  // Calculate estimated time remaining for processing
+  const calculateEstimatedTime = (stats: UploadProgressStats): string => {
+    if (stats.processedRows === 0 || stats.totalRows === 0) return "Calculando...";
+    
+    const percentComplete = stats.processedRows / stats.totalRows;
+    if (percentComplete >= 0.99) return "Menos de 5 segundos";
+    
+    // Estimate based on typical processing rate
+    const remainingRows = stats.totalRows - stats.processedRows;
+    const estimatedSecondsPerRow = 0.05; // Adjust based on actual performance
+    const secondsRemaining = Math.ceil(remainingRows * estimatedSecondsPerRow);
+    
+    if (secondsRemaining < 60) return `${secondsRemaining} segundos`;
+    if (secondsRemaining < 3600) {
+      const minutes = Math.floor(secondsRemaining / 60);
+      return `${minutes} ${minutes === 1 ? 'minuto' : 'minutos'}`;
+    }
+    
+    const hours = Math.floor(secondsRemaining / 3600);
+    const minutes = Math.floor((secondsRemaining % 3600) / 60);
+    return `${hours} ${hours === 1 ? 'hora' : 'horas'} e ${minutes} ${minutes === 1 ? 'minuto' : 'minutos'}`;
+  };
 
   // Handle SGZ file upload
   const handleSGZFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -34,113 +87,246 @@ const UploadSection = ({
     if (!file) return;
 
     onUploadStart();
-    setUploadProgress(5); // Start progress
+    
+    // Initialize progress tracking
+    setUploadStats(prev => ({
+      ...prev,
+      sgz: {
+        ...initialProgressState,
+        stage: 'uploading',
+        message: 'Iniciando upload do arquivo SGZ...',
+        totalRows: 0,
+      },
+      lastRefreshed: undefined
+    }));
     
     try {
       const result = await handleFileUpload(
         file, 
         user, 
-        (progress) => setUploadProgress(progress),
-        (stats) => setUploadStats(stats)
+        (progress) => {
+          setUploadStats(prev => ({
+            ...prev,
+            sgz: {
+              ...prev.sgz!,
+              processedRows: Math.floor((progress / 100) * (prev.sgz?.totalRows || 100)),
+              stage: progress >= 100 ? 'complete' : (progress >= 30 ? 'processing' : 'uploading'),
+              message: progress >= 100 
+                ? 'Upload concluído!' 
+                : (progress >= 30 ? 'Processando registros...' : 'Enviando arquivo...'),
+            }
+          }));
+        },
+        (stats) => {
+          setUploadStats(prev => {
+            const newSgzStats = {
+              ...prev.sgz!,
+              totalRows: stats.totalRows || stats.totalServiceOrders || 100,
+              newRows: stats.newOrders || 0,
+              updatedRows: stats.updatedOrders || 0,
+              message: stats.message || prev.sgz?.message,
+              stage: stats.processingStatus === 'processing' 
+                ? 'processing' 
+                : (stats.processingStatus === 'success' ? 'complete' : stats.processingStatus === 'error' ? 'error' : prev.sgz?.stage)
+            };
+            
+            // Add estimated time remaining
+            if (newSgzStats.stage === 'processing') {
+              newSgzStats.estimatedTimeRemaining = calculateEstimatedTime(newSgzStats);
+            }
+            
+            return {
+              ...prev,
+              sgz: newSgzStats
+            };
+          });
+        }
       );
       
       if (result && result.success) {
-        setUploadProgress(100);
+        setUploadStats(prev => ({
+          ...prev,
+          sgz: {
+            ...prev.sgz!,
+            stage: 'complete',
+            message: `Upload concluído: ${result.recordCount} registros processados`,
+            processedRows: result.recordCount,
+            totalRows: result.recordCount,
+            newRows: result.newOrders || 0,
+            updatedRows: result.updatedOrders || 0
+          }
+        }));
         
-        // Show animated feedback
         showFeedback('success', `Upload da planilha SGZ concluído: ${result.recordCount} registros processados`);
         
-        // Also toast for additional visibility
-        toast.success(`Upload da planilha SGZ concluído: ${result.recordCount} registros processados`);
+        onUploadComplete(result.id!, result.data || []);
         
-        onUploadComplete(result.id, result.data || []);
-        
-        // Refresh the data to show the new uploads
-        await onRefreshData();
+        // Data will be refreshed automatically via the useEffect
       } else {
-        setUploadProgress(0);
+        setUploadStats(prev => ({
+          ...prev,
+          sgz: {
+            ...prev.sgz!,
+            stage: 'error',
+            message: `Erro no upload: ${result?.message || 'Erro desconhecido'}`
+          }
+        }));
+        
         showFeedback('error', `Erro no upload: ${result?.message || 'Erro desconhecido'}`);
         toast.error(`Erro no upload: ${result?.message || 'Erro desconhecido'}`);
       }
     } catch (err) {
       console.error('Error uploading SGZ file:', err);
-      setUploadProgress(0);
+      
+      setUploadStats(prev => ({
+        ...prev,
+        sgz: {
+          ...prev.sgz!,
+          stage: 'error',
+          message: 'Erro ao processar arquivo SGZ'
+        }
+      }));
+      
       showFeedback('error', 'Erro ao processar arquivo SGZ');
       toast.error('Erro ao processar arquivo SGZ');
     } finally {
       // Reset the file input
       event.target.value = '';
-      // Reset progress after a delay
-      setTimeout(() => setUploadProgress(0), 2000);
     }
   };
 
-  // Handle Painel file upload
+  // Handle Painel file upload with similar improvements
   const handlePainelFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
     onUploadStart();
-    setUploadProgress(5); // Start progress
+    
+    // Initialize progress tracking
+    setUploadStats(prev => ({
+      ...prev,
+      painel: {
+        ...initialProgressState,
+        stage: 'uploading',
+        message: 'Iniciando upload do arquivo do Painel...',
+        totalRows: 0,
+      },
+      lastRefreshed: undefined
+    }));
     
     try {
       const result = await handlePainelZeladoriaUpload(
         file, 
         user, 
-        (progress) => setUploadProgress(progress),
-        (stats) => setUploadStats(stats)
+        (progress) => {
+          setUploadStats(prev => ({
+            ...prev,
+            painel: {
+              ...prev.painel!,
+              processedRows: Math.floor((progress / 100) * (prev.painel?.totalRows || 100)),
+              stage: progress >= 100 ? 'complete' : (progress >= 30 ? 'processing' : 'uploading'),
+              message: progress >= 100 
+                ? 'Upload concluído!' 
+                : (progress >= 30 ? 'Processando registros...' : 'Enviando arquivo...'),
+            }
+          }));
+        },
+        (stats) => {
+          setUploadStats(prev => {
+            const newPainelStats = {
+              ...prev.painel!,
+              totalRows: stats.totalRecords || stats.recordCount || 100,
+              newRows: stats.recordCount || 0,
+              updatedRows: 0,
+              message: stats.message || prev.painel?.message,
+              stage: stats.processingStatus === 'processing' 
+                ? 'processing' 
+                : (stats.processingStatus === 'success' ? 'complete' : stats.processingStatus === 'error' ? 'error' : prev.painel?.stage)
+            };
+            
+            // Add estimated time remaining
+            if (newPainelStats.stage === 'processing') {
+              newPainelStats.estimatedTimeRemaining = calculateEstimatedTime(newPainelStats);
+            }
+            
+            return {
+              ...prev,
+              painel: newPainelStats
+            };
+          });
+        }
       );
       
       if (result && result.success) {
-        setUploadProgress(100);
+        setUploadStats(prev => ({
+          ...prev,
+          painel: {
+            ...prev.painel!,
+            stage: 'complete',
+            message: `Upload concluído: ${result.recordCount} registros processados`,
+            processedRows: result.recordCount,
+            totalRows: result.recordCount,
+            newRows: result.recordCount,
+            updatedRows: 0
+          }
+        }));
         
-        // Show animated feedback
         showFeedback('success', `Upload da planilha do Painel concluído: ${result.recordCount} registros processados`);
         
-        // Also toast for additional visibility
-        toast.success(`Upload da planilha do Painel concluído: ${result.recordCount} registros processados`);
+        onPainelUploadComplete(result.id!, result.data || []);
         
-        onPainelUploadComplete(result.id, result.data || []);
-        
-        // Refresh the data to show the new uploads
-        await onRefreshData();
+        // Data will be refreshed automatically via the useEffect
       } else {
-        setUploadProgress(0);
+        setUploadStats(prev => ({
+          ...prev,
+          painel: {
+            ...prev.painel!,
+            stage: 'error',
+            message: `Erro no upload: ${result?.message || 'Erro desconhecido'}`
+          }
+        }));
+        
         showFeedback('error', `Erro no upload: ${result?.message || 'Erro desconhecido'}`);
         toast.error(`Erro no upload: ${result?.message || 'Erro desconhecido'}`);
       }
     } catch (err) {
       console.error('Error uploading Painel file:', err);
-      setUploadProgress(0);
+      
+      setUploadStats(prev => ({
+        ...prev,
+        painel: {
+          ...prev.painel!,
+          stage: 'error',
+          message: 'Erro ao processar arquivo do Painel'
+        }
+      }));
+      
       showFeedback('error', 'Erro ao processar arquivo do Painel');
       toast.error('Erro ao processar arquivo do Painel');
     } finally {
       // Reset the file input
       event.target.value = '';
-      // Reset progress after a delay
-      setTimeout(() => setUploadProgress(0), 2000);
     }
   };
 
   return (
     <div className="space-y-4">
-      {/* Progress Bar */}
-      {uploadProgress > 0 && (
-        <div className="space-y-2">
-          <div className="flex justify-between items-center text-xs text-gray-600">
-            <span>
-              {uploadProgress < 100 
-                ? `Processando... ${uploadProgress}%` 
-                : 'Concluído! 100%'}
-            </span>
-            {uploadStats.totalServiceOrders && (
-              <span>Total de Ordens: {uploadStats.totalServiceOrders}</span>
-            )}
-          </div>
-          <Progress 
-            value={uploadProgress} 
-            className="h-2 bg-gray-100" 
-          />
+      {/* Progress Bars for Active Uploads */}
+      {(uploadStats.sgz || uploadStats.painel) && (
+        <div className="space-y-4">
+          {uploadStats.sgz && (
+            <div className="p-3 bg-blue-50 rounded-lg border border-blue-100">
+              <h4 className="font-medium text-sm text-blue-800 mb-2">Upload SGZ</h4>
+              <UploadProgressDisplay stats={uploadStats.sgz} type="sgz" />
+            </div>
+          )}
+          
+          {uploadStats.painel && (
+            <div className="p-3 bg-indigo-50 rounded-lg border border-indigo-100">
+              <h4 className="font-medium text-sm text-indigo-800 mb-2">Upload Painel</h4>
+              <UploadProgressDisplay stats={uploadStats.painel} type="painel" />
+            </div>
+          )}
         </div>
       )}
     
@@ -170,20 +356,10 @@ const UploadSection = ({
             >
               <span>
                 <Upload className="h-4 w-4 mr-2" />
-                {isUploading ? 'Processando...' : 'Selecionar Arquivo'}
+                {isUploading && (!uploadStats.sgz || uploadStats.sgz.stage !== 'complete') ? 'Processando...' : 'Selecionar Arquivo'}
               </span>
             </Button>
           </label>
-          
-          {isUploading && uploadStats.processingStatus === 'processing' && uploadStats.newOrders !== undefined && (
-            <div className="mt-2 text-xs text-gray-600">
-              <p>Novas ordens: {uploadStats.newOrders}</p>
-              <p>Ordens atualizadas: {uploadStats.updatedOrders}</p>
-              {uploadStats.totalServiceOrders && (
-                <p>Total no sistema: {uploadStats.totalServiceOrders}</p>
-              )}
-            </div>
-          )}
         </div>
 
         {/* Painel Upload */}
@@ -211,18 +387,10 @@ const UploadSection = ({
             >
               <span>
                 <Upload className="h-4 w-4 mr-2" />
-                {isUploading ? 'Processando...' : 'Selecionar Arquivo'}
+                {isUploading && (!uploadStats.painel || uploadStats.painel.stage !== 'complete') ? 'Processando...' : 'Selecionar Arquivo'}
               </span>
             </Button>
           </label>
-          
-          {isUploading && uploadStats.processingStatus === 'processing' && uploadStats.message && (
-            <div className="mt-2 text-xs text-gray-600">
-              <p>{uploadStats.message}</p>
-              {uploadStats.recordCount > 0 && <p>Registros: {uploadStats.recordCount}</p>}
-              {uploadStats.totalRecords && <p>Total no sistema: {uploadStats.totalRecords}</p>}
-            </div>
-          )}
         </div>
       </div>
     </div>

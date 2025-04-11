@@ -35,7 +35,7 @@ export function PrioridadeBadge({
       text: 'text-green-700',
       border: 'border-green-200'
     }
-  }[prioridade.toLowerCase()] || {
+  }[prioridade?.toLowerCase()] || {
     icon: Clock,
     bg: 'bg-gray-50',
     text: 'text-gray-700',

@@ -39,3 +39,19 @@ export interface ChartVisibility {
 export interface ChartData {
   [key: string]: any;
 }
+
+export interface UploadProgressStats {
+  totalRows: number;
+  processedRows: number;
+  updatedRows: number;
+  newRows: number;
+  estimatedTimeRemaining?: string;
+  stage: 'uploading' | 'processing' | 'complete' | 'error';
+  message?: string;
+}
+
+export interface UploadStats {
+  sgz?: UploadProgressStats;
+  painel?: UploadProgressStats;
+  lastRefreshed?: Date;
+}

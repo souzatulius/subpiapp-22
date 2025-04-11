@@ -47,9 +47,9 @@ export function ResponsabilidadeBadge({
       text: 'text-green-700',
       border: 'border-green-200'
     }
-  }[responsavel.toLowerCase()] || {
+  }[responsavel?.toLowerCase()] || {
     icon: Building2,
-    label: 'Outro',
+    label: responsavel || 'Outro',
     bg: 'bg-gray-50',
     text: 'text-gray-700',
     border: 'border-gray-200'

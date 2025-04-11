@@ -20,6 +20,7 @@ export interface FilterOptions {
   dataFim?: string;
   tiposServico?: string[];
   departamento?: string[];
+  responsavel?: string[]; // Added to filter by responsibility
 }
 
 export interface ChartItem {
@@ -32,7 +33,7 @@ export interface ChartItem {
   isAnalysisExpanded: boolean;
   showAnalysisOnly: boolean;
   subtitle?: string;
-  type?: string; // Added type property to match useChartItems usage
+  type?: string;
 }
 
 // Types for upload service
@@ -44,6 +45,8 @@ export interface ProcessingStats {
   totalRecords?: number;
   recordCount?: number;
   message?: string;
+  totalRows?: number; // Added for better progress tracking
+  totalServiceOrders?: number;
 }
 
 export interface UploadResult {
@@ -55,4 +58,20 @@ export interface UploadResult {
   newOrders?: number;
   updatedOrders?: number;
   totalRecords?: number;
+}
+
+export interface UploadProgressStats {
+  totalRows: number;
+  processedRows: number;
+  updatedRows: number;
+  newRows: number;
+  estimatedTimeRemaining?: string;
+  stage: 'uploading' | 'processing' | 'complete' | 'error';
+  message?: string;
+}
+
+export interface UploadStats {
+  sgz?: UploadProgressStats;
+  painel?: UploadProgressStats;
+  lastRefreshed?: Date;
 }

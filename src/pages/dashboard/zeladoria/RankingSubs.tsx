@@ -15,6 +15,7 @@ import UploadSection from '@/components/ranking/UploadSection';
 import { supabase } from '@/integrations/supabase/client';
 import FeedbackProvider from '@/components/ui/feedback-provider';
 import CleanDataDialog from '@/components/ranking/CleanDataDialog';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const RankingSubs = () => {
   const [filterDialogOpen, setFilterDialogOpen] = useState(false);
@@ -32,11 +33,16 @@ const RankingSubs = () => {
         setCurrentUser(data.session.user);
         
         // Check if user is admin
-        const { data: isAdminData } = await supabase.rpc('is_admin', {
-          user_id: data.session.user.id
-        });
-        
-        setIsAdmin(Boolean(isAdminData));
+        try {
+          const { data: isAdminData } = await supabase.rpc('is_admin', {
+            user_id: data.session.user.id
+          });
+          
+          setIsAdmin(Boolean(isAdminData));
+        } catch (error) {
+          console.error('Error checking admin status:', error);
+          setIsAdmin(false);
+        }
       } else {
         console.log('No authenticated user found');
       }
@@ -59,16 +65,17 @@ const RankingSubs = () => {
 
   const handleUploadComplete = (id: string, data: any[]) => {
     console.log(`SGZ upload complete, ID: ${id}, Records: ${data.length}`);
-    setIsUploading(false);
+    // Don't reset isUploading immediately to allow for background processing
   };
 
   const handlePainelUploadComplete = (id: string, data: any[]) => {
     console.log(`Painel upload complete, ID: ${id}, Records: ${data.length}`);
-    setIsUploading(false);
+    // Don't reset isUploading immediately to allow for background processing
   };
   
   const handleCleanDataSuccess = () => {
     // We'll reload the data in the child component
+    setCleanDataDialogOpen(false);
   };
   
   return (
@@ -78,6 +85,7 @@ const RankingSubs = () => {
           filterDialogOpen={filterDialogOpen}
           setFilterDialogOpen={setFilterDialogOpen}
           isUploading={isUploading}
+          setIsUploading={setIsUploading}
           handleUploadStart={handleUploadStart}
           handleUploadComplete={handleUploadComplete}
           handlePainelUploadComplete={handlePainelUploadComplete}
@@ -100,6 +108,7 @@ const RankingSubsContent = ({
   filterDialogOpen,
   setFilterDialogOpen,
   isUploading,
+  setIsUploading,
   handleUploadStart,
   handleUploadComplete,
   handlePainelUploadComplete,
@@ -112,7 +121,7 @@ const RankingSubsContent = ({
   setCleanDataDialogOpen,
   handleCleanDataSuccess
 }) => {
-  const { refreshData } = useRealData();
+  const { refreshData, isLoading, isRefreshing, lastUpdated, formattedLastUpdated } = useRealData();
   
   return (
     <motion.div 
@@ -138,9 +147,10 @@ const RankingSubsContent = ({
               size="sm"
               className="bg-blue-50 text-blue-600 border-blue-200 hover:bg-blue-100"
               onClick={refreshData}
+              disabled={isRefreshing || isLoading}
             >
-              <RefreshCw className="h-4 w-4 mr-1" />
-              Atualizar Dados
+              <RefreshCw className={`h-4 w-4 mr-1 ${isRefreshing ? 'animate-spin' : ''}`} />
+              {isRefreshing ? 'Atualizando...' : 'Atualizar Dados'}
             </Button>
             
             {isAdmin && (
@@ -149,6 +159,7 @@ const RankingSubsContent = ({
                 size="sm"
                 className="bg-red-50 text-red-600 border-red-200 hover:bg-red-100"
                 onClick={() => setCleanDataDialogOpen(true)}
+                disabled={isRefreshing || isLoading}
               >
                 <Trash2 className="h-4 w-4 mr-1" />
                 Limpar Dados
@@ -156,6 +167,18 @@ const RankingSubsContent = ({
             )}
           </div>
         </div>
+        
+        {/* Last Updated Indicator */}
+        {formattedLastUpdated && (
+          <div className="mb-4 text-xs text-gray-500 flex items-center">
+            <span className="mr-1">Última atualização:</span>
+            {isRefreshing ? (
+              <Skeleton className="h-4 w-32" />
+            ) : (
+              <span className="font-medium">{formattedLastUpdated}</span>
+            )}
+          </div>
+        )}
         
         <UploadSection 
           onUploadStart={handleUploadStart}
