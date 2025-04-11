@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useCallback } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -216,12 +217,12 @@ const ConsultarDemandasContent = () => {
         </div>
 
         <div className="flex space-x-2 w-full md:w-2/3">
-          <Select onValueChange={setStatusFilter}>
+          <Select value={statusFilter} onValueChange={setStatusFilter}>
             <SelectTrigger className="w-full">
               <SelectValue placeholder="Filtrar por status" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Todos os status</SelectItem>
+              <SelectItem value="todos">Todos os status</SelectItem>
               <SelectItem value="pendente">Pendente</SelectItem>
               <SelectItem value="em-andamento">Em Andamento</SelectItem>
               <SelectItem value="concluido">Concluído</SelectItem>
@@ -230,12 +231,12 @@ const ConsultarDemandasContent = () => {
             </SelectContent>
           </Select>
 
-          <Select onValueChange={setOrigemFilter}>
+          <Select value={origemFilter} onValueChange={setOrigemFilter}>
             <SelectTrigger className="w-full">
               <SelectValue placeholder="Filtrar por origem" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Todas as origens</SelectItem>
+              <SelectItem value="todas">Todas as origens</SelectItem>
               {origens.map((origem) => (
                 <SelectItem key={origem.id} value={origem.id}>
                   {origem.descricao}

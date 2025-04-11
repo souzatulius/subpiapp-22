@@ -154,7 +154,7 @@ const DemandasTable: React.FC<DemandasTableProps> = ({
             Anterior
           </Button>
           <span className="text-sm text-gray-600">
-            Página {page} de {Math.ceil(totalCount / pageSize)}
+            Página {page} de {Math.ceil(totalCount / pageSize) || 1}
           </span>
           <Button
             variant="outline"
