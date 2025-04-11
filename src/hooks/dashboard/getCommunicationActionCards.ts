@@ -4,99 +4,136 @@ import { ActionCardItem } from '@/types/dashboard';
 
 export const getCommunicationActionCards = (): ActionCardItem[] => {
   return [
-    // First, add the press request card - properly configured to support drag and hide
     {
-      id: 'press-request-card',
-      title: "Nova Solicitação da Imprensa",
-      subtitle: "Cadastre uma nova demanda de imprensa",
-      iconId: "Newspaper",
-      path: "/dashboard/comunicacao/cadastrar",
-      color: "blue-light",
-      width: "100",
-      height: "2",
-      type: "press_request_card",
-      isCustom: false,
+      id: 'comunicacao-search-card',
+      title: 'Busca Comunicação',
+      iconId: 'Search',
+      path: '',
+      color: 'bg-white',
+      width: '100',
+      height: '0.5',
+      type: 'smart_search',
+      isSearch: true,
       displayMobile: true,
       mobileOrder: 1
     },
-    // The rest of the cards
     {
-      id: uuidv4(),
-      title: "Demandas da Imprensa",
-      iconId: "ClipboardList",
-      path: "/dashboard/comunicacao/demandas",
-      color: "bg-blue-500",
-      width: "50",
-      height: "1",
-      isCustom: false,
+      id: 'press-request-card',
+      title: 'Nova Solicitação da Imprensa',
+      iconId: 'Newspaper',
+      path: '',
+      color: 'bg-white',
+      width: '50',
+      height: '2',
+      type: 'press_request_card',
       displayMobile: true,
       mobileOrder: 2
     },
     {
       id: uuidv4(),
-      title: "Cadastrar Nova Nota",
-      iconId: "FileCheck",
-      path: "/dashboard/comunicacao/notas/criar",
-      color: "bg-teal-500",
-      width: "25",
-      height: "1",
-      isCustom: false,
+      title: 'Cadastrar Demanda',
+      iconId: 'PlusCircle',
+      path: '/dashboard/comunicacao/cadastrar',
+      color: 'blue-light',
+      width: '25',
+      height: '2',
+      type: 'standard',
       displayMobile: true,
       mobileOrder: 3
     },
     {
       id: uuidv4(),
-      title: "Notas Publicadas",
-      iconId: "FileCheck",
-      path: "/dashboard/comunicacao/notas",
-      color: "bg-green-500",
-      width: "25",
-      height: "1",
-      isCustom: false,
+      title: 'Responder Demanda',
+      iconId: 'MessageSquare',
+      path: '/dashboard/comunicacao/responder',
+      color: 'gray-medium',
+      width: '25',
+      height: '2',
+      type: 'standard',
       displayMobile: true,
       mobileOrder: 4
     },
     {
-      id: 'origem-demandas-card',
-      title: "Atividades em Andamento",
-      subtitle: "Demandas da semana por área técnica",
-      iconId: "BarChart2",
-      path: "",
-      color: "gray-light",
-      width: "50",
-      height: "2",
-      type: "origin_demand_chart",
-      isCustom: false,
+      id: uuidv4(),
+      title: 'Criar Nota Oficial',
+      iconId: 'FileText',
+      path: '/dashboard/comunicacao/criar-nota',
+      color: 'orange-light',
+      width: '25',
+      height: '2',
+      type: 'standard',
       displayMobile: true,
       mobileOrder: 5
     },
     {
-      id: 'acoes-pendentes-card',
-      title: "Ações Pendentes",
-      iconId: "Clock",
-      path: "",
-      color: "orange-light",
-      width: "50",
-      height: "1",
-      isPendingTasks: true,
-      type: "pending_tasks",
-      isCustom: false,
+      id: uuidv4(),
+      title: 'Aprovar Notas',
+      iconId: 'CheckCircle',
+      path: '/dashboard/comunicacao/aprovar-nota',
+      color: 'blue-dark',
+      width: '25',
+      height: '2',
+      type: 'standard',
       displayMobile: true,
       mobileOrder: 6
     },
     {
-      id: uuidv4(),
-      title: "Comunicados Oficiais",
-      iconId: "Megaphone",
-      path: "/dashboard/comunicados",
-      color: "blue-vivid",
-      width: "50",
-      height: "1",
-      type: "communications",
-      isComunicados: true,
-      isCustom: false,
+      id: 'origem-demandas-card',
+      title: 'Atividades em Andamento',
+      subtitle: 'Demandas da semana por área técnica',
+      iconId: 'BarChart2',
+      path: '',
+      color: 'gray-light',
+      width: '50',
+      height: '2',
+      type: 'origin_demand_chart',
       displayMobile: true,
       mobileOrder: 7
+    },
+    {
+      id: uuidv4(),
+      title: 'Processos e-SIC',
+      iconId: 'FileSearch',
+      path: '/dashboard/esic',
+      color: 'deep-blue',
+      width: '25',
+      height: '2',
+      type: 'standard',
+      displayMobile: true,
+      mobileOrder: 8
+    },
+    {
+      id: uuidv4(),
+      title: 'Releases e Notícias',
+      iconId: 'Newspaper',
+      path: '/dashboard/comunicacao/releases',
+      color: 'blue-light',
+      width: '25',
+      height: '2',
+      type: 'standard',
+      displayMobile: true,
+      mobileOrder: 9
     }
   ];
+};
+
+// Helper function to get background color from card color
+export const getBgColor = (color: string): string => {
+  if (color.startsWith('bg-')) return color;
+  
+  // Color mapping for custom colors
+  switch (color) {
+    case 'deep-blue': return 'bg-blue-600';
+    case 'blue-light': return 'bg-blue-400';
+    case 'blue-dark': return 'bg-blue-800';
+    case 'blue-vivid': return 'bg-blue-500';
+    case 'gray-light': return 'bg-gray-200';
+    case 'gray-medium': return 'bg-gray-400';
+    case 'orange-light': return 'bg-orange-300';
+    case 'orange-dark': return 'bg-orange-700';
+    case 'green-teal': return 'bg-teal-500';
+    case 'green-neon': return 'bg-green-400';
+    case 'green-dark': return 'bg-green-700';
+    default: return 'bg-gray-200';
+  }
 };

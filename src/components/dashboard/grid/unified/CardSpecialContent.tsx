@@ -7,7 +7,6 @@ import PendingTasksCard from '../../cards/PendingTasksCard';
 import ComunicadosCard from '../../cards/ComunicadosCard';
 import UserProfileCard from '../../cards/UserProfileCard';
 import NotificationSettingsCard from '../../cards/NotificationSettingsCard';
-import PressRequestQuickStartCard from '@/components/comunicacao/PressRequestQuickStartCard';
 
 interface CardSpecialContentProps {
   card: ActionCardItem;
@@ -64,22 +63,17 @@ export const getSpecialContent = ({
   }
   
   if (card.type === 'user_profile' || card.isUserProfile) {
-    return <UserProfileCard 
+    return <UserProfileCard
       id={card.id}
       title={card.title}
     />;
   }
   
   if (card.type === 'notification_settings' || card.isNotificationSettings) {
-    return <NotificationSettingsCard 
+    return <NotificationSettingsCard
       id={card.id}
       title={card.title}
     />;
-  }
-  
-  // Add support for press request card type
-  if (card.type === 'press_request_card' || card.id.includes('press-request')) {
-    return <PressRequestQuickStartCard />;
   }
   
   return null;

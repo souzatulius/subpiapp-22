@@ -31,8 +31,8 @@ export const useGptNotaSuggestion = () => {
       // Prepare data for generation
       const dados = {
         resumo: selectedDemanda.titulo || '',
-        perguntas: formattedResponses.map(qa => qa.question),
-        respostas: formattedResponses.map(qa => qa.answer),
+        perguntas: formattedResponses.map(qa => qa.pergunta),
+        respostas: formattedResponses.map(qa => qa.resposta),
         dataAtual: currentDate,
         comentariosAdicionais: selectedDemanda.detalhes_solicitacao || ''
       };

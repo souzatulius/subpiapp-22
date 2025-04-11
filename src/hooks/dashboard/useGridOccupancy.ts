@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { CardType } from '@/types/dashboard';
 
@@ -5,7 +6,7 @@ import { CardType } from '@/types/dashboard';
 export interface CardDimensions {
   width: string; // '25', '50', '75', '100'
   height: string; // '1', '2'
-  type?: CardType | string; // Accept all card types
+  type?: string; // Changed from 'standard' | 'data_dynamic' to string to accept all CardType values
   id: string;
 }
 
@@ -58,10 +59,6 @@ export const getMinimumWidth = (type?: string, isMobileView: boolean = false): s
     return '50'; // 2 columns
   }
   
-  if (type === 'press_request_card') {
-    return '100'; // Press request card takes full width
-  }
-  
   return '25'; // Default minimum width (1 column)
 };
 
@@ -70,15 +67,6 @@ export const getMinimumHeight = (type?: string): string => {
   if (type === 'data_dynamic' || type === 'in_progress_demands') {
     return '2'; // Dynamic cards need 2 rows
   }
-  
-  if (type === 'press_request_card') {
-    return '2'; // Press request card needs 2 rows
-  }
-  
-  if (type === 'origin_demand_chart') {
-    return '2'; // Chart needs 2 rows
-  }
-  
   return '1'; // Default height (1 row)
 };
 
@@ -100,28 +88,13 @@ export const useGridOccupancy = (cards: CardDimensions[], isMobileView: boolean)
       return;
     }
     
-    // First pass: place special cards that need particular positions
-    const specialCards = cards.filter(card => 
-      card.type === 'press_request_card' || 
-      card.type === 'origin_demand_chart' || 
-      card.type === 'in_progress_demands'
-    );
-    
-    const regularCards = cards.filter(card => 
-      card.type !== 'press_request_card' && 
-      card.type !== 'origin_demand_chart' && 
-      card.type !== 'in_progress_demands'
-    );
-    
-    // Sort remaining cards by height (descending) to place taller cards first
-    const sortedCards = [
-      ...specialCards,
-      ...regularCards.sort((a, b) => {
-        const heightA = parseInt(a.height || '1');
-        const heightB = parseInt(b.height || '1');
-        return heightB - heightA;
-      })
-    ];
+    // First pass: place height-2 cards
+    const sortedCards = [...cards].sort((a, b) => {
+      // Sort by height (descending) to place taller cards first
+      const heightA = parseInt(a.height || '1');
+      const heightB = parseInt(b.height || '1');
+      return heightB - heightA;
+    });
     
     // Place each card in the grid
     sortedCards.forEach(card => {
@@ -132,54 +105,42 @@ export const useGridOccupancy = (cards: CardDimensions[], isMobileView: boolean)
       let placed = false;
       let rowIndex = 0;
       
-      // Special handling for press request card - always place it at the top
-      if (card.type === 'press_request_card') {
-        while (newOccupiedSlots.length < cardHeight) {
+      while (!placed) {
+        // Ensure we have enough rows
+        while (rowIndex + cardHeight > newOccupiedSlots.length) {
           newOccupiedSlots.push(Array(totalColumns).fill(false));
         }
         
-        // Place it at the top
-        placeCard(newOccupiedSlots, 0, 0, totalColumns, cardHeight);
-        placed = true;
-      } else {
-        // Standard placement algorithm
-        while (!placed) {
-          // Ensure we have enough rows
-          while (rowIndex + cardHeight > newOccupiedSlots.length) {
-            newOccupiedSlots.push(Array(totalColumns).fill(false));
-          }
-          
-          // Try to place the card at each column position
-          for (let colIndex = 0; colIndex <= totalColumns - cardWidth; colIndex++) {
-            if (canPlaceCard(newOccupiedSlots, rowIndex, colIndex, cardWidth, cardHeight)) {
-              // Special handling for height-1 cards that could fit beside height-2 cards
-              if (cardHeight === 1 && cardWidth === 1) {
-                // Look for adjacent height-2 card slots
-                const adjacentSlot = findAdjacentToHeightTwoSlot(newOccupiedSlots, rowIndex);
-                if (adjacentSlot !== -1) {
-                  placeCard(newOccupiedSlots, rowIndex, adjacentSlot, cardWidth, cardHeight);
-                  placed = true;
-                  break;
-                }
+        // Try to place the card at each column position
+        for (let colIndex = 0; colIndex <= totalColumns - cardWidth; colIndex++) {
+          if (canPlaceCard(newOccupiedSlots, rowIndex, colIndex, cardWidth, cardHeight)) {
+            // Special handling for height-1 cards that could fit beside height-2 cards
+            if (cardHeight === 1 && cardWidth === 1) {
+              // Look for adjacent height-2 card slots
+              const adjacentSlot = findAdjacentToHeightTwoSlot(newOccupiedSlots, rowIndex);
+              if (adjacentSlot !== -1) {
+                placeCard(newOccupiedSlots, rowIndex, adjacentSlot, cardWidth, cardHeight);
+                placed = true;
+                break;
               }
-              
-              // Standard placement
-              placeCard(newOccupiedSlots, rowIndex, colIndex, cardWidth, cardHeight);
-              placed = true;
-              break;
             }
+            
+            // Standard placement
+            placeCard(newOccupiedSlots, rowIndex, colIndex, cardWidth, cardHeight);
+            placed = true;
+            break;
           }
-          
-          // If not placed, try next row
-          if (!placed) {
-            rowIndex++;
-          }
+        }
+        
+        // If not placed, try next row
+        if (!placed) {
+          rowIndex++;
         }
       }
     });
     
     setOccupiedSlots(newOccupiedSlots);
-  }, [cards, isMobileView, totalColumns]);
+  }, [cards, isMobileView]);
   
   // Check if a card can be placed at a specific position
   const canPlaceCard = (
@@ -206,7 +167,7 @@ export const useGridOccupancy = (cards: CardDimensions[], isMobileView: boolean)
   ): number => {
     if (grid.length <= rowIndex || rowIndex + 1 >= grid.length) return -1;
     
-    for (let col = 0; col < totalColumns; col++) {
+    for (let col = 0; col < 4; col++) {
       // Check if this column is free in current row
       if (!grid[rowIndex][col]) {
         // Check if the same column one row below is occupied
@@ -229,10 +190,6 @@ export const useGridOccupancy = (cards: CardDimensions[], isMobileView: boolean)
   ) => {
     for (let row = rowStart; row < rowStart + height; row++) {
       for (let col = colStart; col < colStart + width; col++) {
-        // Ensure the grid has enough rows
-        while (grid.length <= row) {
-          grid.push(Array(totalColumns).fill(false));
-        }
         grid[row][col] = true; // Mark as occupied
       }
     }
