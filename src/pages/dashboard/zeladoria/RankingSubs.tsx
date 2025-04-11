@@ -1,8 +1,8 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { BarChart3, SlidersHorizontal, Printer, FileText, Trash2, RefreshCw } from 'lucide-react';
 import RankingContent from '@/components/ranking/RankingContent';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import WelcomeCard from '@/components/shared/WelcomeCard';
 import { Button } from '@/components/ui/button';
 // Import Chart registration to ensure scales are registered
@@ -19,7 +19,6 @@ import UploadButton from '@/components/ranking/UploadButton';
 import { useAnimatedFeedback } from '@/hooks/use-animated-feedback';
 import { useUploadState } from '@/hooks/ranking/useUploadState';
 import UploadSection from '@/components/ranking/UploadSection';
-import { toast } from 'sonner';
 import UploadProgressDisplay from '@/components/ranking/UploadProgressDisplay';
 
 const RankingSubs = () => {
@@ -34,7 +33,7 @@ const RankingSubs = () => {
   const { resetProgress } = useUploadState();
   
   // Get current user on component mount
-  React.useEffect(() => {
+  useEffect(() => {
     const fetchUser = async () => {
       const { data } = await supabase.auth.getSession();
       if (data?.session?.user) {
@@ -61,10 +60,12 @@ const RankingSubs = () => {
   
   const handlePrint = () => {
     printWithStyles();
+    showFeedback('success', 'Documento enviado para impressão', { duration: 2000 });
   };
   
   const handleExportPDF = () => {
     exportToPDF('Ranking da Zeladoria');
+    showFeedback('success', 'PDF gerado com sucesso', { duration: 2000 });
   };
   
   const handleUploadStart = () => {
@@ -72,19 +73,23 @@ const RankingSubs = () => {
     // Reset progress first
     resetProgress();
     // Show feedback to user
-    showFeedback('success', 'Iniciando upload da planilha...');
+    showFeedback('loading', 'Iniciando upload da planilha...', { 
+      duration: 0, 
+      progress: 10,
+      stage: 'Preparando upload'
+    });
   };
 
   const handleUploadComplete = (id: string, data: any[]) => {
     console.log(`SGZ upload complete, ID: ${id}, Records: ${data.length}`);
-    toast.success(`Upload concluído: ${data.length} registros processados`);
+    showFeedback('success', `Upload concluído: ${data.length} registros processados`, { duration: 3000 });
     // Don't reset isUploading immediately to allow for background processing
     setTimeout(() => setIsUploading(false), 1500);
   };
 
   const handlePainelUploadComplete = (id: string, data: any[]) => {
     console.log(`Painel upload complete, ID: ${id}, Records: ${data.length}`);
-    toast.success(`Upload concluído: ${data.length} registros processados`);
+    showFeedback('success', `Upload concluído: ${data.length} registros processados`, { duration: 3000 });
     // Don't reset isUploading immediately to allow for background processing
     setTimeout(() => setIsUploading(false), 1500);
   };
@@ -92,7 +97,7 @@ const RankingSubs = () => {
   const handleCleanDataSuccess = () => {
     // We'll reload the data in the child component
     setCleanDataDialogOpen(false);
-    showFeedback('success', 'Dados limpos com sucesso');
+    showFeedback('success', 'Dados limpos com sucesso', { duration: 2000 });
   };
   
   return (
@@ -144,9 +149,29 @@ const RankingSubsContent = ({
 }) => {
   const { refreshData, isLoading, isRefreshing, lastUpdated, formattedLastUpdated } = useRealData();
   const { sgzProgress, painelProgress } = useUploadState();
+  const { showFeedback, updateFeedbackProgress } = useAnimatedFeedback();
   
   // Active uploads detection
   const hasActiveUploads = sgzProgress || painelProgress;
+
+  // Handle refresh with feedback
+  const handleRefreshData = async () => {
+    showFeedback('loading', 'Atualizando dados...', {
+      duration: 0,
+      progress: 10,
+      stage: 'Iniciando atualização'
+    });
+    
+    try {
+      await refreshData();
+      updateFeedbackProgress(100, 'Dados atualizados com sucesso');
+      setTimeout(() => {
+        showFeedback('success', 'Dados atualizados com sucesso', { duration: 2000 });
+      }, 500);
+    } catch (error) {
+      showFeedback('error', 'Erro ao atualizar dados', { duration: 3000 });
+    }
+  };
   
   return (
     <motion.div 
@@ -165,7 +190,7 @@ const RankingSubsContent = ({
             variant="outline"
             size="icon"
             className="bg-white/20 text-white border-white/30 hover:bg-white/30"
-            onClick={refreshData}
+            onClick={handleRefreshData}
             disabled={isRefreshing || isLoading || isUploading}
             title="Atualizar Dados"
           >
@@ -264,42 +289,44 @@ const RankingSubsContent = ({
       )}
       
       {/* Upload section - now shown below the buttons */}
-      {showUploadSection && !hasActiveUploads && (
-        <motion.div 
-          initial={{ opacity: 0, height: 0 }}
-          animate={{ opacity: 1, height: 'auto' }}
-          exit={{ opacity: 0, height: 0 }}
-          transition={{ duration: 0.3 }}
-          className="mt-4"
-        >
-          <div className="p-4 rounded-xl bg-white border border-gray-200 shadow-sm">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-sm font-medium text-gray-700">Upload de Planilhas</h3>
-              {isAdmin && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="bg-orange-500 text-white hover:bg-orange-600"
-                  onClick={() => setCleanDataDialogOpen(true)}
-                  disabled={isRefreshing || isLoading}
-                >
-                  <Trash2 className="h-4 w-4 mr-1" />
-                  Limpar Dados
-                </Button>
-              )}
+      <AnimatePresence>
+        {showUploadSection && !hasActiveUploads && (
+          <motion.div 
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.3 }}
+            className="mt-4"
+          >
+            <div className="p-4 rounded-xl bg-white border border-gray-200 shadow-sm">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-sm font-medium text-gray-700">Upload de Planilhas</h3>
+                {isAdmin && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="bg-orange-500 text-white hover:bg-orange-600"
+                    onClick={() => setCleanDataDialogOpen(true)}
+                    disabled={isRefreshing || isLoading}
+                  >
+                    <Trash2 className="h-4 w-4 mr-1" />
+                    Limpar Dados
+                  </Button>
+                )}
+              </div>
+              
+              <UploadSection
+                onUploadStart={handleUploadStart}
+                onUploadComplete={handleUploadComplete}
+                onPainelUploadComplete={handlePainelUploadComplete}
+                isUploading={isUploading}
+                user={currentUser}
+                onRefreshData={refreshData}
+              />
             </div>
-            
-            <UploadSection
-              onUploadStart={handleUploadStart}
-              onUploadComplete={handleUploadComplete}
-              onPainelUploadComplete={handlePainelUploadComplete}
-              isUploading={isUploading}
-              user={currentUser}
-              onRefreshData={refreshData}
-            />
-          </div>
-        </motion.div>
-      )}
+          </motion.div>
+        )}
+      </AnimatePresence>
       
       <div className="mt-6">
         <RankingContent 

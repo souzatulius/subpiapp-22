@@ -1,10 +1,19 @@
 
 import React, { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
-import { AlertTriangle, Trash2 } from 'lucide-react';
-import { toast } from 'sonner';
+import { Loader2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import { useAnimatedFeedback } from '@/hooks/use-animated-feedback';
 
 interface CleanDataDialogProps {
   isOpen: boolean;
@@ -12,126 +21,102 @@ interface CleanDataDialogProps {
   onSuccess: () => void;
 }
 
-const CleanDataDialog: React.FC<CleanDataDialogProps> = ({
-  isOpen,
-  onClose,
-  onSuccess
-}) => {
+const CleanDataDialog: React.FC<CleanDataDialogProps> = ({ isOpen, onClose, onSuccess }) => {
   const [isLoading, setIsLoading] = useState(false);
-  const [confirmation, setConfirmation] = useState('');
+  const { showFeedback } = useAnimatedFeedback();
 
   const handleCleanData = async () => {
-    if (confirmation !== 'LIMPAR') {
-      toast.error('Digite "LIMPAR" para confirmar a operação');
-      return;
-    }
-
     setIsLoading(true);
-
+    showFeedback('loading', 'Limpando dados...', { 
+      duration: 0,
+      progress: 25,
+      stage: 'Iniciando limpeza'
+    });
+    
     try {
-      // Delete records from all tables
-      const { error: painelDataError } = await supabase
+      // Delete all data from painel_zeladoria_dados
+      const { error: dataDeletionError } = await supabase
         .from('painel_zeladoria_dados')
         .delete()
-        .neq('id', '00000000-0000-0000-0000-000000000000'); // Delete all rows
+        .neq('id', 'dummy_id_for_all');
+        
+      if (dataDeletionError) {
+        throw new Error(`Erro ao limpar dados: ${dataDeletionError.message}`);
+      }
       
-      if (painelDataError) throw painelDataError;
+      showFeedback('loading', 'Removendo registros de upload...', { 
+        duration: 0,
+        progress: 50,
+        stage: 'Limpando registros'
+      });
       
-      const { error: painelUploadsError } = await supabase
+      // Delete all uploads
+      const { error: uploadDeletionError } = await supabase
         .from('painel_zeladoria_uploads')
         .delete()
-        .neq('id', '00000000-0000-0000-0000-000000000000');
+        .neq('id', 'dummy_id_for_all');
+        
+      if (uploadDeletionError) {
+        throw new Error(`Erro ao limpar registros de upload: ${uploadDeletionError.message}`);
+      }
       
-      if (painelUploadsError) throw painelUploadsError;
+      showFeedback('loading', 'Removendo insights salvos...', { 
+        duration: 0,
+        progress: 75,
+        stage: 'Finalizando limpeza'
+      });
       
-      const { error: sgzStatusHistoricoError } = await supabase
-        .from('sgz_status_historico')
+      // Delete all insights
+      const { error: insightsDeletionError } = await supabase
+        .from('painel_zeladoria_insights')
         .delete()
-        .neq('id', '00000000-0000-0000-0000-000000000000');
+        .neq('id', 'dummy_id_for_all');
+        
+      if (insightsDeletionError) {
+        throw new Error(`Erro ao limpar insights: ${insightsDeletionError.message}`);
+      }
       
-      if (sgzStatusHistoricoError) throw sgzStatusHistoricoError;
-      
-      const { error: sgzOrdensError } = await supabase
-        .from('sgz_ordens_servico')
-        .delete()
-        .neq('id', '00000000-0000-0000-0000-000000000000');
-      
-      if (sgzOrdensError) throw sgzOrdensError;
-      
-      const { error: sgzUploadsError } = await supabase
-        .from('sgz_uploads')
-        .delete()
-        .neq('id', '00000000-0000-0000-0000-000000000000');
-      
-      if (sgzUploadsError) throw sgzUploadsError;
-      
-      toast.success('Dados limpos com sucesso!');
+      // Show success message and close the dialog
+      showFeedback('success', 'Todos os dados foram limpos com sucesso', { duration: 3000 });
       onSuccess();
-      onClose();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error cleaning data:', error);
-      toast.error(`Erro ao limpar dados: ${error instanceof Error ? error.message : 'Erro desconhecido'}`);
+      showFeedback('error', `Erro ao limpar dados: ${error.message}`, { duration: 3000 });
     } finally {
       setIsLoading(false);
-      setConfirmation('');
+      onClose();
     }
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-red-600">
-            <AlertTriangle className="h-5 w-5" />
-            Limpar Todos os Dados
-          </DialogTitle>
-          <DialogDescription>
-            Esta operação irá <span className="font-bold">excluir permanentemente</span> todos os dados do Ranking da Zeladoria, 
-            incluindo uploads SGZ e Painel. Esta ação não pode ser desfeita.
-          </DialogDescription>
-        </DialogHeader>
-        
-        <div className="bg-red-50 p-4 rounded-md border border-red-200 my-4">
-          <h4 className="text-sm font-medium text-red-700">Serão excluídos:</h4>
-          <ul className="list-disc list-inside text-sm text-red-600 mt-2 space-y-1">
-            <li>Todas as ordens de serviço SGZ</li>
-            <li>Todos os registros de histórico de status</li>
-            <li>Todos os uploads SGZ</li>
-            <li>Todos os dados do Painel da Zeladoria</li>
-            <li>Todos os uploads do Painel da Zeladoria</li>
-          </ul>
-        </div>
-        
-        <div className="space-y-2 mt-2">
-          <label className="text-sm font-medium" htmlFor="confirmation">
-            Digite "LIMPAR" para confirmar a exclusão:
-          </label>
-          <input
-            id="confirmation"
-            className="w-full p-2 border border-gray-300 rounded-md"
-            type="text"
-            value={confirmation}
-            onChange={(e) => setConfirmation(e.target.value)}
-            placeholder="LIMPAR"
-          />
-        </div>
-        
-        <DialogFooter>
-          <Button variant="outline" onClick={onClose} disabled={isLoading}>
-            Cancelar
-          </Button>
+    <AlertDialog open={isOpen} onOpenChange={onClose}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Limpar Todos os Dados</AlertDialogTitle>
+          <AlertDialogDescription>
+            Esta ação removerá permanentemente todos os dados de ordens de serviço, uploads e insights.
+            Esta operação não pode ser desfeita.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel disabled={isLoading}>Cancelar</AlertDialogCancel>
           <Button 
             variant="destructive" 
-            onClick={handleCleanData} 
-            disabled={isLoading || confirmation !== 'LIMPAR'}
-            className="flex items-center gap-2"
+            onClick={handleCleanData}
+            disabled={isLoading}
           >
-            <Trash2 className="h-4 w-4" />
-            {isLoading ? 'Limpando...' : 'Confirmar Exclusão'}
+            {isLoading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Limpando...
+              </>
+            ) : (
+              'Sim, limpar todos os dados'
+            )}
           </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   );
 };
 

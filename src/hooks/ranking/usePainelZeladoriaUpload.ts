@@ -2,10 +2,10 @@
 import { useCallback } from 'react';
 import { User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from 'sonner';
 import * as XLSX from 'xlsx';
 import { useUploadState } from './useUploadState';
 import { UploadResult } from '@/hooks/ranking/types/uploadTypes';
+import { useAnimatedFeedback } from '@/hooks/use-animated-feedback';
 
 export const usePainelZeladoriaUpload = (user: User | null) => {
   const { 
@@ -14,10 +14,12 @@ export const usePainelZeladoriaUpload = (user: User | null) => {
     setIsUploading,
     setLastRefreshTime
   } = useUploadState();
+  
+  const { showFeedback, updateFeedbackProgress } = useAnimatedFeedback();
 
   const handleUploadPainel = useCallback(async (file: File): Promise<UploadResult | null> => {
     if (!user) {
-      toast.error('Você precisa estar logado para fazer upload');
+      showFeedback('error', 'Você precisa estar logado para fazer upload', { duration: 3000 });
       return null;
     }
 
@@ -32,9 +34,15 @@ export const usePainelZeladoriaUpload = (user: User | null) => {
         message: 'Iniciando upload do arquivo do Painel...'
       });
       
+      showFeedback('loading', 'Iniciando upload do arquivo do Painel...', { 
+        duration: 0,
+        progress: 10,
+        stage: 'Enviando'
+      });
+      
       // Verificar tipo de arquivo
       if (!file.name.endsWith('.xlsx') && !file.name.endsWith('.xls')) {
-        toast.error('Formato de arquivo inválido. Por favor, carregue um arquivo Excel (.xlsx ou .xls)');
+        showFeedback('error', 'Formato de arquivo inválido. Por favor, carregue um arquivo Excel (.xlsx ou .xls)', { duration: 3000 });
         setPainelProgress({
           ...painelProgress!,
           stage: 'error',
@@ -51,7 +59,7 @@ export const usePainelZeladoriaUpload = (user: User | null) => {
       
       // Verificar se os dados foram processados corretamente
       if (!dadosPainel || dadosPainel.length === 0) {
-        toast.error('Não foi possível processar os dados do arquivo');
+        showFeedback('error', 'Não foi possível processar os dados do arquivo', { duration: 3000 });
         setPainelProgress({
           ...painelProgress!,
           stage: 'error',
@@ -61,6 +69,7 @@ export const usePainelZeladoriaUpload = (user: User | null) => {
       }
       
       updateProgress(30, 'processing', 'Validando dados...', dadosPainel.length);
+      updateFeedbackProgress(30, 'Validando dados...');
       
       // Registrar o upload
       const { data: uploadData, error: uploadError } = await supabase
@@ -74,7 +83,7 @@ export const usePainelZeladoriaUpload = (user: User | null) => {
 
       if (uploadError) {
         console.error('Erro ao registrar upload:', uploadError);
-        toast.error('Erro ao registrar upload');
+        showFeedback('error', 'Erro ao registrar upload', { duration: 3000 });
         setPainelProgress({
           ...painelProgress!,
           stage: 'error',
@@ -85,6 +94,7 @@ export const usePainelZeladoriaUpload = (user: User | null) => {
       
       const uploadId = uploadData.id;
       updateProgress(50, 'processing', 'Salvando dados...', dadosPainel.length);
+      updateFeedbackProgress(50, 'Salvando dados no banco...');
       
       // Inserir dados processados
       const { error: insertError } = await supabase
@@ -96,7 +106,7 @@ export const usePainelZeladoriaUpload = (user: User | null) => {
         
       if (insertError) {
         console.error('Erro ao inserir dados:', insertError);
-        toast.error('Erro ao salvar dados no banco');
+        showFeedback('error', 'Erro ao salvar dados no banco', { duration: 3000 });
         setPainelProgress({
           ...painelProgress!,
           stage: 'error',
@@ -106,11 +116,10 @@ export const usePainelZeladoriaUpload = (user: User | null) => {
       }
       
       updateProgress(100, 'complete', `${dadosPainel.length} registros processados com sucesso`, dadosPainel.length, dadosPainel.length);
+      updateFeedbackProgress(100, 'Upload finalizado com sucesso');
       
       // Set last refresh time
       setLastRefreshTime(new Date());
-      
-      toast.success(`Upload concluído: ${dadosPainel.length} registros processados`);
       
       return {
         success: true,
@@ -121,7 +130,7 @@ export const usePainelZeladoriaUpload = (user: User | null) => {
       };
     } catch (error) {
       console.error('Erro no processamento do upload:', error);
-      toast.error('Erro ao processar arquivo');
+      showFeedback('error', 'Erro ao processar arquivo', { duration: 3000 });
       setPainelProgress({
         ...painelProgress!,
         stage: 'error',
@@ -133,7 +142,7 @@ export const usePainelZeladoriaUpload = (user: User | null) => {
         message: 'Erro ao processar arquivo'
       };
     }
-  }, [user, painelProgress, setPainelProgress, setIsUploading, setLastRefreshTime]);
+  }, [user, painelProgress, setPainelProgress, setIsUploading, setLastRefreshTime, showFeedback, updateFeedbackProgress]);
 
   const updateProgress = (
     progressValue: number,

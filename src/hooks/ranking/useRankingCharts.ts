@@ -1,10 +1,34 @@
-import { useState, useEffect } from 'react';
-import { ChartConfig } from '@/types/ranking';
-import { ChartVisibility } from '@/components/ranking/types';
+import { create } from 'zustand';
+import { ChartData, ChartVisibility } from '@/components/ranking/types';
 
-export const useRankingCharts = () => {
-  // Initialize chart visibility state with the correct structure
-  const [chartVisibility, setChartVisibility] = useState<ChartVisibility>({
+interface RankingChartsState {
+  chartVisibility: ChartVisibility;
+  chartData: ChartData;
+  planilhaData: any[] | null;
+  sgzData: any[] | null;
+  painelData: any[] | null;
+  isLoading: boolean;
+  isInsightsLoading: boolean;
+  isChartsLoading: boolean;
+  uploadId: string | null;
+  insightsProgress: number;
+  chartsProgress: number;
+  
+  toggleChartVisibility: (chartId: string) => void;
+  setChartVisibility: (visibility: ChartVisibility) => void;
+  setPlanilhaData: (data: any[]) => void;
+  setSgzData: (data: any[]) => void;
+  setPainelData: (data: any[]) => void;
+  setIsLoading: (isLoading: boolean) => void;
+  setIsInsightsLoading: (isLoading: boolean) => void;
+  setIsChartsLoading: (isLoading: boolean) => void;
+  setUploadId: (id: string | null) => void;
+  setInsightsProgress: (progress: number) => void;
+  setChartsProgress: (progress: number) => void;
+}
+
+export const useRankingCharts = create<RankingChartsState>((set) => ({
+  chartVisibility: {
     // Performance & Efficiency charts
     statusDistribution: true,
     statusTransition: true,
@@ -21,86 +45,82 @@ export const useRankingCharts = () => {
     oldestPendingList: true,
     
     // Keeping other chart visibility flags for backward compatibility
-    evolution: false,
-    departmentComparison: false,
-    topCompanies: false,
-    districtDistribution: false,
-    servicesByDepartment: false,
-    servicesByDistrict: false,
-    timeComparison: false,
-    dailyDemands: false,
-    closureTime: false,
-    neighborhoodComparison: false,
-    efficiencyImpact: false,
-    criticalStatus: false,
-    serviceDiversity: false,
-    externalDistricts: false,
-  });
-
-  // Mock charts data for potential future use
-  const [charts] = useState<ChartConfig[]>([]);
-
-  const [isLoading, setIsLoading] = useState(false);
-  const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
-  const [currentTab, setCurrentTab] = useState('performance');
-  const [planilhaData, setPlanilhaData] = useState<any[]>([]);
-  const [painelData, setPainelData] = useState<any[]>([]);
-  const [uploadId, setUploadId] = useState<string | undefined>(undefined);
-  const [sgzData, setSgzData] = useState<any[] | null>([]);
-
-  // Toggle chart visibility
-  const toggleChartVisibility = (chartId: string) => {
-    setChartVisibility(prev => ({
-      ...prev,
-      [chartId]: !prev[chartId]
-    }));
-  };
-
-  // Mock data refresh function
-  const refreshData = () => {
-    setIsLoading(true);
-    
-    // Simulate API call
-    setTimeout(() => {
-      setLastUpdated(new Date());
-      setIsLoading(false);
-    }, 1000);
-  };
-
-  // Initialize mock data
-  useEffect(() => {
-    // Only set mock data if we don't already have data
-    if (planilhaData.length === 0) {
-      setPlanilhaData([{ id: 1, name: 'Mock Data' }]);
-    }
-    if (painelData.length === 0) {
-      setPainelData([{ id: 1, name: 'Painel Data' }]);
-    }
-    if (!sgzData || sgzData.length === 0) {
-      setSgzData([{ id: 1, name: 'SGZ Data' }]);
-    }
-    if (!uploadId) {
-      setUploadId('mock-upload-id');
-    }
-  }, [planilhaData.length, painelData.length, sgzData, uploadId]);
-
-  return {
-    charts,
-    isLoading,
-    refreshData,
-    chartVisibility,
-    toggleChartVisibility,
-    setChartVisibility,
-    lastUpdated,
-    currentTab,
-    setCurrentTab,
-    planilhaData,
-    setPlanilhaData,
-    painelData,
-    setPainelData,
-    sgzData,
-    setSgzData,
-    uploadId,
-    setUploadId
-  };
-};
+    evolution: true,
+    departmentComparison: true,
+    topCompanies: true,
+    districtDistribution: true,
+    servicesByDepartment: true,
+    servicesByDistrict: true,
+    timeComparison: true,
+    dailyDemands: true,
+    closureTime: true,
+    neighborhoodComparison: true,
+    externalDistricts: true,
+    efficiencyImpact: true,
+    criticalStatus: true,
+    serviceDiversity: true
+  },
+  chartData: {},
+  planilhaData: null,
+  sgzData: null,
+  painelData: null,
+  isLoading: false,
+  isInsightsLoading: false,
+  isChartsLoading: false,
+  uploadId: null,
+  insightsProgress: 0,
+  chartsProgress: 0,
+  
+  toggleChartVisibility: (chartId: string) => 
+    set(state => ({
+      chartVisibility: {
+        ...state.chartVisibility,
+        [chartId]: !state.chartVisibility[chartId]
+      }
+    })),
+  
+  setChartVisibility: (visibility: ChartVisibility) => 
+    set({ chartVisibility: visibility }),
+  
+  setPlanilhaData: (data: any[]) => 
+    set({ 
+      planilhaData: data,
+      isLoading: true, 
+      isInsightsLoading: true,
+      insightsProgress: 10 
+    }),
+  
+  setSgzData: (data: any[]) => 
+    set({ sgzData: data }),
+  
+  setPainelData: (data: any[]) => 
+    set({
+      painelData: data,
+      isLoading: true, 
+      chartsProgress: 20
+    }),
+  
+  setIsLoading: (isLoading: boolean) => 
+    set({ isLoading }),
+  
+  setIsInsightsLoading: (isInsightsLoading: boolean) => 
+    set({ 
+      isInsightsLoading,
+      insightsProgress: isInsightsLoading ? 10 : 100
+    }),
+  
+  setIsChartsLoading: (isChartsLoading: boolean) => 
+    set({ 
+      isChartsLoading,
+      chartsProgress: isChartsLoading ? 20 : 100 
+    }),
+  
+  setUploadId: (id: string | null) => 
+    set({ uploadId: id }),
+  
+  setInsightsProgress: (progress: number) => 
+    set({ insightsProgress: progress }),
+  
+  setChartsProgress: (progress: number) => 
+    set({ chartsProgress: progress }),
+}));

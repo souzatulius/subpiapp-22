@@ -1,10 +1,9 @@
 
 import React from 'react';
 import { Upload, Loader } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import FileUploadWithProgress from '@/components/shared/FileUploadWithProgress';
 import { usePainelZeladoriaUpload } from '@/hooks/ranking/usePainelZeladoriaUpload';
-import { useToast } from '@/hooks/use-toast';
+import { useAnimatedFeedback } from '@/hooks/use-animated-feedback';
 import { useUploadState } from '@/hooks/ranking/useUploadState';
 
 interface UploadButtonProps {
@@ -24,7 +23,7 @@ const UploadButton: React.FC<UploadButtonProps> = ({
   currentUser,
   onRefreshData
 }) => {
-  const { toast } = useToast();
+  const { showFeedback } = useAnimatedFeedback();
   const { sgzProgress, painelProgress } = useUploadState();
   const { handleUploadPainel } = usePainelZeladoriaUpload(currentUser);
   
@@ -33,35 +32,29 @@ const UploadButton: React.FC<UploadButtonProps> = ({
     try {
       const result = await handleUploadPainel(file);
       if (result && result.success) {
-        toast({
-          title: "Upload concluído",
-          description: `${result.recordCount} registros processados com sucesso`,
-          variant: "success",
+        showFeedback('success', `Upload concluído: ${result.recordCount} registros processados`, {
+          duration: 3000
         });
         onPainelUploadComplete(result.id || "", result.data || []);
         onRefreshData();
       } else {
-        toast({
-          title: "Erro no upload",
-          description: result?.message || "Não foi possível processar o arquivo",
-          variant: "destructive",
+        showFeedback('error', result?.message || "Não foi possível processar o arquivo", {
+          duration: 3000
         });
       }
     } catch (err) {
       console.error("Erro no upload:", err);
-      toast({
-        title: "Erro no upload",
-        description: "Ocorreu um erro ao processar o arquivo",
-        variant: "destructive",
+      showFeedback('error', "Ocorreu um erro ao processar o arquivo", {
+        duration: 3000
       });
     }
   };
   
   // Check if we have any active uploads
   const isActiveUpload = sgzProgress?.stage === 'uploading' || 
-                         sgzProgress?.stage === 'processing' ||
-                         painelProgress?.stage === 'uploading' ||
-                         painelProgress?.stage === 'processing';
+                        sgzProgress?.stage === 'processing' ||
+                        painelProgress?.stage === 'uploading' ||
+                        painelProgress?.stage === 'processing';
   
   return (
     <>

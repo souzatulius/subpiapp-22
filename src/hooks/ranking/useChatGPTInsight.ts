@@ -2,7 +2,8 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useOpenAIWithRetry } from '@/hooks/useOpenAIWithRetry';
-import { toast } from 'sonner';
+import { useAnimatedFeedback } from '@/hooks/use-animated-feedback';
+import { useRankingCharts } from './useRankingCharts';
 
 // Add a type for the API response
 interface InsightResponse {
@@ -18,6 +19,8 @@ export const useChatGPTInsight = (dadosPlanilha: any[] | null, uploadId?: string
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const { callWithRetry, isLoading: isApiLoading } = useOpenAIWithRetry();
+  const { showFeedback, updateFeedbackProgress, updateFeedbackMessage } = useAnimatedFeedback();
+  const { setInsightsProgress, insightsProgress } = useRankingCharts();
 
   useEffect(() => {
     const fetchOrGenerateInsights = async () => {
@@ -27,18 +30,29 @@ export const useChatGPTInsight = (dadosPlanilha: any[] | null, uploadId?: string
       }
 
       setIsLoading(true);
+      setInsightsProgress(10);
+      showFeedback('loading', 'Gerando análise inteligente...', { 
+        duration: 0, 
+        progress: 10,
+        stage: 'Iniciando análise'
+      });
       
       try {
         // Check cache first if we have a cache key (uploadId)
         if (uploadId && insightsCache.has(uploadId)) {
           console.log('Using cached insights for upload', uploadId);
           setIndicadores(insightsCache.get(uploadId));
+          setInsightsProgress(100);
+          updateFeedbackProgress(100, 'Análise inteligente recuperada do cache');
           setIsLoading(false);
           return;
         }
         
         // Check for existing insights in database
         if (uploadId) {
+          setInsightsProgress(20);
+          updateFeedbackProgress(20, 'Verificando análises existentes...');
+          
           const { data: existingInsights, error: fetchError } = await supabase
             .from('painel_zeladoria_insights')
             .select('*')
@@ -53,10 +67,19 @@ export const useChatGPTInsight = (dadosPlanilha: any[] | null, uploadId?: string
             setIndicadores(existingInsights.indicadores);
             // Update cache
             insightsCache.set(uploadId, existingInsights.indicadores);
+            setInsightsProgress(100);
+            updateFeedbackProgress(100, 'Análise inteligente recuperada com sucesso');
+            setTimeout(() => {
+              showFeedback('success', 'Análise inteligente carregada', { duration: 2000 });
+            }, 500);
             setIsLoading(false);
             return;
           }
         }
+
+        // Progress update
+        setInsightsProgress(30);
+        updateFeedbackProgress(30, 'Enviando dados para processamento...');
 
         // Generate new insights using edge function with retry mechanism
         const response = await callWithRetry<InsightResponse>(
@@ -73,6 +96,10 @@ export const useChatGPTInsight = (dadosPlanilha: any[] | null, uploadId?: string
           throw new Error(`Erro na análise: ${response.error}`);
         }
         
+        // Progress update
+        setInsightsProgress(90);
+        updateFeedbackProgress(90, 'Finalizando análise...');
+        
         setIndicadores(response.indicadores);
         
         // Update cache
@@ -80,22 +107,34 @@ export const useChatGPTInsight = (dadosPlanilha: any[] | null, uploadId?: string
           insightsCache.set(uploadId, response.indicadores);
         }
         
-        // Notify user of success
-        toast.success('Análise inteligente gerada com sucesso');
+        // Final progress update
+        setInsightsProgress(100);
+        updateFeedbackProgress(100, 'Análise inteligente concluída');
+        
+        // Transition to success message
+        setTimeout(() => {
+          showFeedback('success', 'Análise inteligente gerada com sucesso', { duration: 2000 });
+        }, 500);
       } catch (err: any) {
         console.error('Erro ao buscar ou gerar insights:', err);
         setError(err.message || 'Falha ao gerar indicadores');
+        
+        // Show error in feedback
+        updateFeedbackMessage('Erro na geração de análise, usando estatísticas básicas', 'warning');
+        
         // Fallback to static insights
         const fallbackInsights = gerarInsightsEstatisticos(dadosPlanilha);
         setIndicadores(fallbackInsights);
-        toast.error('Usando análise estatística devido a erro na IA');
+        
+        setInsightsProgress(100);
+        updateFeedbackProgress(100);
       } finally {
         setIsLoading(false);
       }
     };
 
     fetchOrGenerateInsights();
-  }, [dadosPlanilha, uploadId, callWithRetry]);
+  }, [dadosPlanilha, uploadId, callWithRetry, showFeedback, updateFeedbackProgress, updateFeedbackMessage, setInsightsProgress]);
 
   return { indicadores, isLoading, error };
 };
