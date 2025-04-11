@@ -59,6 +59,7 @@ export interface ESICJustificativa {
 export interface ESICJustificativaFormValues {
   texto: string;
   gerado_por_ia: boolean;
+  rascunho?: string;
 }
 
 export const situacaoLabels: Record<string, string> = {

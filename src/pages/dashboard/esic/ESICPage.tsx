@@ -41,8 +41,17 @@ const ESICPage: React.FC = () => {
     handleGenerateJustificativa,
     handleUpdateStatus,
     handleUpdateSituacao,
+    generatedJustificativaText,
+    setGeneratedJustificativaText,
     fetchProcessos
   } = useESICPageState();
+  
+  // Effect to update the justificativa text field when AI generates content
+  useEffect(() => {
+    if (generatedJustificativaText && screen === 'justify') {
+      // This will be handled by the JustificativaCreate or JustificativaForm component
+    }
+  }, [generatedJustificativaText, screen]);
   
   // Fetch processes when the component mounts
   useEffect(() => {

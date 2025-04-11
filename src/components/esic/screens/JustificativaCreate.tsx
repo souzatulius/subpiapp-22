@@ -6,18 +6,19 @@ import { z } from 'zod';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArrowLeft, Wand2 } from 'lucide-react';
 import { ESICJustificativaFormValues } from '@/types/esic';
 
 const justificativaSchema = z.object({
-  texto: z.string().min(10, "A justificativa deve ter no mínimo 10 caracteres")
+  texto: z.string().min(10, "A justificativa deve ter no mínimo 10 caracteres"),
+  rascunho: z.string().optional(),
 });
 
 interface JustificativaCreateProps {
   processoTexto: string;
   onSubmit: (values: ESICJustificativaFormValues) => void;
-  onGenerate: () => void;
+  onGenerate: (rascunho: string) => void;
   onBack: () => void;
   isLoading: boolean;
   isGenerating: boolean;
@@ -31,20 +32,25 @@ const JustificativaCreate: React.FC<JustificativaCreateProps> = ({
   isLoading,
   isGenerating
 }) => {
-  const form = useForm<ESICJustificativaFormValues>({
+  const form = useForm<ESICJustificativaFormValues & { rascunho: string }>({
     resolver: zodResolver(justificativaSchema),
     defaultValues: {
       texto: '',
+      rascunho: '',
       gerado_por_ia: false
     }
   });
 
   const handleGenerateClick = () => {
-    onGenerate();
+    const rascunho = form.getValues('rascunho');
+    onGenerate(rascunho);
   };
 
-  const handleSubmit = (values: ESICJustificativaFormValues) => {
-    onSubmit(values);
+  const handleSubmit = (values: ESICJustificativaFormValues & { rascunho: string }) => {
+    onSubmit({
+      texto: values.texto,
+      gerado_por_ia: values.gerado_por_ia
+    });
   };
 
   return (
@@ -76,13 +82,31 @@ const JustificativaCreate: React.FC<JustificativaCreateProps> = ({
               <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
                 <FormField
                   control={form.control}
+                  name="rascunho"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Rascunho</FormLabel>
+                      <FormControl>
+                        <Textarea
+                          placeholder="Escreva um rascunho para gerar uma sugestão com IA..."
+                          className="min-h-[100px]"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
                   name="texto"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Texto da Justificativa</FormLabel>
                       <FormControl>
                         <Textarea
-                          placeholder="Digite a justificativa para este processo..."
+                          placeholder="Digite a justificativa para este processo ou use a IA para gerar uma sugestão..."
                           className="min-h-[200px]"
                           {...field}
                         />
@@ -101,7 +125,7 @@ const JustificativaCreate: React.FC<JustificativaCreateProps> = ({
                     className="flex items-center"
                   >
                     <Wand2 className="h-4 w-4 mr-2" />
-                    {isGenerating ? 'Gerando...' : 'Gerar com IA'}
+                    {isGenerating ? 'Gerando...' : 'Gerar'}
                   </Button>
 
                   <Button type="submit" disabled={isLoading}>

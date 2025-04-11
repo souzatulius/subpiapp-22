@@ -94,10 +94,12 @@ export const useJustificativas = (processoId?: string) => {
   const generateJustificativaMutation = useMutation({
     mutationFn: async ({ 
       processoId, 
-      processoTexto 
+      processoTexto,
+      rascunho 
     }: { 
       processoId: string; 
-      processoTexto: string 
+      processoTexto: string;
+      rascunho: string;
     }) => {
       if (!user) throw new Error('Usuário não autenticado');
 
@@ -118,7 +120,9 @@ export const useJustificativas = (processoId?: string) => {
               },
               {
                 role: 'user',
-                content: `Elabore uma justificativa formal para o seguinte processo e-SIC: "${processoTexto}"`
+                content: `Elabore uma justificativa formal para o seguinte processo e-SIC: "${processoTexto}" 
+                
+                Considere as seguintes ideias para a justificativa: "${rascunho}"`
               }
             ],
             temperature: 0.7,
@@ -134,33 +138,10 @@ export const useJustificativas = (processoId?: string) => {
 
         const justificativaTexto = data.choices[0].message.content;
 
-        // Save the generated justification
-        const { data: justificativa, error } = await supabase
-          .from('esic_justificativas')
-          .insert({
-            processo_id: processoId,
-            texto: justificativaTexto,
-            gerado_por_ia: true,
-            autor_id: user.id,
-          })
-          .select();
-
-        if (error) {
-          throw error;
-        }
-
-        // Update the process status to "aguardando_aprovacao"
-        await supabase
-          .from('esic_processos')
-          .update({ status: 'aguardando_aprovacao' })
-          .eq('id', processoId);
-
-        toast({
-          title: 'Justificativa gerada com sucesso',
-          variant: 'default',
-        });
-
-        return justificativa[0] as ESICJustificativa;
+        return {
+          justificativaTexto,
+          processoId
+        };
       } catch (error: any) {
         toast({
           title: 'Erro ao gerar justificativa',
@@ -169,11 +150,7 @@ export const useJustificativas = (processoId?: string) => {
         });
         throw error;
       }
-    },
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['esic-justificativas', variables.processoId] });
-      queryClient.invalidateQueries({ queryKey: ['esic-processos'] });
-    },
+    }
   });
 
   return {

@@ -28,8 +28,10 @@ export interface ESICStateReturn {
   handleEditProcesso: (processo: ESICProcesso) => void;
   handleAddJustificativa: () => void;
   handleCreateJustificativa: (values: ESICJustificativaFormValues) => Promise<void>;
-  handleGenerateJustificativa: () => Promise<void>;
+  handleGenerateJustificativa: (rascunho?: string) => Promise<void>;
   handleUpdateStatus: (status: 'novo_processo' | 'aguardando_justificativa' | 'aguardando_aprovacao' | 'concluido') => void;
   handleUpdateSituacao: (situacao: 'em_tramitacao' | 'prazo_prorrogado' | 'concluido') => void;
   fetchProcessos: () => Promise<void>;
+  generatedJustificativaText?: string;
+  setGeneratedJustificativaText: (text: string) => void;
 }

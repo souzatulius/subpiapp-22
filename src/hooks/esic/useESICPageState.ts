@@ -65,6 +65,9 @@ export const useESICPageState = (): ESICStateReturn => {
     setSelectedProcesso
   );
   
+  // State for storing AI-generated text
+  const [generatedJustificativaText, setGeneratedJustificativaText] = useState<string>('');
+  
   const handleCreateProcesso = async (values: ESICProcessoFormValues): Promise<void> => {
     return new Promise((resolve, reject) => {
       createProcesso(values, {
@@ -148,21 +151,26 @@ export const useESICPageState = (): ESICStateReturn => {
     });
   };
   
-  const handleGenerateJustificativa = async (): Promise<void> => {
+  const handleGenerateJustificativa = async (rascunho: string = ""): Promise<void> => {
     if (!selectedProcesso) return Promise.reject(new Error('Nenhum processo selecionado'));
     
     return new Promise((resolve, reject) => {
       generateJustificativa(
         {
           processoId: selectedProcesso.id,
-          processoTexto: selectedProcesso.texto
+          processoTexto: selectedProcesso.texto,
+          rascunho: rascunho
         },
         {
-          onSuccess: () => {
-            setScreen('view');
+          onSuccess: (data) => {
+            // Update the form with the AI-generated text
+            setGeneratedJustificativaText(data.justificativaTexto);
+            
+            // Instead of automatically saving, we just update the form field
+            // The user can review and manually save
             toast({
               title: 'Justificativa gerada com sucesso',
-              description: 'A IA gerou uma justificativa para este processo.',
+              description: 'A IA gerou uma justificativa. Revise e clique em Salvar para confirmar.',
             });
             resolve();
           },
@@ -216,6 +224,8 @@ export const useESICPageState = (): ESICStateReturn => {
     handleGenerateJustificativa,
     handleUpdateStatus: statusUpdateHandler,
     handleUpdateSituacao: situacaoUpdateHandler,
-    fetchProcessos
+    fetchProcessos,
+    generatedJustificativaText, 
+    setGeneratedJustificativaText
   };
 };
