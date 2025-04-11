@@ -36,6 +36,7 @@ ChartJS.defaults.elements.line.borderWidth = 2;
 ChartJS.defaults.elements.point.radius = 3;
 ChartJS.defaults.elements.point.hoverRadius = 5;
 
+// Export the same chart colors to maintain consistency
 export const chartColors = [
   '#F97316', // orange-500
   '#3B82F6', // blue-500

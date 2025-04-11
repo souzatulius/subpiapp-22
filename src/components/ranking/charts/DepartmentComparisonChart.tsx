@@ -105,10 +105,8 @@ const DepartmentComparisonChart: React.FC<DepartmentComparisonChartProps> = ({
         callbacks: {
           label: function(context: any) {
             const label = context.dataset.label || '';
-            const value = context.raw;
-            return context.datasetIndex === 0
-              ? `${label}: ${value.toFixed(1)}%`
-              : `${label}: ${value}`;
+            const value = context.raw || 0;
+            return `${label}: ${value}${context.datasetIndex === 0 ? '%' : ''}`;
           }
         }
       }
@@ -122,7 +120,7 @@ const DepartmentComparisonChart: React.FC<DepartmentComparisonChartProps> = ({
           display: true,
           text: 'Eficiência (%)'
         },
-        min: 0,
+        beginAtZero: true,
         max: 100
       },
       y1: {
@@ -131,13 +129,13 @@ const DepartmentComparisonChart: React.FC<DepartmentComparisonChartProps> = ({
         position: 'right' as const,
         title: {
           display: true,
-          text: 'Total de Demandas'
+          text: 'Total'
         },
+        beginAtZero: true,
         grid: {
           drawOnChartArea: false,
-        },
-        beginAtZero: true
-      },
+        }
+      }
     }
   };
   
