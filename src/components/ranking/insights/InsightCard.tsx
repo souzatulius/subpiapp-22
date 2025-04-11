@@ -1,56 +1,67 @@
 
 import React from 'react';
-import { Card } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { TrendingUp, TrendingDown } from 'lucide-react';
+import { Progress } from '@/components/ui/progress';
 
 interface InsightCardProps {
   title: string;
-  value: string;
-  comment: string;
-  isLoading: boolean;
-  trend?: 'up' | 'down' | 'neutral';
+  value: string | number;
+  comment?: string;
+  isLoading?: boolean;
   isSimulated?: boolean;
+  progress?: number;
 }
 
 const InsightCard: React.FC<InsightCardProps> = ({ 
   title, 
   value, 
-  comment, 
-  isLoading,
-  trend,
-  isSimulated = false
+  comment,
+  isLoading = false,
+  isSimulated = false,
+  progress = 0
 }) => {
   return (
-    <Card className={`overflow-hidden rounded-xl shadow-sm hover:shadow-md transition-all ${
-      isSimulated ? 'border-orange-300 bg-orange-50' : 'border-blue-100'
-    }`}>
-      <div className="p-4">
-        <div className="flex items-center justify-between">
-          <h3 className={`text-sm font-medium ${isSimulated ? 'text-orange-700' : 'text-blue-700'}`}>
-            {title}
-          </h3>
-          {trend && (
-            <div className={`flex items-center ${trend === 'up' ? 'text-green-500' : 'text-red-500'}`}>
-              {trend === 'up' ? <TrendingUp size={16} /> : <TrendingDown size={16} />}
-            </div>
-          )}
-        </div>
-        
+    <Card className={`
+      overflow-hidden
+      ${isSimulated ? 'border-orange-400 bg-orange-50' : 'border-gray-200'}
+      ${isLoading ? 'animate-pulse' : ''}
+    `}>
+      <CardContent className="p-4">
         {isLoading ? (
-          <div className="mt-2">
-            <Skeleton className="h-8 w-28 bg-blue-50" />
-            <Skeleton className="h-4 w-full mt-2 bg-blue-50" />
+          <div className="space-y-3">
+            <Skeleton className="h-4 w-1/2" />
+            <Skeleton className="h-7 w-3/4" />
+            <Skeleton className="h-4 w-full" />
+            {/* Mostrar barra de progresso se progress > 0 */}
+            {progress > 0 && (
+              <div className="mt-2">
+                <Progress 
+                  value={progress} 
+                  className="h-1.5" 
+                  indicatorClassName="bg-orange-500" 
+                />
+                <p className="text-xs text-gray-500 text-right mt-1">
+                  {progress < 100 ? 'Analisando...' : 'Análise concluída'} {progress}%
+                </p>
+              </div>
+            )}
           </div>
         ) : (
           <>
-            <p className={`text-2xl font-bold mt-1 ${isSimulated ? 'text-orange-800' : 'text-blue-900'}`}>
-              {value}
-            </p>
-            <p className="text-xs mt-1.5 text-gray-500">{comment}</p>
+            <h3 className="text-sm font-medium text-gray-500 mb-1">{title}</h3>
+            <p className="text-2xl font-semibold text-gray-800">{value}</p>
+            {comment && (
+              <p className="text-xs text-gray-500 mt-2 line-clamp-2">{comment}</p>
+            )}
+            {isSimulated && (
+              <div className="mt-2 inline-flex items-center rounded-full px-2 py-1 text-xs font-medium bg-orange-100 text-orange-700">
+                Simulação
+              </div>
+            )}
           </>
         )}
-      </div>
+      </CardContent>
     </Card>
   );
 };

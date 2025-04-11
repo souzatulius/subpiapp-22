@@ -1,11 +1,21 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { useOpenAIWithRetry } from '@/hooks/useOpenAIWithRetry';
+import { toast } from 'sonner';
 
 export const useChatGPTInsight = (dadosPlanilha: any[] | null, uploadId?: string) => {
   const [indicadores, setIndicadores] = useState<any>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [analysisProgress, setAnalysisProgress] = useState<number>(0);
+  
+  // Use our new OpenAI hook with retry
+  const { callOpenAI, isLoading: isAILoading } = useOpenAIWithRetry<any>({
+    maxRetries: 2,
+    timeout: 30000,
+    onProgress: (progress) => setAnalysisProgress(progress)
+  });
 
   useEffect(() => {
     const fetchOrGenerateInsights = async () => {
@@ -15,6 +25,7 @@ export const useChatGPTInsight = (dadosPlanilha: any[] | null, uploadId?: string
       }
 
       setIsLoading(true);
+      setAnalysisProgress(0);
       
       try {
         // Verificar se existem insights previamente gerados para este upload
@@ -28,17 +39,21 @@ export const useChatGPTInsight = (dadosPlanilha: any[] | null, uploadId?: string
           if (existingInsights) {
             setIndicadores(existingInsights.indicadores);
             setIsLoading(false);
+            setAnalysisProgress(100);
             return;
           }
         }
 
-        // Se não houver insights salvos, gerar novos com nossa edge function
-        const { data, error: insightError } = await supabase.functions.invoke('generate-sgz-insights', {
-          body: { dados_sgz: dadosPlanilha, upload_id: uploadId }
+        // Se não houver insights salvos, gerar novos com nossa edge function usando o hook com retry
+        toast.info('Analisando dados com IA...', { duration: 3000 });
+        
+        const data = await callOpenAI('generate-sgz-insights', { 
+          dados_sgz: dadosPlanilha, 
+          upload_id: uploadId 
         });
         
-        if (insightError) {
-          throw new Error(`Erro ao gerar insights: ${insightError.message}`);
+        if (!data) {
+          throw new Error('Não foi possível gerar insights');
         }
         
         if (data.error) {
@@ -46,20 +61,28 @@ export const useChatGPTInsight = (dadosPlanilha: any[] | null, uploadId?: string
         }
         
         setIndicadores(data.indicadores);
-      } catch (err) {
+        toast.success('Análise de dados concluída com sucesso');
+        setAnalysisProgress(100);
+      } catch (err: any) {
         console.error('Erro ao buscar ou gerar insights:', err);
         setError('Falha ao gerar indicadores');
         // Fallback para indicadores gerados estatisticamente
         setIndicadores(gerarInsightsEstatisticos(dadosPlanilha));
+        toast.error(`Usando análise estatística básica: ${err.message || 'Erro na geração de insights'}`);
       } finally {
         setIsLoading(false);
       }
     };
 
     fetchOrGenerateInsights();
-  }, [dadosPlanilha, uploadId]);
+  }, [dadosPlanilha, uploadId, callOpenAI]);
 
-  return { indicadores, isLoading, error };
+  return { 
+    indicadores, 
+    isLoading, 
+    error,
+    analysisProgress 
+  };
 };
 
 // Função para gerar insights estatísticos sem depender de IA
