@@ -52,7 +52,7 @@ const ChartCategorySection: React.FC<ChartCategorySectionProps> = ({
         <CardContent>
           <div className="space-y-2">
             {charts.map((chart) => (
-              <div key={chart.id} className="flex items-center justify-between">
+              <div key={String(chart.id)} className="flex items-center justify-between">
                 <span className="text-sm">{chart.label}</span>
                 <Switch 
                   checked={chartVisibility[chart.id]}
