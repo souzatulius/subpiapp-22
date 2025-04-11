@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { BarChart3, SlidersHorizontal, Printer, FileText, Trash2, RefreshCw } from 'lucide-react';
 import RankingContent from '@/components/ranking/RankingContent';
@@ -19,6 +20,7 @@ import { useAnimatedFeedback } from '@/hooks/use-animated-feedback';
 import { useUploadState } from '@/hooks/ranking/useUploadState';
 import UploadSection from '@/components/ranking/UploadSection';
 import { toast } from 'sonner';
+import UploadProgressDisplay from '@/components/ranking/UploadProgressDisplay';
 
 const RankingSubs = () => {
   const [filterDialogOpen, setFilterDialogOpen] = useState(false);

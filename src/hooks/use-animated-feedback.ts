@@ -2,13 +2,18 @@
 import { useState, useCallback } from 'react';
 import { FeedbackType } from '@/components/ui/animated-feedback';
 
+interface FeedbackOptions {
+  duration?: number;
+  [key: string]: any;
+}
+
 export function useAnimatedFeedback() {
   const [isVisible, setIsVisible] = useState(false);
   const [feedbackType, setFeedbackType] = useState<FeedbackType>('success');
   const [feedbackMessage, setFeedbackMessage] = useState('');
-  const [options, setOptions] = useState<any>({});
+  const [options, setOptions] = useState<FeedbackOptions>({});
 
-  const showFeedback = useCallback((type: FeedbackType, message: string, customOptions = {}) => {
+  const showFeedback = useCallback((type: FeedbackType, message: string, customOptions: FeedbackOptions = {}) => {
     setFeedbackType(type);
     setFeedbackMessage(message);
     setOptions(customOptions);

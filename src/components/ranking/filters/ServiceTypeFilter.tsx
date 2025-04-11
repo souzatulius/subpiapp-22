@@ -6,7 +6,7 @@ import { FilterOptions } from '@/components/ranking/types';
 
 interface ServiceTypeFilterProps {
   serviceTypes: FilterOptions['serviceTypes'];
-  onServiceTypeChange: (types: string[]) => void; // Changed from (type: string) => void
+  onServiceTypeChange: (types: string[]) => void; // Changed to accept an array of strings
 }
 
 const ServiceTypeFilter: React.FC<ServiceTypeFilterProps> = ({ serviceTypes, onServiceTypeChange }) => {

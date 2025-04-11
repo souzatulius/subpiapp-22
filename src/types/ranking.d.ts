@@ -8,7 +8,7 @@ export interface ChartItem {
   analysis?: string;
   isAnalysisExpanded: boolean;
   showAnalysisOnly: boolean;
-  order: number; // Changed from optional to required to match ranking/types.ts
+  order: number;
   visible: boolean;
   subtitle?: string;
   type?: string;
