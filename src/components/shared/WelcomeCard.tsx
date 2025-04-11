@@ -20,6 +20,7 @@ interface WelcomeCardProps {
   showResetButton?: boolean;
   onResetClick?: () => void;
   resetButtonIcon?: React.ReactNode;
+  rightContent?: React.ReactNode; // Added rightContent prop
 }
 
 const WelcomeCard: React.FC<WelcomeCardProps> = ({
@@ -36,7 +37,8 @@ const WelcomeCard: React.FC<WelcomeCardProps> = ({
   greeting = false,
   showResetButton = false,
   onResetClick,
-  resetButtonIcon = <RotateCcw className="h-4 w-4" />
+  resetButtonIcon = <RotateCcw className="h-4 w-4" />,
+  rightContent // Added rightContent prop
 }) => {
   // Ensure userName is treated as a string even if it's undefined
   const displayName = userName || '';
@@ -95,6 +97,12 @@ const WelcomeCard: React.FC<WelcomeCardProps> = ({
                 {buttonIcon && <span className="mr-2">{buttonIcon}</span>}
                 {buttonText}
               </Button>
+            )}
+            
+            {rightContent && (
+              <div className="ml-2">
+                {rightContent}
+              </div>
             )}
           </div>
         </div>
