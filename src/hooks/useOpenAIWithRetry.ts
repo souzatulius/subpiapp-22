@@ -49,14 +49,13 @@ export function useOpenAIWithRetry<T>(options: OpenAIOptions = {}): {
         try {
           // Create an AbortController for timeout
           const controller = new AbortController();
-          const signal = controller.signal;
           
           // Set timeout
           const timeoutId = setTimeout(() => controller.abort(), timeout);
           
+          // Call Supabase function without passing the signal to the options
           const { data: responseData, error: supabaseError } = await supabase.functions.invoke(endpoint, {
-            body: payload,
-            signal
+            body: payload
           });
           
           // Clear timeout
