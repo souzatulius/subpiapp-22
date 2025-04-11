@@ -29,37 +29,7 @@ const RankingFilters: React.FC<RankingFiltersProps> = ({
     });
   };
 
-  return (
-    <div className="flex flex-wrap items-center justify-between gap-2 bg-white p-3 rounded-lg border border-gray-200">
-      <div className="flex items-center gap-2">
-        <Button
-          onClick={onOpenFilterDialog}
-          variant="outline"
-          size="sm"
-          className="bg-white border-gray-200 text-gray-700 hover:bg-gray-100"
-        >
-          <SlidersHorizontal className="h-4 w-4 mr-2" />
-          {buttonText}
-        </Button>
-        
-        {onRefresh && (
-          <Button
-            onClick={onRefresh}
-            variant="outline"
-            size="sm"
-            className="bg-white border-gray-200 text-gray-700 hover:bg-gray-100"
-          >
-            <RefreshCw className="h-4 w-4 mr-2" />
-            Atualizar
-          </Button>
-        )}
-      </div>
-      
-      <div className="text-sm text-gray-500">
-        {lastUpdateText}: <span className="font-medium">{formatLastUpdated()}</span>
-      </div>
-    </div>
-  );
+  return null; // Return null instead of rendering the div since it's unnecessary
 };
 
 export default RankingFilters;
