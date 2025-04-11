@@ -28,8 +28,8 @@ const DemandaCard: React.FC<DemandaCardProps> = ({ demanda, isSelected, onClick 
     }
   };
   
-  // Extraindo a sigla da coordenação associada ao problema
-  const coordenacaoSigla = demanda.problema?.coordenacao?.sigla || 
+  // Extraindo a sigla da coordenação associada ao problema ou do coordenacao_id da demanda
+  const coordenacaoSigla = demanda.coordenacao?.sigla || 
                           (demanda.coordenacao_id ? 'Coord.' : 'Interna');
   
   // Format relative time
