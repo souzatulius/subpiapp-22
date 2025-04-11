@@ -1,12 +1,11 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import TitleSection from './organize/TitleSection';
 import { ValidationError, hasFieldError, getFieldErrorMessage } from '@/lib/formValidationUtils';
 import QuestionsSection from './questions/QuestionsSection';
 import FileUploadSection from './questions/FileUploadSection';
 import { Textarea } from '@/components/ui/textarea';
-import { Button } from '@/components/ui/button';
-import { Sparkles, Loader2 } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 
 interface OrganizeStepProps {
   formData: {
@@ -27,8 +26,7 @@ interface OrganizeStepProps {
   servicos: any[];
   filteredBairros: any[];
   errors: ValidationError[];
-  onGenerateAIContent?: () => void;
-  isGenerating?: boolean;
+  onGenerateAIContent?: () => Promise<void>;
 }
 
 const OrganizeStep: React.FC<OrganizeStepProps> = ({
@@ -40,38 +38,44 @@ const OrganizeStep: React.FC<OrganizeStepProps> = ({
   servicos,
   filteredBairros,
   errors,
-  onGenerateAIContent,
-  isGenerating = false
+  onGenerateAIContent
 }) => {
+  const [isGenerating, setIsGenerating] = useState(false);
+
   // Find the problem and service descriptions
   const selectedProblem = problemas.find(p => p.id === formData.problema_id);
   const selectedService = servicos.find(s => s.id === formData.servico_id);
   const selectedBairro = filteredBairros.find(b => b.id === formData.bairro_id);
+  
+  // Auto-generate content when component mounts
+  useEffect(() => {
+    const generateContent = async () => {
+      if (
+        formData.problema_id && 
+        formData.detalhes_solicitacao &&
+        onGenerateAIContent &&
+        (!formData.titulo || !formData.resumo_situacao)
+      ) {
+        setIsGenerating(true);
+        try {
+          await onGenerateAIContent();
+        } finally {
+          setIsGenerating(false);
+        }
+      }
+    };
+    
+    generateContent();
+  }, [formData.problema_id, formData.detalhes_solicitacao, onGenerateAIContent]);
 
   return (
     <div className="space-y-6">
-      {/* AI-assisted content generation button */}
-      <div className="flex justify-end">
-        <Button
-          type="button"
-          variant="outline"
-          onClick={onGenerateAIContent}
-          disabled={isGenerating}
-          className="flex items-center gap-2"
-        >
-          {isGenerating ? (
-            <>
-              <Loader2 className="h-4 w-4 animate-spin" />
-              Gerando sugestões...
-            </>
-          ) : (
-            <>
-              <Sparkles className="h-4 w-4" />
-              Gerar sugestões com IA
-            </>
-          )}
-        </Button>
-      </div>
+      {isGenerating && (
+        <div className="flex flex-col items-center justify-center py-6 bg-blue-50 rounded-xl border border-blue-100">
+          <Loader2 className="h-8 w-8 text-blue-500 animate-spin mb-4" />
+          <p className="text-blue-700">Gerando sugestões com IA...</p>
+        </div>
+      )}
 
       {/* Título da Demanda */}
       <TitleSection 
@@ -87,7 +91,7 @@ const OrganizeStep: React.FC<OrganizeStepProps> = ({
         filteredBairros={filteredBairros}
       />
 
-      {/* Resumo da situação - New field */}
+      {/* Resumo da situação */}
       <div>
         <label 
           htmlFor="resumo_situacao" 
@@ -101,7 +105,7 @@ const OrganizeStep: React.FC<OrganizeStepProps> = ({
           value={formData.resumo_situacao || ''}
           onChange={handleChange}
           placeholder="Um resumo claro da situação para facilitar o entendimento pela área técnica..."
-          className={`min-h-[100px] ${hasFieldError('resumo_situacao', errors) ? 'border-orange-500' : ''}`}
+          className={`min-h-[100px] rounded-xl ${hasFieldError('resumo_situacao', errors) ? 'border-orange-500' : ''}`}
         />
         {hasFieldError('resumo_situacao', errors) && (
           <p className="text-orange-500 text-sm mt-1">{getFieldErrorMessage('resumo_situacao', errors)}</p>

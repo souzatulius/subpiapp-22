@@ -1,4 +1,3 @@
-
 import { DemandFormData } from '@/hooks/demandForm';
 
 export interface ValidationError {
@@ -28,16 +27,16 @@ const fieldNames: Record<string, string> = {
 // Validação por etapa do formulário
 const stepValidations: Record<number, string[]> = {
   0: ["origem_id", "prazo_resposta"], // Origem, Protocolo, Prazo
-  1: ["tipo_midia_id", "nome_solicitante", "telefone_solicitante", "email_solicitante"], // Mídia, Solicitante
+  1: ["tipo_midia_id"], // Mídia, Solicitante (fields are now optional)
   2: ["problema_id", "detalhes_solicitacao", "bairro_id"], // Tema, Serviço, Detalhes, Localização
   3: ["titulo"], // Título, Perguntas, Anexos
-  4: ["titulo", "problema_id", "origem_id", "prazo_resposta", "nome_solicitante", "email_solicitante", "bairro_id", "detalhes_solicitacao"] // Revisão (todos os campos obrigatórios)
+  4: ["titulo", "problema_id", "origem_id", "prazo_resposta", "bairro_id", "detalhes_solicitacao"] // Revisão (campos obrigatórios)
 };
 
 export const validateDemandForm = (formData: DemandFormData, step: number): ValidationError[] => {
   const errors: ValidationError[] = [];
   const fieldsToValidate = step === 4 ? 
-    // No passo de revisão, validar todos os campos
+    // No passo de revisão, validar todos os campos obrigatórios
     stepValidations[4] : 
     // Nos outros passos, validar apenas os campos da etapa atual
     stepValidations[step] || [];
@@ -75,30 +74,6 @@ export const validateDemandForm = (formData: DemandFormData, step: number): Vali
     errors.push({
       field: "veiculo_imprensa",
       message: "Informe o veículo de imprensa"
-    });
-  }
-  
-  // Validar nome_solicitante
-  if (fieldsToValidate.includes("nome_solicitante") && !formData.nome_solicitante) {
-    errors.push({
-      field: "nome_solicitante",
-      message: "Informe o nome do solicitante"
-    });
-  }
-  
-  // Validar telefone_solicitante
-  if (fieldsToValidate.includes("telefone_solicitante") && !formData.telefone_solicitante) {
-    errors.push({
-      field: "telefone_solicitante",
-      message: "Informe o telefone do solicitante"
-    });
-  }
-  
-  // Validar email_solicitante
-  if (fieldsToValidate.includes("email_solicitante") && !formData.email_solicitante) {
-    errors.push({
-      field: "email_solicitante",
-      message: "Informe o email do solicitante"
     });
   }
   

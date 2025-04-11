@@ -29,9 +29,9 @@ const RequesterFields: React.FC<RequesterFieldsProps> = ({
       <div>
         <Label 
           htmlFor="nome_solicitante" 
-          className={`block text-base font-medium mb-2 ${hasFieldError('nome_solicitante', errors) ? 'text-orange-500' : ''}`}
+          className="block text-base font-medium mb-2"
         >
-          Nome do Solicitante {hasFieldError('nome_solicitante', errors) && <span className="text-orange-500">*</span>}
+          Nome do Solicitante (opcional)
         </Label>
         <Input
           id="nome_solicitante"
@@ -39,19 +39,16 @@ const RequesterFields: React.FC<RequesterFieldsProps> = ({
           value={formData.nome_solicitante || ''}
           onChange={handleChange}
           placeholder=""
-          className={hasFieldError('nome_solicitante', errors) ? 'border-orange-500' : ''}
+          className="rounded-xl"
         />
-        {hasFieldError('nome_solicitante', errors) && (
-          <p className="text-orange-500 text-sm mt-1">{getFieldErrorMessage('nome_solicitante', errors)}</p>
-        )}
       </div>
       
       <div>
         <Label 
           htmlFor="telefone_solicitante" 
-          className={`block text-base font-medium mb-2 ${hasFieldError('telefone_solicitante', errors) ? 'text-orange-500' : ''}`}
+          className="block text-base font-medium mb-2"
         >
-          Telefone {hasFieldError('telefone_solicitante', errors) && <span className="text-orange-500">*</span>}
+          Telefone (opcional)
         </Label>
         <Input
           id="telefone_solicitante"
@@ -59,19 +56,16 @@ const RequesterFields: React.FC<RequesterFieldsProps> = ({
           value={formData.telefone_solicitante || ''}
           onChange={handleChange}
           placeholder="(11) 98765-4321"
-          className={hasFieldError('telefone_solicitante', errors) ? 'border-orange-500' : ''}
+          className="rounded-xl"
         />
-        {hasFieldError('telefone_solicitante', errors) && (
-          <p className="text-orange-500 text-sm mt-1">{getFieldErrorMessage('telefone_solicitante', errors)}</p>
-        )}
       </div>
       
       <div>
         <Label 
           htmlFor="email_solicitante" 
-          className={`block text-base font-medium mb-2 ${hasFieldError('email_solicitante', errors) ? 'text-orange-500' : ''}`}
+          className="block text-base font-medium mb-2"
         >
-          E-mail {hasFieldError('email_solicitante', errors) && <span className="text-orange-500">*</span>}
+          E-mail (opcional)
         </Label>
         <Input
           id="email_solicitante"
@@ -80,11 +74,8 @@ const RequesterFields: React.FC<RequesterFieldsProps> = ({
           value={formData.email_solicitante || ''}
           onChange={handleChange}
           placeholder="email@exemplo.com"
-          className={hasFieldError('email_solicitante', errors) ? 'border-orange-500' : ''}
+          className="rounded-xl"
         />
-        {hasFieldError('email_solicitante', errors) && (
-          <p className="text-orange-500 text-sm mt-1">{getFieldErrorMessage('email_solicitante', errors)}</p>
-        )}
       </div>
     </div>
   );
