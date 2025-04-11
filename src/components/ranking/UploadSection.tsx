@@ -34,6 +34,8 @@ const UploadSection = ({
   onRefreshData
 }: UploadSectionProps) => {
   const [uploadStats, setUploadStats] = useState<UploadStats>({});
+  const [isSgzUploading, setIsSgzUploading] = useState(false);
+  const [isPainelUploading, setIsPainelUploading] = useState(false);
   const { showFeedback } = useAnimatedFeedback();
 
   // Auto refresh data when uploads are complete
@@ -41,7 +43,13 @@ const UploadSection = ({
     const sgzComplete = uploadStats.sgz?.stage === 'complete';
     const painelComplete = uploadStats.painel?.stage === 'complete';
     
-    if ((sgzComplete || painelComplete) && !uploadStats.lastRefreshed) {
+    const bothComplete = (sgzComplete || !uploadStats.sgz) && 
+                         (painelComplete || !uploadStats.painel);
+    
+    // Only refresh when all active uploads are complete
+    if ((sgzComplete || painelComplete) && 
+        !uploadStats.lastRefreshed && 
+        ((isSgzUploading && sgzComplete) || (isPainelUploading && painelComplete))) {
       // Set a small delay before refreshing to ensure all data is committed
       const timer = setTimeout(() => {
         onRefreshData().then(() => {
@@ -51,12 +59,16 @@ const UploadSection = ({
           }));
           
           showFeedback('success', 'Dados atualizados com sucesso');
+          
+          // Reset upload state flags
+          if (sgzComplete) setIsSgzUploading(false);
+          if (painelComplete) setIsPainelUploading(false);
         });
       }, 1500);
       
       return () => clearTimeout(timer);
     }
-  }, [uploadStats, onRefreshData, showFeedback]);
+  }, [uploadStats, onRefreshData, showFeedback, isSgzUploading, isPainelUploading]);
 
   // Calculate estimated time remaining for processing
   const calculateEstimatedTime = (stats: UploadProgressStats): string => {
@@ -87,6 +99,7 @@ const UploadSection = ({
     if (!file) return;
 
     onUploadStart();
+    setIsSgzUploading(true);
     
     // Initialize progress tracking
     setUploadStats(prev => ({
@@ -172,6 +185,7 @@ const UploadSection = ({
           }
         }));
         
+        setIsSgzUploading(false);
         showFeedback('error', `Erro no upload: ${result?.message || 'Erro desconhecido'}`);
         toast.error(`Erro no upload: ${result?.message || 'Erro desconhecido'}`);
       }
@@ -187,6 +201,7 @@ const UploadSection = ({
         }
       }));
       
+      setIsSgzUploading(false);
       showFeedback('error', 'Erro ao processar arquivo SGZ');
       toast.error('Erro ao processar arquivo SGZ');
     } finally {
@@ -201,6 +216,7 @@ const UploadSection = ({
     if (!file) return;
 
     onUploadStart();
+    setIsPainelUploading(true);
     
     // Initialize progress tracking
     setUploadStats(prev => ({
@@ -286,6 +302,7 @@ const UploadSection = ({
           }
         }));
         
+        setIsPainelUploading(false);
         showFeedback('error', `Erro no upload: ${result?.message || 'Erro desconhecido'}`);
         toast.error(`Erro no upload: ${result?.message || 'Erro desconhecido'}`);
       }
@@ -301,6 +318,7 @@ const UploadSection = ({
         }
       }));
       
+      setIsPainelUploading(false);
       showFeedback('error', 'Erro ao processar arquivo do Painel');
       toast.error('Erro ao processar arquivo do Painel');
     } finally {
@@ -344,19 +362,19 @@ const UploadSection = ({
             accept=".xlsx,.xls,.csv"
             className="hidden"
             onChange={handleSGZFileUpload}
-            disabled={isUploading}
+            disabled={isSgzUploading || isPainelUploading}
           />
           <label htmlFor="sgzFile">
             <Button
               variant="outline"
               size="sm"
-              className={`cursor-pointer ${isUploading ? 'bg-gray-200' : 'bg-gray-100'} text-gray-700 border-gray-300 hover:bg-gray-200`}
-              disabled={isUploading}
+              className={`cursor-pointer ${isSgzUploading ? 'bg-gray-200' : 'bg-gray-100'} text-gray-700 border-gray-300 hover:bg-gray-200`}
+              disabled={isSgzUploading || isPainelUploading}
               asChild
             >
               <span>
                 <Upload className="h-4 w-4 mr-2" />
-                {isUploading && (!uploadStats.sgz || uploadStats.sgz.stage !== 'complete') ? 'Processando...' : 'Selecionar Arquivo'}
+                {isSgzUploading ? 'Processando...' : 'Selecionar Arquivo'}
               </span>
             </Button>
           </label>
@@ -375,19 +393,19 @@ const UploadSection = ({
             accept=".xlsx,.xls,.csv"
             className="hidden"
             onChange={handlePainelFileUpload}
-            disabled={isUploading}
+            disabled={isSgzUploading || isPainelUploading}
           />
           <label htmlFor="painelFile">
             <Button
               variant="outline"
               size="sm"
-              className={`cursor-pointer ${isUploading ? 'bg-gray-200' : 'bg-gray-100'} text-gray-700 border-gray-300 hover:bg-gray-200`}
-              disabled={isUploading}
+              className={`cursor-pointer ${isPainelUploading ? 'bg-gray-200' : 'bg-gray-100'} text-gray-700 border-gray-300 hover:bg-gray-200`}
+              disabled={isSgzUploading || isPainelUploading}
               asChild
             >
               <span>
                 <Upload className="h-4 w-4 mr-2" />
-                {isUploading && (!uploadStats.painel || uploadStats.painel.stage !== 'complete') ? 'Processando...' : 'Selecionar Arquivo'}
+                {isPainelUploading ? 'Processando...' : 'Selecionar Arquivo'}
               </span>
             </Button>
           </label>

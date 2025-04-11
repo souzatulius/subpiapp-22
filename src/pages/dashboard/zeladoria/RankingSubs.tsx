@@ -11,11 +11,11 @@ import '@/components/ranking/charts/ChartRegistration';
 import RealDataProvider, { useRealData } from '@/components/ranking/RealDataProvider';
 import { exportToPDF, printWithStyles } from '@/utils/pdfExport';
 import { useIsMobile } from '@/hooks/use-mobile';
-import UploadSection from '@/components/ranking/UploadSection';
 import { supabase } from '@/integrations/supabase/client';
 import FeedbackProvider from '@/components/ui/feedback-provider';
 import CleanDataDialog from '@/components/ranking/CleanDataDialog';
 import { Skeleton } from '@/components/ui/skeleton';
+import UploadButton from '@/components/ranking/UploadButton';
 
 const RankingSubs = () => {
   const [filterDialogOpen, setFilterDialogOpen] = useState(false);
@@ -135,60 +135,31 @@ const RankingSubsContent = ({
         description="Acompanhamento de desempenho e análises de ações, projetos e obras."
         icon={<BarChart3 className="h-6 w-6 mr-2 text-white" />}
         color="bg-gradient-to-r from-orange-500 to-orange-700"
+        rightContent={
+          <Button
+            variant="outline"
+            size="icon"
+            className="bg-white/20 text-white border-white/30 hover:bg-white/30"
+            onClick={refreshData}
+            disabled={isRefreshing || isLoading}
+            title="Atualizar Dados"
+          >
+            <RefreshCw className={`h-5 w-5 ${isRefreshing ? 'animate-spin' : ''}`} />
+          </Button>
+        }
       />
       
-      {/* Upload Section */}
-      <div className="mt-6 bg-white p-4 rounded-xl border border-gray-100 shadow-sm">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-lg font-medium">Upload de Planilhas</h2>
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              className="bg-blue-50 text-blue-600 border-blue-200 hover:bg-blue-100"
-              onClick={refreshData}
-              disabled={isRefreshing || isLoading}
-            >
-              <RefreshCw className={`h-4 w-4 mr-1 ${isRefreshing ? 'animate-spin' : ''}`} />
-              {isRefreshing ? 'Atualizando...' : 'Atualizar Dados'}
-            </Button>
-            
-            {isAdmin && (
-              <Button
-                variant="outline"
-                size="sm"
-                className="bg-red-50 text-red-600 border-red-200 hover:bg-red-100"
-                onClick={() => setCleanDataDialogOpen(true)}
-                disabled={isRefreshing || isLoading}
-              >
-                <Trash2 className="h-4 w-4 mr-1" />
-                Limpar Dados
-              </Button>
-            )}
-          </div>
+      {/* Last Updated Indicator */}
+      {formattedLastUpdated && (
+        <div className="mt-2 text-xs text-gray-500 flex items-center">
+          <span className="mr-1">Última atualização:</span>
+          {isRefreshing ? (
+            <Skeleton className="h-4 w-32" />
+          ) : (
+            <span className="font-medium">{formattedLastUpdated}</span>
+          )}
         </div>
-        
-        {/* Last Updated Indicator */}
-        {formattedLastUpdated && (
-          <div className="mb-4 text-xs text-gray-500 flex items-center">
-            <span className="mr-1">Última atualização:</span>
-            {isRefreshing ? (
-              <Skeleton className="h-4 w-32" />
-            ) : (
-              <span className="font-medium">{formattedLastUpdated}</span>
-            )}
-          </div>
-        )}
-        
-        <UploadSection 
-          onUploadStart={handleUploadStart}
-          onUploadComplete={handleUploadComplete}
-          onPainelUploadComplete={handlePainelUploadComplete}
-          isUploading={isUploading}
-          user={currentUser}
-          onRefreshData={refreshData}
-        />
-      </div>
+      )}
       
       <div className="flex justify-end mt-4 space-x-2">
         <Button
@@ -217,7 +188,33 @@ const RankingSubsContent = ({
         >
           <SlidersHorizontal className="h-5 w-5 text-gray-600" />
         </Button>
+        
+        {/* Upload Button */}
+        <UploadButton
+          isUploading={isUploading}
+          onUploadStart={handleUploadStart}
+          onUploadComplete={handleUploadComplete}
+          onPainelUploadComplete={handlePainelUploadComplete}
+          currentUser={currentUser}
+          onRefreshData={refreshData}
+        />
       </div>
+      
+      {/* Clean Data Admin Button - If user is admin */}
+      {isAdmin && (
+        <div className="mt-2">
+          <Button
+            variant="outline"
+            size="sm"
+            className="bg-red-50 text-red-600 border-red-200 hover:bg-red-100"
+            onClick={() => setCleanDataDialogOpen(true)}
+            disabled={isRefreshing || isLoading}
+          >
+            <Trash2 className="h-4 w-4 mr-1" />
+            Limpar Dados
+          </Button>
+        </div>
+      )}
       
       <div className="mt-6">
         <RankingContent 

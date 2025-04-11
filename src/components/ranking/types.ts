@@ -1,3 +1,4 @@
+
 export interface ChartItem {
   id: string;
   title: string;
@@ -23,7 +24,7 @@ export interface ChartVisibility {
   
   // Critical Flows charts
   responsibility: boolean;
-  sgzPainel: boolean;  // Adding the missing property
+  sgzPainel: boolean;
   oldestPendingList: boolean;
   
   // Keeping other chart visibility flags for backward compatibility
@@ -41,6 +42,9 @@ export interface ChartVisibility {
   efficiencyImpact: boolean;
   criticalStatus: boolean;
   serviceDiversity: boolean;
+  
+  // Index signature to allow any string key
+  [key: string]: boolean;
 }
 
 export interface ChartData {

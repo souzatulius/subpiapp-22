@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { Filter, LayoutDashboard, ActivitySquare, MapPin, Network } from 'lucide-react';
+import { Filter, LayoutDashboard, ActivitySquare, MapPin, Network, EyeOff } from 'lucide-react';
 import { ChartVisibility } from '@/types/ranking';
 import DateRangeFilter from './DateRangeFilter';
 
@@ -28,6 +28,22 @@ const RankingFilterDialog: React.FC<RankingFilterDialogProps> = ({
   chartVisibility,
   onToggleChartVisibility,
 }) => {
+  // Get all hidden charts
+  const hiddenCharts = chartVisibility ? 
+    Object.entries(chartVisibility)
+      .filter(([key, visible]) => !visible && !key.startsWith('__')) // Filter out hidden charts and special properties
+      : [];
+  
+  const handleRestoreAll = () => {
+    if (chartVisibility && onToggleChartVisibility) {
+      Object.keys(chartVisibility).forEach(key => {
+        if (!chartVisibility[key]) {
+          onToggleChartVisibility(key);
+        }
+      });
+    }
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
@@ -44,6 +60,13 @@ const RankingFilterDialog: React.FC<RankingFilterDialogProps> = ({
               <LayoutDashboard className="h-4 w-4 mr-2" />
               Visualização
             </TabsTrigger>
+            
+            {hiddenCharts.length > 0 && (
+              <TabsTrigger value="hidden" className="flex-1">
+                <EyeOff className="h-4 w-4 mr-2" />
+                Gráficos Ocultos ({hiddenCharts.length})
+              </TabsTrigger>
+            )}
           </TabsList>
 
           <TabsContent value="visibility" className="space-y-6">
@@ -198,6 +221,47 @@ const RankingFilterDialog: React.FC<RankingFilterDialogProps> = ({
               </>
             )}
           </TabsContent>
+          
+          {/* Hidden Charts Tab */}
+          <TabsContent value="hidden" className="space-y-6">
+            {hiddenCharts.length > 0 ? (
+              <>
+                <div className="flex justify-between mb-4">
+                  <h3 className="font-medium text-gray-700">Gráficos Ocultos</h3>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={handleRestoreAll}
+                    className="text-xs text-blue-600 hover:text-blue-800 border-blue-200"
+                  >
+                    Restaurar todos
+                  </Button>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  {hiddenCharts.map(([chartId]) => (
+                    <div key={chartId} className="flex items-center justify-between p-3 border rounded-md bg-gray-50">
+                      <Label className="font-medium text-sm text-gray-600">
+                        {getChartName(chartId)}
+                      </Label>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => onToggleChartVisibility?.(chartId)}
+                        className="text-xs border-orange-200 text-orange-600 hover:bg-orange-50"
+                      >
+                        Restaurar
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              </>
+            ) : (
+              <div className="text-center py-6 text-gray-500">
+                Não há gráficos ocultos no momento
+              </div>
+            )}
+          </TabsContent>
         </Tabs>
 
         <DialogFooter className="mt-6">
@@ -210,6 +274,37 @@ const RankingFilterDialog: React.FC<RankingFilterDialogProps> = ({
       </DialogContent>
     </Dialog>
   );
+};
+
+// Helper function to get a human-readable name for chart IDs
+const getChartName = (chartId: string): string => {
+  const names: Record<string, string> = {
+    districtPerformance: "Ordens por Distrito (SGZ)",
+    serviceTypes: "Tipos de Serviço Mais Frequentes",
+    resolutionTime: "Tempo Médio por Status",
+    responsibility: "Impacto dos Terceiros",
+    statusDistribution: "Distribuição por Status",
+    statusTransition: "Status de Atendimento",
+    districtEfficiencyRadar: "Radar de Eficiência por Distrito",
+    sgzPainel: "Comparativo SGZ vs Painel",
+    oldestPendingList: "Tempo de Abertura das OS",
+    evolution: "Evolução",
+    departmentComparison: "Comparativo de Departamentos",
+    topCompanies: "Top Empresas",
+    districtDistribution: "Distribuição por Distrito",
+    servicesByDepartment: "Serviços por Departamento",
+    servicesByDistrict: "Serviços por Distrito",
+    timeComparison: "Comparação de Tempo",
+    dailyDemands: "Demandas Diárias",
+    closureTime: "Tempo de Fechamento",
+    neighborhoodComparison: "Comparativo de Bairros",
+    externalDistricts: "Distritos Externos",
+    efficiencyImpact: "Impacto de Eficiência",
+    criticalStatus: "Status Crítico",
+    serviceDiversity: "Diversidade de Serviços"
+  };
+  
+  return names[chartId] || chartId;
 };
 
 export default RankingFilterDialog;

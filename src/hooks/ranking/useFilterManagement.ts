@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { ChartVisibility, FilterOptions } from '@/components/ranking/types';
 
@@ -42,7 +43,6 @@ export const useFilterManagement = () => {
     dailyDemands: true,
     closureTime: true,
     neighborhoodComparison: true,
-    districtEfficiencyRadar: true,
     externalDistricts: true,
     efficiencyImpact: true,
     criticalStatus: true,
