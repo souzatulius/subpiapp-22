@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { ChartVisibility, FilterOptions } from '@/components/ranking/types';
 
@@ -17,28 +16,37 @@ export const useFilterManagement = () => {
 
   // Initialize chart visibility with all charts visible by default
   const [chartVisibility, setChartVisibility] = useState<ChartVisibility>({
+    // Performance & Efficiency charts
     statusDistribution: true,
+    statusTransition: true,
+    districtEfficiencyRadar: true,
+    resolutionTime: true,
+    
+    // Territories & Services charts
+    districtPerformance: true,
+    serviceTypes: true,
+    
+    // Critical Flows charts
+    responsibility: true,
+    sgzPainel: true,
+    oldestPendingList: true,
+    
+    // Keeping other chart visibility flags for backward compatibility
+    evolution: true,
+    departmentComparison: true,
     topCompanies: true,
     districtDistribution: true,
     servicesByDepartment: true,
     servicesByDistrict: true,
     timeComparison: true,
     dailyDemands: true,
-    statusTransition: true,
     closureTime: true,
     neighborhoodComparison: true,
     districtEfficiencyRadar: true,
     externalDistricts: true,
     efficiencyImpact: true,
     criticalStatus: true,
-    serviceDiversity: true,
-    districtPerformance: true,
-    serviceTypes: true,
-    resolutionTime: true,
-    responsibility: true,
-    evolution: true,
-    departmentComparison: true,
-    oldestPendingList: true
+    serviceDiversity: true
   });
 
   const handleFiltersChange = (newFilters: Partial<FilterOptions>) => {
