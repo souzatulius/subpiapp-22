@@ -50,7 +50,7 @@ const Settings = () => {
   
   return (
     <AdminProtectedRoute>
-      <div className="flex flex-col h-screen bg-[#FFFAFA]">
+      <div className="flex flex-col min-h-screen bg-[#FFFAFA]">
         {/* Header */}
         <div 
           style={isMobile ? scrollFadeStyles : undefined}
@@ -63,12 +63,12 @@ const Settings = () => {
           {/* Only show sidebar on desktop */}
           {!isMobile && <DashboardSidebar isOpen={sidebarOpen} />}
           
-          <main className={`flex-1 flex flex-col overflow-auto ${isMobile ? 'pt-0' : ''} bg-[#FFFAFA]`}>
+          <main className={`flex-1 flex flex-col overflow-hidden ${isMobile ? 'pt-0' : ''} bg-[#FFFAFA]`}>
             {/* Desktop breadcrumb - only show on desktop before content */}
             {!isMobile && <BreadcrumbBar onSettingsClick={handleBackClick} className="flex-shrink-0" />}
             
             <div className="flex-1 overflow-auto w-full max-w-full mx-auto">
-              <div className={`p-4 ${isMobile ? 'pb-16' : 'pb-4'} h-full flex flex-col`}>
+              <div className={`p-4 ${isMobile ? 'pb-24' : 'pb-16'} h-full flex flex-col`}>
                 {activeSection === 'dashboard' ? (
                   <div
                     style={isMobile ? scrollFadeStyles : undefined}

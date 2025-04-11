@@ -15,7 +15,6 @@ import { toast } from '@/hooks/use-toast';
 import OriginsDemandChartCompact from '@/components/dashboard/cards/OriginsDemandChartCompact';
 import PendingTasksCard from '@/components/dashboard/cards/PendingTasksCard';
 import PressRequestQuickStartCard from '@/components/comunicacao/PressRequestQuickStartCard';
-import { ActionCardItem } from '@/types/dashboard';
 import { Button } from '@/components/ui/button';
 import { format } from 'date-fns';
 
@@ -137,8 +136,8 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
         />
       </div>
       
-      {/* Save status indicator */}
-      {!isPreview && user && (
+      {/* Save status indicator - only render if there's save information to show */}
+      {!isPreview && user && (isSaving || lastSaved || hasUnsavedChanges) && (
         <div className="flex items-center justify-between px-4 py-2 bg-white rounded-xl shadow-sm">
           <div className="text-sm text-gray-600">
             {isSaving ? (
@@ -150,9 +149,7 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
               <span>
                 Última alteração salva: {formattedLastSaved}
               </span>
-            ) : (
-              <span>Dashboard carregado</span>
-            )}
+            ) : null}
           </div>
           {hasUnsavedChanges && (
             <Button 

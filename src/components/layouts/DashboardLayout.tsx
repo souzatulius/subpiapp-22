@@ -32,16 +32,16 @@ const DashboardLayout: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col h-screen bg-[#FFFAFA]">
+    <div className="flex flex-col min-h-screen bg-[#FFFAFA]">
       <Header 
         showControls={true} 
         toggleSidebar={toggleSidebar} 
         className="flex-shrink-0 z-10"
       />
       
-      {/* Flex container para distribuir a altura restante */}
+      {/* Flex container for remaining space */}
       <div className="flex flex-1 overflow-hidden">
-        {/* Container do sidebar com altura explícita */}
+        {/* Sidebar container with full height */}
         {!isMobile && (
           <div className="h-full flex-shrink-0">
             <DashboardSidebar isOpen={sidebarOpen} />
@@ -53,7 +53,7 @@ const DashboardLayout: React.FC = () => {
           
           <div className="flex-1 w-full max-w-7xl mx-auto overflow-y-auto">
             <motion.div 
-              className={`p-2 sm:p-4 ${isMobile ? 'pb-16 pt-0' : 'pb-6'} h-full`}
+              className={`p-4 ${isMobile ? 'pb-24' : 'pb-16'} h-full`}
               initial={{ opacity: 1, y: 20 }} 
               animate={{ opacity: 1, y: 0 }} 
               transition={{ duration: 0.5 }}

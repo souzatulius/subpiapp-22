@@ -70,7 +70,7 @@ const Relatorios = () => {
   };
 
   return (
-    <div className="flex flex-col h-screen bg-[#FFFAFA]">
+    <div className="flex flex-col min-h-screen bg-[#FFFAFA]">
       {/* Header */}
       <div className="flex-shrink-0">
         <Header showControls={true} toggleSidebar={toggleSidebar} />
@@ -90,12 +90,12 @@ const Relatorios = () => {
           </div>
         )}
         
-        <main className="flex-1 flex flex-col overflow-auto">
+        <main className="flex-1 flex flex-col overflow-hidden">
           {/* Desktop breadcrumb */}
           {!isMobile && <BreadcrumbBar className="flex-shrink-0" />}
           
           <div className="flex-1 max-w-full mx-auto w-full overflow-y-auto">
-            <div className={`p-4 ${isMobile ? 'pb-32' : ''}`}>
+            <div className={`p-4 ${isMobile ? 'pb-24' : 'pb-16'}`}>
               <motion.div 
                 initial={{ opacity: 0, y: 20 }} 
                 animate={{ opacity: 1, y: 0 }} 

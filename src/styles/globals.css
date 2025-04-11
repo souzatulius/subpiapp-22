@@ -189,6 +189,18 @@ main,
   min-height: 0;
 }
 
+/* Bottom padding for main content areas */
+.main-content-area {
+  padding-bottom: 4rem;
+}
+
+/* Ensure sidebars extend to bottom of screen */
+.sidebar-full-height {
+  height: 100vh;
+  position: sticky;
+  top: 0;
+}
+
 /* Adicionar bordas arredondadas para todos os inputs e formulários da página ESIC */
 .esic-page input,
 .esic-page textarea,
@@ -206,4 +218,10 @@ main,
 /* Garantir que todas as badges tenham bordas arredondadas */
 .badge {
   @apply rounded-full;
+}
+
+/* Ensure min-h-screen works consistently */
+.min-h-screen {
+  min-height: 100vh;
+  min-height: 100dvh;
 }
