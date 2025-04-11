@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Loader2 } from 'lucide-react';
-import * as ChartJS from './charts/ChartRegistration';
+import { setLoading } from './charts/ChartRegistration';
 
 interface EnhancedChartCardProps {
   title: string;
@@ -25,7 +25,7 @@ const EnhancedChartCard: React.FC<EnhancedChartCardProps> = ({
     setShowLoading(isLoading);
     
     if (chartRef?.current) {
-      ChartJS.setLoading(chartRef.current, isLoading);
+      setLoading(chartRef.current, isLoading);
     }
     
   }, [isLoading, chartRef]);
