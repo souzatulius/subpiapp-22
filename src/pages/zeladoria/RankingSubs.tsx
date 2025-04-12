@@ -37,7 +37,8 @@ const RankingSubs = () => {
     isRefreshing,
     setIsRefreshing,
     isMockData,
-    sgzData
+    sgzData,
+    isLoading
   } = useRankingCharts();
   
   const { showFeedback } = useAnimatedFeedback();
