@@ -1,0 +1,95 @@
+
+{
+  "kpis": {
+    "total_os": 50,
+    "os_fechadas": 18,
+    "os_pendentes": 28,
+    "os_canceladas": 4,
+    "os_fora_do_prazo": 9,
+    "media_dias_atendimento": 12.4
+  },
+  "por_distrito": {
+    "Pinheiros": 12,
+    "Itaim Bibi": 10,
+    "Vila Madalena": 8,
+    "Jardins": 11,
+    "Alto de Pinheiros": 9
+  },
+  "por_status": {
+    "NOVO": 8,
+    "PLANEJAR": 10,
+    "EM ANDAMENTO": 12,
+    "CONCLUÍDO": 16,
+    "CANCELADO": 4
+  },
+  "por_responsavel": {
+    "subprefeitura": 35,
+    "enel": 5,
+    "sabesp": 4,
+    "dzu": 3,
+    "selimp": 2,
+    "outros": 1
+  },
+  "por_tipo_servico_agrupado": {
+    "Poda Remoção Árvores": 14,
+    "Tapa Buraco": 9,
+    "Limpeza de Córregos e Bocas de Lobo": 7,
+    "Conservação de Logradouros": 6,
+    "Limpeza Urbana": 9,
+    "Equipamentos Urbanos": 5
+  },
+  "tempo_medio_por_status": {
+    "NOVO": 6.2,
+    "PLANEJAR": 4.7,
+    "CONCLUÍDO": 13.8,
+    "CANCELADO": 3.1
+  },
+  "tempo_abertura_distribuicao": {
+    "0–10 dias": 16,
+    "11–30 dias": 21,
+    "31–60 dias": 9,
+    "+60 dias": 4
+  },
+  "prazo_fechamento_distribuicao": {
+    "Dentro do Prazo": 41,
+    "Fora do Prazo": 9
+  },
+  "mais_frequentes": [
+    {
+      "servico": "Poda Remoção Árvores",
+      "quantidade": 14
+    },
+    {
+      "servico": "Tapa Buraco",
+      "quantidade": 9
+    },
+    {
+      "servico": "Limpeza Urbana",
+      "quantidade": 9
+    }
+  ],
+  "evolucao_diaria": {
+    "2025-04-01": 2,
+    "2025-04-02": 4,
+    "2025-04-03": 6,
+    "2025-04-04": 8,
+    "2025-04-05": 10
+  },
+  "fluxo_status": [
+    {
+      "from": "NOVO",
+      "to": "PLANEJAR",
+      "count": 8
+    },
+    {
+      "from": "PLANEJAR",
+      "to": "EM ANDAMENTO",
+      "count": 6
+    },
+    {
+      "from": "EM ANDAMENTO",
+      "to": "CONCLUÍDO",
+      "count": 10
+    }
+  ]
+}
