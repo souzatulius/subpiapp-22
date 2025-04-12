@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -7,6 +6,12 @@ import { Button } from '@/components/ui/button';
 import { Copy, RefreshCw, Eye, Save, Edit, AlertCircle, RotateCcw, Info } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
+
+// Define storage keys constants
+const STORAGE_KEY_SGZ = 'demo-sgz-data';
+const STORAGE_KEY_PAINEL = 'demo-painel-data';
+const STORAGE_KEY_LAST_UPDATE = 'demo-last-update';
+const STORAGE_KEY_DATA_SOURCE = 'demo-data-source';
 
 interface ChartDebugPanelProps {
   sgzData: any[] | null;

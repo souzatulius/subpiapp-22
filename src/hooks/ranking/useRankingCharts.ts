@@ -1,4 +1,3 @@
-
 import { create } from 'zustand';
 import { ChartVisibility } from '@/components/ranking/types';
 import { supabase } from '@/integrations/supabase/client';
@@ -19,6 +18,7 @@ interface RankingChartsState {
   isLoading: boolean;
   isInsightsLoading: boolean;
   isChartsLoading: boolean;
+  isRefreshing: boolean;
   uploadId: string | null;
   insightsProgress: number;
   chartsProgress: number;
@@ -34,6 +34,7 @@ interface RankingChartsState {
   setIsLoading: (isLoading: boolean) => void;
   setIsInsightsLoading: (isLoading: boolean) => void;
   setIsChartsLoading: (isLoading: boolean) => void;
+  setIsRefreshing: (isRefreshing: boolean) => void;
   setUploadId: (id: string | null) => void;
   setInsightsProgress: (progress: number) => void;
   setChartsProgress: (progress: number) => void;
@@ -85,6 +86,7 @@ export const useRankingCharts = create<RankingChartsState>()(
       isLoading: false,
       isInsightsLoading: false,
       isChartsLoading: false,
+      isRefreshing: false,
       uploadId: null,
       insightsProgress: 0,
       chartsProgress: 0,
@@ -140,6 +142,9 @@ export const useRankingCharts = create<RankingChartsState>()(
           chartsProgress: isChartsLoading ? 20 : 100 
         }),
       
+      setIsRefreshing: (isRefreshing: boolean) => 
+        set({ isRefreshing }),
+      
       setUploadId: (id: string | null) => 
         set({ uploadId: id }),
       
@@ -168,6 +173,7 @@ export const useRankingCharts = create<RankingChartsState>()(
           
           set({ 
             isLoading: true,
+            isRefreshing: true,
             isInsightsLoading: true,
             isChartsLoading: true,
             insightsProgress: 10,
