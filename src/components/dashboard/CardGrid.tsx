@@ -115,9 +115,9 @@ const CardGrid: React.FC<CardGridProps> = ({
   disableWiggleEffect,
   showSpecialFeatures
 }) => {
-  // For mobile view, use a single column
+  // For mobile view, use two columns instead of one
   const gridClass = isMobileView 
-    ? "grid grid-cols-1 gap-4" 
+    ? "grid grid-cols-2 gap-4" 
     : "grid grid-cols-4 gap-4";
     
   return (

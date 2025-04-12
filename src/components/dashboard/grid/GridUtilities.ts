@@ -7,7 +7,7 @@ export const getWidthClass = (width?: CardWidth, isMobileView: boolean = false):
       case '25':
         return 'col-span-1';
       case '50':
-        return 'col-span-1'; // Em mobile, 50% também ocupa 1 coluna (de um total de 2)
+        return 'col-span-2'; // Em mobile, 50% ocupa a largura total (2 colunas)
       case '75':
         return 'col-span-2';
       case '100':

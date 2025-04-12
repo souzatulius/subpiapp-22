@@ -18,7 +18,7 @@ const LeftContentSection: React.FC = () => {
   
   return (
     <div className="max-w-2xl mx-auto md:mx-auto flex flex-col items-center text-center">
-      <h1 className="text-5xl md:text-6xl font-bold leading-[1.1] md:leading-[1.1] mb-6 lg:text-8xl">
+      <h1 className="text-6xl md:text-6xl font-bold leading-[1.1] md:leading-[1.1] mb-6 lg:text-8xl">
         <div className="text-[#002855] bg-transparent">Demandas com mais</div>
         <div className="text-[#f57c35]">eficiência</div>
       </h1>

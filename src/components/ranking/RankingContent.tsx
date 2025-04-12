@@ -6,6 +6,8 @@ import { ChartVisibility } from './types';
 import { useRankingCharts } from '@/hooks/ranking/useRankingCharts';
 import DashboardCards from './insights/DashboardCards';
 import { useAnimatedFeedback } from '@/hooks/use-animated-feedback';
+import UploadProgressDisplay from './UploadProgressDisplay';
+import { useUploadState } from '@/hooks/ranking/useUploadState';
 
 interface RankingContentProps {
   filterDialogOpen: boolean;
@@ -32,7 +34,8 @@ const RankingContent: React.FC<RankingContentProps> = ({
     planilhaData, sgzData, painelData, isLoading, setIsInsightsLoading,
     refreshChartData
   } = useRankingCharts();
-
+  
+  const { sgzProgress, painelProgress, lastRefreshTime } = useUploadState();
   const { showFeedback } = useAnimatedFeedback();
 
   const handleSimulateIdealRanking = () => {
@@ -72,6 +75,24 @@ const RankingContent: React.FC<RankingContentProps> = ({
         isSimulationActive={isSimulationActive}
       />
 
+      {/* Display upload progress when uploads are in progress */}
+      {(sgzProgress || painelProgress) && (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+          {sgzProgress && (
+            <UploadProgressDisplay 
+              stats={sgzProgress} 
+              type="sgz"
+            />
+          )}
+          {painelProgress && (
+            <UploadProgressDisplay 
+              stats={painelProgress}
+              type="painel"
+            />
+          )}
+        </div>
+      )}
+
       <RankingCharts
         chartData={{}}
         sgzData={planilhaData}
@@ -82,7 +103,6 @@ const RankingContent: React.FC<RankingContentProps> = ({
         onSimulateIdealRanking={handleSimulateIdealRanking}
         disableCardContainers={disableCardContainers}
         onToggleChartVisibility={toggleChartVisibility}
-        onRefreshData={refreshChartData}
       />
 
       <RankingFilterDialog 
