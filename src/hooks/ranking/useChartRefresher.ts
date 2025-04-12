@@ -82,7 +82,7 @@ export const useChartRefresher = () => {
         console.log("Data comparison results:", {
           totalDivergencias: comparacao.divergencias.length,
           totalAusentes: comparacao.ausentes.length,
-          detalhes: comparacao.detalhes
+          divergenciasStatus: comparacao.divergenciasStatus.length
         });
       }
 
