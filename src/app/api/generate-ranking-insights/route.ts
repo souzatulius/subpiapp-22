@@ -20,9 +20,26 @@ export async function POST(request: Request) {
     
     // Get the request data
     const requestData = await request.json();
+    console.log("API route: Received request with data", {
+      sgzDataLength: requestData.sgz_data?.length || 0,
+      painelDataLength: requestData.painel_data?.length || 0,
+      uploadId: requestData.upload_id || 'none'
+    });
+    
+    if (!requestData.sgz_data && !requestData.painel_data) {
+      console.error("API route: Missing required data in request");
+      return new Response(
+        JSON.stringify({ error: 'Missing required data: sgz_data or painel_data' }),
+        { 
+          status: 400,
+          headers: { 'Content-Type': 'application/json' }
+        }
+      );
+    }
     
     // Call the Supabase Edge Function
     const functionUrl = `${supabaseUrl}/functions/v1/generate-ranking-insights`;
+    console.log(`API route: Calling edge function at ${functionUrl}`);
     
     const response = await fetch(functionUrl, {
       method: 'POST',
@@ -35,6 +52,8 @@ export async function POST(request: Request) {
     
     if (!response.ok) {
       const errorData = await response.json();
+      console.error("API route: Edge function error response", errorData);
+      
       return new Response(
         JSON.stringify({ error: `Edge function error: ${errorData.error || response.statusText}` }),
         { 
@@ -45,6 +64,7 @@ export async function POST(request: Request) {
     }
     
     const data = await response.json();
+    console.log("API route: Successfully received edge function response");
     
     return new Response(
       JSON.stringify(data),

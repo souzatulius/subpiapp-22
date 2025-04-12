@@ -12,6 +12,11 @@ export interface ResultadoComparacao {
   ausentes: string[];
   divergencias: OSComparacao[];
   divergenciasStatus: OSComparacao[];
+  detalhes?: {
+    porcentagemDivergente: number;
+    porcentagemAusente: number;
+    analise: string;
+  };
 }
 
 /**
@@ -21,6 +26,8 @@ export const compararBases = (
   dadosSGZ: any[],
   dadosPainel: any[]
 ): ResultadoComparacao => {
+  console.log(`Comparando bases - SGZ: ${dadosSGZ.length} registros, Painel: ${dadosPainel.length} registros`);
+  
   // Mapear OS do SGZ por número para acesso rápido
   const mapSGZ = new Map();
   dadosSGZ.forEach(os => {
@@ -79,11 +86,34 @@ export const compararBases = (
     }
   });
 
+  // Calcular métricas adicionais
+  const porcentagemDivergente = dadosSGZ.length > 0 
+    ? (divergenciasStatus.length / dadosSGZ.length) * 100 
+    : 0;
+    
+  const porcentagemAusente = dadosSGZ.length > 0 
+    ? (ausentes.length / dadosSGZ.length) * 100 
+    : 0;
+    
+  let analise = "Os dados estão consistentes entre os sistemas.";
+  if (porcentagemDivergente > 10 || porcentagemAusente > 10) {
+    analise = "Há divergências significativas entre os sistemas que precisam de atenção.";
+  } else if (porcentagemDivergente > 2 || porcentagemAusente > 5) {
+    analise = "Existem algumas divergências entre os sistemas que devem ser monitoradas.";
+  }
+  
+  console.log(`Comparação concluída: ${divergencias.length} divergências encontradas, ${ausentes.length} registros ausentes`);
+
   return {
     totalSGZ: dadosSGZ.length,
     totalPainel: dadosPainel.length,
     ausentes,
     divergencias,
-    divergenciasStatus
+    divergenciasStatus,
+    detalhes: {
+      porcentagemDivergente,
+      porcentagemAusente,
+      analise
+    }
   };
 };

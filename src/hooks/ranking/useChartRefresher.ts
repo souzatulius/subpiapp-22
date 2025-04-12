@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useRankingCharts } from './useRankingCharts';
 import { useAnimatedFeedback } from '@/hooks/use-animated-feedback';
 import { useUploadState } from './useUploadState';
+import { compararBases } from './utils/compararBases';
 
 export const useChartRefresher = () => {
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -51,6 +52,8 @@ export const useChartRefresher = () => {
         throw sgzError;
       }
 
+      console.log(`Retrieved ${sgzData?.length || 0} SGZ records`);
+
       // Step 2: Get the latest Painel data
       updateFeedbackProgress(40, 'Obtendo dados do Painel...');
       const { data: painelData, error: painelError } = await supabase
@@ -64,6 +67,8 @@ export const useChartRefresher = () => {
         throw painelError;
       }
 
+      console.log(`Retrieved ${painelData?.length || 0} Painel records`);
+
       // Step 3: Set data in store
       setSgzData(sgzData || []);
       setPlanilhaData(sgzData || []);  // planilhaData is an alias for sgzData
@@ -71,7 +76,17 @@ export const useChartRefresher = () => {
 
       updateFeedbackProgress(60, 'Gerando insights...');
 
-      // Step 4: Check if we have valid data for insights
+      // Step 4: Compare data for basic verification
+      if ((sgzData && sgzData.length > 0) && (painelData && painelData.length > 0)) {
+        const comparacao = compararBases(sgzData, painelData);
+        console.log("Data comparison results:", {
+          totalDivergencias: comparacao.divergencias.length,
+          totalAusentes: comparacao.ausentes.length,
+          detalhes: comparacao.detalhes
+        });
+      }
+
+      // Step 5: Check if we have valid data for insights
       if ((sgzData && sgzData.length > 0) || (painelData && painelData.length > 0)) {
         try {
           // Get the most recent upload ID for insights association
@@ -84,6 +99,7 @@ export const useChartRefresher = () => {
           const uploadId = uploadData && uploadData.length > 0 ? uploadData[0].id : null;
           
           if (uploadId) {
+            console.log(`Found latest upload ID: ${uploadId}`);
             setUploadId(uploadId);
             
             // Check if we already have insights for this upload
@@ -95,24 +111,33 @@ export const useChartRefresher = () => {
 
             // If no insights yet, generate them
             if (!existingInsights) {
+              console.log("No existing insights, generating new ones...");
               updateFeedbackProgress(75, 'Analisando dados com IA...');
               
               try {
-                await generateInsights({
-                  sgz_data: sgzData,
-                  painel_data: painelData,
+                const result = await generateInsights({
+                  sgz_data: sgzData || [],
+                  painel_data: painelData || [],
                   upload_id: uploadId
                 });
+                
+                console.log("Insights generation result:", result?.insights ? "Success" : "No insights generated");
               } catch (insightError) {
                 console.error("Error generating insights:", insightError);
                 // Non-fatal error, continue with refresh
               }
+            } else {
+              console.log("Using existing insights");
             }
+          } else {
+            console.log("No upload ID found, insights cannot be associated with an upload");
           }
         } catch (insightsError) {
           console.error("Error in insights flow:", insightsError);
           // Continue even if insights generation fails
         }
+      } else {
+        console.log("Insufficient data for insights generation");
       }
 
       updateFeedbackProgress(90, 'Finalizando...');
@@ -139,7 +164,7 @@ export const useChartRefresher = () => {
       setIsRefreshing(false);
       setIsLoading(false);
       setIsChartsLoading(false);
-      showFeedback('error', 'Erro ao atualizar dados', { duration: 3000 });
+      showFeedback('error', 'Erro ao atualizar dados: ' + (error.message || 'Erro desconhecido'), { duration: 3000 });
       throw error;
     }
   };
@@ -153,6 +178,8 @@ export const useChartRefresher = () => {
     upload_id: string
   }) => {
     try {
+      console.log("Calling generate-ranking-insights API...");
+      
       const response = await fetch('/api/generate-ranking-insights', {
         method: 'POST',
         headers: {
@@ -163,11 +190,13 @@ export const useChartRefresher = () => {
 
       if (!response.ok) {
         const errorData = await response.json();
+        console.error("Error response from insights API:", errorData);
         throw new Error(`Error generating insights: ${errorData.error || 'Unknown error'}`);
       }
 
       const result = await response.json();
-      return result.insights;
+      console.log("Insights API response received successfully");
+      return result;
     } catch (error) {
       console.error('Error calling insights API:', error);
       throw error;
