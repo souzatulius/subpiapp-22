@@ -116,7 +116,8 @@ export const usePainelZeladoriaUpload = (user: User | null) => {
           
           const uniqueFileName = `${baseName}_${timestamp}${ext}`;
           
-          showFeedback('info', 'Arquivo já existe, tentando com nome único...', { duration: 1500 });
+          // Changed from 'info' to 'loading' to match FeedbackType
+          showFeedback('loading', 'Arquivo já existe, tentando com nome único...', { duration: 1500 });
           
           // Retry with unique filename
           const retryResponse = await supabase.functions.invoke("create_painel_upload_with_data", {
