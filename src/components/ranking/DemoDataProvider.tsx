@@ -19,38 +19,82 @@ export const useDemoData = () => {
   return context;
 };
 
+const STORAGE_KEY_SGZ = 'demo-sgz-data';
+const STORAGE_KEY_PAINEL = 'demo-painel-data';
+const STORAGE_KEY_LAST_UPDATE = 'demo-last-update';
+
 const DemoDataProvider: React.FC<DemoDataProviderProps> = ({ children }) => {
   const [demoSgzData, setDemoSgzData] = useState<any[]>([]);
   const [demoPainelData, setDemoPainelData] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
-  const { setSgzData, setPlanilhaData, setPainelData } = useRankingCharts();
+  const { setSgzData, setPlanilhaData, setPainelData, setIsMockData } = useRankingCharts();
   
+  // Load data on component mount
   useEffect(() => {
-    // Load mock data from the JSON files
-    async function loadMockData() {
+    async function loadData() {
+      setIsLoading(true);
+      
+      // Try to get cached data from localStorage first
+      let sgzData: any[] = [];
+      let painelData: any[] = [];
+      let shouldFetchFromAPI = true;
+      
       try {
-        setIsLoading(true);
+        // Check for cached data
+        const cachedSgzData = localStorage.getItem(STORAGE_KEY_SGZ);
+        const cachedPainelData = localStorage.getItem(STORAGE_KEY_PAINEL);
+        const cachedLastUpdate = localStorage.getItem(STORAGE_KEY_LAST_UPDATE);
         
+        if (cachedSgzData && cachedPainelData) {
+          sgzData = JSON.parse(cachedSgzData);
+          painelData = JSON.parse(cachedPainelData);
+          
+          if (cachedLastUpdate) {
+            setLastUpdated(new Date(cachedLastUpdate));
+          }
+          
+          console.log("DemoDataProvider: Using cached data:", {
+            sgzData: sgzData.length,
+            painelData: painelData.length
+          });
+          
+          // If we have cached data, use it immediately but still refresh in background
+          if (sgzData.length > 0 && painelData.length > 0) {
+            setDemoSgzData(sgzData);
+            setDemoPainelData(painelData);
+            setSgzData(sgzData);
+            setPlanilhaData(sgzData);
+            setPainelData(painelData);
+            setIsMockData(true);
+            setIsLoading(false);
+          }
+        }
+      } catch (error) {
+        console.error("Error loading from localStorage:", error);
+      }
+      
+      // Always fetch fresh data from mock API
+      try {
         // Load SGZ data
         const sgzResponse = await fetch('/mock/sgz_data_mock.json');
         if (!sgzResponse.ok) {
           throw new Error(`Failed to load SGZ mock data: ${sgzResponse.status}`);
         }
-        const sgzData = await sgzResponse.json();
-        console.log("DemoDataProvider: Loaded SGZ mock data:", sgzData.length, "records");
+        const freshSgzData = await sgzResponse.json();
+        console.log("DemoDataProvider: Loaded SGZ mock data:", freshSgzData.length, "records");
         
         // Load Painel data
         const painelResponse = await fetch('/mock/painel_data_mock.json');
         if (!painelResponse.ok) {
           throw new Error(`Failed to load Painel mock data: ${painelResponse.status}`);
         }
-        const painelData = await painelResponse.json();
-        console.log("DemoDataProvider: Loaded Painel mock data:", painelData.length, "records");
+        const freshPainelData = await painelResponse.json();
+        console.log("DemoDataProvider: Loaded Painel mock data:", freshPainelData.length, "records");
         
         // Compare data to verify integration
-        if (sgzData.length > 0 && painelData.length > 0) {
-          const comparacao = compararBases(sgzData, painelData);
+        if (freshSgzData.length > 0 && freshPainelData.length > 0) {
+          const comparacao = compararBases(freshSgzData, freshPainelData);
           console.log("DemoDataProvider: Data comparison results:", {
             totalDivergencias: comparacao.divergencias.length,
             totalAusentes: comparacao.ausentes.length,
@@ -59,12 +103,25 @@ const DemoDataProvider: React.FC<DemoDataProviderProps> = ({ children }) => {
         }
         
         // Set the data in both local state and the store
-        setDemoSgzData(sgzData);
-        setDemoPainelData(painelData);
+        setDemoSgzData(freshSgzData);
+        setDemoPainelData(freshPainelData);
         
-        setSgzData(sgzData);
-        setPlanilhaData(sgzData);
-        setPainelData(painelData);
+        setSgzData(freshSgzData);
+        setPlanilhaData(freshSgzData);
+        setPainelData(freshPainelData);
+        setIsMockData(true);
+        
+        const now = new Date();
+        setLastUpdated(now);
+        
+        // Cache in localStorage
+        try {
+          localStorage.setItem(STORAGE_KEY_SGZ, JSON.stringify(freshSgzData));
+          localStorage.setItem(STORAGE_KEY_PAINEL, JSON.stringify(freshPainelData));
+          localStorage.setItem(STORAGE_KEY_LAST_UPDATE, now.toISOString());
+        } catch (storageError) {
+          console.error("Error saving to localStorage:", storageError);
+        }
         
         // Update loading state
         setIsLoading(false);
@@ -74,8 +131,8 @@ const DemoDataProvider: React.FC<DemoDataProviderProps> = ({ children }) => {
       }
     }
     
-    loadMockData();
-  }, [setSgzData, setPlanilhaData, setPainelData]);
+    loadData();
+  }, [setSgzData, setPlanilhaData, setPainelData, setIsMockData]);
   
   // Refresh function for demo data
   const refreshData = async () => {
@@ -107,8 +164,20 @@ const DemoDataProvider: React.FC<DemoDataProviderProps> = ({ children }) => {
       setSgzData(sgzData);
       setPlanilhaData(sgzData);
       setPainelData(painelData);
+      setIsMockData(true);
       
-      setLastUpdated(new Date());
+      const now = new Date();
+      setLastUpdated(now);
+      
+      // Cache in localStorage
+      try {
+        localStorage.setItem(STORAGE_KEY_SGZ, JSON.stringify(sgzData));
+        localStorage.setItem(STORAGE_KEY_PAINEL, JSON.stringify(painelData));
+        localStorage.setItem(STORAGE_KEY_LAST_UPDATE, now.toISOString());
+      } catch (storageError) {
+        console.error("Error saving to localStorage:", storageError);
+      }
+      
       setIsLoading(false);
     } catch (error) {
       console.error("Error refreshing demo data:", error);

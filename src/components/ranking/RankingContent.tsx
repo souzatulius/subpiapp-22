@@ -33,7 +33,7 @@ const RankingContent: React.FC<RankingContentProps> = ({
   const { 
     chartVisibility, toggleChartVisibility, setChartVisibility,
     planilhaData, sgzData, painelData, isLoading, setIsInsightsLoading,
-    refreshChartData
+    refreshChartData, isMockData
   } = useRankingCharts();
   
   const { lastRefreshTime } = useUploadState();
@@ -44,9 +44,11 @@ const RankingContent: React.FC<RankingContentProps> = ({
     console.log("RankingContent: Data availability check:", {
       planilhaData: planilhaData?.length || 0,
       sgzData: sgzData?.length || 0,
-      painelData: painelData?.length || 0
+      painelData: painelData?.length || 0,
+      isMockData,
+      isLoading
     });
-  }, [planilhaData, sgzData, painelData]);
+  }, [planilhaData, sgzData, painelData, isMockData, isLoading]);
 
   const handleSimulateIdealRanking = () => {
     const wasActive = isSimulationActive;

@@ -1,201 +1,145 @@
 
-import React, { useState, useEffect } from 'react';
-import { useZeladoriaChartDataMock } from '@/hooks/ranking/useZeladoriaChartDataMock';
+import React, { useState } from 'react';
+import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useRankingCharts } from '@/hooks/ranking/useRankingCharts';
-import { Bug, RefreshCw } from 'lucide-react';
+import { Trash2, RefreshCw, Database, ToggleLeft, ToggleRight } from 'lucide-react';
 
 interface ChartDebugPanelProps {
-  sgzData?: any[] | null;
-  painelData?: any[] | null;
-  isVisible?: boolean;
-  isLoading?: boolean; // Added the isLoading prop to the interface
+  sgzData: any[] | null;
+  painelData: any[] | null;
+  isVisible: boolean;
 }
 
-const ChartDebugPanel: React.FC<ChartDebugPanelProps> = ({ 
-  sgzData,
-  painelData,
-  isVisible = false,
-  isLoading = false // Added default value for isLoading
-}) => {
-  const { data: mockData, isLoading: mockIsLoading, error, refresh: refreshMock } = useZeladoriaChartDataMock(0); // No delay for quick debug
-  const [activeTab, setActiveTab] = useState('mock');
-  const { setSgzData, setPlanilhaData, setPainelData } = useRankingCharts();
-  const [isExpanded, setIsExpanded] = useState(false);
-
-  // Function to load mock SGZ data from JSON and inject it into the store
-  const loadAndInjectSgzMockData = async () => {
-    try {
-      const response = await fetch('/mock/sgz_data_mock.json');
-      if (!response.ok) {
-        console.error(`Failed to load SGZ mock data: ${response.status}`);
-        return;
-      }
-      const data = await response.json();
-      console.log("Debug Panel: Loaded mock SGZ data, injecting into store:", data);
-      
-      // Set the data in the store
-      setSgzData(data);
-      setPlanilhaData(data);
-    } catch (error) {
-      console.error("Debug Panel: Error loading mock SGZ data:", error);
-    }
-  };
-
-  // Function to load mock Painel data from JSON and inject it into the store
-  const loadAndInjectPainelMockData = async () => {
-    try {
-      const response = await fetch('/mock/painel_data_mock.json');
-      if (!response.ok) {
-        console.error(`Failed to load Painel mock data: ${response.status}`);
-        return;
-      }
-      const data = await response.json();
-      console.log("Debug Panel: Loaded mock Painel data, injecting into store:", data);
-      
-      // Set the data in the store
-      setPainelData(data);
-    } catch (error) {
-      console.error("Debug Panel: Error loading mock Painel data:", error);
-    }
-  };
-
-  // Function to load both SGZ and Painel mock data
-  const loadAllMockData = async () => {
-    await loadAndInjectSgzMockData();
-    await loadAndInjectPainelMockData();
-  };
+const ChartDebugPanel: React.FC<ChartDebugPanelProps> = ({ sgzData, painelData, isVisible }) => {
+  const [activeTab, setActiveTab] = useState('sgz');
+  const { isMockData, setIsMockData, refreshChartData } = useRankingCharts();
 
   if (!isVisible) return null;
 
+  const clearLocalStorage = () => {
+    localStorage.removeItem('ranking-charts-storage');
+    localStorage.removeItem('demo-sgz-data');
+    localStorage.removeItem('demo-painel-data');
+    localStorage.removeItem('demo-last-update');
+    window.location.reload();
+  };
+
+  const toggleMockMode = () => {
+    setIsMockData(!isMockData);
+    setTimeout(() => {
+      refreshChartData();
+    }, 100);
+  };
+
   return (
-    <div className={`fixed bottom-4 right-4 z-50 bg-white p-4 rounded-lg border border-gray-300 shadow-lg ${isExpanded ? 'w-[600px] max-h-[600px]' : 'w-96 max-h-96'} overflow-auto`}>
-      <div className="flex justify-between items-center mb-2">
-        <div className="flex items-center gap-2">
-          <Bug size={16} className="text-orange-500" />
-          <h3 className="text-sm font-bold">Chart Debug Panel</h3>
-        </div>
+    <Card className="mt-4 p-4 bg-gray-50 border-gray-200 shadow-sm">
+      <div className="flex justify-between items-center mb-4">
+        <h3 className="text-sm font-medium text-gray-700 flex items-center">
+          <Database className="h-4 w-4 mr-2 text-orange-500" />
+          Debug Panel
+          <span className="ml-2 px-2 py-0.5 text-xs bg-orange-100 rounded-full text-orange-800">
+            {isMockData ? 'Mock Mode' : 'Supabase Mode'}
+          </span>
+        </h3>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm" onClick={loadAllMockData} className="flex items-center gap-1">
-            <RefreshCw size={12} />
-            <span>Inject All Mocks</span>
+          <Button 
+            size="sm" 
+            variant="outline" 
+            className="flex items-center gap-1 text-xs h-7"
+            onClick={toggleMockMode}
+          >
+            {isMockData ? <ToggleRight className="h-3 w-3" /> : <ToggleLeft className="h-3 w-3" />}
+            {isMockData ? 'Using Mocks' : 'Using Supabase'}
           </Button>
-          <Button variant="outline" size="sm" onClick={() => setIsExpanded(!isExpanded)}>
-            {isExpanded ? 'Compress' : 'Expand'}
+          <Button 
+            size="sm" 
+            variant="outline" 
+            className="flex items-center gap-1 text-xs h-7"
+            onClick={() => refreshChartData()}
+          >
+            <RefreshCw className="h-3 w-3" />
+            Refresh
+          </Button>
+          <Button 
+            size="sm" 
+            variant="destructive" 
+            className="flex items-center gap-1 text-xs h-7"
+            onClick={clearLocalStorage}
+          >
+            <Trash2 className="h-3 w-3" />
+            Clear Cache
           </Button>
         </div>
       </div>
-      
-      <Tabs defaultValue={activeTab} value={activeTab} onValueChange={setActiveTab} className="w-full">
+
+      <div className="grid grid-cols-4 gap-2 mb-4">
+        <div className="bg-blue-50 p-2 rounded-md">
+          <div className="text-xs font-medium text-blue-700">SGZ Records</div>
+          <div className="text-lg font-bold">{sgzData?.length || 0}</div>
+        </div>
+        <div className="bg-green-50 p-2 rounded-md">
+          <div className="text-xs font-medium text-green-700">Painel Records</div>
+          <div className="text-lg font-bold">{painelData?.length || 0}</div>
+        </div>
+        <div className="bg-purple-50 p-2 rounded-md">
+          <div className="text-xs font-medium text-purple-700">Data Source</div>
+          <div className="text-lg font-bold">{isMockData ? 'Mock' : 'Supabase'}</div>
+        </div>
+        <div className="bg-orange-50 p-2 rounded-md">
+          <div className="text-xs font-medium text-orange-700">Environment</div>
+          <div className="text-lg font-bold">{process.env.NODE_ENV}</div>
+        </div>
+      </div>
+
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="w-full mb-2">
-          <TabsTrigger value="mock">Mock Data</TabsTrigger>
           <TabsTrigger value="sgz">SGZ Data</TabsTrigger>
           <TabsTrigger value="painel">Painel Data</TabsTrigger>
-          <TabsTrigger value="status">Status</TabsTrigger>
+          <TabsTrigger value="storage">Local Storage</TabsTrigger>
         </TabsList>
         
-        <TabsContent value="mock">
-          {mockIsLoading ? (
-            <p className="text-xs">Loading mock data...</p>
-          ) : error ? (
-            <p className="text-xs text-red-500">{error}</p>
-          ) : !mockData ? (
-            <p className="text-xs">No mock data available</p>
+        <TabsContent value="sgz" className="p-2 bg-white rounded-md border border-gray-200 max-h-80 overflow-auto">
+          {sgzData && sgzData.length > 0 ? (
+            <div className="text-xs">
+              <pre>{JSON.stringify(sgzData.slice(0, 3), null, 2)}</pre>
+              {sgzData.length > 3 && (
+                <div className="text-gray-500 mt-2">... and {sgzData.length - 3} more records</div>
+              )}
+            </div>
           ) : (
-            <pre className="text-xs bg-gray-100 p-2 rounded max-h-32 overflow-auto">
-              {JSON.stringify(mockData, null, 2)}
-            </pre>
+            <div className="text-gray-500 text-sm">No SGZ data available</div>
           )}
         </TabsContent>
         
-        <TabsContent value="sgz">
-          {!sgzData ? (
-            <div>
-              <p className="text-xs text-red-600 font-semibold mb-2">No SGZ data provided</p>
-              <Button size="sm" variant="destructive" onClick={loadAndInjectSgzMockData}>
-                Inject Mock Data to SGZ
-              </Button>
+        <TabsContent value="painel" className="p-2 bg-white rounded-md border border-gray-200 max-h-80 overflow-auto">
+          {painelData && painelData.length > 0 ? (
+            <div className="text-xs">
+              <pre>{JSON.stringify(painelData.slice(0, 3), null, 2)}</pre>
+              {painelData.length > 3 && (
+                <div className="text-gray-500 mt-2">... and {painelData.length - 3} more records</div>
+              )}
             </div>
           ) : (
-            <div>
-              <div className="flex justify-between items-center mb-2">
-                <p className="text-xs font-medium">Total items: {sgzData.length}</p>
-                {sgzData.length > 0 && (
-                  <Button size="sm" variant="outline" onClick={() => navigator.clipboard.writeText(JSON.stringify(sgzData[0]))} className="text-xs">
-                    Copy Sample
-                  </Button>
-                )}
-              </div>
-              <pre className="text-xs bg-gray-100 p-2 rounded max-h-48 overflow-auto">
-                {sgzData.length > 0 ? (
-                  JSON.stringify(sgzData[0], null, 2)
-                ) : (
-                  "[]"
-                )}
-              </pre>
-            </div>
+            <div className="text-gray-500 text-sm">No Painel data available</div>
           )}
         </TabsContent>
         
-        <TabsContent value="painel">
-          {!painelData ? (
-            <div>
-              <p className="text-xs text-red-600 font-semibold mb-2">No Painel data provided</p>
-              <Button size="sm" variant="destructive" onClick={loadAndInjectPainelMockData}>
-                Inject Mock Data to Painel
-              </Button>
-            </div>
-          ) : (
-            <div>
-              <div className="flex justify-between items-center mb-2">
-                <p className="text-xs font-medium">Total items: {painelData.length}</p>
-                {painelData.length > 0 && (
-                  <Button size="sm" variant="outline" onClick={() => navigator.clipboard.writeText(JSON.stringify(painelData[0]))} className="text-xs">
-                    Copy Sample
-                  </Button>
-                )}
-              </div>
-              <pre className="text-xs bg-gray-100 p-2 rounded max-h-48 overflow-auto">
-                {painelData.length > 0 ? (
-                  JSON.stringify(painelData[0], null, 2)
-                ) : (
-                  "[]"
-                )}
-              </pre>
-            </div>
-          )}
-        </TabsContent>
-        
-        <TabsContent value="status">
+        <TabsContent value="storage" className="p-2 bg-white rounded-md border border-gray-200 max-h-80 overflow-auto">
           <div className="text-xs">
-            <p><strong>Status:</strong></p>
-            <ul className="bg-gray-100 p-2 rounded">
-              <li>Mock Data: {mockData ? '✅ Available' : '❌ Not Available'}</li>
-              <li>SGZ Data: {sgzData && sgzData.length > 0 ? `✅ Available (${sgzData.length} items)` : '❌ Not Available'}</li>
-              <li>Painel Data: {painelData && painelData.length > 0 ? `✅ Available (${painelData.length} items)` : '❌ Not Available'}</li>
-              <li>Loading State: {isLoading ? '⏳ Loading' : '✅ Not Loading'}</li>
-              {error && <li className="text-red-500">Error: {error}</li>}
-            </ul>
-            
-            <div className="mt-3">
-              <p><strong>Debug Actions:</strong></p>
-              <div className="grid grid-cols-3 gap-2 mt-1">
-                <Button size="sm" variant="outline" onClick={refreshMock} className="text-xs">
-                  Refresh Mock
-                </Button>
-                <Button size="sm" variant="outline" onClick={loadAndInjectSgzMockData} className="text-xs">
-                  Load SGZ Mock
-                </Button>
-                <Button size="sm" variant="outline" onClick={loadAndInjectPainelMockData} className="text-xs">
-                  Load Painel Mock
-                </Button>
+            {Object.keys(localStorage).filter(key => 
+              key.includes('ranking') || key.includes('demo')
+            ).map(key => (
+              <div key={key} className="mb-2">
+                <div className="font-medium text-blue-700">{key}:</div>
+                <pre className="bg-gray-50 p-1 rounded">{localStorage.getItem(key)?.substring(0, 100)}...</pre>
               </div>
-            </div>
+            ))}
           </div>
         </TabsContent>
       </Tabs>
-    </div>
+    </Card>
   );
 };
 
