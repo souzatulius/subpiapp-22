@@ -55,62 +55,55 @@ export const usePainelZeladoriaUpload = (user: User | null) => {
       updateProgress(10, 'uploading', 'Lendo arquivo...');
       
       // Ler e processar arquivo Excel
-      const dadosPainel = await processarPlanilhaPainel(file);
-      
-      // Verificar se os dados foram processados corretamente
-      if (!dadosPainel || dadosPainel.length === 0) {
-        showFeedback('error', 'Não foi possível processar os dados do arquivo', { duration: 3000 });
-        setPainelProgress({
-          ...painelProgress!,
-          stage: 'error',
-          message: 'Falha ao processar dados'
-        });
-        return null;
-      }
-      
-      updateProgress(30, 'processing', 'Validando dados...', dadosPainel.length);
-      updateFeedbackProgress(30, 'Validando dados...');
-      
-      // Registrar o upload
-      const { data: uploadData, error: uploadError } = await supabase
-        .from('painel_zeladoria_uploads')
-        .insert({
-          usuario_email: user.email,
-          nome_arquivo: file.name
-        })
-        .select('id')
-        .single();
-
-      if (uploadError) {
-        console.error('Erro ao registrar upload:', uploadError);
-        showFeedback('error', 'Erro ao registrar upload', { duration: 3000 });
-        setPainelProgress({
-          ...painelProgress!,
-          stage: 'error',
-          message: 'Erro ao registrar upload no banco de dados'
-        });
-        return null;
-      }
-      
-      const uploadId = uploadData.id;
-      updateProgress(50, 'processing', 'Salvando dados...', dadosPainel.length);
-      updateFeedbackProgress(50, 'Salvando dados no banco...');
-      
-      // Inserir dados processados
-      const { error: insertError } = await supabase
-        .from('painel_zeladoria_dados')
-        .insert(dadosPainel.map(item => ({
-          ...item,
-          upload_id: uploadId
-        })));
+      let dadosPainel;
+      try {
+        dadosPainel = await processarPlanilhaPainel(file);
         
-      if (insertError) {
-        console.error('Erro ao inserir dados:', insertError);
-        showFeedback('error', 'Erro ao salvar dados no banco', { duration: 3000 });
+        // Verificar se os dados foram processados corretamente
+        if (!dadosPainel || dadosPainel.length === 0) {
+          showFeedback('error', 'Não foi possível processar os dados do arquivo', { duration: 3000 });
+          setPainelProgress({
+            ...painelProgress!,
+            stage: 'error',
+            message: 'Falha ao processar dados'
+          });
+          return null;
+        }
+        
+        updateProgress(30, 'processing', 'Validando dados...', dadosPainel.length);
+        updateFeedbackProgress(30, 'Validando dados...');
+      } catch (error) {
+        console.error('Erro ao processar planilha:', error);
+        showFeedback('error', 'Erro ao processar o arquivo Excel', { duration: 3000 });
         setPainelProgress({
           ...painelProgress!,
           stage: 'error',
-          message: 'Erro ao inserir dados no banco'
+          message: 'Erro ao processar o arquivo Excel'
+        });
+        return null;
+      }
+      
+      // Use uma transação para garantir consistência dos dados
+      const { data: uploadId, error: transactionError } = await supabase.rpc('create_painel_upload_with_data', {
+        p_usuario_email: user.email,
+        p_nome_arquivo: file.name,
+        p_dados: dadosPainel
+      });
+      
+      if (transactionError) {
+        console.error('Erro na transação de upload:', transactionError);
+        
+        // Verificar se é um erro de chave estrangeira para fornecer uma mensagem mais clara
+        if (transactionError.message.includes('violates foreign key constraint')) {
+          showFeedback('error', 'Erro de referência: não foi possível associar os dados ao registro de upload', { duration: 3000 });
+        } else {
+          showFeedback('error', `Erro ao salvar dados: ${transactionError.message}`, { duration: 3000 });
+        }
+        
+        setPainelProgress({
+          ...painelProgress!,
+          stage: 'error',
+          message: `Erro na transação: ${transactionError.message}`
         });
         return null;
       }
@@ -128,19 +121,21 @@ export const usePainelZeladoriaUpload = (user: User | null) => {
         message: 'Upload realizado com sucesso',
         data: dadosPainel
       };
-    } catch (error) {
+    } catch (error: any) {
       console.error('Erro no processamento do upload:', error);
-      showFeedback('error', 'Erro ao processar arquivo', { duration: 3000 });
+      showFeedback('error', `Erro ao processar arquivo: ${error.message || 'Erro desconhecido'}`, { duration: 3000 });
       setPainelProgress({
         ...painelProgress!,
         stage: 'error',
-        message: 'Erro ao processar arquivo'
+        message: `Erro ao processar arquivo: ${error.message || 'Erro desconhecido'}`
       });
       return {
         success: false,
         recordCount: 0,
-        message: 'Erro ao processar arquivo'
+        message: `Erro ao processar arquivo: ${error.message || 'Erro desconhecido'}`
       };
+    } finally {
+      setIsUploading(false);
     }
   }, [user, painelProgress, setPainelProgress, setIsUploading, setLastRefreshTime, showFeedback, updateFeedbackProgress]);
 

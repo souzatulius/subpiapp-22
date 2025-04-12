@@ -1401,7 +1401,7 @@ export type Database = {
             foreignKeyName: "painel_zeladoria_dados_upload_id_fkey"
             columns: ["upload_id"]
             isOneToOne: false
-            referencedRelation: "painel_zeladoria"
+            referencedRelation: "painel_zeladoria_uploads"
             referencedColumns: ["id"]
           },
         ]

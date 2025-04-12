@@ -29,3 +29,6 @@ site_url = "http://localhost:3000"
 [functions]
 [functions.generate-ranking-insights]
 verify_jwt = false
+
+[functions.create_painel_upload_with_data]
+verify_jwt = false
