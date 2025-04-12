@@ -120,6 +120,7 @@ const RankingContent: React.FC<RankingContentProps> = ({
       
       <ChartDebugPanel 
         sgzData={sgzData || planilhaData} 
+        painelData={painelData}
         isVisible={isDebugVisible} 
       />
     </div>
