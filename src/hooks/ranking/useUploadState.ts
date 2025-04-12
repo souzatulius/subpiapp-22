@@ -1,26 +1,27 @@
 
 import { create } from 'zustand';
+import { UploadProgressStats } from './types/uploadTypes';
 
 interface UploadState {
+  sgzProgress: UploadProgressStats | null;
+  painelProgress: UploadProgressStats | null;
   isUploading: boolean;
-  uploadProgress: number;
-  uploadStage: 'uploading' | 'processing' | 'complete' | 'error';
   lastRefreshTime: Date | null;
-  
+  setSgzProgress: (progress: UploadProgressStats) => void;
+  setPainelProgress: (progress: UploadProgressStats) => void;
   setIsUploading: (isUploading: boolean) => void;
-  setUploadProgress: (progress: number) => void;
-  setUploadStage: (stage: 'uploading' | 'processing' | 'complete' | 'error') => void;
   setLastRefreshTime: (time: Date) => void;
+  resetProgress: () => void; // Added reset function
 }
 
 export const useUploadState = create<UploadState>((set) => ({
+  sgzProgress: null,
+  painelProgress: null,
   isUploading: false,
-  uploadProgress: 0,
-  uploadStage: 'uploading',
   lastRefreshTime: null,
-  
-  setIsUploading: (isUploading: boolean) => set({ isUploading }),
-  setUploadProgress: (progress: number) => set({ uploadProgress: progress }),
-  setUploadStage: (stage) => set({ uploadStage: stage }),
-  setLastRefreshTime: (time: Date) => set({ lastRefreshTime: time })
+  setSgzProgress: (progress) => set({ sgzProgress: progress }),
+  setPainelProgress: (progress) => set({ painelProgress: progress }),
+  setIsUploading: (isUploading) => set({ isUploading }),
+  setLastRefreshTime: (time) => set({ lastRefreshTime: time }),
+  resetProgress: () => set({ sgzProgress: null, painelProgress: null }) // Reset function implementation
 }));

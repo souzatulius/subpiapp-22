@@ -1,84 +1,97 @@
 
-import React, { useState, useEffect } from 'react';
-import { AnimatePresence } from 'framer-motion';
-import { useRankingCharts } from '@/hooks/ranking/useRankingCharts';
+import React, { useEffect } from 'react';
+import AnimatedFeedback from './animated-feedback';
+import { useAnimatedFeedback } from '@/hooks/use-animated-feedback';
 import { useUploadState } from '@/hooks/ranking/useUploadState';
-import GlobalProgressBar from './global-progress-bar';
+import { useRankingCharts } from '@/hooks/ranking/useRankingCharts';
 
-interface FeedbackProviderProps {
-  children: React.ReactNode;
-}
-
-const FeedbackProvider: React.FC<FeedbackProviderProps> = ({ children }) => {
-  const [showProgress, setShowProgress] = useState<boolean>(false);
-  const [progressText, setProgressText] = useState<string>('');
-  const { isLoading, isChartsLoading, insightsProgress, chartsProgress } = useRankingCharts();
-  const { uploadProgress, isUploading, uploadStage } = useUploadState();
-
-  // Show progress bar for uploads or chart loading
+export const FeedbackProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { 
+    isVisible, 
+    feedbackType, 
+    feedbackMessage, 
+    options,
+    hideFeedback, 
+    showFeedback, 
+    updateFeedbackProgress
+  } = useAnimatedFeedback();
+  
+  const { sgzProgress, painelProgress } = useUploadState();
+  const { isInsightsLoading, isChartsLoading, insightsProgress, chartsProgress } = useRankingCharts();
+  
+  // Monitor upload progress and show feedback
   useEffect(() => {
-    if (isUploading) {
-      setShowProgress(true);
-      switch(uploadStage) {
-        case 'uploading':
-          setProgressText(`Enviando arquivos (${Math.round(uploadProgress)}%)`);
-          break;
-        case 'processing':
-          setProgressText(`Processando dados (${Math.round(uploadProgress)}%)`);
-          break;
-        case 'complete':
-          setProgressText('Upload completo!');
-          setTimeout(() => setShowProgress(false), 1500);
-          break;
-        case 'error':
-          setProgressText('Erro no upload');
-          setTimeout(() => setShowProgress(false), 1500);
-          break;
-        default:
-          setProgressText(`Carregando (${Math.round(uploadProgress)}%)`);
-      }
-    } else if (isChartsLoading || isLoading) {
-      setShowProgress(true);
-      const progress = Math.max(insightsProgress || 0, chartsProgress || 0);
-      setProgressText(`Carregando dados (${Math.round(progress)}%)`);
-    } else {
-      // Hide progress bar when operations complete
-      setTimeout(() => {
-        setShowProgress(false);
-      }, 1000);
+    if (sgzProgress?.stage === 'uploading' || sgzProgress?.stage === 'processing') {
+      const progress = sgzProgress.processedRows && sgzProgress.totalRows 
+        ? Math.floor((sgzProgress.processedRows / sgzProgress.totalRows) * 100) 
+        : 10;
+        
+      const message = sgzProgress.stage === 'uploading' 
+        ? 'Enviando arquivo SGZ...'
+        : `Processando dados SGZ (${progress}%)`;
+        
+      showFeedback('loading', message, { 
+        progress, 
+        stage: sgzProgress.stage === 'uploading' ? 'Enviando' : 'Processando SGZ',
+        duration: 0
+      });
+    } else if (painelProgress?.stage === 'uploading' || painelProgress?.stage === 'processing') {
+      const progress = painelProgress.processedRows && painelProgress.totalRows 
+        ? Math.floor((painelProgress.processedRows / painelProgress.totalRows) * 100) 
+        : 10;
+        
+      const message = painelProgress.stage === 'uploading' 
+        ? 'Enviando arquivo do Painel...'
+        : `Processando dados do Painel (${progress}%)`;
+        
+      showFeedback('loading', message, { 
+        progress, 
+        stage: painelProgress.stage === 'uploading' ? 'Enviando' : 'Processando Painel',
+        duration: 0
+      });
+    } else if (isInsightsLoading && !isVisible) {
+      showFeedback('loading', 'Gerando análise inteligente...', { 
+        progress: insightsProgress,
+        stage: 'Processando dados',
+        duration: 0
+      });
+    } else if (isChartsLoading && !isInsightsLoading && !isVisible) {
+      showFeedback('loading', 'Gerando visualizações...', { 
+        progress: chartsProgress,
+        stage: 'Criando gráficos',
+        duration: 0
+      });
     }
   }, [
-    isUploading, 
-    uploadProgress, 
-    uploadStage,
+    sgzProgress, 
+    painelProgress, 
+    isInsightsLoading, 
     isChartsLoading, 
-    isLoading,
-    insightsProgress,
-    chartsProgress
+    insightsProgress, 
+    chartsProgress,
+    showFeedback,
+    isVisible
   ]);
-
-  // Calculate combined progress percentage
-  const calculateProgress = () => {
-    if (isUploading) {
-      return uploadProgress;
-    } else if (isChartsLoading || isLoading) {
-      return Math.max(insightsProgress || 0, chartsProgress || 0);
+  
+  // Update progress when insights or charts progress changes
+  useEffect(() => {
+    if (isVisible && isInsightsLoading) {
+      updateFeedbackProgress(insightsProgress, `Analisando dados (${insightsProgress}%)`);
+    } else if (isVisible && isChartsLoading) {
+      updateFeedbackProgress(chartsProgress, `Gerando gráficos (${chartsProgress}%)`);
     }
-    return 0;
-  };
-
+  }, [isVisible, isInsightsLoading, isChartsLoading, insightsProgress, chartsProgress, updateFeedbackProgress]);
+  
   return (
     <>
-      <AnimatePresence>
-        {showProgress && (
-          <GlobalProgressBar 
-            progress={calculateProgress()} 
-            isVisible={showProgress}
-            message={progressText}
-          />
-        )}
-      </AnimatePresence>
       {children}
+      <AnimatedFeedback
+        visible={isVisible}
+        type={feedbackType}
+        message={feedbackMessage}
+        onClose={hideFeedback}
+        options={options}
+      />
     </>
   );
 };
