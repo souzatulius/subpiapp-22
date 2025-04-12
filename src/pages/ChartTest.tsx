@@ -18,7 +18,8 @@ export default function ChartTest() {
     painelData, 
     isLoading, 
     setIsLoading,
-    setIsMockData
+    setIsMockData,
+    dataSource
   } = useRankingCharts();
   
   // Load mock data from the JSON files immediately when component mounts
@@ -114,6 +115,14 @@ export default function ChartTest() {
         painelData={painelData} 
         isVisible={true} 
         isLoading={isLoading}
+        dataSource={dataSource || 'mock'}
+        dataStatus={{
+          sgzCount: sgzData?.length || 0,
+          painelCount: painelData?.length || 0,
+          lastSgzUpdate: localStorage.getItem('demo-last-update'),
+          lastPainelUpdate: localStorage.getItem('demo-last-update'),
+          dataSource: localStorage.getItem('demo-data-source') || 'unknown'
+        }}
       />
       
       <Tabs defaultValue="charts">
