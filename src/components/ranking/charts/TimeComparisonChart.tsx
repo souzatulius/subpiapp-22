@@ -1,58 +1,70 @@
 
 import React from 'react';
-import { Bar } from 'react-chartjs-2';
-import { Loader2 } from 'lucide-react';
-import { chartColors } from './ChartRegistration';
+import { Line } from 'react-chartjs-2';
+import { ChartData, ChartOptions } from 'chart.js';
+import { lineChartColors } from '@/components/ranking/utils/chartColors';
+import { getColorWithOpacity } from '@/components/ranking/utils/chartColors';
 
 interface TimeComparisonChartProps {
-  data: any;
-  sgzData: any[] | null;
-  isLoading: boolean;
-  isSimulationActive: boolean;
+  isLoading?: boolean;
 }
 
 const TimeComparisonChart: React.FC<TimeComparisonChartProps> = ({
-  data,
-  sgzData,
-  isLoading,
-  isSimulationActive
+  isLoading = false
 }) => {
-  // Basic implementation for now
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <Loader2 className="h-8 w-8 text-orange-500 animate-spin" />
-      </div>
-    );
-  }
+  // Sample data for demonstration
+  const data: ChartData<'line'> = {
+    labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun'],
+    datasets: [
+      {
+        label: '2023',
+        data: [65, 59, 80, 81, 56, 55],
+        borderColor: lineChartColors[0],
+        backgroundColor: getColorWithOpacity(lineChartColors[0], 0.1),
+        tension: 0.4,
+        fill: true,
+      },
+      {
+        label: '2024',
+        data: [28, 48, 40, 19, 86, 27],
+        borderColor: lineChartColors[1],
+        backgroundColor: getColorWithOpacity(lineChartColors[1], 0.1),
+        tension: 0.4,
+        fill: true,
+      }
+    ]
+  };
   
-  if (!sgzData || sgzData.length === 0) {
-    return (
-      <div className="flex items-center justify-center h-64 text-gray-500">
-        Sem dados disponíveis para exibir
-      </div>
-    );
-  }
-  
-  // Sample data for now
-  const sampleData = {
-    labels: ['Categoria 1', 'Categoria 2', 'Categoria 3', 'Categoria 4', 'Categoria 5'],
-    datasets: [{
-      label: 'Dias',
-      data: [12, 19, 8, 15, 7],
-      backgroundColor: chartColors[1]
-    }]
+  const options: ChartOptions<'line'> = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        position: 'top',
+      },
+      tooltip: {
+        mode: 'index',
+        intersect: false,
+      }
+    },
+    scales: {
+      y: {
+        beginAtZero: true,
+        title: {
+          display: true,
+          text: 'Quantidade'
+        }
+      }
+    },
+    interaction: {
+      intersect: false,
+      mode: 'nearest'
+    }
   };
   
   return (
-    <div className="h-64">
-      <Bar 
-        data={sampleData} 
-        options={{
-          responsive: true,
-          maintainAspectRatio: false,
-        }} 
-      />
+    <div className="h-80">
+      <Line data={data} options={options} />
     </div>
   );
 };

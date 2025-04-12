@@ -32,7 +32,7 @@ ChartJS.register(
 // Configure Chart.js defaults
 ChartJS.defaults.font.family = "'Inter', 'Helvetica', 'Arial', sans-serif";
 
-// Configure scales to use integer ticks for Y-axis - Ensure this works properly
+// Configure scales to use integer ticks for Y-axis
 ChartJS.defaults.scale.y = {
   ...ChartJS.defaults.scale.y,
   ticks: {
@@ -109,12 +109,58 @@ ChartJS.defaults.plugins.legend.labels = {
 };
 
 // Helper function to set loading state
-ChartJS.setLoading = function(chartInstance, loading) {
+export const setLoading = function(chartInstance, loading) {
+  if (!chartInstance) return;
+  
+  chartInstance.options.plugins = chartInstance.options.plugins || {};
   chartInstance.options.plugins.loadingIndicator = { 
     ...chartInstance.options.plugins.loadingIndicator,
     loading
   };
   chartInstance.update();
 };
+
+// Export chart colors for consistent use
+export const chartColors = [
+  '#0066FF', // Blue
+  '#F97316', // Orange
+  '#10B981', // Green
+  '#6366F1', // Indigo
+  '#EC4899', // Pink
+  '#8B5CF6', // Purple
+  '#F59E0B', // Amber
+  '#EF4444', // Red
+  '#64748B', // Slate
+  '#0EA5E9', // Sky
+];
+
+export const pieChartColors = [
+  '#0066FF', // Blue
+  '#F97316', // Orange
+  '#10B981', // Green
+  '#6366F1', // Indigo
+  '#EC4899', // Pink
+  '#8B5CF6', // Purple
+  '#F59E0B', // Amber
+  '#EF4444', // Red
+  '#64748B', // Slate
+  '#0EA5E9', // Sky
+];
+
+export const barChartColors = [
+  '#0066FF', // Blue
+  '#F97316', // Orange
+  '#10B981', // Green
+  '#6366F1', // Indigo
+  '#EC4899', // Pink
+];
+
+export const lineChartColors = [
+  '#0066FF', // Blue
+  '#F97316', // Orange
+  '#10B981', // Green
+  '#6366F1', // Indigo
+  '#EC4899', // Pink
+];
 
 export default ChartJS;

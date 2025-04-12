@@ -1,58 +1,56 @@
 
 import React from 'react';
-import { Bar } from 'react-chartjs-2';
-import { Loader2 } from 'lucide-react';
-import { chartColors } from './ChartRegistration';
+import { Doughnut } from 'react-chartjs-2';
+import { ChartData, ChartOptions } from 'chart.js';
+import { pieChartColors } from '@/components/ranking/utils/chartColors';
 
 interface ServiceDiversityChartProps {
-  data: any;
-  sgzData: any[] | null;
-  isLoading: boolean;
-  isSimulationActive: boolean;
+  isLoading?: boolean;
 }
 
 const ServiceDiversityChart: React.FC<ServiceDiversityChartProps> = ({
-  data,
-  sgzData,
-  isLoading,
-  isSimulationActive
+  isLoading = false
 }) => {
-  // Basic implementation for now
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <Loader2 className="h-8 w-8 text-orange-500 animate-spin" />
-      </div>
-    );
-  }
+  // Sample data for demonstration
+  const data: ChartData<'doughnut'> = {
+    labels: ['Iluminação', 'Pavimentação', 'Limpeza', 'Árvores', 'Outros'],
+    datasets: [
+      {
+        data: [35, 25, 20, 15, 5],
+        backgroundColor: pieChartColors,
+        borderWidth: 1,
+        borderColor: '#fff',
+      }
+    ]
+  };
   
-  if (!sgzData || sgzData.length === 0) {
-    return (
-      <div className="flex items-center justify-center h-64 text-gray-500">
-        Sem dados disponíveis para exibir
-      </div>
-    );
-  }
-  
-  // Sample data for now
-  const sampleData = {
-    labels: ['Serviço A', 'Serviço B', 'Serviço C', 'Serviço D', 'Serviço E'],
-    datasets: [{
-      label: 'Quantidade',
-      data: [65, 59, 80, 81, 56],
-      backgroundColor: chartColors[0]
-    }]
+  const options: ChartOptions<'doughnut'> = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        position: 'right',
+        labels: {
+          boxWidth: 12,
+        }
+      },
+      tooltip: {
+        callbacks: {
+          label: (context) => {
+            const value = context.raw as number;
+            const total = (context.dataset.data as number[]).reduce((a, b) => a + b, 0);
+            const percentage = ((value / total) * 100).toFixed(1);
+            return `${context.label}: ${percentage}%`;
+          }
+        }
+      }
+    },
+    cutout: '60%'
   };
   
   return (
-    <div className="h-64">
-      <Bar 
-        data={sampleData} 
-        options={{
-          responsive: true,
-          maintainAspectRatio: false,
-        }} 
-      />
+    <div className="h-80">
+      <Doughnut data={data} options={options} />
     </div>
   );
 };

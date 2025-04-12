@@ -11,7 +11,7 @@ interface UploadState {
   setPainelProgress: (progress: UploadProgressStats) => void;
   setIsUploading: (isUploading: boolean) => void;
   setLastRefreshTime: (time: Date) => void;
-  resetProgress: () => void; // Added reset function
+  resetProgress: () => void;
 }
 
 export const useUploadState = create<UploadState>((set) => ({
@@ -23,5 +23,5 @@ export const useUploadState = create<UploadState>((set) => ({
   setPainelProgress: (progress) => set({ painelProgress: progress }),
   setIsUploading: (isUploading) => set({ isUploading }),
   setLastRefreshTime: (time) => set({ lastRefreshTime: time }),
-  resetProgress: () => set({ sgzProgress: null, painelProgress: null }) // Reset function implementation
+  resetProgress: () => set({ sgzProgress: null, painelProgress: null })
 }));

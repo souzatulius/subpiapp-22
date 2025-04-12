@@ -17,7 +17,7 @@ export const FeedbackProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   } = useAnimatedFeedback();
   
   const { sgzProgress, painelProgress } = useUploadState();
-  const { isInsightsLoading, isChartsLoading, insightsProgress, chartsProgress } = useRankingCharts();
+  const { isLoading } = useRankingCharts();
   
   // Monitor upload progress and show feedback
   useEffect(() => {
@@ -49,38 +49,27 @@ export const FeedbackProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         stage: painelProgress.stage === 'uploading' ? 'Enviando' : 'Processando Painel',
         duration: 0
       });
-    } else if (isInsightsLoading && !isVisible) {
-      showFeedback('loading', 'Gerando análise inteligente...', { 
-        progress: insightsProgress,
-        stage: 'Processando dados',
-        duration: 0
-      });
-    } else if (isChartsLoading && !isInsightsLoading && !isVisible) {
-      showFeedback('loading', 'Gerando visualizações...', { 
-        progress: chartsProgress,
-        stage: 'Criando gráficos',
+    } else if (isLoading && !isVisible) {
+      showFeedback('loading', 'Processando dados...', { 
+        progress: 50,
+        stage: 'Carregando gráficos',
         duration: 0
       });
     }
   }, [
     sgzProgress, 
     painelProgress, 
-    isInsightsLoading, 
-    isChartsLoading, 
-    insightsProgress, 
-    chartsProgress,
+    isLoading, 
     showFeedback,
     isVisible
   ]);
   
-  // Update progress when insights or charts progress changes
+  // Update progress when new data comes in
   useEffect(() => {
-    if (isVisible && isInsightsLoading) {
-      updateFeedbackProgress(insightsProgress, `Analisando dados (${insightsProgress}%)`);
-    } else if (isVisible && isChartsLoading) {
-      updateFeedbackProgress(chartsProgress, `Gerando gráficos (${chartsProgress}%)`);
+    if (isVisible && isLoading) {
+      updateFeedbackProgress(50, `Carregando visualizações (50%)`);
     }
-  }, [isVisible, isInsightsLoading, isChartsLoading, insightsProgress, chartsProgress, updateFeedbackProgress]);
+  }, [isVisible, isLoading, updateFeedbackProgress]);
   
   return (
     <>
