@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { usePainelZeladoriaUpload } from '@/hooks/ranking/usePainelZeladoriaUpload';
 import { handleFileUpload } from '@/hooks/ranking/services/uploadService';
@@ -31,6 +32,9 @@ const UploadSection: React.FC<UploadSectionProps> = ({
   const [painelFile, setPainelFile] = useState<File | null>(null);
   const { toast } = useToast();
   const { sgzProgress, painelProgress, setSgzProgress, setPainelProgress, setValidationErrors } = useUploadState();
+  
+  // Get the painel upload function from our hook
+  const { handleUploadPainel } = usePainelZeladoriaUpload(user);
   
   const handleSgzFileChange = (file: File | null) => {
     setSgzFile(file);
@@ -102,23 +106,49 @@ const UploadSection: React.FC<UploadSectionProps> = ({
     }
   };
   
-  const { uploadPainelZeladoria } = usePainelZeladoriaUpload({
-    onUploadStart,
-    onUploadComplete: onPainelUploadComplete,
-    setUploadProgress: (progress: number) => {
-      setPainelProgress({
-        totalRows: 0,
-        processedRows: 0,
-        updatedRows: 0,
-        newRows: 0,
-        stage: 'uploading',
-        message: `Processando... ${progress.toFixed(0)}%`,
+  // Function to handle Painel upload
+  const handlePainelUpload = async () => {
+    if (!painelFile) {
+      toast({
+        title: 'Erro',
+        description: 'Por favor, selecione o arquivo do Painel da Zeladoria para upload.',
+        variant: 'destructive'
       });
-    },
-    setUploadStats: (stats: any) => {
-      setPainelProgress(stats);
+      return;
     }
-  });
+    
+    onUploadStart();
+    
+    try {
+      const uploadResult = await handleUploadPainel(painelFile);
+      
+      if (uploadResult && uploadResult.success) {
+        toast({
+          title: 'Sucesso',
+          description: uploadResult.message
+        });
+        
+        onPainelUploadComplete(uploadResult.id || 'no-id', uploadResult.data || []);
+        onRefreshData();
+      } else {
+        console.error('Painel Upload failed:', uploadResult);
+        
+        toast({
+          title: 'Erro no Upload Painel',
+          description: uploadResult?.message || 'Falha ao processar o arquivo do Painel.',
+          variant: 'destructive'
+        });
+      }
+    } catch (error: any) {
+      console.error('Error during Painel file upload:', error);
+      
+      toast({
+        title: 'Erro no Upload Painel',
+        description: `Ocorreu um erro inesperado: ${error.message}`,
+        variant: 'destructive'
+      });
+    }
+  };
   
   return (
     <div className="flex flex-col space-y-4">
@@ -166,17 +196,7 @@ const UploadSection: React.FC<UploadSectionProps> = ({
             <button
               type="button"
               className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
-              onClick={() => {
-                if (painelFile) {
-                  uploadPainelZeladoria(painelFile);
-                } else {
-                  toast({
-                    title: 'Erro',
-                    description: 'Por favor, selecione o arquivo do Painel da Zeladoria para upload.',
-                    variant: 'destructive'
-                  });
-                }
-              }}
+              onClick={handlePainelUpload}
               disabled={isUploading || !painelFile}
             >
               {isUploading ? 'Enviando...' : 'Enviar Painel'}
