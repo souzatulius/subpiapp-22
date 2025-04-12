@@ -21,7 +21,8 @@ const DashboardCards: React.FC<DashboardCardsProps> = ({
   isSimulationActive = false
 }) => {
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const { indicadores, isLoading, error } = useChatGPTInsight(dadosPlanilha, uploadId);
+  const { results, isLoading, generateInsights } = useChatGPTInsight(dadosPlanilha);
+  const [error, setError] = useState<string | null>(null);
   
   // Predefined analyses for each card
   const cardAnalyses = {
@@ -34,10 +35,10 @@ const DashboardCards: React.FC<DashboardCardsProps> = ({
   
   // Apply simulation adjustments to indicators if simulation is active
   const simulatedIndicadores = React.useMemo(() => {
-    if (!isSimulationActive || !indicadores) return indicadores;
+    if (!isSimulationActive || !results) return results;
     
     // Create a deep copy to avoid mutating the original
-    const simulated = JSON.parse(JSON.stringify(indicadores));
+    const simulated = JSON.parse(JSON.stringify(results));
     
     // Apply improvements in the "ideal" scenario
     if (simulated.fechadas) {
@@ -86,7 +87,7 @@ const DashboardCards: React.FC<DashboardCardsProps> = ({
     }
     
     return simulated;
-  }, [indicadores, isSimulationActive]);
+  }, [results, isSimulationActive]);
 
   const handleRefreshInsights = async () => {
     if (!dadosPlanilha || dadosPlanilha.length === 0) {
@@ -97,10 +98,15 @@ const DashboardCards: React.FC<DashboardCardsProps> = ({
     setIsRefreshing(true);
     toast.info('Atualizando análises...');
     
-    // Force re-render of the component to trigger the useChatGPTInsight hook
-    setTimeout(() => {
+    try {
+      await generateInsights(dadosPlanilha);
+      setError(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Erro ao gerar insights');
+      toast.error('Falha ao atualizar análises');
+    } finally {
       setIsRefreshing(false);
-    }, 2000);
+    }
   };
 
   return (

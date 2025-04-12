@@ -1,4 +1,3 @@
-
 // Custom color palette for charts based on requirements
 export const chartColors = {
   blue: '#095dff',      // Azul 
@@ -12,43 +11,57 @@ export const chartColors = {
 
 // Color arrays for different chart types
 export const barChartColors = [
-  chartColors.blue,
-  chartColors.darkOrange,
-  chartColors.mediumBlue,
-  chartColors.green,
-  chartColors.mediumOrange,
-  chartColors.darkBlue,
+  'rgba(59, 130, 246, 0.7)', // blue-500
+  'rgba(249, 115, 22, 0.7)', // orange-500
+  'rgba(16, 185, 129, 0.7)', // green-500
+  'rgba(244, 63, 94, 0.7)',  // rose-500
+  'rgba(168, 85, 247, 0.7)', // purple-500
+  'rgba(234, 179, 8, 0.7)',  // yellow-500
+  'rgba(14, 165, 233, 0.7)', // sky-500
+  'rgba(239, 68, 68, 0.7)',  // red-500
+];
+
+export const lineChartColors = [
+  'rgba(59, 130, 246, 1)', // blue-500
+  'rgba(249, 115, 22, 1)', // orange-500
+  'rgba(16, 185, 129, 1)', // green-500
+  'rgba(244, 63, 94, 1)',  // rose-500
+  'rgba(168, 85, 247, 1)', // purple-500
 ];
 
 export const pieChartColors = [
-  chartColors.darkOrange,
-  chartColors.blue,
-  chartColors.mediumOrange,
-  chartColors.mediumBlue,
-  chartColors.green,
-  chartColors.darkBlue,
-  chartColors.lightGray,
-];
-
-// Adding line chart colors
-export const lineChartColors = [
-  chartColors.blue,
-  chartColors.darkOrange,
-  chartColors.green,
-  chartColors.mediumOrange,
-  chartColors.mediumBlue,
-  chartColors.darkBlue,
+  'rgba(59, 130, 246, 0.8)',  // blue-500
+  'rgba(249, 115, 22, 0.8)',  // orange-500
+  'rgba(16, 185, 129, 0.8)',  // green-500
+  'rgba(244, 63, 94, 0.8)',   // rose-500
+  'rgba(168, 85, 247, 0.8)',  // purple-500
+  'rgba(234, 179, 8, 0.8)',   // yellow-500
+  'rgba(14, 165, 233, 0.8)',  // sky-500
+  'rgba(239, 68, 68, 0.8)',   // red-500
+  'rgba(124, 58, 237, 0.8)',  // violet-500
+  'rgba(236, 72, 153, 0.8)',  // pink-500
 ];
 
 // Function to get colors with opacity
 export const getColorWithOpacity = (color: string, opacity: number): string => {
-  // Convert hex to rgba
-  if (color.startsWith('#')) {
-    const r = parseInt(color.slice(1, 3), 16);
-    const g = parseInt(color.slice(3, 5), 16);
-    const b = parseInt(color.slice(5, 7), 16);
+  // If color is in rgba format, extract the components and change opacity
+  const rgbaMatch = color.match(/rgba\((\d+),\s*(\d+),\s*(\d+),\s*[\d.]+\)/);
+  if (rgbaMatch) {
+    const [, r, g, b] = rgbaMatch;
     return `rgba(${r}, ${g}, ${b}, ${opacity})`;
   }
+
+  // If color is in hex format, convert to rgba
+  const hexMatch = color.match(/#([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})/i);
+  if (hexMatch) {
+    const [, r, g, b] = hexMatch;
+    const rInt = parseInt(r, 16);
+    const gInt = parseInt(g, 16);
+    const bInt = parseInt(b, 16);
+    return `rgba(${rInt}, ${gInt}, ${bInt}, ${opacity})`;
+  }
+
+  // If color is already in a different format, return it unchanged
   return color;
 };
 
