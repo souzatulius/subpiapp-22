@@ -1,486 +1,443 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { ProcessingStats, UploadResult } from '@/types/ranking';
 import * as XLSX from 'xlsx';
-import { normalizeColumnName, findColumnName } from '@/hooks/ranking/utils/excelUtils';
+import { UploadResult, UploadProgressStats } from '../types/uploadTypes';
 
-// Process the Excel file for SGZ uploads
+// Type for progress update callbacks
+type ProgressCallback = (progress: number) => void;
+type StatsCallback = (stats: any) => void;
+
+/**
+ * Process SGZ file upload
+ */
 export const handleFileUpload = async (
   file: File,
   user: any,
-  onProgress: (progress: number) => void,
-  onStats: (stats: ProcessingStats) => void
-): Promise<UploadResult> => {
-  if (!file || !user?.id) {
-    return {
-      success: false,
-      message: 'Arquivo ou usuário inválido',
-      recordCount: 0
-    };
-  }
-
+  onProgress?: ProgressCallback,
+  onStatsUpdate?: StatsCallback
+): Promise<UploadResult | null> => {
   try {
-    // Initial progress update
-    onProgress(5);
-    onStats({
-      processingStatus: 'processing',
-      newOrders: 0,
-      updatedOrders: 0,
-      message: 'Iniciando leitura do arquivo...'
-    });
-
-    // Read the file
-    const data = await file.arrayBuffer();
-    onProgress(10);
+    // Report initial progress
+    onProgress?.(10);
     
-    // Parse the Excel file
-    const workbook = XLSX.read(data);
-    const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-    const jsonData = XLSX.utils.sheet_to_json(worksheet);
+    // Read Excel file
+    const workbook = await readExcelFile(file);
     
-    onProgress(20);
-    onStats({
-      processingStatus: 'processing',
-      newOrders: 0,
-      updatedOrders: 0,
-      message: 'Arquivo lido, processando dados...',
-      totalRows: jsonData.length
-    });
-
-    // Check if data is valid
-    if (!jsonData || jsonData.length === 0) {
+    // Update progress
+    onProgress?.(30);
+    
+    // Process data from the workbook
+    const data = processXLSX(workbook);
+    
+    if (!data || data.length === 0) {
       return {
         success: false,
-        message: 'Arquivo não contém dados válidos',
-        recordCount: 0
+        recordCount: 0,
+        message: 'Não foi possível processar dados do arquivo',
       };
     }
-
-    onProgress(30);
-    onStats({
+    
+    // Update progress
+    onProgress?.(50);
+    onStatsUpdate?.({
+      totalRows: data.length,
       processingStatus: 'processing',
-      newOrders: 0,
-      updatedOrders: 0,
-      message: `Analisando ${jsonData.length} registros...`,
-      totalRows: jsonData.length
+      message: 'Processando registros...'
     });
-
-    // Create upload record
+    
+    // Register the upload
     const { data: uploadData, error: uploadError } = await supabase
       .from('sgz_uploads')
       .insert({
         nome_arquivo: file.name,
-        usuario_id: user.id,
-        processado: false
+        usuario_id: user?.id || 'anonymous'
       })
       .select('id')
       .single();
-
+      
     if (uploadError) {
-      console.error('Error creating upload record:', uploadError);
+      console.error('Error registering upload:', uploadError);
       return {
         success: false,
-        message: 'Erro ao registrar upload',
-        recordCount: 0
+        recordCount: 0,
+        message: 'Erro ao registrar upload: ' + uploadError.message,
       };
     }
-
-    onProgress(40);
     
-    // Process the data - here we would normally insert into the database
     const uploadId = uploadData.id;
+    onProgress?.(70);
     
-    // Get count of existing service orders
-    const { count: existingCount, error: countError } = await supabase
+    // Format data for insertion
+    const formattedData = data.map(item => ({
+      ...item,
+      planilha_referencia: uploadId,
+      servico_responsavel: classifyServiceResponsibility(item.sgz_tipo_servico || '')
+    }));
+    
+    // Insert data
+    const { error: insertError } = await supabase
       .from('sgz_ordens_servico')
-      .select('*', { count: 'exact', head: true });
+      .insert(formattedData);
       
-    const existingOrdersCount = countError ? 0 : (existingCount || 0);
-    
-    onProgress(50);
-    onStats({
-      processingStatus: 'processing',
-      newOrders: jsonData.length,
-      updatedOrders: 0,
-      message: `Preparando dados para inserção...`,
-      totalRows: jsonData.length,
-      totalServiceOrders: existingOrdersCount + jsonData.length
-    });
-    
-    // Simulate batch processing
-    const batchSize = 100;
-    const batches = Math.ceil(jsonData.length / batchSize);
-    
-    let processedCount = 0;
-    let newOrdersCount = 0;
-    let updatedOrdersCount = 0;
-    
-    for (let i = 0; i < batches; i++) {
-      const start = i * batchSize;
-      const end = Math.min(start + batchSize, jsonData.length);
-      const batch = jsonData.slice(start, end);
-      
-      // Process this batch (in a real implementation, this would insert to database)
-      // This is a simplified example
-      await new Promise(resolve => setTimeout(resolve, 50)); // Simulate network delay
-      
-      processedCount += batch.length;
-      newOrdersCount += batch.length;
-      
-      const progress = 50 + Math.floor((processedCount / jsonData.length) * 40);
-      onProgress(progress);
-      onStats({
-        processingStatus: 'processing',
-        newOrders: newOrdersCount,
-        updatedOrders: updatedOrdersCount,
-        message: `Processando registros (${processedCount}/${jsonData.length})...`,
-        totalRows: jsonData.length,
-        totalServiceOrders: existingOrdersCount + jsonData.length
-      });
+    if (insertError) {
+      console.error('Error inserting data:', insertError);
+      return {
+        success: false,
+        recordCount: 0,
+        message: 'Erro ao inserir dados: ' + insertError.message,
+      };
     }
-
-    // Complete the process
-    onProgress(95);
-    onStats({
-      processingStatus: 'success',
-      newOrders: newOrdersCount,
-      updatedOrders: updatedOrdersCount,
-      message: 'Finalizado com sucesso!',
-      totalRows: jsonData.length,
-      totalServiceOrders: existingOrdersCount + jsonData.length
-    });
     
-    onProgress(100);
+    onProgress?.(100);
+    onStatsUpdate?.({
+      totalRows: data.length,
+      processingStatus: 'success',
+      message: `${data.length} registros processados com sucesso`,
+    });
     
     return {
       success: true,
-      message: 'Upload concluído com sucesso',
-      recordCount: jsonData.length,
       id: uploadId,
-      data: jsonData,
-      newOrders: newOrdersCount,
-      updatedOrders: updatedOrdersCount,
-      totalRecords: existingOrdersCount + jsonData.length
+      recordCount: data.length,
+      message: 'Upload realizado com sucesso',
+      data: formattedData,
+      newOrders: data.length,
+      updatedOrders: 0
     };
-  } catch (error) {
-    console.error('Error processing file:', error);
-    onStats({
-      processingStatus: 'error',
-      message: `Erro ao processar arquivo: ${error instanceof Error ? error.message : String(error)}`,
-      totalRows: 0
-    });
+  } catch (error: any) {
+    console.error('Error in file upload processing:', error);
     return {
       success: false,
-      message: `Erro ao processar arquivo: ${error instanceof Error ? error.message : String(error)}`,
-      recordCount: 0
+      recordCount: 0,
+      message: 'Erro ao processar arquivo: ' + error.message
     };
   }
 };
 
-// Process the Excel file for Painel uploads with improved progress tracking
+/**
+ * Process Painel Zeladoria file upload
+ */
 export const handlePainelZeladoriaUpload = async (
   file: File,
   user: any,
-  onProgress: (progress: number) => void,
-  onStats: (stats: ProcessingStats) => void
-): Promise<UploadResult> => {
-  if (!file || !user?.id) {
-    return {
-      success: false,
-      message: 'Arquivo ou usuário inválido',
-      recordCount: 0
-    };
-  }
-
+  onProgress?: ProgressCallback,
+  onStatsUpdate?: StatsCallback
+): Promise<UploadResult | null> => {
   try {
-    // Initial progress update
-    onProgress(5);
-    onStats({
-      processingStatus: 'processing',
-      message: 'Iniciando processamento do arquivo do Painel',
-      totalRows: 0
-    });
-
-    // Read the file
-    const data = await file.arrayBuffer();
-    onProgress(15);
+    // Report initial progress
+    onProgress?.(10);
     
-    // Parse the Excel file
-    const workbook = XLSX.read(data);
-    const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-    const jsonData = XLSX.utils.sheet_to_json(worksheet);
+    // Read Excel file
+    const workbook = await readExcelFile(file);
     
-    onProgress(25);
-    onStats({
-      processingStatus: 'processing',
-      message: 'Arquivo lido, processando dados...',
-      totalRows: jsonData.length,
-      recordCount: 0
-    });
-
-    // Check if data is valid
-    if (!jsonData || jsonData.length === 0) {
+    // Update progress
+    onProgress?.(30);
+    
+    // Process data from the workbook
+    const data = processXLSXPainel(workbook);
+    
+    if (!data || data.length === 0) {
       return {
         success: false,
-        message: 'Arquivo não contém dados válidos',
-        recordCount: 0
+        recordCount: 0,
+        message: 'Não foi possível processar dados do arquivo',
       };
     }
-
-    onProgress(30);
-    onStats({
+    
+    // Update progress
+    onProgress?.(50);
+    onStatsUpdate?.({
+      totalRows: data.length,
       processingStatus: 'processing',
-      message: `Analisando ${jsonData.length} registros...`,
-      totalRows: jsonData.length,
-      recordCount: jsonData.length
+      message: 'Processando registros...'
     });
-
-    // Create upload record
+    
+    // Register the upload
     const { data: uploadData, error: uploadError } = await supabase
       .from('painel_zeladoria_uploads')
       .insert({
         nome_arquivo: file.name,
-        usuario_email: user.email,
-        usuario_id: user.id 
+        usuario_email: user?.email || 'anonymous'
       })
       .select('id')
       .single();
-
+      
     if (uploadError) {
-      console.error('Error creating upload record:', uploadError);
+      console.error('Error registering upload:', uploadError);
       return {
         success: false,
-        message: 'Erro ao registrar upload',
-        recordCount: 0
+        recordCount: 0,
+        message: 'Erro ao registrar upload: ' + uploadError.message,
       };
     }
-
+    
     const uploadId = uploadData.id;
-    onProgress(40);
-    onStats({
-      processingStatus: 'processing',
-      message: `Mapeando ${jsonData.length} registros...`,
-      totalRows: jsonData.length,
-      recordCount: jsonData.length
-    });
-
-    // Process and map the records
-    const painelRecords = mapPainelDataRecords(jsonData, uploadId);
+    onProgress?.(70);
     
-    onProgress(60);
-    onStats({
-      processingStatus: 'processing',
-      message: `Processando ${painelRecords.length} registros do Painel da Zeladoria`,
-      recordCount: painelRecords.length,
-      totalRows: painelRecords.length
-    });
+    // Format data for insertion
+    const formattedData = data.map(item => ({
+      ...item,
+      upload_id: uploadId,
+      responsavel_classificado: classifyServiceResponsibility(item.tipo_servico || '')
+    }));
     
-    // Simulate batch processing
-    const batchSize = 50;
-    const batches = Math.ceil(painelRecords.length / batchSize);
-    
-    let processedCount = 0;
-    
-    for (let i = 0; i < batches; i++) {
-      const start = i * batchSize;
-      const end = Math.min(start + batchSize, painelRecords.length);
-      const batch = painelRecords.slice(start, end);
-      
-      // Process this batch (in a real implementation, this would insert to database)
-      // This is a simplified example
-      await new Promise(resolve => setTimeout(resolve, 50)); // Simulate network delay
-      
-      processedCount += batch.length;
-      
-      const progress = 60 + Math.floor((processedCount / painelRecords.length) * 30);
-      onProgress(progress);
-      onStats({
-        processingStatus: 'processing',
-        message: `Processando registros (${processedCount}/${painelRecords.length})...`,
-        totalRows: painelRecords.length,
-        recordCount: painelRecords.length
-      });
-    }
-    
-    // Insert the processed records
-    if (painelRecords.length > 0) {
-      const { error: insertError } = await supabase
-        .from('painel_zeladoria_dados')
-        .insert(painelRecords);
-        
-      if (insertError) {
-        console.error('Error inserting Painel data:', insertError);
-        return {
-          success: false,
-          message: `Erro ao inserir dados do Painel: ${insertError.message}`,
-          recordCount: 0
-        };
-      }
-    }
-    
-    onProgress(95);
-    onStats({
-      processingStatus: 'success',
-      message: 'Finalizando processamento...',
-      totalRows: painelRecords.length,
-      recordCount: painelRecords.length
-    });
-
-    // Get current count for stats
-    const { count, error: countError } = await supabase
+    // Insert data
+    const { error: insertError } = await supabase
       .from('painel_zeladoria_dados')
-      .select('*', { count: 'exact', head: true });
+      .insert(formattedData);
+      
+    if (insertError) {
+      console.error('Error inserting data:', insertError);
+      return {
+        success: false,
+        recordCount: 0,
+        message: 'Erro ao inserir dados: ' + insertError.message,
+      };
+    }
     
-    const totalRecords = countError ? painelRecords.length : (count || 0);
-    
-    onProgress(100);
-    onStats({
+    onProgress?.(100);
+    onStatsUpdate?.({
+      totalRows: data.length,
       processingStatus: 'success',
-      message: 'Upload concluído com sucesso!',
-      totalRows: painelRecords.length,
-      recordCount: painelRecords.length,
-      totalRecords
+      message: `${data.length} registros processados com sucesso`,
     });
+    
+    // After successful insertion, compare with SGZ data to detect inconsistencies
+    try {
+      const { data: sgzData } = await supabase
+        .from('sgz_ordens_servico')
+        .select('*')
+        .order('sgz_criado_em', { ascending: false })
+        .limit(1000);
+
+      if (sgzData && sgzData.length > 0) {
+        compareAndStoreDivergences(sgzData, formattedData, uploadId);
+      }
+    } catch (compareError) {
+      console.warn('Non-critical error comparing data:', compareError);
+    }
     
     return {
       success: true,
-      message: 'Upload do Painel concluído com sucesso',
-      recordCount: painelRecords.length,
       id: uploadId,
-      data: painelRecords,
-      totalRecords
+      recordCount: data.length,
+      message: 'Upload realizado com sucesso',
+      data: formattedData,
+      newOrders: data.length,
+      updatedOrders: 0
     };
-  } catch (error) {
-    console.error('Error processing Painel file:', error);
-    onStats({
-      processingStatus: 'error',
-      message: `Erro ao processar arquivo do Painel: ${error instanceof Error ? error.message : String(error)}`,
-      totalRows: 0,
-      recordCount: 0
-    });
+  } catch (error: any) {
+    console.error('Error in Painel Zeladoria upload processing:', error);
     return {
       success: false,
-      message: `Erro ao processar arquivo do Painel: ${error instanceof Error ? error.message : String(error)}`,
-      recordCount: 0
+      recordCount: 0,
+      message: 'Erro ao processar arquivo: ' + error.message
     };
   }
 };
 
-// Helper function to map Painel data to our database schema
-function mapPainelDataRecords(data: any[], uploadId: string) {
-  return data.map(row => {
-    // Try to find common column names using normalized versions
-    const idField = findFieldValue(row, ['ordem_de_servico', 'protocolo', 'id', 'os']);
-    const tipoServicoField = findFieldValue(row, ['tipo_de_servico', 'servico', 'classificacao']);
-    const statusField = findFieldValue(row, ['status', 'situacao']);
-    const distritoField = findFieldValue(row, ['distrito', 'subprefeitura', 'regiao']);
-    const departamentoField = findFieldValue(row, ['departamento', 'setor', 'area']);
-    const dataAberturaField = findDateFieldValue(row, ['data_abertura', 'data_inicio', 'criado_em']);
-    const dataFechamentoField = findDateFieldValue(row, ['data_fechamento', 'data_conclusao', 'data_fim']);
-    const responsavelField = findFieldValue(row, ['responsavel', 'responsavel_real', 'executor']);
+/**
+ * Read Excel file as workbook
+ */
+const readExcelFile = async (file: File): Promise<XLSX.WorkBook> => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
     
-    return {
-      id_os: idField || `PAINEL-${Math.random().toString(36).substring(2, 10)}`,
-      tipo_servico: tipoServicoField || '',
-      status: statusField || '',
-      distrito: distritoField || '',
-      departamento: departamentoField || '',
-      data_abertura: dataAberturaField ? new Date(dataAberturaField).toISOString() : null,
-      data_fechamento: dataFechamentoField ? new Date(dataFechamentoField).toISOString() : null,
-      responsavel_real: responsavelField || '',
-      upload_id: uploadId,
-      responsavel_classificado: classifyServiceResponsibility(tipoServicoField || '')
+    reader.onload = (event) => {
+      try {
+        if (!event.target?.result) {
+          reject(new Error('Failed to read file'));
+          return;
+        }
+        
+        const data = new Uint8Array(event.target.result as ArrayBuffer);
+        const workbook = XLSX.read(data, { type: 'array' });
+        resolve(workbook);
+      } catch (error) {
+        reject(error);
+      }
     };
+    
+    reader.onerror = (error) => reject(error);
+    reader.readAsArrayBuffer(file);
   });
-}
+};
 
-// Helper function to classify service responsibility
-function classifyServiceResponsibility(serviceType: string): string {
-  const upperService = (serviceType || '').toUpperCase();
+/**
+ * Process SGZ XLSX workbook data
+ */
+const processXLSX = (workbook: XLSX.WorkBook): any[] => {
+  try {
+    const firstSheetName = workbook.SheetNames[0];
+    const worksheet = workbook.Sheets[firstSheetName];
+    
+    // Convert to JSON
+    const data = XLSX.utils.sheet_to_json(worksheet, { raw: false, defval: '' });
+    
+    if (!data || data.length === 0) {
+      throw new Error('Planilha vazia ou formato inválido');
+    }
+    
+    // Map fields to database columns
+    return data.map((row: any) => {
+      // Check for required fields
+      const ordemServico = row['OS'] || row['Ordem de Serviço'] || row['Ordem Serviço'] || '';
+      
+      if (!ordemServico) {
+        console.warn(`Linha sem número de OS`);
+      }
+      
+      // Map fields to our schema
+      return {
+        ordem_servico: ordemServico,
+        sgz_tipo_servico: row['Serviço'] || row['Tipo de Serviço'] || '',
+        sgz_status: row['Status'] || '',
+        sgz_distrito: row['Distrito'] || '',
+        sgz_bairro: row['Bairro'] || '',
+        sgz_departamento_tecnico: row['Departamento'] || '',
+        sgz_empresa: row['Empresa'] || '',
+        sgz_criado_em: parseExcelDate(row['Data de Abertura'] || row['Criado em'] || ''),
+        sgz_modificado_em: parseExcelDate(row['Data de Fechamento'] || row['Modificado em'] || row['Última atualização'] || '')
+      };
+    }).filter((item: any) => item.ordem_servico.trim() !== '');
+  } catch (error) {
+    console.error('Error processing XLSX:', error);
+    throw error;
+  }
+};
+
+/**
+ * Process Painel XLSX workbook data
+ */
+const processXLSXPainel = (workbook: XLSX.WorkBook): any[] => {
+  try {
+    const firstSheetName = workbook.SheetNames[0];
+    const worksheet = workbook.Sheets[firstSheetName];
+    
+    // Convert to JSON
+    const data = XLSX.utils.sheet_to_json(worksheet, { raw: false, defval: '' });
+    
+    if (!data || data.length === 0) {
+      throw new Error('Planilha vazia ou formato inválido');
+    }
+    
+    // Map fields to database columns
+    return data.map((row: any) => {
+      // Check for required fields
+      const idOS = row["Ordem de Serviço"] || row["Protocolo"] || row["OS"] || '';
+      
+      if (!idOS) {
+        console.warn(`Linha sem número de OS/protocolo`);
+      }
+      
+      // Map fields to our schema
+      return {
+        id_os: idOS,
+        tipo_servico: row["Tipo de Serviço"] || row["Serviço"] || '',
+        status: row["Status"] || '',
+        distrito: row["Distrito"] || '',
+        departamento: row["Departamento"] || row["Setor"] || '',
+        data_abertura: parseExcelDate(row["Data de Abertura"] || ''),
+        data_fechamento: parseExcelDate(row["Data de Fechamento"] || ''),
+        responsavel_real: row["Responsável"] || ''
+      };
+    }).filter((item: any) => item.id_os.trim() !== '');
+  } catch (error) {
+    console.error('Error processing XLSX:', error);
+    throw error;
+  }
+};
+
+/**
+ * Parse Excel date to ISO format
+ */
+const parseExcelDate = (dateString: string): string | null => {
+  if (!dateString) return null;
+  
+  try {
+    // Try as Brazilian date format (DD/MM/YYYY)
+    const parts = dateString.split('/');
+    if (parts.length === 3) {
+      const [day, month, year] = parts;
+      return new Date(`${year}-${month}-${day}`).toISOString();
+    }
+    
+    // Try as ISO or other recognized format
+    const date = new Date(dateString);
+    return !isNaN(date.getTime()) ? date.toISOString() : null;
+  } catch (error) {
+    console.error("Error converting date:", error);
+    return null;
+  }
+};
+
+/**
+ * Classify service responsibility based on service type
+ */
+const classifyServiceResponsibility = (serviceType: string): string => {
+  const upperService = serviceType.toUpperCase();
   
   if (upperService.includes('TAPA') && upperService.includes('BURACO')) {
     return 'dzu';
   } else if (upperService.includes('ENEL') || upperService.includes('ELETROPAULO')) {
     return 'enel';
-  } else if ((upperService.includes('GALERIA') && upperService.includes('SABESP')) || 
-             upperService.includes('SABESP')) {
+  } else if (upperService.includes('SABESP') || 
+            (upperService.includes('AGUA') && upperService.includes('VAZAMENTO'))) {
     return 'sabesp';
+  } else if (upperService.includes('COLETA') && 
+            (upperService.includes('LIXO') || upperService.includes('LIMPEZA'))) {
+    return 'selimp';
   } else {
     return 'subprefeitura';
   }
-}
+};
 
-// Helper function to find field values from multiple possible column names
-function findFieldValue(row: any, possibleFieldNames: string[]) {
-  for (const fieldName of possibleFieldNames) {
-    // Try direct access
-    if (row[fieldName] !== undefined) {
-      return row[fieldName];
-    }
-    
-    // Try various capitalizations and formats
-    const variants = [
-      fieldName,
-      fieldName.toUpperCase(),
-      fieldName.toLowerCase(),
-      fieldName.charAt(0).toUpperCase() + fieldName.slice(1),
-      fieldName.replace(/_/g, ' '),
-      fieldName.replace(/\s/g, '_')
-    ];
-    
-    for (const variant of variants) {
-      if (row[variant] !== undefined) {
-        return row[variant];
-      }
-    }
-  }
-  
-  // If we still haven't found it, check all keys with partial matches
-  const keys = Object.keys(row);
-  for (const fieldName of possibleFieldNames) {
-    for (const key of keys) {
-      if (key.toLowerCase().includes(fieldName.toLowerCase())) {
-        return row[key];
-      }
-    }
-  }
-  
-  return null;
-}
-
-// Helper function specifically for date fields
-function findDateFieldValue(row: any, possibleFieldNames: string[]) {
-  const value = findFieldValue(row, possibleFieldNames);
-  if (!value) return null;
-  
-  // Handle Excel numeric dates
-  if (typeof value === 'number') {
-    // Excel dates are days since 1900-01-01 (except there's a leap year bug)
-    const excelEpoch = new Date(1899, 11, 30);
-    const date = new Date(excelEpoch);
-    date.setDate(date.getDate() + value);
-    return date.toISOString();
-  }
-  
-  // Handle string dates in various formats
+/**
+ * Compare data sets and store divergences for later analysis
+ */
+const compareAndStoreDivergences = async (
+  sgzData: any[], 
+  painelData: any[], 
+  uploadId: string
+) => {
   try {
-    if (typeof value === 'string') {
-      // Try to parse as a date with various formats
-      if (value.includes('/')) {
-        // Likely DD/MM/YYYY format
-        const parts = value.split('/');
-        // Check if we have day/month/year format
-        if (parts.length === 3 && parts[0].length <= 2) {
-          return new Date(`${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`).toISOString();
-        }
-      }
+    // Map SGZ data by order number
+    const sgzMap = new Map();
+    sgzData.forEach(os => {
+      sgzMap.set(os.ordem_servico, os);
+    });
+    
+    // Map Painel data by order number
+    const painelMap = new Map();
+    painelData.forEach(os => {
+      painelMap.set(os.id_os, os);
+    });
+    
+    const divergences = [];
+    
+    // Check SGZ orders that are in both systems but with different status
+    for (const sgzItem of sgzData) {
+      const painelItem = painelMap.get(sgzItem.ordem_servico);
       
-      // Try standard ISO parsing
-      return new Date(value).toISOString();
+      if (painelItem && sgzItem.sgz_status !== painelItem.status) {
+        divergences.push({
+          id_os: sgzItem.ordem_servico,
+          status_sgz: sgzItem.sgz_status,
+          status_painel: painelItem.status,
+          motivo: 'Status divergente',
+          upload_id: uploadId
+        });
+      }
     }
-  } catch (e) {
-    console.error('Error parsing date:', value, e);
+    
+    // If we found divergences, store them
+    if (divergences.length > 0) {
+      await supabase
+        .from('painel_zeladoria_comparacoes')
+        .insert(divergences);
+    }
+  } catch (error) {
+    console.error('Error comparing data sets:', error);
+    // Non-critical error, don't throw
   }
-  
-  return null;
-}
+};

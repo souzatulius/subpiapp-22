@@ -19,6 +19,7 @@ import { useAnimatedFeedback } from '@/hooks/use-animated-feedback';
 import FeedbackProvider from '@/components/ui/feedback-provider';
 import { useUploadState } from '@/hooks/ranking/useUploadState';
 import UploadProgressDisplay from '@/components/ranking/UploadProgressDisplay';
+import { useChartRefresher } from '@/hooks/ranking/useChartRefresher';
 
 const RankingSubs = () => {
   // Start with sidebar collapsed
@@ -33,11 +34,11 @@ const RankingSubs = () => {
     setPlanilhaData,
     painelData,
     setPainelData,
-    refreshChartData
   } = useRankingCharts();
   
   const { showFeedback } = useAnimatedFeedback();
   const { sgzProgress, painelProgress, setLastRefreshTime } = useUploadState();
+  const { refreshAllChartData, isRefreshing } = useChartRefresher();
   
   const handlePrint = () => {
     printWithStyles();
@@ -70,7 +71,7 @@ const RankingSubs = () => {
     
     // Refresh data after upload
     try {
-      await refreshChartData();
+      await refreshAllChartData();
       setLastRefreshTime(new Date());
     } catch (err) {
       console.error("Error refreshing data after upload:", err);
@@ -88,7 +89,7 @@ const RankingSubs = () => {
     
     // Refresh data after upload
     try {
-      await refreshChartData();
+      await refreshAllChartData();
       setLastRefreshTime(new Date());
     } catch (err) {
       console.error("Error refreshing data after upload:", err);
@@ -99,26 +100,17 @@ const RankingSubs = () => {
 
   // Refresh data when component mounts
   useEffect(() => {
-    refreshChartData().catch(err => {
+    refreshAllChartData().catch(err => {
       console.error("Error refreshing chart data on mount:", err);
     });
-  }, [refreshChartData]);
+  }, [refreshAllChartData]);
 
   // Handle refresh with visual feedback
   const handleRefreshData = async () => {
-    showFeedback('loading', 'Atualizando dados...', {
-      duration: 0,
-      progress: 20,
-      stage: 'Buscando dados mais recentes'
-    });
-    
     try {
-      await refreshChartData();
-      setLastRefreshTime(new Date());
-      showFeedback('success', 'Dados atualizados com sucesso', { duration: 2000 });
+      await refreshAllChartData();
     } catch (error) {
       console.error("Error refreshing data:", error);
-      showFeedback('error', 'Erro ao atualizar dados', { duration: 3000 });
     }
   };
   
@@ -202,8 +194,9 @@ const RankingSubs = () => {
             size="sm"
             className="bg-white hover:bg-gray-100 border-gray-200"
             onClick={handleRefreshData}
+            disabled={isRefreshing}
           >
-            Atualizar
+            {isRefreshing ? 'Atualizando...' : 'Atualizar'}
           </Button>
         </div>
         

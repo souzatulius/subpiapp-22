@@ -1,97 +1,89 @@
 
-import { supabase } from "@/integrations/supabase/client";
-
 export interface OSComparacao {
   id_os: string;
-  status_sgz?: string;
-  status_painel?: string;
-  encontradoPainel: boolean;
-  motivo: string;
+  sgz_status?: string;
+  painel_status?: string;
+  divergente: boolean;
 }
 
 export interface ResultadoComparacao {
   totalSGZ: number;
   totalPainel: number;
+  ausentes: string[];
   divergencias: OSComparacao[];
-  ausentes: OSComparacao[];
   divergenciasStatus: OSComparacao[];
 }
 
-export function normalizarID(id: string | number): string {
-  return String(id).trim().replace(/^0+/, '');
-}
+/**
+ * Compara os dados entre SGZ e Painel da Zeladoria para identificar divergências
+ */
+export const compararBases = (
+  dadosSGZ: any[],
+  dadosPainel: any[]
+): ResultadoComparacao => {
+  // Mapear OS do SGZ por número para acesso rápido
+  const mapSGZ = new Map();
+  dadosSGZ.forEach(os => {
+    mapSGZ.set(os.ordem_servico, {
+      id_os: os.ordem_servico,
+      status: os.sgz_status
+    });
+  });
 
-export function compararBases(sgz: any[], painel: any[]): ResultadoComparacao {
-  const painelMap = new Map(
-    painel.map((p) => [normalizarID(p.id_os), p])
-  );
+  // Mapear OS do Painel por número para acesso rápido
+  const mapPainel = new Map();
+  dadosPainel.forEach(os => {
+    mapPainel.set(os.id_os, {
+      id_os: os.id_os,
+      status: os.status
+    });
+  });
 
-  const divergencias = sgz.map((os) => {
-    const id = normalizarID(os.ordem_servico);
-    const painelOS = painelMap.get(id);
+  const divergencias: OSComparacao[] = [];
+  const divergenciasStatus: OSComparacao[] = [];
+  const ausentes: string[] = [];
 
-    if (!painelOS) {
-      return {
-        id_os: id,
-        status_sgz: os.sgz_status,
-        encontradoPainel: false,
-        motivo: 'Ausente no Painel da Zeladoria'
-      };
-    }
-
-    const statusSGZ = os.sgz_status?.trim().toUpperCase();
-    const statusPainel = painelOS.status?.trim().toUpperCase();
-
-    if (statusSGZ !== statusPainel) {
-      return {
-        id_os: id,
-        status_sgz: statusSGZ,
-        status_painel: statusPainel,
-        encontradoPainel: true,
-        motivo: 'Status divergente'
-      };
-    }
-
-    return null;
-  }).filter(Boolean) as OSComparacao[];
-
-  return {
-    totalSGZ: sgz.length,
-    totalPainel: painel.length,
-    divergencias,
-    ausentes: divergencias.filter((d) => !d.encontradoPainel),
-    divergenciasStatus: divergencias.filter((d) => d.encontradoPainel),
-  };
-}
-
-export async function salvarComparacaoNaBase(resultado: ResultadoComparacao, uploadId: string) {
-  try {
-    const batch: any[] = resultado.divergencias.map(div => ({
-      id_os: div.id_os,
-      status_sgz: div.status_sgz,
-      status_painel: div.status_painel,
-      motivo: div.motivo,
-      upload_id: uploadId
-    }));
-
-    if (batch.length > 0) {
-      const { error } = await supabase
-        .from('painel_zeladoria_comparacoes')
-        .insert(batch);
-
-      if (error) {
-        console.error('Erro ao salvar comparação:', error);
-        throw error;
+  // Verificar OS que estão no SGZ mas não no Painel ou com status diferentes
+  dadosSGZ.forEach(os => {
+    const idOS = os.ordem_servico;
+    const statusSGZ = os.sgz_status;
+    
+    // Se não existe no Painel
+    if (!mapPainel.has(idOS)) {
+      ausentes.push(idOS);
+      
+      divergencias.push({
+        id_os: idOS,
+        sgz_status: statusSGZ,
+        divergente: true
+      });
+    } 
+    // Se existe, verificar se o status é diferente
+    else {
+      const painelOS = mapPainel.get(idOS);
+      if (statusSGZ !== painelOS.status) {
+        divergenciasStatus.push({
+          id_os: idOS,
+          sgz_status: statusSGZ,
+          painel_status: painelOS.status,
+          divergente: true
+        });
+        
+        divergencias.push({
+          id_os: idOS,
+          sgz_status: statusSGZ,
+          painel_status: painelOS.status,
+          divergente: true
+        });
       }
     }
+  });
 
-    return {
-      totalDivergencias: resultado.divergencias.length,
-      totalAusentes: resultado.ausentes.length,
-      totalDivergenciasStatus: resultado.divergenciasStatus.length
-    };
-  } catch (error) {
-    console.error('Erro ao salvar comparação:', error);
-    throw error;
-  }
-}
+  return {
+    totalSGZ: dadosSGZ.length,
+    totalPainel: dadosPainel.length,
+    ausentes,
+    divergencias,
+    divergenciasStatus
+  };
+};
