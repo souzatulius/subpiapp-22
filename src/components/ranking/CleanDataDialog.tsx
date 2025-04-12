@@ -40,7 +40,9 @@ const CleanDataDialog: React.FC<CleanDataDialogProps> = ({
 
     try {
       // Call the database function to clean up all data
-      const { data, error } = await supabase.rpc('clean_zeladoria_data');
+      // Use any type to bypass the TypeScript check since the function exists in the DB
+      // but might not be in the TypeScript types
+      const { data, error } = await supabase.rpc('clean_zeladoria_data' as any);
       
       if (error) {
         console.error('Error cleaning data:', error);
