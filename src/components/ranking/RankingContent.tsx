@@ -7,6 +7,7 @@ import { useRankingCharts } from '@/hooks/ranking/useRankingCharts';
 import DashboardCards from './insights/DashboardCards';
 import { useAnimatedFeedback } from '@/hooks/use-animated-feedback';
 import { useUploadState } from '@/hooks/ranking/useUploadState';
+import ChartDebugPanel from './charts/ChartDebugPanel';
 
 interface RankingContentProps {
   filterDialogOpen: boolean;
@@ -28,6 +29,7 @@ const RankingContent: React.FC<RankingContentProps> = ({
   onRefreshData
 }) => {
   const [isSimulationActive, setIsSimulationActive] = useState(false);
+  const [isDebugVisible, setIsDebugVisible] = useState(process.env.NODE_ENV === 'development');
   const { 
     chartVisibility, toggleChartVisibility, setChartVisibility,
     planilhaData, sgzData, painelData, isLoading, setIsInsightsLoading,
@@ -66,6 +68,20 @@ const RankingContent: React.FC<RankingContentProps> = ({
     }
   }, [onRefreshData]);
 
+  // Toggle debug panel with Alt+D
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'd' && e.altKey) {
+        setIsDebugVisible(prev => !prev);
+      }
+    };
+    
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, []);
+
   return (
     <div className="space-y-6">
       <DashboardCards 
@@ -91,6 +107,11 @@ const RankingContent: React.FC<RankingContentProps> = ({
         onOpenChange={setFilterDialogOpen}
         chartVisibility={chartVisibility}
         onToggleChartVisibility={toggleChartVisibility}
+      />
+      
+      <ChartDebugPanel 
+        sgzData={planilhaData} 
+        isVisible={isDebugVisible} 
       />
     </div>
   );

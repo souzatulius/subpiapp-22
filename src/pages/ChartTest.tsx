@@ -4,6 +4,7 @@ import ChartDataDebugger from '@/components/ranking/debug/ChartDataDebugger';
 import { Card } from '@/components/ui/card';
 import StatusDistributionChart from '@/components/ranking/charts/StatusDistributionChart';
 import { useZeladoriaChartDataMock } from '@/hooks/ranking/useZeladoriaChartDataMock';
+import ChartDebugPanel from '@/components/ranking/charts/ChartDebugPanel';
 
 export default function ChartTest() {
   const { data, isLoading, error } = useZeladoriaChartDataMock(500);
@@ -24,6 +25,7 @@ export default function ChartTest() {
       <h1 className="text-2xl font-bold">Chart Testing Page</h1>
       
       <ChartDataDebugger />
+      <ChartDebugPanel sgzData={mockSgzData} isVisible={true} />
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Card className="p-4">
