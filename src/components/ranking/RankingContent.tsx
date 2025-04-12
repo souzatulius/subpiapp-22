@@ -8,6 +8,7 @@ import DashboardCards from './insights/DashboardCards';
 import { useAnimatedFeedback } from '@/hooks/use-animated-feedback';
 import { useUploadState } from '@/hooks/ranking/useUploadState';
 import ChartDebugPanel from './charts/ChartDebugPanel';
+import UploadHistoryCard from './UploadHistoryCard';
 import { toast } from 'sonner';
 
 interface RankingContentProps {
@@ -47,7 +48,9 @@ const RankingContent: React.FC<RankingContentProps> = ({
       sgzData: sgzData?.length || 0,
       painelData: painelData?.length || 0,
       isMockData,
-      isLoading
+      isLoading,
+      dataSource: localStorage.getItem('demo-data-source') || 'unknown',
+      lastUpdate: localStorage.getItem('demo-last-update') || 'never'
     });
   }, [planilhaData, sgzData, painelData, isMockData, isLoading]);
 
@@ -138,11 +141,22 @@ const RankingContent: React.FC<RankingContentProps> = ({
 
   return (
     <div className="space-y-6">
-      <DashboardCards 
-        dadosPlanilha={planilhaData} 
-        dadosPainel={painelData} 
-        isSimulationActive={isSimulationActive}
-      />
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="md:col-span-2">
+          <DashboardCards 
+            dadosPlanilha={planilhaData} 
+            dadosPainel={painelData} 
+            isSimulationActive={isSimulationActive}
+          />
+        </div>
+        <div className="md:col-span-1">
+          <UploadHistoryCard 
+            sgzData={sgzData || planilhaData}
+            painelData={painelData}
+            lastUpdate={localStorage.getItem('demo-last-update')}
+          />
+        </div>
+      </div>
 
       <RankingCharts
         chartData={{}}
@@ -175,7 +189,8 @@ const RankingContent: React.FC<RankingContentProps> = ({
             sgzCount: sgzData?.length || 0,
             painelCount: painelData?.length || 0,
             lastSgzUpdate: lastRefreshTime ? lastRefreshTime.toISOString() : null,
-            lastPainelUpdate: lastRefreshTime ? lastRefreshTime.toISOString() : null
+            lastPainelUpdate: lastRefreshTime ? lastRefreshTime.toISOString() : null,
+            dataSource: localStorage.getItem('demo-data-source') || 'unknown'
           }}
           isLoading={isLoading}
         />

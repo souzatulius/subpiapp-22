@@ -37,6 +37,7 @@ const RankingSubs = () => {
     isRefreshing,
     setIsRefreshing,
     isMockData,
+    setIsMockData,
     sgzData,
     isLoading
   } = useRankingCharts();
@@ -73,47 +74,51 @@ const RankingSubs = () => {
       localStorage.setItem('demo-data-source', 'upload');
       localStorage.setItem('demo-sgz-data', JSON.stringify(data));
       localStorage.setItem('demo-last-update', new Date().toISOString());
-    } catch (error) {
-      console.error("Error saving upload source to localStorage:", error);
-    }
-    
-    setPlanilhaData(data);
-    setUploadId(id);
-    
-    showFeedback('success', `Upload concluído: ${data.length} registros processados`, { 
-      duration: 3000 
-    });
-    
-    try {
-      const isValid = validateData(data, 'sgz');
-      if (!isValid.valid) {
-        toast.warning(`Upload realizado, mas com avisos: ${isValid.message}`);
-      }
       
-      await refreshAllChartData();
-      setLastRefreshTime(new Date());
+      setIsMockData(false);
       
-      if (data.length > 0) {
-        try {
-          showFeedback('loading', 'Gerando insights com IA...', { 
-            duration: 0,
-            progress: 50,
-            stage: 'Processando dados'
-          });
-          
-          const chartData = await generateChartData('zeladoria-stats', data);
-          console.log('AI-generated chart data:', chartData);
-          
-          showFeedback('success', 'Insights gerados com sucesso!', { duration: 2000 });
-        } catch (aiErr) {
-          console.error('Error generating AI insights:', aiErr);
-          showFeedback('error', 'Não foi possível gerar os insights com IA', { duration: 3000 });
+      setPlanilhaData(data);
+      setUploadId(id);
+      
+      showFeedback('success', `Upload concluído: ${data.length} registros processados`, { 
+        duration: 3000 
+      });
+      
+      try {
+        const isValid = validateData(data, 'sgz');
+        if (!isValid.valid) {
+          toast.warning(`Upload realizado, mas com avisos: ${isValid.message}`);
         }
+        
+        await refreshAllChartData();
+        setLastRefreshTime(new Date());
+        
+        if (data.length > 0) {
+          try {
+            showFeedback('loading', 'Gerando insights com IA...', { 
+              duration: 0,
+              progress: 50,
+              stage: 'Processando dados'
+            });
+            
+            const chartData = await generateChartData('zeladoria-stats', data);
+            console.log('AI-generated chart data:', chartData);
+            
+            showFeedback('success', 'Insights gerados com sucesso!', { duration: 2000 });
+          } catch (aiErr) {
+            console.error('Error generating AI insights:', aiErr);
+            showFeedback('error', 'Não foi possível gerar os insights com IA', { duration: 3000 });
+          }
+        }
+      } catch (err) {
+        console.error("Error refreshing data after upload:", err);
+        toast.error("Erro ao processar os dados após o upload");
+      } finally {
+        setIsUploading(false);
       }
-    } catch (err) {
-      console.error("Error refreshing data after upload:", err);
-      toast.error("Erro ao processar os dados após o upload");
-    } finally {
+    } catch (error) {
+      console.error("Error in handleUploadComplete:", error);
+      toast.error("Ocorreu um erro ao processar os dados do SGZ");
       setIsUploading(false);
     }
   };
@@ -125,46 +130,55 @@ const RankingSubs = () => {
       localStorage.setItem('demo-data-source', 'upload');
       localStorage.setItem('demo-painel-data', JSON.stringify(data));
       localStorage.setItem('demo-last-update', new Date().toISOString());
-    } catch (error) {
-      console.error("Error saving upload source to localStorage:", error);
-    }
-    
-    setPainelData(data);
-    
-    showFeedback('success', `Upload concluído: ${data.length} registros processados`, { 
-      duration: 3000 
-    });
-    
-    try {
-      const isValid = validateData(data, 'painel');
-      if (!isValid.valid) {
-        toast.warning(`Upload realizado, mas com avisos: ${isValid.message}`);
-      }
       
-      await refreshAllChartData();
-      setLastRefreshTime(new Date());
+      setIsMockData(false);
       
-      if (data.length > 0) {
-        try {
-          showFeedback('loading', 'Gerando insights com IA...', { 
-            duration: 0,
-            progress: 50,
-            stage: 'Processando dados'
-          });
-          
-          const chartData = await generateChartData('zeladoria-stats', data);
-          console.log('AI-generated chart data:', chartData);
-          
-          showFeedback('success', 'Insights gerados com sucesso!', { duration: 2000 });
-        } catch (aiErr) {
-          console.error('Error generating AI insights:', aiErr);
-          showFeedback('error', 'Não foi possível gerar os insights com IA', { duration: 3000 });
+      setPainelData(data);
+      
+      showFeedback('success', `Upload concluído: ${data.length} registros processados`, { 
+        duration: 3000 
+      });
+      
+      try {
+        const isValid = validateData(data, 'painel');
+        if (!isValid.valid) {
+          toast.warning(`Upload realizado, mas com avisos: ${isValid.message}`);
         }
+        
+        await refreshAllChartData();
+        setLastRefreshTime(new Date());
+        
+        if (data.length > 0 && sgzData && sgzData.length > 0) {
+          try {
+            showFeedback('loading', 'Gerando insights com IA...', { 
+              duration: 0,
+              progress: 50,
+              stage: 'Processando dados'
+            });
+            
+            const combinedData = {
+              sgz: sgzData,
+              painel: data
+            };
+            
+            const chartData = await generateChartData('zeladoria-comparison', combinedData);
+            console.log('AI-generated comparison chart data:', chartData);
+            
+            showFeedback('success', 'Insights comparativos gerados com sucesso!', { duration: 2000 });
+          } catch (aiErr) {
+            console.error('Error generating AI comparison insights:', aiErr);
+            showFeedback('error', 'Não foi possível gerar os insights comparativos com IA', { duration: 3000 });
+          }
+        }
+      } catch (err) {
+        console.error("Error refreshing data after upload:", err);
+        toast.error("Erro ao processar os dados após o upload");
+      } finally {
+        setIsUploading(false);
       }
-    } catch (err) {
-      console.error("Error refreshing data after upload:", err);
-      toast.error("Erro ao processar os dados após o upload");
-    } finally {
+    } catch (error) {
+      console.error("Error in handlePainelUploadComplete:", error);
+      toast.error("Ocorreu um erro ao processar os dados do Painel");
       setIsUploading(false);
     }
   };
@@ -221,12 +235,33 @@ const RankingSubs = () => {
         stage: 'Sincronizando dados'
       });
       
+      const dataSource = localStorage.getItem('demo-data-source');
+      console.log("Current data source:", dataSource);
+      
+      if (dataSource === 'upload') {
+        setIsMockData(false);
+      }
+      
       await refreshAllChartData();
       
       showFeedback('success', 'Dados atualizados com sucesso', { duration: 2000 });
     } catch (error) {
       console.error("Error refreshing data:", error);
       showFeedback('error', 'Erro ao atualizar dados', { duration: 3000 });
+      
+      if (!isMockData) {
+        console.warn("Supabase failed. Falling back to mock data.");
+        localStorage.setItem('demo-data-source', 'mock');
+        setIsMockData(true);
+        
+        try {
+          await refreshAllChartData();
+          showFeedback('warning', 'Usando dados de demonstração (mock)', { duration: 3000 });
+        } catch (mockError) {
+          console.error("Even mock data failed to load:", mockError);
+          showFeedback('error', 'Falha total ao carregar dados', { duration: 3000 });
+        }
+      }
     } finally {
       setIsRefreshing(false);
     }
@@ -245,6 +280,26 @@ const RankingSubs = () => {
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [showDebugPanel]);
+  
+  useEffect(() => {
+    const dataSource = localStorage.getItem('demo-data-source');
+    const lastUpdate = localStorage.getItem('demo-last-update');
+    
+    console.log("Current data configuration:", {
+      dataSource,
+      lastUpdate: lastUpdate ? new Date(lastUpdate).toLocaleString() : 'Never',
+      isMockData,
+      sgzDataLength: sgzData?.length || 0,
+      planilhaDataLength: planilhaData?.length || 0,
+      painelDataLength: painelData?.length || 0
+    });
+    
+    if (dataSource === 'upload' || dataSource === 'supabase') {
+      setIsMockData(false);
+    } else if (dataSource === 'mock') {
+      setIsMockData(true);
+    }
+  }, []);
   
   return (
     <FeedbackProvider>
@@ -363,8 +418,9 @@ const RankingSubs = () => {
               dataStatus={{
                 sgzCount: sgzData?.length || 0,
                 painelCount: painelData?.length || 0,
-                lastSgzUpdate: null,
-                lastPainelUpdate: null
+                lastSgzUpdate: localStorage.getItem('demo-last-update'),
+                lastPainelUpdate: localStorage.getItem('demo-last-update'),
+                dataSource: localStorage.getItem('demo-data-source') || 'unknown'
               }}
             />
           )}

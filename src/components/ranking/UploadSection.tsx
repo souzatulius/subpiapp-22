@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { usePainelZeladoriaUpload } from '@/hooks/ranking/usePainelZeladoriaUpload';
 import { handleFileUpload } from '@/hooks/ranking/services/uploadService';
@@ -41,12 +40,10 @@ const UploadSection: React.FC<UploadSectionProps> = ({
     setValidationErrors 
   } = useUploadState();
   
-  // Get the painel upload function from our hook
   const { handleUploadPainel } = usePainelZeladoriaUpload(user);
   
   const handleSgzFileChange = (file: File | null) => {
     setSgzFile(file);
-    // Clear validation errors when choosing a new file
     setValidationErrors([]);
   };
   
@@ -70,7 +67,6 @@ const UploadSection: React.FC<UploadSectionProps> = ({
     try {
       console.log("Starting SGZ file upload:", sgzFile.name);
       
-      // Update progress to uploading state
       setSgzProgress({
         totalRows: 0,
         processedRows: 0,
@@ -110,10 +106,16 @@ const UploadSection: React.FC<UploadSectionProps> = ({
           setValidationErrors([]);
         }
         
-        // Pass data to parent component
+        try {
+          localStorage.setItem('demo-data-source', 'upload');
+          localStorage.setItem('demo-sgz-data', JSON.stringify(uploadResult.data || []));
+          localStorage.setItem('demo-last-update', new Date().toISOString());
+        } catch (error) {
+          console.error("Error saving upload source to localStorage:", error);
+        }
+        
         onUploadComplete(uploadResult.id || 'no-id', uploadResult.data || []);
         
-        // Ensure we refresh data
         try {
           await onRefreshData();
         } catch (refreshError) {
@@ -155,7 +157,6 @@ const UploadSection: React.FC<UploadSectionProps> = ({
     }
   };
   
-  // Function to handle Painel upload
   const handlePainelUpload = async () => {
     if (!painelFile) {
       toast.error('Por favor, selecione o arquivo do Painel da Zeladoria para upload.');
@@ -167,7 +168,6 @@ const UploadSection: React.FC<UploadSectionProps> = ({
     try {
       console.log("Starting Painel file upload:", painelFile.name);
       
-      // Update progress to uploading state
       setPainelProgress({
         totalRows: 0,
         processedRows: 0,
@@ -183,10 +183,16 @@ const UploadSection: React.FC<UploadSectionProps> = ({
       if (uploadResult && uploadResult.success) {
         toast.success(uploadResult.message);
         
-        // Pass data to parent component
+        try {
+          localStorage.setItem('demo-data-source', 'upload');
+          localStorage.setItem('demo-painel-data', JSON.stringify(uploadResult.data || []));
+          localStorage.setItem('demo-last-update', new Date().toISOString());
+        } catch (error) {
+          console.error("Error saving upload source to localStorage:", error);
+        }
+        
         onPainelUploadComplete(uploadResult.id || 'no-id', uploadResult.data || []);
         
-        // Ensure we refresh data
         try {
           await onRefreshData();
         } catch (refreshError) {
@@ -223,13 +229,11 @@ const UploadSection: React.FC<UploadSectionProps> = ({
     }
   };
   
-  // Display progress or errors
   const showSgzProgress = sgzProgress && (sgzProgress.stage === 'uploading' || sgzProgress.stage === 'processing');
   const showPainelProgress = painelProgress && (painelProgress.stage === 'uploading' || painelProgress.stage === 'processing');
   
   return (
     <div className="flex flex-col space-y-4">
-      {/* SGZ Upload */}
       <Card>
         <CardContent className="p-4">
           <h3 className="text-sm font-medium text-gray-700 mb-2">
@@ -259,21 +263,18 @@ const UploadSection: React.FC<UploadSectionProps> = ({
             </Button>
           </div>
           
-          {/* Display upload progress */}
           {sgzProgress && sgzProgress.stage !== 'complete' && sgzProgress.stage !== 'error' && (
             <div className="mt-4">
               <UploadProgressDisplay stats={sgzProgress} type="sgz" />
             </div>
           )}
           
-          {/* Also display progress if it's complete or error stage */}
           {sgzProgress && (sgzProgress.stage === 'complete' || sgzProgress.stage === 'error') && (
             <div className="mt-4">
               <UploadProgressDisplay stats={sgzProgress} type="sgz" />
             </div>
           )}
           
-          {/* Display validation errors */}
           {validationErrors && validationErrors.length > 0 && (
             <div className="mt-4">
               <ErrorSummary errors={validationErrors} maxErrors={5} />
@@ -282,7 +283,6 @@ const UploadSection: React.FC<UploadSectionProps> = ({
         </CardContent>
       </Card>
       
-      {/* Painel Upload */}
       <Card>
         <CardContent className="p-4">
           <h3 className="text-sm font-medium text-gray-700 mb-2">
@@ -312,14 +312,12 @@ const UploadSection: React.FC<UploadSectionProps> = ({
             </Button>
           </div>
           
-          {/* Display upload progress */}
           {painelProgress && painelProgress.stage !== 'complete' && painelProgress.stage !== 'error' && (
             <div className="mt-4">
               <UploadProgressDisplay stats={painelProgress} type="painel" />
             </div>
           )}
           
-          {/* Also display progress if it's complete or error stage */}
           {painelProgress && (painelProgress.stage === 'complete' || painelProgress.stage === 'error') && (
             <div className="mt-4">
               <UploadProgressDisplay stats={painelProgress} type="painel" />

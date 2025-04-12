@@ -183,9 +183,15 @@ export const useRankingCharts = create<RankingChartsState>()(
           
           console.log("Refreshing chart data...");
           
-          // Check if we should use mock data based on environment or state
-          const useMockData = process.env.NODE_ENV === 'development' || get().isMockData;
-          const dataSource = localStorage.getItem('demo-data-source') || (useMockData ? 'mock' : 'supabase');
+          // Check if we should use mock data based on explicitly set dataSource in localStorage
+          const dataSourceFromStorage = localStorage.getItem('demo-data-source');
+          console.log("Data source from localStorage:", dataSourceFromStorage);
+          
+          // Use the value from localStorage if available, otherwise fall back to state
+          const useMockData = dataSourceFromStorage === 'mock' || 
+            (dataSourceFromStorage !== 'upload' && dataSourceFromStorage !== 'supabase' && get().isMockData);
+          
+          console.log("Using mock data:", useMockData);
           
           // First check if we have cached data in localStorage
           let loadedFromCache = false;
@@ -204,7 +210,8 @@ export const useRankingCharts = create<RankingChartsState>()(
                   sgzData: sgzData,
                   planilhaData: sgzData,
                   painelData: painelData,
-                  isMockData: dataSource === 'mock',
+                  // Set mock data based on actual data source
+                  isMockData: dataSourceFromStorage === 'mock',
                   isInsightsLoading: false,
                   insightsProgress: 100
                 });
@@ -216,7 +223,7 @@ export const useRankingCharts = create<RankingChartsState>()(
           }
           
           // Load fresh data if needed
-          if (useMockData || dataSource === 'mock') {
+          if (useMockData || dataSourceFromStorage === 'mock') {
             // Only load from mock API if we didn't get valid data from cache
             if (!loadedFromCache) {
               try {
@@ -277,7 +284,7 @@ export const useRankingCharts = create<RankingChartsState>()(
           }
           
           // Only fetch from Supabase if we're not using mocks or mock loading failed
-          if (!useMockData && dataSource === 'supabase' && !loadedFromCache) {
+          if (!useMockData && (dataSourceFromStorage === 'upload' || dataSourceFromStorage === 'supabase') && !loadedFromCache) {
             try {
               // Fetch latest SGZ data from Supabase
               const { data: sgzData, error: sgzError } = await supabase
@@ -292,6 +299,8 @@ export const useRankingCharts = create<RankingChartsState>()(
                 throw sgzError;
               }
               
+              console.log("Fetched SGZ data from Supabase:", sgzData?.length || 0, "records");
+              
               // Fetch latest Painel data from Supabase
               const { data: painelData, error: painelError } = await supabase
                 .from('painel_zeladoria_dados')
@@ -305,7 +314,7 @@ export const useRankingCharts = create<RankingChartsState>()(
                 throw painelError;
               }
               
-              console.log(`Fetched ${sgzData?.length || 0} SGZ records and ${painelData?.length || 0} Painel records from Supabase`);
+              console.log("Fetched Painel data from Supabase:", painelData?.length || 0, "records");
               
               // Update state with fetched data
               set({ 
@@ -331,7 +340,26 @@ export const useRankingCharts = create<RankingChartsState>()(
               console.error("Error fetching data from Supabase:", supabaseError);
               toast.error("Erro ao buscar dados do Supabase");
               set({ lastRefreshSuccess: false });
-              throw supabaseError;
+              
+              // Fall back to mock data if Supabase fails
+              if (!get().isMockData) {
+                console.warn("Supabase failed. Falling back to mock data.");
+                try {
+                  // Update localStorage to use mock data
+                  localStorage.setItem('demo-data-source', 'mock');
+                  
+                  // Retry with mock data
+                  set({ isMockData: true });
+                  
+                  // Re-run the refresh with mock data
+                  return get().refreshChartData();
+                } catch (fallbackError) {
+                  console.error("Failed to fall back to mock data:", fallbackError);
+                  throw supabaseError;
+                }
+              } else {
+                throw supabaseError;
+              }
             }
           }
           
@@ -340,6 +368,7 @@ export const useRankingCharts = create<RankingChartsState>()(
             isLoading: false,
             isChartsLoading: false,
             chartsProgress: 100,
+            isRefreshing: false,
             lastRefreshTime: new Date()
           });
           
@@ -351,6 +380,7 @@ export const useRankingCharts = create<RankingChartsState>()(
             isLoading: false,
             isInsightsLoading: false,
             isChartsLoading: false,
+            isRefreshing: false,
             insightsProgress: 0,
             chartsProgress: 0,
             lastRefreshSuccess: false

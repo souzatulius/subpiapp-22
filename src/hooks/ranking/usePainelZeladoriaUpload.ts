@@ -91,7 +91,13 @@ export const usePainelZeladoriaUpload = (user: User | null) => {
       let responseError;
       
       try {
-        // Initial request
+        // Initial request with detailed error logging
+        console.log('Enviando dados para Edge Function:', {
+          email: user.email,
+          fileName: file.name,
+          recordCount: dadosPainel.length
+        });
+        
         const initialResponse = await supabase.functions.invoke("create_painel_upload_with_data", {
           body: {
             p_usuario_email: user.email,
@@ -100,10 +106,36 @@ export const usePainelZeladoriaUpload = (user: User | null) => {
           }
         });
         
+        // Log detailed response information
+        console.log('Edge Function response:', {
+          status: initialResponse.status,
+          data: initialResponse.data,
+          error: initialResponse.error
+        });
+        
         responseData = initialResponse.data;
         responseError = initialResponse.error;
+        
+        // If we got an error response but no error object, try to extract more details
+        if (!responseData && !responseError && initialResponse.status >= 400) {
+          console.error('Edge function error details:', {
+            status: initialResponse.status,
+            statusText: initialResponse.statusText
+          });
+          
+          responseError = {
+            message: `Error ${initialResponse.status}: ${initialResponse.statusText || 'Unknown error'}`
+          };
+        }
       } catch (err: any) {
         console.error('Exception during function invocation:', err);
+        console.error('Error details:', {
+          name: err.name,
+          message: err.message,
+          stack: err.stack,
+          cause: err.cause
+        });
+        
         showFeedback('error', `Erro na chamada: ${err.message || 'Erro desconhecido'}`, { duration: 3000 });
         setPainelProgress({
           ...painelProgress!,
@@ -129,7 +161,7 @@ export const usePainelZeladoriaUpload = (user: User | null) => {
           
           const uniqueFileName = `${baseName}_${timestamp}${ext}`;
           
-          // Changed from 'info' to 'loading' to match FeedbackType
+          console.log('Retrying with unique filename:', uniqueFileName);
           showFeedback('loading', 'Arquivo já existe, tentando com nome único...', { duration: 1500 });
           
           try {
@@ -142,6 +174,12 @@ export const usePainelZeladoriaUpload = (user: User | null) => {
               }
             });
             
+            console.log('Retry response:', {
+              status: retryResponse.status,
+              data: retryResponse.data,
+              error: retryResponse.error
+            });
+            
             if (retryResponse.error) {
               throw new Error(retryResponse.error.message || 'Erro desconhecido');
             }
@@ -150,6 +188,7 @@ export const usePainelZeladoriaUpload = (user: User | null) => {
             responseData = retryResponse.data;
             responseError = null;
           } catch (retryErr: any) {
+            console.error('Error on retry:', retryErr);
             showFeedback('error', `Erro ao processar upload: ${retryErr.message || 'Erro desconhecido'}`, { duration: 3000 });
             setPainelProgress({
               ...painelProgress!,
@@ -196,6 +235,11 @@ export const usePainelZeladoriaUpload = (user: User | null) => {
       
       updateProgress(100, 'complete', `${recordCount} registros processados com sucesso`, recordCount, recordCount);
       updateFeedbackProgress(100, 'Upload finalizado com sucesso');
+      
+      // Set data source to upload explicitly
+      localStorage.setItem('demo-data-source', 'upload');
+      localStorage.setItem('demo-painel-data', JSON.stringify(dadosPainel));
+      localStorage.setItem('demo-last-update', new Date().toISOString());
       
       // Set last refresh time
       setLastRefreshTime(new Date());
