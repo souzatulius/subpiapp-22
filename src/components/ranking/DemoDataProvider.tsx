@@ -1,79 +1,119 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useRealData } from './RealDataProvider';
+import { useRankingCharts } from '@/hooks/ranking/useRankingCharts';
 
 interface DemoDataProviderProps {
   children: ReactNode;
 }
 
+// Create a context for real data
+export const RealDataContext = createContext<any>(null);
+
+// Hook to use the real data context
+export const useRealData = () => {
+  const context = useContext(RealDataContext);
+  if (!context) {
+    throw new Error('useRealData must be used within a RealDataProvider');
+  }
+  return context;
+};
+
 const DemoDataProvider: React.FC<DemoDataProviderProps> = ({ children }) => {
   const [demoSgzData, setDemoSgzData] = useState<any[]>([]);
   const [demoPainelData, setDemoPainelData] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
+  const { setSgzData, setPlanilhaData } = useRankingCharts();
   
   useEffect(() => {
-    // Generate mock SGZ data
-    const generateMockSgzData = () => {
-      const districts = ['Centro', 'Leste', 'Norte', 'Oeste', 'Sul', 'Sudeste', 'Noroeste'];
-      const serviceTypes = ['Tapa-buraco', 'Poda de árvore', 'Limpeza', 'Iluminação', 'Pavimentação'];
-      const status = ['pendente', 'em-andamento', 'concluido', 'cancelado'];
-      const departments = ['CPO', 'CPDU', 'AMB', 'CPL', 'CRO'];
-      
-      const mockData = [];
-      
-      for (let i = 0; i < 500; i++) {
-        const createdDate = new Date();
-        createdDate.setDate(createdDate.getDate() - Math.floor(Math.random() * 180));
+    // Load mock SGZ data from the JSON file
+    async function loadMockSgzData() {
+      try {
+        const response = await fetch('/mock/sgz_data_mock.json');
+        if (!response.ok) {
+          throw new Error(`Failed to load mock data: ${response.status}`);
+        }
+        const data = await response.json();
+        console.log("DemoDataProvider: Loaded SGZ mock data:", data);
         
-        const currentStatus = status[Math.floor(Math.random() * status.length)];
-        const daysToStatus = Math.floor(Math.random() * 30);
+        // Set the data in both local state and the store
+        setDemoSgzData(data);
+        setSgzData(data);
+        setPlanilhaData(data);
         
-        mockData.push({
-          id: `OS-${i + 1000}`,
-          sgz_ordem_servico: `OS-${i + 1000}`,
-          sgz_distrito: districts[Math.floor(Math.random() * districts.length)],
-          sgz_tipo_servico: serviceTypes[Math.floor(Math.random() * serviceTypes.length)],
-          sgz_status: currentStatus,
-          sgz_coordenacao: departments[Math.floor(Math.random() * departments.length)],
-          sgz_criado_em: createdDate.toISOString(),
-          sgz_modificado_em: new Date(createdDate.getTime() + (daysToStatus * 24 * 60 * 60 * 1000)).toISOString(),
-          sgz_dias_ate_status_atual: daysToStatus,
-          sgz_descricao: `Demanda de teste ${i + 1}`
-        });
+        // Generate mock Painel data
+        generateMockPainelData();
+        
+        // Update loading state
+        setIsLoading(false);
+      } catch (error) {
+        console.error("DemoDataProvider: Error loading mock SGZ data:", error);
+        setIsLoading(false);
       }
-      
-      setDemoSgzData(mockData);
-    };
+    }
     
     // Generate mock Painel data
     const generateMockPainelData = () => {
-      setDemoPainelData([
-        { id: 1, name: 'Painel Data 1' },
-        { id: 2, name: 'Painel Data 2' },
-        { id: 3, name: 'Painel Data 3' }
-      ]);
+      const mockPainel = [
+        { id: 1, responsavel_classificado: 'Subprefeitura Pinheiros', distrito: 'Pinheiros', status: 'Concluído' },
+        { id: 2, responsavel_classificado: 'ENEL', distrito: 'Vila Madalena', status: 'Em Andamento' },
+        { id: 3, responsavel_classificado: 'SABESP', distrito: 'Itaim Bibi', status: 'Pendente' }
+      ];
+      
+      setDemoPainelData(mockPainel);
     };
     
-    setTimeout(() => {
-      generateMockSgzData();
-      generateMockPainelData();
+    loadMockSgzData();
+  }, [setSgzData, setPlanilhaData]);
+  
+  // Refresh function for demo data
+  const refreshData = async () => {
+    setIsLoading(true);
+    
+    // Simulate a network delay
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    // Reload from the JSON file
+    try {
+      const response = await fetch('/mock/sgz_data_mock.json');
+      if (!response.ok) {
+        throw new Error(`Failed to load mock data: ${response.status}`);
+      }
+      const data = await response.json();
+      
+      // Update with refreshed data
+      setDemoSgzData(data);
+      setSgzData(data);
+      setPlanilhaData(data);
+      setLastUpdated(new Date());
+      
+    } catch (error) {
+      console.error("Error refreshing demo data:", error);
+    } finally {
       setIsLoading(false);
-    }, 1000);
-  }, []);
+    }
+  };
+  
+  // Format the last updated date for display
+  const formattedLastUpdated = lastUpdated.toLocaleString('pt-BR', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  });
   
   // Override the real data context with demo data
   const overriddenValue = {
     sgzData: demoSgzData,
     painelData: demoPainelData,
     isLoading,
+    isRefreshing: isLoading,
     hasData: demoSgzData.length > 0 || demoPainelData.length > 0,
-    refreshData: async () => {
-      setIsLoading(true);
-      setTimeout(() => {
-        setIsLoading(false);
-      }, 1000);
-    },
-    lastUpdated: new Date()
+    refreshData,
+    lastUpdated,
+    formattedLastUpdated
   };
   
   return (
@@ -82,8 +122,5 @@ const DemoDataProvider: React.FC<DemoDataProviderProps> = ({ children }) => {
     </RealDataContext.Provider>
   );
 };
-
-// Re-export the same context
-const RealDataContext = createContext<any>(null);
 
 export default DemoDataProvider;

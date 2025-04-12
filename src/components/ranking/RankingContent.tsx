@@ -39,6 +39,15 @@ const RankingContent: React.FC<RankingContentProps> = ({
   const { lastRefreshTime } = useUploadState();
   const { showFeedback } = useAnimatedFeedback();
 
+  // Log data availability for debugging
+  useEffect(() => {
+    console.log("RankingContent: Data availability check:", {
+      planilhaData: planilhaData?.length || 0,
+      sgzData: sgzData?.length || 0,
+      painelData: painelData?.length || 0
+    });
+  }, [planilhaData, sgzData, painelData]);
+
   const handleSimulateIdealRanking = () => {
     const wasActive = isSimulationActive;
     setIsSimulationActive(!isSimulationActive);
@@ -92,7 +101,7 @@ const RankingContent: React.FC<RankingContentProps> = ({
 
       <RankingCharts
         chartData={{}}
-        sgzData={planilhaData}
+        sgzData={sgzData || planilhaData} // Use sgzData if available, fall back to planilhaData
         painelData={painelData}
         isLoading={isLoading}
         chartVisibility={chartVisibility}
@@ -110,7 +119,7 @@ const RankingContent: React.FC<RankingContentProps> = ({
       />
       
       <ChartDebugPanel 
-        sgzData={planilhaData} 
+        sgzData={sgzData || planilhaData} 
         isVisible={isDebugVisible} 
       />
     </div>
