@@ -1,4 +1,3 @@
-
 import { useCallback } from 'react';
 import { User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -87,18 +86,25 @@ export const usePainelZeladoriaUpload = (user: User | null) => {
       updateFeedbackProgress(50, 'Enviando dados para processamento...');
       
       // Usar nossa Edge Function para fazer o upload com transação
-      const { data, error } = await supabase.functions.invoke("create_painel_upload_with_data", {
+      let responseData;
+      let responseError;
+      
+      // Initial request
+      const initialResponse = await supabase.functions.invoke("create_painel_upload_with_data", {
         body: {
           p_usuario_email: user.email,
           p_nome_arquivo: file.name,
           p_dados: dadosPainel
         }
       });
+      
+      responseData = initialResponse.data;
+      responseError = initialResponse.error;
 
-      if (error) {
-        console.error('Erro na função de upload:', error);
+      if (responseError) {
+        console.error('Erro na função de upload:', responseError);
         // Check if the error is related to duplicate file
-        if (error.message && error.message.includes('já foi carregado')) {
+        if (responseError.message && responseError.message.includes('já foi carregado')) {
           // Use a modified filename to force uniqueness
           const timestamp = new Date().toISOString().replace(/[:.-]/g, '_');
           const ext = file.name.lastIndexOf('.') > 0 
@@ -113,7 +119,7 @@ export const usePainelZeladoriaUpload = (user: User | null) => {
           showFeedback('info', 'Arquivo já existe, tentando com nome único...', { duration: 1500 });
           
           // Retry with unique filename
-          const { data: retryData, error: retryError } = await supabase.functions.invoke("create_painel_upload_with_data", {
+          const retryResponse = await supabase.functions.invoke("create_painel_upload_with_data", {
             body: {
               p_usuario_email: user.email,
               p_nome_arquivo: uniqueFileName,
@@ -121,32 +127,33 @@ export const usePainelZeladoriaUpload = (user: User | null) => {
             }
           });
           
-          if (retryError) {
-            showFeedback('error', `Erro ao processar upload: ${retryError.message || 'Erro desconhecido'}`, { duration: 3000 });
+          if (retryResponse.error) {
+            showFeedback('error', `Erro ao processar upload: ${retryResponse.error.message || 'Erro desconhecido'}`, { duration: 3000 });
             setPainelProgress({
               ...painelProgress!,
               stage: 'error',
-              message: `Erro ao processar upload: ${retryError.message || 'Erro desconhecido'}`
+              message: `Erro ao processar upload: ${retryResponse.error.message || 'Erro desconhecido'}`
             });
             return null;
           }
           
-          // Use the retry data from now on
-          data = retryData;
+          // Use the retry data instead of trying to reassign to a const
+          responseData = retryResponse.data;
+          responseError = null;
         } else {
           // For other errors, just show the error
-          showFeedback('error', `Erro ao processar upload: ${error.message || 'Erro desconhecido'}`, { duration: 3000 });
+          showFeedback('error', `Erro ao processar upload: ${responseError.message || 'Erro desconhecido'}`, { duration: 3000 });
           setPainelProgress({
             ...painelProgress!,
             stage: 'error',
-            message: `Erro ao processar upload: ${error.message || 'Erro desconhecido'}`
+            message: `Erro ao processar upload: ${responseError.message || 'Erro desconhecido'}`
           });
           return null;
         }
       }
       
-      if (!data || data.error) {
-        const errorMsg = data?.error || 'Erro desconhecido no servidor';
+      if (!responseData || responseData.error) {
+        const errorMsg = responseData?.error || 'Erro desconhecido no servidor';
         console.error('Erro retornado pela função:', errorMsg);
         showFeedback('error', `Erro no servidor: ${errorMsg}`, { duration: 3000 });
         setPainelProgress({
@@ -157,8 +164,8 @@ export const usePainelZeladoriaUpload = (user: User | null) => {
         return null;
       }
       
-      const uploadId = data.id;
-      const recordCount = data.record_count || dadosPainel.length;
+      const uploadId = responseData.id;
+      const recordCount = responseData.record_count || dadosPainel.length;
       
       updateProgress(100, 'complete', `${recordCount} registros processados com sucesso`, recordCount, recordCount);
       updateFeedbackProgress(100, 'Upload finalizado com sucesso');
@@ -208,7 +215,6 @@ export const usePainelZeladoriaUpload = (user: User | null) => {
     });
   };
 
-  // Processamento da planilha
   const processarPlanilhaPainel = async (file: File) => {
     return new Promise<any[]>((resolve, reject) => {
       const reader = new FileReader();
@@ -263,7 +269,6 @@ export const usePainelZeladoriaUpload = (user: User | null) => {
     });
   };
 
-  // Helper para converter datas do Excel
   const parseExcelDate = (dateString: string) => {
     if (!dateString) return null;
     
