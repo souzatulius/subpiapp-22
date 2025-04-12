@@ -23,6 +23,15 @@ const DashboardCards: React.FC<DashboardCardsProps> = ({
   const [isRefreshing, setIsRefreshing] = useState(false);
   const { indicadores, isLoading, error } = useChatGPTInsight(dadosPlanilha, uploadId);
   
+  // Predefined analyses for each card
+  const cardAnalyses = {
+    fechadas: "Este indicador mostra quantas ordens de serviço foram concluídas oficialmente. Uma alta taxa indica boa eficiência operacional na finalização das solicitações.",
+    pendentes: "Representa solicitações ainda não resolvidas ou em andamento. Um número alto pode indicar acúmulo de demanda ou gargalos operacionais.",
+    canceladas: "Ordens canceladas sem execução, geralmente por duplicidade, inviabilidade ou resolução por outros meios. Taxa elevada pode indicar problemas de triagem.",
+    prazo_medio: "Tempo médio entre abertura e conclusão das OS. Um valor menor indica maior eficiência e resposta mais rápida às solicitações.",
+    fora_do_prazo: "Solicitações que excederam o tempo previsto para conclusão. Alto volume indica necessidade de revisão de processos ou alocação de recursos."
+  };
+  
   // Apply simulation adjustments to indicators if simulation is active
   const simulatedIndicadores = React.useMemo(() => {
     if (!isSimulationActive || !indicadores) return indicadores;
@@ -154,6 +163,7 @@ const DashboardCards: React.FC<DashboardCardsProps> = ({
           isLoading={isLoading || isRefreshing} 
           isSimulated={isSimulationActive}
           trend={simulatedIndicadores?.fechadas?.trend}
+          analysis={cardAnalyses.fechadas}
         />
         <InsightCard 
           title="OS Pendentes" 
@@ -162,6 +172,7 @@ const DashboardCards: React.FC<DashboardCardsProps> = ({
           isLoading={isLoading || isRefreshing} 
           isSimulated={isSimulationActive}
           trend={simulatedIndicadores?.pendentes?.trend}
+          analysis={cardAnalyses.pendentes}
         />
         <InsightCard 
           title="OS Canceladas" 
@@ -170,6 +181,7 @@ const DashboardCards: React.FC<DashboardCardsProps> = ({
           isLoading={isLoading || isRefreshing} 
           isSimulated={isSimulationActive}
           trend={simulatedIndicadores?.canceladas?.trend}
+          analysis={cardAnalyses.canceladas}
         />
         <InsightCard 
           title="Atendimento" 
@@ -178,6 +190,7 @@ const DashboardCards: React.FC<DashboardCardsProps> = ({
           isLoading={isLoading || isRefreshing} 
           isSimulated={isSimulationActive}
           trend={simulatedIndicadores?.prazo_medio?.trend}
+          analysis={cardAnalyses.prazo_medio}
         />
         <InsightCard 
           title="OS Fora do Prazo" 
@@ -186,6 +199,7 @@ const DashboardCards: React.FC<DashboardCardsProps> = ({
           isLoading={isLoading || isRefreshing} 
           isSimulated={isSimulationActive}
           trend={simulatedIndicadores?.fora_do_prazo?.trend}
+          analysis={cardAnalyses.fora_do_prazo}
         />
       </motion.div>
     </div>

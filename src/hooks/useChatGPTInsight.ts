@@ -1,22 +1,30 @@
 
-import { useCallback } from 'react';
+import { useCallback, useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
 interface InsightResponse {
   insights: {
-    fechadas: { valor: string; comentario: string };
-    pendentes: { valor: string; comentario: string };
-    canceladas: { valor: string; comentario: string };
-    prazo_medio: { valor: string; comentario: string };
-    fora_do_prazo: { valor: string; comentario: string };
-    [key: string]: { valor: string; comentario: string };
+    fechadas: { valor: string; comentario: string; trend?: 'up' | 'down' | 'neutral' };
+    pendentes: { valor: string; comentario: string; trend?: 'up' | 'down' | 'neutral' };
+    canceladas: { valor: string; comentario: string; trend?: 'up' | 'down' | 'neutral' };
+    prazo_medio: { valor: string; comentario: string; trend?: 'up' | 'down' | 'neutral' };
+    fora_do_prazo: { valor: string; comentario: string; trend?: 'up' | 'down' | 'neutral' };
+    [key: string]: { 
+      valor: string; 
+      comentario: string;
+      trend?: 'up' | 'down' | 'neutral';
+    };
   };
 }
 
-export function useChatGPTInsight() {
-  const gerarInsights = useCallback(async (dadosPlanilha: any[]) => {
-    const total = dadosPlanilha.length;
-    const statusCount = dadosPlanilha.reduce(
+export function useChatGPTInsight(dadosPlanilha: any[] = [], uploadId?: string) {
+  const [indicadores, setIndicadores] = useState<InsightResponse['insights'] | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+  
+  const gerarInsights = useCallback(async (dados: any[]) => {
+    const total = dados.length;
+    const statusCount = dados.reduce(
       (acc, item) => {
         const status = item.status?.toUpperCase();
         if (!status) return acc;
@@ -29,12 +37,12 @@ export function useChatGPTInsight() {
       { fechadas: 0, pendentes: 0, canceladas: 0, conc: 0 }
     );
 
-    const prazoMedio = calcularPrazoMedio(dadosPlanilha);
-    const foraDoPrazo = dadosPlanilha.filter(
+    const prazoMedio = calcularPrazoMedio(dados);
+    const foraDoPrazo = dados.filter(
       (d) => d.status?.toUpperCase().includes('PENDEN') && d.prazo === 'FORA DO PRAZO'
     ).length;
 
-    const dados = {
+    const dadosCalculados = {
       total,
       fechadas: statusCount.fechadas,
       pendentes: statusCount.pendentes,
@@ -47,7 +55,7 @@ export function useChatGPTInsight() {
     try {
       // Usar a função supabase.functions.invoke em vez de fetch diretamente
       const { data, error } = await supabase.functions.invoke<InsightResponse>('generate-ranking-insights', {
-        body: { tipo: 'indicadores', dados }
+        body: { tipo: 'indicadores', dados: dadosCalculados }
       });
 
       if (error) {
@@ -62,8 +70,32 @@ export function useChatGPTInsight() {
       return getDefaultInsights(statusCount, total, prazoMedio, foraDoPrazo);
     }
   }, []);
+  
+  // Load data on mount or when dadosPlanilha changes
+  useEffect(() => {
+    const loadInsights = async () => {
+      if (!dadosPlanilha || dadosPlanilha.length === 0) {
+        setIsLoading(false);
+        return;
+      }
+      
+      try {
+        setIsLoading(true);
+        setError(null);
+        const insights = await gerarInsights(dadosPlanilha);
+        setIndicadores(insights);
+      } catch (err) {
+        console.error('Erro ao carregar insights:', err);
+        setError(err instanceof Error ? err.message : 'Erro desconhecido ao carregar indicadores');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    loadInsights();
+  }, [dadosPlanilha, gerarInsights, uploadId]);
 
-  return { gerarInsights };
+  return { indicadores, isLoading, error, gerarInsights };
 }
 
 function calcularPrazoMedio(planilha: any[]) {
@@ -84,26 +116,43 @@ function getDefaultInsights(
   prazoMedio: number,
   foraDoPrazo: number
 ) {
+  // Calculate trends based on values
+  const fechadasPercent = total > 0 ? (statusCount.fechadas / total) * 100 : 0;
+  const pendentesPercent = total > 0 ? (statusCount.pendentes / total) * 100 : 0;
+  const canceladasPercent = total > 0 ? (statusCount.canceladas / total) * 100 : 0;
+  
+  // Determine trends based on thresholds
+  const fechadasTrend = fechadasPercent > 60 ? 'up' : fechadasPercent < 30 ? 'down' : 'neutral';
+  const pendentesTrend = pendentesPercent > 40 ? 'down' : pendentesPercent < 20 ? 'up' : 'neutral';
+  const canceladasTrend = canceladasPercent > 15 ? 'down' : canceladasPercent < 5 ? 'up' : 'neutral';
+  const prazoMedioTrend = prazoMedio > 10 ? 'down' : prazoMedio < 5 ? 'up' : 'neutral';
+  const foraDoPrazoTrend = foraDoPrazo > 10 ? 'down' : foraDoPrazo < 3 ? 'up' : 'neutral';
+
   return {
     fechadas: { 
-      valor: `${Math.round((statusCount.fechadas / total) * 100)}%`, 
-      comentario: "Taxa de conclusão de ordens de serviço." 
+      valor: `${Math.round(fechadasPercent)}%`, 
+      comentario: "Finalizadas oficialmente",
+      trend: fechadasTrend as 'up' | 'down' | 'neutral'
     },
     pendentes: { 
-      valor: `${Math.round((statusCount.pendentes / total) * 100)}%`, 
-      comentario: "Ordens de serviço ainda não concluídas." 
+      valor: `${Math.round(pendentesPercent)}%`, 
+      comentario: "Aguardando solução",
+      trend: pendentesTrend as 'up' | 'down' | 'neutral'
     },
     canceladas: { 
-      valor: `${Math.round((statusCount.canceladas / total) * 100)}%`, 
-      comentario: "Ordens de serviço canceladas." 
+      valor: `${Math.round(canceladasPercent)}%`, 
+      comentario: "Encerradas sem execução",
+      trend: canceladasTrend as 'up' | 'down' | 'neutral' 
     },
     prazo_medio: { 
       valor: `${prazoMedio.toFixed(1)} dias`, 
-      comentario: "Tempo médio para conclusão das ordens de serviço." 
+      comentario: "Tempo médio até execução",
+      trend: prazoMedioTrend as 'up' | 'down' | 'neutral'
     },
     fora_do_prazo: { 
-      valor: `${foraDoPrazo} OS`, 
-      comentario: "Ordens de serviço que ultrapassaram o prazo estabelecido." 
+      valor: `${foraDoPrazo}`, 
+      comentario: "Ultrapassaram período",
+      trend: foraDoPrazoTrend as 'up' | 'down' | 'neutral'
     }
   };
 }

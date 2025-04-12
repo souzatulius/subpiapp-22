@@ -1,8 +1,9 @@
 
 import React, { useState, useEffect } from 'react';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Search, EyeOff } from 'lucide-react';
 import { setLoading } from './charts/ChartRegistration';
 import ChartLoadingOverlay, { LoadingState } from './charts/ChartLoadingOverlay';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface EnhancedChartCardProps {
   title: string;
@@ -16,6 +17,8 @@ interface EnhancedChartCardProps {
   dataSource?: 'SGZ' | 'Painel da Zeladoria' | string;
   onToggleAnalysis?: () => void;
   onToggleVisibility?: () => void;
+  subtitle?: string;
+  analysis?: string;
 }
 
 const EnhancedChartCard: React.FC<EnhancedChartCardProps> = ({ 
@@ -29,9 +32,13 @@ const EnhancedChartCard: React.FC<EnhancedChartCardProps> = ({
   errorMessage,
   dataSource,
   onToggleAnalysis,
-  onToggleVisibility
+  onToggleVisibility,
+  subtitle,
+  analysis
 }) => {
   const [showLoading, setShowLoading] = useState<boolean>(isLoading);
+  const [showAnalysis, setShowAnalysis] = useState<boolean>(false);
+  const [isHovered, setIsHovered] = useState<boolean>(false);
   
   // Update chart loading state when isLoading prop changes
   useEffect(() => {
@@ -40,7 +47,6 @@ const EnhancedChartCard: React.FC<EnhancedChartCardProps> = ({
     if (chartRef?.current) {
       setLoading(chartRef.current, isLoading);
     }
-    
   }, [isLoading, chartRef]);
 
   // Determine the loading state
@@ -62,10 +68,26 @@ const EnhancedChartCard: React.FC<EnhancedChartCardProps> = ({
     }
   };
 
+  // Toggle analysis view locally if no external handler provided
+  const handleToggleAnalysis = () => {
+    if (onToggleAnalysis) {
+      onToggleAnalysis();
+    } else if (analysis) {
+      setShowAnalysis(!showAnalysis);
+    }
+  };
+
   return (
-    <div className={`bg-white p-4 rounded-xl shadow-sm border border-gray-100 relative hover:bg-orange-50 hover:border-orange-200 hover:shadow-md transition-all ${className}`}>
-      <div className="flex items-center justify-between mb-3">
-        <h3 className="font-medium text-sm text-gray-800">{title}</h3>
+    <motion.div 
+      className={`bg-white p-4 rounded-2xl shadow-sm border border-gray-100 relative hover:bg-orange-50 hover:border-orange-200 hover:shadow-md transition-all ${className}`}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      <div className="flex items-center justify-between mb-3 relative">
+        <div>
+          <h3 className="font-medium text-sm text-gray-800">{title}</h3>
+          {subtitle && <p className="text-xs text-gray-500 mt-1">{subtitle}</p>}
+        </div>
         
         <div className="flex items-center space-x-2">
           {dataSource && (
@@ -74,46 +96,48 @@ const EnhancedChartCard: React.FC<EnhancedChartCardProps> = ({
             </span>
           )}
           
-          {/* Control buttons moved here */}
-          <div className="flex items-center space-x-1">
-            {showLoading && (
-              <div className="flex items-center space-x-1">
-                <Loader2 size={16} className="text-orange-500 animate-spin" />
-                <span className="text-xs text-orange-500">Atualizando...</span>
-              </div>
-            )}
-            
-            {onToggleAnalysis && (
-              <button
-                onClick={onToggleAnalysis}
-                className="p-1 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-                title="Alternar análise"
+          {/* Control buttons shown on hover */}
+          <AnimatePresence>
+            {isHovered && !isLoading && (
+              <motion.div 
+                className="flex items-center space-x-1"
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+                transition={{ duration: 0.2 }}
               >
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <circle cx="12" cy="12" r="10"/>
-                  <line x1="12" y1="16" x2="12" y2="12"/>
-                  <line x1="12" y1="8" x2="12.01" y2="8"/>
-                </svg>
-              </button>
+                {showLoading && (
+                  <div className="flex items-center space-x-1">
+                    <Loader2 size={16} className="text-orange-500 animate-spin" />
+                    <span className="text-xs text-orange-500">Atualizando...</span>
+                  </div>
+                )}
+                
+                {(onToggleAnalysis || analysis) && (
+                  <button
+                    onClick={handleToggleAnalysis}
+                    className="p-1.5 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600 transition-colors"
+                    title={showAnalysis ? "Mostrar gráfico" : "Ver análise interpretativa"}
+                  >
+                    <Search size={16} />
+                  </button>
+                )}
+                
+                {onToggleVisibility && (
+                  <button
+                    onClick={onToggleVisibility}
+                    className="p-1.5 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600 transition-colors"
+                    title="Ocultar gráfico"
+                  >
+                    <EyeOff size={16} />
+                  </button>
+                )}
+              </motion.div>
             )}
-            
-            {onToggleVisibility && (
-              <button
-                onClick={onToggleVisibility}
-                className="p-1 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-                title="Ocultar gráfico"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/>
-                  <path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/>
-                  <path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/>
-                  <line x1="2" y1="2" x2="22" y2="22"/>
-                </svg>
-              </button>
-            )}
-          </div>
+          </AnimatePresence>
         </div>
       </div>
+      
       <div className="relative">
         {actualLoadingState !== 'idle' && (
           <ChartLoadingOverlay 
@@ -122,9 +146,34 @@ const EnhancedChartCard: React.FC<EnhancedChartCardProps> = ({
             errorMessage={errorMessage}
           />
         )}
-        {children}
+        
+        <AnimatePresence mode="wait">
+          {showAnalysis && analysis ? (
+            <motion.div
+              key="analysis"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3 }}
+              className="bg-orange-50 rounded-xl p-4 min-h-[200px]"
+            >
+              <h4 className="font-medium text-orange-800 mb-2">Análise do gráfico</h4>
+              <p className="text-sm text-gray-700">{analysis}</p>
+            </motion.div>
+          ) : (
+            <motion.div
+              key="chart"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              {children}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
-    </div>
+    </motion.div>
   );
 };
 
