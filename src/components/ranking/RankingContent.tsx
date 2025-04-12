@@ -9,6 +9,7 @@ import { useAnimatedFeedback } from '@/hooks/use-animated-feedback';
 import { useUploadState } from '@/hooks/ranking/useUploadState';
 import ChartDebugPanel from './charts/ChartDebugPanel';
 import { useDemoData } from './DemoDataProvider';
+import { toast } from 'sonner';
 
 interface RankingContentProps {
   filterDialogOpen: boolean;
@@ -56,7 +57,8 @@ const RankingContent: React.FC<RankingContentProps> = ({
       painelData: painelData?.length || 0,
       isMockData,
       isLoading,
-      demoDataAvailable: !!demoDataContext
+      demoDataAvailable: !!demoDataContext,
+      demoUpdateMockDataAvailable: !!(demoDataContext?.updateMockData)
     });
   }, [planilhaData, sgzData, painelData, isMockData, isLoading, demoDataContext]);
 
@@ -85,7 +87,11 @@ const RankingContent: React.FC<RankingContentProps> = ({
   // Refresh data when component mounts
   useEffect(() => {
     if (onRefreshData) {
-      onRefreshData();
+      console.log("RankingContent: Calling onRefreshData on mount");
+      onRefreshData().catch(err => {
+        console.error("Error refreshing data on mount:", err);
+        toast.error("Erro ao carregar dados iniciais");
+      });
     }
   }, [onRefreshData]);
 
@@ -94,6 +100,11 @@ const RankingContent: React.FC<RankingContentProps> = ({
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'd' && e.altKey) {
         setIsDebugVisible(prev => !prev);
+        if (!prev) {
+          toast.info("Painel de debug ativado", { duration: 1000 });
+        } else {
+          toast.info("Painel de debug desativado", { duration: 1000 });
+        }
       }
     };
     
@@ -102,6 +113,35 @@ const RankingContent: React.FC<RankingContentProps> = ({
       window.removeEventListener('keydown', handleKeyDown);
     };
   }, []);
+  
+  // Function to handle mock data updates - will be passed to the debug panel
+  const handleUpdateMockData = async (type: 'sgz' | 'painel', data: any[]) => {
+    console.log(`RankingContent: Attempting to update ${type} mock data`);
+    
+    if (!demoDataContext || !demoDataContext.updateMockData) {
+      console.error("updateMockData function is not available in the context");
+      toast.error("Função de atualização de dados mock não disponível. Verifique se o componente está dentro de DemoDataProvider.");
+      return false;
+    }
+    
+    try {
+      await demoDataContext.updateMockData(type, data);
+      
+      // Refresh charts after updating mock data
+      if (onRefreshData) {
+        await onRefreshData();
+      } else {
+        await refreshChartData();
+      }
+      
+      toast.success(`Dados ${type} atualizados com sucesso`);
+      return true;
+    } catch (error) {
+      console.error(`Error updating ${type} mock data:`, error);
+      toast.error(`Erro ao atualizar dados mock de ${type}`);
+      return false;
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -130,15 +170,16 @@ const RankingContent: React.FC<RankingContentProps> = ({
         onToggleChartVisibility={toggleChartVisibility}
       />
       
-      {/* Only render the debug panel if we have access to the updateMockData function */}
+      {/* Only render the debug panel if we're in development mode or debug is visible */}
       {isDebugVisible && (
         <ChartDebugPanel 
           sgzData={sgzData || planilhaData} 
           painelData={painelData}
           isVisible={isDebugVisible}
-          onUpdateMockData={demoDataContext?.updateMockData}
-          dataSource={demoDataContext?.dataSource}
-          dataStatus={demoDataContext?.dataStatus}
+          onUpdateMockData={handleUpdateMockData}
+          dataSource={demoDataContext?.dataSource || 'unknown'}
+          dataStatus={demoDataContext?.dataStatus || {}}
+          isLoading={isLoading}
         />
       )}
     </div>
