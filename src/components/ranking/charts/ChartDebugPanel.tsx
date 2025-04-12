@@ -143,7 +143,8 @@ const ChartDebugPanel: React.FC<ChartDebugPanelProps> = ({
         setSgzJsonError(null);
         toast.success(`SGZ mock data atualizado com sucesso: ${parsedData.length} registros`);
       } else {
-        toast.error("Função de atualização não disponível");
+        console.error("Update mock data function not available");
+        toast.error("Função de atualização não disponível. Verifique se o componente está dentro de DemoDataProvider.");
       }
     } catch (error) {
       console.error('Error parsing or saving SGZ JSON:', error);
@@ -172,7 +173,8 @@ const ChartDebugPanel: React.FC<ChartDebugPanelProps> = ({
         setPainelJsonError(null);
         toast.success(`Painel mock data atualizado com sucesso: ${parsedData.length} registros`);
       } else {
-        toast.error("Função de atualização não disponível");
+        console.error("Update mock data function not available");
+        toast.error("Função de atualização não disponível. Verifique se o componente está dentro de DemoDataProvider.");
       }
     } catch (error) {
       console.error('Error parsing or saving Painel JSON:', error);

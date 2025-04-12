@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useRankingCharts } from '@/hooks/ranking/useRankingCharts';
 import { compararBases } from '@/hooks/ranking/utils/compararBases';
@@ -9,8 +8,21 @@ interface DemoDataProviderProps {
   children: ReactNode;
 }
 
-// Create a context for demo data
-const DemoDataContext = createContext<any>(null);
+// Create a context for demo data with proper typing
+interface DemoDataContextType {
+  sgzData: any[] | null;
+  painelData: any[] | null;
+  isLoading: boolean;
+  isRefreshing: boolean;
+  hasData: boolean;
+  refreshData: () => Promise<boolean>;
+  updateMockData: (type: 'sgz' | 'painel', data: any[]) => Promise<void>;
+  lastUpdated: Date;
+  formattedLastUpdated: string;
+}
+
+// Create a context with a null initial value
+const DemoDataContext = createContext<DemoDataContextType | null>(null);
 
 // Hook to use the demo data context
 export const useDemoData = () => {
@@ -199,9 +211,16 @@ const DemoDataProvider: React.FC<DemoDataProviderProps> = ({ children }) => {
     }
   };
 
-  // New function to update mock data
+  // Function to update mock data
   const updateMockData = async (type: 'sgz' | 'painel', data: any[]) => {
+    if (!data || !Array.isArray(data)) {
+      console.error(`Invalid data format for ${type} update:`, data);
+      toast.error(`Formato inválido para dados ${type}`);
+      throw new Error(`Invalid data format for ${type}`);
+    }
+    
     setIsLoading(true);
+    console.log(`Updating ${type} mock data with ${data.length} records`);
     
     try {
       // Update local state
@@ -209,9 +228,11 @@ const DemoDataProvider: React.FC<DemoDataProviderProps> = ({ children }) => {
         setDemoSgzData(data);
         setSgzData(data);
         setPlanilhaData(data);
+        console.log(`Updated SGZ mock data: ${data.length} records`);
       } else if (type === 'painel') {
         setDemoPainelData(data);
         setPainelData(data);
+        console.log(`Updated Painel mock data: ${data.length} records`);
       }
       
       // Update localStorage
@@ -226,6 +247,7 @@ const DemoDataProvider: React.FC<DemoDataProviderProps> = ({ children }) => {
           localStorage.setItem(STORAGE_KEY_PAINEL, JSON.stringify(data));
         }
         localStorage.setItem(STORAGE_KEY_LAST_UPDATE, now.toISOString());
+        console.log(`Saved ${type} mock data to localStorage`);
       } catch (storageError) {
         console.error("Error saving to localStorage:", storageError);
         toast.error("Erro ao salvar dados no localStorage");
@@ -234,7 +256,7 @@ const DemoDataProvider: React.FC<DemoDataProviderProps> = ({ children }) => {
       
       // In development mode, we'll allow updating the mock data files (would require backend)
       if (process.env.NODE_ENV === 'development') {
-        console.log(`Mock data update requested for ${type}:`, data);
+        console.log(`Mock data update requested for ${type}:`, data.length);
         toast.success(`Mock data para ${type === 'sgz' ? 'SGZ' : 'Painel da Zeladoria'} atualizado com sucesso`);
       }
       
@@ -245,7 +267,6 @@ const DemoDataProvider: React.FC<DemoDataProviderProps> = ({ children }) => {
       }
       
       setIsLoading(false);
-      return true;
     } catch (error) {
       console.error(`Error updating ${type} mock data:`, error);
       toast.error(`Erro ao atualizar dados mock de ${type === 'sgz' ? 'SGZ' : 'Painel da Zeladoria'}`);

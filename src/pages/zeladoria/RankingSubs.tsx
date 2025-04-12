@@ -320,11 +320,18 @@ const RankingContentWithDebug = ({
   lastUpdateText,
   onRefreshData
 }) => {
-  const { sgzData, painelData, isLoading, refreshData, updateMockData } = useDemoData();
+  const { 
+    sgzData, 
+    painelData, 
+    isLoading, 
+    refreshData, 
+    updateMockData 
+  } = useDemoData();
   
   // Handle mock data update and perform refresh
   const handleUpdateMockData = async (type: 'sgz' | 'painel', data: any[]) => {
     if (!updateMockData) {
+      console.error("updateMockData function is not available in the context");
       toast.error("Função de atualização de dados mock não disponível");
       return;
     }
@@ -335,7 +342,9 @@ const RankingContentWithDebug = ({
       
       // Then refresh the data to update charts
       toast.info("Atualizando gráficos com os novos dados mock...");
-      await refreshData();
+      if (refreshData) {
+        await refreshData();
+      }
       
       toast.success(`Dados ${type.toUpperCase()} e gráficos atualizados com sucesso`);
       
