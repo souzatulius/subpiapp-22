@@ -4,9 +4,19 @@ export interface UploadProgressStats {
   processedRows: number;
   updatedRows: number;
   newRows: number;
+  errorCount?: number;
+  validRows?: number;
+  skippedRows?: number;
   estimatedTimeRemaining?: string;
   stage: 'uploading' | 'processing' | 'complete' | 'error';
   message?: string;
+}
+
+export interface ValidationError {
+  row: number;
+  column: string;
+  message: string;
+  value?: any;
 }
 
 export interface UploadResult {
@@ -17,4 +27,5 @@ export interface UploadResult {
   data?: any[];
   newOrders?: number;
   updatedOrders?: number;
+  errors?: ValidationError[];
 }

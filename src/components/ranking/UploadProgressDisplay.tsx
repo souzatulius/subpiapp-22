@@ -3,6 +3,7 @@ import React from 'react';
 import { Progress } from '@/components/ui/progress';
 import { UploadProgressStats } from '@/hooks/ranking/types/uploadTypes';
 import { CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 
 interface UploadProgressDisplayProps {
   stats: UploadProgressStats;
@@ -61,6 +62,15 @@ const UploadProgressDisplay: React.FC<UploadProgressDisplayProps> = ({ stats, ty
           <span>Tempo restante: {stats.estimatedTimeRemaining}</span>
         )}
       </div>
+
+      {/* Display validation error count if any */}
+      {stats.errorCount > 0 && (
+        <div className="mt-1">
+          <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">
+            {stats.errorCount} {stats.errorCount === 1 ? 'erro' : 'erros'} de validação
+          </Badge>
+        </div>
+      )}
 
       {stats.stage === 'complete' && (
         <div className="text-xs grid grid-cols-2 gap-x-4 mt-1">

@@ -1,13 +1,13 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Upload } from 'lucide-react';
 import { handleFileUpload, handlePainelZeladoriaUpload } from '@/hooks/ranking/services/uploadService';
 import { useAnimatedFeedback } from '@/hooks/use-animated-feedback';
-import { UploadProgressStats } from '@/hooks/ranking/types/uploadTypes';
+import { UploadProgressStats, ValidationError } from '@/hooks/ranking/types/uploadTypes';
 import UploadProgressDisplay from './UploadProgressDisplay';
 import { useUploadState } from '@/hooks/ranking/useUploadState';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import ErrorSummary from './ErrorSummary';
 
 interface UploadSectionProps {
   onUploadStart: () => void;
@@ -38,6 +38,8 @@ const UploadSection = ({
   const [isPainelUploading, setIsPainelUploading] = useState(false);
   const { showFeedback } = useAnimatedFeedback();
   const [isOpen, setIsOpen] = useState(false);
+  const [validationErrors, setValidationErrors] = useState<ValidationError[]>([]);
+  const [showErrorDetails, setShowErrorDetails] = useState(false);
   
   const { 
     sgzProgress, 
@@ -120,6 +122,8 @@ const UploadSection = ({
     onUploadStart();
     setIsSgzUploading(true);
     setIsOpen(true); // Keep the section open during upload
+    setValidationErrors([]); // Reset previous validation errors
+    setShowErrorDetails(false);
     
     // Initialize progress tracking
     const initialProgress: UploadProgressStats = {
@@ -148,10 +152,13 @@ const UploadSection = ({
         (stats) => {
           const updatedStats: UploadProgressStats = {
             ...initialProgress,
-            totalRows: stats.totalRows || stats.totalServiceOrders || 100,
+            totalRows: stats.totalRows || 100,
             newRows: stats.newOrders || 0,
             updatedRows: stats.updatedOrders || 0,
             message: stats.message || initialProgress.message,
+            errorCount: stats.errorCount || 0,
+            validRows: stats.validRows || 0,
+            skippedRows: stats.skippedRows || 0,
             stage: stats.processingStatus === 'processing' 
               ? 'processing' 
               : (stats.processingStatus === 'success' ? 'complete' : stats.processingStatus === 'error' ? 'error' : initialProgress.stage)
@@ -173,20 +180,34 @@ const UploadSection = ({
           processedRows: result.recordCount,
           totalRows: result.recordCount,
           newRows: result.newOrders || 0,
-          updatedRows: result.updatedOrders || 0
+          updatedRows: result.updatedOrders || 0,
+          errorCount: result.errors?.length || 0
         };
         
         setSgzProgress(completedStats);
+        
+        // Store validation errors for display
+        if (result.errors && result.errors.length > 0) {
+          setValidationErrors(result.errors);
+          setShowErrorDetails(true);
+        }
         
         onUploadComplete(result.id!, result.data || []);
       } else {
         const errorStats: UploadProgressStats = {
           ...initialProgress,
           stage: 'error',
-          message: `Erro no upload: ${result?.message || 'Erro desconhecido'}`
+          message: `Erro no upload: ${result?.message || 'Erro desconhecido'}`,
+          errorCount: result?.errors?.length || 0
         };
         
         setSgzProgress(errorStats);
+        
+        // Store validation errors for display
+        if (result?.errors && result.errors.length > 0) {
+          setValidationErrors(result.errors);
+          setShowErrorDetails(true);
+        }
         
         setIsSgzUploading(false);
         showFeedback('error', `Erro no upload: ${result?.message || 'Erro desconhecido'}`, { duration: 3000 });
@@ -307,7 +328,7 @@ const UploadSection = ({
       event.target.value = '';
     }
   };
-  
+
   // Utility function for estimating time
   const calculateEstimatedTime = (stats: UploadProgressStats): string => {
     if (stats.processedRows === 0 || stats.totalRows === 0) return "Calculando...";
@@ -352,6 +373,33 @@ const UploadSection = ({
               <UploadProgressDisplay stats={painelProgress} type="painel" />
             </div>
           )}
+          
+          {/* Show validation error summary if there are errors */}
+          {validationErrors.length > 0 && (
+            <div className="mt-4">
+              <Collapsible 
+                open={showErrorDetails} 
+                onOpenChange={setShowErrorDetails}
+                className="rounded-md"
+              >
+                <CollapsibleTrigger asChild>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    className="w-full justify-between mb-2 border-amber-200 bg-amber-50 text-amber-700 hover:bg-amber-100 hover:text-amber-800"
+                  >
+                    <span>
+                      {validationErrors.length} {validationErrors.length === 1 ? 'erro' : 'erros'} de validação
+                    </span>
+                    <span>{showErrorDetails ? '▲ Ocultar' : '▼ Mostrar'}</span>
+                  </Button>
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <ErrorSummary errors={validationErrors} />
+                </CollapsibleContent>
+              </Collapsible>
+            </div>
+          )}
         </div>
       )}
 
@@ -381,6 +429,10 @@ const UploadSection = ({
               </span>
             </Button>
           </label>
+          <p className="text-xs text-gray-500 mt-2 text-center max-w-xs">
+            Selecione uma planilha SGZ (.xlsx ou .xls) com colunas como "Ordem de Serviço", 
+            "Classificação de Serviço", "Status", etc.
+          </p>
         </div>
 
         {/* Painel Upload */}
@@ -408,6 +460,10 @@ const UploadSection = ({
               </span>
             </Button>
           </label>
+          <p className="text-xs text-gray-500 mt-2 text-center max-w-xs">
+            Selecione uma planilha do Painel de Zeladoria (.xlsx ou .xls) com colunas como "Ordem de Serviço", 
+            "Tipo de Serviço", "Status", etc.
+          </p>
         </div>
       </div>
     </div>
