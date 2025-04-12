@@ -10,14 +10,16 @@ interface ChartDebugPanelProps {
   sgzData?: any[] | null;
   painelData?: any[] | null;
   isVisible?: boolean;
+  isLoading?: boolean; // Added the isLoading prop to the interface
 }
 
 const ChartDebugPanel: React.FC<ChartDebugPanelProps> = ({ 
   sgzData,
   painelData,
-  isVisible = false 
+  isVisible = false,
+  isLoading = false // Added default value for isLoading
 }) => {
-  const { data: mockData, isLoading, error, refresh: refreshMock } = useZeladoriaChartDataMock(0); // No delay for quick debug
+  const { data: mockData, isLoading: mockIsLoading, error, refresh: refreshMock } = useZeladoriaChartDataMock(0); // No delay for quick debug
   const [activeTab, setActiveTab] = useState('mock');
   const { setSgzData, setPlanilhaData, setPainelData } = useRankingCharts();
   const [isExpanded, setIsExpanded] = useState(false);
@@ -94,7 +96,7 @@ const ChartDebugPanel: React.FC<ChartDebugPanelProps> = ({
         </TabsList>
         
         <TabsContent value="mock">
-          {isLoading ? (
+          {mockIsLoading ? (
             <p className="text-xs">Loading mock data...</p>
           ) : error ? (
             <p className="text-xs text-red-500">{error}</p>
