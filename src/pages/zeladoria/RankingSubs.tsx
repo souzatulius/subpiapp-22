@@ -3,14 +3,14 @@ import React, { useState, useEffect } from 'react';
 import Header from '@/components/layouts/Header';
 import DashboardSidebar from '@/components/dashboard/DashboardSidebar';
 import RankingContent from '@/components/ranking/RankingContent';
-import { BarChart3, SlidersHorizontal, Printer, FileText, RefreshCw } from 'lucide-react';
+import { BarChart3, SlidersHorizontal, Printer, FileText, RefreshCw, Bug } from 'lucide-react';
 import WelcomeCard from '@/components/shared/WelcomeCard';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
 // Import Chart registration to ensure scales are registered
 import '@/components/ranking/charts/ChartRegistration';
 // Import the demo data provider
-import DemoDataProvider from '@/components/ranking/DemoDataProvider';
+import DemoDataProvider, { useDemoData } from '@/components/ranking/DemoDataProvider';
 import { exportToPDF, printWithStyles } from '@/utils/pdfExport';
 import { useIsMobile } from '@/hooks/use-mobile';
 import UploadSection from '@/components/ranking/UploadSection';
@@ -21,12 +21,14 @@ import { useUploadState } from '@/hooks/ranking/useUploadState';
 import { useChartRefresher } from '@/hooks/ranking/useChartRefresher';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { useOpenAIChartData } from '@/hooks/ranking/useOpenAIChartData';
+import ChartDebugPanel from '@/components/ranking/charts/ChartDebugPanel';
 
 const RankingSubs = () => {
   // Start with sidebar collapsed
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [filterDialogOpen, setFilterDialogOpen] = useState(false);
   const [isUploadSectionOpen, setIsUploadSectionOpen] = useState(false);
+  const [showDebugPanel, setShowDebugPanel] = useState(false);
   const isMobile = useIsMobile();
   
   const { 
@@ -176,16 +178,30 @@ const RankingSubs = () => {
           icon={<BarChart3 className="h-6 w-6 mr-2 text-white" />}
           color="bg-gradient-to-r from-orange-500 to-orange-700"
           rightContent={
-            <Button
-              variant="outline"
-              size="icon"
-              className="bg-white/20 text-white border-white/30 hover:bg-white/30"
-              onClick={handleRefreshData}
-              disabled={isRefreshing || isUploading}
-              title="Atualizar Dados"
-            >
-              <RefreshCw className={`h-5 w-5 ${isRefreshing ? 'animate-spin' : ''}`} />
-            </Button>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="icon"
+                className="bg-white/20 text-white border-white/30 hover:bg-white/30"
+                onClick={handleRefreshData}
+                disabled={isRefreshing || isUploading}
+                title="Atualizar Dados"
+              >
+                <RefreshCw className={`h-5 w-5 ${isRefreshing ? 'animate-spin' : ''}`} />
+              </Button>
+              
+              {process.env.NODE_ENV === 'development' && (
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className={`bg-white/20 text-white border-white/30 hover:bg-white/30 ${showDebugPanel ? 'bg-white/40' : ''}`}
+                  onClick={() => setShowDebugPanel(!showDebugPanel)}
+                  title="Debug Panel"
+                >
+                  <Bug className="h-5 w-5" />
+                </Button>
+              )}
+            </div>
           }
         />
         
@@ -247,7 +263,7 @@ const RankingSubs = () => {
         
         <div className="mt-6">
           <DemoDataProvider>
-            <RankingContent 
+            <RankingContentWithDebug 
               filterDialogOpen={filterDialogOpen} 
               setFilterDialogOpen={setFilterDialogOpen} 
               disableCardContainers={true}
@@ -255,6 +271,7 @@ const RankingSubs = () => {
               buttonText="Atualizar"
               lastUpdateText="Atualização"
               onRefreshData={handleRefreshData}
+              showDebugPanel={showDebugPanel}
             />
           </DemoDataProvider>
         </div>
@@ -288,6 +305,30 @@ const RankingSubs = () => {
         </style>
       </motion.div>
     </FeedbackProvider>
+  );
+};
+
+// Separate child component to use the demo data context
+const RankingContentWithDebug = ({ 
+  showDebugPanel, 
+  ...rankingProps 
+}) => {
+  const { sgzData, painelData, isLoading, refreshData, updateMockData } = useDemoData();
+  
+  return (
+    <>
+      <RankingContent {...rankingProps} />
+      
+      {showDebugPanel && (
+        <ChartDebugPanel 
+          sgzData={sgzData}
+          painelData={painelData}
+          isVisible={showDebugPanel}
+          isLoading={isLoading}
+          onUpdateMockData={updateMockData}
+        />
+      )}
+    </>
   );
 };
 

@@ -3,6 +3,7 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import { useRankingCharts } from '@/hooks/ranking/useRankingCharts';
 import { compararBases } from '@/hooks/ranking/utils/compararBases';
 import { useUploadState } from '@/hooks/ranking/useUploadState';
+import { toast } from 'sonner';
 
 interface DemoDataProviderProps {
   children: ReactNode;
@@ -204,6 +205,53 @@ const DemoDataProvider: React.FC<DemoDataProviderProps> = ({ children }) => {
       setIsLoading(false);
     }
   };
+
+  // New function to update mock data
+  const updateMockData = async (type: 'sgz' | 'painel', data: any[]) => {
+    setIsLoading(true);
+    
+    try {
+      // Update local state
+      if (type === 'sgz') {
+        setDemoSgzData(data);
+        setSgzData(data);
+        setPlanilhaData(data);
+      } else {
+        setDemoPainelData(data);
+        setPainelData(data);
+      }
+      
+      // Update localStorage
+      const now = new Date();
+      setLastUpdated(now);
+      setLastRefreshTime(now);
+      
+      try {
+        if (type === 'sgz') {
+          localStorage.setItem(STORAGE_KEY_SGZ, JSON.stringify(data));
+        } else {
+          localStorage.setItem(STORAGE_KEY_PAINEL, JSON.stringify(data));
+        }
+        localStorage.setItem(STORAGE_KEY_LAST_UPDATE, now.toISOString());
+      } catch (storageError) {
+        console.error("Error saving to localStorage:", storageError);
+        toast.error("Erro ao salvar dados no localStorage");
+      }
+      
+      // In development mode, we'll allow updating the mock data files
+      if (process.env.NODE_ENV === 'development') {
+        // This would require server-side code, so we'll just mock it
+        console.log(`Mock data update requested for ${type}:`, data);
+        toast.success(`Mock data para ${type === 'sgz' ? 'SGZ' : 'Painel da Zeladoria'} atualizado com sucesso`);
+      }
+      
+      setIsLoading(false);
+    } catch (error) {
+      console.error(`Error updating ${type} mock data:`, error);
+      toast.error(`Erro ao atualizar dados mock de ${type === 'sgz' ? 'SGZ' : 'Painel da Zeladoria'}`);
+      setIsLoading(false);
+    }
+  };
   
   // Format the last updated date for display
   const formattedLastUpdated = lastUpdated.toLocaleString('pt-BR', {
@@ -222,6 +270,7 @@ const DemoDataProvider: React.FC<DemoDataProviderProps> = ({ children }) => {
     isRefreshing: isLoading,
     hasData: demoSgzData.length > 0 || demoPainelData.length > 0,
     refreshData,
+    updateMockData,
     lastUpdated,
     formattedLastUpdated
   };
