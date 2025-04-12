@@ -5,7 +5,8 @@ import {
   generatePressRequestPrompt,
   generateNotaImprensaPrompt,
   generateReleaseToNewsPrompt,
-  generateEsicJustificativaPrompt 
+  generateEsicJustificativaPrompt,
+  generateZeladoriaChartsPrompt 
 } from "./prompts.ts";
 
 const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
@@ -25,6 +26,10 @@ serve(async (req) => {
     const { tipo, dados } = await req.json();
 
     let prompt: string;
+    let model: string = 'gpt-4o-mini'; // Default model
+    let temperature: number = 0.5; // Default temperature
+    let responseFormat: any = undefined; // Default response format
+
     switch (tipo) {
       case 'resumo_solicitacao':
         prompt = generatePressRequestPrompt(dados);
@@ -37,6 +42,11 @@ serve(async (req) => {
         break;
       case 'esic':
         prompt = generateEsicJustificativaPrompt(dados);
+        break;
+      case 'graficos_zeladoria':
+        prompt = generateZeladoriaChartsPrompt(dados);
+        temperature = 0.3; // Lower temperature for more deterministic results
+        responseFormat = { type: "json_object" }; // Ensure JSON response format
         break;
       default:
         return new Response(
@@ -52,9 +62,10 @@ serve(async (req) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4o-mini',
+        model: model,
         messages: [{ role: 'user', content: prompt }],
-        temperature: 0.5,
+        temperature: temperature,
+        ...(responseFormat ? { response_format: responseFormat } : {})
       }),
     });
 

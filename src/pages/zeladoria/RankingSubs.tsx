@@ -20,6 +20,7 @@ import FeedbackProvider from '@/components/ui/feedback-provider';
 import { useUploadState } from '@/hooks/ranking/useUploadState';
 import { useChartRefresher } from '@/hooks/ranking/useChartRefresher';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { useOpenAIChartData } from '@/hooks/ranking/useOpenAIChartData';
 
 const RankingSubs = () => {
   // Start with sidebar collapsed
@@ -40,6 +41,7 @@ const RankingSubs = () => {
   const { showFeedback } = useAnimatedFeedback();
   const { sgzProgress, painelProgress, setLastRefreshTime, resetProgress } = useUploadState();
   const { refreshAllChartData, isRefreshing } = useChartRefresher();
+  const { generateChartData } = useOpenAIChartData();
   
   const handlePrint = () => {
     printWithStyles();
@@ -76,6 +78,25 @@ const RankingSubs = () => {
     try {
       await refreshAllChartData();
       setLastRefreshTime(new Date());
+      
+      // Generate chart data using OpenAI
+      if (data.length > 0) {
+        try {
+          showFeedback('loading', 'Gerando insights com IA...', { 
+            duration: 0,
+            progress: 50,
+            stage: 'Processando dados'
+          });
+          
+          const chartData = await generateChartData('zeladoria-stats', data);
+          console.log('AI-generated chart data:', chartData);
+          
+          showFeedback('success', 'Insights gerados com sucesso!', { duration: 2000 });
+        } catch (aiErr) {
+          console.error('Error generating AI insights:', aiErr);
+          showFeedback('error', 'Não foi possível gerar os insights com IA', { duration: 3000 });
+        }
+      }
     } catch (err) {
       console.error("Error refreshing data after upload:", err);
     }
@@ -95,6 +116,25 @@ const RankingSubs = () => {
     try {
       await refreshAllChartData();
       setLastRefreshTime(new Date());
+      
+      // Generate chart data using OpenAI
+      if (data.length > 0) {
+        try {
+          showFeedback('loading', 'Gerando insights com IA...', { 
+            duration: 0,
+            progress: 50,
+            stage: 'Processando dados'
+          });
+          
+          const chartData = await generateChartData('zeladoria-stats', data);
+          console.log('AI-generated chart data:', chartData);
+          
+          showFeedback('success', 'Insights gerados com sucesso!', { duration: 2000 });
+        } catch (aiErr) {
+          console.error('Error generating AI insights:', aiErr);
+          showFeedback('error', 'Não foi possível gerar os insights com IA', { duration: 3000 });
+        }
+      }
     } catch (err) {
       console.error("Error refreshing data after upload:", err);
     }
