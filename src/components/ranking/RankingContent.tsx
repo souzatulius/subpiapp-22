@@ -99,8 +99,8 @@ const RankingContent: React.FC<RankingContentProps> = ({
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'd' && e.altKey) {
-        setIsDebugVisible(prev => !prev);
-        if (!prev) {
+        setIsDebugVisible(prevState => !prevState);
+        if (!isDebugVisible) {
           toast.info("Painel de debug ativado", { duration: 1000 });
         } else {
           toast.info("Painel de debug desativado", { duration: 1000 });
@@ -112,7 +112,7 @@ const RankingContent: React.FC<RankingContentProps> = ({
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, []);
+  }, [isDebugVisible]);
   
   // Function to handle mock data updates - will be passed to the debug panel
   const handleUpdateMockData = async (type: 'sgz' | 'painel', data: any[]) => {

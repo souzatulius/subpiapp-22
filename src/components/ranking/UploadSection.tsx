@@ -84,11 +84,14 @@ const UploadSection: React.FC<UploadSectionProps> = ({
         sgzFile,
         user,
         (progress: number) => {
-          setSgzProgress(prev => ({
-            ...prev,
+          setSgzProgress({
+            totalRows: 0,
+            processedRows: 0,
+            updatedRows: 0,
+            newRows: 0,
             stage: 'uploading',
             message: `Processando... ${progress.toFixed(0)}%`,
-          }));
+          });
         },
         (stats: any) => {
           setSgzProgress(stats);
@@ -257,7 +260,14 @@ const UploadSection: React.FC<UploadSectionProps> = ({
           </div>
           
           {/* Display upload progress */}
-          {sgzProgress && sgzProgress.stage !== 'idle' && (
+          {sgzProgress && sgzProgress.stage !== 'complete' && sgzProgress.stage !== 'error' && (
+            <div className="mt-4">
+              <UploadProgressDisplay stats={sgzProgress} type="sgz" />
+            </div>
+          )}
+          
+          {/* Also display progress if it's complete or error stage */}
+          {sgzProgress && (sgzProgress.stage === 'complete' || sgzProgress.stage === 'error') && (
             <div className="mt-4">
               <UploadProgressDisplay stats={sgzProgress} type="sgz" />
             </div>
@@ -303,7 +313,14 @@ const UploadSection: React.FC<UploadSectionProps> = ({
           </div>
           
           {/* Display upload progress */}
-          {painelProgress && painelProgress.stage !== 'idle' && (
+          {painelProgress && painelProgress.stage !== 'complete' && painelProgress.stage !== 'error' && (
+            <div className="mt-4">
+              <UploadProgressDisplay stats={painelProgress} type="painel" />
+            </div>
+          )}
+          
+          {/* Also display progress if it's complete or error stage */}
+          {painelProgress && (painelProgress.stage === 'complete' || painelProgress.stage === 'error') && (
             <div className="mt-4">
               <UploadProgressDisplay stats={painelProgress} type="painel" />
             </div>

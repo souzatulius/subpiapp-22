@@ -437,13 +437,13 @@ const RankingContentWithDebug = ({
   }, [updateMockData]);
   
   // Handle mock data update and perform refresh
-  const handleUpdateMockData = async (type: 'sgz' | 'painel', data: any[]) => {
+  const handleUpdateMockData = async (type: 'sgz' | 'painel', data: any[]): Promise<boolean> => {
     console.log(`RankingContentWithDebug: Updating ${type} mock data, updateMockData available:`, !!updateMockData);
     
     if (!updateMockData) {
       console.error("updateMockData function is not available in the context");
       toast.error("Função de atualização de dados mock não disponível");
-      return;
+      return false;
     }
     
     try {
@@ -462,9 +462,12 @@ const RankingContentWithDebug = ({
       if (onRefreshData) {
         await onRefreshData();
       }
+      
+      return true;
     } catch (error) {
       console.error(`Error updating ${type} mock data:`, error);
       toast.error(`Erro ao atualizar dados mock de ${type}`);
+      return false;
     }
   };
   
@@ -486,7 +489,7 @@ const RankingContentWithDebug = ({
           painelData={painelData}
           isVisible={showDebugPanel}
           isLoading={isLoading}
-          onUpdateMockData={updateMockData} // Pass the update function directly 
+          onUpdateMockData={handleUpdateMockData} 
           dataSource={dataSource}
           dataStatus={dataStatus}
         />
