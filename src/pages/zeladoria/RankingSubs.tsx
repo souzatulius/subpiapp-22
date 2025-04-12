@@ -18,13 +18,14 @@ import { useRankingCharts } from '@/hooks/ranking/useRankingCharts';
 import { useAnimatedFeedback } from '@/hooks/use-animated-feedback';
 import FeedbackProvider from '@/components/ui/feedback-provider';
 import { useUploadState } from '@/hooks/ranking/useUploadState';
-import UploadProgressDisplay from '@/components/ranking/UploadProgressDisplay';
 import { useChartRefresher } from '@/hooks/ranking/useChartRefresher';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 
 const RankingSubs = () => {
   // Start with sidebar collapsed
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [filterDialogOpen, setFilterDialogOpen] = useState(false);
+  const [isUploadSectionOpen, setIsUploadSectionOpen] = useState(false);
   const isMobile = useIsMobile();
   
   const { 
@@ -37,7 +38,7 @@ const RankingSubs = () => {
   } = useRankingCharts();
   
   const { showFeedback } = useAnimatedFeedback();
-  const { sgzProgress, painelProgress, setLastRefreshTime } = useUploadState();
+  const { sgzProgress, painelProgress, setLastRefreshTime, resetProgress } = useUploadState();
   const { refreshAllChartData, isRefreshing } = useChartRefresher();
   
   const handlePrint = () => {
@@ -129,37 +130,32 @@ const RankingSubs = () => {
           color="bg-gradient-to-r from-orange-500 to-orange-700"
         />
         
-        {/* Upload Section - Restored */}
-        <div className="mt-6 bg-white p-4 rounded-xl border border-gray-100 shadow-sm">
-          <h2 className="text-lg font-medium mb-4">Upload de Planilhas</h2>
-          <UploadSection 
-            onUploadStart={handleUploadStart}
-            onUploadComplete={handleUploadComplete}
-            onPainelUploadComplete={handlePainelUploadComplete}
-            isUploading={isUploading}
-            user={{}} // Pass user info here when authentication is implemented
-            onRefreshData={handleRefreshData}
-          />
+        {/* Upload Section in Collapsible */}
+        <Collapsible 
+          open={isUploadSectionOpen} 
+          onOpenChange={setIsUploadSectionOpen}
+          className="mt-6 bg-white p-4 rounded-xl border border-gray-100 shadow-sm"
+        >
+          <div className="flex justify-between items-center">
+            <h2 className="text-lg font-medium">Upload de Planilhas</h2>
+            <CollapsibleTrigger asChild>
+              <Button variant="ghost" size="sm">
+                {isUploadSectionOpen ? 'Fechar' : 'Expandir'}
+              </Button>
+            </CollapsibleTrigger>
+          </div>
           
-          {/* Show progress indicators when uploads are active */}
-          {(sgzProgress || painelProgress) && (
-            <div className="mt-4 p-3 bg-white rounded-lg border border-gray-200 animate-fade-in">
-              <h3 className="text-sm font-medium mb-3">Importação em Andamento</h3>
-              
-              {sgzProgress && (
-                <div className="mb-3">
-                  <UploadProgressDisplay stats={sgzProgress} type="sgz" />
-                </div>
-              )}
-              
-              {painelProgress && (
-                <div>
-                  <UploadProgressDisplay stats={painelProgress} type="painel" />
-                </div>
-              )}
-            </div>
-          )}
-        </div>
+          <CollapsibleContent className="mt-4">
+            <UploadSection 
+              onUploadStart={handleUploadStart}
+              onUploadComplete={handleUploadComplete}
+              onPainelUploadComplete={handlePainelUploadComplete}
+              isUploading={isUploading}
+              user={{}} // Pass user info here when authentication is implemented
+              onRefreshData={handleRefreshData}
+            />
+          </CollapsibleContent>
+        </Collapsible>
         
         <div className="flex justify-end mt-4 space-x-2">
           <Button

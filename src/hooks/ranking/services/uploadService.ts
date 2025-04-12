@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import * as XLSX from 'xlsx';
 import { UploadResult, UploadProgressStats } from '../types/uploadTypes';
@@ -66,6 +67,25 @@ export const handleFileUpload = async (
     const uploadId = uploadData.id;
     onProgress?.(70);
     
+    // Ensure all departments exist in the database before inserting data
+    for (const item of data) {
+      if (item.sgz_departamento_tecnico && item.sgz_departamento_tecnico !== '') {
+        try {
+          // Use the existing ensure_sgz_department_exists function to create the department if it doesn't exist
+          await supabase.rpc('ensure_sgz_department_exists', {
+            department_name: item.sgz_departamento_tecnico
+          });
+        } catch (deptError) {
+          console.warn('Department registration error:', deptError);
+          // If this fails, set a default department
+          item.sgz_departamento_tecnico = 'NAO_ESPECIFICADO';
+        }
+      } else {
+        // Default department for empty values
+        item.sgz_departamento_tecnico = 'NAO_ESPECIFICADO';
+      }
+    }
+    
     // Format data for insertion
     const formattedData = data.map(item => ({
       ...item,
@@ -73,18 +93,39 @@ export const handleFileUpload = async (
       servico_responsavel: classifyServiceResponsibility(item.sgz_tipo_servico || '')
     }));
     
-    // Insert data
-    const { error: insertError } = await supabase
-      .from('sgz_ordens_servico')
-      .insert(formattedData);
+    // Insert data in batches to prevent oversized payload
+    const batchSize = 100;
+    for (let i = 0; i < formattedData.length; i += batchSize) {
+      const batch = formattedData.slice(i, i + batchSize);
+      // Insert data
+      const { error: insertError } = await supabase
+        .from('sgz_ordens_servico')
+        .insert(batch);
+        
+      if (insertError) {
+        console.error('Error inserting data batch:', insertError);
+        if (insertError.message.includes('violates foreign key constraint')) {
+          return {
+            success: false,
+            recordCount: 0,
+            message: 'Erro com os departamentos técnicos. Verifique se todos os departamentos existem no sistema.',
+          };
+        }
+        
+        return {
+          success: false,
+          recordCount: 0,
+          message: 'Erro ao inserir dados: ' + insertError.message,
+        };
+      }
       
-    if (insertError) {
-      console.error('Error inserting data:', insertError);
-      return {
-        success: false,
-        recordCount: 0,
-        message: 'Erro ao inserir dados: ' + insertError.message,
-      };
+      onProgress?.(70 + Math.floor((i / formattedData.length) * 30));
+      onStatsUpdate?.({
+        totalRows: data.length,
+        processedRows: i + batch.length,
+        processingStatus: 'processing',
+        message: `Processando registros (${i + batch.length} de ${data.length})`,
+      });
     }
     
     onProgress?.(100);
@@ -227,18 +268,32 @@ export const handlePainelZeladoriaUpload = async (
       responsavel_classificado: classifyServiceResponsibility(item.tipo_servico || '')
     }));
     
-    // Insert data
-    const { error: insertError } = await supabase
-      .from('painel_zeladoria_dados')
-      .insert(formattedData);
+    // Insert data in batches to prevent oversized payload
+    const batchSize = 100;
+    for (let i = 0; i < formattedData.length; i += batchSize) {
+      const batch = formattedData.slice(i, i + batchSize);
       
-    if (insertError) {
-      console.error('Error inserting data:', insertError);
-      return {
-        success: false,
-        recordCount: 0,
-        message: 'Erro ao inserir dados: ' + insertError.message,
-      };
+      // Insert data
+      const { error: insertError } = await supabase
+        .from('painel_zeladoria_dados')
+        .insert(batch);
+        
+      if (insertError) {
+        console.error('Error inserting data batch:', insertError);
+        return {
+          success: false,
+          recordCount: 0,
+          message: 'Erro ao inserir dados: ' + insertError.message,
+        };
+      }
+      
+      onProgress?.(70 + Math.floor((i / formattedData.length) * 30));
+      onStatsUpdate?.({
+        totalRows: data.length,
+        processedRows: i + batch.length,
+        processingStatus: 'processing',
+        message: `Processando registros (${i + batch.length} de ${data.length})`,
+      });
     }
     
     onProgress?.(100);

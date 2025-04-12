@@ -7,6 +7,7 @@ import { useAnimatedFeedback } from '@/hooks/use-animated-feedback';
 import { UploadProgressStats } from '@/hooks/ranking/types/uploadTypes';
 import UploadProgressDisplay from './UploadProgressDisplay';
 import { useUploadState } from '@/hooks/ranking/useUploadState';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 
 interface UploadSectionProps {
   onUploadStart: () => void;
@@ -36,14 +37,48 @@ const UploadSection = ({
   const [isSgzUploading, setIsSgzUploading] = useState(false);
   const [isPainelUploading, setIsPainelUploading] = useState(false);
   const { showFeedback } = useAnimatedFeedback();
+  const [isOpen, setIsOpen] = useState(false);
   
   const { 
     sgzProgress, 
     painelProgress, 
     setSgzProgress, 
     setPainelProgress, 
-    setLastRefreshTime 
+    setLastRefreshTime,
+    resetProgress
   } = useUploadState();
+
+  // Auto reset and collapse when both uploads complete successfully
+  useEffect(() => {
+    const sgzComplete = sgzProgress?.stage === 'complete';
+    const painelComplete = painelProgress?.stage === 'complete';
+    const anyError = sgzProgress?.stage === 'error' || painelProgress?.stage === 'error';
+    
+    if ((sgzComplete && isSgzUploading) || (painelComplete && isPainelUploading)) {
+      // If upload was successful, show success feedback
+      if (!anyError) {
+        const successMessage = sgzComplete 
+          ? `Upload da planilha SGZ concluído com sucesso!` 
+          : `Upload da planilha do Painel concluído com sucesso!`;
+        
+        showFeedback('success', successMessage, { duration: 3000 });
+      }
+      
+      // Reset upload state flags after a short delay
+      const timer = setTimeout(() => {
+        if (sgzComplete) setIsSgzUploading(false);
+        if (painelComplete) setIsPainelUploading(false);
+      }, 1000);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [
+    sgzProgress, 
+    painelProgress, 
+    isSgzUploading, 
+    isPainelUploading,
+    showFeedback
+  ]);
 
   // Auto refresh data when uploads are complete
   useEffect(() => {
@@ -84,6 +119,7 @@ const UploadSection = ({
 
     onUploadStart();
     setIsSgzUploading(true);
+    setIsOpen(true); // Keep the section open during upload
     
     // Initialize progress tracking
     const initialProgress: UploadProgressStats = {
@@ -142,8 +178,6 @@ const UploadSection = ({
         
         setSgzProgress(completedStats);
         
-        showFeedback('success', `Upload da planilha SGZ concluído: ${result.recordCount} registros processados`, { duration: 3000 });
-        
         onUploadComplete(result.id!, result.data || []);
       } else {
         const errorStats: UploadProgressStats = {
@@ -183,6 +217,7 @@ const UploadSection = ({
 
     onUploadStart();
     setIsPainelUploading(true);
+    setIsOpen(true); // Keep the section open during upload
     
     // Initialize progress tracking
     const initialProgress: UploadProgressStats = {
@@ -241,8 +276,6 @@ const UploadSection = ({
         
         setPainelProgress(completedStats);
         
-        showFeedback('success', `Upload da planilha do Painel concluído: ${result.recordCount} registros processados`, { duration: 3000 });
-        
         onPainelUploadComplete(result.id!, result.data || []);
       } else {
         const errorStats: UploadProgressStats = {
@@ -298,8 +331,30 @@ const UploadSection = ({
     return `${hours} ${hours === 1 ? 'hora' : 'horas'} e ${minutes} ${minutes === 1 ? 'minuto' : 'minutos'}`;
   };
 
+  // Active uploads indicator
+  const hasActiveUploads = sgzProgress || painelProgress;
+
   return (
     <div className="space-y-4">
+      {/* Show progress indicators when uploads are active */}
+      {hasActiveUploads && (
+        <div className="p-3 bg-white rounded-lg border border-gray-200 animate-fade-in">
+          <h3 className="text-sm font-medium mb-3">Importação em Andamento</h3>
+          
+          {sgzProgress && (
+            <div className="mb-3">
+              <UploadProgressDisplay stats={sgzProgress} type="sgz" />
+            </div>
+          )}
+          
+          {painelProgress && (
+            <div>
+              <UploadProgressDisplay stats={painelProgress} type="painel" />
+            </div>
+          )}
+        </div>
+      )}
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* SGZ Upload */}
         <div className="flex flex-col items-center p-4 border border-gray-200 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors">

@@ -6,7 +6,6 @@ import { ChartVisibility } from './types';
 import { useRankingCharts } from '@/hooks/ranking/useRankingCharts';
 import DashboardCards from './insights/DashboardCards';
 import { useAnimatedFeedback } from '@/hooks/use-animated-feedback';
-import UploadProgressDisplay from './UploadProgressDisplay';
 import { useUploadState } from '@/hooks/ranking/useUploadState';
 
 interface RankingContentProps {
@@ -35,7 +34,7 @@ const RankingContent: React.FC<RankingContentProps> = ({
     refreshChartData
   } = useRankingCharts();
   
-  const { sgzProgress, painelProgress, lastRefreshTime } = useUploadState();
+  const { lastRefreshTime } = useUploadState();
   const { showFeedback } = useAnimatedFeedback();
 
   const handleSimulateIdealRanking = () => {
@@ -74,24 +73,6 @@ const RankingContent: React.FC<RankingContentProps> = ({
         dadosPainel={painelData} 
         isSimulationActive={isSimulationActive}
       />
-
-      {/* Display upload progress when uploads are in progress */}
-      {(sgzProgress || painelProgress) && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-          {sgzProgress && (
-            <UploadProgressDisplay 
-              stats={sgzProgress} 
-              type="sgz"
-            />
-          )}
-          {painelProgress && (
-            <UploadProgressDisplay 
-              stats={painelProgress}
-              type="painel"
-            />
-          )}
-        </div>
-      )}
 
       <RankingCharts
         chartData={{}}
