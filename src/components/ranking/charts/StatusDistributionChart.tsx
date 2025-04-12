@@ -46,7 +46,7 @@ const StatusDistributionChart: React.FC<StatusDistributionChartProps> = ({
         try {
           const aiChartData = await generateChartData('statusDistribution', sgzData);
           
-          if (aiChartData) {
+          if (aiChartData && aiChartData.labels && aiChartData.data) {
             const pieData = {
               labels: aiChartData.labels || [],
               datasets: [{
