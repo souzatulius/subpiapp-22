@@ -2548,6 +2548,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
+      create_painel_upload_with_data: {
+        Args: { p_usuario_email: string; p_nome_arquivo: string; p_dados: Json }
+        Returns: Json
+      }
       create_permissions_table: {
         Args: Record<PropertyKey, never>
         Returns: undefined
@@ -2571,6 +2575,10 @@ export type Database = {
       delete_tipo_midia: {
         Args: { p_id: string }
         Returns: boolean
+      }
+      ensure_sgz_department_exists: {
+        Args: { department_name: string }
+        Returns: string
       }
       get_demandas_por_origem: {
         Args: Record<PropertyKey, never>
