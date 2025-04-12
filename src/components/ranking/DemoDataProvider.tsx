@@ -1,20 +1,19 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { useRealData } from './RealDataProvider';
 import { useRankingCharts } from '@/hooks/ranking/useRankingCharts';
 
 interface DemoDataProviderProps {
   children: ReactNode;
 }
 
-// Create a context for real data
-export const RealDataContext = createContext<any>(null);
+// Create a context for demo data
+const DemoDataContext = createContext<any>(null);
 
-// Hook to use the real data context
-export const useRealData = () => {
-  const context = useContext(RealDataContext);
+// Hook to use the demo data context
+export const useDemoData = () => {
+  const context = useContext(DemoDataContext);
   if (!context) {
-    throw new Error('useRealData must be used within a RealDataProvider');
+    throw new Error('useDemoData must be used within a DemoDataProvider');
   }
   return context;
 };
@@ -104,8 +103,8 @@ const DemoDataProvider: React.FC<DemoDataProviderProps> = ({ children }) => {
     minute: '2-digit'
   });
   
-  // Override the real data context with demo data
-  const overriddenValue = {
+  // Provide demo data context
+  const demoDataValue = {
     sgzData: demoSgzData,
     painelData: demoPainelData,
     isLoading,
@@ -117,9 +116,9 @@ const DemoDataProvider: React.FC<DemoDataProviderProps> = ({ children }) => {
   };
   
   return (
-    <RealDataContext.Provider value={overriddenValue}>
+    <DemoDataContext.Provider value={demoDataValue}>
       {children}
-    </RealDataContext.Provider>
+    </DemoDataContext.Provider>
   );
 };
 
