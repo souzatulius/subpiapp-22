@@ -65,7 +65,7 @@ const StatusAtendimentoChart: React.FC<StatusAtendimentoChartProps> = ({
   }, [chartData]);
   
   // Prepare chart data
-  const prepareChartData = (): ChartData<'pie' | 'bar'> => {
+  const prepareChartData = (): ChartData<'pie'> => {
     if (statusCounts.length === 0) {
       return {
         labels: [],
@@ -90,7 +90,7 @@ const StatusAtendimentoChart: React.FC<StatusAtendimentoChartProps> = ({
   };
   
   // Chart options
-  const chartOptions: ChartOptions<'pie' | 'bar'> = {
+  const chartOptions: ChartOptions<'pie'> = {
     responsive: true,
     maintainAspectRatio: false,
     plugins: {

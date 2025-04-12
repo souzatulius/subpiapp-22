@@ -1,141 +1,159 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useRankingCharts } from '@/hooks/ranking/useRankingCharts';
-import { Trash2, RefreshCw, Database, ToggleLeft, ToggleRight } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Copy, RefreshCw } from 'lucide-react';
 
 interface ChartDebugPanelProps {
   sgzData: any[] | null;
   painelData: any[] | null;
-  isVisible: boolean;
+  isVisible?: boolean;
+  isLoading?: boolean; // Add isLoading prop
 }
 
-const ChartDebugPanel: React.FC<ChartDebugPanelProps> = ({ sgzData, painelData, isVisible }) => {
-  const [activeTab, setActiveTab] = useState('sgz');
-  const { isMockData, setIsMockData, refreshChartData } = useRankingCharts();
-
-  if (!isVisible) return null;
-
-  const clearLocalStorage = () => {
-    localStorage.removeItem('ranking-charts-storage');
-    localStorage.removeItem('demo-sgz-data');
-    localStorage.removeItem('demo-painel-data');
-    localStorage.removeItem('demo-last-update');
-    window.location.reload();
+const ChartDebugPanel: React.FC<ChartDebugPanelProps> = ({
+  sgzData,
+  painelData,
+  isVisible = false,
+  isLoading = false // Include isLoading prop with default
+}) => {
+  const [showPanel, setShowPanel] = useState<boolean>(isVisible);
+  const [activeSgzSample, setActiveSgzSample] = useState<any>(null);
+  const [activePainelSample, setActivePainelSample] = useState<any>(null);
+  
+  useEffect(() => {
+    setShowPanel(isVisible);
+  }, [isVisible]);
+  
+  // Check samples when data changes
+  useEffect(() => {
+    if (sgzData && sgzData.length > 0) {
+      setActiveSgzSample(sgzData[0]);
+    }
+    
+    if (painelData && painelData.length > 0) {
+      setActivePainelSample(painelData[0]);
+    }
+  }, [sgzData, painelData]);
+  
+  if (!showPanel) return null;
+  
+  const handleSampleSgz = () => {
+    if (!sgzData || sgzData.length === 0) return;
+    
+    const randomIndex = Math.floor(Math.random() * sgzData.length);
+    setActiveSgzSample(sgzData[randomIndex]);
   };
-
-  const toggleMockMode = () => {
-    setIsMockData(!isMockData);
-    setTimeout(() => {
-      refreshChartData();
-    }, 100);
+  
+  const handleSamplePainel = () => {
+    if (!painelData || painelData.length === 0) return;
+    
+    const randomIndex = Math.floor(Math.random() * painelData.length);
+    setActivePainelSample(painelData[randomIndex]);
   };
-
+  
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+  };
+  
   return (
-    <Card className="mt-4 p-4 bg-gray-50 border-gray-200 shadow-sm">
-      <div className="flex justify-between items-center mb-4">
-        <h3 className="text-sm font-medium text-gray-700 flex items-center">
-          <Database className="h-4 w-4 mr-2 text-orange-500" />
-          Debug Panel
-          <span className="ml-2 px-2 py-0.5 text-xs bg-orange-100 rounded-full text-orange-800">
-            {isMockData ? 'Mock Mode' : 'Supabase Mode'}
-          </span>
-        </h3>
-        <div className="flex gap-2">
-          <Button 
-            size="sm" 
-            variant="outline" 
-            className="flex items-center gap-1 text-xs h-7"
-            onClick={toggleMockMode}
+    <Card className="p-4 mt-4 border-dashed border-2 border-gray-300 bg-gray-50">
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="font-semibold text-gray-700">Debug Panel</h3>
+        <div className="flex items-center gap-2">
+          {isLoading && (
+            <Badge variant="outline" className="bg-blue-100 text-blue-800 border-blue-300">
+              <RefreshCw className="w-3 h-3 mr-1 animate-spin" />
+              Loading...
+            </Badge>
+          )}
+          <Badge variant="outline">
+            SGZ: {sgzData?.length || 0} records
+          </Badge>
+          <Badge variant="outline">
+            Painel: {painelData?.length || 0} records
+          </Badge>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setShowPanel(false)}
           >
-            {isMockData ? <ToggleRight className="h-3 w-3" /> : <ToggleLeft className="h-3 w-3" />}
-            {isMockData ? 'Using Mocks' : 'Using Supabase'}
-          </Button>
-          <Button 
-            size="sm" 
-            variant="outline" 
-            className="flex items-center gap-1 text-xs h-7"
-            onClick={() => refreshChartData()}
-          >
-            <RefreshCw className="h-3 w-3" />
-            Refresh
-          </Button>
-          <Button 
-            size="sm" 
-            variant="destructive" 
-            className="flex items-center gap-1 text-xs h-7"
-            onClick={clearLocalStorage}
-          >
-            <Trash2 className="h-3 w-3" />
-            Clear Cache
+            Close
           </Button>
         </div>
       </div>
-
-      <div className="grid grid-cols-4 gap-2 mb-4">
-        <div className="bg-blue-50 p-2 rounded-md">
-          <div className="text-xs font-medium text-blue-700">SGZ Records</div>
-          <div className="text-lg font-bold">{sgzData?.length || 0}</div>
-        </div>
-        <div className="bg-green-50 p-2 rounded-md">
-          <div className="text-xs font-medium text-green-700">Painel Records</div>
-          <div className="text-lg font-bold">{painelData?.length || 0}</div>
-        </div>
-        <div className="bg-purple-50 p-2 rounded-md">
-          <div className="text-xs font-medium text-purple-700">Data Source</div>
-          <div className="text-lg font-bold">{isMockData ? 'Mock' : 'Supabase'}</div>
-        </div>
-        <div className="bg-orange-50 p-2 rounded-md">
-          <div className="text-xs font-medium text-orange-700">Environment</div>
-          <div className="text-lg font-bold">{process.env.NODE_ENV}</div>
-        </div>
-      </div>
-
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="w-full mb-2">
+      
+      <Tabs defaultValue="sgz">
+        <TabsList className="mb-4 bg-gray-100">
           <TabsTrigger value="sgz">SGZ Data</TabsTrigger>
           <TabsTrigger value="painel">Painel Data</TabsTrigger>
-          <TabsTrigger value="storage">Local Storage</TabsTrigger>
         </TabsList>
         
-        <TabsContent value="sgz" className="p-2 bg-white rounded-md border border-gray-200 max-h-80 overflow-auto">
-          {sgzData && sgzData.length > 0 ? (
-            <div className="text-xs">
-              <pre>{JSON.stringify(sgzData.slice(0, 3), null, 2)}</pre>
-              {sgzData.length > 3 && (
-                <div className="text-gray-500 mt-2">... and {sgzData.length - 3} more records</div>
-              )}
+        <TabsContent value="sgz" className="space-y-4">
+          <div className="flex justify-between mb-2">
+            <h4 className="text-sm font-medium">Sample SGZ Record</h4>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleSampleSgz}
+              disabled={!sgzData || sgzData.length === 0}
+              className="text-xs"
+            >
+              <RefreshCw className="w-3 h-3 mr-1" />
+              New Sample
+            </Button>
+          </div>
+          
+          <div className="bg-slate-800 text-white p-3 rounded-md text-xs">
+            <div className="flex justify-between mb-1">
+              <span>Sample from SGZ data:</span>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-5 p-1 text-gray-300 hover:text-white"
+                onClick={() => activeSgzSample && copyToClipboard(JSON.stringify(activeSgzSample, null, 2))}
+              >
+                <Copy className="w-3 h-3" />
+              </Button>
             </div>
-          ) : (
-            <div className="text-gray-500 text-sm">No SGZ data available</div>
-          )}
+            <pre className="overflow-auto max-h-[200px] whitespace-pre-wrap">
+              {activeSgzSample ? JSON.stringify(activeSgzSample, null, 2) : 'No SGZ data available'}
+            </pre>
+          </div>
         </TabsContent>
         
-        <TabsContent value="painel" className="p-2 bg-white rounded-md border border-gray-200 max-h-80 overflow-auto">
-          {painelData && painelData.length > 0 ? (
-            <div className="text-xs">
-              <pre>{JSON.stringify(painelData.slice(0, 3), null, 2)}</pre>
-              {painelData.length > 3 && (
-                <div className="text-gray-500 mt-2">... and {painelData.length - 3} more records</div>
-              )}
+        <TabsContent value="painel" className="space-y-4">
+          <div className="flex justify-between mb-2">
+            <h4 className="text-sm font-medium">Sample Painel Record</h4>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleSamplePainel}
+              disabled={!painelData || painelData.length === 0}
+              className="text-xs"
+            >
+              <RefreshCw className="w-3 h-3 mr-1" />
+              New Sample
+            </Button>
+          </div>
+          
+          <div className="bg-slate-800 text-white p-3 rounded-md text-xs">
+            <div className="flex justify-between mb-1">
+              <span>Sample from Painel data:</span>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-5 p-1 text-gray-300 hover:text-white"
+                onClick={() => activePainelSample && copyToClipboard(JSON.stringify(activePainelSample, null, 2))}
+              >
+                <Copy className="w-3 h-3" />
+              </Button>
             </div>
-          ) : (
-            <div className="text-gray-500 text-sm">No Painel data available</div>
-          )}
-        </TabsContent>
-        
-        <TabsContent value="storage" className="p-2 bg-white rounded-md border border-gray-200 max-h-80 overflow-auto">
-          <div className="text-xs">
-            {Object.keys(localStorage).filter(key => 
-              key.includes('ranking') || key.includes('demo')
-            ).map(key => (
-              <div key={key} className="mb-2">
-                <div className="font-medium text-blue-700">{key}:</div>
-                <pre className="bg-gray-50 p-1 rounded">{localStorage.getItem(key)?.substring(0, 100)}...</pre>
-              </div>
-            ))}
+            <pre className="overflow-auto max-h-[200px] whitespace-pre-wrap">
+              {activePainelSample ? JSON.stringify(activePainelSample, null, 2) : 'No Painel data available'}
+            </pre>
           </div>
         </TabsContent>
       </Tabs>
