@@ -1,113 +1,93 @@
 
 [
   {
-    "sgz_id": "OS-1000",
-    "sgz_tipo_servico": "Galerias Sabesp",
-    "sgz_criado_em": "2025-02-10T00:00:00",
-    "sgz_status": "CANCELADO",
-    "sgz_data_status": "2025-02-18T00:00:00",
-    "sgz_distrito": "Vila Madalena",
-    "sgz_responsavel": "sabesp",
-    "sgz_dias_ate_status_atual": 8
+    "ordem_de_servico":"OS-100",
+    "classificacao_de_servico":"Tapa Buraco",
+    "criado_em":"2025-04-01T09:00:00Z",
+    "status":"EM ANDAMENTO",
+    "data_do_status":"2025-04-02T17:00:00Z",
+    "distrito":"Pinheiros",
+    "servico_responsavel":"dzu"
   },
   {
-    "sgz_id": "OS-1001",
-    "sgz_tipo_servico": "Limpeza Urbana",
-    "sgz_criado_em": "2025-03-27T00:00:00",
-    "sgz_status": "CANCELADO",
-    "sgz_data_status": "2025-04-03T00:00:00",
-    "sgz_distrito": "Pinheiros",
-    "sgz_responsavel": "selimp",
-    "sgz_dias_ate_status_atual": 7
+    "ordem_de_servico":"OS-101",
+    "classificacao_de_servico":"Tapa Buraco",
+    "criado_em":"2025-04-02T09:00:00Z",
+    "status":"CONCLUÍDO",
+    "data_do_status":"2025-04-03T17:00:00Z",
+    "distrito":"Pinheiros",
+    "servico_responsavel":"dzu"
   },
   {
-    "sgz_id": "OS-1002",
-    "sgz_tipo_servico": "Limpeza de Córregos",
-    "sgz_criado_em": "2025-03-12T00:00:00",
-    "sgz_status": "CONCLUÍDO",
-    "sgz_data_status": "2025-03-19T00:00:00",
-    "sgz_distrito": "Vila Madalena",
-    "sgz_responsavel": "subprefeitura",
-    "sgz_dias_ate_status_atual": 7
+    "ordem_de_servico":"OS-102",
+    "classificacao_de_servico":"Tapa Buraco",
+    "criado_em":"2025-04-03T09:00:00Z",
+    "status":"EM ANDAMENTO",
+    "data_do_status":"2025-04-04T17:00:00Z",
+    "distrito":"Pinheiros",
+    "servico_responsavel":"dzu"
   },
   {
-    "sgz_id": "OS-1003",
-    "sgz_tipo_servico": "Limpeza Urbana",
-    "sgz_criado_em": "2025-03-09T00:00:00",
-    "sgz_status": "CONCLUÍDO",
-    "sgz_data_status": "2025-03-18T00:00:00",
-    "sgz_distrito": "Jardins",
-    "sgz_responsavel": "selimp",
-    "sgz_dias_ate_status_atual": 9
+    "ordem_de_servico":"OS-103",
+    "classificacao_de_servico":"Tapa Buraco",
+    "criado_em":"2025-04-04T09:00:00Z",
+    "status":"CONCLUÍDO",
+    "data_do_status":"2025-04-05T17:00:00Z",
+    "distrito":"Pinheiros",
+    "servico_responsavel":"dzu"
   },
   {
-    "sgz_id": "OS-1004",
-    "sgz_tipo_servico": "Limpeza Urbana",
-    "sgz_criado_em": "2025-02-18T00:00:00",
-    "sgz_status": "PLANEJAR",
-    "sgz_data_status": "2025-02-20T00:00:00",
-    "sgz_distrito": "Pinheiros",
-    "sgz_responsavel": "selimp",
-    "sgz_dias_ate_status_atual": 2
+    "ordem_de_servico":"OS-104",
+    "classificacao_de_servico":"Tapa Buraco",
+    "criado_em":"2025-04-05T09:00:00Z",
+    "status":"EM ANDAMENTO",
+    "data_do_status":"2025-04-06T17:00:00Z",
+    "distrito":"Pinheiros",
+    "servico_responsavel":"dzu"
   },
   {
-    "sgz_id": "OS-1005",
-    "sgz_tipo_servico": "Poda Remoção Árvores",
-    "sgz_criado_em": "2025-02-09T00:00:00",
-    "sgz_status": "PLANEJAR",
-    "sgz_data_status": "2025-02-12T00:00:00",
-    "sgz_distrito": "Pinheiros",
-    "sgz_responsavel": "subprefeitura",
-    "sgz_dias_ate_status_atual": 3
+    "ordem_de_servico":"OS-105",
+    "classificacao_de_servico":"Tapa Buraco",
+    "criado_em":"2025-04-06T09:00:00Z",
+    "status":"CONCLUÍDO",
+    "data_do_status":"2025-04-07T17:00:00Z",
+    "distrito":"Pinheiros",
+    "servico_responsavel":"dzu"
   },
   {
-    "sgz_id": "OS-1006",
-    "sgz_tipo_servico": "Limpeza Urbana",
-    "sgz_criado_em": "2025-03-06T00:00:00",
-    "sgz_status": "CANCELADO",
-    "sgz_data_status": "2025-03-15T00:00:00",
-    "sgz_distrito": "Pinheiros",
-    "sgz_responsavel": "selimp",
-    "sgz_dias_ate_status_atual": 9
+    "ordem_de_servico":"OS-106",
+    "classificacao_de_servico":"Tapa Buraco",
+    "criado_em":"2025-04-07T09:00:00Z",
+    "status":"EM ANDAMENTO",
+    "data_do_status":"2025-04-08T17:00:00Z",
+    "distrito":"Pinheiros",
+    "servico_responsavel":"dzu"
   },
   {
-    "sgz_id": "OS-1007",
-    "sgz_tipo_servico": "Tapa Buraco",
-    "sgz_criado_em": "2025-03-15T00:00:00",
-    "sgz_status": "CANCELADO",
-    "sgz_data_status": "2025-03-17T00:00:00",
-    "sgz_distrito": "Jardins",
-    "sgz_responsavel": "dzu",
-    "sgz_dias_ate_status_atual": 2
+    "ordem_de_servico":"OS-107",
+    "classificacao_de_servico":"Tapa Buraco",
+    "criado_em":"2025-04-08T09:00:00Z",
+    "status":"CONCLUÍDO",
+    "data_do_status":"2025-04-09T17:00:00Z",
+    "distrito":"Pinheiros",
+    "servico_responsavel":"dzu"
   },
   {
-    "sgz_id": "OS-1008",
-    "sgz_tipo_servico": "Galerias Sabesp",
-    "sgz_criado_em": "2025-03-16T00:00:00",
-    "sgz_status": "EM ANDAMENTO",
-    "sgz_data_status": "2025-03-24T00:00:00",
-    "sgz_distrito": "Pinheiros",
-    "sgz_responsavel": "sabesp",
-    "sgz_dias_ate_status_atual": 8
+    "ordem_de_servico":"OS-108",
+    "classificacao_de_servico":"Tapa Buraco",
+    "criado_em":"2025-04-09T09:00:00Z",
+    "status":"EM ANDAMENTO",
+    "data_do_status":"2025-04-10T17:00:00Z",
+    "distrito":"Pinheiros",
+    "servico_responsavel":"dzu"
   },
   {
-    "sgz_id": "OS-1009",
-    "sgz_tipo_servico": "Galerias Sabesp",
-    "sgz_criado_em": "2025-02-28T00:00:00",
-    "sgz_status": "PLANEJAR",
-    "sgz_data_status": "2025-03-07T00:00:00",
-    "sgz_distrito": "Pinheiros",
-    "sgz_responsavel": "sabesp",
-    "sgz_dias_ate_status_atual": 8
-  },
-  {
-    "sgz_id": "OS-1010",
-    "sgz_tipo_servico": "Limpeza de Córregos",
-    "sgz_criado_em": "2025-02-26T00:00:00",
-    "sgz_status": "PLANEJAR",
-    "sgz_data_status": "2025-03-07T00:00:00",
-    "sgz_distrito": "Itaim Bibi",
-    "sgz_responsavel": "subprefeitura",
-    "sgz_dias_ate_status_atual": 10
+    "ordem_de_servico":"OS-109",
+    "classificacao_de_servico":"Tapa Buraco",
+    "criado_em":"2025-04-10T09:00:00Z",
+    "status":"CONCLUÍDO",
+    "data_do_status":"2025-04-11T17:00:00Z",
+    "distrito":"Pinheiros",
+    "servico_responsavel":"dzu"
   }
 ]

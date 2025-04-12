@@ -2,6 +2,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useRankingCharts } from '@/hooks/ranking/useRankingCharts';
 import { compararBases } from '@/hooks/ranking/utils/compararBases';
+import { useUploadState } from '@/hooks/ranking/useUploadState';
 
 interface DemoDataProviderProps {
   children: ReactNode;
@@ -28,7 +29,13 @@ const DemoDataProvider: React.FC<DemoDataProviderProps> = ({ children }) => {
   const [demoPainelData, setDemoPainelData] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
-  const { setSgzData, setPlanilhaData, setPainelData, setIsMockData } = useRankingCharts();
+  const { 
+    setSgzData, 
+    setPlanilhaData, 
+    setPainelData, 
+    setIsMockData 
+  } = useRankingCharts();
+  const { setLastRefreshTime } = useUploadState();
   
   // Load data on component mount
   useEffect(() => {
@@ -38,7 +45,6 @@ const DemoDataProvider: React.FC<DemoDataProviderProps> = ({ children }) => {
       // Try to get cached data from localStorage first
       let sgzData: any[] = [];
       let painelData: any[] = [];
-      let shouldFetchFromAPI = true;
       
       try {
         // Check for cached data
@@ -47,27 +53,33 @@ const DemoDataProvider: React.FC<DemoDataProviderProps> = ({ children }) => {
         const cachedLastUpdate = localStorage.getItem(STORAGE_KEY_LAST_UPDATE);
         
         if (cachedSgzData && cachedPainelData) {
-          sgzData = JSON.parse(cachedSgzData);
-          painelData = JSON.parse(cachedPainelData);
-          
-          if (cachedLastUpdate) {
-            setLastUpdated(new Date(cachedLastUpdate));
-          }
-          
-          console.log("DemoDataProvider: Using cached data:", {
-            sgzData: sgzData.length,
-            painelData: painelData.length
-          });
-          
-          // If we have cached data, use it immediately but still refresh in background
-          if (sgzData.length > 0 && painelData.length > 0) {
-            setDemoSgzData(sgzData);
-            setDemoPainelData(painelData);
-            setSgzData(sgzData);
-            setPlanilhaData(sgzData);
-            setPainelData(painelData);
-            setIsMockData(true);
-            setIsLoading(false);
+          try {
+            sgzData = JSON.parse(cachedSgzData);
+            painelData = JSON.parse(cachedPainelData);
+            
+            if (cachedLastUpdate) {
+              setLastUpdated(new Date(cachedLastUpdate));
+              setLastRefreshTime(new Date(cachedLastUpdate));
+            }
+            
+            console.log("DemoDataProvider: Using cached data:", {
+              sgzData: sgzData.length,
+              painelData: painelData.length
+            });
+            
+            // If we have cached data, use it immediately but still refresh in background
+            if (sgzData.length > 0 && painelData.length > 0) {
+              setDemoSgzData(sgzData);
+              setDemoPainelData(painelData);
+              setSgzData(sgzData);
+              setPlanilhaData(sgzData);
+              setPainelData(painelData);
+              setIsMockData(true);
+              setIsLoading(false);
+            }
+          } catch (parseError) {
+            console.error("Error parsing cached data:", parseError);
+            // Continue to fetch fresh data on parse error
           }
         }
       } catch (error) {
@@ -76,8 +88,11 @@ const DemoDataProvider: React.FC<DemoDataProviderProps> = ({ children }) => {
       
       // Always fetch fresh data from mock API
       try {
+        // Add timestamp to prevent caching
+        const timestamp = new Date().getTime();
+        
         // Load SGZ data
-        const sgzResponse = await fetch('/mock/sgz_data_mock.json');
+        const sgzResponse = await fetch(`/mock/sgz_data_mock.json?t=${timestamp}`);
         if (!sgzResponse.ok) {
           throw new Error(`Failed to load SGZ mock data: ${sgzResponse.status}`);
         }
@@ -85,7 +100,7 @@ const DemoDataProvider: React.FC<DemoDataProviderProps> = ({ children }) => {
         console.log("DemoDataProvider: Loaded SGZ mock data:", freshSgzData.length, "records");
         
         // Load Painel data
-        const painelResponse = await fetch('/mock/painel_data_mock.json');
+        const painelResponse = await fetch(`/mock/painel_data_mock.json?t=${timestamp}`);
         if (!painelResponse.ok) {
           throw new Error(`Failed to load Painel mock data: ${painelResponse.status}`);
         }
@@ -113,6 +128,7 @@ const DemoDataProvider: React.FC<DemoDataProviderProps> = ({ children }) => {
         
         const now = new Date();
         setLastUpdated(now);
+        setLastRefreshTime(now);
         
         // Cache in localStorage
         try {
@@ -132,26 +148,29 @@ const DemoDataProvider: React.FC<DemoDataProviderProps> = ({ children }) => {
     }
     
     loadData();
-  }, [setSgzData, setPlanilhaData, setPainelData, setIsMockData]);
+  }, [setSgzData, setPlanilhaData, setPainelData, setIsMockData, setLastRefreshTime]);
   
   // Refresh function for demo data
   const refreshData = async () => {
     setIsLoading(true);
     
     // Simulate a network delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await new Promise(resolve => setTimeout(resolve, 500));
     
     // Reload from the JSON files
     try {
+      // Add timestamp to prevent caching
+      const timestamp = new Date().getTime();
+      
       // Load SGZ data
-      const sgzResponse = await fetch('/mock/sgz_data_mock.json');
+      const sgzResponse = await fetch(`/mock/sgz_data_mock.json?t=${timestamp}`);
       if (!sgzResponse.ok) {
         throw new Error(`Failed to load SGZ mock data: ${sgzResponse.status}`);
       }
       const sgzData = await sgzResponse.json();
       
       // Load Painel data
-      const painelResponse = await fetch('/mock/painel_data_mock.json');
+      const painelResponse = await fetch(`/mock/painel_data_mock.json?t=${timestamp}`);
       if (!painelResponse.ok) {
         throw new Error(`Failed to load Painel mock data: ${painelResponse.status}`);
       }
@@ -168,6 +187,7 @@ const DemoDataProvider: React.FC<DemoDataProviderProps> = ({ children }) => {
       
       const now = new Date();
       setLastUpdated(now);
+      setLastRefreshTime(now);
       
       // Cache in localStorage
       try {

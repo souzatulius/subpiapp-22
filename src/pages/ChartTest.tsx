@@ -11,9 +11,17 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { compararBases } from '@/hooks/ranking/utils/compararBases';
 
 export default function ChartTest() {
-  const { setSgzData, sgzData, setPainelData, painelData, isLoading, setIsLoading } = useRankingCharts();
+  const { 
+    setSgzData, 
+    sgzData, 
+    setPainelData, 
+    painelData, 
+    isLoading, 
+    setIsLoading,
+    setIsMockData
+  } = useRankingCharts();
   
-  // Load mock data from the JSON files
+  // Load mock data from the JSON files immediately when component mounts
   useEffect(() => {
     async function loadMockData() {
       try {
@@ -41,6 +49,9 @@ export default function ChartTest() {
         // Set the Painel data in the store
         setPainelData(painelData);
         
+        // Set mock data flag to true
+        setIsMockData(true);
+        
         // Compare data to verify integration
         if (sgzData.length > 0 && painelData.length > 0) {
           const comparacao = compararBases(sgzData, painelData);
@@ -60,7 +71,7 @@ export default function ChartTest() {
     }
     
     loadMockData();
-  }, [setSgzData, setPainelData, setIsLoading]);
+  }, [setSgzData, setPainelData, setIsLoading, setIsMockData]);
   
   // Function to reload data
   const reloadData = async () => {
@@ -68,14 +79,17 @@ export default function ChartTest() {
       setIsLoading(true);
       
       // Load SGZ data
-      const sgzResponse = await fetch('/mock/sgz_data_mock.json');
+      const sgzResponse = await fetch('/mock/sgz_data_mock.json?' + new Date().getTime());
       const sgzData = await sgzResponse.json();
       setSgzData(sgzData);
       
       // Load Painel data
-      const painelResponse = await fetch('/mock/painel_data_mock.json');
+      const painelResponse = await fetch('/mock/painel_data_mock.json?' + new Date().getTime());
       const painelData = await painelResponse.json();
       setPainelData(painelData);
+      
+      // Set mock data flag to true
+      setIsMockData(true);
       
       console.log("Data reloaded successfully!");
       setIsLoading(false);
