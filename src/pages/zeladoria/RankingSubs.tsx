@@ -311,13 +311,27 @@ const RankingSubs = () => {
 // Separate child component to use the demo data context
 const RankingContentWithDebug = ({ 
   showDebugPanel, 
-  ...rankingProps 
+  filterDialogOpen,
+  setFilterDialogOpen,
+  disableCardContainers,
+  className,
+  buttonText,
+  lastUpdateText,
+  onRefreshData
 }) => {
   const { sgzData, painelData, isLoading, refreshData, updateMockData } = useDemoData();
   
   return (
     <>
-      <RankingContent {...rankingProps} />
+      <RankingContent 
+        filterDialogOpen={filterDialogOpen}
+        setFilterDialogOpen={setFilterDialogOpen}
+        disableCardContainers={disableCardContainers}
+        className={className}
+        buttonText={buttonText}
+        lastUpdateText={lastUpdateText}
+        onRefreshData={onRefreshData}
+      />
       
       {showDebugPanel && (
         <ChartDebugPanel 
