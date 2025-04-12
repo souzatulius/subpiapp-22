@@ -104,8 +104,8 @@ export const useRankingCharts = create<RankingChartsState>((set, get) => ({
   setPainelData: (data: any[]) => 
     set({
       painelData: data,
-      isLoading: true, 
-      chartsProgress: 20
+      isLoading: false, // Changed to false to avoid loading states
+      chartsProgress: 100 // Set to 100 to indicate it's complete
     }),
   
   setIsLoading: (isLoading: boolean) => 
@@ -144,7 +144,51 @@ export const useRankingCharts = create<RankingChartsState>((set, get) => ({
       
       console.log("Refreshing chart data...");
       
-      // Fetch latest SGZ data
+      // In development environment, load from mock files
+      if (process.env.NODE_ENV === 'development') {
+        try {
+          // Load SGZ data
+          const sgzResponse = await fetch('/mock/sgz_data_mock.json');
+          if (sgzResponse.ok) {
+            const sgzData = await sgzResponse.json();
+            console.log(`Loaded ${sgzData.length} SGZ records from mock`);
+            set({ 
+              sgzData: sgzData,
+              planilhaData: sgzData
+            });
+          }
+          
+          // Load Painel data
+          const painelResponse = await fetch('/mock/painel_data_mock.json');
+          if (painelResponse.ok) {
+            const painelData = await painelResponse.json();
+            console.log(`Loaded ${painelData.length} Painel records from mock`);
+            set({ painelData });
+          }
+          
+          // Set loading states
+          set({
+            isInsightsLoading: false,
+            insightsProgress: 100
+          });
+          
+          // Complete loading after a short delay
+          setTimeout(() => {
+            set({ 
+              isLoading: false,
+              isChartsLoading: false,
+              chartsProgress: 100
+            });
+          }, 500);
+          
+          return;
+        } catch (mockError) {
+          console.error("Error loading mock data:", mockError);
+          // Continue to try loading from Supabase if mock loading fails
+        }
+      }
+      
+      // Fetch latest SGZ data from Supabase
       const { data: sgzData, error: sgzError } = await supabase
         .from('sgz_ordens_servico')
         .select('*')
@@ -156,7 +200,7 @@ export const useRankingCharts = create<RankingChartsState>((set, get) => ({
         throw sgzError;
       }
       
-      // Fetch latest Painel data
+      // Fetch latest Painel data from Supabase
       const { data: painelData, error: painelError } = await supabase
         .from('painel_zeladoria_dados')
         .select('*')
@@ -168,7 +212,7 @@ export const useRankingCharts = create<RankingChartsState>((set, get) => ({
         throw painelError;
       }
       
-      console.log(`Fetched ${sgzData?.length || 0} SGZ records and ${painelData?.length || 0} Painel records`);
+      console.log(`Fetched ${sgzData?.length || 0} SGZ records and ${painelData?.length || 0} Painel records from Supabase`);
       
       // Update state with fetched data
       set({ 

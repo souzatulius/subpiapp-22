@@ -23,48 +23,46 @@ const DemoDataProvider: React.FC<DemoDataProviderProps> = ({ children }) => {
   const [demoPainelData, setDemoPainelData] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
-  const { setSgzData, setPlanilhaData } = useRankingCharts();
+  const { setSgzData, setPlanilhaData, setPainelData } = useRankingCharts();
   
   useEffect(() => {
-    // Load mock SGZ data from the JSON file
-    async function loadMockSgzData() {
+    // Load mock data from the JSON files
+    async function loadMockData() {
       try {
-        const response = await fetch('/mock/sgz_data_mock.json');
-        if (!response.ok) {
-          throw new Error(`Failed to load mock data: ${response.status}`);
+        // Load SGZ data
+        const sgzResponse = await fetch('/mock/sgz_data_mock.json');
+        if (!sgzResponse.ok) {
+          throw new Error(`Failed to load SGZ mock data: ${sgzResponse.status}`);
         }
-        const data = await response.json();
-        console.log("DemoDataProvider: Loaded SGZ mock data:", data);
+        const sgzData = await sgzResponse.json();
+        console.log("DemoDataProvider: Loaded SGZ mock data:", sgzData);
+        
+        // Load Painel data
+        const painelResponse = await fetch('/mock/painel_data_mock.json');
+        if (!painelResponse.ok) {
+          throw new Error(`Failed to load Painel mock data: ${painelResponse.status}`);
+        }
+        const painelData = await painelResponse.json();
+        console.log("DemoDataProvider: Loaded Painel mock data:", painelData);
         
         // Set the data in both local state and the store
-        setDemoSgzData(data);
-        setSgzData(data);
-        setPlanilhaData(data);
+        setDemoSgzData(sgzData);
+        setDemoPainelData(painelData);
         
-        // Generate mock Painel data
-        generateMockPainelData();
+        setSgzData(sgzData);
+        setPlanilhaData(sgzData);
+        setPainelData(painelData);
         
         // Update loading state
         setIsLoading(false);
       } catch (error) {
-        console.error("DemoDataProvider: Error loading mock SGZ data:", error);
+        console.error("DemoDataProvider: Error loading mock data:", error);
         setIsLoading(false);
       }
     }
     
-    // Generate mock Painel data
-    const generateMockPainelData = () => {
-      const mockPainel = [
-        { id: 1, responsavel_classificado: 'Subprefeitura Pinheiros', distrito: 'Pinheiros', status: 'Concluído' },
-        { id: 2, responsavel_classificado: 'ENEL', distrito: 'Vila Madalena', status: 'Em Andamento' },
-        { id: 3, responsavel_classificado: 'SABESP', distrito: 'Itaim Bibi', status: 'Pendente' }
-      ];
-      
-      setDemoPainelData(mockPainel);
-    };
-    
-    loadMockSgzData();
-  }, [setSgzData, setPlanilhaData]);
+    loadMockData();
+  }, [setSgzData, setPlanilhaData, setPainelData]);
   
   // Refresh function for demo data
   const refreshData = async () => {
@@ -73,20 +71,31 @@ const DemoDataProvider: React.FC<DemoDataProviderProps> = ({ children }) => {
     // Simulate a network delay
     await new Promise(resolve => setTimeout(resolve, 1000));
     
-    // Reload from the JSON file
+    // Reload from the JSON files
     try {
-      const response = await fetch('/mock/sgz_data_mock.json');
-      if (!response.ok) {
-        throw new Error(`Failed to load mock data: ${response.status}`);
+      // Load SGZ data
+      const sgzResponse = await fetch('/mock/sgz_data_mock.json');
+      if (!sgzResponse.ok) {
+        throw new Error(`Failed to load SGZ mock data: ${sgzResponse.status}`);
       }
-      const data = await response.json();
+      const sgzData = await sgzResponse.json();
+      
+      // Load Painel data
+      const painelResponse = await fetch('/mock/painel_data_mock.json');
+      if (!painelResponse.ok) {
+        throw new Error(`Failed to load Painel mock data: ${painelResponse.status}`);
+      }
+      const painelData = await painelResponse.json();
       
       // Update with refreshed data
-      setDemoSgzData(data);
-      setSgzData(data);
-      setPlanilhaData(data);
-      setLastUpdated(new Date());
+      setDemoSgzData(sgzData);
+      setDemoPainelData(painelData);
       
+      setSgzData(sgzData);
+      setPlanilhaData(sgzData);
+      setPainelData(painelData);
+      
+      setLastUpdated(new Date());
     } catch (error) {
       console.error("Error refreshing demo data:", error);
     } finally {

@@ -1,119 +1,105 @@
 
+/**
+ * Utility functions to compare SGZ and Painel da Zeladoria data
+ */
+
 export interface OSComparacao {
-  id_os: string;
-  sgz_status?: string;
-  painel_status?: string;
+  sgzId: string;
+  painelId?: string;
+  status: {
+    sgz: string;
+    painel?: string;
+  };
   divergente: boolean;
+  motivo?: string;
 }
 
 export interface ResultadoComparacao {
   totalSGZ: number;
   totalPainel: number;
-  ausentes: string[];
   divergencias: OSComparacao[];
   divergenciasStatus: OSComparacao[];
-  detalhes?: {
-    porcentagemDivergente: number;
-    porcentagemAusente: number;
-    analise: string;
-  };
+  ausentes: OSComparacao[];
 }
 
 /**
- * Compara os dados entre SGZ e Painel da Zeladoria para identificar divergências
+ * Compara dados do SGZ com dados do Painel da Zeladoria
+ * @param dadosSGZ Array de dados do SGZ 
+ * @param dadosPainel Array de dados do Painel da Zeladoria
+ * @returns Resultado da comparação entre as bases
  */
-export const compararBases = (
+export function compararBases(
   dadosSGZ: any[],
   dadosPainel: any[]
-): ResultadoComparacao => {
-  console.log(`Comparando bases - SGZ: ${dadosSGZ.length} registros, Painel: ${dadosPainel.length} registros`);
-  
-  // Mapear OS do SGZ por número para acesso rápido
-  const mapSGZ = new Map();
-  dadosSGZ.forEach(os => {
-    mapSGZ.set(os.ordem_servico, {
-      id_os: os.ordem_servico,
-      status: os.sgz_status
-    });
+): ResultadoComparacao {
+  const resultado: ResultadoComparacao = {
+    totalSGZ: dadosSGZ.length || 0,
+    totalPainel: dadosPainel.length || 0,
+    divergencias: [],
+    divergenciasStatus: [],
+    ausentes: []
+  };
+
+  // Se não tiver dados, retornar resultado vazio
+  if (!dadosSGZ?.length || !dadosPainel?.length) {
+    return resultado;
+  }
+
+  // Mapeia os dados do Painel para fácil busca por número OS
+  const painelMap = new Map();
+  dadosPainel.forEach(item => {
+    const id = item.numero_os || '';
+    painelMap.set(id, item);
   });
 
-  // Mapear OS do Painel por número para acesso rápido
-  const mapPainel = new Map();
-  dadosPainel.forEach(os => {
-    mapPainel.set(os.id_os, {
-      id_os: os.id_os,
-      status: os.status
-    });
-  });
-
-  const divergencias: OSComparacao[] = [];
-  const divergenciasStatus: OSComparacao[] = [];
-  const ausentes: string[] = [];
-
-  // Verificar OS que estão no SGZ mas não no Painel ou com status diferentes
-  dadosSGZ.forEach(os => {
-    const idOS = os.ordem_servico;
-    const statusSGZ = os.sgz_status;
+  // Para cada OS no SGZ, verificar se existe no Painel e se há divergências
+  dadosSGZ.forEach(sgzItem => {
+    const sgzId = sgzItem.sgz_id || '';
     
-    // Se não existe no Painel
-    if (!mapPainel.has(idOS)) {
-      ausentes.push(idOS);
-      
-      divergencias.push({
-        id_os: idOS,
-        sgz_status: statusSGZ,
-        divergente: true
+    // Tenta encontrar a OS no Painel
+    const painelItem = painelMap.get(sgzId);
+
+    if (!painelItem) {
+      // OS não encontrada no Painel
+      resultado.ausentes.push({
+        sgzId,
+        status: {
+          sgz: sgzItem.sgz_status || 'N/A'
+        },
+        divergente: true,
+        motivo: 'OS ausente no Painel da Zeladoria'
       });
-    } 
-    // Se existe, verificar se o status é diferente
-    else {
-      const painelOS = mapPainel.get(idOS);
-      if (statusSGZ !== painelOS.status) {
-        divergenciasStatus.push({
-          id_os: idOS,
-          sgz_status: statusSGZ,
-          painel_status: painelOS.status,
-          divergente: true
-        });
+      resultado.divergencias.push({
+        sgzId,
+        status: {
+          sgz: sgzItem.sgz_status || 'N/A'
+        },
+        divergente: true,
+        motivo: 'OS ausente no Painel da Zeladoria'
+      });
+    } else {
+      // Verificar divergência de status
+      const sgzStatus = sgzItem.sgz_status?.toUpperCase() || '';
+      const painelStatus = painelItem.status_atual?.toUpperCase() || '';
+      
+      if (sgzStatus !== painelStatus) {
+        // Encontrou divergência de status
+        const divergencia: OSComparacao = {
+          sgzId,
+          painelId: painelItem.numero_os,
+          status: {
+            sgz: sgzStatus,
+            painel: painelStatus
+          },
+          divergente: true,
+          motivo: `Status divergente: SGZ=${sgzStatus}, Painel=${painelStatus}`
+        };
         
-        divergencias.push({
-          id_os: idOS,
-          sgz_status: statusSGZ,
-          painel_status: painelOS.status,
-          divergente: true
-        });
+        resultado.divergenciasStatus.push(divergencia);
+        resultado.divergencias.push(divergencia);
       }
     }
   });
 
-  // Calcular métricas adicionais
-  const porcentagemDivergente = dadosSGZ.length > 0 
-    ? (divergenciasStatus.length / dadosSGZ.length) * 100 
-    : 0;
-    
-  const porcentagemAusente = dadosSGZ.length > 0 
-    ? (ausentes.length / dadosSGZ.length) * 100 
-    : 0;
-    
-  let analise = "Os dados estão consistentes entre os sistemas.";
-  if (porcentagemDivergente > 10 || porcentagemAusente > 10) {
-    analise = "Há divergências significativas entre os sistemas que precisam de atenção.";
-  } else if (porcentagemDivergente > 2 || porcentagemAusente > 5) {
-    analise = "Existem algumas divergências entre os sistemas que devem ser monitoradas.";
-  }
-  
-  console.log(`Comparação concluída: ${divergencias.length} divergências encontradas, ${ausentes.length} registros ausentes`);
-
-  return {
-    totalSGZ: dadosSGZ.length,
-    totalPainel: dadosPainel.length,
-    ausentes,
-    divergencias,
-    divergenciasStatus,
-    detalhes: {
-      porcentagemDivergente,
-      porcentagemAusente,
-      analise
-    }
-  };
-};
+  return resultado;
+}
