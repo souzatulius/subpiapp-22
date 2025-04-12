@@ -1,19 +1,20 @@
 
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
-import { cookies } from 'next/headers';
-import { NextResponse } from 'next/server';
+import { supabase } from '@/integrations/supabase/client';
 
 export const dynamic = 'force-dynamic';
 
 export async function POST(request: Request) {
   try {
     const requestUrl = new URL(request.url);
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseUrl = "https://mapjrbfzurpjmianfnev.supabase.co";
     
     if (!supabaseUrl) {
-      return NextResponse.json(
-        { error: 'Supabase URL not configured' },
-        { status: 500 }
+      return new Response(
+        JSON.stringify({ error: 'Supabase URL not configured' }),
+        { 
+          status: 500,
+          headers: { 'Content-Type': 'application/json' }
+        }
       );
     }
     
@@ -27,28 +28,40 @@ export async function POST(request: Request) {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${process.env.SUPABASE_ANON_KEY}`,
+        'Authorization': `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1hcGpyYmZ6dXJwam1pYW5mbmV2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDIzNDQ0NjAsImV4cCI6MjA1NzkyMDQ2MH0.BG4zRB-6i_cpXyT6w0Zb3EmFZ6d5ZB8YseqklLUPeXc`,
       },
       body: JSON.stringify(requestData),
     });
     
     if (!response.ok) {
       const errorData = await response.json();
-      return NextResponse.json(
-        { error: `Edge function error: ${errorData.error || response.statusText}` },
-        { status: response.status }
+      return new Response(
+        JSON.stringify({ error: `Edge function error: ${errorData.error || response.statusText}` }),
+        { 
+          status: response.status,
+          headers: { 'Content-Type': 'application/json' }
+        }
       );
     }
     
     const data = await response.json();
     
-    return NextResponse.json(data);
+    return new Response(
+      JSON.stringify(data),
+      { 
+        status: 200,
+        headers: { 'Content-Type': 'application/json' }
+      }
+    );
   } catch (error) {
     console.error('Error in generate-ranking-insights route:', error);
     
-    return NextResponse.json(
-      { error: 'Failed to process request' },
-      { status: 500 }
+    return new Response(
+      JSON.stringify({ error: 'Failed to process request' }),
+      { 
+        status: 500,
+        headers: { 'Content-Type': 'application/json' }
+      }
     );
   }
 }
