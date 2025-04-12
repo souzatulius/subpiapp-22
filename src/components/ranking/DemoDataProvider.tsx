@@ -34,7 +34,8 @@ const DemoDataProvider: React.FC<DemoDataProviderProps> = ({ children }) => {
     setSgzData, 
     setPlanilhaData, 
     setPainelData, 
-    setIsMockData 
+    setIsMockData,
+    refreshChartData
   } = useRankingCharts();
   const { setLastRefreshTime } = useUploadState();
   
@@ -155,54 +156,46 @@ const DemoDataProvider: React.FC<DemoDataProviderProps> = ({ children }) => {
   const refreshData = async () => {
     setIsLoading(true);
     
-    // Simulate a network delay
-    await new Promise(resolve => setTimeout(resolve, 500));
-    
-    // Reload from the JSON files
+    // Trigger a refresh of all chart data
     try {
-      // Add timestamp to prevent caching
-      const timestamp = new Date().getTime();
-      
-      // Load SGZ data
-      const sgzResponse = await fetch(`/mock/sgz_data_mock.json?t=${timestamp}`);
-      if (!sgzResponse.ok) {
-        throw new Error(`Failed to load SGZ mock data: ${sgzResponse.status}`);
-      }
-      const sgzData = await sgzResponse.json();
-      
-      // Load Painel data
-      const painelResponse = await fetch(`/mock/painel_data_mock.json?t=${timestamp}`);
-      if (!painelResponse.ok) {
-        throw new Error(`Failed to load Painel mock data: ${painelResponse.status}`);
-      }
-      const painelData = await painelResponse.json();
-      
-      // Update with refreshed data
-      setDemoSgzData(sgzData);
-      setDemoPainelData(painelData);
-      
-      setSgzData(sgzData);
-      setPlanilhaData(sgzData);
-      setPainelData(painelData);
-      setIsMockData(true);
-      
+      // First ensure we have the latest data
       const now = new Date();
       setLastUpdated(now);
       setLastRefreshTime(now);
       
-      // Cache in localStorage
+      // If we have edited mock data in localStorage, use that
       try {
-        localStorage.setItem(STORAGE_KEY_SGZ, JSON.stringify(sgzData));
-        localStorage.setItem(STORAGE_KEY_PAINEL, JSON.stringify(painelData));
-        localStorage.setItem(STORAGE_KEY_LAST_UPDATE, now.toISOString());
-      } catch (storageError) {
-        console.error("Error saving to localStorage:", storageError);
+        const cachedSgzData = localStorage.getItem(STORAGE_KEY_SGZ);
+        const cachedPainelData = localStorage.getItem(STORAGE_KEY_PAINEL);
+        
+        if (cachedSgzData) {
+          const sgzData = JSON.parse(cachedSgzData);
+          setDemoSgzData(sgzData);
+          setSgzData(sgzData);
+          setPlanilhaData(sgzData);
+        }
+        
+        if (cachedPainelData) {
+          const painelData = JSON.parse(cachedPainelData);
+          setDemoPainelData(painelData);
+          setPainelData(painelData);
+        }
+      } catch (error) {
+        console.error("Error loading cached data during refresh:", error);
+      }
+      
+      // Then trigger a refresh of all chart data
+      if (refreshChartData) {
+        await refreshChartData();
+        console.log("DemoDataProvider: Charts refreshed with mock data");
       }
       
       setIsLoading(false);
+      return true;
     } catch (error) {
       console.error("Error refreshing demo data:", error);
       setIsLoading(false);
+      return false;
     }
   };
 
@@ -216,7 +209,7 @@ const DemoDataProvider: React.FC<DemoDataProviderProps> = ({ children }) => {
         setDemoSgzData(data);
         setSgzData(data);
         setPlanilhaData(data);
-      } else {
+      } else if (type === 'painel') {
         setDemoPainelData(data);
         setPainelData(data);
       }
@@ -229,27 +222,35 @@ const DemoDataProvider: React.FC<DemoDataProviderProps> = ({ children }) => {
       try {
         if (type === 'sgz') {
           localStorage.setItem(STORAGE_KEY_SGZ, JSON.stringify(data));
-        } else {
+        } else if (type === 'painel') {
           localStorage.setItem(STORAGE_KEY_PAINEL, JSON.stringify(data));
         }
         localStorage.setItem(STORAGE_KEY_LAST_UPDATE, now.toISOString());
       } catch (storageError) {
         console.error("Error saving to localStorage:", storageError);
         toast.error("Erro ao salvar dados no localStorage");
+        throw storageError;
       }
       
-      // In development mode, we'll allow updating the mock data files
+      // In development mode, we'll allow updating the mock data files (would require backend)
       if (process.env.NODE_ENV === 'development') {
-        // This would require server-side code, so we'll just mock it
         console.log(`Mock data update requested for ${type}:`, data);
         toast.success(`Mock data para ${type === 'sgz' ? 'SGZ' : 'Painel da Zeladoria'} atualizado com sucesso`);
       }
       
+      // Trigger a refresh of all chart data after updating the mock data
+      if (refreshChartData) {
+        await refreshChartData();
+        console.log(`DemoDataProvider: Charts refreshed after ${type} mock data update`);
+      }
+      
       setIsLoading(false);
+      return true;
     } catch (error) {
       console.error(`Error updating ${type} mock data:`, error);
       toast.error(`Erro ao atualizar dados mock de ${type === 'sgz' ? 'SGZ' : 'Painel da Zeladoria'}`);
       setIsLoading(false);
+      throw error;
     }
   };
   

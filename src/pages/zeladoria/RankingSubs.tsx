@@ -22,6 +22,7 @@ import { useChartRefresher } from '@/hooks/ranking/useChartRefresher';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { useOpenAIChartData } from '@/hooks/ranking/useOpenAIChartData';
 import ChartDebugPanel from '@/components/ranking/charts/ChartDebugPanel';
+import { toast } from 'sonner';
 
 const RankingSubs = () => {
   // Start with sidebar collapsed
@@ -321,6 +322,33 @@ const RankingContentWithDebug = ({
 }) => {
   const { sgzData, painelData, isLoading, refreshData, updateMockData } = useDemoData();
   
+  // Handle mock data update and perform refresh
+  const handleUpdateMockData = async (type: 'sgz' | 'painel', data: any[]) => {
+    if (!updateMockData) {
+      toast.error("Função de atualização de dados mock não disponível");
+      return;
+    }
+    
+    try {
+      // First update the mock data
+      await updateMockData(type, data);
+      
+      // Then refresh the data to update charts
+      toast.info("Atualizando gráficos com os novos dados mock...");
+      await refreshData();
+      
+      toast.success(`Dados ${type.toUpperCase()} e gráficos atualizados com sucesso`);
+      
+      // Also call the parent refresh function to ensure everything is updated
+      if (onRefreshData) {
+        await onRefreshData();
+      }
+    } catch (error) {
+      console.error(`Error updating ${type} mock data:`, error);
+      toast.error(`Erro ao atualizar dados mock de ${type}`);
+    }
+  };
+  
   return (
     <>
       <RankingContent 
@@ -339,7 +367,7 @@ const RankingContentWithDebug = ({
           painelData={painelData}
           isVisible={showDebugPanel}
           isLoading={isLoading}
-          onUpdateMockData={updateMockData}
+          onUpdateMockData={handleUpdateMockData}
         />
       )}
     </>

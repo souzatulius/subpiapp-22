@@ -4,7 +4,7 @@ import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
-import { Copy, RefreshCw, Eye, Save, Edit } from 'lucide-react';
+import { Copy, RefreshCw, Eye, Save, Edit, AlertCircle, RotateCcw } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
 
@@ -27,29 +27,37 @@ const ChartDebugPanel: React.FC<ChartDebugPanelProps> = ({
   const [activeSgzSample, setActiveSgzSample] = useState<any>(null);
   const [activePainelSample, setActivePainelSample] = useState<any>(null);
   
-  // New state for editing mode
+  // Edit mode state
   const [editingSgz, setEditingSgz] = useState<boolean>(false);
   const [editingPainel, setEditingPainel] = useState<boolean>(false);
   const [sgzJsonText, setSgzJsonText] = useState<string>('');
   const [painelJsonText, setPainelJsonText] = useState<string>('');
+  const [sgzJsonError, setSgzJsonError] = useState<string | null>(null);
+  const [painelJsonError, setPainelJsonError] = useState<string | null>(null);
+  const [isSavingSgz, setIsSavingSgz] = useState<boolean>(false);
+  const [isSavingPainel, setIsSavingPainel] = useState<boolean>(false);
   
   // Update panel visibility when prop changes
   useEffect(() => {
     setShowPanel(isVisible);
   }, [isVisible]);
   
-  // Automatically select the first item when data changes
+  // Automatically select the first item and update JSON text when data changes
   useEffect(() => {
     if (sgzData && sgzData.length > 0) {
       setActiveSgzSample(sgzData[0]);
       setSgzJsonText(JSON.stringify(sgzData, null, 2));
+      setSgzJsonError(null);
     }
-    
+  }, [sgzData]);
+  
+  useEffect(() => {
     if (painelData && painelData.length > 0) {
       setActivePainelSample(painelData[0]);
       setPainelJsonText(JSON.stringify(painelData, null, 2));
+      setPainelJsonError(null);
     }
-  }, [sgzData, painelData]);
+  }, [painelData]);
   
   if (!showPanel) return null;
   
@@ -72,34 +80,105 @@ const ChartDebugPanel: React.FC<ChartDebugPanelProps> = ({
   // Copy to clipboard
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
+    toast.success("Copiado para a área de transferência");
+  };
+  
+  // Reset to original data
+  const handleResetSgz = () => {
+    if (sgzData) {
+      setSgzJsonText(JSON.stringify(sgzData, null, 2));
+      setSgzJsonError(null);
+      toast.info("Dados SGZ restaurados ao original");
+    }
+  };
+  
+  const handleResetPainel = () => {
+    if (painelData) {
+      setPainelJsonText(JSON.stringify(painelData, null, 2));
+      setPainelJsonError(null);
+      toast.info("Dados do Painel restaurados ao original");
+    }
+  };
+  
+  // Validate JSON
+  const validateJson = (jsonString: string): { valid: boolean, error?: string } => {
+    try {
+      const parsed = JSON.parse(jsonString);
+      if (!Array.isArray(parsed)) {
+        return { valid: false, error: 'O JSON deve ser um array de objetos' };
+      }
+      return { valid: true };
+    } catch (error) {
+      return { valid: false, error: (error as Error).message };
+    }
+  };
+  
+  // Preview parsed JSON before saving
+  const previewParsedJson = (jsonString: string) => {
+    try {
+      const parsed = JSON.parse(jsonString);
+      toast.info(`Prévia: ${Array.isArray(parsed) ? parsed.length : 0} registros`);
+    } catch (error) {
+      toast.error("JSON inválido, não foi possível mostrar prévia");
+    }
   };
   
   // Handle saving mock data
   const handleSaveSgzMock = async () => {
+    // Validate JSON first
+    const validation = validateJson(sgzJsonText);
+    if (!validation.valid) {
+      setSgzJsonError(validation.error || "JSON inválido");
+      toast.error(`JSON inválido: ${validation.error}`);
+      return;
+    }
+    
     try {
+      setIsSavingSgz(true);
       const parsedData = JSON.parse(sgzJsonText);
+      
       if (onUpdateMockData) {
         await onUpdateMockData('sgz', parsedData);
         setEditingSgz(false);
-        toast.success('SGZ mock data atualizado com sucesso');
+        setSgzJsonError(null);
+        toast.success(`SGZ mock data atualizado com sucesso: ${parsedData.length} registros`);
+      } else {
+        toast.error("Função de atualização não disponível");
       }
     } catch (error) {
-      console.error('Error parsing SGZ JSON:', error);
-      toast.error('JSON inválido. Verifique a formatação.');
+      console.error('Error parsing or saving SGZ JSON:', error);
+      toast.error(`Erro ao salvar: ${(error as Error).message}`);
+    } finally {
+      setIsSavingSgz(false);
     }
   };
   
   const handleSavePainelMock = async () => {
+    // Validate JSON first
+    const validation = validateJson(painelJsonText);
+    if (!validation.valid) {
+      setPainelJsonError(validation.error || "JSON inválido");
+      toast.error(`JSON inválido: ${validation.error}`);
+      return;
+    }
+    
     try {
+      setIsSavingPainel(true);
       const parsedData = JSON.parse(painelJsonText);
+      
       if (onUpdateMockData) {
         await onUpdateMockData('painel', parsedData);
         setEditingPainel(false);
-        toast.success('Painel mock data atualizado com sucesso');
+        setPainelJsonError(null);
+        toast.success(`Painel mock data atualizado com sucesso: ${parsedData.length} registros`);
+      } else {
+        toast.error("Função de atualização não disponível");
       }
     } catch (error) {
-      console.error('Error parsing Painel JSON:', error);
-      toast.error('JSON inválido. Verifique a formatação.');
+      console.error('Error parsing or saving Painel JSON:', error);
+      toast.error(`Erro ao salvar: ${(error as Error).message}`);
+    } finally {
+      setIsSavingPainel(false);
     }
   };
   
@@ -183,9 +262,38 @@ const ChartDebugPanel: React.FC<ChartDebugPanelProps> = ({
                     size="sm"
                     className="text-xs bg-green-50 text-green-700 border-green-200 hover:bg-green-100"
                     onClick={handleSaveSgzMock}
+                    disabled={isSavingSgz}
                   >
-                    <Save className="w-3 h-3 mr-1" />
-                    Save Mock
+                    {isSavingSgz ? (
+                      <RefreshCw className="w-3 h-3 mr-1 animate-spin" />
+                    ) : (
+                      <Save className="w-3 h-3 mr-1" />
+                    )}
+                    Save
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="text-xs"
+                    onClick={() => handleResetSgz()}
+                  >
+                    <RotateCcw className="w-3 h-3 mr-1" />
+                    Reset
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="text-xs"
+                    onClick={() => {
+                      try {
+                        previewParsedJson(sgzJsonText);
+                      } catch (error) {
+                        // Already handled in previewParsedJson
+                      }
+                    }}
+                  >
+                    <Eye className="w-3 h-3 mr-1" />
+                    Preview
                   </Button>
                   <Button
                     variant="outline"
@@ -226,9 +334,18 @@ const ChartDebugPanel: React.FC<ChartDebugPanelProps> = ({
               </div>
               <Textarea 
                 value={sgzJsonText}
-                onChange={(e) => setSgzJsonText(e.target.value)}
+                onChange={(e) => {
+                  setSgzJsonText(e.target.value);
+                  setSgzJsonError(null); // Clear error on change
+                }}
                 className="font-mono text-xs bg-slate-900 text-white border-slate-700 h-[300px]"
               />
+              {sgzJsonError && (
+                <div className="mt-2 text-red-400 text-xs flex items-center">
+                  <AlertCircle className="w-3 h-3 mr-1" />
+                  {sgzJsonError}
+                </div>
+              )}
             </div>
           )}
         </TabsContent>
@@ -280,9 +397,38 @@ const ChartDebugPanel: React.FC<ChartDebugPanelProps> = ({
                     size="sm"
                     className="text-xs bg-green-50 text-green-700 border-green-200 hover:bg-green-100"
                     onClick={handleSavePainelMock}
+                    disabled={isSavingPainel}
                   >
-                    <Save className="w-3 h-3 mr-1" />
-                    Save Mock
+                    {isSavingPainel ? (
+                      <RefreshCw className="w-3 h-3 mr-1 animate-spin" />
+                    ) : (
+                      <Save className="w-3 h-3 mr-1" />
+                    )}
+                    Save
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="text-xs"
+                    onClick={() => handleResetPainel()}
+                  >
+                    <RotateCcw className="w-3 h-3 mr-1" />
+                    Reset
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="text-xs"
+                    onClick={() => {
+                      try {
+                        previewParsedJson(painelJsonText);
+                      } catch (error) {
+                        // Already handled in previewParsedJson
+                      }
+                    }}
+                  >
+                    <Eye className="w-3 h-3 mr-1" />
+                    Preview
                   </Button>
                   <Button
                     variant="outline"
@@ -323,9 +469,18 @@ const ChartDebugPanel: React.FC<ChartDebugPanelProps> = ({
               </div>
               <Textarea 
                 value={painelJsonText}
-                onChange={(e) => setPainelJsonText(e.target.value)}
+                onChange={(e) => {
+                  setPainelJsonText(e.target.value);
+                  setPainelJsonError(null); // Clear error on change
+                }}
                 className="font-mono text-xs bg-slate-900 text-white border-slate-700 h-[300px]"
               />
+              {painelJsonError && (
+                <div className="mt-2 text-red-400 text-xs flex items-center">
+                  <AlertCircle className="w-3 h-3 mr-1" />
+                  {painelJsonError}
+                </div>
+              )}
             </div>
           )}
         </TabsContent>
