@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { UploadResult, UploadProgressStats } from '../types/uploadTypes';
 import { 
@@ -201,5 +200,5 @@ function summarizeErrors(errors: ValidationError[]): Record<string, number> {
   return summary;
 }
 
-// Export the original functions
-export { handlePainelZeladoriaUpload } from '@/components/ranking/hooks/usePainelZeladoriaUpload';
+// Export the hook instead of a non-existent function
+export { usePainelZeladoriaUpload } from '@/hooks/ranking/usePainelZeladoriaUpload';
