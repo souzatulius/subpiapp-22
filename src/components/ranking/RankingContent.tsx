@@ -8,7 +8,6 @@ import DashboardCards from './insights/DashboardCards';
 import { useAnimatedFeedback } from '@/hooks/use-animated-feedback';
 import { useUploadState } from '@/hooks/ranking/useUploadState';
 import ChartDebugPanel from './charts/ChartDebugPanel';
-import { useDemoData } from './DemoDataProvider';
 import { toast } from 'sonner';
 
 interface RankingContentProps {
@@ -40,14 +39,6 @@ const RankingContent: React.FC<RankingContentProps> = ({
   
   const { lastRefreshTime } = useUploadState();
   const { showFeedback } = useAnimatedFeedback();
-  
-  // Get the demo data context when available (only inside DemoDataProvider)
-  let demoDataContext = null;
-  try {
-    demoDataContext = useDemoData();
-  } catch (error) {
-    console.log("RankingContent: DemoDataProvider context not available");
-  }
 
   // Log data availability for debugging
   useEffect(() => {
@@ -56,11 +47,9 @@ const RankingContent: React.FC<RankingContentProps> = ({
       sgzData: sgzData?.length || 0,
       painelData: painelData?.length || 0,
       isMockData,
-      isLoading,
-      demoDataAvailable: !!demoDataContext,
-      demoUpdateMockDataAvailable: !!(demoDataContext?.updateMockData)
+      isLoading
     });
-  }, [planilhaData, sgzData, painelData, isMockData, isLoading, demoDataContext]);
+  }, [planilhaData, sgzData, painelData, isMockData, isLoading]);
 
   const handleSimulateIdealRanking = () => {
     const wasActive = isSimulationActive;
@@ -115,17 +104,21 @@ const RankingContent: React.FC<RankingContentProps> = ({
   }, [isDebugVisible]);
   
   // Function to handle mock data updates - will be passed to the debug panel
-  const handleUpdateMockData = async (type: 'sgz' | 'painel', data: any[]) => {
+  const handleUpdateMockData = async (type: 'sgz' | 'painel', data: any[]): Promise<boolean> => {
     console.log(`RankingContent: Attempting to update ${type} mock data`);
     
-    if (!demoDataContext || !demoDataContext.updateMockData) {
-      console.error("updateMockData function is not available in the context");
-      toast.error("Função de atualização de dados mock não disponível. Verifique se o componente está dentro de DemoDataProvider.");
-      return false;
-    }
-    
     try {
-      await demoDataContext.updateMockData(type, data);
+      // We no longer have the DemoDataProvider, so we'll use refreshChartData directly
+      if (type === 'sgz') {
+        // Store in localStorage for persistence
+        localStorage.setItem('demo-sgz-data', JSON.stringify(data));
+        localStorage.setItem('demo-last-update', new Date().toISOString());
+        localStorage.setItem('demo-data-source', 'mock');
+      } else if (type === 'painel') {
+        localStorage.setItem('demo-painel-data', JSON.stringify(data));
+        localStorage.setItem('demo-last-update', new Date().toISOString());
+        localStorage.setItem('demo-data-source', 'mock');
+      }
       
       // Refresh charts after updating mock data
       if (onRefreshData) {
@@ -177,8 +170,13 @@ const RankingContent: React.FC<RankingContentProps> = ({
           painelData={painelData}
           isVisible={isDebugVisible}
           onUpdateMockData={handleUpdateMockData}
-          dataSource={demoDataContext?.dataSource || 'unknown'}
-          dataStatus={demoDataContext?.dataStatus || {}}
+          dataSource={isMockData ? 'mock' : 'supabase'}
+          dataStatus={{
+            sgzCount: sgzData?.length || 0,
+            painelCount: painelData?.length || 0,
+            lastSgzUpdate: lastRefreshTime ? lastRefreshTime.toISOString() : null,
+            lastPainelUpdate: lastRefreshTime ? lastRefreshTime.toISOString() : null
+          }}
           isLoading={isLoading}
         />
       )}

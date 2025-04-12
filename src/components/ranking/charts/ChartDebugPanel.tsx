@@ -62,7 +62,7 @@ const ChartDebugPanel: React.FC<ChartDebugPanelProps> = ({
   
   const handleSaveData = async (type: 'sgz' | 'painel') => {
     if (!onUpdateMockData) {
-      toast.error("Função de atualização não disponível. Verifique se o componente está dentro de DemoDataProvider.");
+      toast.error("Função de atualização não disponível");
       return;
     }
     
@@ -149,7 +149,7 @@ const ChartDebugPanel: React.FC<ChartDebugPanelProps> = ({
             <div className="mt-2 p-2 bg-amber-50 border border-amber-200 rounded-md text-amber-700 flex items-start">
               <AlertTriangle className="h-4 w-4 mr-1 flex-shrink-0 mt-0.5" />
               <div>
-                <span className="font-medium">Modo somente leitura:</span> Este componente não pode salvar alterações. Verifique se o componente está dentro de {`<DemoDataProvider>`}. Caso contrário, navegue para /zeladoria/ranking-subs para usar o modo de edição.
+                <span className="font-medium">Modo somente leitura:</span> Funcionalidade de edição indisponível.
               </div>
             </div>
           )}
@@ -192,13 +192,6 @@ const ChartDebugPanel: React.FC<ChartDebugPanelProps> = ({
               placeholder="Nenhum dado SGZ disponível"
               readOnly={isLoading || !sgzData}
             />
-            
-            {!canUpdateData && (
-              <div className="mt-2 text-xs text-amber-600">
-                <FileJson className="h-3 w-3 inline mr-1" />
-                Somente visualização. Para editar, verifique se o componente está dentro de DemoDataProvider.
-              </div>
-            )}
           </TabsContent>
 
           <TabsContent value="painel" className="mt-0">
@@ -227,13 +220,6 @@ const ChartDebugPanel: React.FC<ChartDebugPanelProps> = ({
               placeholder="Nenhum dado do Painel disponível"
               readOnly={isLoading || !painelData}
             />
-            
-            {!canUpdateData && (
-              <div className="mt-2 text-xs text-amber-600">
-                <FileJson className="h-3 w-3 inline mr-1" />
-                Somente visualização. Para editar, verifique se o componente está dentro de DemoDataProvider.
-              </div>
-            )}
           </TabsContent>
           
           <TabsContent value="status" className="mt-0">
