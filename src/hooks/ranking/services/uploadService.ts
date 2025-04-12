@@ -152,11 +152,56 @@ export const handlePainelZeladoriaUpload = async (
       message: 'Processando registros...'
     });
     
-    // Register the upload
+    // Try to use the transaction function for better consistency
+    try {
+      const { data: txnResult, error: txnError } = await supabase.rpc('create_painel_upload_with_data', {
+        p_usuario_email: user?.email || 'anonymous',
+        p_nome_arquivo: file.name,
+        p_dados: JSON.stringify(data)
+      });
+      
+      if (txnError) {
+        console.log('Transaction function error:', txnError);
+        // If error is about duplicate, we'll fall back to regular upload method
+        if (!txnError.message.includes('já foi carregado')) {
+          throw txnError;
+        }
+        // If it's a duplicate error, continue with the fallback below
+      } else {
+        // Success with transaction function
+        onProgress?.(100);
+        onStatsUpdate?.({
+          totalRows: data.length,
+          processingStatus: 'success',
+          message: `${data.length} registros processados com sucesso`,
+        });
+        
+        return {
+          success: true,
+          id: txnResult.id,
+          recordCount: txnResult.record_count || data.length,
+          message: 'Upload realizado com sucesso',
+          data: data,
+          newOrders: data.length,
+          updatedOrders: 0
+        };
+      }
+    } catch (txError) {
+      console.log('Trying fallback upload method after transaction error:', txError);
+      // Continue with fallback upload method
+    }
+    
+    // Fallback upload method - direct insert
+    // Generate a unique file name if needed
+    const fileName = file.name;
+    const timestamp = new Date().toISOString().replace(/[:.-]/g, '_');
+    const uniqueFileName = `${fileName.split('.')[0]}_${timestamp}.${fileName.split('.').pop()}`;
+    
+    // Register the upload with unique name
     const { data: uploadData, error: uploadError } = await supabase
       .from('painel_zeladoria_uploads')
       .insert({
-        nome_arquivo: file.name,
+        nome_arquivo: uniqueFileName,
         usuario_email: user?.email || 'anonymous'
       })
       .select('id')

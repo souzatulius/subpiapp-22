@@ -51,6 +51,8 @@ const CleanDataDialog: React.FC<CleanDataDialogProps> = ({
         return;
       }
       
+      console.log("Clean data result:", data);
+      
       // Success
       showFeedback('success', 'Dados limpos com sucesso', { duration: 2000 });
       onSuccess();

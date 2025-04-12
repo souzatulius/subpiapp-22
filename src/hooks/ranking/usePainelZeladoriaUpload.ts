@@ -97,13 +97,52 @@ export const usePainelZeladoriaUpload = (user: User | null) => {
 
       if (error) {
         console.error('Erro na função de upload:', error);
-        showFeedback('error', `Erro ao processar upload: ${error.message || 'Erro desconhecido'}`, { duration: 3000 });
-        setPainelProgress({
-          ...painelProgress!,
-          stage: 'error',
-          message: `Erro ao processar upload: ${error.message || 'Erro desconhecido'}`
-        });
-        return null;
+        // Check if the error is related to duplicate file
+        if (error.message && error.message.includes('já foi carregado')) {
+          // Use a modified filename to force uniqueness
+          const timestamp = new Date().toISOString().replace(/[:.-]/g, '_');
+          const ext = file.name.lastIndexOf('.') > 0 
+            ? file.name.substring(file.name.lastIndexOf('.'))
+            : '';
+          const baseName = file.name.lastIndexOf('.') > 0
+            ? file.name.substring(0, file.name.lastIndexOf('.'))
+            : file.name;
+          
+          const uniqueFileName = `${baseName}_${timestamp}${ext}`;
+          
+          showFeedback('info', 'Arquivo já existe, tentando com nome único...', { duration: 1500 });
+          
+          // Retry with unique filename
+          const { data: retryData, error: retryError } = await supabase.functions.invoke("create_painel_upload_with_data", {
+            body: {
+              p_usuario_email: user.email,
+              p_nome_arquivo: uniqueFileName,
+              p_dados: dadosPainel
+            }
+          });
+          
+          if (retryError) {
+            showFeedback('error', `Erro ao processar upload: ${retryError.message || 'Erro desconhecido'}`, { duration: 3000 });
+            setPainelProgress({
+              ...painelProgress!,
+              stage: 'error',
+              message: `Erro ao processar upload: ${retryError.message || 'Erro desconhecido'}`
+            });
+            return null;
+          }
+          
+          // Use the retry data from now on
+          data = retryData;
+        } else {
+          // For other errors, just show the error
+          showFeedback('error', `Erro ao processar upload: ${error.message || 'Erro desconhecido'}`, { duration: 3000 });
+          setPainelProgress({
+            ...painelProgress!,
+            stage: 'error',
+            message: `Erro ao processar upload: ${error.message || 'Erro desconhecido'}`
+          });
+          return null;
+        }
       }
       
       if (!data || data.error) {

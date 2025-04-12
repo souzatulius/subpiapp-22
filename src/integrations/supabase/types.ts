@@ -2540,6 +2540,10 @@ export type Database = {
         Args: { service_type: string }
         Returns: string
       }
+      clean_zeladoria_data: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
       create_default_permissions: {
         Args: Record<PropertyKey, never>
         Returns: undefined
