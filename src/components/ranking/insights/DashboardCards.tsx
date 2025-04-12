@@ -36,7 +36,7 @@ const DashboardCards: React.FC<DashboardCardsProps> = ({
       const currentValue = parseFloat(simulated.fechadas.valor) || 0;
       const newValue = Math.min(currentValue + 15, 100); // Cap at 100%
       simulated.fechadas.valor = `${newValue.toFixed(1)}%`;
-      simulated.fechadas.comentario = "Ordens de serviço finalizadas oficialmente";
+      simulated.fechadas.comentario = "Finalizadas oficialmente";
       simulated.fechadas.trend = "up";
     }
     
@@ -45,7 +45,7 @@ const DashboardCards: React.FC<DashboardCardsProps> = ({
       const currentValue = parseFloat(simulated.pendentes.valor) || 0;
       const newValue = Math.max(currentValue - 10, 0); // Minimum 0%
       simulated.pendentes.valor = `${newValue.toFixed(1)}%`;
-      simulated.pendentes.comentario = "Ainda em aberto, aguardando solução";
+      simulated.pendentes.comentario = "Aguardando solução";
       simulated.pendentes.trend = "down";
     }
     
@@ -54,7 +54,7 @@ const DashboardCards: React.FC<DashboardCardsProps> = ({
       const currentValue = parseFloat(simulated.canceladas.valor) || 0;
       const newValue = Math.max(currentValue - 5, 0); // Minimum 0%
       simulated.canceladas.valor = `${newValue.toFixed(1)}%`;
-      simulated.canceladas.comentario = "Solicitações encerradas sem execução";
+      simulated.canceladas.comentario = "Encerradas sem execução";
       simulated.canceladas.trend = "down";
     }
     
@@ -63,7 +63,7 @@ const DashboardCards: React.FC<DashboardCardsProps> = ({
       const currentValue = parseFloat(simulated.prazo_medio.valor.split(' ')[0]) || 0;
       const newValue = Math.max(currentValue * 0.7, 1); // At least 1 day
       simulated.prazo_medio.valor = `${newValue.toFixed(1)} dias`;
-      simulated.prazo_medio.comentario = "Média de dias entre abertura e execução das ordens";
+      simulated.prazo_medio.comentario = "Tempo médio até execução";
       simulated.prazo_medio.trend = "down";
     }
     
@@ -71,8 +71,8 @@ const DashboardCards: React.FC<DashboardCardsProps> = ({
       // Reduce overdue orders by 40%
       const currentValue = parseFloat(simulated.fora_do_prazo.valor.split(' ')[0]) || 0;
       const newValue = Math.max(currentValue * 0.6, 0); // Minimum 0
-      simulated.fora_do_prazo.valor = `${newValue.toFixed(0)} OS`;
-      simulated.fora_do_prazo.comentario = "Ultrapassaram o prazo de atendimento";
+      simulated.fora_do_prazo.valor = `${newValue.toFixed(0)}`;
+      simulated.fora_do_prazo.comentario = "Ultrapassaram período";
       simulated.fora_do_prazo.trend = "down";
     }
     
@@ -150,7 +150,7 @@ const DashboardCards: React.FC<DashboardCardsProps> = ({
         <InsightCard 
           title="OS Fechadas" 
           value={simulatedIndicadores?.fechadas?.valor || '0%'} 
-          comment={simulatedIndicadores?.fechadas?.comentario || 'Ordens de serviço finalizadas oficialmente'} 
+          comment={simulatedIndicadores?.fechadas?.comentario || 'Finalizadas oficialmente'} 
           isLoading={isLoading || isRefreshing} 
           isSimulated={isSimulationActive}
           trend={simulatedIndicadores?.fechadas?.trend}
@@ -158,7 +158,7 @@ const DashboardCards: React.FC<DashboardCardsProps> = ({
         <InsightCard 
           title="OS Pendentes" 
           value={simulatedIndicadores?.pendentes?.valor || '0%'} 
-          comment={simulatedIndicadores?.pendentes?.comentario || 'Ainda em aberto, aguardando solução'} 
+          comment={simulatedIndicadores?.pendentes?.comentario || 'Aguardando solução'} 
           isLoading={isLoading || isRefreshing} 
           isSimulated={isSimulationActive}
           trend={simulatedIndicadores?.pendentes?.trend}
@@ -166,23 +166,23 @@ const DashboardCards: React.FC<DashboardCardsProps> = ({
         <InsightCard 
           title="OS Canceladas" 
           value={simulatedIndicadores?.canceladas?.valor || '0%'} 
-          comment={simulatedIndicadores?.canceladas?.comentario || 'Solicitações encerradas sem execução'} 
+          comment={simulatedIndicadores?.canceladas?.comentario || 'Encerradas sem execução'} 
           isLoading={isLoading || isRefreshing} 
           isSimulated={isSimulationActive}
           trend={simulatedIndicadores?.canceladas?.trend}
         />
         <InsightCard 
-          title="Tempo de Atendimento" 
+          title="Atendimento" 
           value={simulatedIndicadores?.prazo_medio?.valor || '0 dias'} 
-          comment={simulatedIndicadores?.prazo_medio?.comentario || 'Média de dias entre abertura e execução das ordens'} 
+          comment={simulatedIndicadores?.prazo_medio?.comentario || 'Tempo médio até execução'} 
           isLoading={isLoading || isRefreshing} 
           isSimulated={isSimulationActive}
           trend={simulatedIndicadores?.prazo_medio?.trend}
         />
         <InsightCard 
           title="OS Fora do Prazo" 
-          value={simulatedIndicadores?.fora_do_prazo?.valor || '0 OS'} 
-          comment={simulatedIndicadores?.fora_do_prazo?.comentario || 'Ultrapassaram o prazo de atendimento'} 
+          value={simulatedIndicadores?.fora_do_prazo?.valor || '0'} 
+          comment={simulatedIndicadores?.fora_do_prazo?.comentario || 'Ultrapassaram período'} 
           isLoading={isLoading || isRefreshing} 
           isSimulated={isSimulationActive}
           trend={simulatedIndicadores?.fora_do_prazo?.trend}

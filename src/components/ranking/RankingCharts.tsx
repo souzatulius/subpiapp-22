@@ -83,24 +83,30 @@ const RankingCharts: React.FC<RankingChartsProps> = ({
   return (
     <Card className="p-4 bg-white border-orange-200 shadow-sm overflow-hidden hover:shadow-md transition-all">
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-lg font-semibold text-orange-700 flex items-center">
+        <h2 className="text-lg font-semibold text-orange-800 flex items-center">
           <BarChart3 className="h-5 w-5 mr-2 text-orange-500" />
           Análise de Desempenho
         </h2>
         <div className="flex items-center gap-2">
           <Button 
             variant={showOnlySubprefeitura ? "default" : "outline"}
-            className={`flex items-center gap-2 ${showOnlySubprefeitura ? 'bg-green-600 hover:bg-green-700' : 'border-green-300 text-green-700 hover:bg-green-50'}`}
+            className={`flex items-center gap-2 rounded-lg ${
+              showOnlySubprefeitura 
+                ? 'bg-blue-900 hover:bg-blue-800 text-white' 
+                : 'border-blue-900 text-blue-900 hover:bg-blue-50'
+            }`}
             onClick={() => setShowOnlySubprefeitura(!showOnlySubprefeitura)}
+            title="Considerar apenas dados da subprefeitura"
           >
             <Building2 className="h-4 w-4" />
-            {showOnlySubprefeitura ? 'Mostrando Apenas Subprefeitura' : 'Mostrar Apenas Subprefeitura'}
+            Apenas Sub
           </Button>
           
           <Button 
             variant="outline" 
-            className={`flex items-center gap-2 border ${isSimulationActive ? 'bg-orange-100 text-orange-700 border-orange-300' : 'text-gray-600'}`}
+            className={`flex items-center gap-2 border rounded-lg ${isSimulationActive ? 'bg-orange-100 text-orange-700 border-orange-300' : 'text-gray-600'}`}
             onClick={onSimulateIdealRanking}
+            title="Como seria o ranking com dados corretos"
           >
             <RefreshCw className="h-4 w-4" />
             {isSimulationActive ? 'Desativar Simulação' : 'Simular Ranking Ideal'}
@@ -109,27 +115,34 @@ const RankingCharts: React.FC<RankingChartsProps> = ({
       </div>
 
       <Tabs defaultValue="performance" className="w-full" onValueChange={setActiveTab}>
-        <TabsList className="w-full mb-6 bg-orange-50 p-1 border border-orange-100">
+        <TabsList className="w-full mb-6 bg-orange-50 p-1 border border-orange-100 rounded-lg">
           <TabsTrigger 
             value="performance" 
-            className="flex-1 data-[state=active]:bg-orange-500 data-[state=active]:text-white"
+            className="flex-1 data-[state=active]:bg-orange-500 data-[state=active]:text-white rounded-lg"
           >
             <ActivitySquare className="h-4 w-4 mr-2" /> 
-            Performance e Eficiência
+            Eficiência
           </TabsTrigger>
           <TabsTrigger 
             value="territories" 
-            className="flex-1 data-[state=active]:bg-orange-500 data-[state=active]:text-white"
+            className="flex-1 data-[state=active]:bg-orange-500 data-[state=active]:text-white rounded-lg"
           >
             <MapPin className="h-4 w-4 mr-2" /> 
-            Territórios e Serviços
+            Localização
+          </TabsTrigger>
+          <TabsTrigger 
+            value="services"
+            className="flex-1 data-[state=active]:bg-orange-500 data-[state=active]:text-white rounded-lg"
+          >
+            <Briefcase className="h-4 w-4 mr-2" />
+            Serviços
           </TabsTrigger>
           <TabsTrigger 
             value="critical" 
-            className="flex-1 data-[state=active]:bg-orange-500 data-[state=active]:text-white"
+            className="flex-1 data-[state=active]:bg-orange-500 data-[state=active]:text-white rounded-lg"
           >
             <Network className="h-4 w-4 mr-2" /> 
-            Fluxos Críticos
+            Problemas
           </TabsTrigger>
         </TabsList>
 
@@ -179,7 +192,7 @@ const RankingCharts: React.FC<RankingChartsProps> = ({
           </div>
         </TabsContent>
 
-        {/* Territories & Services Tab */}
+        {/* Territories & Location Tab */}
         <TabsContent value="territories" className="mt-0">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {chartVisibility.districtPerformance && (
@@ -192,6 +205,12 @@ const RankingCharts: React.FC<RankingChartsProps> = ({
                 onToggleAnalysis={() => toggleAnalysis('districtPerformance')}
               />
             )}
+          </div>
+        </TabsContent>
+
+        {/* Services Tab */}
+        <TabsContent value="services" className="mt-0">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {chartVisibility.serviceTypes && (
               <ServiceTypesChart 
                 data={emptyData} 
@@ -215,7 +234,7 @@ const RankingCharts: React.FC<RankingChartsProps> = ({
           </div>
         </TabsContent>
 
-        {/* Critical Flows Tab */}
+        {/* Critical Issues Tab */}
         <TabsContent value="critical" className="mt-0">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {chartVisibility.responsibility && (

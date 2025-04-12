@@ -22,6 +22,11 @@ const InsightCard: React.FC<InsightCardProps> = ({
   trend,
   isSimulated = false
 }) => {
+  // Format value to use commas instead of periods for decimal separator (Brazilian format)
+  const formatValue = (val: string): string => {
+    return val.replace('.', ',');
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}
@@ -33,7 +38,7 @@ const InsightCard: React.FC<InsightCardProps> = ({
       }`}>
         <div className="p-4">
           <div className="flex items-center justify-between">
-            <h3 className={`text-sm font-medium ${isSimulated ? 'text-orange-700' : 'text-blue-700'}`}>
+            <h3 className={`text-sm font-medium text-blue-900`}>
               {title}
             </h3>
             {trend && (
@@ -69,8 +74,8 @@ const InsightCard: React.FC<InsightCardProps> = ({
               animate={{ opacity: 1 }}
               transition={{ delay: 0.2, duration: 0.3 }}
             >
-              <p className={`text-2xl font-bold mt-1 ${isSimulated ? 'text-orange-800' : 'text-blue-900'}`}>
-                {value}
+              <p className={`text-2xl font-bold mt-1 text-orange-500`}>
+                {isSimulated ? formatValue(value) : value}
               </p>
               <p className="text-xs mt-1.5 text-gray-500">{comment}</p>
             </motion.div>

@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import Header from '@/components/layouts/Header';
 import DashboardSidebar from '@/components/dashboard/DashboardSidebar';
 import RankingContent from '@/components/ranking/RankingContent';
-import { BarChart3, SlidersHorizontal, Printer, FileText } from 'lucide-react';
+import { BarChart3, SlidersHorizontal, Printer, FileText, RefreshCw } from 'lucide-react';
 import WelcomeCard from '@/components/shared/WelcomeCard';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
@@ -175,6 +175,18 @@ const RankingSubs = () => {
           description="Acompanhamento de desempenho e análises de ações, projetos e obras."
           icon={<BarChart3 className="h-6 w-6 mr-2 text-white" />}
           color="bg-gradient-to-r from-orange-500 to-orange-700"
+          rightContent={
+            <Button
+              variant="outline"
+              size="icon"
+              className="bg-white/20 text-white border-white/30 hover:bg-white/30"
+              onClick={handleRefreshData}
+              disabled={isRefreshing || isUploading}
+              title="Atualizar Dados"
+            >
+              <RefreshCw className={`h-5 w-5 ${isRefreshing ? 'animate-spin' : ''}`} />
+            </Button>
+          }
         />
         
         {/* Upload Section in Collapsible */}
@@ -208,7 +220,7 @@ const RankingSubs = () => {
           <Button
             variant="outline"
             size="icon"
-            className="bg-white hover:bg-gray-100 border-gray-200"
+            className="bg-white hover:bg-gray-100 border-gray-200 rounded-lg"
             onClick={handlePrint}
           >
             <Printer className="h-5 w-5 text-gray-600" />
@@ -217,7 +229,7 @@ const RankingSubs = () => {
           <Button
             variant="outline"
             size="icon"
-            className="bg-white hover:bg-gray-100 border-gray-200"
+            className="bg-white hover:bg-gray-100 border-gray-200 rounded-lg"
             onClick={handleExportPDF}
           >
             <FileText className="h-5 w-5 text-gray-600" />
@@ -226,20 +238,10 @@ const RankingSubs = () => {
           <Button
             variant="outline"
             size="icon"
-            className="bg-white hover:bg-gray-100 border-gray-200"
+            className="bg-white hover:bg-gray-100 border-gray-200 rounded-lg"
             onClick={() => setFilterDialogOpen(true)}
           >
             <SlidersHorizontal className="h-5 w-5 text-gray-600" />
-          </Button>
-
-          <Button
-            variant="outline"
-            size="sm"
-            className="bg-white hover:bg-gray-100 border-gray-200"
-            onClick={handleRefreshData}
-            disabled={isRefreshing}
-          >
-            {isRefreshing ? 'Atualizando...' : 'Atualizar'}
           </Button>
         </div>
         
