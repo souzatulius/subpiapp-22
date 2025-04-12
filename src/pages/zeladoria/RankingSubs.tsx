@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import Header from '@/components/layouts/Header';
 import DashboardSidebar from '@/components/dashboard/DashboardSidebar';
@@ -432,6 +431,11 @@ const RankingContentWithDebug = ({
     dataStatus
   } = useDemoData();
   
+  // Log to verify we have updateMockData
+  useEffect(() => {
+    console.log("RankingContentWithDebug: updateMockData function available:", !!updateMockData);
+  }, [updateMockData]);
+  
   // Handle mock data update and perform refresh
   const handleUpdateMockData = async (type: 'sgz' | 'painel', data: any[]) => {
     console.log(`RankingContentWithDebug: Updating ${type} mock data, updateMockData available:`, !!updateMockData);
@@ -482,7 +486,7 @@ const RankingContentWithDebug = ({
           painelData={painelData}
           isVisible={showDebugPanel}
           isLoading={isLoading}
-          onUpdateMockData={handleUpdateMockData} // Pass the handler function
+          onUpdateMockData={updateMockData} // Pass the update function directly 
           dataSource={dataSource}
           dataStatus={dataStatus}
         />

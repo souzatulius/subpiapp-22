@@ -8,6 +8,7 @@ import DashboardCards from './insights/DashboardCards';
 import { useAnimatedFeedback } from '@/hooks/use-animated-feedback';
 import { useUploadState } from '@/hooks/ranking/useUploadState';
 import ChartDebugPanel from './charts/ChartDebugPanel';
+import { useDemoData } from './DemoDataProvider';
 
 interface RankingContentProps {
   filterDialogOpen: boolean;
@@ -38,6 +39,14 @@ const RankingContent: React.FC<RankingContentProps> = ({
   
   const { lastRefreshTime } = useUploadState();
   const { showFeedback } = useAnimatedFeedback();
+  
+  // Get the demo data context when available (only inside DemoDataProvider)
+  let demoDataContext = null;
+  try {
+    demoDataContext = useDemoData();
+  } catch (error) {
+    console.log("RankingContent: DemoDataProvider context not available");
+  }
 
   // Log data availability for debugging
   useEffect(() => {
@@ -46,9 +55,10 @@ const RankingContent: React.FC<RankingContentProps> = ({
       sgzData: sgzData?.length || 0,
       painelData: painelData?.length || 0,
       isMockData,
-      isLoading
+      isLoading,
+      demoDataAvailable: !!demoDataContext
     });
-  }, [planilhaData, sgzData, painelData, isMockData, isLoading]);
+  }, [planilhaData, sgzData, painelData, isMockData, isLoading, demoDataContext]);
 
   const handleSimulateIdealRanking = () => {
     const wasActive = isSimulationActive;
@@ -120,11 +130,17 @@ const RankingContent: React.FC<RankingContentProps> = ({
         onToggleChartVisibility={toggleChartVisibility}
       />
       
-      <ChartDebugPanel 
-        sgzData={sgzData || planilhaData} 
-        painelData={painelData}
-        isVisible={isDebugVisible} 
-      />
+      {/* Only render the debug panel if we have access to the updateMockData function */}
+      {isDebugVisible && (
+        <ChartDebugPanel 
+          sgzData={sgzData || planilhaData} 
+          painelData={painelData}
+          isVisible={isDebugVisible}
+          onUpdateMockData={demoDataContext?.updateMockData}
+          dataSource={demoDataContext?.dataSource}
+          dataStatus={demoDataContext?.dataStatus}
+        />
+      )}
     </div>
   );
 };

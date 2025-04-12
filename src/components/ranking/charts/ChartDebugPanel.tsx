@@ -53,6 +53,9 @@ const ChartDebugPanel: React.FC<ChartDebugPanelProps> = ({
   const [isSavingSgz, setIsSavingSgz] = useState<boolean>(false);
   const [isSavingPainel, setIsSavingPainel] = useState<boolean>(false);
   
+  // Flag to track if update function is available
+  const canUpdate = !!onUpdateMockData;
+  
   // Update panel visibility when prop changes
   useEffect(() => {
     setShowPanel(isVisible);
@@ -78,7 +81,12 @@ const ChartDebugPanel: React.FC<ChartDebugPanelProps> = ({
   // Debug log to verify that onUpdateMockData is available
   useEffect(() => {
     console.log("ChartDebugPanel mounted, onUpdateMockData available:", !!onUpdateMockData);
-  }, [onUpdateMockData]);
+    
+    // Show warning toast if function is not available
+    if (!onUpdateMockData && (editingSgz || editingPainel)) {
+      toast.warning("Função de atualização não disponível. Você pode editar os dados, mas não poderá salvá-los.");
+    }
+  }, [onUpdateMockData, editingSgz, editingPainel]);
   
   if (!showPanel) return null;
   
@@ -188,6 +196,13 @@ const ChartDebugPanel: React.FC<ChartDebugPanelProps> = ({
     // Log the function availability
     console.log("Attempting to save SGZ mock data, onUpdateMockData available:", !!onUpdateMockData);
     
+    // Check if update function is available
+    if (!onUpdateMockData) {
+      toast.error("Função de atualização não disponível. Verifique se o componente está dentro de DemoDataProvider.");
+      setActiveTab('status');
+      return;
+    }
+    
     // Validate JSON first
     const jsonValidation = validateJson(sgzJsonText);
     if (!jsonValidation.valid) {
@@ -208,26 +223,21 @@ const ChartDebugPanel: React.FC<ChartDebugPanelProps> = ({
       setIsSavingSgz(true);
       const parsedData = JSON.parse(sgzJsonText);
       
-      if (onUpdateMockData) {
-        // Save to localStorage first to ensure data is not lost
-        try {
-          localStorage.setItem(STORAGE_KEY_SGZ, JSON.stringify(parsedData));
-          localStorage.setItem(STORAGE_KEY_LAST_UPDATE, new Date().toISOString());
-          localStorage.setItem(STORAGE_KEY_DATA_SOURCE, 'mock');
-        } catch (storageError) {
-          console.error("Error saving to localStorage:", storageError);
-          // Continue with update anyway
-        }
-        
-        await onUpdateMockData('sgz', parsedData);
-        setEditingSgz(false);
-        setSgzJsonError(null);
-        setActiveTab('status'); // Switch to status tab to show updated information
-        toast.success("Dados SGZ atualizados com sucesso!");
-      } else {
-        console.error("Update mock data function not available");
-        toast.error("Função de atualização não disponível. Verifique se o componente está dentro de DemoDataProvider.");
+      // Save to localStorage first to ensure data is not lost
+      try {
+        localStorage.setItem(STORAGE_KEY_SGZ, JSON.stringify(parsedData));
+        localStorage.setItem(STORAGE_KEY_LAST_UPDATE, new Date().toISOString());
+        localStorage.setItem(STORAGE_KEY_DATA_SOURCE, 'mock');
+      } catch (storageError) {
+        console.error("Error saving to localStorage:", storageError);
+        // Continue with update anyway
       }
+      
+      await onUpdateMockData('sgz', parsedData);
+      setEditingSgz(false);
+      setSgzJsonError(null);
+      setActiveTab('status'); // Switch to status tab to show updated information
+      toast.success("Dados SGZ atualizados com sucesso!");
     } catch (error) {
       console.error('Error parsing or saving SGZ JSON:', error);
       toast.error(`Erro ao salvar: ${(error as Error).message}`);
@@ -239,6 +249,13 @@ const ChartDebugPanel: React.FC<ChartDebugPanelProps> = ({
   const handleSavePainelMock = async () => {
     // Log the function availability
     console.log("Attempting to save Painel mock data, onUpdateMockData available:", !!onUpdateMockData);
+    
+    // Check if update function is available
+    if (!onUpdateMockData) {
+      toast.error("Função de atualização não disponível. Verifique se o componente está dentro de DemoDataProvider.");
+      setActiveTab('status');
+      return;
+    }
     
     // Validate JSON first
     const jsonValidation = validateJson(painelJsonText);
@@ -260,26 +277,21 @@ const ChartDebugPanel: React.FC<ChartDebugPanelProps> = ({
       setIsSavingPainel(true);
       const parsedData = JSON.parse(painelJsonText);
       
-      if (onUpdateMockData) {
-        // Save to localStorage first to ensure data is not lost
-        try {
-          localStorage.setItem(STORAGE_KEY_PAINEL, JSON.stringify(parsedData));
-          localStorage.setItem(STORAGE_KEY_LAST_UPDATE, new Date().toISOString());
-          localStorage.setItem(STORAGE_KEY_DATA_SOURCE, 'mock');
-        } catch (storageError) {
-          console.error("Error saving to localStorage:", storageError);
-          // Continue with update anyway
-        }
-        
-        await onUpdateMockData('painel', parsedData);
-        setEditingPainel(false);
-        setPainelJsonError(null);
-        setActiveTab('status'); // Switch to status tab to show updated information
-        toast.success("Dados do Painel atualizados com sucesso!");
-      } else {
-        console.error("Update mock data function not available");
-        toast.error("Função de atualização não disponível. Verifique se o componente está dentro de DemoDataProvider.");
+      // Save to localStorage first to ensure data is not lost
+      try {
+        localStorage.setItem(STORAGE_KEY_PAINEL, JSON.stringify(parsedData));
+        localStorage.setItem(STORAGE_KEY_LAST_UPDATE, new Date().toISOString());
+        localStorage.setItem(STORAGE_KEY_DATA_SOURCE, 'mock');
+      } catch (storageError) {
+        console.error("Error saving to localStorage:", storageError);
+        // Continue with update anyway
       }
+      
+      await onUpdateMockData('painel', parsedData);
+      setEditingPainel(false);
+      setPainelJsonError(null);
+      setActiveTab('status'); // Switch to status tab to show updated information
+      toast.success("Dados do Painel atualizados com sucesso!");
     } catch (error) {
       console.error('Error parsing or saving Painel JSON:', error);
       toast.error(`Erro ao salvar: ${(error as Error).message}`);
@@ -316,6 +328,12 @@ const ChartDebugPanel: React.FC<ChartDebugPanelProps> = ({
           <Badge variant="outline" className={`ml-2 ${getDataSourceBadgeColor()}`}>
             {getDataSourceLabel()}
           </Badge>
+          {!canUpdate && (
+            <Badge variant="outline" className="ml-2 bg-red-100 text-red-800 border-red-300">
+              <AlertCircle className="w-3 h-3 mr-1" />
+              Apenas Leitura
+            </Badge>
+          )}
         </div>
         <div className="flex items-center gap-2">
           {isLoading && (
@@ -392,16 +410,16 @@ const ChartDebugPanel: React.FC<ChartDebugPanelProps> = ({
                   <Button
                     variant="outline"
                     size="sm"
-                    className="text-xs bg-green-50 text-green-700 border-green-200 hover:bg-green-100"
+                    className={`text-xs ${canUpdate ? 'bg-green-50 text-green-700 border-green-200 hover:bg-green-100' : 'bg-gray-50 text-gray-400'}`}
                     onClick={handleSaveSgzMock}
-                    disabled={isSavingSgz}
+                    disabled={isSavingSgz || !canUpdate}
                   >
                     {isSavingSgz ? (
                       <RefreshCw className="w-3 h-3 mr-1 animate-spin" />
                     ) : (
                       <Save className="w-3 h-3 mr-1" />
                     )}
-                    Save
+                    Save {!canUpdate && "(Indisponível)"}
                   </Button>
                   <Button
                     variant="outline"
@@ -478,6 +496,12 @@ const ChartDebugPanel: React.FC<ChartDebugPanelProps> = ({
                   {sgzJsonError}
                 </div>
               )}
+              {!canUpdate && (
+                <div className="mt-2 text-yellow-400 text-xs flex items-center">
+                  <AlertCircle className="w-3 h-3 mr-1" />
+                  Você está no modo somente leitura. Para salvar alterações, verifique se o componente está dentro de DemoDataProvider.
+                </div>
+              )}
             </div>
           )}
         </TabsContent>
@@ -527,16 +551,16 @@ const ChartDebugPanel: React.FC<ChartDebugPanelProps> = ({
                   <Button
                     variant="outline"
                     size="sm"
-                    className="text-xs bg-green-50 text-green-700 border-green-200 hover:bg-green-100"
+                    className={`text-xs ${canUpdate ? 'bg-green-50 text-green-700 border-green-200 hover:bg-green-100' : 'bg-gray-50 text-gray-400'}`}
                     onClick={handleSavePainelMock}
-                    disabled={isSavingPainel}
+                    disabled={isSavingPainel || !canUpdate}
                   >
                     {isSavingPainel ? (
                       <RefreshCw className="w-3 h-3 mr-1 animate-spin" />
                     ) : (
                       <Save className="w-3 h-3 mr-1" />
                     )}
-                    Save
+                    Save {!canUpdate && "(Indisponível)"}
                   </Button>
                   <Button
                     variant="outline"
@@ -613,6 +637,12 @@ const ChartDebugPanel: React.FC<ChartDebugPanelProps> = ({
                   {painelJsonError}
                 </div>
               )}
+              {!canUpdate && (
+                <div className="mt-2 text-yellow-400 text-xs flex items-center">
+                  <AlertCircle className="w-3 h-3 mr-1" />
+                  Você está no modo somente leitura. Para salvar alterações, verifique se o componente está dentro de DemoDataProvider.
+                </div>
+              )}
             </div>
           )}
         </TabsContent>
@@ -632,6 +662,12 @@ const ChartDebugPanel: React.FC<ChartDebugPanelProps> = ({
                   <span className="text-sm">Fonte:</span>
                   <Badge className={getDataSourceBadgeColor()}>
                     {getDataSourceLabel()}
+                  </Badge>
+                </div>
+                <div className="flex items-center justify-between mt-2">
+                  <span className="text-sm">Edição:</span>
+                  <Badge className={canUpdate ? 'bg-green-100 text-green-800 border-green-300' : 'bg-red-100 text-red-800 border-red-300'}>
+                    {canUpdate ? 'Habilitada' : 'Desabilitada'}
                   </Badge>
                 </div>
               </div>
@@ -717,6 +753,22 @@ const ChartDebugPanel: React.FC<ChartDebugPanelProps> = ({
                     <Copy className="w-3 h-3 mr-1" />
                     Copiar Status
                   </Button>
+                  
+                  {!canUpdate && (
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="text-xs bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100"
+                      onClick={() => {
+                        toast.info("Para habilitar a edição, garanta que este componente esteja usado dentro da página 'zeladoria/RankingSubs.tsx', e não 'dashboard/zeladoria/RankingSubs.tsx'.", {
+                          duration: 5000
+                        });
+                      }}
+                    >
+                      <Info className="w-3 h-3 mr-1" />
+                      Sobre o Modo Somente Leitura
+                    </Button>
+                  )}
                 </div>
               </div>
             </div>
@@ -748,6 +800,9 @@ const ChartDebugPanel: React.FC<ChartDebugPanelProps> = ({
    - ChartDebugPanel: permite edição e visualização de dados
 
 Origem atual: ${getDataSourceLabel()}
+Status da edição: ${canUpdate ? 'Habilitada' : 'Desabilitada'}
+
+${!canUpdate ? '⚠️ IMPORTANTE: A edição só está disponível na página /zeladoria/ranking-subs, não em /dashboard/zeladoria/ranking-subs' : ''}
 `}
               </pre>
             </div>
