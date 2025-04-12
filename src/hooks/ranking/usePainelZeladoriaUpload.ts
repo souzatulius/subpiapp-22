@@ -90,17 +90,29 @@ export const usePainelZeladoriaUpload = (user: User | null) => {
       let responseData;
       let responseError;
       
-      // Initial request
-      const initialResponse = await supabase.functions.invoke("create_painel_upload_with_data", {
-        body: {
-          p_usuario_email: user.email,
-          p_nome_arquivo: file.name,
-          p_dados: dadosPainel
-        }
-      });
-      
-      responseData = initialResponse.data;
-      responseError = initialResponse.error;
+      try {
+        // Initial request
+        const initialResponse = await supabase.functions.invoke("create_painel_upload_with_data", {
+          body: {
+            p_usuario_email: user.email,
+            p_nome_arquivo: file.name,
+            p_dados: dadosPainel
+          }
+        });
+        
+        responseData = initialResponse.data;
+        responseError = initialResponse.error;
+      } catch (err: any) {
+        console.error('Exception during function invocation:', err);
+        showFeedback('error', `Erro na chamada: ${err.message || 'Erro desconhecido'}`, { duration: 3000 });
+        setPainelProgress({
+          ...painelProgress!,
+          stage: 'error',
+          message: `Erro na chamada: ${err.message || 'Erro desconhecido'}`
+        });
+        setIsUploading(false);
+        return null;
+      }
 
       if (responseError) {
         console.error('Erro na função de upload:', responseError);
@@ -120,36 +132,48 @@ export const usePainelZeladoriaUpload = (user: User | null) => {
           // Changed from 'info' to 'loading' to match FeedbackType
           showFeedback('loading', 'Arquivo já existe, tentando com nome único...', { duration: 1500 });
           
-          // Retry with unique filename
-          const retryResponse = await supabase.functions.invoke("create_painel_upload_with_data", {
-            body: {
-              p_usuario_email: user.email,
-              p_nome_arquivo: uniqueFileName,
-              p_dados: dadosPainel
+          try {
+            // Retry with unique filename
+            const retryResponse = await supabase.functions.invoke("create_painel_upload_with_data", {
+              body: {
+                p_usuario_email: user.email,
+                p_nome_arquivo: uniqueFileName,
+                p_dados: dadosPainel
+              }
+            });
+            
+            if (retryResponse.error) {
+              throw new Error(retryResponse.error.message || 'Erro desconhecido');
             }
-          });
-          
-          if (retryResponse.error) {
-            showFeedback('error', `Erro ao processar upload: ${retryResponse.error.message || 'Erro desconhecido'}`, { duration: 3000 });
+            
+            // Use the retry data
+            responseData = retryResponse.data;
+            responseError = null;
+          } catch (retryErr: any) {
+            showFeedback('error', `Erro ao processar upload: ${retryErr.message || 'Erro desconhecido'}`, { duration: 3000 });
             setPainelProgress({
               ...painelProgress!,
               stage: 'error',
-              message: `Erro ao processar upload: ${retryResponse.error.message || 'Erro desconhecido'}`
+              message: `Erro ao processar upload: ${retryErr.message || 'Erro desconhecido'}`
             });
+            setIsUploading(false);
             return null;
           }
-          
-          // Use the retry data instead of trying to reassign to a const
-          responseData = retryResponse.data;
-          responseError = null;
         } else {
-          // For other errors, just show the error
-          showFeedback('error', `Erro ao processar upload: ${responseError.message || 'Erro desconhecido'}`, { duration: 3000 });
+          // For other errors, check if it's related to department constraint
+          if (responseError.message && responseError.message.includes('violates foreign key constraint')) {
+            showFeedback('error', 'Erro: Alguns departamentos no arquivo não existem no sistema. Por favor, verifique os dados.', { duration: 5000 });
+          } else {
+            // For other errors, just show the error
+            showFeedback('error', `Erro ao processar upload: ${responseError.message || 'Erro desconhecido'}`, { duration: 3000 });
+          }
+          
           setPainelProgress({
             ...painelProgress!,
             stage: 'error',
             message: `Erro ao processar upload: ${responseError.message || 'Erro desconhecido'}`
           });
+          setIsUploading(false);
           return null;
         }
       }
@@ -163,6 +187,7 @@ export const usePainelZeladoriaUpload = (user: User | null) => {
           stage: 'error',
           message: `Erro no servidor: ${errorMsg}`
         });
+        setIsUploading(false);
         return null;
       }
       
@@ -190,6 +215,7 @@ export const usePainelZeladoriaUpload = (user: User | null) => {
         stage: 'error',
         message: `Erro ao processar arquivo: ${error.message || 'Erro desconhecido'}`
       });
+      setIsUploading(false);
       return {
         success: false,
         recordCount: 0,
@@ -246,13 +272,21 @@ export const usePainelZeladoriaUpload = (user: User | null) => {
               console.warn(`Linha ${index + 1}: Sem número de protocolo/OS`);
             }
             
+            // Get department and ensure it's not empty
+            let departamento = row["Departamento"] || row["Setor"] || "";
+            
+            // If department is empty, assign a default value
+            if (!departamento) {
+              departamento = "NAO_ESPECIFICADO";
+            }
+            
             // Mapear campos e converter datas
             return {
               id_os: protocolField,
               tipo_servico: row["Tipo de Serviço"] || row["Serviço"] || "",
               status: row["Status"] || "",
               distrito: row["Distrito"] || "",
-              departamento: row["Departamento"] || row["Setor"] || "",
+              departamento: departamento,
               data_abertura: parseExcelDate(row["Data de Abertura"] || ""),
               data_fechamento: parseExcelDate(row["Data de Fechamento"] || ""),
               responsavel_real: row["Responsável"] || ""

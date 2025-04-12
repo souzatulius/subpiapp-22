@@ -53,6 +53,7 @@ const RankingSubs = () => {
   
   const handleUploadStart = () => {
     setIsUploading(true);
+    resetProgress(); // Reset any previous upload progress
     showFeedback('loading', 'Iniciando upload da planilha...', { 
       duration: 0,
       progress: 10,
@@ -66,6 +67,7 @@ const RankingSubs = () => {
     setUploadId(id);
     setIsUploading(false);
     
+    // Show success feedback with longer duration
     showFeedback('success', `Upload concluído: ${data.length} registros processados`, { 
       duration: 3000 
     });
@@ -84,6 +86,7 @@ const RankingSubs = () => {
     setPainelData(data);
     setIsUploading(false);
     
+    // Show success feedback with longer duration
     showFeedback('success', `Upload concluído: ${data.length} registros processados`, { 
       duration: 3000 
     });
@@ -110,8 +113,12 @@ const RankingSubs = () => {
   const handleRefreshData = async () => {
     try {
       await refreshAllChartData();
+      // Show success feedback after refresh
+      showFeedback('success', 'Dados atualizados com sucesso', { duration: 2000 });
     } catch (error) {
       console.error("Error refreshing data:", error);
+      // Show error feedback
+      showFeedback('error', 'Erro ao atualizar dados', { duration: 3000 });
     }
   };
   
