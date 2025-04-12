@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import Header from '@/components/layouts/Header';
 import DashboardSidebar from '@/components/dashboard/DashboardSidebar';
@@ -156,12 +157,12 @@ const RankingSubs = () => {
               stage: 'Processando dados'
             });
             
-            const combinedData = {
+            // Fix: pass the data in the format the function expects
+            const chartData = await generateChartData('zeladoria-comparison', JSON.stringify({
               sgz: sgzData,
               painel: data
-            };
+            }));
             
-            const chartData = await generateChartData('zeladoria-comparison', combinedData);
             console.log('AI-generated comparison chart data:', chartData);
             
             showFeedback('success', 'Insights comparativos gerados com sucesso!', { duration: 2000 });

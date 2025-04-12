@@ -1,4 +1,3 @@
-
 import { useCallback } from 'react';
 import { User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -108,7 +107,6 @@ export const usePainelZeladoriaUpload = (user: User | null) => {
         
         // Log detailed response information
         console.log('Edge Function response:', {
-          status: initialResponse.status,
           data: initialResponse.data,
           error: initialResponse.error
         });
@@ -117,14 +115,11 @@ export const usePainelZeladoriaUpload = (user: User | null) => {
         responseError = initialResponse.error;
         
         // If we got an error response but no error object, try to extract more details
-        if (!responseData && !responseError && initialResponse.status >= 400) {
-          console.error('Edge function error details:', {
-            status: initialResponse.status,
-            statusText: initialResponse.statusText
-          });
+        if (!responseData && !responseError) {
+          console.error('Edge function returned no data or error object');
           
           responseError = {
-            message: `Error ${initialResponse.status}: ${initialResponse.statusText || 'Unknown error'}`
+            message: `Error: Unknown error with edge function`
           };
         }
       } catch (err: any) {
@@ -175,7 +170,6 @@ export const usePainelZeladoriaUpload = (user: User | null) => {
             });
             
             console.log('Retry response:', {
-              status: retryResponse.status,
               data: retryResponse.data,
               error: retryResponse.error
             });
