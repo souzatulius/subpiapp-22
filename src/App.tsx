@@ -19,6 +19,7 @@ import AuthCallback from "./components/AuthCallback";
 import ProtectedRoute from "./components/layouts/ProtectedRoute";
 import DashboardLayout from "./components/layouts/DashboardLayout";
 import UserProfile from "./pages/UserProfile";
+import ChartTest from './pages/ChartTest';
 
 // Dashboard Pages
 import CadastrarDemanda from './pages/dashboard/comunicacao/CadastrarDemanda';
@@ -103,6 +104,9 @@ function App() {
 
                   {/* 404 route */}
                   <Route path="*" element={<NotFound />} />
+
+                  {/* Add the chart test route */}
+                  <Route path="/chart-test" element={<ChartTest />} />
                 </Routes>
               </TooltipProvider>
             </AuthProvider>

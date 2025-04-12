@@ -21,17 +21,20 @@ export function useZeladoriaChartDataMock(
     
     async function loadData() {
       try {
+        console.log('useZeladoriaChartDataMock: Loading mock data...');
         // Simulate network delay for realistic testing
         if (delay > 0) {
           await new Promise(resolve => setTimeout(resolve, delay));
         }
         
+        // Use an absolute path to ensure the file is found
         const res = await fetch('/mock/zeladoria_mock_data.json');
         if (!res.ok) {
           throw new Error(`Failed to fetch mock data: ${res.status} ${res.statusText}`);
         }
         
         const json = await res.json();
+        console.log('useZeladoriaChartDataMock: Mock data loaded successfully', json);
         
         if (isMounted) {
           setData(json);
@@ -57,7 +60,10 @@ export function useZeladoriaChartDataMock(
   }, [delay, refreshToken]);
 
   // Function to refresh data (simulates fetching new data)
-  const refresh = () => setRefreshToken(prev => prev + 1);
+  const refresh = () => {
+    console.log('useZeladoriaChartDataMock: Refreshing data...');
+    setRefreshToken(prev => prev + 1);
+  };
 
   return { data, isLoading, error, refresh };
 }

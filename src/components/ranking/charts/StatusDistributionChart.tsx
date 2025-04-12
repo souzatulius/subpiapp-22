@@ -38,13 +38,18 @@ const StatusDistributionChart: React.FC<StatusDistributionChartProps> = ({
       
       try {
         if (!sgzData || sgzData.length === 0) {
+          console.log('StatusDistributionChart: No SGZ data provided');
           setChartData(null);
+          setIsProcessing(false);
           return;
         }
+
+        console.log(`StatusDistributionChart: Processing ${sgzData.length} records`);
 
         // Try to generate data with OpenAI
         try {
           const aiChartData = await generateChartData('statusDistribution', sgzData);
+          console.log('StatusDistributionChart: AI chart data received', aiChartData);
           
           if (aiChartData && aiChartData.labels && aiChartData.data) {
             const pieData = {
@@ -66,6 +71,7 @@ const StatusDistributionChart: React.FC<StatusDistributionChartProps> = ({
               setAnalysis('Distribuição de status das ordens de serviço mostra a proporção de cada estado no sistema.');
             }
             
+            setIsProcessing(false);
             return;
           }
         } catch (aiError) {
@@ -74,6 +80,7 @@ const StatusDistributionChart: React.FC<StatusDistributionChartProps> = ({
         }
 
         // Fallback to client-side processing
+        console.log('StatusDistributionChart: Using fallback processing');
         const statusCounts: Record<string, number> = {};
         
         sgzData.forEach(item => {
@@ -88,6 +95,8 @@ const StatusDistributionChart: React.FC<StatusDistributionChartProps> = ({
         // Prepare chart data
         const labels = sortedStatuses.map(([status]) => status);
         const values = sortedStatuses.map(([, count]) => count);
+        
+        console.log('StatusDistributionChart: Generated chart data', {labels, values});
         
         setChartData({
           labels,
@@ -138,7 +147,7 @@ const StatusDistributionChart: React.FC<StatusDistributionChartProps> = ({
         <div className="text-center h-full flex flex-col items-center justify-center text-red-500">
           <p>{error}</p>
         </div>
-      ) : chartData ? (
+      ) : chartData && chartData.labels && chartData.labels.length > 0 ? (
         <Pie 
           data={chartData} 
           options={chartOptions}
