@@ -4,7 +4,7 @@ import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
-import { Copy, RefreshCw, Eye, Save, Edit, AlertCircle, RotateCcw } from 'lucide-react';
+import { Copy, RefreshCw, Eye, Save, Edit, AlertCircle, RotateCcw, Info } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
 
@@ -14,6 +14,13 @@ interface ChartDebugPanelProps {
   isVisible?: boolean;
   isLoading?: boolean;
   onUpdateMockData?: (type: 'sgz' | 'painel', data: any[]) => Promise<void>;
+  dataSource?: 'mock' | 'upload' | 'supabase';
+  dataStatus?: {
+    sgzCount: number;
+    painelCount: number;
+    lastSgzUpdate: string | null;
+    lastPainelUpdate: string | null;
+  };
 }
 
 const ChartDebugPanel: React.FC<ChartDebugPanelProps> = ({
@@ -21,11 +28,14 @@ const ChartDebugPanel: React.FC<ChartDebugPanelProps> = ({
   painelData,
   isVisible = false,
   isLoading = false,
-  onUpdateMockData
+  onUpdateMockData,
+  dataSource = 'mock',
+  dataStatus
 }) => {
   const [showPanel, setShowPanel] = useState<boolean>(isVisible);
   const [activeSgzSample, setActiveSgzSample] = useState<any>(null);
   const [activePainelSample, setActivePainelSample] = useState<any>(null);
+  const [activeTab, setActiveTab] = useState<string>('sgz');
   
   // Edit mode state
   const [editingSgz, setEditingSgz] = useState<boolean>(false);
@@ -123,13 +133,60 @@ const ChartDebugPanel: React.FC<ChartDebugPanelProps> = ({
     }
   };
   
+  // Validate specific fields in parsed JSON
+  const validateJsonFields = (jsonString: string, type: 'sgz' | 'painel'): { valid: boolean, error?: string } => {
+    try {
+      const parsed = JSON.parse(jsonString);
+      if (!Array.isArray(parsed) || parsed.length === 0) {
+        return { valid: true }; // Empty array is valid
+      }
+      
+      // Check first item to validate structure
+      const firstItem = parsed[0];
+      
+      if (type === 'sgz') {
+        const requiredFields = ['ordem_servico', 'sgz_status', 'sgz_tipo_servico', 'sgz_distrito'];
+        for (const field of requiredFields) {
+          if (!(field in firstItem)) {
+            return { 
+              valid: false, 
+              error: `Campo obrigatório '${field}' ausente nos dados do SGZ` 
+            };
+          }
+        }
+      } else if (type === 'painel') {
+        const requiredFields = ['id_os', 'status', 'tipo_servico', 'distrito'];
+        for (const field of requiredFields) {
+          if (!(field in firstItem)) {
+            return { 
+              valid: false, 
+              error: `Campo obrigatório '${field}' ausente nos dados do Painel` 
+            };
+          }
+        }
+      }
+      
+      return { valid: true };
+    } catch (error) {
+      return { valid: false, error: (error as Error).message };
+    }
+  };
+  
   // Handle saving mock data
   const handleSaveSgzMock = async () => {
     // Validate JSON first
-    const validation = validateJson(sgzJsonText);
-    if (!validation.valid) {
-      setSgzJsonError(validation.error || "JSON inválido");
-      toast.error(`JSON inválido: ${validation.error}`);
+    const jsonValidation = validateJson(sgzJsonText);
+    if (!jsonValidation.valid) {
+      setSgzJsonError(jsonValidation.error || "JSON inválido");
+      toast.error(`JSON inválido: ${jsonValidation.error}`);
+      return;
+    }
+    
+    // Validate fields and structure
+    const fieldsValidation = validateJsonFields(sgzJsonText, 'sgz');
+    if (!fieldsValidation.valid) {
+      setSgzJsonError(fieldsValidation.error || "Estrutura de dados inválida");
+      toast.error(`Estrutura de dados inválida: ${fieldsValidation.error}`);
       return;
     }
     
@@ -141,7 +198,7 @@ const ChartDebugPanel: React.FC<ChartDebugPanelProps> = ({
         await onUpdateMockData('sgz', parsedData);
         setEditingSgz(false);
         setSgzJsonError(null);
-        toast.success(`SGZ mock data atualizado com sucesso: ${parsedData.length} registros`);
+        setActiveTab('status'); // Switch to status tab to show updated information
       } else {
         console.error("Update mock data function not available");
         toast.error("Função de atualização não disponível. Verifique se o componente está dentro de DemoDataProvider.");
@@ -156,10 +213,18 @@ const ChartDebugPanel: React.FC<ChartDebugPanelProps> = ({
   
   const handleSavePainelMock = async () => {
     // Validate JSON first
-    const validation = validateJson(painelJsonText);
-    if (!validation.valid) {
-      setPainelJsonError(validation.error || "JSON inválido");
-      toast.error(`JSON inválido: ${validation.error}`);
+    const jsonValidation = validateJson(painelJsonText);
+    if (!jsonValidation.valid) {
+      setPainelJsonError(jsonValidation.error || "JSON inválido");
+      toast.error(`JSON inválido: ${jsonValidation.error}`);
+      return;
+    }
+    
+    // Validate fields and structure
+    const fieldsValidation = validateJsonFields(painelJsonText, 'painel');
+    if (!fieldsValidation.valid) {
+      setPainelJsonError(fieldsValidation.error || "Estrutura de dados inválida");
+      toast.error(`Estrutura de dados inválida: ${fieldsValidation.error}`);
       return;
     }
     
@@ -171,7 +236,7 @@ const ChartDebugPanel: React.FC<ChartDebugPanelProps> = ({
         await onUpdateMockData('painel', parsedData);
         setEditingPainel(false);
         setPainelJsonError(null);
-        toast.success(`Painel mock data atualizado com sucesso: ${parsedData.length} registros`);
+        setActiveTab('status'); // Switch to status tab to show updated information
       } else {
         console.error("Update mock data function not available");
         toast.error("Função de atualização não disponível. Verifique se o componente está dentro de DemoDataProvider.");
@@ -184,10 +249,35 @@ const ChartDebugPanel: React.FC<ChartDebugPanelProps> = ({
     }
   };
   
+  // Get data source label
+  const getDataSourceLabel = () => {
+    switch(dataSource) {
+      case 'mock': return 'Dados Mock (Demo)';
+      case 'upload': return 'Upload Manual';
+      case 'supabase': return 'Supabase (Produção)';
+      default: return 'Desconhecido';
+    }
+  };
+  
+  // Get data source badge color
+  const getDataSourceBadgeColor = () => {
+    switch(dataSource) {
+      case 'mock': return 'bg-amber-100 text-amber-800 border-amber-300';
+      case 'upload': return 'bg-green-100 text-green-800 border-green-300';
+      case 'supabase': return 'bg-blue-100 text-blue-800 border-blue-300';
+      default: return 'bg-gray-100 text-gray-800 border-gray-300';
+    }
+  };
+  
   return (
     <Card className="p-4 mt-4 border-dashed border-2 border-gray-300 bg-gray-50">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="font-semibold text-gray-700">Debug Panel</h3>
+        <div className="flex items-center">
+          <h3 className="font-semibold text-gray-700">Debug Panel</h3>
+          <Badge variant="outline" className={`ml-2 ${getDataSourceBadgeColor()}`}>
+            {getDataSourceLabel()}
+          </Badge>
+        </div>
         <div className="flex items-center gap-2">
           {isLoading && (
             <Badge variant="outline" className="bg-blue-100 text-blue-800 border-blue-300">
@@ -211,10 +301,11 @@ const ChartDebugPanel: React.FC<ChartDebugPanelProps> = ({
         </div>
       </div>
       
-      <Tabs defaultValue="sgz">
+      <Tabs defaultValue="sgz" value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="mb-4 bg-gray-100">
           <TabsTrigger value="sgz">SGZ Data</TabsTrigger>
           <TabsTrigger value="painel">Painel Data</TabsTrigger>
+          <TabsTrigger value="status" className="animate-pulse">Status do Sistema</TabsTrigger>
         </TabsList>
         
         <TabsContent value="sgz" className="space-y-4">
@@ -485,6 +576,143 @@ const ChartDebugPanel: React.FC<ChartDebugPanelProps> = ({
               )}
             </div>
           )}
+        </TabsContent>
+        
+        <TabsContent value="status" className="space-y-4">
+          <div className="bg-white p-4 rounded-md border border-gray-200">
+            <h4 className="text-sm font-medium mb-4 flex items-center">
+              <Info className="w-4 h-4 mr-1 text-blue-500" />
+              Status do Sistema
+            </h4>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Origem dos dados */}
+              <div className="border rounded-md p-3 bg-gray-50">
+                <h5 className="text-xs font-medium text-gray-700 mb-2">Origem dos Dados</h5>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm">Fonte:</span>
+                  <Badge className={getDataSourceBadgeColor()}>
+                    {getDataSourceLabel()}
+                  </Badge>
+                </div>
+              </div>
+              
+              {/* Última atualização */}
+              <div className="border rounded-md p-3 bg-gray-50">
+                <h5 className="text-xs font-medium text-gray-700 mb-2">Última Atualização</h5>
+                <div className="text-sm">
+                  <div className="flex justify-between items-center mb-1">
+                    <span>SGZ:</span> 
+                    <span className="font-medium">{dataStatus?.lastSgzUpdate || 'Nunca'}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span>Painel:</span> 
+                    <span className="font-medium">{dataStatus?.lastPainelUpdate || 'Nunca'}</span>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Estatísticas de dados */}
+              <div className="border rounded-md p-3 bg-gray-50">
+                <h5 className="text-xs font-medium text-gray-700 mb-2">Estatísticas</h5>
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="bg-blue-50 rounded p-2">
+                    <div className="text-xs text-gray-600">Registros SGZ</div>
+                    <div className="text-lg font-bold text-blue-700">{sgzData?.length || 0}</div>
+                  </div>
+                  <div className="bg-orange-50 rounded p-2">
+                    <div className="text-xs text-gray-600">Registros Painel</div>
+                    <div className="text-lg font-bold text-orange-700">{painelData?.length || 0}</div>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Status de sincronização */}
+              <div className="border rounded-md p-3 bg-gray-50">
+                <h5 className="text-xs font-medium text-gray-700 mb-2">Status de Sincronização</h5>
+                <div className="flex flex-col gap-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm">Cache Storage:</span>
+                    <Badge variant="outline" className="bg-green-100 text-green-800 border-green-300">
+                      Ativo
+                    </Badge>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm">Persistência:</span>
+                    <Badge variant="outline" className="bg-green-100 text-green-800 border-green-300">
+                      {localStorage.getItem('demo-sgz-data') ? 'Dados salvos' : 'Não inicializado'}
+                    </Badge>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Ações */}
+              <div className="border rounded-md p-3 bg-gray-50 col-span-1 md:col-span-2">
+                <h5 className="text-xs font-medium text-gray-700 mb-2">Ações</h5>
+                <div className="flex flex-wrap gap-2">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={() => {
+                      localStorage.removeItem(STORAGE_KEY_SGZ);
+                      localStorage.removeItem(STORAGE_KEY_PAINEL);
+                      localStorage.removeItem(STORAGE_KEY_LAST_UPDATE);
+                      localStorage.removeItem(STORAGE_KEY_DATA_SOURCE);
+                      toast.success("Cache limpo com sucesso");
+                      
+                      // Recarregar a página após 1 segundo
+                      setTimeout(() => {
+                        window.location.reload();
+                      }, 1000);
+                    }}
+                    className="text-xs bg-red-50 text-red-700 border-red-200 hover:bg-red-100"
+                  >
+                    Limpar Cache
+                  </Button>
+                  
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="text-xs"
+                  >
+                    <Copy className="w-3 h-3 mr-1" />
+                    Copiar Status
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          {/* Diagrama de fluxo de dados simplificado */}
+          <div className="bg-white p-4 rounded-md border border-gray-200">
+            <h4 className="text-sm font-medium mb-4">Fluxo de Dados</h4>
+            <div className="p-2 text-xs">
+              <pre className="bg-gray-100 p-3 rounded-md overflow-auto">
+{`Fluxo de Dados da Aplicação:
+
+1. Fontes de Dados:
+   - Mock Data (desenvolvimento)
+   - Upload Manual (produção)
+   - Supabase API (produção)
+
+2. Armazenamento Local:
+   - LocalStorage para persistência entre sessões
+   - Cache em memória durante execução
+
+3. Provedores de Estado:
+   - DemoDataProvider: gerencia dados mock e uploads
+   - useRankingCharts: gerencia estado dos gráficos
+   - useUploadState: gerencia estado de uploads
+
+4. Visualização:
+   - RankingContent: renderiza gráficos baseados no estado
+   - ChartDebugPanel: permite edição e visualização de dados
+
+Origem atual: ${getDataSourceLabel()}
+`}
+              </pre>
+            </div>
+          </div>
         </TabsContent>
       </Tabs>
     </Card>

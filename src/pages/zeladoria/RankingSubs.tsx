@@ -68,17 +68,32 @@ const RankingSubs = () => {
 
   const handleUploadComplete = async (id: string, data: any[]) => {
     console.log(`SGZ upload complete, ID: ${id}, Records: ${data.length}`);
+    
+    // Save the upload origin in localStorage
+    try {
+      localStorage.setItem('demo-data-source', 'upload');
+      localStorage.setItem('demo-sgz-data', JSON.stringify(data));
+      localStorage.setItem('demo-last-update', new Date().toISOString());
+    } catch (error) {
+      console.error("Error saving upload source to localStorage:", error);
+    }
+    
     setPlanilhaData(data);
     setUploadId(id);
-    setIsUploading(false);
     
     // Show success feedback with longer duration
     showFeedback('success', `Upload concluído: ${data.length} registros processados`, { 
       duration: 3000 
     });
     
-    // Refresh data after upload
+    // Refresh data after upload and validate it
     try {
+      // Perform data validation
+      const isValid = validateData(data, 'sgz');
+      if (!isValid.valid) {
+        toast.warning(`Upload realizado, mas com avisos: ${isValid.message}`);
+      }
+      
       await refreshAllChartData();
       setLastRefreshTime(new Date());
       
@@ -102,21 +117,39 @@ const RankingSubs = () => {
       }
     } catch (err) {
       console.error("Error refreshing data after upload:", err);
+      toast.error("Erro ao processar os dados após o upload");
+    } finally {
+      setIsUploading(false);
     }
   };
 
   const handlePainelUploadComplete = async (id: string, data: any[]) => {
     console.log(`Painel upload complete, ID: ${id}, Records: ${data.length}`);
+    
+    // Save the upload origin in localStorage
+    try {
+      localStorage.setItem('demo-data-source', 'upload');
+      localStorage.setItem('demo-painel-data', JSON.stringify(data));
+      localStorage.setItem('demo-last-update', new Date().toISOString());
+    } catch (error) {
+      console.error("Error saving upload source to localStorage:", error);
+    }
+    
     setPainelData(data);
-    setIsUploading(false);
     
     // Show success feedback with longer duration
     showFeedback('success', `Upload concluído: ${data.length} registros processados`, { 
       duration: 3000 
     });
     
-    // Refresh data after upload
+    // Refresh data after upload and validate it
     try {
+      // Perform data validation
+      const isValid = validateData(data, 'painel');
+      if (!isValid.valid) {
+        toast.warning(`Upload realizado, mas com avisos: ${isValid.message}`);
+      }
+      
       await refreshAllChartData();
       setLastRefreshTime(new Date());
       
@@ -140,7 +173,48 @@ const RankingSubs = () => {
       }
     } catch (err) {
       console.error("Error refreshing data after upload:", err);
+      toast.error("Erro ao processar os dados após o upload");
+    } finally {
+      setIsUploading(false);
     }
+  };
+  
+  // Function to validate uploaded data
+  const validateData = (data: any[], type: 'sgz' | 'painel'): { valid: boolean, message?: string } => {
+    if (!data || !Array.isArray(data) || data.length === 0) {
+      return { valid: false, message: "Nenhum dado encontrado para processar" };
+    }
+    
+    let requiredFields: string[] = [];
+    if (type === 'sgz') {
+      requiredFields = ['ordem_servico', 'sgz_status', 'sgz_tipo_servico'];
+    } else {
+      requiredFields = ['id_os', 'status', 'tipo_servico'];
+    }
+    
+    // Check a sample of records (first 10) for required fields
+    const sampleSize = Math.min(10, data.length);
+    let missingFields = 0;
+    
+    for (let i = 0; i < sampleSize; i++) {
+      const record = data[i];
+      for (const field of requiredFields) {
+        if (!(field in record) || record[field] === null || record[field] === undefined) {
+          missingFields++;
+          break;
+        }
+      }
+    }
+    
+    // If more than 30% of sample records have missing fields, warn user
+    if (missingFields > sampleSize * 0.3) {
+      return { 
+        valid: false, 
+        message: `Dados podem estar incompletos. Campos obrigatórios ausentes em ${missingFields} registros da amostra.` 
+      };
+    }
+    
+    return { valid: true };
   };
   
   const [isUploading, setIsUploading] = useState(false);
@@ -152,10 +226,17 @@ const RankingSubs = () => {
     });
   }, [refreshAllChartData]);
 
-  // Handle refresh with visual feedback
+  // Handle refresh with visual feedback and ensure data is synced across providers
   const handleRefreshData = async () => {
     try {
+      showFeedback('loading', 'Atualizando dados...', { 
+        duration: 0,
+        progress: 20,
+        stage: 'Sincronizando dados'
+      });
+      
       await refreshAllChartData();
+      
       // Show success feedback after refresh
       showFeedback('success', 'Dados atualizados com sucesso', { duration: 2000 });
     } catch (error) {
@@ -164,6 +245,22 @@ const RankingSubs = () => {
       showFeedback('error', 'Erro ao atualizar dados', { duration: 3000 });
     }
   };
+  
+  // Add keyboard shortcut for debug panel
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Alt+D to toggle debug panel
+      if (e.altKey && e.key === 'd') {
+        setShowDebugPanel(prev => !prev);
+        if (!showDebugPanel) {
+          toast.info("Painel de debug ativado");
+        }
+      }
+    };
+    
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [showDebugPanel]);
   
   return (
     <FeedbackProvider>
@@ -325,7 +422,9 @@ const RankingContentWithDebug = ({
     painelData, 
     isLoading, 
     refreshData, 
-    updateMockData 
+    updateMockData,
+    dataSource,
+    dataStatus
   } = useDemoData();
   
   // Handle mock data update and perform refresh
@@ -377,6 +476,8 @@ const RankingContentWithDebug = ({
           isVisible={showDebugPanel}
           isLoading={isLoading}
           onUpdateMockData={handleUpdateMockData}
+          dataSource={dataSource}
+          dataStatus={dataStatus}
         />
       )}
     </>
