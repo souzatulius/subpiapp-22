@@ -1,17 +1,15 @@
 
 import React, { useState } from 'react';
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
-import { Button } from '@/components/ui/button';
-import { Loader2 } from 'lucide-react';
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { AlertTriangle, Trash2, CheckCircle, XCircle } from "lucide-react";
 import { supabase } from '@/integrations/supabase/client';
 import { useAnimatedFeedback } from '@/hooks/use-animated-feedback';
 
@@ -21,102 +19,123 @@ interface CleanDataDialogProps {
   onSuccess: () => void;
 }
 
-const CleanDataDialog: React.FC<CleanDataDialogProps> = ({ isOpen, onClose, onSuccess }) => {
-  const [isLoading, setIsLoading] = useState(false);
+const CleanDataDialog: React.FC<CleanDataDialogProps> = ({ 
+  isOpen, 
+  onClose,
+  onSuccess
+}) => {
+  const [isConfirming, setIsConfirming] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const { showFeedback } = useAnimatedFeedback();
 
   const handleCleanData = async () => {
-    setIsLoading(true);
-    showFeedback('loading', 'Limpando dados...', { 
-      duration: 0,
-      progress: 25,
-      stage: 'Iniciando limpeza'
-    });
-    
-    try {
-      // Delete all data from painel_zeladoria_dados
-      const { error: dataDeletionError } = await supabase
-        .from('painel_zeladoria_dados')
-        .delete()
-        .neq('id', 'dummy_id_for_all');
-        
-      if (dataDeletionError) {
-        throw new Error(`Erro ao limpar dados: ${dataDeletionError.message}`);
-      }
-      
-      showFeedback('loading', 'Removendo registros de upload...', { 
-        duration: 0,
-        progress: 50,
-        stage: 'Limpando registros'
-      });
-      
-      // Delete all uploads
-      const { error: uploadDeletionError } = await supabase
-        .from('painel_zeladoria_uploads')
-        .delete()
-        .neq('id', 'dummy_id_for_all');
-        
-      if (uploadDeletionError) {
-        throw new Error(`Erro ao limpar registros de upload: ${uploadDeletionError.message}`);
-      }
-      
-      showFeedback('loading', 'Removendo insights salvos...', { 
-        duration: 0,
-        progress: 75,
-        stage: 'Finalizando limpeza'
-      });
-      
-      // Delete all insights
-      const { error: insightsDeletionError } = await supabase
-        .from('painel_zeladoria_insights')
-        .delete()
-        .neq('id', 'dummy_id_for_all');
-        
-      if (insightsDeletionError) {
-        throw new Error(`Erro ao limpar insights: ${insightsDeletionError.message}`);
-      }
-      
-      // Show success message and close the dialog
-      showFeedback('success', 'Todos os dados foram limpos com sucesso', { duration: 3000 });
-      onSuccess();
-    } catch (error: any) {
-      console.error('Error cleaning data:', error);
-      showFeedback('error', `Erro ao limpar dados: ${error.message}`, { duration: 3000 });
-    } finally {
-      setIsLoading(false);
-      onClose();
+    if (!isConfirming) {
+      setIsConfirming(true);
+      return;
     }
+
+    setIsProcessing(true);
+    setError(null);
+
+    try {
+      // Call the database function to clean up all data
+      const { data, error } = await supabase.rpc('clean_zeladoria_data');
+      
+      if (error) {
+        console.error('Error cleaning data:', error);
+        setError(`Erro ao limpar dados: ${error.message}`);
+        showFeedback('error', `Erro ao limpar dados: ${error.message}`, { duration: 3000 });
+        return;
+      }
+      
+      // Success
+      showFeedback('success', 'Dados limpos com sucesso', { duration: 2000 });
+      onSuccess();
+      onClose();
+      
+    } catch (err: any) {
+      console.error('Error in clean data operation:', err);
+      setError(`Erro inesperado: ${err.message}`);
+      showFeedback('error', `Erro inesperado: ${err.message}`, { duration: 3000 });
+    } finally {
+      setIsProcessing(false);
+      setIsConfirming(false);
+    }
+  };
+  
+  const handleCancel = () => {
+    setIsConfirming(false);
+    setError(null);
+    onClose();
   };
 
   return (
-    <AlertDialog open={isOpen} onOpenChange={onClose}>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>Limpar Todos os Dados</AlertDialogTitle>
-          <AlertDialogDescription>
-            Esta ação removerá permanentemente todos os dados de ordens de serviço, uploads e insights.
-            Esta operação não pode ser desfeita.
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel disabled={isLoading}>Cancelar</AlertDialogCancel>
+    <Dialog open={isOpen} onOpenChange={handleCancel}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle className="flex items-center">
+            {isConfirming ? (
+              <AlertTriangle className="h-6 w-6 text-red-500 mr-2" />
+            ) : (
+              <Trash2 className="h-6 w-6 text-gray-500 mr-2" />
+            )}
+            {isConfirming ? 'Confirmação de Exclusão' : 'Limpar Dados'}
+          </DialogTitle>
+          
+          <DialogDescription>
+            {isConfirming ? (
+              <span className="text-red-500 font-medium">
+                ATENÇÃO: Esta ação excluirá TODOS os dados de uploads do Painel da Zeladoria e SGZ.
+                Esta ação não pode ser desfeita.
+              </span>
+            ) : (
+              'Esta ação removerá todos os dados carregados do Painel da Zeladoria e SGZ.'
+            )}
+          </DialogDescription>
+        </DialogHeader>
+        
+        {error && (
+          <div className="bg-red-50 border border-red-200 rounded-md p-3 text-sm text-red-600">
+            {error}
+          </div>
+        )}
+
+        <DialogFooter>
           <Button 
-            variant="destructive" 
-            onClick={handleCleanData}
-            disabled={isLoading}
+            variant="outline" 
+            onClick={handleCancel}
+            disabled={isProcessing}
           >
-            {isLoading ? (
+            <XCircle className="h-4 w-4 mr-1" />
+            Cancelar
+          </Button>
+          
+          <Button 
+            variant={isConfirming ? "destructive" : "default"}
+            onClick={handleCleanData}
+            disabled={isProcessing}
+          >
+            {isProcessing ? (
               <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Limpando...
+                <span className="animate-spin mr-1">⏳</span>
+                Processando...
+              </>
+            ) : isConfirming ? (
+              <>
+                <Trash2 className="h-4 w-4 mr-1" />
+                Confirmar Exclusão
               </>
             ) : (
-              'Sim, limpar todos os dados'
+              <>
+                <CheckCircle className="h-4 w-4 mr-1" />
+                Limpar Dados
+              </>
             )}
           </Button>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 };
 

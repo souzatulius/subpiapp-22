@@ -44,6 +44,36 @@ serve(async (req) => {
     }
     
     const supabase = createClient(supabaseUrl, supabaseServiceRole)
+
+    // Check for duplicate filename
+    const { data: existingFile, error: checkError } = await supabase
+      .from('painel_zeladoria_uploads')
+      .select('id, nome_arquivo')
+      .eq('nome_arquivo', p_nome_arquivo)
+      .limit(1)
+
+    if (checkError) {
+      console.error('Erro ao verificar arquivo existente:', checkError)
+      return new Response(
+        JSON.stringify({ error: `Erro ao verificar arquivo existente: ${checkError.message}` }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
+    // If file already exists, append timestamp to make it unique
+    let uniqueFilename = p_nome_arquivo
+    if (existingFile && existingFile.length > 0) {
+      const timestamp = new Date().toISOString().replace(/[:.]/g, '-')
+      const fileExtension = p_nome_arquivo.lastIndexOf('.') > 0 
+        ? p_nome_arquivo.substring(p_nome_arquivo.lastIndexOf('.'))
+        : ''
+      const fileName = p_nome_arquivo.lastIndexOf('.') > 0
+        ? p_nome_arquivo.substring(0, p_nome_arquivo.lastIndexOf('.'))
+        : p_nome_arquivo
+        
+      uniqueFilename = `${fileName}_${timestamp}${fileExtension}`
+      console.log(`Arquivo já existente. Usando nome único: ${uniqueFilename}`)
+    }
     
     // Start a transaction by using the API
     // 1. Create the upload record first
@@ -51,7 +81,7 @@ serve(async (req) => {
       .from('painel_zeladoria_uploads')
       .insert({
         usuario_email: p_usuario_email,
-        nome_arquivo: p_nome_arquivo
+        nome_arquivo: uniqueFilename
       })
       .select('id')
       .single()
@@ -70,7 +100,8 @@ serve(async (req) => {
     // 2. Insert the data referencing the upload ID
     const dataToInsert = p_dados.map((item: any) => ({
       ...item,
-      upload_id: uploadId
+      upload_id: uploadId,
+      responsavel_classificado: item.responsavel_classificado || 'subprefeitura'
     }))
     
     const { error: insertError } = await supabase
@@ -92,9 +123,14 @@ serve(async (req) => {
       )
     }
     
-    // Return success with the upload ID
+    // Return success with the upload ID and original filename
     return new Response(
-      JSON.stringify(uploadId),
+      JSON.stringify({ 
+        id: uploadId, 
+        nome_arquivo: uniqueFilename,
+        original_filename: p_nome_arquivo,
+        record_count: dataToInsert.length
+      }),
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
     

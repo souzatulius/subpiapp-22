@@ -83,32 +83,45 @@ export const usePainelZeladoriaUpload = (user: User | null) => {
         return null;
       }
       
-      // Use uma transação para garantir consistência dos dados
-      const { data: uploadId, error: transactionError } = await supabase.rpc('create_painel_upload_with_data', {
-        p_usuario_email: user.email,
-        p_nome_arquivo: file.name,
-        p_dados: dadosPainel
-      });
+      updateProgress(50, 'processing', 'Enviando dados para processamento...', dadosPainel.length);
+      updateFeedbackProgress(50, 'Enviando dados para processamento...');
       
-      if (transactionError) {
-        console.error('Erro na transação de upload:', transactionError);
-        
-        // Verificar se é um erro de chave estrangeira para fornecer uma mensagem mais clara
-        if (transactionError.message.includes('violates foreign key constraint')) {
-          showFeedback('error', 'Erro de referência: não foi possível associar os dados ao registro de upload', { duration: 3000 });
-        } else {
-          showFeedback('error', `Erro ao salvar dados: ${transactionError.message}`, { duration: 3000 });
+      // Usar nossa Edge Function para fazer o upload com transação
+      const { data, error } = await supabase.functions.invoke("create_painel_upload_with_data", {
+        body: {
+          p_usuario_email: user.email,
+          p_nome_arquivo: file.name,
+          p_dados: dadosPainel
         }
-        
+      });
+
+      if (error) {
+        console.error('Erro na função de upload:', error);
+        showFeedback('error', `Erro ao processar upload: ${error.message || 'Erro desconhecido'}`, { duration: 3000 });
         setPainelProgress({
           ...painelProgress!,
           stage: 'error',
-          message: `Erro na transação: ${transactionError.message}`
+          message: `Erro ao processar upload: ${error.message || 'Erro desconhecido'}`
         });
         return null;
       }
       
-      updateProgress(100, 'complete', `${dadosPainel.length} registros processados com sucesso`, dadosPainel.length, dadosPainel.length);
+      if (!data || data.error) {
+        const errorMsg = data?.error || 'Erro desconhecido no servidor';
+        console.error('Erro retornado pela função:', errorMsg);
+        showFeedback('error', `Erro no servidor: ${errorMsg}`, { duration: 3000 });
+        setPainelProgress({
+          ...painelProgress!,
+          stage: 'error',
+          message: `Erro no servidor: ${errorMsg}`
+        });
+        return null;
+      }
+      
+      const uploadId = data.id;
+      const recordCount = data.record_count || dadosPainel.length;
+      
+      updateProgress(100, 'complete', `${recordCount} registros processados com sucesso`, recordCount, recordCount);
       updateFeedbackProgress(100, 'Upload finalizado com sucesso');
       
       // Set last refresh time
@@ -117,7 +130,7 @@ export const usePainelZeladoriaUpload = (user: User | null) => {
       return {
         success: true,
         id: uploadId,
-        recordCount: dadosPainel.length,
+        recordCount: recordCount,
         message: 'Upload realizado com sucesso',
         data: dadosPainel
       };
@@ -180,7 +193,7 @@ export const usePainelZeladoriaUpload = (user: User | null) => {
           const dadosFormatados = jsonData.map((row: any, index: number) => {
             // Verificar existência de campos obrigatórios
             // NOTE: Using "Ordem de Serviço" as the protocol field
-            const protocolField = row["Ordem de Serviço"] || row["Protocolo"] || "";
+            const protocolField = row["Ordem de Serviço"] || row["Protocolo"] || row["OS"] || "";
             
             if (!protocolField) {
               console.warn(`Linha ${index + 1}: Sem número de protocolo/OS`);
