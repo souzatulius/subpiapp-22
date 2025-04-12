@@ -1,4 +1,3 @@
-
 import { create } from 'zustand';
 import { ChartVisibility } from '@/components/ranking/types';
 import { supabase } from '@/integrations/supabase/client';
@@ -93,7 +92,6 @@ export const useRankingCharts = create<RankingChartsState>((set, get) => ({
   setPlanilhaData: (data: any[]) => 
     set({ 
       planilhaData: data,
-      isLoading: true, 
       isInsightsLoading: true,
       insightsProgress: 10 
     }),
@@ -104,8 +102,8 @@ export const useRankingCharts = create<RankingChartsState>((set, get) => ({
   setPainelData: (data: any[]) => 
     set({
       painelData: data,
-      isLoading: false, // Changed to false to avoid loading states
-      chartsProgress: 100 // Set to 100 to indicate it's complete
+      isLoading: false,
+      chartsProgress: 100
     }),
   
   setIsLoading: (isLoading: boolean) => 
@@ -166,20 +164,18 @@ export const useRankingCharts = create<RankingChartsState>((set, get) => ({
             set({ painelData });
           }
           
-          // Set loading states
+          // Set loading states - this ensures loading spinner stops
           set({
             isInsightsLoading: false,
             insightsProgress: 100
           });
           
-          // Complete loading after a short delay
-          setTimeout(() => {
-            set({ 
-              isLoading: false,
-              isChartsLoading: false,
-              chartsProgress: 100
-            });
-          }, 500);
+          // Complete loading immediately, don't use setTimeout
+          set({ 
+            isLoading: false,
+            isChartsLoading: false,
+            chartsProgress: 100
+          });
           
           return;
         } catch (mockError) {
@@ -220,17 +216,12 @@ export const useRankingCharts = create<RankingChartsState>((set, get) => ({
         planilhaData: sgzData || [],
         painelData: painelData || [],
         isInsightsLoading: false,
-        insightsProgress: 100
+        insightsProgress: 100,
+        // Set loading to false immediately, don't wait
+        isLoading: false,
+        isChartsLoading: false,
+        chartsProgress: 100
       });
-      
-      // Small delay before considering the loading complete
-      setTimeout(() => {
-        set({ 
-          isLoading: false,
-          isChartsLoading: false,
-          chartsProgress: 100
-        });
-      }, 1000);
       
       return;
     } catch (error) {

@@ -8,21 +8,24 @@ import { useRankingCharts } from '@/hooks/ranking/useRankingCharts';
 import ChartDebugPanel from '@/components/ranking/charts/ChartDebugPanel';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { compararBases } from '@/hooks/ranking/utils/compararBases';
 
 export default function ChartTest() {
-  const { setSgzData, sgzData, setPainelData, painelData, isLoading } = useRankingCharts();
+  const { setSgzData, sgzData, setPainelData, painelData, isLoading, setIsLoading } = useRankingCharts();
   
   // Load mock data from the JSON files
   useEffect(() => {
     async function loadMockData() {
       try {
+        setIsLoading(true);
+        
         // Load SGZ data
         const sgzResponse = await fetch('/mock/sgz_data_mock.json');
         if (!sgzResponse.ok) {
           throw new Error(`Failed to load SGZ mock data: ${sgzResponse.status}`);
         }
         const sgzData = await sgzResponse.json();
-        console.log("ChartTest: Loaded SGZ mock data:", sgzData);
+        console.log("ChartTest: Loaded SGZ mock data:", sgzData.length, "records");
         
         // Set the SGZ data in the store
         setSgzData(sgzData);
@@ -33,21 +36,37 @@ export default function ChartTest() {
           throw new Error(`Failed to load Painel mock data: ${painelResponse.status}`);
         }
         const painelData = await painelResponse.json();
-        console.log("ChartTest: Loaded Painel mock data:", painelData);
+        console.log("ChartTest: Loaded Painel mock data:", painelData.length, "records");
         
         // Set the Painel data in the store
         setPainelData(painelData);
+        
+        // Compare data to verify integration
+        if (sgzData.length > 0 && painelData.length > 0) {
+          const comparacao = compararBases(sgzData, painelData);
+          console.log("ChartTest: Data comparison results:", {
+            totalDivergencias: comparacao.divergencias.length,
+            totalAusentes: comparacao.ausentes.length,
+            divergenciasStatus: comparacao.divergenciasStatus.length
+          });
+        }
+        
+        // Explicitly set loading to false after data is loaded
+        setIsLoading(false);
       } catch (error) {
         console.error("ChartTest: Error loading mock data:", error);
+        setIsLoading(false);
       }
     }
     
     loadMockData();
-  }, [setSgzData, setPainelData]);
+  }, [setSgzData, setPainelData, setIsLoading]);
   
   // Function to reload data
   const reloadData = async () => {
     try {
+      setIsLoading(true);
+      
       // Load SGZ data
       const sgzResponse = await fetch('/mock/sgz_data_mock.json');
       const sgzData = await sgzResponse.json();
@@ -59,8 +78,10 @@ export default function ChartTest() {
       setPainelData(painelData);
       
       console.log("Data reloaded successfully!");
+      setIsLoading(false);
     } catch (error) {
       console.error("Error reloading data:", error);
+      setIsLoading(false);
     }
   };
 
@@ -68,13 +89,18 @@ export default function ChartTest() {
     <div className="p-6 max-w-6xl mx-auto space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold">Chart Testing Page</h1>
-        <Button onClick={reloadData} variant="outline">
-          Reload Mock Data
+        <Button onClick={reloadData} variant="outline" disabled={isLoading}>
+          {isLoading ? 'Loading...' : 'Reload Mock Data'}
         </Button>
       </div>
       
       <ChartDataDebugger />
-      <ChartDebugPanel sgzData={sgzData} painelData={painelData} isVisible={true} />
+      <ChartDebugPanel 
+        sgzData={sgzData} 
+        painelData={painelData} 
+        isVisible={true} 
+        isLoading={isLoading}
+      />
       
       <Tabs defaultValue="charts">
         <TabsList>

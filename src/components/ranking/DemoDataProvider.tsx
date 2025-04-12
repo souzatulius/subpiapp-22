@@ -1,6 +1,7 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useRankingCharts } from '@/hooks/ranking/useRankingCharts';
+import { compararBases } from '@/hooks/ranking/utils/compararBases';
 
 interface DemoDataProviderProps {
   children: ReactNode;
@@ -29,13 +30,15 @@ const DemoDataProvider: React.FC<DemoDataProviderProps> = ({ children }) => {
     // Load mock data from the JSON files
     async function loadMockData() {
       try {
+        setIsLoading(true);
+        
         // Load SGZ data
         const sgzResponse = await fetch('/mock/sgz_data_mock.json');
         if (!sgzResponse.ok) {
           throw new Error(`Failed to load SGZ mock data: ${sgzResponse.status}`);
         }
         const sgzData = await sgzResponse.json();
-        console.log("DemoDataProvider: Loaded SGZ mock data:", sgzData);
+        console.log("DemoDataProvider: Loaded SGZ mock data:", sgzData.length, "records");
         
         // Load Painel data
         const painelResponse = await fetch('/mock/painel_data_mock.json');
@@ -43,7 +46,17 @@ const DemoDataProvider: React.FC<DemoDataProviderProps> = ({ children }) => {
           throw new Error(`Failed to load Painel mock data: ${painelResponse.status}`);
         }
         const painelData = await painelResponse.json();
-        console.log("DemoDataProvider: Loaded Painel mock data:", painelData);
+        console.log("DemoDataProvider: Loaded Painel mock data:", painelData.length, "records");
+        
+        // Compare data to verify integration
+        if (sgzData.length > 0 && painelData.length > 0) {
+          const comparacao = compararBases(sgzData, painelData);
+          console.log("DemoDataProvider: Data comparison results:", {
+            totalDivergencias: comparacao.divergencias.length,
+            totalAusentes: comparacao.ausentes.length,
+            divergenciasStatus: comparacao.divergenciasStatus.length
+          });
+        }
         
         // Set the data in both local state and the store
         setDemoSgzData(sgzData);
@@ -96,9 +109,9 @@ const DemoDataProvider: React.FC<DemoDataProviderProps> = ({ children }) => {
       setPainelData(painelData);
       
       setLastUpdated(new Date());
+      setIsLoading(false);
     } catch (error) {
       console.error("Error refreshing demo data:", error);
-    } finally {
       setIsLoading(false);
     }
   };
