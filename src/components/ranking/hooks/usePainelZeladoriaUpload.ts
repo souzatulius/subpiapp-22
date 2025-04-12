@@ -4,7 +4,7 @@ import { User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import * as XLSX from 'xlsx';
-import { UploadResult } from '@/hooks/ranking/types/uploadTypes';
+import { UploadResult, UploadProgressStats } from '@/hooks/ranking/types/uploadTypes';
 
 export const usePainelZeladoriaUpload = (user: User | null) => {
   const [isLoading, setIsLoading] = useState(false);

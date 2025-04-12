@@ -4,7 +4,7 @@ import { User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import * as XLSX from 'xlsx';
 import { useUploadState } from './useUploadState';
-import { UploadResult } from '@/hooks/ranking/types/uploadTypes';
+import { UploadResult, UploadProgressStats } from '@/hooks/ranking/types/uploadTypes';
 import { useAnimatedFeedback } from '@/hooks/use-animated-feedback';
 
 export const usePainelZeladoriaUpload = (user: User | null) => {
@@ -146,7 +146,7 @@ export const usePainelZeladoriaUpload = (user: User | null) => {
 
   const updateProgress = (
     progressValue: number,
-    stage: 'idle' | 'uploading' | 'processing' | 'complete' | 'error',
+    stage: 'uploading' | 'processing' | 'complete' | 'error',
     message: string,
     totalRows: number = 0,
     processedRows: number = 0
@@ -242,7 +242,7 @@ export const usePainelZeladoriaUpload = (user: User | null) => {
     uploadProgress: painelProgress?.stage === 'complete' ? 100 : painelProgress?.processedRows && painelProgress?.totalRows ? 
       Math.round((painelProgress.processedRows / painelProgress.totalRows) * 100) : 0,
     processamentoPainel: {
-      status: painelProgress?.stage || 'idle',
+      status: painelProgress?.stage || 'uploading',
       message: painelProgress?.message || '',
       recordCount: painelProgress?.processedRows || 0
     },

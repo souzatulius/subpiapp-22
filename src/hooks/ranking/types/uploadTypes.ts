@@ -8,3 +8,13 @@ export interface UploadProgressStats {
   stage: 'uploading' | 'processing' | 'complete' | 'error';
   message?: string;
 }
+
+export interface UploadResult {
+  success: boolean;
+  recordCount: number;
+  message: string;
+  id?: string;
+  data?: any[];
+  newOrders?: number;
+  updatedOrders?: number;
+}
