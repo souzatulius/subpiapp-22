@@ -39,11 +39,13 @@ const RankingSubs = () => {
     setPlanilhaData,
     painelData,
     setPainelData,
+    isRefreshing, // Now correctly recognized by TypeScript
+    setIsRefreshing,
   } = useRankingCharts();
   
   const { showFeedback } = useAnimatedFeedback();
   const { sgzProgress, painelProgress, setLastRefreshTime, resetProgress } = useUploadState();
-  const { refreshAllChartData, isRefreshing } = useChartRefresher();
+  const { refreshAllChartData } = useChartRefresher();
   const { generateChartData } = useOpenAIChartData();
   
   const handlePrint = () => {
@@ -229,6 +231,7 @@ const RankingSubs = () => {
   // Handle refresh with visual feedback and ensure data is synced across providers
   const handleRefreshData = async () => {
     try {
+      setIsRefreshing(true); // Set the refresh state in useRankingCharts
       showFeedback('loading', 'Atualizando dados...', { 
         duration: 0,
         progress: 20,
@@ -243,6 +246,8 @@ const RankingSubs = () => {
       console.error("Error refreshing data:", error);
       // Show error feedback
       showFeedback('error', 'Erro ao atualizar dados', { duration: 3000 });
+    } finally {
+      setIsRefreshing(false); // Reset the refresh state
     }
   };
   
@@ -264,103 +269,103 @@ const RankingSubs = () => {
   
   return (
     <FeedbackProvider>
-      <motion.div 
-        className="max-w-full mx-auto pdf-content h-full pb-32" 
-        initial={{ opacity: 0, y: 20 }} 
-        animate={{ opacity: 1, y: 0 }} 
-        transition={{ duration: 0.5 }}
-      >
-        <WelcomeCard 
-          title="Ranking da Zeladoria"
-          description="Acompanhamento de desempenho e análises de ações, projetos e obras."
-          icon={<BarChart3 className="h-6 w-6 mr-2 text-white" />}
-          color="bg-gradient-to-r from-orange-500 to-orange-700"
-          rightContent={
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                size="icon"
-                className="bg-white/20 text-white border-white/30 hover:bg-white/30"
-                onClick={handleRefreshData}
-                disabled={isRefreshing || isUploading}
-                title="Atualizar Dados"
-              >
-                <RefreshCw className={`h-5 w-5 ${isRefreshing ? 'animate-spin' : ''}`} />
-              </Button>
-              
-              {process.env.NODE_ENV === 'development' && (
+      <DemoDataProvider> {/* Move DemoDataProvider up to wrap the entire component */}
+        <motion.div 
+          className="max-w-full mx-auto pdf-content h-full pb-32" 
+          initial={{ opacity: 0, y: 20 }} 
+          animate={{ opacity: 1, y: 0 }} 
+          transition={{ duration: 0.5 }}
+        >
+          <WelcomeCard 
+            title="Ranking da Zeladoria"
+            description="Acompanhamento de desempenho e análises de ações, projetos e obras."
+            icon={<BarChart3 className="h-6 w-6 mr-2 text-white" />}
+            color="bg-gradient-to-r from-orange-500 to-orange-700"
+            rightContent={
+              <div className="flex gap-2">
                 <Button
                   variant="outline"
                   size="icon"
-                  className={`bg-white/20 text-white border-white/30 hover:bg-white/30 ${showDebugPanel ? 'bg-white/40' : ''}`}
-                  onClick={() => setShowDebugPanel(!showDebugPanel)}
-                  title="Debug Panel"
+                  className="bg-white/20 text-white border-white/30 hover:bg-white/30"
+                  onClick={handleRefreshData}
+                  disabled={isRefreshing || isUploading}
+                  title="Atualizar Dados"
                 >
-                  <Bug className="h-5 w-5" />
+                  <RefreshCw className={`h-5 w-5 ${isRefreshing ? 'animate-spin' : ''}`} />
                 </Button>
-              )}
+                
+                {process.env.NODE_ENV === 'development' && (
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className={`bg-white/20 text-white border-white/30 hover:bg-white/30 ${showDebugPanel ? 'bg-white/40' : ''}`}
+                    onClick={() => setShowDebugPanel(!showDebugPanel)}
+                    title="Debug Panel"
+                  >
+                    <Bug className="h-5 w-5" />
+                  </Button>
+                )}
+              </div>
+            }
+          />
+          
+          {/* Upload Section in Collapsible */}
+          <Collapsible 
+            open={isUploadSectionOpen} 
+            onOpenChange={setIsUploadSectionOpen}
+            className="mt-6 bg-white p-4 rounded-xl border border-gray-100 shadow-sm"
+          >
+            <div className="flex justify-between items-center">
+              <h2 className="text-lg font-medium">Upload de Planilhas</h2>
+              <CollapsibleTrigger asChild>
+                <Button variant="ghost" size="sm">
+                  {isUploadSectionOpen ? 'Fechar' : 'Expandir'}
+                </Button>
+              </CollapsibleTrigger>
             </div>
-          }
-        />
-        
-        {/* Upload Section in Collapsible */}
-        <Collapsible 
-          open={isUploadSectionOpen} 
-          onOpenChange={setIsUploadSectionOpen}
-          className="mt-6 bg-white p-4 rounded-xl border border-gray-100 shadow-sm"
-        >
-          <div className="flex justify-between items-center">
-            <h2 className="text-lg font-medium">Upload de Planilhas</h2>
-            <CollapsibleTrigger asChild>
-              <Button variant="ghost" size="sm">
-                {isUploadSectionOpen ? 'Fechar' : 'Expandir'}
-              </Button>
-            </CollapsibleTrigger>
+            
+            <CollapsibleContent className="mt-4">
+              <UploadSection 
+                onUploadStart={handleUploadStart}
+                onUploadComplete={handleUploadComplete}
+                onPainelUploadComplete={handlePainelUploadComplete}
+                isUploading={isUploading}
+                user={{}} // Pass user info here when authentication is implemented
+                onRefreshData={handleRefreshData}
+              />
+            </CollapsibleContent>
+          </Collapsible>
+          
+          <div className="flex justify-end mt-4 space-x-2">
+            <Button
+              variant="outline"
+              size="icon"
+              className="bg-white hover:bg-gray-100 border-gray-200 rounded-lg"
+              onClick={handlePrint}
+            >
+              <Printer className="h-5 w-5 text-gray-600" />
+            </Button>
+            
+            <Button
+              variant="outline"
+              size="icon"
+              className="bg-white hover:bg-gray-100 border-gray-200 rounded-lg"
+              onClick={handleExportPDF}
+            >
+              <FileText className="h-5 w-5 text-gray-600" />
+            </Button>
+            
+            <Button
+              variant="outline"
+              size="icon"
+              className="bg-white hover:bg-gray-100 border-gray-200 rounded-lg"
+              onClick={() => setFilterDialogOpen(true)}
+            >
+              <SlidersHorizontal className="h-5 w-5 text-gray-600" />
+            </Button>
           </div>
           
-          <CollapsibleContent className="mt-4">
-            <UploadSection 
-              onUploadStart={handleUploadStart}
-              onUploadComplete={handleUploadComplete}
-              onPainelUploadComplete={handlePainelUploadComplete}
-              isUploading={isUploading}
-              user={{}} // Pass user info here when authentication is implemented
-              onRefreshData={handleRefreshData}
-            />
-          </CollapsibleContent>
-        </Collapsible>
-        
-        <div className="flex justify-end mt-4 space-x-2">
-          <Button
-            variant="outline"
-            size="icon"
-            className="bg-white hover:bg-gray-100 border-gray-200 rounded-lg"
-            onClick={handlePrint}
-          >
-            <Printer className="h-5 w-5 text-gray-600" />
-          </Button>
-          
-          <Button
-            variant="outline"
-            size="icon"
-            className="bg-white hover:bg-gray-100 border-gray-200 rounded-lg"
-            onClick={handleExportPDF}
-          >
-            <FileText className="h-5 w-5 text-gray-600" />
-          </Button>
-          
-          <Button
-            variant="outline"
-            size="icon"
-            className="bg-white hover:bg-gray-100 border-gray-200 rounded-lg"
-            onClick={() => setFilterDialogOpen(true)}
-          >
-            <SlidersHorizontal className="h-5 w-5 text-gray-600" />
-          </Button>
-        </div>
-        
-        <div className="mt-6">
-          <DemoDataProvider>
+          <div className="mt-6">
             <RankingContentWithDebug 
               filterDialogOpen={filterDialogOpen} 
               setFilterDialogOpen={setFilterDialogOpen} 
@@ -371,37 +376,37 @@ const RankingSubs = () => {
               onRefreshData={handleRefreshData}
               showDebugPanel={showDebugPanel}
             />
-          </DemoDataProvider>
-        </div>
+          </div>
 
-        {/* Add CSS for mobile KPI grid */}
-        <style>
-          {`
-            @media (max-width: 767px) {
-              .mobile-kpi-grid .kpi-container {
-                display: grid;
-                grid-template-columns: repeat(2, 1fr);
-                gap: 8px;
+          {/* Add CSS for mobile KPI grid */}
+          <style>
+            {`
+              @media (max-width: 767px) {
+                .mobile-kpi-grid .kpi-container {
+                  display: grid;
+                  grid-template-columns: repeat(2, 1fr);
+                  gap: 8px;
+                }
               }
-            }
-            
-            .animate-fade-in {
-              animation: fadeIn 0.3s ease-in-out;
-            }
-            
-            @keyframes fadeIn {
-              0% {
-                opacity: 0;
-                transform: translateY(-10px);
+              
+              .animate-fade-in {
+                animation: fadeIn 0.3s ease-in-out;
               }
-              100% {
-                opacity: 1;
-                transform: translateY(0);
+              
+              @keyframes fadeIn {
+                0% {
+                  opacity: 0;
+                  transform: translateY(-10px);
+                }
+                100% {
+                  opacity: 1;
+                  transform: translateY(0);
+                }
               }
-            }
-          `}
-        </style>
-      </motion.div>
+            `}
+          </style>
+        </motion.div>
+      </DemoDataProvider>
     </FeedbackProvider>
   );
 };
@@ -422,13 +427,15 @@ const RankingContentWithDebug = ({
     painelData, 
     isLoading, 
     refreshData, 
-    updateMockData,
+    updateMockData, // Make sure this is passed properly
     dataSource,
     dataStatus
   } = useDemoData();
   
   // Handle mock data update and perform refresh
   const handleUpdateMockData = async (type: 'sgz' | 'painel', data: any[]) => {
+    console.log(`RankingContentWithDebug: Updating ${type} mock data, updateMockData available:`, !!updateMockData);
+    
     if (!updateMockData) {
       console.error("updateMockData function is not available in the context");
       toast.error("Função de atualização de dados mock não disponível");
@@ -475,7 +482,7 @@ const RankingContentWithDebug = ({
           painelData={painelData}
           isVisible={showDebugPanel}
           isLoading={isLoading}
-          onUpdateMockData={handleUpdateMockData}
+          onUpdateMockData={handleUpdateMockData} // Pass the handler function
           dataSource={dataSource}
           dataStatus={dataStatus}
         />

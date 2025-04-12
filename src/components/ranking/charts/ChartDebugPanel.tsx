@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -73,6 +74,11 @@ const ChartDebugPanel: React.FC<ChartDebugPanelProps> = ({
       setPainelJsonError(null);
     }
   }, [painelData]);
+
+  // Debug log to verify that onUpdateMockData is available
+  useEffect(() => {
+    console.log("ChartDebugPanel mounted, onUpdateMockData available:", !!onUpdateMockData);
+  }, [onUpdateMockData]);
   
   if (!showPanel) return null;
   
@@ -179,6 +185,9 @@ const ChartDebugPanel: React.FC<ChartDebugPanelProps> = ({
   
   // Handle saving mock data
   const handleSaveSgzMock = async () => {
+    // Log the function availability
+    console.log("Attempting to save SGZ mock data, onUpdateMockData available:", !!onUpdateMockData);
+    
     // Validate JSON first
     const jsonValidation = validateJson(sgzJsonText);
     if (!jsonValidation.valid) {
@@ -200,10 +209,21 @@ const ChartDebugPanel: React.FC<ChartDebugPanelProps> = ({
       const parsedData = JSON.parse(sgzJsonText);
       
       if (onUpdateMockData) {
+        // Save to localStorage first to ensure data is not lost
+        try {
+          localStorage.setItem(STORAGE_KEY_SGZ, JSON.stringify(parsedData));
+          localStorage.setItem(STORAGE_KEY_LAST_UPDATE, new Date().toISOString());
+          localStorage.setItem(STORAGE_KEY_DATA_SOURCE, 'mock');
+        } catch (storageError) {
+          console.error("Error saving to localStorage:", storageError);
+          // Continue with update anyway
+        }
+        
         await onUpdateMockData('sgz', parsedData);
         setEditingSgz(false);
         setSgzJsonError(null);
         setActiveTab('status'); // Switch to status tab to show updated information
+        toast.success("Dados SGZ atualizados com sucesso!");
       } else {
         console.error("Update mock data function not available");
         toast.error("Função de atualização não disponível. Verifique se o componente está dentro de DemoDataProvider.");
@@ -217,6 +237,9 @@ const ChartDebugPanel: React.FC<ChartDebugPanelProps> = ({
   };
   
   const handleSavePainelMock = async () => {
+    // Log the function availability
+    console.log("Attempting to save Painel mock data, onUpdateMockData available:", !!onUpdateMockData);
+    
     // Validate JSON first
     const jsonValidation = validateJson(painelJsonText);
     if (!jsonValidation.valid) {
@@ -238,10 +261,21 @@ const ChartDebugPanel: React.FC<ChartDebugPanelProps> = ({
       const parsedData = JSON.parse(painelJsonText);
       
       if (onUpdateMockData) {
+        // Save to localStorage first to ensure data is not lost
+        try {
+          localStorage.setItem(STORAGE_KEY_PAINEL, JSON.stringify(parsedData));
+          localStorage.setItem(STORAGE_KEY_LAST_UPDATE, new Date().toISOString());
+          localStorage.setItem(STORAGE_KEY_DATA_SOURCE, 'mock');
+        } catch (storageError) {
+          console.error("Error saving to localStorage:", storageError);
+          // Continue with update anyway
+        }
+        
         await onUpdateMockData('painel', parsedData);
         setEditingPainel(false);
         setPainelJsonError(null);
         setActiveTab('status'); // Switch to status tab to show updated information
+        toast.success("Dados do Painel atualizados com sucesso!");
       } else {
         console.error("Update mock data function not available");
         toast.error("Função de atualização não disponível. Verifique se o componente está dentro de DemoDataProvider.");

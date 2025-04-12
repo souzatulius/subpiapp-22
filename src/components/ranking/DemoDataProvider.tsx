@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useRankingCharts } from '@/hooks/ranking/useRankingCharts';
 import { compararBases } from '@/hooks/ranking/utils/compararBases';
