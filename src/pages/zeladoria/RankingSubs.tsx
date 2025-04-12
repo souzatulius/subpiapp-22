@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import Header from '@/components/layouts/Header';
 import DashboardSidebar from '@/components/dashboard/DashboardSidebar';
@@ -39,7 +40,8 @@ const RankingSubs = () => {
     isMockData,
     setIsMockData,
     sgzData,
-    isLoading
+    isLoading,
+    setDataSource
   } = useRankingCharts();
   
   const { showFeedback } = useAnimatedFeedback();
@@ -71,11 +73,13 @@ const RankingSubs = () => {
     console.log(`SGZ upload complete, ID: ${id}, Records: ${data.length}`);
     
     try {
+      // Explicitly set data source to upload
       localStorage.setItem('demo-data-source', 'upload');
       localStorage.setItem('demo-sgz-data', JSON.stringify(data));
       localStorage.setItem('demo-last-update', new Date().toISOString());
       
       setIsMockData(false);
+      setDataSource('upload');
       
       setPlanilhaData(data);
       setUploadId(id);
@@ -127,11 +131,13 @@ const RankingSubs = () => {
     console.log(`Painel upload complete, ID: ${id}, Records: ${data.length}`);
     
     try {
+      // Explicitly set data source to upload
       localStorage.setItem('demo-data-source', 'upload');
       localStorage.setItem('demo-painel-data', JSON.stringify(data));
       localStorage.setItem('demo-last-update', new Date().toISOString());
       
       setIsMockData(false);
+      setDataSource('upload');
       
       setPainelData(data);
       
@@ -238,8 +244,13 @@ const RankingSubs = () => {
       const dataSource = localStorage.getItem('demo-data-source');
       console.log("Current data source:", dataSource);
       
-      if (dataSource === 'upload') {
+      // Update mock data status based on data source
+      if (dataSource === 'upload' || dataSource === 'supabase') {
         setIsMockData(false);
+        setDataSource(dataSource as 'upload' | 'supabase');
+      } else if (dataSource === 'mock') {
+        setIsMockData(true);
+        setDataSource('mock');
       }
       
       await refreshAllChartData();
@@ -253,6 +264,7 @@ const RankingSubs = () => {
         console.warn("Supabase failed. Falling back to mock data.");
         localStorage.setItem('demo-data-source', 'mock');
         setIsMockData(true);
+        setDataSource('mock');
         
         try {
           await refreshAllChartData();
@@ -282,24 +294,32 @@ const RankingSubs = () => {
   }, [showDebugPanel]);
   
   useEffect(() => {
+    // Synchronize with the local storage data source on component mount
     const dataSource = localStorage.getItem('demo-data-source');
-    const lastUpdate = localStorage.getItem('demo-last-update');
     
+    if (dataSource) {
+      // Update state based on stored data source
+      if (dataSource === 'upload' || dataSource === 'supabase') {
+        setIsMockData(false);
+        setDataSource(dataSource as 'upload' | 'supabase');
+      } else if (dataSource === 'mock') {
+        setIsMockData(true);
+        setDataSource('mock');
+      }
+    }
+    
+    // Log current data source configuration
     console.log("Current data configuration:", {
-      dataSource,
-      lastUpdate: lastUpdate ? new Date(lastUpdate).toLocaleString() : 'Never',
+      dataSource: localStorage.getItem('demo-data-source') || 'unknown',
+      lastUpdate: localStorage.getItem('demo-last-update') 
+        ? new Date(localStorage.getItem('demo-last-update') as string).toLocaleString() 
+        : 'Never',
       isMockData,
       sgzDataLength: sgzData?.length || 0,
       planilhaDataLength: planilhaData?.length || 0,
       painelDataLength: painelData?.length || 0
     });
-    
-    if (dataSource === 'upload' || dataSource === 'supabase') {
-      setIsMockData(false);
-    } else if (dataSource === 'mock') {
-      setIsMockData(true);
-    }
-  }, []);
+  }, [setIsMockData, setDataSource, sgzData, planilhaData, painelData, isMockData]);
   
   return (
     <FeedbackProvider>
@@ -414,7 +434,7 @@ const RankingSubs = () => {
               painelData={painelData}
               isVisible={showDebugPanel}
               isLoading={isLoading}
-              dataSource={isMockData ? 'mock' : 'supabase'}
+              dataSource={isMockData ? 'mock' : (localStorage.getItem('demo-data-source') as 'upload' | 'supabase' | 'mock')}
               dataStatus={{
                 sgzCount: sgzData?.length || 0,
                 painelCount: painelData?.length || 0,

@@ -35,7 +35,7 @@ const RankingContent: React.FC<RankingContentProps> = ({
   const { 
     chartVisibility, toggleChartVisibility, setChartVisibility,
     planilhaData, sgzData, painelData, isLoading, setIsInsightsLoading,
-    refreshChartData, isMockData
+    refreshChartData, isMockData, dataSource, setDataSource
   } = useRankingCharts();
   
   const { lastRefreshTime } = useUploadState();
@@ -48,11 +48,12 @@ const RankingContent: React.FC<RankingContentProps> = ({
       sgzData: sgzData?.length || 0,
       painelData: painelData?.length || 0,
       isMockData,
+      dataSource,
       isLoading,
-      dataSource: localStorage.getItem('demo-data-source') || 'unknown',
+      localStorageDataSource: localStorage.getItem('demo-data-source') || 'unknown',
       lastUpdate: localStorage.getItem('demo-last-update') || 'never'
     });
-  }, [planilhaData, sgzData, painelData, isMockData, isLoading]);
+  }, [planilhaData, sgzData, painelData, isMockData, isLoading, dataSource]);
 
   const handleSimulateIdealRanking = () => {
     const wasActive = isSimulationActive;
@@ -111,17 +112,18 @@ const RankingContent: React.FC<RankingContentProps> = ({
     console.log(`RankingContent: Attempting to update ${type} mock data`);
     
     try {
-      // We no longer have the DemoDataProvider, so we'll use refreshChartData directly
+      // Store in localStorage for persistence and set data source to mock
       if (type === 'sgz') {
-        // Store in localStorage for persistence
         localStorage.setItem('demo-sgz-data', JSON.stringify(data));
         localStorage.setItem('demo-last-update', new Date().toISOString());
-        localStorage.setItem('demo-data-source', 'mock');
       } else if (type === 'painel') {
         localStorage.setItem('demo-painel-data', JSON.stringify(data));
         localStorage.setItem('demo-last-update', new Date().toISOString());
-        localStorage.setItem('demo-data-source', 'mock');
       }
+      
+      // Always set to mock when manually updating mock data
+      localStorage.setItem('demo-data-source', 'mock');
+      setDataSource('mock');
       
       // Refresh charts after updating mock data
       if (onRefreshData) {
@@ -160,7 +162,7 @@ const RankingContent: React.FC<RankingContentProps> = ({
 
       <RankingCharts
         chartData={{}}
-        sgzData={sgzData || planilhaData} // Use sgzData if available, fall back to planilhaData
+        sgzData={sgzData || planilhaData}
         painelData={painelData}
         isLoading={isLoading}
         chartVisibility={chartVisibility}
@@ -184,13 +186,13 @@ const RankingContent: React.FC<RankingContentProps> = ({
           painelData={painelData}
           isVisible={isDebugVisible}
           onUpdateMockData={handleUpdateMockData}
-          dataSource={isMockData ? 'mock' : 'supabase'}
+          dataSource={dataSource}
           dataStatus={{
             sgzCount: sgzData?.length || 0,
             painelCount: painelData?.length || 0,
             lastSgzUpdate: lastRefreshTime ? lastRefreshTime.toISOString() : null,
             lastPainelUpdate: lastRefreshTime ? lastRefreshTime.toISOString() : null,
-            dataSource: localStorage.getItem('demo-data-source') || 'unknown'
+            dataSource: dataSource
           }}
           isLoading={isLoading}
         />

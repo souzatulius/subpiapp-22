@@ -1,3 +1,4 @@
+
 import { create } from 'zustand';
 import { ChartVisibility } from '@/components/ranking/types';
 import { supabase } from '@/integrations/supabase/client';
@@ -25,6 +26,7 @@ interface RankingChartsState {
   isMockData: boolean;
   lastRefreshTime: Date | null;
   lastRefreshSuccess: boolean;
+  dataSource: 'mock' | 'upload' | 'supabase';
   
   toggleChartVisibility: (chartId: string) => void;
   setChartVisibility: (visibility: ChartVisibility) => void;
@@ -41,7 +43,9 @@ interface RankingChartsState {
   setIsMockData: (isMock: boolean) => void;
   setLastRefreshTime: (time: Date | null) => void;
   setLastRefreshSuccess: (success: boolean) => void;
+  setDataSource: (source: 'mock' | 'upload' | 'supabase') => void;
   refreshChartData: () => Promise<void>;
+  clearAllData: () => void;
 }
 
 export const useRankingCharts = create<RankingChartsState>()(
@@ -93,6 +97,7 @@ export const useRankingCharts = create<RankingChartsState>()(
       isMockData: false,
       lastRefreshTime: null,
       lastRefreshSuccess: true,
+      dataSource: 'mock',
       
       toggleChartVisibility: (chartId: string) => 
         set(state => ({
@@ -155,13 +160,32 @@ export const useRankingCharts = create<RankingChartsState>()(
         set({ chartsProgress: progress }),
         
       setIsMockData: (isMock: boolean) =>
-        set({ isMockData: isMock }),
+        set({ 
+          isMockData: isMock,
+          dataSource: isMock ? 'mock' : get().dataSource
+        }),
         
       setLastRefreshTime: (time: Date | null) =>
         set({ lastRefreshTime: time }),
         
       setLastRefreshSuccess: (success: boolean) =>
         set({ lastRefreshSuccess: success }),
+
+      setDataSource: (source: 'mock' | 'upload' | 'supabase') =>
+        set({ 
+          dataSource: source,
+          isMockData: source === 'mock'
+        }),
+        
+      // Clear all data - useful for debugging
+      clearAllData: () => set({
+        planilhaData: null,
+        sgzData: null,
+        painelData: null,
+        chartData: {},
+        lastRefreshTime: null,
+        uploadId: null
+      }),
         
       refreshChartData: async () => {
         try {
@@ -181,17 +205,25 @@ export const useRankingCharts = create<RankingChartsState>()(
             lastRefreshSuccess: false
           });
           
-          console.log("Refreshing chart data...");
+          console.log("Refreshing chart data with current dataSource:", get().dataSource);
           
-          // Check if we should use mock data based on explicitly set dataSource in localStorage
+          // Check if we should use mock data based on explicitly set dataSource
           const dataSourceFromStorage = localStorage.getItem('demo-data-source');
           console.log("Data source from localStorage:", dataSourceFromStorage);
           
           // Use the value from localStorage if available, otherwise fall back to state
-          const useMockData = dataSourceFromStorage === 'mock' || 
+          let useMockData = dataSourceFromStorage === 'mock' || 
             (dataSourceFromStorage !== 'upload' && dataSourceFromStorage !== 'supabase' && get().isMockData);
           
-          console.log("Using mock data:", useMockData);
+          // Update the store's dataSource based on localStorage
+          if (dataSourceFromStorage) {
+            set({ 
+              dataSource: dataSourceFromStorage as 'mock' | 'upload' | 'supabase',
+              isMockData: dataSourceFromStorage === 'mock'
+            });
+          }
+          
+          console.log("Using mock data:", useMockData, "with data source:", get().dataSource);
           
           // First check if we have cached data in localStorage
           let loadedFromCache = false;
@@ -211,7 +243,7 @@ export const useRankingCharts = create<RankingChartsState>()(
                   planilhaData: sgzData,
                   painelData: painelData,
                   // Set mock data based on actual data source
-                  isMockData: dataSourceFromStorage === 'mock',
+                  isMockData: get().dataSource === 'mock',
                   isInsightsLoading: false,
                   insightsProgress: 100
                 });
@@ -223,7 +255,7 @@ export const useRankingCharts = create<RankingChartsState>()(
           }
           
           // Load fresh data if needed
-          if (useMockData || dataSourceFromStorage === 'mock') {
+          if (get().dataSource === 'mock' || useMockData) {
             // Only load from mock API if we didn't get valid data from cache
             if (!loadedFromCache) {
               try {
@@ -251,6 +283,7 @@ export const useRankingCharts = create<RankingChartsState>()(
                   planilhaData: sgzData,
                   painelData: painelData,
                   isMockData: true,
+                  dataSource: 'mock',
                   lastRefreshSuccess: true
                 });
                 
@@ -284,7 +317,7 @@ export const useRankingCharts = create<RankingChartsState>()(
           }
           
           // Only fetch from Supabase if we're not using mocks or mock loading failed
-          if (!useMockData && (dataSourceFromStorage === 'upload' || dataSourceFromStorage === 'supabase') && !loadedFromCache) {
+          if (get().dataSource !== 'mock' && !useMockData && !loadedFromCache) {
             try {
               // Fetch latest SGZ data from Supabase
               const { data: sgzData, error: sgzError } = await supabase
@@ -324,6 +357,7 @@ export const useRankingCharts = create<RankingChartsState>()(
                 isInsightsLoading: false,
                 insightsProgress: 100,
                 isMockData: false,
+                dataSource: 'supabase',
                 lastRefreshSuccess: true
               });
               
@@ -349,7 +383,7 @@ export const useRankingCharts = create<RankingChartsState>()(
                   localStorage.setItem('demo-data-source', 'mock');
                   
                   // Retry with mock data
-                  set({ isMockData: true });
+                  set({ isMockData: true, dataSource: 'mock' });
                   
                   // Re-run the refresh with mock data
                   return get().refreshChartData();
@@ -394,7 +428,10 @@ export const useRankingCharts = create<RankingChartsState>()(
       storage: createJSONStorage(() => localStorage),
       partialize: (state) => ({ 
         chartVisibility: state.chartVisibility,
-        isMockData: state.isMockData
+        isMockData: state.isMockData,
+        dataSource: state.dataSource,
+        uploadId: state.uploadId,
+        lastRefreshTime: state.lastRefreshTime ? state.lastRefreshTime.toISOString() : null
       }),
     }
   )
