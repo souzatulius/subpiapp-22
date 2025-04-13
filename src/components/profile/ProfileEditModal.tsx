@@ -1,10 +1,8 @@
 
 import React, { useState, useEffect } from 'react';
-import { format } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Calendar } from '@/components/ui/calendar';
 import {
   Dialog,
   DialogContent,
@@ -13,13 +11,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 import { updateProfile } from '@/services/authService';
-import { CalendarIcon, Save, X } from 'lucide-react';
+import { Save, X } from 'lucide-react';
 import { ProfileData } from '@/components/profile/types';
 import { toast } from '@/components/ui/use-toast';
 import { cn } from '@/lib/utils';
@@ -54,6 +47,51 @@ const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
       aniversario: profileData.aniversario ? new Date(profileData.aniversario) : undefined
     });
   }, [profileData]);
+
+  // Format date to DD/MM/YYYY for display
+  const formatDateToBrazilian = (date: Date | undefined): string => {
+    if (!date) return '';
+    return `${String(date.getDate()).padStart(2, '0')}/${String(date.getMonth() + 1).padStart(2, '0')}/${date.getFullYear()}`;
+  };
+
+  // Parse date from DD/MM/YYYY to Date object
+  const parseBrazilianDate = (dateString: string): Date | undefined => {
+    if (!dateString || !dateString.match(/^\d{2}\/\d{2}\/\d{4}$/)) return undefined;
+    const [day, month, year] = dateString.split('/').map(part => parseInt(part, 10));
+    const parsedDate = new Date(year, month - 1, day);
+    return !isNaN(parsedDate.getTime()) ? parsedDate : undefined;
+  };
+
+  const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    // Allow direct input in DD/MM/YYYY format
+    if (!value) {
+      setFormData({ ...formData, aniversario: undefined });
+      return;
+    }
+    
+    const parsedDate = parseBrazilianDate(value);
+    setFormData({ ...formData, aniversario: parsedDate });
+  };
+
+  const handleWhatsappChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let value = e.target.value;
+    // Remove non-numeric characters
+    const numericValue = value.replace(/\D/g, '');
+    
+    // Format as (XX) XXXXX-XXXX
+    if (numericValue.length > 0) {
+      if (numericValue.length <= 2) {
+        value = `(${numericValue}`;
+      } else if (numericValue.length <= 7) {
+        value = `(${numericValue.substring(0, 2)}) ${numericValue.substring(2)}`;
+      } else {
+        value = `(${numericValue.substring(0, 2)}) ${numericValue.substring(2, 7)}-${numericValue.substring(7, 11)}`;
+      }
+    }
+    
+    setFormData({ ...formData, whatsapp: value });
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -104,50 +142,76 @@ const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
               className="rounded-lg"
             />
           </div>
+          
+          {/* Display-only fields */}
+          {profileData.cargo && (
+            <div className="grid gap-2">
+              <Label htmlFor="cargo">Cargo</Label>
+              <Input
+                id="cargo"
+                value={typeof profileData.cargo === 'string' ? profileData.cargo : profileData.cargo?.descricao || ''}
+                disabled
+                className="rounded-lg bg-gray-100"
+              />
+            </div>
+          )}
+          
+          {profileData.coordenacao && (
+            <div className="grid gap-2">
+              <Label htmlFor="coordenacao">Coordenação</Label>
+              <Input
+                id="coordenacao"
+                value={typeof profileData.coordenacao === 'string' ? profileData.coordenacao : profileData.coordenacao?.descricao || ''}
+                disabled
+                className="rounded-lg bg-gray-100"
+              />
+            </div>
+          )}
+          
+          {profileData.supervisao_tecnica && (
+            <div className="grid gap-2">
+              <Label htmlFor="supervisao_tecnica">Supervisão Técnica</Label>
+              <Input
+                id="supervisao_tecnica"
+                value={typeof profileData.supervisao_tecnica === 'string' ? profileData.supervisao_tecnica : profileData.supervisao_tecnica?.descricao || ''}
+                disabled
+                className="rounded-lg bg-gray-100"
+              />
+            </div>
+          )}
+          
+          {profileData.email && (
+            <div className="grid gap-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                value={profileData.email}
+                disabled
+                className="rounded-lg bg-gray-100"
+              />
+            </div>
+          )}
 
           <div className="grid gap-2">
             <Label htmlFor="whatsapp">WhatsApp</Label>
             <Input
               id="whatsapp"
               value={formData.whatsapp}
-              onChange={(e) => setFormData({ ...formData, whatsapp: e.target.value })}
-              placeholder="(11) 99999-9999"
+              onChange={handleWhatsappChange}
+              placeholder="(XX) XXXXX-XXXX"
               className="rounded-lg"
             />
           </div>
 
           <div className="grid gap-2">
             <Label htmlFor="aniversario">Data de nascimento</Label>
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  className={cn(
-                    "w-full justify-start text-left font-normal rounded-lg",
-                    !formData.aniversario && "text-muted-foreground"
-                  )}
-                >
-                  <CalendarIcon className="mr-2 h-4 w-4" />
-                  {formData.aniversario ? (
-                    format(formData.aniversario as Date, "PPP")
-                  ) : (
-                    <span>Selecione uma data</span>
-                  )}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0">
-                <Calendar
-                  mode="single"
-                  selected={formData.aniversario as Date | undefined}
-                  onSelect={(date) => setFormData({ ...formData, aniversario: date })}
-                  initialFocus
-                  captionLayout="dropdown"
-                  fromYear={1940}
-                  toYear={new Date().getFullYear()}
-                  className="rounded-lg"
-                />
-              </PopoverContent>
-            </Popover>
+            <Input
+              id="aniversario"
+              value={formData.aniversario ? formatDateToBrazilian(formData.aniversario as Date) : ''}
+              onChange={handleDateChange}
+              placeholder="DD/MM/AAAA"
+              className="rounded-lg"
+            />
           </div>
 
           <DialogFooter>

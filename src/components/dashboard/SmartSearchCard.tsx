@@ -17,13 +17,15 @@ interface SmartSearchCardProps {
   onSearch?: (query: string) => void;
   className?: string;
   isEditMode?: boolean;
+  disableNavigation?: boolean;
 }
 
 const SmartSearchCard: React.FC<SmartSearchCardProps> = ({
   placeholder = "Pesquisar por demandas, notas, configurações...",
   onSearch,
   className = "",
-  isEditMode = false
+  isEditMode = false,
+  disableNavigation = false
 }) => {
   const { 
     query, 
@@ -47,11 +49,20 @@ const SmartSearchCard: React.FC<SmartSearchCardProps> = ({
     if (query.trim()) {
       if (onSearch) {
         onSearch(query);
-      } else {
+      } else if (!disableNavigation) {
         handleSearch(query);
       }
       setShowSuggestions(false);
     }
+  };
+
+  const handleSelectItem = (suggestion: SearchSuggestion) => {
+    if (disableNavigation) {
+      setQuery(suggestion.title);
+    } else {
+      handleSelectSuggestion(suggestion);
+    }
+    setShowSuggestions(false);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -99,7 +110,7 @@ const SmartSearchCard: React.FC<SmartSearchCardProps> = ({
               onChange={handleInputChange}
               onFocus={() => setShowSuggestions(suggestions.length > 0)}
               onKeyDown={handleKeyDown}
-              className="pl-12 pr-4 rounded-xl border border-gray-300 w-full bg-white text-lg font-medium text-gray-800 placeholder:text-gray-400 placeholder:font-normal py-[20px]" 
+              className="pl-12 pr-4 rounded-2xl border border-gray-300 w-full bg-white text-lg font-medium text-gray-800 placeholder:text-gray-400 placeholder:font-normal py-[20px]" 
               disabled={isEditMode}
             />
           </div>
@@ -110,7 +121,7 @@ const SmartSearchCard: React.FC<SmartSearchCardProps> = ({
                 {suggestions.map((suggestion, index) => (
                   <li
                     key={index}
-                    onClick={() => handleSelectSuggestion(suggestion)}
+                    onClick={() => handleSelectItem(suggestion)}
                     className="px-4 py-3 hover:bg-gray-100 cursor-pointer text-lg"
                   >
                     {suggestion.title}

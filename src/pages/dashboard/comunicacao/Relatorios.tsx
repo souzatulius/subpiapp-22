@@ -91,8 +91,8 @@ const RelatoriosPage = () => {
       <WelcomeCard
         title="Relatórios da Comunicação"
         description="Ações e estatísticas da área"
-        icon={<PieChart className="h-6 w-6 mr-2" />}
-        color="bg-gradient-to-r from-gray-600 to-blue-700"
+        icon={<PieChart className="h-6 w-6 mr-2 text-blue-500" />}
+        color="bg-gradient-to-r from-blue-600 to-blue-800"
         showResetButton={true}
         onResetClick={resetDashboard}
         resetButtonIcon={<RotateCcw className="h-4 w-4" />}

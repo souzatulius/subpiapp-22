@@ -12,6 +12,7 @@ import { toast } from 'sonner';
 import EditCardModal from '@/components/dashboard/EditCardModal';
 import PendingActionsCard from '@/components/dashboard/cards/PendingActionsCard';
 import OriginDemandStatistics from '@/components/dashboard/cards/OriginDemandStatistics';
+import SmartSearchCard from '@/components/dashboard/SmartSearchCard';
 
 const DashboardPage: React.FC = () => {
   const {
@@ -116,13 +117,7 @@ const DashboardPage: React.FC = () => {
     }
     if (cardId === 'busca-rapida') {
       return <div className="p-4 flex items-center justify-center w-full h-full">
-          <div className="bg-white rounded-2xl w-full flex items-center shadow-sm border border-gray-200">
-            <Search className="h-5 w-5 ml-3 text-gray-500" />
-            <input type="text" placeholder="Pesquisar..." onClick={e => {
-            e.preventDefault();
-            window.location.href = '/search';
-          }} className="w-full p-2 border-none focus:outline-none focus:ring-0 rounded-2xl px-0 py-0" />
-          </div>
+          <SmartSearchCard disableNavigation={true} placeholder="Pesquisar..." />
         </div>;
     }
     return null;
@@ -154,7 +149,7 @@ const DashboardPage: React.FC = () => {
         onEditCard={handleCardEdit} 
         onHideCard={handleCardHide} 
         isMobileView={isMobileView} 
-        isEditMode={true} 
+        isEditMode={isEditMode} 
         disableWiggleEffect={true} 
         renderSpecialCardContent={renderSpecialCardContent} 
       />

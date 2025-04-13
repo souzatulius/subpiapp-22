@@ -49,7 +49,7 @@ const ProfileMenu: React.FC = () => {
   const profileData: ProfileData | null = userProfile ? {
     nome_completo: userProfile.nome_completo || '',
     whatsapp: userProfile.whatsapp || '',
-    aniversario: userProfile.aniversario
+    aniversario: userProfile.aniversario || ''
   } : null;
 
   if (isLoading) {

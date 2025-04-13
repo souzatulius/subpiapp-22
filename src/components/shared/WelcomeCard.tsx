@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { RotateCcw, Home } from 'lucide-react';
@@ -21,6 +22,7 @@ interface WelcomeCardProps {
   className?: string;
   spacingClassName?: string;
   rightContent?: React.ReactNode;
+  hideFunctions?: boolean;
 }
 const WelcomeCard: React.FC<WelcomeCardProps> = ({
   title,
@@ -40,7 +42,8 @@ const WelcomeCard: React.FC<WelcomeCardProps> = ({
   onButtonClick,
   className,
   spacingClassName,
-  rightContent
+  rightContent,
+  hideFunctions = false
 }) => {
   return <div className="bg-transparent">
       <div className="bg-transparent">
@@ -73,7 +76,7 @@ const WelcomeCard: React.FC<WelcomeCardProps> = ({
         </div>
       </div>
 
-      {(showButton || showResetButton) && <div className="flex flex-col sm:flex-row gap-2 mt-4">
+      {!hideFunctions && (showButton || showResetButton) && <div className="flex flex-col sm:flex-row gap-2 mt-4">
           {showButton && <Button variant={buttonVariant} onClick={onButtonClick} className="flex items-center gap-2">
               {buttonIcon}
               {buttonText}

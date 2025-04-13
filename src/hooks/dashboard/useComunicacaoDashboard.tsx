@@ -100,7 +100,7 @@ export const useComunicacaoDashboard = (
   // Return everything the dashboard needs
   return {
     cards,
-    isEditMode,
+    isEditMode: true, // Set to true to enable drag functionality permanently
     isEditModalOpen,
     selectedCard,
     isLoading,
