@@ -145,7 +145,7 @@ const DashboardPage: React.FC = () => {
             y: 0
           }} transition={{
             duration: 0.5
-          }} className="max-w-7xl mx-auto p-4 px-[30px]">
+          }} className="max-w-7xl mx-auto p-4 px-[30px] py-[30px]">
               <div className="">
                 <div className="w-full">
                   <WelcomeCard title="Dashboard" description="Arraste e edite os cards para personalizar a sua tela" icon={<Home className="h-8 w-8 mr-2 text-gray-500" />} color="bg-gradient-to-r from-blue-800 to-blue-950" userName={firstName || ''} greeting={true} showResetButton={true} resetButtonIcon={<RotateCcw className="h-4 w-4" />} onResetClick={handleResetDashboard} />

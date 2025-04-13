@@ -113,13 +113,13 @@ const NotesApprovalCard: React.FC<NotesApprovalCardProps> = ({
       </div>;
   }
   return <div className="h-full w-full">
-      <div className="flex flex-col h-full border border-slate-300 rounded-3xl">
+      <div className="flex flex-col h-full border border-slate-300 rounded-3xl px-0">
         <h3 className="text-lg font-semibold mb-2 text-center py-[6px] my-[12px] text-gray-950">Últimas Notas</h3>
-        <div className="overflow-auto flex-1">
+        <div className="overflow-auto flex-1 px-0">
           {notes.length === 0 ? <div className="text-sm bg-gray-300 my-0 px-[8px] mx-[5px] py-[5px] rounded-xl">
               Nenhuma nota disponível
             </div> : <ul className="space-y-2 px-1">
-              {notes.map(note => <li key={note.id} onClick={() => handleNoteClick(note.id)} className="p-2 cursor-pointer transition-all bg-gray-100 hover:bg-gray-200 rounded-2xl mx-[6px] px-[13px]">
+              {notes.map(note => <li key={note.id} onClick={() => handleNoteClick(note.id)} className="p-2 cursor-pointer transition-all bg-gray-100 hover:bg-gray-200 rounded-2xl mx-[6px] px-[10px]">
                   <div className="flex flex-col">
                     <span className="text-sm font-medium truncate text-gray-800 w-full">
                       {note.titulo}
@@ -128,7 +128,7 @@ const NotesApprovalCard: React.FC<NotesApprovalCardProps> = ({
                       <span className="text-xs text-gray-600">
                         {note.coordenacao?.sigla || note.coordenacao?.descricao || 'Coordenação'}
                       </span>
-                      <Badge className="text-xs text-white px-[10px] py-[4px] bg-orange-400 rounded-sm">
+                      <Badge className="text-xs text-white px-[10px] py-[4px] bg-orange-400 rounded-2xl">
                         {getStatusLabel(note.status)}
                       </Badge>
                     </div>

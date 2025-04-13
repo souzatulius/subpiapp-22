@@ -58,7 +58,7 @@ const WelcomeCard: React.FC<WelcomeCardProps> = ({
             </p>
           </div>
           
-          <div className="flex items-center gap-2">
+          <div className="py-0 px-0 my-0 mx-0">
             {showResetButton && <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
