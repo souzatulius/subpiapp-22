@@ -43,7 +43,9 @@ const NotesApprovalCard: React.FC<NotesApprovalCardProps> = ({
             status, 
             criado_em,
             autor:usuarios!autor_id(nome_completo),
-            coordenacao:coordenacao_id(sigla, descricao)
+            problema!problema_id(
+              coordenacao:coordenacao_id(sigla, descricao)
+            )
           `).order('criado_em', {
           ascending: false
         }).limit(maxNotes);
@@ -57,7 +59,7 @@ const NotesApprovalCard: React.FC<NotesApprovalCardProps> = ({
             status: note.status,
             criado_em: note.criado_em,
             autor: note.autor,
-            coordenacao: note.coordenacao
+            coordenacao: note.problema?.coordenacao || null
           };
         });
         
