@@ -93,7 +93,7 @@ export function SortableUnifiedActionCard(props: UnifiedActionCardProps) {
     zIndex: isDragging ? 10 : 'auto',
     opacity: isDragging ? 0.8 : 1
   };
-  return <div ref={setNodeRef} style={style} className="h-full py-[7px] my-0 mx-0 px-[3px]">
+  return <div ref={setNodeRef} style={style} className="h-full mx-0 my-0 py-0 px-0">
       <UnifiedActionCard id={id} sortableProps={isDraggable ? {
       attributes,
       listeners
