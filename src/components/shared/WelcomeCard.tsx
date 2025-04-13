@@ -46,9 +46,9 @@ const WelcomeCard: React.FC<WelcomeCardProps> = ({
   // Description text color
   const descriptionColorClass = 'text-gray-600';
   return <Card className="border-0 shadow-none bg-transparent">
-      <CardContent className="border border-none bg-transparent">
-        <div className="border border-none bg-transparent rounded-none">
-          <div className="px-0 py-0">
+      <CardContent className="px-0 py-0">
+        <div className="">
+          <div className="py-0 mx-0 px-0">
             <h2 className={`${greeting && displayName ? 'text-3xl' : 'text-2xl'} font-bold mb-3 flex items-center text-gray-900`}>
               {icon}
               {greeting && displayName ? `Olá, ${displayName}!` : title}
@@ -58,11 +58,11 @@ const WelcomeCard: React.FC<WelcomeCardProps> = ({
             </p>
           </div>
           
-          <div className="flex items-center gap-2">
+          <div className="col-span-6 rounded-xl h-32 flex items-center justify-center hover:shadow-none hover:border-none hover:outline-none bg-transparent">
             {showResetButton && <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <Button variant="ghost" size="icon" onClick={onResetClick} className="bg-gray-100 py-0 my-[33px]">
+                    <Button variant="ghost" size="icon" onClick={onResetClick} className="bg-gray-100 py-0 my-[33px] text-center">
                       {resetButtonIcon}
                     </Button>
                   </TooltipTrigger>
