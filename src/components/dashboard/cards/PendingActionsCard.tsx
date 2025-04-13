@@ -14,6 +14,8 @@ interface PendingItem {
 }
 
 interface PendingActionsCardProps {
+  id?: string;
+  title?: string;
   notesToApprove?: number;
   responsesToDo?: number;
   isComunicacao?: boolean;
@@ -21,6 +23,8 @@ interface PendingActionsCardProps {
 }
 
 const PendingActionsCard: React.FC<PendingActionsCardProps> = ({
+  id,
+  title = "Ações Pendentes",
   notesToApprove,
   responsesToDo,
   isComunicacao,
@@ -94,7 +98,7 @@ const PendingActionsCard: React.FC<PendingActionsCardProps> = ({
   return (
     <div className="w-full h-full bg-gray-100 p-4 rounded-xl">
       <div className="flex justify-between mb-3 items-center">
-        <h3 className="font-medium text-gray-800">Ações Pendentes</h3>
+        <h3 className="font-medium text-gray-800">{title}</h3>
       </div>
       
       <div className="space-y-3 overflow-auto max-h-[calc(100%-2rem)]">

@@ -1,7 +1,9 @@
+
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { RotateCcw, Home } from 'lucide-react';
 import { cn } from '@/utils/cn';
+
 interface WelcomeCardProps {
   title: string;
   description: string;
@@ -22,6 +24,7 @@ interface WelcomeCardProps {
   spacingClassName?: string;
   rightContent?: React.ReactNode;
 }
+
 const WelcomeCard: React.FC<WelcomeCardProps> = ({
   title,
   description,
@@ -86,4 +89,5 @@ const WelcomeCard: React.FC<WelcomeCardProps> = ({
         </div>}
     </div>;
 };
+
 export default WelcomeCard;

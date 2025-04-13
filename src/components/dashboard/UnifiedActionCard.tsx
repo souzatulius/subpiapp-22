@@ -9,6 +9,7 @@ import DynamicListCard from '@/components/settings/dashboard-management/DynamicL
 import OriginSelectionCard from './cards/OriginSelectionCard';
 import SmartSearchCard from './SmartSearchCard';
 import CardControls from './card-parts/CardControls';
+
 export interface Controls {
   cardId: string;
   onEdit: (id: string) => void;
@@ -16,6 +17,7 @@ export interface Controls {
   onHide?: (id: string) => void;
   isCustom?: boolean;
 }
+
 export const Controls: React.FC<Controls> = ({
   cardId,
   onEdit,
@@ -46,6 +48,7 @@ export const Controls: React.FC<Controls> = ({
         </button>}
     </div>;
 };
+
 export interface UnifiedActionCardProps extends ActionCardItem {
   isDraggable?: boolean;
   isEditing?: boolean;
@@ -69,6 +72,7 @@ export interface UnifiedActionCardProps extends ActionCardItem {
   specialContent?: React.ReactNode;
   children?: React.ReactNode;
 }
+
 export function SortableUnifiedActionCard(props: UnifiedActionCardProps) {
   const {
     id,
@@ -100,10 +104,12 @@ export function SortableUnifiedActionCard(props: UnifiedActionCardProps) {
     } : undefined} isEditing={isEditing} disableWiggleEffect={disableWiggleEffect} {...rest} />
     </div>;
 }
+
 export interface SortableProps {
   attributes: ReturnType<typeof useSortable>['attributes'];
   listeners: ReturnType<typeof useSortable>['listeners'];
 }
+
 export function UnifiedActionCard({
   id,
   title,
@@ -149,15 +155,18 @@ export function UnifiedActionCard({
       navigate(path);
     }
   };
+  
   const renderCardContent = () => {
     if (specialContent) {
       return <div className="w-full h-full p-2 py-0 mx-0 px-0">
           {specialContent}
         </div>;
     }
+    
     if (children) {
       return children;
     }
+    
     if (type === 'data_dynamic' && specialCardsData?.kpis) {
       const kpis = specialCardsData.kpis;
       if (title.includes('Solicitações de imprensa')) {
@@ -168,22 +177,28 @@ export function UnifiedActionCard({
         return <KPICard title="Notas produzidas" value={kpis.notesProduced.total} secondaryValue={kpis.notesProduced.approved} secondaryLabel={`aprovadas | ${kpis.notesProduced.rejected} recusadas`} loading={kpis.notesProduced.loading} variant="success" />;
       }
     }
+    
     if (type === 'in_progress_demands' && specialCardsData?.lists) {
       return <DynamicListCard title="Demandas em andamento" items={specialCardsData.lists.recentDemands.items || []} loading={specialCardsData.lists.recentDemands.loading} emptyMessage="Nenhuma demanda em andamento" viewAllPath="/dashboard/comunicacao/demandas" viewAllLabel="Ver todas as demandas" />;
     }
+    
     if (type === 'recent_notes' && specialCardsData?.lists) {
       return <DynamicListCard title="Notas de imprensa" items={specialCardsData.lists.recentNotes.items || []} loading={specialCardsData.lists.recentNotes.loading} emptyMessage="Nenhuma nota de imprensa" viewAllPath="/dashboard/comunicacao/notas" viewAllLabel="Ver todas as notas" />;
     }
+    
     if (type === 'origin_selection' && specialCardsData?.originOptions) {
       return <OriginSelectionCard title="Cadastro de nova solicitação de imprensa" options={specialCardsData.originOptions || []} />;
     }
+    
     if (type === 'smart_search') {
       return <SmartSearchCard placeholder="O que vamos fazer?" onSearch={onSearchSubmit} />;
     }
+    
     return <div className="h-full" onClick={handleCardClick}>
         <ActionCard id={id} title={title} iconId={iconId} path={path} color={color} isDraggable={isEditing} onEdit={undefined} onDelete={undefined} onHide={undefined} isCustom={isCustom} iconSize={iconSize} isMobileView={isMobileView} showControls={false} subtitle={subtitle} />
       </div>;
   };
+  
   return <div onClick={isEditing ? undefined : handleCardClick} className="py-0 my-0 px-0">
       {renderCardContent()}
       
@@ -192,4 +207,5 @@ export function UnifiedActionCard({
         </div>}
     </div>;
 }
+
 export default UnifiedActionCard;

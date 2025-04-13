@@ -6,8 +6,8 @@ export type CardColor =
   | 'bg-blue-500' 
   | 'bg-orange-500' 
   | 'bg-gray-500' 
-  | 'bg-gray-100'  // Added bg-gray-100 as valid CardColor
-  | 'bg-blue-600'  // Added bg-blue-600 as valid CardColor
+  | 'bg-gray-100'  
+  | 'bg-blue-600'  
   | 'bg-yellow-500' 
   | 'bg-teal-500'
   | 'bg-green-500'
@@ -26,7 +26,7 @@ export type CardColor =
   | 'orange-dark'
   | 'neutral-800'
   | 'orange-700'
-  | 'orange-800'; // Added this color
+  | 'orange-800'; 
 
 export type CardType = 
   | 'standard' 
@@ -91,5 +91,5 @@ export interface ActionCardItem {
   isComunicados?: boolean;
   isUserProfile?: boolean;
   isNotificationSettings?: boolean;
-  isVisible?: boolean; // Added isVisible property
+  isVisible?: boolean;
 }
