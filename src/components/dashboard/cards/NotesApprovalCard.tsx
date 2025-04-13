@@ -128,7 +128,7 @@ const NotesApprovalCard: React.FC<NotesApprovalCardProps> = ({
                       <span className="text-xs text-gray-600">
                         {note.coordenacao?.sigla || note.coordenacao?.descricao || 'Coordenação'}
                       </span>
-                      <Badge className="rounded-2xl text-xs bg-gray-300 text-gray-600 px-[10px] py-[4px]">
+                      <Badge className="text-xs text-white px-[10px] py-[4px] bg-orange-400 rounded-sm">
                         {getStatusLabel(note.status)}
                       </Badge>
                     </div>
