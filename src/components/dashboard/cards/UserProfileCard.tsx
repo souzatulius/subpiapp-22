@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { User, Settings, UserCheck, LogOut } from 'lucide-react';
 import { Card } from '@/components/ui/card';
@@ -9,69 +8,64 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useSupabaseAuth';
-
 interface UserProfileCardProps {
   id: string;
   title: string;
   className?: string;
 }
-
 const UserProfileCard: React.FC<UserProfileCardProps> = ({
   id,
   title,
   className = ''
 }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const { user, signOut } = useAuth();
+  const {
+    user,
+    signOut
+  } = useAuth();
   const [name, setName] = useState(user?.user_metadata?.name || '');
   const [email, setEmail] = useState(user?.email || '');
   const [isUpdating, setIsUpdating] = useState(false);
-
   const handleUpdateProfile = async () => {
     setIsUpdating(true);
-    
     try {
       // In a real implementation, we would update the user profile
       // For now, just show a success toast
       toast({
         title: "Perfil atualizado",
         description: "Suas informações foram atualizadas com sucesso.",
-        variant: "default",
+        variant: "default"
       });
-      
       setIsOpen(false);
     } catch (error) {
       toast({
         title: "Erro",
         description: "Não foi possível atualizar o perfil.",
-        variant: "destructive",
+        variant: "destructive"
       });
     } finally {
       setIsUpdating(false);
     }
   };
-
   const handleLogout = async () => {
     try {
       await signOut();
       toast({
         title: "Logout realizado",
         description: "Você foi desconectado com sucesso.",
-        variant: "default",
+        variant: "default"
       });
     } catch (error) {
       console.error('Error during logout:', error);
     }
   };
-
-  return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+  return <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
         <div className="h-full cursor-pointer">
           <Card className="h-full flex flex-col items-center justify-center p-4 shadow-md border border-gray-100 hover:shadow-lg transition-all">
             <User className="h-12 w-12 text-gray-600 mb-3" />
             <h3 className="font-semibold text-lg">{title}</h3>
-            <p className="text-sm text-gray-500 mt-2">Clique para editar seu perfil</p>
+            <p className="text-sm text-gray-500 mt-2 text-center">Clique para editar seu perfil</p>
           </Card>
         </div>
       </DialogTrigger>
@@ -98,7 +92,7 @@ const UserProfileCard: React.FC<UserProfileCardProps> = ({
               
               <div className="space-y-2">
                 <Label htmlFor="name">Nome completo</Label>
-                <Input id="name" value={name} onChange={(e) => setName(e.target.value)} />
+                <Input id="name" value={name} onChange={e => setName(e.target.value)} />
               </div>
               
               <div className="space-y-2">
@@ -106,11 +100,7 @@ const UserProfileCard: React.FC<UserProfileCardProps> = ({
                 <Input id="email" value={email} disabled />
               </div>
               
-              <Button 
-                onClick={handleUpdateProfile} 
-                disabled={isUpdating} 
-                className="w-full"
-              >
+              <Button onClick={handleUpdateProfile} disabled={isUpdating} className="w-full">
                 {isUpdating ? 'Salvando...' : 'Salvar alterações'}
               </Button>
             </div>
@@ -133,26 +123,19 @@ const UserProfileCard: React.FC<UserProfileCardProps> = ({
                 <Input id="confirm-password" type="password" />
               </div>
               
-              <Button 
-                onClick={() => {
-                  toast({
-                    title: "Senha atualizada",
-                    description: "Sua senha foi atualizada com sucesso.",
-                    variant: "default",
-                  });
-                  setIsOpen(false);
-                }} 
-                className="w-full"
-              >
+              <Button onClick={() => {
+              toast({
+                title: "Senha atualizada",
+                description: "Sua senha foi atualizada com sucesso.",
+                variant: "default"
+              });
+              setIsOpen(false);
+            }} className="w-full">
                 Atualizar senha
               </Button>
               
               <div className="pt-6 border-t mt-6">
-                <Button 
-                  variant="destructive" 
-                  onClick={handleLogout} 
-                  className="w-full flex items-center gap-2"
-                >
+                <Button variant="destructive" onClick={handleLogout} className="w-full flex items-center gap-2">
                   <LogOut className="h-4 w-4" />
                   <span>Sair da conta</span>
                 </Button>
@@ -161,8 +144,6 @@ const UserProfileCard: React.FC<UserProfileCardProps> = ({
           </TabsContent>
         </Tabs>
       </DialogContent>
-    </Dialog>
-  );
+    </Dialog>;
 };
-
 export default UserProfileCard;
