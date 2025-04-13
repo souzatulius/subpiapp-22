@@ -43,10 +43,9 @@ const NotesApprovalCard: React.FC<NotesApprovalCardProps> = ({
             status, 
             criado_em,
             autor_id,
-            problema_id,
-            autor:autor_id(nome_completo),
-            problema:problema_id(
-              coordenacao:coordenacao_id(sigla, descricao)
+            autor:autor_id (nome_completo),
+            problema:problema_id (
+              coordenacao:coordenacao_id (sigla, descricao)
             )
           `).order('criado_em', {
           ascending: false
