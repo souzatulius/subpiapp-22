@@ -41,6 +41,11 @@ export const useRankingCharts = () => {
   const [dataSource, setDataSource] = useState<'mock' | 'upload' | 'supabase'>('mock');
   const [isInsightsLoading, setIsInsightsLoading] = useState<boolean>(false);
   
+  // Add progress tracking states
+  const [insightsProgress, setInsightsProgress] = useState<number>(0); 
+  const [chartsProgress, setChartsProgress] = useState<number>(0);
+  const [isChartsLoading, setIsChartsLoading] = useState<boolean>(false);
+  
   // Toggle chart visibility function
   const toggleChartVisibility = useCallback((chartId: keyof ChartVisibility) => {
     setChartVisibility(prevState => {
@@ -148,6 +153,12 @@ export const useRankingCharts = () => {
     setDataSource,
     isInsightsLoading,
     setIsInsightsLoading,
+    insightsProgress,
+    setInsightsProgress,
+    chartsProgress,
+    setChartsProgress,
+    isChartsLoading,
+    setIsChartsLoading,
     refreshChartData
   };
 };

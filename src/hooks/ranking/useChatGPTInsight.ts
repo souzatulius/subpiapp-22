@@ -20,7 +20,7 @@ export const useChatGPTInsight = (dadosPlanilha: any[] | null, uploadId?: string
   const [error, setError] = useState<string | null>(null);
   const { callWithRetry, isLoading: isApiLoading } = useOpenAIWithRetry();
   const { showFeedback, updateFeedbackProgress, updateFeedbackMessage } = useAnimatedFeedback();
-  const { setInsightsProgress, insightsProgress } = useRankingCharts();
+  const { setInsightsProgress } = useRankingCharts();
 
   useEffect(() => {
     const fetchOrGenerateInsights = async () => {

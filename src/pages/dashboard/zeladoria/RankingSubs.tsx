@@ -382,7 +382,7 @@ const RankingSubsContent = ({
                 )}
               </div>
               
-              <UploadSection
+              <UploadSection 
                 onUploadStart={handleUploadStart}
                 onUploadComplete={handleUploadComplete}
                 onPainelUploadComplete={handlePainelUploadComplete}
@@ -395,56 +395,26 @@ const RankingSubsContent = ({
         )}
       </AnimatePresence>
       
-      <ErrorBoundary
-        FallbackComponent={ChartErrorFallback}
-        onReset={() => {
-          // Refresh data when user tries again
-          refreshData();
-        }}
-      >
-        <div className="mt-6">
-          <RankingContent
-            filterDialogOpen={filterDialogOpen}
-            setFilterDialogOpen={setFilterDialogOpen}
-            disableCardContainers={true}
-            className={isMobile ? "mobile-kpi-grid" : ""}
-            buttonText="Filtrar"
-            lastUpdateText="Atualização"
-            onRefreshData={refreshData}
-          />
-        </div>
-      </ErrorBoundary>
+      <style>{`
+        @media print {
+          .pdf-content {
+            padding: 20px;
+            max-width: 100% !important;
+          }
+        }
+      `}</style>
 
+      {/* Clean Data Dialog */}
       <CleanDataDialog
-        isOpen={cleanDataDialogOpen}
+        open={cleanDataDialogOpen}
         onClose={() => setCleanDataDialogOpen(false)}
         onSuccess={handleCleanDataSuccess}
       />
 
-      <style jsx global>{`
-        @media (max-width: 767px) {
-          .mobile-kpi-grid .kpi-container {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 8px;
-          }
-        }
-        
-        .animate-fade-in {
-          animation: fadeIn 0.3s ease-in-out;
-        }
-        
-        @keyframes fadeIn {
-          0% {
-            opacity: 0;
-            transform: translateY(-10px);
-          }
-          100% {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-      `}</style>
+      {/* Main Content */}
+      <div className="mt-6">
+        <RankingContent />
+      </div>
     </motion.div>
   );
 };
