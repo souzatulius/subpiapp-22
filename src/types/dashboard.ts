@@ -23,7 +23,8 @@ export type CardColor =
   | 'green-teal'
   | 'orange-dark'
   | 'neutral-800'
-  | 'orange-700';
+  | 'orange-700'
+  | 'orange-800'; // Added this color
 
 export type CardType = 
   | 'standard' 

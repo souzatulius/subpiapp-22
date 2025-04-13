@@ -39,8 +39,8 @@ const NotesApprovalCard: React.FC<NotesApprovalCardProps> = ({ maxNotes = 5 }) =
             titulo, 
             status, 
             criado_em,
-            autor:autor_id(nome_completo),
-            coordenacao:coordenacao_id(sigla, descricao)
+            autor:autor_id (nome_completo),
+            coordenacao:coordenacao_id (sigla, descricao)
           `)
           .order('criado_em', { ascending: false })
           .limit(maxNotes);
