@@ -37,7 +37,7 @@ const SmartSearchPopover: React.FC = () => {
   // Only show suggestions when the user types 4 or more characters
   const filteredSuggestions = searchQuery.length >= 4 
     ? suggestions.map(suggestion => ({
-        title: suggestion.label || 'Sugestão',
+        title: suggestion.title || suggestion.label || 'Sugestão',
         route: suggestion.route
       }))
     : [];
