@@ -114,12 +114,12 @@ const NotesApprovalCard: React.FC<NotesApprovalCardProps> = ({
   }
   return <div className="h-full w-full border border-slate-300 bg-gray-2100 rounded-2xl py-0">
       <div className="">
-        <h3 className="font-semibold mb-2 text-center my-[12px] py-0 text-gray-900 text-lg">Últimas Notas</h3>
+        <h3 className="font-semibold mb-2 text-center py-0 text-gray-900 text-lg my-[20px]">Últimas Notas</h3>
         <div className="overflow-auto flex-1">
           {notes.length === 0 ? <div className="text-sm bg-gray-300 my-0 px-[8px] mx-[5px] py-[5px] rounded-xl">
               Nenhuma nota disponível
             </div> : <ul className="space-y-2 px-1">
-              {notes.map(note => <li key={note.id} onClick={() => handleNoteClick(note.id)} className="p-2 cursor-pointer transition-all bg-gray-200 rounded-xl py-[12px] px-[16px]">
+              {notes.map(note => <li key={note.id} onClick={() => handleNoteClick(note.id)} className="p-2 cursor-pointer transition-all bg-gray-200 rounded-xl mx-[6px] px-[12px] py-[8px] my-[27px]">
                   <div className="flex flex-col">
                     <span className="font-medium truncate w-full text-gray-600 text-sm">
                       {note.titulo}

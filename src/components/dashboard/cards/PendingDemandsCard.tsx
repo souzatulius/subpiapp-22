@@ -79,7 +79,7 @@ const PendingDemandsCard: React.FC<PendingDemandsCardProps> = ({
           {demands.length === 0 ? <div className="text-center text-gray-500 p-4">
               Nenhuma demanda disponível
             </div> : <ul className="">
-              {demands.map(demand => <li key={demand.id} onClick={() => handleDemandClick(demand.id)} className="bg-gray-300 rounded-2xl">
+              {demands.map(demand => <li key={demand.id} onClick={() => handleDemandClick(demand.id)} className="bg-gray-300 rounded-xl">
                   <div className="">
                     <span className="">
                       {demand.titulo}
