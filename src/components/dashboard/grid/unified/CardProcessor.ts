@@ -6,7 +6,7 @@ import { getMobileSpecificDimensions } from '../GridUtilities';
 export const useCardProcessor = (isMobileView: boolean = false) => {
   // Process card dimensions based on mobile or desktop view
   const processCardDimensions = useCallback((card: ActionCardItem): ActionCardItem => {
-    // Always create a new card object to avoid mutation
+    // Create a copy of the card to modify
     const processedCard = { ...card };
     
     // For mobile view, ensure cards are appropriately sized

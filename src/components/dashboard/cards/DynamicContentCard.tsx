@@ -1,9 +1,8 @@
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { Card } from '@/components/ui/card';
 import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { useNavigate } from 'react-router-dom';
 
 interface TimelineItemProps {
   id: string;
@@ -65,10 +64,9 @@ const ItemCard: React.FC<{
   item: TimelineItemProps, 
   type: 'notes' | 'demands' | 'news' 
 }> = ({ item, type }) => {
-  const navigate = useNavigate();
-  
-  // Use useMemo for the date formatting to ensure consistent hook usage
-  const timeAgo = useMemo(() => {
+  // Safely parse the date string to Date object for formatting
+  // Handle potential invalid dates gracefully
+  const timeAgo = (() => {
     try {
       const date = new Date(item.date);
       // Check if date is valid
@@ -80,22 +78,10 @@ const ItemCard: React.FC<{
       console.error("Error formatting date:", error);
       return "Data desconhecida";
     }
-  }, [item.date]);
-  
-  // Handle navigation when clicking on an item
-  const handleClick = () => {
-    if (type === 'notes' && item.id) {
-      navigate(`/notas/${item.id}`);
-    } else if (item.link) {
-      navigate(item.link);
-    }
-  };
+  })();
   
   return (
-    <Card 
-      className="p-3 hover:bg-gray-50 transition-colors cursor-pointer" 
-      onClick={handleClick}
-    >
+    <Card className="p-3 hover:bg-gray-50 transition-colors">
       <div className="flex flex-col space-y-1">
         <div className="flex justify-between items-start">
           <h4 className="font-medium text-gray-800 line-clamp-1">{item.title}</h4>

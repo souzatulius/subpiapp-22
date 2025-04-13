@@ -10,24 +10,6 @@ interface GetSpecialContentProps {
   specialCardsData?: any;
 }
 
-// Default mock data for statistics to ensure consistent rendering
-const DEFAULT_MOCK_STATISTICS = {
-  demands: [
-    { name: 'Pendentes', value: 25, color: '#3B82F6' },
-    { name: 'Em andamento', value: 15, color: '#F59E0B' },
-    { name: 'Concluídas', value: 45, color: '#10B981' }
-  ],
-  notes: [
-    { name: 'Aprovadas', value: 30, color: '#10B981' },
-    { name: 'Pendentes', value: 12, color: '#F59E0B' },
-    { name: 'Rejeitadas', value: 8, color: '#EF4444' }
-  ],
-  news: [
-    { name: 'Publicadas', value: 22, color: '#3B82F6' },
-    { name: 'Rascunhos', value: 10, color: '#9CA3AF' }
-  ]
-};
-
 const getSpecialContent = ({ 
   card, 
   renderSpecialCardContent, 
@@ -39,15 +21,14 @@ const getSpecialContent = ({
     const customContent = renderSpecialCardContent(card.id);
     if (customContent) return customContent;
   }
-  
-  // Safely access data with defaults
-  const safeSpecialCardsData = specialCardsData || {};
-  const notasItems = safeSpecialCardsData.notasItems || [];
-  const demandasItems = safeSpecialCardsData.demandasItems || [];
-  const isLoading = safeSpecialCardsData.isLoading || false;
 
   // For cards with dataSourceKey
   if (card.dataSourceKey) {
+    // Always define these variables, even if they're empty arrays or default values
+    const notasItems = specialCardsData?.notasItems || [];
+    const demandasItems = specialCardsData?.demandasItems || [];
+    const isLoading = specialCardsData?.isLoading || false;
+    
     switch (card.dataSourceKey) {
       case 'ultimas_notas':
         return (
@@ -76,8 +57,23 @@ const getSpecialContent = ({
           );
         }
         
-        // Use mock or provided statistics data
-        const mockStatistics = safeSpecialCardsData.statistics || DEFAULT_MOCK_STATISTICS;
+        // Create mock statistics data since we don't have actual statistics yet
+        const mockStatistics = {
+          demands: [
+            { name: 'Pendentes', value: 25, color: '#3B82F6' },
+            { name: 'Em andamento', value: 15, color: '#F59E0B' },
+            { name: 'Concluídas', value: 45, color: '#10B981' }
+          ],
+          notes: [
+            { name: 'Aprovadas', value: 30, color: '#10B981' },
+            { name: 'Pendentes', value: 12, color: '#F59E0B' },
+            { name: 'Rejeitadas', value: 8, color: '#EF4444' }
+          ],
+          news: [
+            { name: 'Publicadas', value: 22, color: '#3B82F6' },
+            { name: 'Rascunhos', value: 10, color: '#9CA3AF' }
+          ]
+        };
         
         // Create a dynamic charts view based on available statistics
         return (
