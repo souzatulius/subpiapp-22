@@ -37,7 +37,7 @@ const WelcomeCard: React.FC<WelcomeCardProps> = ({
   greeting = false,
   showResetButton = false,
   onResetClick,
-  resetButtonIcon = <RotateCcw className="h-4 w-4 text-white" />,
+  resetButtonIcon = <RotateCcw className="h-4 w-4" />,
   rightContent
 }) => {
   // Ensure userName is treated as a string even if it's undefined
@@ -47,11 +47,11 @@ const WelcomeCard: React.FC<WelcomeCardProps> = ({
     <div className="py-0 mx-0 px-0">
       <div className="flex justify-between items-start">
         <div className="flex flex-col">
-          <h2 className={`${greeting && displayName ? 'text-3xl' : 'text-2xl'} font-bold flex items-center text-gray-950`}>
+          <h2 className={`${greeting && displayName ? 'text-3xl' : 'text-2xl'} font-bold flex items-center text-gray-900`}>
             {icon}
             {greeting && displayName ? `Olá, ${displayName}!` : title}
           </h2>
-          <p className="text-gray-600 mt-4 mb-6">
+          <p className="text-gray-600 mt-1">
             {description}{!description.endsWith('.') && '.'}
           </p>
         </div>
@@ -62,10 +62,10 @@ const WelcomeCard: React.FC<WelcomeCardProps> = ({
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button 
-                    variant="default" 
+                    variant="ghost" 
                     size="icon" 
                     onClick={onResetClick} 
-                    className="rounded-full bg-blue-600 hover:bg-blue-700 mr-2"
+                    className="bg-transparent hover:bg-transparent focus:ring-0 border-0 shadow-none p-2"
                   >
                     {resetButtonIcon}
                   </Button>
@@ -81,7 +81,7 @@ const WelcomeCard: React.FC<WelcomeCardProps> = ({
             <Button 
               variant={buttonVariant} 
               onClick={onButtonClick} 
-              className="bg-transparent hover:bg-gray-100 focus:ring-0 shadow-none"
+              className="bg-transparent hover:bg-transparent focus:ring-0 border-0 shadow-none"
             >
               {buttonIcon && <span className="mr-2">{buttonIcon}</span>}
               {buttonText}
