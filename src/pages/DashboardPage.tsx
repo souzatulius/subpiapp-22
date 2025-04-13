@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useCallback } from 'react';
 import WelcomeCard from '@/components/shared/WelcomeCard';
 import CardGridContainer from '@/components/dashboard/CardGridContainer';
@@ -11,6 +12,7 @@ import { toast } from 'sonner';
 import EditCardModal from '@/components/dashboard/EditCardModal';
 import PendingActionsCard from '@/components/dashboard/cards/PendingActionsCard';
 import OriginDemandStatistics from '@/components/dashboard/cards/OriginDemandStatistics';
+
 const DashboardPage: React.FC = () => {
   const {
     viewType,
@@ -26,13 +28,16 @@ const DashboardPage: React.FC = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const isMobileView = useIsMobile();
+
   const toggleEditMode = () => {
     setIsEditMode(prev => !prev);
   };
+
   const handleCardEdit = (card: ActionCardItem) => {
     setSelectedCard(card);
     setIsCardEditModalOpen(true);
   };
+
   const handleCardHide = (cardId: string) => {
     const updatedCards = actionCards.map(card => card.id === cardId ? {
       ...card,
@@ -41,10 +46,12 @@ const DashboardPage: React.FC = () => {
     setActionCards(updatedCards);
     saveCardsToSupabase(updatedCards);
   };
+
   const handleCardsReorder = (reorderedCards: ActionCardItem[]) => {
     setActionCards(reorderedCards);
     saveCardsToSupabase(reorderedCards);
   };
+
   const handleSaveCardEdit = (editedCard: ActionCardItem) => {
     const updatedCards = actionCards.map(card => card.id === editedCard.id ? editedCard : card);
     setActionCards(updatedCards);
@@ -52,6 +59,7 @@ const DashboardPage: React.FC = () => {
     setSelectedCard(null);
     saveCardsToSupabase(updatedCards);
   };
+
   const saveCardsToSupabase = async (cards: ActionCardItem[]) => {
     if (!user || !user.id) return;
     setIsSaving(true);
@@ -75,6 +83,7 @@ const DashboardPage: React.FC = () => {
       setIsSaving(false);
     }
   };
+
   const resetDashboard = async () => {
     if (!user || !user.id) return;
     try {
@@ -118,6 +127,7 @@ const DashboardPage: React.FC = () => {
     }
     return null;
   }, []);
+
   return <div className="space-y-6">
       <div className="mb-8">
         <WelcomeCard title="Dashboard" description="Acompanhe indicadores e acesse as principais funcionalidades do sistema" greeting={true} userName={firstName} userNameClassName="text-gray-950" showResetButton={isEditMode} onResetClick={resetDashboard} showButton={true} buttonText={isEditMode ? "Concluir Edição" : "Personalizar Dashboard"} buttonVariant="outline" onButtonClick={toggleEditMode} spacingClassName="space-y-3" />
@@ -133,4 +143,5 @@ const DashboardPage: React.FC = () => {
       {selectedCard && <EditCardModal isOpen={isCardEditModalOpen} onClose={() => setIsCardEditModalOpen(false)} onSave={handleSaveCardEdit} card={selectedCard} />}
     </div>;
 };
+
 export default DashboardPage;
