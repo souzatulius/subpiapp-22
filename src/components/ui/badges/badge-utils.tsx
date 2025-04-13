@@ -1,6 +1,7 @@
+
 import { cn } from "@/lib/utils";
 
-export type BadgeSize = 'sm' | 'md' | 'lg';
+export type BadgeSize = 'xs' | 'sm' | 'md' | 'lg';
 
 export interface BadgeStyleConfig {
   text: string;
@@ -11,6 +12,7 @@ export interface BadgeStyleConfig {
 
 export const getSizeClasses = (size: BadgeSize) => {
   const sizeClasses = {
+    xs: 'text-[10px] py-0 px-1.5 h-4',
     sm: 'text-xs py-0.5 px-2 h-5',
     md: 'text-sm py-1 px-2.5 h-6',
     lg: 'text-sm py-1.5 px-3 h-7',
@@ -20,6 +22,7 @@ export const getSizeClasses = (size: BadgeSize) => {
 
 export const getIconSize = (size: BadgeSize) => {
   const iconSizes = {
+    xs: 10,
     sm: 12,
     md: 14,
     lg: 16,

@@ -54,7 +54,7 @@ const DemandaCard: React.FC<DemandaCardProps> = ({ demanda, isSelected, onClick 
           </div>
           <div className="flex items-center gap-2">
             <span>{formattedDate}</span>
-            <DemandaStatusBadge status={demanda.status} showIcon={false} size="xs" />
+            <DemandaStatusBadge status={demanda.status} showIcon={false} size="sm" />
           </div>
         </div>
       </div>
