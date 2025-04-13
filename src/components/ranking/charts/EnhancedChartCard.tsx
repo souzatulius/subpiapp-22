@@ -1,10 +1,8 @@
-
 import React, { ReactNode, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { EyeOff, Search } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-
 interface EnhancedChartCardProps {
   title: string;
   subtitle?: string;
@@ -19,12 +17,11 @@ interface EnhancedChartCardProps {
   dataSource?: 'SGZ' | 'Painel da Zeladoria' | string;
   analysis?: string;
 }
-
-const EnhancedChartCard: React.FC<EnhancedChartCardProps> = ({ 
-  title, 
+const EnhancedChartCard: React.FC<EnhancedChartCardProps> = ({
+  title,
   subtitle,
-  value, 
-  isLoading, 
+  value,
+  isLoading,
   children,
   onToggleVisibility,
   onToggleAnalysis,
@@ -39,8 +36,7 @@ const EnhancedChartCard: React.FC<EnhancedChartCardProps> = ({
   // Generate badge color based on data source
   const getBadgeColor = (source?: string) => {
     if (!source) return 'bg-gray-200 text-gray-700';
-    
-    switch(source.toLowerCase()) {
+    switch (source.toLowerCase()) {
       case 'sgz':
         return 'bg-blue-100 text-blue-700 border-blue-300';
       case 'painel da zeladoria':
@@ -49,63 +45,38 @@ const EnhancedChartCard: React.FC<EnhancedChartCardProps> = ({
         return 'bg-gray-100 text-gray-700 border-gray-300';
     }
   };
-
-  return (
-    <Card 
-      className={`border border-orange-200 shadow-sm hover:shadow-md transition-all relative ${className}`}
-      onMouseEnter={() => setIsHovering(true)}
-      onMouseLeave={() => setIsHovering(false)}
-    >
-      <CardHeader>
+  return <Card className={`border border-orange-200 shadow-sm hover:shadow-md transition-all relative ${className}`} onMouseEnter={() => setIsHovering(true)} onMouseLeave={() => setIsHovering(false)}>
+      <CardHeader className="py-[29px] px-[12px]">
         <div className="flex items-center justify-between">
-          <div className="flex-1">
-            <div className="flex items-center justify-between mb-1">
+          <div className="flex-1 px-0 mx-0">
+            <div className="flex items-center justify-between mb-1 px-0 mx-0">
               <CardTitle className="text-sm font-medium">{title}</CardTitle>
               
               {/* Data source badge moved to right side */}
-              {dataSource && (
-                <Badge 
-                  variant="outline" 
-                  className={`text-xs py-0 px-1.5 ml-2 ${getBadgeColor(dataSource)}`}
-                >
+              {dataSource && <Badge variant="outline" className={`text-xs py-0 px-1.5 ml-2 ${getBadgeColor(dataSource)}`}>
                   {dataSource}
-                </Badge>
-              )}
+                </Badge>}
             </div>
             
-            {subtitle && <p className="text-xs text-gray-500">{subtitle}</p>}
-            {value !== undefined && (
-              <p className="text-lg font-semibold text-blue-700 mt-1">{value}</p>
-            )}
+            {subtitle && <p className="text-xs text-gray-500 py-[14px] px-0 mx-0">{subtitle}</p>}
+            {value !== undefined && <p className="mt-1 font-bold text-orange-600 text-2xl my-0">{value}</p>}
           </div>
           
           {/* Action buttons on header with updated styling */}
-          <div className="flex space-x-1 ml-2">
-            {onToggleAnalysis && (
-              <button 
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onToggleAnalysis();
-                }}
-                className="p-1.5 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600 transition-colors"
-                title="Mostrar análise"
-              >
+          <div className="flex space-x-1 ml-2 mx-0 py-0 my-0">
+            {onToggleAnalysis && <button onClick={e => {
+            e.stopPropagation();
+            onToggleAnalysis();
+          }} className="p-1.5 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600 transition-colors" title="Mostrar análise">
                 <Search size={16} />
-              </button>
-            )}
+              </button>}
             
-            {onToggleVisibility && (
-              <button 
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onToggleVisibility();
-                }}
-                className="p-1.5 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600 transition-colors"
-                title="Ocultar card"
-              >
+            {onToggleVisibility && <button onClick={e => {
+            e.stopPropagation();
+            onToggleVisibility();
+          }} className="p-1.5 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600 transition-colors" title="Ocultar card">
                 <EyeOff size={16} />
-              </button>
-            )}
+              </button>}
           </div>
           
           {headerContent}
@@ -113,24 +84,16 @@ const EnhancedChartCard: React.FC<EnhancedChartCardProps> = ({
       </CardHeader>
       
       <CardContent className="relative">
-        {isLoading ? (
-          <div className="flex items-center justify-center h-[220px]">
+        {isLoading ? <div className="flex items-center justify-center h-[220px]">
             <Skeleton className="h-[200px] w-[200px]" />
-          </div>
-        ) : (
-          <div className="h-[220px]">
+          </div> : <div className="h-[220px]">
             {children}
-          </div>
-        )}
+          </div>}
         
-        {footerContent && (
-          <div className="mt-3">
+        {footerContent && <div className="mt-3">
             {footerContent}
-          </div>
-        )}
+          </div>}
       </CardContent>
-    </Card>
-  );
+    </Card>;
 };
-
 export default EnhancedChartCard;
