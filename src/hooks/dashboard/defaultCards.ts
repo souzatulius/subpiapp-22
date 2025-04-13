@@ -1,4 +1,3 @@
-
 import { v4 as uuidv4 } from 'uuid';
 import { ActionCardItem } from '@/types/dashboard';
 import React from 'react';
@@ -65,10 +64,10 @@ export const getDefaultCards = (): ActionCardItem[] => {
       mobileOrder: 1
     },
     {
-      id: 'comunicacao-area-card',
-      title: 'Área da Comunicação',
-      iconId: 'Bell',
-      path: '/dashboard/comunicacao',
+      id: 'ranking-zeladoria-card',
+      title: 'Ranking Zeladoria',
+      iconId: 'TrendingUp',
+      path: '/dashboard/zeladoria/ranking',
       color: 'deep-blue',
       width: '25',
       height: '1',
@@ -77,17 +76,116 @@ export const getDefaultCards = (): ActionCardItem[] => {
       mobileOrder: 2
     },
     {
-      id: 'origem-demandas-card',
-      title: 'Atividades em Andamento',
-      subtitle: 'Demandas da semana por área técnica',
+      id: 'relatorio-comunicacao-card',
+      title: 'Relatório Comunicação',
       iconId: 'BarChart2',
-      path: '',
-      color: 'gray-light',
-      width: '50',
-      height: '2',
-      type: 'origin_demand_chart',
+      path: '/dashboard/comunicacao/relatorios',
+      color: 'blue-light',
+      width: '25',
+      height: '1',
+      type: 'standard',
       displayMobile: true,
       mobileOrder: 3
+    },
+    {
+      id: 'responder-demanda-card',
+      title: 'Responder Demanda',
+      iconId: 'MessageSquare',
+      path: '/dashboard/comunicacao/responder',
+      color: 'gray-medium',
+      width: '25',
+      height: '0.5',
+      type: 'standard',
+      displayMobile: true,
+      mobileOrder: 4
+    },
+    {
+      id: 'aprovar-notas-card',
+      title: 'Aprovar Notas',
+      iconId: 'CheckCircle',
+      path: '/dashboard/comunicacao/aprovar-nota',
+      color: 'orange-light',
+      width: '25',
+      height: '0.5',
+      type: 'standard',
+      displayMobile: true,
+      mobileOrder: 5
+    },
+    {
+      id: 'responder-demanda-dinamico-card',
+      title: 'Responder Demanda',
+      subtitle: 'Acompanhe demandas pendentes',
+      iconId: 'MessageSquare',
+      path: '/dashboard/comunicacao/responder',
+      color: 'gray-light',
+      width: '25',
+      height: '2',
+      type: 'in_progress_demands',
+      displayMobile: true,
+      mobileOrder: 6
+    },
+    {
+      id: 'perfil-usuario-card',
+      title: 'Perfil do Usuário',
+      iconId: 'User',
+      path: '',
+      color: 'deep-blue',
+      width: '25',
+      height: '1',
+      type: 'user_profile',
+      isUserProfile: true,
+      displayMobile: true,
+      mobileOrder: 7
+    },
+    {
+      id: 'aprovar-nota-dinamico-card',
+      title: 'Aprovar Nota',
+      subtitle: 'Notas pendentes de aprovação',
+      iconId: 'FileCheck',
+      path: '/dashboard/comunicacao/aprovar-nota',
+      color: 'orange-light',
+      width: '25',
+      height: '2',
+      type: 'recent_notes',
+      displayMobile: true,
+      mobileOrder: 8
+    },
+    {
+      id: 'ajustes-notificacao-card',
+      title: 'Ajustes de Notificação',
+      iconId: 'Bell',
+      path: '',
+      color: 'blue-dark',
+      width: '25',
+      height: '1',
+      type: 'notification_settings',
+      isNotificationSettings: true,
+      displayMobile: true,
+      mobileOrder: 9
+    },
+    {
+      id: 'noticias-site-card',
+      title: 'Notícias do Site',
+      iconId: 'Newspaper',
+      path: '/dashboard/comunicacao/releases',
+      color: 'blue-light',
+      width: '25',
+      height: '0.5',
+      type: 'standard',
+      displayMobile: true,
+      mobileOrder: 10
+    },
+    {
+      id: 'esic-card',
+      title: 'Processos e-SIC',
+      iconId: 'FileSearch',
+      path: '/dashboard/esic',
+      color: 'deep-blue',
+      width: '25',
+      height: '0.5',
+      type: 'standard',
+      displayMobile: true,
+      mobileOrder: 11
     },
     {
       id: 'acoes-pendentes-card',
@@ -100,57 +198,7 @@ export const getDefaultCards = (): ActionCardItem[] => {
       type: 'pending_tasks',
       isPendingTasks: true,
       displayMobile: true,
-      mobileOrder: 4
-    },
-    {
-      id: 'aprovar-notas-card',
-      title: 'Aprovar Notas de Imprensa',
-      iconId: 'FileText',
-      path: '/dashboard/comunicacao/criar-nota',
-      color: 'orange-light',
-      width: '25',
-      height: '1',
-      type: 'standard',
-      displayMobile: true,
-      mobileOrder: 5
-    },
-    {
-      id: 'noticias-site-card',
-      title: 'Notícias do Site',
-      iconId: 'Newspaper',
-      path: '/dashboard/comunicacao/releases',
-      color: 'blue-light',
-      width: '25',
-      height: '1',
-      type: 'standard',
-      displayMobile: true,
-      mobileOrder: 6
-    },
-    {
-      id: 'perfil-usuario-card',
-      title: 'Perfil do Usuário',
-      iconId: 'User',
-      path: '',
-      color: 'deep-blue',
-      width: '25',
-      height: '2',
-      type: 'user_profile',
-      isUserProfile: true,
-      displayMobile: true,
-      mobileOrder: 7
-    },
-    {
-      id: 'ajustes-notificacao-card',
-      title: 'Ajustes de Notificação',
-      iconId: 'Bell',
-      path: '',
-      color: 'blue-dark',
-      width: '25',
-      height: '2',
-      type: 'notification_settings',
-      isNotificationSettings: true,
-      displayMobile: true,
-      mobileOrder: 8
+      mobileOrder: 12
     }
   ];
 };

@@ -1,4 +1,3 @@
-
 import { CardWidth, CardHeight } from '@/types/dashboard';
 
 export const getWidthClass = (width?: CardWidth, isMobileView: boolean = false): string => {
@@ -7,11 +6,11 @@ export const getWidthClass = (width?: CardWidth, isMobileView: boolean = false):
       case '25':
         return 'col-span-1';
       case '50':
-        return 'col-span-2'; // Em mobile, 50% ocupa a largura total (2 colunas)
+        return 'col-span-1'; // Mobile 50% is just 1 column (2-column grid)
       case '75':
         return 'col-span-2';
       case '100':
-        return 'col-span-2'; // Em mobile, 100% ocupa largura total (2 colunas)
+        return 'col-span-2'; // Mobile 100% is full width (2 columns)
       default:
         return 'col-span-1';
     }
@@ -32,11 +31,11 @@ export const getWidthClass = (width?: CardWidth, isMobileView: boolean = false):
 };
 
 export const getHeightClass = (height?: CardHeight, isMobileView: boolean = false): string => {
-  // Para specific cards on mobile, we might want different heights
+  // For specific cards on mobile, we might want different heights
   if (isMobileView) {
     switch (height) {
       case '0.5':
-        return 'h-20'; // Half height on mobile
+        return 'h-24'; // Half height on mobile
       case '2':
         return 'h-80'; // Double height on mobile
       case '3':
@@ -52,7 +51,7 @@ export const getHeightClass = (height?: CardHeight, isMobileView: boolean = fals
   // Regular desktop heights - using row spans instead of fixed heights
   switch (height) {
     case '0.5':
-      return 'row-span-1'; // Half height
+      return 'row-span-1 h-24'; // Half height
     case '2':
       return 'row-span-2';
     case '3':
@@ -69,30 +68,22 @@ export const getHeightClass = (height?: CardHeight, isMobileView: boolean = fals
 export const getMobileSpecificDimensions = (cardTitle: string): { width: CardWidth, height: CardHeight } => {
   switch (cardTitle) {
     case "Busca Rápida":
-      return { width: '100' as CardWidth, height: '0.5' as CardHeight }; // 2 columns, half height on mobile
-    case "Demandas":
-    case "Avisos":
-    case "Responder Demandas":
-    case "Ranking da Zeladoria":
-    case "Nova Solicitação":
-    case "Nova Demanda":
-    case "Cadastrar Demanda":
-    case "Aprovar Nota":
-    case "Criar Nota":
-    case "Criar Nota de Imprensa":
-    case "Consultar Notas":
-    case "Cadastrar Release":
-    case "Releases e Notícias":
-      return { width: '50' as CardWidth, height: '1' as CardHeight }; // 1 column, 1 row on mobile
-    case "Origem das Demandas":
-    case "Cadastro de nova solicitação de imprensa":
-      return { width: '100' as CardWidth, height: '2' as CardHeight }; // 2 columns, 2 rows on mobile
-    case "Ações Pendentes":
-      return { width: '50' as CardWidth, height: '2' as CardHeight }; // 1 column, 2 rows on mobile
+      return { width: '100' as CardWidth, height: '1' as CardHeight }; // 2 columns, full height on mobile
+    case "Ranking Zeladoria":
+    case "Relatório Comunicação":
+    case "Responder Demanda":
+    case "Aprovar Notas":
+    case "Notícias do Site":
     case "Processos e-SIC":
       return { width: '50' as CardWidth, height: '1' as CardHeight }; // 1 column, 1 row on mobile
-    case "Notificações":
-      return { width: '50' as CardWidth, height: '0.5' as CardHeight }; // 1 column, half row on mobile
+    case "Responder Demanda Dinâmico":
+    case "Aprovar Nota Dinâmico":
+    case "Ajustes de Notificação":
+      return { width: '100' as CardWidth, height: '1' as CardHeight }; // 2 columns, 1 row on mobile
+    case "Perfil do Usuário":
+      return { width: '50' as CardWidth, height: '1' as CardHeight }; // 1 column, 1 row on mobile
+    case "Ações Pendentes":
+      return { width: '100' as CardWidth, height: '2' as CardHeight }; // 2 columns, 2 rows on mobile
     default:
       return { width: '50' as CardWidth, height: '1' as CardHeight }; // Default size for mobile
   }
