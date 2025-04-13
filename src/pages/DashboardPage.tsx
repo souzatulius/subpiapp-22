@@ -137,7 +137,7 @@ const DashboardPage: React.FC = () => {
             </div>}
           
           <div className="flex-1 overflow-auto">
-            <motion.div className="max-w-7xl mx-auto p-4" initial={{
+            <motion.div initial={{
             opacity: 0,
             y: 20
           }} animate={{
@@ -145,8 +145,8 @@ const DashboardPage: React.FC = () => {
             y: 0
           }} transition={{
             duration: 0.5
-          }}>
-              <div className="space-y-6">
+          }} className="max-w-7xl mx-auto p-4 px-[30px]">
+              <div className="space-y-6 py-0 my-0">
                 <div className="w-full">
                   <WelcomeCard title="Dashboard" description="Arraste e edite os cards para personalizar a sua tela" icon={<Home className="h-8 w-8 mr-2 text-gray-500" />} color="bg-gradient-to-r from-blue-800 to-blue-950" userName={firstName || ''} greeting={true} showResetButton={true} resetButtonIcon={<RotateCcw className="h-4 w-4" />} onResetClick={handleResetDashboard} />
                 </div>

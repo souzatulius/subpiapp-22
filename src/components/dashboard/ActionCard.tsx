@@ -105,7 +105,7 @@ const ActionCard = memo(({
             <div className={`mb-2.5 ${textColorClass}`}>
               {renderIcon()}
             </div>
-            <div className="line-clamp-2 max-w-[90%]">
+            <div className="line-clamp-2 max-w-[90%] py-[6px] my-[5px]">
               <h3 className={`font-semibold ${textColorClass} text-lg leading-tight break-words text-balance`}>
                 {title}
               </h3>
