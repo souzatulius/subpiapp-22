@@ -75,7 +75,7 @@ export const SmartSearchCard: React.FC<SmartSearchCardProps> = ({
                       onMouseDown={() => handleSelectSuggestion(suggestion)}
                     >
                       <div className="flex-grow">
-                        <div className="font-medium text-gray-700">{suggestion.title}</div>
+                        <div className="font-medium text-gray-700">{suggestion.label}</div>
                       </div>
                       <div className="text-gray-400">
                         <Search className="h-6 w-6" />

@@ -10,56 +10,48 @@ export interface SearchAction {
   route: string;
   keywords: string[];
   // Add title property to match SearchSuggestion interface
-  title: string;
+  title?: string;
 }
 
 // Predefined search actions with their routes and keywords
 const searchActions: SearchAction[] = [
   {
     label: "Nova Demanda de Comunicação",
-    title: "Nova Demanda de Comunicação", // Add title to match both interfaces
     route: "/dashboard/comunicacao/cadastrar",
     keywords: ["nova", "demanda", "cadastrar", "criar", "comunicação", "registrar"]
   },
   {
     label: "Aprovar Nota Oficial",
-    title: "Aprovar Nota Oficial",
     route: "/dashboard/comunicacao/aprovar-nota",
     keywords: ["aprovar", "nota", "oficial", "autorizar", "verificar"]
   },
   {
     label: "Responder Demandas",
-    title: "Responder Demandas",
     route: "/dashboard/comunicacao/responder",
     keywords: ["responder", "atender", "demanda", "pendente", "resposta"]
   },
   {
     label: "Consultar Demandas",
-    title: "Consultar Demandas",
     route: "/dashboard/comunicacao/consultar-demandas",
     keywords: ["consultar", "buscar", "encontrar", "demanda", "listar", "visualizar"]
   },
   {
     label: "Criar Nota Oficial",
-    title: "Criar Nota Oficial",
     route: "/dashboard/comunicacao/criar-nota",
     keywords: ["criar", "nova", "nota", "oficial", "elaborar", "redigir"]
   },
   {
     label: "Consultar Notas Oficiais",
-    title: "Consultar Notas Oficiais",
     route: "/dashboard/comunicacao/consultar-notas",
     keywords: ["consultar", "buscar", "notas", "oficial", "listar", "visualizar"]
   },
   {
     label: "Ver Relatórios",
-    title: "Ver Relatórios",
     route: "/dashboard/comunicacao/relatorios",
     keywords: ["relatório", "estatística", "número", "métrica", "dashboard", "indicador"]
   },
   {
     label: "Configurações da Conta",
-    title: "Configurações da Conta",
     route: "/settings",
     keywords: ["configuração", "ajuste", "conta", "perfil", "preferência", "setting"]
   }
@@ -155,7 +147,7 @@ export const useSmartSearch = () => {
       // Map the Fuse.js results to SearchSuggestion type
       const filteredSuggestions = results
         .map(result => ({
-          title: result.item.title, // Use title instead of label
+          title: result.item.label, // Use label as title
           route: result.item.route
         }))
         .slice(0, 5); // Limit to 5 suggestions
