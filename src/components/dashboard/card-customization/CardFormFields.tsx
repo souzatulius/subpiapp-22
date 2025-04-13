@@ -11,10 +11,10 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { CardTypeSelector } from "./CardTypeSelector";
-import { ColorSelector } from "./ColorSelector";
-import { IconSelector } from "./IconSelector";
-import { CardSizeSelector } from "./CardSizeSelector";
+import CardTypeSelector from "./CardTypeSelector";
+import ColorSelector from "./ColorSelector";
+import IconSelector from "./IconSelector";
+import CardSizeSelector from "./CardSizeSelector";
 import { FormSchema } from "@/types/formSchema";
 import { MultiSelect } from "@/components/ui/multi-select";
 

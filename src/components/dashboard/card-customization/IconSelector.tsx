@@ -2,19 +2,19 @@
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Search } from "lucide-react";
-import { getAllIcons } from "./utils";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
+import * as LucideIcons from "lucide-react";
 
 interface IconSelectorProps {
-  selectedIcon: string;
-  onIconSelect: (iconId: string) => void;
+  selectedIconId: string;
+  onSelectIcon: (iconId: string) => void;
 }
 
 export default function IconSelector({
-  selectedIcon,
-  onIconSelect
+  selectedIconId,
+  onSelectIcon
 }: IconSelectorProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [icons, setIcons] = useState<{ id: string; component: any }[]>([]);
@@ -46,7 +46,7 @@ export default function IconSelector({
       <ScrollArea className="h-40 rounded-md border border-gray-200">
         <div className="grid grid-cols-6 gap-1 p-2">
           {filteredIcons.map((icon) => {
-            const isSelected = icon.id === selectedIcon;
+            const isSelected = icon.id === selectedIconId;
             return (
               <Button
                 key={icon.id}
@@ -57,7 +57,7 @@ export default function IconSelector({
                   "h-10 w-10 rounded-md p-0 flex items-center justify-center",
                   isSelected && "bg-blue-100 text-blue-700 ring-1 ring-blue-500"
                 )}
-                onClick={() => onIconSelect(icon.id)}
+                onClick={() => onSelectIcon(icon.id)}
                 title={icon.id}
               >
                 <icon.component className="h-5 w-5" />
@@ -74,8 +74,20 @@ export default function IconSelector({
       </ScrollArea>
       
       <div className="text-xs text-gray-500 mt-1">
-        Ícone selecionado: {selectedIcon}
+        Ícone selecionado: {selectedIconId}
       </div>
     </div>
   );
+}
+
+// Utility function to get all icons from lucide-react
+function getAllIcons() {
+  const iconEntries = Object.entries(LucideIcons)
+    .filter(([name]) => typeof name === 'string' && name !== 'createLucideIcon')
+    .map(([name, component]) => ({
+      id: name,
+      component
+    }));
+
+  return iconEntries;
 }
