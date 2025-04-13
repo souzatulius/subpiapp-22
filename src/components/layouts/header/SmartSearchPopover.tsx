@@ -21,8 +21,10 @@ const SmartSearchPopover: React.FC = () => {
   const navigate = useNavigate();
 
   const handleSearch = (query: string) => {
-    navigate(`/search?q=${encodeURIComponent(query)}`);
-    setIsOpen(false);
+    if (query.trim()) {
+      navigate(`/search?q=${encodeURIComponent(query)}`);
+      setIsOpen(false);
+    }
   };
 
   const handleSelectSuggestion = (suggestion: { title: string; route: string }) => {

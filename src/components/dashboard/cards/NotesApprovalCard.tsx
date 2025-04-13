@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
@@ -34,7 +35,7 @@ const NotesApprovalCard: React.FC<NotesApprovalCardProps> = ({ maxNotes = 5 }) =
             titulo, 
             status, 
             criado_em,
-            autor:usuarios(nome_completo)
+            autor:autor_id(nome_completo)
           `)
           .order('criado_em', { ascending: false })
           .limit(maxNotes);
@@ -68,7 +69,7 @@ const NotesApprovalCard: React.FC<NotesApprovalCardProps> = ({ maxNotes = 5 }) =
 
   const getStatusColor = (status: string): string => {
     switch (status.toLowerCase()) {
-      case 'pendente': return 'bg-yellow-500 hover:bg-yellow-600';
+      case 'pendente': return 'bg-orange-500 hover:bg-orange-600';
       case 'aprovada': return 'bg-green-500 hover:bg-green-600';
       case 'rejeitada': return 'bg-red-500 hover:bg-red-600';
       default: return 'bg-gray-500 hover:bg-gray-600';
@@ -128,7 +129,7 @@ const NotesApprovalCard: React.FC<NotesApprovalCardProps> = ({ maxNotes = 5 }) =
                   `}
                 >
                   <div className="flex justify-between items-start">
-                    <span className="text-sm font-medium truncate">{note.titulo}</span>
+                    <span className="text-sm font-medium truncate text-gray-800">{note.titulo}</span>
                     <Badge className={`ml-1 shrink-0 ${getStatusColor(note.status)}`}>
                       {getStatusLabel(note.status)}
                     </Badge>

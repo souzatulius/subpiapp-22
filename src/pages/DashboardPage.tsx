@@ -20,6 +20,9 @@ import { motion } from 'framer-motion';
 import { useCardStorage } from '@/hooks/dashboard/useCardStorage';
 import PendingTasksCard from '@/components/dashboard/cards/PendingTasksCard';
 import ComunicadosCard from '@/components/dashboard/cards/ComunicadosCard';
+import NotesApprovalCard from '@/components/dashboard/cards/NotesApprovalCard';
+import PendingDemandsCard from '@/components/dashboard/cards/PendingDemandsCard';
+import SmartSearchCard from '@/components/dashboard/SmartSearchCard';
 
 const DashboardPage: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -103,18 +106,31 @@ const DashboardPage: React.FC = () => {
       variant: "default"
     });
   };
-
-  // Removed the useEffect that was adding the duplicate search card
   
   const renderSpecialCardContent = useCallback((cardId: string) => {
     const card = cards.find(c => c.id === cardId);
     if (!card) return null;
+    
+    if (cardId === 'busca-rapida' || card.isSearch || card.type === 'smart_search') {
+      return <SmartSearchCard className="w-full h-full" />;
+    }
+    
     if (cardId === 'acoes-pendentes-card' || cardId.includes('acoes-pendentes') || card.isPendingTasks || card.type === 'pending_tasks') {
       return <PendingTasksCard id={card.id} title={card.title} userDepartmentId={userCoordenaticaoId} isComunicacao={userCoordenaticaoId === 'comunicacao'} />;
     }
+    
     if (cardId === 'comunicados-card' || cardId.includes('comunicados') || card.isComunicados || card.type === 'communications') {
       return <ComunicadosCard id={card.id} title={card.title} className="w-full h-full" />;
     }
+    
+    if (cardId === 'aprovar-notas' || card.type === 'recent_notes') {
+      return <NotesApprovalCard maxNotes={5} />;
+    }
+    
+    if (cardId === 'responder-demandas' || card.type === 'in_progress_demands') {
+      return <PendingDemandsCard maxDemands={5} />;
+    }
+    
     return null;
   }, [cards, userCoordenaticaoId]);
 

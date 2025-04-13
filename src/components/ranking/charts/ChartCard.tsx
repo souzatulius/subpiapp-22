@@ -56,7 +56,7 @@ const ChartCard: React.FC<ChartCardProps> = ({
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      {/* Action buttons on hover */}
+      {/* Action buttons only visible on hover */}
       <AnimatePresence>
         {isHovered && !isLoading && (
           <motion.div 

@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Settings, RotateCcw } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
@@ -45,7 +46,9 @@ const WelcomeCard: React.FC<WelcomeCardProps> = ({
 
   // Description text color
   const descriptionColorClass = 'text-gray-600';
-  return <Card className="border-0 shadow-none bg-transparent">
+  
+  return (
+    <Card className="border-0 shadow-none bg-transparent">
       <CardContent className="p-4 bg-transparent px-0 py-0">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
           <div className="px-0">
@@ -59,7 +62,8 @@ const WelcomeCard: React.FC<WelcomeCardProps> = ({
           </div>
           
           <div className="flex items-center gap-2">
-            {showResetButton && <TooltipProvider>
+            {showResetButton && (
+              <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Button variant="ghost" size="icon" onClick={onResetClick} className="bg-gray-100">
@@ -70,19 +74,25 @@ const WelcomeCard: React.FC<WelcomeCardProps> = ({
                     <p>Resetar Dashboard</p>
                   </TooltipContent>
                 </Tooltip>
-              </TooltipProvider>}
+              </TooltipProvider>
+            )}
             
-            {showButton && <Button variant={buttonVariant} onClick={onButtonClick} className="bg-gray-100">
+            {showButton && (
+              <Button variant={buttonVariant} onClick={onButtonClick} className="bg-gray-100">
                 {buttonIcon && <span className="mr-2">{buttonIcon}</span>}
                 {buttonText}
-              </Button>}
+              </Button>
+            )}
             
-            {rightContent && <div className="ml-2">
+            {rightContent && (
+              <div className="ml-2">
                 {rightContent}
-              </div>}
+              </div>
+            )}
           </div>
         </div>
       </CardContent>
-    </Card>;
+    </Card>
+  );
 };
 export default WelcomeCard;

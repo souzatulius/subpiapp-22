@@ -40,7 +40,9 @@ const SearchInput: React.FC<SearchInputProps> = ({
   };
 
   const handleSubmit = (e?: React.FormEvent) => {
-    if (e) e.preventDefault();
+    if (e) {
+      e.preventDefault();
+    }
     if (query.trim()) {
       onSearch(query.trim());
     }

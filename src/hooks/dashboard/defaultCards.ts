@@ -1,4 +1,3 @@
-
 import { v4 as uuidv4 } from 'uuid';
 import { ActionCardItem } from '@/types/dashboard';
 import React from 'react';
@@ -56,7 +55,7 @@ export const getDefaultCards = (): ActionCardItem[] => {
       id: 'busca-rapida',
       title: 'Busca Rápida',
       iconId: 'Search',
-      path: '/dashboard/busca',  // This path was causing a 404, keeping as is for now
+      path: '/dashboard/busca',
       color: 'bg-white',
       width: '100',
       height: '0.5',
@@ -72,7 +71,7 @@ export const getDefaultCards = (): ActionCardItem[] => {
       path: '/dashboard/ranking-subs',
       color: 'bg-orange-500',
       width: '25',  
-      height: '1',  // Changed from '4' to '1' as requested
+      height: '1',
       type: 'standard',
       displayMobile: true,
       mobileOrder: 2
@@ -84,32 +83,21 @@ export const getDefaultCards = (): ActionCardItem[] => {
       path: '/dashboard/relatorios',
       color: 'bg-orange-500',
       width: '25',
-      height: '1',  // Changed from '4' to '1' as requested 
+      height: '1',
       type: 'standard',
       displayMobile: true,
       mobileOrder: 3
     },
     {
-      id: 'noticias-site',
-      title: 'Notícias do Site',
-      iconId: 'Newspaper',
-      path: '/dashboard/comunicacao/releases',
-      color: 'bg-gray-500',
+      id: 'ajustes-notificacao',
+      title: 'Ajustes de Notificação',
+      iconId: 'Bell',
+      path: '/dashboard/settings/notifications',
+      color: 'bg-blue-500',
       width: '25',
-      height: '2',  // Changed from '1' to '2' as requested
-      type: 'standard',
-      displayMobile: true,
-      mobileOrder: 6
-    },
-    {
-      id: 'aprovar-notas',
-      title: 'Últimas Notas',
-      iconId: 'FileText',
-      path: '/dashboard/comunicacao/aprovar-nota',
-      color: 'bg-orange-500',
-      width: '25',
-      height: '3',
-      type: 'recent_notes',
+      height: '1',
+      type: 'notification_settings',
+      isNotificationSettings: true,
       displayMobile: true,
       mobileOrder: 4
     },
@@ -126,6 +114,30 @@ export const getDefaultCards = (): ActionCardItem[] => {
       mobileOrder: 5
     },
     {
+      id: 'aprovar-notas',
+      title: 'Últimas Notas',
+      iconId: 'FileText',
+      path: '/dashboard/comunicacao/aprovar-nota',
+      color: 'bg-orange-500',
+      width: '25',
+      height: '3',
+      type: 'recent_notes',
+      displayMobile: true,
+      mobileOrder: 6
+    },
+    {
+      id: 'noticias-site',
+      title: 'Notícias do Site',
+      iconId: 'Newspaper',
+      path: '/dashboard/comunicacao/releases',
+      color: 'bg-gray-500',
+      width: '25',
+      height: '1',
+      type: 'standard',
+      displayMobile: true,
+      mobileOrder: 7
+    },
+    {
       id: 'esic-processos',
       title: 'Processos e-SIC',
       iconId: 'FileSearch',
@@ -135,20 +147,7 @@ export const getDefaultCards = (): ActionCardItem[] => {
       height: '1',
       type: 'standard',
       displayMobile: true,
-      mobileOrder: 7
-    },
-    {
-      id: 'ajustes-notificacao',
-      title: 'Ajustes de Notificação',
-      iconId: 'Bell',
-      path: '/dashboard/settings/notifications',
-      color: 'bg-blue-500',
-      width: '25',
-      height: '1',
-      type: 'notification_settings',
-      isNotificationSettings: true,
-      displayMobile: true,
-      mobileOrder: 9
+      mobileOrder: 8
     },
     {
       id: 'perfil-usuario',

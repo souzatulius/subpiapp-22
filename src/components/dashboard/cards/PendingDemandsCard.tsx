@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
@@ -93,11 +94,11 @@ const PendingDemandsCard: React.FC<PendingDemandsCardProps> = ({ maxDemands = 5 
                   onClick={() => handleDemandClick(demand.id)}
                   className={`
                     p-2 rounded-lg cursor-pointer transition-all
-                    ${demand.status === 'pendente' ? 'bg-blue-100 hover:bg-blue-200' : 'bg-gray-100 hover:bg-gray-200'}
+                    ${demand.status === 'pendente' ? 'bg-orange-100 hover:bg-orange-200' : 'bg-gray-100 hover:bg-gray-200'}
                   `}
                 >
                   <div className="flex justify-between items-start">
-                    <span className="text-sm font-medium truncate">{demand.titulo}</span>
+                    <span className="text-sm font-medium truncate text-gray-800">{demand.titulo}</span>
                     <Badge className={`ml-1 shrink-0 ${getStatusColor(demand.status)}`}>
                       {getStatusLabel(demand.status)}
                     </Badge>
@@ -118,7 +119,7 @@ const PendingDemandsCard: React.FC<PendingDemandsCardProps> = ({ maxDemands = 5 
 
 const getStatusColor = (status: string): string => {
   switch (status.toLowerCase()) {
-    case 'pendente': return 'bg-yellow-500 hover:bg-yellow-600';
+    case 'pendente': return 'bg-orange-500 hover:bg-orange-600';
     case 'em_progresso': return 'bg-blue-500 hover:bg-blue-600';
     case 'concluida': return 'bg-green-500 hover:bg-green-600';
     case 'cancelada': return 'bg-red-500 hover:bg-red-600';

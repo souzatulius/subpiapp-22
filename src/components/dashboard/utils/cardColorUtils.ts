@@ -40,9 +40,10 @@ export const getHoverColorClasses = (color: CardColor): string => {
 };
 
 export const getTextColorClass = (color: CardColor, cardId?: string): string => {
-  // Special case for Ranking Zeladoria card - always use gray-950 text
-  if (cardId === 'ranking-zeladoria') {
-    return 'text-gray-950';
+  // Special cases for ranking related cards - always use white text
+  if (cardId === 'ranking-zeladoria' || cardId === 'relatorios-comunicacao' || 
+      (cardId && cardId.includes('ranking'))) {
+    return 'text-white';
   }
   
   switch (color) {
@@ -55,6 +56,8 @@ export const getTextColorClass = (color: CardColor, cardId?: string): string => 
     case 'green-neon':
     case 'green-dark':
       return 'text-white'; // White text for green backgrounds
+    case 'bg-orange-500':
+      return 'text-white'; // White text on orange background
     default:
       return 'text-white'; // White text on dark backgrounds
   }
