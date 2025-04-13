@@ -73,13 +73,13 @@ const PendingDemandsCard: React.FC<PendingDemandsCardProps> = ({
       </div>;
   }
   return <div className="h-full w-full border border-slate-300 rounded-3xl">
-      <div className="flex flex-col h-full mx-[12px] my-0 py-[10px] px-0">
+      <div className="flex flex-col h-full px-[7px] mx-[12px] my-0 py-[10px]">
         <h3 className="text-lg font-semibold mb-2 text-center my-[7px]">Últimas Demandas</h3>
         <div className="overflow-auto flex-1">
           {demands.length === 0 ? <div className="text-center text-gray-500 p-4">
               Nenhuma demanda disponível
             </div> : <ul className="space-y-2 px-0">
-              {demands.map(demand => <li key={demand.id} onClick={() => handleDemandClick(demand.id)} className="p-2 cursor-pointer transition-all rounded-2xl my-[19px] px-[6px] bg-gray-50 py-px">
+              {demands.map(demand => <li key={demand.id} onClick={() => handleDemandClick(demand.id)} className="p-2 cursor-pointer transition-all bg-gray-100 hover:bg-gray-200 rounded-2xl py-[11px] my-[19px]">
                   <div className="flex flex-col px-0 py-[5px]">
                     <span className="text-sm font-medium truncate text-gray-800 w-full px-0 py-[4px]">
                       {demand.titulo}
