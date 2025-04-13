@@ -32,11 +32,26 @@ const FileUploadWithProgress: React.FC<FileUploadWithProgressProps> = ({
   const inputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
   
-  // Reset state when disabled prop or isLoading changes
+  // Reset file selection when upload completes or when disabled changes
   useEffect(() => {
-    if (disabled || isLoading) {
-      // Don't clear the file when loading, only when disabled or done loading
-      if (disabled || (isLoading === false && progress === 100)) {
+    if (disabled) {
+      // Clear file when disabled
+      setSelectedFile(null);
+      setError(null);
+      
+      // Clear the input value to allow selecting the same file again
+      if (inputRef.current) {
+        inputRef.current.value = '';
+      }
+    }
+  }, [disabled]);
+
+  // Separate effect for isLoading to prevent clearing during load
+  useEffect(() => {
+    // Only clear after loading completes with 100% progress
+    if (!isLoading && progress === 100) {
+      // Small delay to allow the success state to be visible
+      const timer = setTimeout(() => {
         setSelectedFile(null);
         setError(null);
         
@@ -44,9 +59,11 @@ const FileUploadWithProgress: React.FC<FileUploadWithProgressProps> = ({
         if (inputRef.current) {
           inputRef.current.value = '';
         }
-      }
+      }, 1500);
+      
+      return () => clearTimeout(timer);
     }
-  }, [disabled, isLoading, progress]);
+  }, [isLoading, progress]);
 
   const handleDrag = (e: React.DragEvent<HTMLDivElement>) => {
     if (disabled) return;
@@ -94,7 +111,7 @@ const FileUploadWithProgress: React.FC<FileUploadWithProgressProps> = ({
   };
 
   const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
-    if (disabled) return;
+    if (disabled || isLoading) return;
     
     e.preventDefault();
     e.stopPropagation();
@@ -154,19 +171,21 @@ const FileUploadWithProgress: React.FC<FileUploadWithProgressProps> = ({
     onFileSelected(null);
   };
 
+  const isLoadingActive = isLoading && progress < 100;
+
   return (
     <div className="w-full">
       <div 
         className={`border-2 border-dashed rounded-md p-6 text-center cursor-pointer transition-colors
           ${dragActive ? 'border-blue-500 bg-blue-50' : 'border-gray-300 hover:border-gray-400'} 
           ${error ? 'border-red-300 bg-red-50' : ''} 
-          ${isLoading ? 'opacity-70 pointer-events-none' : ''} 
+          ${isLoadingActive ? 'opacity-70' : ''} 
           ${disabled ? 'opacity-60 cursor-not-allowed' : ''}`}
         onDragEnter={handleDrag}
         onDragOver={handleDrag}
         onDragLeave={handleDrag}
         onDrop={handleDrop}
-        onClick={disabled || isLoading ? undefined : handleClick}
+        onClick={disabled || isLoadingActive ? undefined : handleClick}
       >
         <input
           ref={inputRef}
@@ -174,10 +193,10 @@ const FileUploadWithProgress: React.FC<FileUploadWithProgressProps> = ({
           accept={accept}
           onChange={handleChange}
           className="hidden"
-          disabled={isLoading || disabled}
+          disabled={isLoadingActive || disabled}
         />
         
-        {isLoading ? (
+        {isLoadingActive ? (
           <div className="space-y-3">
             <div className="flex items-center justify-center text-blue-500">
               <Upload className="h-10 w-10 animate-pulse" />

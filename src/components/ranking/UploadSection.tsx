@@ -56,6 +56,7 @@ const UploadSection: React.FC<UploadSectionProps> = ({
   const { handleUploadPainel } = usePainelZeladoriaUpload(user);
   
   useEffect(() => {
+    // Only auto-reset progress 3 seconds after completion, not during active uploads
     if (!isUploading) {
       if (sgzProgress?.stage === 'complete' || painelProgress?.stage === 'complete') {
         setTimeout(() => {
@@ -290,19 +291,19 @@ const UploadSection: React.FC<UploadSectionProps> = ({
     }
   };
   
-  // Check if we have active uploads or their stages indicate they're complete or in error state
-  const showSgzProgress = sgzProgress && (sgzProgress.stage === 'uploading' || sgzProgress.stage === 'processing');
-  const showPainelProgress = painelProgress && (painelProgress.stage === 'uploading' || painelProgress.stage === 'processing');
-  const isCompleteOrError = (progress: any) => progress && (progress.stage === 'complete' || progress.stage === 'error');
-
-  // Calculate if uploads should be disabled
-  const sgzUploadDisabled = isUploading || !sgzFile || showSgzProgress || showPainelProgress;
-  const painelUploadDisabled = isUploading || !painelFile || showSgzProgress || showPainelProgress;
+  // Check if we have active uploads that are in progress
+  const isActiveUpload = (progress: any) => 
+    progress && (progress.stage === 'uploading' || progress.stage === 'processing');
+  
+  // Calculate if uploads should be disabled - only when another upload is in progress
+  const isUploadingNow = isActiveUpload(sgzProgress) || isActiveUpload(painelProgress);
+  const canUploadSGZ = !isUploadingNow && !!sgzFile;
+  const canUploadPainel = !isUploadingNow && !!painelFile;
   
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Card>
+        <Card className="min-h-[340px]">
           <CardContent className="p-4">
             <h3 className="text-sm font-medium text-gray-700 mb-2">
               Importar dados do SGZ
@@ -312,30 +313,24 @@ const UploadSection: React.FC<UploadSectionProps> = ({
               onFileSelected={handleSgzFileSelect}
               accept=".xlsx, .xls"
               maxSize={10}
-              isLoading={isUploading && showSgzProgress}
+              isLoading={isUploadingNow && isActiveUpload(sgzProgress)}
               progress={sgzProgress?.processedRows || 0}
               label={sgzFile ? sgzFile.name : "Selecionar arquivo SGZ"}
               helperText="Clique para selecionar ou arraste o arquivo"
-              disabled={isUploading && !sgzFile && (showSgzProgress || showPainelProgress)}
+              disabled={isUploadingNow && !sgzFile}
             />
             
             <div className="flex justify-end mt-3">
               <Button
                 onClick={uploadSgzFile}
-                disabled={sgzUploadDisabled}
-                className={`bg-blue-500 hover:bg-blue-700 text-white ${sgzUploadDisabled ? 'opacity-50' : ''}`}
+                disabled={!canUploadSGZ}
+                className={`bg-blue-500 hover:bg-blue-700 text-white ${!canUploadSGZ ? 'opacity-50' : ''}`}
               >
-                {isUploading && sgzFile ? 'Enviando...' : 'Enviar SGZ'}
+                {isUploadingNow && sgzFile ? 'Enviando...' : 'Enviar SGZ'}
               </Button>
             </div>
             
-            {showSgzProgress && (
-              <div className="mt-4">
-                <UploadProgressDisplay stats={sgzProgress} type="sgz" />
-              </div>
-            )}
-            
-            {isCompleteOrError(sgzProgress) && (
+            {sgzProgress && (
               <div className="mt-4">
                 <UploadProgressDisplay stats={sgzProgress} type="sgz" />
               </div>
@@ -349,7 +344,7 @@ const UploadSection: React.FC<UploadSectionProps> = ({
           </CardContent>
         </Card>
         
-        <Card>
+        <Card className="min-h-[340px]">
           <CardContent className="p-4">
             <h3 className="text-sm font-medium text-gray-700 mb-2">
               Importar dados do Painel da Zeladoria
@@ -359,30 +354,24 @@ const UploadSection: React.FC<UploadSectionProps> = ({
               onFileSelected={handlePainelFileSelect}
               accept=".xlsx, .xls"
               maxSize={10}
-              isLoading={isUploading && showPainelProgress}
+              isLoading={isUploadingNow && isActiveUpload(painelProgress)}
               progress={painelProgress?.processedRows || 0}
               label={painelFile ? painelFile.name : "Selecionar arquivo Painel"}
               helperText="Clique para selecionar ou arraste o arquivo"
-              disabled={isUploading && !painelFile && (showSgzProgress || showPainelProgress)}
+              disabled={isUploadingNow && !painelFile}
             />
             
             <div className="flex justify-end mt-3">
               <Button
                 onClick={handlePainelUpload}
-                disabled={painelUploadDisabled}
-                className={`bg-blue-500 hover:bg-blue-700 text-white ${painelUploadDisabled ? 'opacity-50' : ''}`}
+                disabled={!canUploadPainel}
+                className={`bg-blue-500 hover:bg-blue-700 text-white ${!canUploadPainel ? 'opacity-50' : ''}`}
               >
-                {isUploading && painelFile ? 'Enviando...' : 'Enviar Painel'}
+                {isUploadingNow && painelFile ? 'Enviando...' : 'Enviar Painel'}
               </Button>
             </div>
             
-            {showPainelProgress && (
-              <div className="mt-4">
-                <UploadProgressDisplay stats={painelProgress} type="painel" />
-              </div>
-            )}
-            
-            {isCompleteOrError(painelProgress) && (
+            {painelProgress && (
               <div className="mt-4">
                 <UploadProgressDisplay stats={painelProgress} type="painel" />
               </div>

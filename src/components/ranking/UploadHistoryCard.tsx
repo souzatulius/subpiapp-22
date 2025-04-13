@@ -50,15 +50,27 @@ const UploadHistoryCard: React.FC<UploadHistoryCardProps> = ({
   useEffect(() => {
     if (Array.isArray(sgzData)) {
       setSgzCount(sgzData.length);
+    } else {
+      setSgzCount(0);
     }
     
     if (Array.isArray(painelData)) {
       setPainelCount(painelData.length);
+    } else {
+      setPainelCount(0);
     }
   }, [sgzData, painelData]);
   
   // Read data source with fallback to localStorage
   const currentDataSource = dataSource || localStorage.getItem('demo-data-source') || 'unknown';
+  
+  // Synchronize with localStorage every time the component renders
+  useEffect(() => {
+    const storedDataSource = localStorage.getItem('demo-data-source');
+    if (storedDataSource && storedDataSource !== currentDataSource) {
+      console.log(`Data source mismatch: state=${currentDataSource}, localStorage=${storedDataSource}`);
+    }
+  }, [currentDataSource]);
   
   // Determine the source badge color and text
   let sourceColor = 'bg-gray-500';

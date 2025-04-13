@@ -1,4 +1,3 @@
-
 import { create } from 'zustand';
 import { ChartVisibility } from '@/components/ranking/types';
 import { supabase } from '@/integrations/supabase/client';
@@ -177,7 +176,6 @@ export const useRankingCharts = create<RankingChartsState>()(
           isMockData: source === 'mock'
         }),
         
-      // Clear all data - useful for debugging
       clearAllData: () => set({
         planilhaData: null,
         sgzData: null,
@@ -232,29 +230,68 @@ export const useRankingCharts = create<RankingChartsState>()(
             const cachedSgzData = localStorage.getItem('demo-sgz-data');
             const cachedPainelData = localStorage.getItem('demo-painel-data');
             
-            if (cachedSgzData && cachedPainelData) {
-              const sgzData = JSON.parse(cachedSgzData);
-              const painelData = JSON.parse(cachedPainelData);
+            if (cachedSgzData || cachedPainelData) {
+              // Process SGZ data if available
+              if (cachedSgzData) {
+                try {
+                  const sgzData = JSON.parse(cachedSgzData);
+                  if (Array.isArray(sgzData) && sgzData.length > 0) {
+                    console.log(`Loaded ${sgzData.length} SGZ records from localStorage cache`);
+                    set({ 
+                      sgzData: sgzData,
+                      planilhaData: sgzData,
+                      // Set mock data based on actual data source
+                      isMockData: dataSourceFromStorage === 'mock',
+                      dataSource: dataSourceFromStorage as 'mock' | 'upload' | 'supabase',
+                      isInsightsLoading: false,
+                      insightsProgress: 100,
+                      lastRefreshSuccess: true
+                    });
+                    loadedFromCache = true;
+                  }
+                } catch (err) {
+                  console.error("Failed to parse SGZ data from localStorage", err);
+                }
+              }
               
-              if (sgzData.length > 0 && painelData.length > 0) {
-                console.log(`Loaded data from localStorage cache: ${sgzData.length} SGZ records, ${painelData.length} Painel records`);
-                set({ 
-                  sgzData: sgzData,
-                  planilhaData: sgzData,
-                  painelData: painelData,
-                  // Set mock data based on actual data source
-                  isMockData: get().dataSource === 'mock',
-                  isInsightsLoading: false,
-                  insightsProgress: 100
+              // Process Painel data if available (independent of SGZ)
+              if (cachedPainelData) {
+                try {
+                  const painelData = JSON.parse(cachedPainelData);
+                  if (Array.isArray(painelData) && painelData.length > 0) {
+                    console.log(`Loaded ${painelData.length} Painel records from localStorage cache`);
+                    set({ 
+                      painelData: painelData,
+                      // Set mock data based on actual data source, only if not already set by SGZ
+                      isMockData: !loadedFromCache ? dataSourceFromStorage === 'mock' : get().isMockData,
+                      dataSource: !loadedFromCache ? 
+                        dataSourceFromStorage as 'mock' | 'upload' | 'supabase' : 
+                        get().dataSource,
+                      isInsightsLoading: false,
+                      insightsProgress: 100,
+                      lastRefreshSuccess: true
+                    });
+                    loadedFromCache = true;
+                  }
+                } catch (err) {
+                  console.error("Failed to parse Painel data from localStorage", err);
+                }
+              }
+              
+              // Special case for uploaded data - ensure we set correct flags
+              if (dataSourceFromStorage === 'upload' && loadedFromCache) {
+                set({
+                  isMockData: false,
+                  dataSource: 'upload',
+                  lastRefreshSuccess: true
                 });
-                loadedFromCache = true;
               }
             }
           } catch (cacheError) {
             console.error("Error loading from cache:", cacheError);
           }
           
-          // Load fresh data if needed
+          // Load fresh data if we didn't load from cache
           if (get().dataSource === 'mock' || useMockData) {
             // Only load from mock API if we didn't get valid data from cache
             if (!loadedFromCache) {
@@ -317,7 +354,7 @@ export const useRankingCharts = create<RankingChartsState>()(
           }
           
           // Only fetch from Supabase if we're not using mocks or mock loading failed
-          if (get().dataSource !== 'mock' && !useMockData && !loadedFromCache) {
+          if (get().dataSource === 'supabase' && !useMockData && !loadedFromCache) {
             try {
               // Fetch latest SGZ data from Supabase
               const { data: sgzData, error: sgzError } = await supabase
@@ -397,7 +434,6 @@ export const useRankingCharts = create<RankingChartsState>()(
             }
           }
           
-          // No need for setTimeout anymore, complete loading immediately
           set({ 
             isLoading: false,
             isChartsLoading: false,

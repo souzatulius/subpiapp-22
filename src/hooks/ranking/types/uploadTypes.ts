@@ -4,28 +4,23 @@ export interface UploadProgressStats {
   processedRows: number;
   updatedRows: number;
   newRows: number;
+  stage: 'idle' | 'uploading' | 'processing' | 'complete' | 'error';
+  message: string;
   errorCount?: number;
-  validRows?: number;
-  skippedRows?: number;
-  estimatedTimeRemaining?: string;
-  stage: 'uploading' | 'processing' | 'complete' | 'error';
-  message?: string;
 }
 
 export interface ValidationError {
-  row: number;
-  column: string;
+  row?: number;
+  column?: string;
   message: string;
+  type: 'error' | 'warning';
   value?: any;
 }
 
 export interface UploadResult {
   success: boolean;
-  recordCount: number;
   message: string;
-  id?: string;
   data?: any[];
-  newOrders?: number;
-  updatedOrders?: number;
   errors?: ValidationError[];
+  id?: string;
 }

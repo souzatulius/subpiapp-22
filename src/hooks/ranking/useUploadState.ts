@@ -32,10 +32,19 @@ export const useUploadState = create<UploadState>((set) => ({
   setLastRefreshTime: (time) => set({ lastRefreshTime: time }),
   setValidationErrors: (errors) => set({ validationErrors: errors }),
   setDataSource: (source) => {
-    // Update localStorage when dataSource changes
+    // Synchronize with localStorage
     if (source) {
+      // Update localStorage when dataSource changes
       localStorage.setItem('demo-data-source', source);
-      console.log(`Data source updated to ${source} in useUploadState`);
+      console.log(`Data source updated to ${source} in useUploadState and localStorage`);
+    } else {
+      // If null is passed, check if there's a value in localStorage
+      const storedSource = localStorage.getItem('demo-data-source') as 'mock' | 'upload' | 'supabase' | null;
+      if (storedSource) {
+        console.log(`Using data source from localStorage: ${storedSource}`);
+        set({ dataSource: storedSource });
+        return;
+      }
     }
     set({ dataSource: source });
   },
