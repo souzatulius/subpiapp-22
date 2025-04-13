@@ -38,7 +38,7 @@ const NotaDetail: React.FC<NotaDetailProps> = ({
             variant="ghost"
             size="sm"
             onClick={onBack}
-            className="px-2 py-1 h-auto rounded-lg"
+            className="px-2 py-1 h-auto rounded-xl"
           >
             ← Voltar
           </Button>
@@ -82,17 +82,17 @@ const NotaDetail: React.FC<NotaDetailProps> = ({
             variant="outline"
             onClick={onEditar}
             disabled={isSubmitting}
-            className="rounded-lg"
+            className="rounded-xl"
           >
             <Edit className="h-4 w-4 mr-2" />
             Editar
           </Button>
           
           <Button 
-            variant="destructive"
+            variant="action"
             onClick={onRejeitar}
             disabled={isSubmitting || nota.status !== 'pendente'}
-            className="rounded-lg"
+            className="rounded-xl bg-orange-500 hover:bg-orange-600"
           >
             <X className="h-4 w-4 mr-2" />
             Rejeitar
@@ -102,7 +102,7 @@ const NotaDetail: React.FC<NotaDetailProps> = ({
             variant="default"
             onClick={onAprovar}
             disabled={isSubmitting || nota.status !== 'pendente'}
-            className="rounded-lg"
+            className="rounded-xl"
           >
             <Check className="h-4 w-4 mr-2" />
             Aprovar

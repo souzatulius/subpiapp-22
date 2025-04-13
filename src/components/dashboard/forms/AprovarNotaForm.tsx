@@ -20,7 +20,7 @@ const AprovarNotaForm: React.FC<AprovarNotaFormProps> = () => {
   const { showFeedback } = useAnimatedFeedback();
 
   const { data: notas, isLoading, refetch } = useQuery({
-    queryKey: ['notas-pendentes'],
+    queryKey: ['notas-pendentes', statusFilter],
     queryFn: async () => {
       if (!session || !user) {
         console.log("Usuário não autenticado ao tentar carregar notas");
@@ -28,8 +28,10 @@ const AprovarNotaForm: React.FC<AprovarNotaFormProps> = () => {
       }
 
       console.log("Carregando notas como usuário:", user.id);
+      console.log("Status filter:", statusFilter);
 
-      const { data, error } = await supabase
+      // Build query based on status filter
+      let query = supabase
         .from('notas_oficiais')
         .select(`
           *,
@@ -44,9 +46,14 @@ const AprovarNotaForm: React.FC<AprovarNotaFormProps> = () => {
             )
           ),
           demanda:demanda_id (id, titulo)
-        `)
-        .eq('status', 'pendente')
-        .order('criado_em', { ascending: false });
+        `);
+        
+      // Apply status filter only if not 'todos'
+      if (statusFilter !== 'todos') {
+        query = query.eq('status', statusFilter);
+      }
+      
+      const { data, error } = await query.order('criado_em', { ascending: false });
         
       if (error) {
         console.error("Erro ao carregar notas:", error);
@@ -163,14 +170,14 @@ const AprovarNotaForm: React.FC<AprovarNotaFormProps> = () => {
         <NotaCard
           nota={nota}
           isSelected={false}
-          onClick={() => {}}
+          onClick={() => handleSelectNota(nota)}
         />
       )}
       renderGridItem={(nota) => (
         <NotaCard
           nota={nota}
           isSelected={false}
-          onClick={() => {}}
+          onClick={() => handleSelectNota(nota)}
         />
       )}
       idExtractor={(nota) => nota.id}

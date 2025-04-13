@@ -23,7 +23,7 @@ const NotaEditForm: React.FC<NotaEditFormProps> = ({
   isSubmitting
 }) => {
   return (
-    <Card className="p-6">
+    <Card className="p-6 rounded-xl">
       <div>
         <button 
           onClick={onCancel} 
@@ -43,7 +43,7 @@ const NotaEditForm: React.FC<NotaEditFormProps> = ({
               type="text"
               value={title}
               onChange={(e) => onTitleChange(e.target.value)}
-              className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+              className="w-full p-2 border border-gray-300 rounded-xl focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
           
@@ -55,7 +55,7 @@ const NotaEditForm: React.FC<NotaEditFormProps> = ({
               value={text}
               onChange={(e) => onTextChange(e.target.value)}
               rows={10}
-              className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+              className="w-full p-2 border border-gray-300 rounded-xl focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
           
@@ -63,7 +63,7 @@ const NotaEditForm: React.FC<NotaEditFormProps> = ({
             <Button
               onClick={onSave}
               disabled={isSubmitting}
-              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50"
+              className="px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50"
             >
               {isSubmitting ? "Salvando..." : "Salvar alterações"}
             </Button>
