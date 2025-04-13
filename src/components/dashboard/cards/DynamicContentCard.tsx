@@ -6,7 +6,7 @@ import { FileText, Clock } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useNavigate } from 'react-router-dom';
 
-export type ItemType = {
+type ItemType = {
   id: string;
   title: string;
   status?: string;
@@ -136,11 +136,9 @@ const DynamicContentCard: React.FC<DynamicContentCardProps> = ({
                 >
                   <div className="flex justify-between items-start gap-2">
                     <p className="text-sm font-medium line-clamp-2">{item.title}</p>
-                    {item.status && (
-                      <Badge variant="outline" className={cn("whitespace-nowrap text-xs", badge.color)}>
-                        {badge.text}
-                      </Badge>
-                    )}
+                    <Badge variant="outline" className={cn("whitespace-nowrap text-xs", badge.color)}>
+                      {badge.text}
+                    </Badge>
                   </div>
                   {formattedDate && (
                     <p className="text-xs text-gray-500 mt-1">{formattedDate}</p>
