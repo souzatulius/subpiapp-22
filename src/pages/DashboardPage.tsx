@@ -116,12 +116,12 @@ const DashboardPage: React.FC = () => {
     }
     if (cardId === 'busca-rapida') {
       return <div className="p-4 flex items-center justify-center w-full h-full">
-          <div className="bg-white rounded-lg w-full flex items-center shadow-sm border border-gray-200">
+          <div className="bg-white rounded-2xl w-full flex items-center shadow-sm border border-gray-200">
             <Search className="h-5 w-5 ml-3 text-gray-500" />
             <input type="text" placeholder="Pesquisar..." onClick={e => {
             e.preventDefault();
             window.location.href = '/search';
-          }} className="w-full p-2 border-none focus:outline-none focus:ring-0 rounded-lg px-0 py-0" />
+          }} className="w-full p-2 border-none focus:outline-none focus:ring-0 rounded-2xl px-0 py-0" />
           </div>
         </div>;
     }
@@ -138,7 +138,7 @@ const DashboardPage: React.FC = () => {
           userNameClassName="text-gray-950" 
           showResetButton={isEditMode} 
           onResetClick={resetDashboard} 
-          showButton={false} // Remove Personalizar Dashboard button
+          showButton={false} 
           spacingClassName="space-y-3" 
         />
       </div>
@@ -154,7 +154,7 @@ const DashboardPage: React.FC = () => {
         onEditCard={handleCardEdit} 
         onHideCard={handleCardHide} 
         isMobileView={isMobileView} 
-        isEditMode={true} // Always in edit mode to show hover buttons
+        isEditMode={true} 
         disableWiggleEffect={true} 
         renderSpecialCardContent={renderSpecialCardContent} 
       />

@@ -1,7 +1,7 @@
 
 import React, { useEffect, useMemo, useCallback } from 'react';
 import { useAuth } from '@/hooks/useSupabaseAuth';
-import { MessageSquareReply, RotateCcw, Save } from 'lucide-react';
+import { MessageSquareReply, Save } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import MobileBottomNav from '@/components/layouts/MobileBottomNav';
 import WelcomeCard from '@/components/shared/WelcomeCard';
@@ -163,9 +163,7 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
           description="Gerencie demandas e notas oficiais" 
           icon={<MessageSquareReply className="h-8 w-8 mr-4 text-gray-600" />} 
           color="bg-gradient-to-r from-[#0066FF] to-blue-700" 
-          showResetButton={true} 
-          resetButtonIcon={<RotateCcw className="h-4 w-4" />} 
-          onResetClick={handleResetDashboard} 
+          showResetButton={false} 
         />
       </div>
       
@@ -190,49 +188,43 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
               className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl" 
               onClick={handleManualSave}
             >
-              <Save className="h-4 w-4 mr-1" /> Salvar alterações
+              <Save className="h-4 w-4 mr-2" />
+              Salvar alterações
             </Button>
           )}
         </div>
       )}
-      
+
       {isLoading ? (
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          {Array.from({length: 8}).map((_, index) => (
-            <Skeleton key={index} className="h-32 w-full rounded-xl" />
+        <div className="grid grid-cols-4 gap-6">
+          {[...Array(8)].map((_, i) => (
+            <div key={i} className="col-span-1">
+              <Skeleton className="h-40 w-full" />
+            </div>
           ))}
         </div>
-      ) : processedCards.length > 0 ? (
-        <div className="px-2 py-2">
-          <CardGridContainer
-            cards={processedCards}
-            onCardsChange={handleCardsReorder}
+      ) : (
+        <>
+          <CardGridContainer 
+            cards={processedCards} 
+            onCardsChange={handleCardsReorder} 
             onEditCard={handleCardEdit}
             onHideCard={handleCardHide}
-            isMobileView={isMobile}
             isEditMode={isEditMode}
-            specialCardsData={specialCardsData}
-            disableWiggleEffect={true}
-            showSpecialFeatures={true}
+            isMobileView={isMobile}
             renderSpecialCardContent={renderSpecialCardContent}
           />
-        </div>
-      ) : (
-        <div className="p-4 text-center text-gray-500">
-          Nenhum card disponível.
-        </div>
+          
+          {selectedCard && (
+            <EditCardModal 
+              isOpen={isEditModalOpen} 
+              onClose={() => setIsEditModalOpen(false)} 
+              onSave={handleSaveCardEdit} 
+              card={selectedCard} 
+            />
+          )}
+        </>
       )}
-      
-      {selectedCard && (
-        <EditCardModal
-          isOpen={isEditModalOpen}
-          onClose={() => setIsEditModalOpen(false)}
-          onSave={handleSaveCardEdit}
-          card={selectedCard}
-        />
-      )}
-      
-      {!isPreview && isMobile && <MobileBottomNav />}
     </div>
   );
 };

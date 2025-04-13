@@ -82,7 +82,7 @@ const PressRequestCard: React.FC = () => {
             <motion.button
               key={origem.id}
               onClick={() => handleOriginClick(origem.id)}
-              className={`flex items-center p-3 rounded-lg transition-colors ${
+              className={`flex items-center p-3 rounded-2xl transition-colors ${
                 selectedId === origem.id 
                   ? "bg-orange-200 border-2 border-orange-400" 
                   : "bg-white hover:bg-orange-50 border-2 border-orange-100"
