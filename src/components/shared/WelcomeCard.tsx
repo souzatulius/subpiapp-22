@@ -26,7 +26,7 @@ interface WelcomeCardProps {
 const WelcomeCard: React.FC<WelcomeCardProps> = ({
   title,
   description,
-  icon = <Settings className="h-8 w-8 mr-2 text-gray-800" />,
+  icon = <Settings className="h-8 w-8 mr-4 text-gray-800" />,
   color = "bg-transparent",
   showButton = false,
   buttonText = "Filtros e Configurações",
