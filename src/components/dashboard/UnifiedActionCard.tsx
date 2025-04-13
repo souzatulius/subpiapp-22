@@ -7,7 +7,6 @@ import CardControls from './card-parts/CardControls';
 import * as LucideIcons from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Badge } from '../ui/badge';
-
 interface ActionCardProps {
   id: string;
   title: string;
@@ -52,7 +51,6 @@ interface ActionCardProps {
   isMobileView?: boolean;
   specialContent?: React.ReactNode;
 }
-
 export const UnifiedActionCard: React.FC<ActionCardProps> = ({
   id,
   title,
@@ -94,11 +92,11 @@ export const UnifiedActionCard: React.FC<ActionCardProps> = ({
   badgeValue = 0,
   hasSubtitle = false,
   isMobileView = false,
-  specialContent,
+  specialContent
 }) => {
   const navigate = useNavigate();
   const [isHovered, setIsHovered] = useState(false);
-  
+
   // Dynamic icon size class
   const iconSizeClass = {
     'sm': 'h-5 w-5',
@@ -107,7 +105,6 @@ export const UnifiedActionCard: React.FC<ActionCardProps> = ({
     'xl': 'h-10 w-10',
     '2xl': 'h-12 w-12'
   }[iconSize] || 'h-10 w-10';
-
   const handleCardClick = () => {
     if (!path || isEditing) return;
     navigate(path);
@@ -124,31 +121,75 @@ export const UnifiedActionCard: React.FC<ActionCardProps> = ({
   }
 
   // Color classes mapping for background and text
-  const colorClasses: Record<string, { bg: string, text: string, hover: string }> = {
-    'blue-vivid': { bg: 'bg-[#0066FF]', text: 'text-white', hover: 'hover:bg-[#0055dd]' },
-    'blue-light': { bg: 'bg-[#66B2FF]', text: 'text-white', hover: 'hover:bg-[#55a1ee]' },
-    'blue-dark': { bg: 'bg-[#1D4ED8]', text: 'text-white', hover: 'hover:bg-[#1c3dc7]' },
-    'green-neon': { bg: 'bg-[#66FF66]', text: 'text-gray-900', hover: 'hover:bg-[#55ee55]' },
-    'green-dark': { bg: 'bg-[#00CC00]', text: 'text-white', hover: 'hover:bg-[#00bb00]' },
-    'gray-light': { bg: 'bg-[#F5F5F5]', text: 'text-gray-900', hover: 'hover:bg-[#e5e5e5]' },
-    'gray-medium': { bg: 'bg-[#D4D4D4]', text: 'text-gray-900', hover: 'hover:bg-[#c4c4c4]' },
-    'orange-dark': { bg: 'bg-[#F25C05]', text: 'text-white', hover: 'hover:bg-[#e24b04]' },
-    'orange-light': { bg: 'bg-[#F89E66]', text: 'text-white', hover: 'hover:bg-[#e78d55]' },
-    'deep-blue': { bg: 'bg-[#051A2C]', text: 'text-white', hover: 'hover:bg-[#04162a]' },
-    'neutral-800': { bg: 'bg-neutral-800', text: 'text-white', hover: 'hover:bg-neutral-700' },
+  const colorClasses: Record<string, {
+    bg: string;
+    text: string;
+    hover: string;
+  }> = {
+    'blue-vivid': {
+      bg: 'bg-[#0066FF]',
+      text: 'text-white',
+      hover: 'hover:bg-[#0055dd]'
+    },
+    'blue-light': {
+      bg: 'bg-[#66B2FF]',
+      text: 'text-white',
+      hover: 'hover:bg-[#55a1ee]'
+    },
+    'blue-dark': {
+      bg: 'bg-[#1D4ED8]',
+      text: 'text-white',
+      hover: 'hover:bg-[#1c3dc7]'
+    },
+    'green-neon': {
+      bg: 'bg-[#66FF66]',
+      text: 'text-gray-900',
+      hover: 'hover:bg-[#55ee55]'
+    },
+    'green-dark': {
+      bg: 'bg-[#00CC00]',
+      text: 'text-white',
+      hover: 'hover:bg-[#00bb00]'
+    },
+    'gray-light': {
+      bg: 'bg-[#F5F5F5]',
+      text: 'text-gray-900',
+      hover: 'hover:bg-[#e5e5e5]'
+    },
+    'gray-medium': {
+      bg: 'bg-[#D4D4D4]',
+      text: 'text-gray-900',
+      hover: 'hover:bg-[#c4c4c4]'
+    },
+    'orange-dark': {
+      bg: 'bg-[#F25C05]',
+      text: 'text-white',
+      hover: 'hover:bg-[#e24b04]'
+    },
+    'orange-light': {
+      bg: 'bg-[#F89E66]',
+      text: 'text-white',
+      hover: 'hover:bg-[#e78d55]'
+    },
+    'deep-blue': {
+      bg: 'bg-[#051A2C]',
+      text: 'text-white',
+      hover: 'hover:bg-[#04162a]'
+    },
+    'neutral-800': {
+      bg: 'bg-neutral-800',
+      text: 'text-white',
+      hover: 'hover:bg-neutral-700'
+    }
   };
 
   // Get color classes for the current color
-  const { bg = 'bg-blue-500', text = 'text-white', hover = 'hover:bg-blue-600' } = 
-    colorClasses[color as string] || {};
-
-  const cardBodyClassNames = cn(
-    "h-full w-full rounded-xl transition-all border border-gray-200 relative overflow-hidden group",
-    contentClassname,
-    bg,
-    text,
-    hover
-  );
+  const {
+    bg = 'bg-blue-500',
+    text = 'text-white',
+    hover = 'hover:bg-blue-600'
+  } = colorClasses[color as string] || {};
+  const cardBodyClassNames = cn("h-full w-full rounded-xl transition-all border border-gray-200 relative overflow-hidden group", contentClassname, bg, text, hover);
 
   // Render the card content
   const renderCardContent = () => {
@@ -156,67 +197,43 @@ export const UnifiedActionCard: React.FC<ActionCardProps> = ({
     if (children) {
       return children;
     }
-    
+
     // If special content is provided from parent, render it
     if (specialContent) {
       return specialContent;
     }
-    
+
     // Otherwise, render default card content
-    return (
-      <div className={`${contentPadding} flex h-full flex-col items-start justify-center`}>
-        {IconComponent && (
-          <div className="mb-4">
+    return <div className="flex flex-col items-center my- py-10">
+        {IconComponent && <div className="mb-4">
             <IconComponent className={iconSizeClass} />
-          </div>
-        )}
+          </div>}
         
         <div>
           <h3 className="text-lg font-bold">{title}</h3>
-          {hasSubtitle && subtitle && (
-            <p className="text-sm opacity-80 mt-1">{subtitle}</p>
-          )}
+          {hasSubtitle && subtitle && <p className="text-sm opacity-80 mt-1">{subtitle}</p>}
         </div>
-      </div>
-    );
+      </div>;
   };
-
-  return (
-    <div 
-      className="h-full w-full cursor-pointer"
-      onClick={handleCardClick}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-    >
+  return <div className="h-full w-full cursor-pointer" onClick={handleCardClick} onMouseEnter={() => setIsHovered(true)} onMouseLeave={() => setIsHovered(false)}>
       <div className={cardBodyClassNames}>
         {/* Hover Controls */}
-        {(isHovered || isEditing) && !isMobileView && (
-          <div className="absolute top-2 right-2 z-10 bg-white/10 backdrop-blur-sm rounded-full px-1 py-1 flex gap-1">
-            {onEdit && (
-              <CardControls 
-                onEdit={() => onEdit(id)} 
-                onHide={onHide ? () => onHide(id) : undefined} 
-              />
-            )}
-          </div>
-        )}
+        {(isHovered || isEditing) && !isMobileView && <div className="absolute top-2 right-2 z-10 bg-white/10 backdrop-blur-sm rounded-full px-1 py-1 flex gap-1">
+            {onEdit && <CardControls onEdit={() => onEdit(id)} onHide={onHide ? () => onHide(id) : undefined} />}
+          </div>}
         
         {/* Badge if needed */}
-        {hasBadge && badgeValue > 0 && (
-          <div className="absolute top-2 left-2">
+        {hasBadge && badgeValue > 0 && <div className="absolute top-2 left-2">
             <Badge variant="destructive" className="rounded-full px-2">
               {badgeValue}
             </Badge>
-          </div>
-        )}
+          </div>}
         
         {renderCardContent()}
       </div>
-    </div>
-  );
+    </div>;
 };
-
-export const SortableUnifiedActionCard: React.FC<ActionCardProps> = (props) => {
+export const SortableUnifiedActionCard: React.FC<ActionCardProps> = props => {
   const {
     attributes,
     listeners,
@@ -228,29 +245,15 @@ export const SortableUnifiedActionCard: React.FC<ActionCardProps> = (props) => {
     id: props.id,
     disabled: !props.isDraggable
   });
-
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
     opacity: isDragging ? 0.5 : 1,
-    zIndex: isDragging ? 10 : 1,
+    zIndex: isDragging ? 10 : 1
   };
-
-  const dragEffectClass = !props.disableWiggleEffect && props.isDraggable 
-    ? "hover:-rotate-1 hover:-translate-y-1" 
-    : "";
-
-  return (
-    <div
-      ref={setNodeRef}
-      style={style}
-      className={`h-full transition-all duration-200 ${dragEffectClass}`}
-      {...attributes}
-      {...listeners}
-    >
+  const dragEffectClass = !props.disableWiggleEffect && props.isDraggable ? "hover:-rotate-1 hover:-translate-y-1" : "";
+  return <div ref={setNodeRef} style={style} className={`h-full transition-all duration-200 ${dragEffectClass}`} {...attributes} {...listeners}>
       <UnifiedActionCard {...props} />
-    </div>
-  );
+    </div>;
 };
-
 export default UnifiedActionCard;
