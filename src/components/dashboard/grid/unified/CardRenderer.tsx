@@ -1,4 +1,5 @@
-import React from 'react';
+
+import React, { useMemo } from 'react';
 import { getWidthClass, getHeightClass } from '../GridUtilities';
 import { ActionCardItem } from '@/types/dashboard';
 import { SortableUnifiedActionCard } from '../../UnifiedActionCard';
@@ -37,7 +38,8 @@ export const CardRenderer: React.FC<CardRendererProps> = ({
   specialCardsData,
   renderSpecialCardContent
 }) => {
-  const specialContent = React.useMemo(() => {
+  // Always use useMemo for specialContent calculation
+  const specialContent = useMemo(() => {
     if (renderSpecialCardContent) {
       const customContent = renderSpecialCardContent(card.id);
       if (customContent) return customContent;
@@ -50,10 +52,21 @@ export const CardRenderer: React.FC<CardRendererProps> = ({
     });
   }, [card, renderSpecialCardContent, specialCardsData]);
   
+  // Get width and height classes
+  const widthClass = useMemo(() => getWidthClass(card.width, isMobileView), [card.width, isMobileView]);
+  const heightClass = useMemo(() => getHeightClass(card.height, isMobileView), [card.height, isMobileView]);
+  
+  // Create a safe edit handler that won't crash if onEditCard is undefined
+  const handleEdit = useMemo(() => {
+    return onEditCard ? (id: string) => {
+      if (onEditCard) onEditCard(id);
+    } : undefined;
+  }, [onEditCard]);
+  
   return (
     <div
       key={card.id}
-      className={`${getWidthClass(card.width, isMobileView)} ${getHeightClass(card.height, isMobileView)}`}
+      className={`${widthClass} ${heightClass}`}
     >
       <SortableUnifiedActionCard
         id={card.id}
@@ -66,11 +79,7 @@ export const CardRenderer: React.FC<CardRendererProps> = ({
         height={card.height}
         isDraggable={isEditMode}
         isEditing={isEditMode}
-        onEdit={onEditCard ? (id) => {
-          if (onEditCard) {
-            onEditCard(id);
-          }
-        } : undefined}
+        onEdit={handleEdit}
         onDelete={onDeleteCard}
         onHide={onHideCard}
         iconSize={isMobileView ? 'lg' : 'xl'}

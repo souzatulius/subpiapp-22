@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Card } from '@/components/ui/card';
 import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -64,9 +64,8 @@ const ItemCard: React.FC<{
   item: TimelineItemProps, 
   type: 'notes' | 'demands' | 'news' 
 }> = ({ item, type }) => {
-  // Safely parse the date string to Date object for formatting
-  // Handle potential invalid dates gracefully
-  const timeAgo = (() => {
+  // Use useMemo for the date formatting to ensure consistent hook usage
+  const timeAgo = useMemo(() => {
     try {
       const date = new Date(item.date);
       // Check if date is valid
@@ -78,7 +77,7 @@ const ItemCard: React.FC<{
       console.error("Error formatting date:", error);
       return "Data desconhecida";
     }
-  })();
+  }, [item.date]);
   
   return (
     <Card className="p-3 hover:bg-gray-50 transition-colors">
