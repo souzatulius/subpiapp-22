@@ -130,7 +130,17 @@ const DashboardPage: React.FC = () => {
 
   return <div className="space-y-6">
       <div className="mb-8">
-        <WelcomeCard title="Dashboard" description="Acompanhe indicadores e acesse as principais funcionalidades do sistema" greeting={true} userName={firstName} userNameClassName="text-gray-950" showResetButton={isEditMode} onResetClick={resetDashboard} showButton={true} buttonText={isEditMode ? "Concluir Edição" : "Personalizar Dashboard"} buttonVariant="outline" onButtonClick={toggleEditMode} spacingClassName="space-y-3" />
+        <WelcomeCard 
+          title="Dashboard" 
+          description="Acompanhe indicadores e acesse as principais funcionalidades do sistema" 
+          greeting={true} 
+          userName={firstName} 
+          userNameClassName="text-gray-950" 
+          showResetButton={isEditMode} 
+          onResetClick={resetDashboard} 
+          showButton={false} // Remove Personalizar Dashboard button
+          spacingClassName="space-y-3" 
+        />
       </div>
 
       {isSaving && <div className="bg-blue-50 text-blue-700 p-2 rounded-lg mb-4 flex items-center">
@@ -138,7 +148,16 @@ const DashboardPage: React.FC = () => {
           Salvando alterações...
         </div>}
 
-      <CardGridContainer cards={actionCards} onCardsChange={handleCardsReorder} onEditCard={handleCardEdit} onHideCard={handleCardHide} isMobileView={isMobileView} isEditMode={isEditMode} disableWiggleEffect={!isEditMode} renderSpecialCardContent={renderSpecialCardContent} />
+      <CardGridContainer 
+        cards={actionCards} 
+        onCardsChange={handleCardsReorder} 
+        onEditCard={handleCardEdit} 
+        onHideCard={handleCardHide} 
+        isMobileView={isMobileView} 
+        isEditMode={true} // Always in edit mode to show hover buttons
+        disableWiggleEffect={true} 
+        renderSpecialCardContent={renderSpecialCardContent} 
+      />
       
       {selectedCard && <EditCardModal isOpen={isCardEditModalOpen} onClose={() => setIsCardEditModalOpen(false)} onSave={handleSaveCardEdit} card={selectedCard} />}
     </div>;

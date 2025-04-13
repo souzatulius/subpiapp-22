@@ -55,6 +55,7 @@ const SearchInput: React.FC<SearchInputProps> = ({
     } else if (e.key === 'Escape') {
       setShowSuggestions(false);
     }
+    // We no longer prevent spaces by removing the space key handling
   };
 
   const handleSelectSuggestion = (suggestion: SearchSuggestion) => {
@@ -69,8 +70,8 @@ const SearchInput: React.FC<SearchInputProps> = ({
 
   // Show suggestions automatically when typing
   useEffect(() => {
-    // Only show suggestions if query is at least 4 characters
-    if (query.length >= 4 && suggestions.length > 0) {
+    // Show suggestions if query has at least 2 characters
+    if (query.length >= 2 && suggestions.length > 0) {
       setShowSuggestions(true);
     } else if (query.length === 0) {
       setShowSuggestions(false);
@@ -102,7 +103,7 @@ const SearchInput: React.FC<SearchInputProps> = ({
           onChange={handleInputChange} 
           onFocus={() => setShowSuggestions(suggestions.length > 0)} 
           onKeyDown={handleKeyDown} 
-          className="pl-10 pr-4 w-full h-full bg-transparent border-gray-300" 
+          className="pl-10 pr-4 w-full h-full bg-transparent border-gray-300 text-lg" 
         />
       </form>
 

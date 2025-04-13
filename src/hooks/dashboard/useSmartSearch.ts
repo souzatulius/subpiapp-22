@@ -18,42 +18,57 @@ const searchActions: SearchAction[] = [
   {
     label: "Nova Demanda de Comunicação",
     route: "/dashboard/comunicacao/cadastrar",
-    keywords: ["nova", "demanda", "cadastrar", "criar", "comunicação", "registrar"]
+    keywords: ["nova", "demanda", "cadastrar", "criar", "comunicação", "registrar", "solicitação"]
   },
   {
     label: "Aprovar Nota Oficial",
     route: "/dashboard/comunicacao/aprovar-nota",
-    keywords: ["aprovar", "nota", "oficial", "autorizar", "verificar"]
+    keywords: ["aprovar", "nota", "oficial", "autorizar", "verificar", "notificação", "notificações"]
   },
   {
     label: "Responder Demandas",
     route: "/dashboard/comunicacao/responder",
-    keywords: ["responder", "atender", "demanda", "pendente", "resposta"]
+    keywords: ["responder", "atender", "demanda", "pendente", "resposta", "recusar"]
   },
   {
     label: "Consultar Demandas",
     route: "/dashboard/comunicacao/consultar-demandas",
-    keywords: ["consultar", "buscar", "encontrar", "demanda", "listar", "visualizar"]
+    keywords: ["consultar", "buscar", "encontrar", "demanda", "listar", "visualizar", "consultat", "ver", "ler"]
   },
   {
     label: "Criar Nota Oficial",
     route: "/dashboard/comunicacao/criar-nota",
-    keywords: ["criar", "nova", "nota", "oficial", "elaborar", "redigir"]
+    keywords: ["criar", "nova", "nota", "oficial", "elaborar", "redigir", "escrever"]
   },
   {
     label: "Consultar Notas Oficiais",
     route: "/dashboard/comunicacao/consultar-notas",
-    keywords: ["consultar", "buscar", "notas", "oficial", "listar", "visualizar"]
+    keywords: ["consultar", "buscar", "notas", "oficial", "listar", "visualizar", "ver"]
   },
   {
     label: "Ver Relatórios",
     route: "/dashboard/comunicacao/relatorios",
-    keywords: ["relatório", "estatística", "número", "métrica", "dashboard", "indicador"]
+    keywords: ["relatório", "estatística", "número", "métrica", "dashboard", "indicador", "relatórios", "estatísticas", "números", "gráficos"]
   },
   {
     label: "Configurações da Conta",
     route: "/settings",
-    keywords: ["configuração", "ajuste", "conta", "perfil", "preferência", "setting"]
+    keywords: ["configuração", "ajuste", "conta", "perfil", "preferência", "setting", "configurar", "ajustar", "notificações"]
+  },
+  {
+    label: "Painel SGZ",
+    route: "/dashboard/zeladoria",
+    keywords: ["sgz", "painel", "zeladoria", "ranking"]
+  },
+  {
+    label: "Comunicações para Imprensa",
+    route: "/dashboard/comunicacao/imprensa",
+    keywords: ["imprensa", "release", "releases", "notícia", "notícias", "comunicação"]
+  },
+  {
+    label: "Editar Perfil",
+    route: "/settings/profile",
+    keywords: ["editar", "perfil", "conta", "usuário", "senha", "email", "dados"]
   }
 ];
 
@@ -75,7 +90,7 @@ export const useSmartSearch = () => {
   const fuse = useMemo(() => new Fuse(searchActions, {
     keys: ['label', 'keywords'],
     includeScore: true,
-    threshold: 0.6, // More lenient matching
+    threshold: 0.4, // More strict matching for better results
     ignoreLocation: true,
     useExtendedSearch: true, // Enable extended search for better phrase matching
   }), []);
@@ -86,7 +101,7 @@ export const useSmartSearch = () => {
     const words = inputQuery.toLowerCase()
       .replace(/[,.?!;:]/g, ' ')
       .split(/\s+/)
-      .filter(word => word.length > 2 && !ignoreWords.includes(word));
+      .filter(word => word.length > 1 && !ignoreWords.includes(word));
     
     // Return unique words
     return Array.from(new Set(words));
@@ -123,13 +138,10 @@ export const useSmartSearch = () => {
       let results = fuse.search(searchQuery);
       
       // Search with individual processed words for better matching
-      if (results.length < 3 && processedWords.length > 0) {
+      if (processedWords.length > 0) {
         // Create a combined search using processed words
         const wordResults = processedWords.flatMap(word => {
-          if (word.length > 2) { // Only use words with 3+ characters
-            return fuse.search(word);
-          }
-          return [];
+          return fuse.search(word);
         });
         
         // Combine and deduplicate results
@@ -150,7 +162,7 @@ export const useSmartSearch = () => {
           title: result.item.label, // Use label as title
           route: result.item.route
         }))
-        .slice(0, 5); // Limit to 5 suggestions
+        .slice(0, 6); // Limit to 6 suggestions
       
       console.log('Suggestions:', filteredSuggestions);
       

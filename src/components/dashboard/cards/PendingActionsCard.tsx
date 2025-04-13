@@ -1,17 +1,9 @@
 
 import React from 'react';
-import { Clock, AlertTriangle } from 'lucide-react';
-import { format } from 'date-fns';
+import { useNavigate } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
-
-interface PendingItem {
-  id: string;
-  title: string;
-  department: string;
-  deadline: Date;
-  priority: 'high' | 'medium' | 'low';
-  type: 'note' | 'demand';
-}
+import { Button } from '@/components/ui/button';
+import { Calendar, FileText, MessageSquare, AlertCircle } from 'lucide-react';
 
 interface PendingActionsCardProps {
   id?: string;
@@ -23,125 +15,101 @@ interface PendingActionsCardProps {
 }
 
 const PendingActionsCard: React.FC<PendingActionsCardProps> = ({
-  id,
-  title = "Ações Pendentes",
-  notesToApprove = 0,
-  responsesToDo = 0,
-  isComunicacao = false,
+  id = 'acoes-pendentes',
+  title = 'Ações Pendentes',
+  notesToApprove = 3,
+  responsesToDo = 5,
+  isComunicacao = true,
   userDepartmentId = ''
 }) => {
-  // Mock data - in production, this would come from an API call
-  const pendingItems: PendingItem[] = [
+  const navigate = useNavigate();
+
+  const pendingActions = [
     {
-      id: '1',
-      title: 'Nota sobre obras na zona leste',
-      department: 'Infraestrutura',
-      deadline: new Date(2025, 3, 15),
-      priority: 'high',
-      type: 'note'
+      name: 'Notas para aprovar',
+      count: notesToApprove,
+      icon: <FileText className="h-4 w-4" />,
+      path: '/dashboard/comunicacao/aprovar-nota'
     },
     {
-      id: '2',
-      title: 'Demanda sobre segurança pública',
-      department: 'Segurança',
-      deadline: new Date(2025, 3, 16),
-      priority: 'medium',
-      type: 'demand'
+      name: 'Demandas para responder',
+      count: responsesToDo,
+      icon: <MessageSquare className="h-4 w-4" />,
+      path: '/dashboard/comunicacao/responder'
     },
     {
-      id: '3',
-      title: 'Resposta para imprensa - evento cultural',
-      department: 'Cultura',
-      deadline: new Date(2025, 3, 14),
-      priority: 'low',
-      type: 'demand'
-    },
-    {
-      id: '4',
-      title: 'Nota oficial - novo programa educacional',
-      department: 'Educação',
-      deadline: new Date(2025, 3, 13),
-      priority: 'high',
-      type: 'note'
+      name: 'Comunicados próximos',
+      count: 2,
+      icon: <Calendar className="h-4 w-4" />,
+      path: '/dashboard/comunicacao/comunicados'
     }
   ];
-  
-  // Sort by deadline, with closest deadlines first
-  const sortedItems = [...pendingItems].sort((a, b) => a.deadline.getTime() - b.deadline.getTime());
-  
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case 'high': return 'bg-red-500';
-      case 'medium': return 'bg-yellow-500';
-      case 'low': return 'bg-green-500';
-      default: return 'bg-gray-500';
-    }
+
+  const handleActionClick = (path: string) => {
+    navigate(path);
   };
-  
-  const getPriorityLabel = (priority: string) => {
-    switch (priority) {
-      case 'high': return 'Alta';
-      case 'medium': return 'Média';
-      case 'low': return 'Baixa';
-      default: return 'Normal';
-    }
-  };
-  
-  const getTypeLabel = (type: string) => {
-    switch (type) {
-      case 'note': return 'Nota';
-      case 'demand': return 'Demanda';
-      default: return 'Item';
-    }
-  };
-  
+
   return (
-    <div className="w-full h-full bg-gray-50 p-4 rounded-xl">
-      <div className="flex justify-between mb-3 items-center">
+    <div className="w-full h-full bg-white p-4 rounded-lg">
+      <div className="flex justify-between items-center mb-4">
         <h3 className="font-medium text-gray-800">{title}</h3>
+        
+        {(notesToApprove > 0 || responsesToDo > 0) && (
+          <Badge variant="destructive" className="rounded-full">
+            {notesToApprove + responsesToDo} pendentes
+          </Badge>
+        )}
       </div>
-      
-      <div className="space-y-3 overflow-auto max-h-[calc(100%-2rem)]">
-        {sortedItems.map((item) => {
-          const isOverdue = item.deadline < new Date();
-          const formattedDate = format(item.deadline, 'dd/MM');
-          
-          return (
-            <div 
-              key={item.id}
-              className="bg-white p-3 rounded-lg shadow-sm"
-            >
-              <div className="flex justify-between items-start">
-                <div>
-                  <div className="flex items-center space-x-1">
-                    <Badge variant="outline">{getTypeLabel(item.type)}</Badge>
-                    <span className="text-xs text-gray-500">{item.department}</span>
+
+      {pendingActions.some(action => action.count > 0) ? (
+        <div className="space-y-3">
+          {pendingActions.map((action, index) => (
+            action.count > 0 && (
+              <div 
+                key={index} 
+                className="p-3 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer transition-colors"
+                onClick={() => handleActionClick(action.path)}
+              >
+                <div className="flex justify-between items-center">
+                  <div className="flex items-center gap-2">
+                    <span className="p-1 rounded-full bg-blue-100 text-blue-700">
+                      {action.icon}
+                    </span>
+                    <span className="text-sm font-medium">{action.name}</span>
                   </div>
-                  <h4 className="text-sm font-medium text-gray-800 mt-1">
-                    {item.title}
-                  </h4>
-                </div>
-                
-                <div className="flex flex-col items-end">
-                  <div className={`flex items-center ${isOverdue ? 'text-red-600' : 'text-gray-600'}`}>
-                    {isOverdue ? (
-                      <AlertTriangle className="h-3.5 w-3.5 mr-1" />
-                    ) : (
-                      <Clock className="h-3.5 w-3.5 mr-1" />
-                    )}
-                    <span className="text-xs">{formattedDate}</span>
-                  </div>
-                  
-                  <div className="mt-1 flex items-center">
-                    <div className={`w-2 h-2 rounded-full ${getPriorityColor(item.priority)} mr-1`}></div>
-                    <span className="text-xs">{getPriorityLabel(item.priority)}</span>
-                  </div>
+                  <Badge variant="outline" className="rounded-full bg-white">
+                    {action.count}
+                  </Badge>
                 </div>
               </div>
-            </div>
-          );
-        })}
-      </div>
+            )
+          ))}
+          
+          <div className="mt-4">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="w-full"
+              onClick={() => navigate('/dashboard/comunicacao/tarefas')}
+            >
+              Ver todas as pendências
+            </Button>
+          </div>
+        </div>
+      ) : (
+        <div className="flex flex-col items-center justify-center h-[calc(100%-36px)] space-y-3 text-center">
+          <div className="p-2 rounded-full bg-green-100 text-green-600">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+              <polyline points="22 4 12 14.01 9 11.01"></polyline>
+            </svg>
+          </div>
+          <div>
+            <p className="text-gray-700 font-medium">Sem pendências</p>
+            <p className="text-gray-500 text-sm">Você está em dia com suas tarefas</p>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

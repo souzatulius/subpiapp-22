@@ -59,7 +59,7 @@ const WelcomeCard: React.FC<WelcomeCardProps> = ({
                     </h2>
                   </div>}
                 
-                <p className="mt-2 opacity-90 text-lg">{description}</p>
+                <p className="mt-2 text-gray-500 font-normal text-lg">{description}</p>
               </div>
             </div>
 

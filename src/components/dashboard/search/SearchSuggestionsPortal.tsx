@@ -67,9 +67,9 @@ const SearchSuggestionsPortal: React.FC<SearchSuggestionsPortalProps> = ({
           <li
             key={index}
             onClick={() => onSelect(suggestion)}
-            className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+            className="px-4 py-3 hover:bg-gray-100 cursor-pointer"
           >
-            <div className="text-sm font-medium text-gray-800">{suggestion.title}</div>
+            <div className="text-lg font-medium text-gray-800">{suggestion.title}</div>
           </li>
         ))}
       </ul>

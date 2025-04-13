@@ -1,86 +1,222 @@
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { ActionCardItem, CardWidth, CardHeight, CardColor, CardType } from '@/types/dashboard';
-import ActionCard from './ActionCard';
-import { PencilLine, Trash2, EyeOff } from 'lucide-react';
-import KPICard from '@/components/settings/dashboard-management/KPICard';
-import DynamicListCard from '@/components/settings/dashboard-management/DynamicListCard';
-import OriginSelectionCard from './cards/OriginSelectionCard';
-import SmartSearchCard from './SmartSearchCard';
+import { ActionCardItem, CardColor } from '@/types/dashboard';
 import CardControls from './card-parts/CardControls';
+import * as LucideIcons from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { Badge } from '../ui/badge';
 
-export interface Controls {
-  cardId: string;
-  onEdit: (id: string) => void;
-  onDelete?: (id: string) => void;
-  onHide?: (id: string) => void;
+interface ActionCardProps {
+  id: string;
+  title: string;
+  subtitle?: string;
+  iconId: string;
+  path: string;
+  color: CardColor;
+  width?: string;
+  height?: string;
+  type?: string;
+  isStandard?: boolean;
+  isQuickDemand?: boolean;
+  isSearch?: boolean;
+  isOverdueDemands?: boolean;
+  isPendingActions?: boolean;
+  isUserProfile?: boolean;
+  isNotificationSettings?: boolean;
+  isTaskCard?: boolean;
+  isNewCardButton?: boolean;
   isCustom?: boolean;
-}
-
-export const Controls: React.FC<Controls> = ({
-  cardId,
-  onEdit,
-  onDelete,
-  onHide,
-  isCustom = false
-}) => {
-  return <div className="flex gap-1">
-      <button onClick={e => {
-      e.stopPropagation();
-      onEdit(cardId);
-    }} className="p-1.5 rounded-full bg-white bg-opacity-80 hover:bg-opacity-100 text-blue-600 hover:text-blue-800 transition-all" title="Editar card">
-        <PencilLine className="h-3.5 w-3.5" />
-      </button>
-
-      {onHide && <button onClick={e => {
-      e.stopPropagation();
-      onHide(cardId);
-    }} className="p-1.5 rounded-full bg-white bg-opacity-80 hover:bg-opacity-100 text-orange-600 hover:text-orange-800 transition-all" title="Ocultar card">
-          <EyeOff className="h-3.5 w-3.5" />
-        </button>}
-      
-      {isCustom && onDelete && <button onClick={e => {
-      e.stopPropagation();
-      onDelete(cardId);
-    }} className="p-1.5 rounded-full bg-white bg-opacity-80 hover:bg-opacity-100 text-red-500 hover:text-red-600 transition-all" title="Excluir card">
-          <Trash2 className="h-3.5 w-3.5" />
-        </button>}
-    </div>;
-};
-
-export interface UnifiedActionCardProps extends ActionCardItem {
-  isDraggable?: boolean;
-  isEditing?: boolean;
-  onEdit?: (id: string) => void;
-  onDelete?: (id: string) => void;
-  onHide?: (id: string) => void;
-  iconSize?: 'sm' | 'md' | 'lg' | 'xl';
-  disableWiggleEffect?: boolean;
-  showSpecialFeatures?: boolean;
+  iconSize?: 'sm' | 'md' | 'lg' | 'xl' | '2xl';
+  contentPadding?: string;
+  contentClassname?: string;
+  children?: React.ReactNode;
   quickDemandTitle?: string;
   onQuickDemandTitleChange?: (value: string) => void;
   onQuickDemandSubmit?: () => void;
   onSearchSubmit?: (query: string) => void;
+  onEdit?: (id: string) => void;
+  onDelete?: (id: string) => void;
+  onHide?: (id: string) => void;
+  onDragStart?: () => void;
+  onDragEnd?: () => void;
+  isDraggable?: boolean;
+  isEditing?: boolean;
+  showSpecialFeatures?: boolean;
+  disableWiggleEffect?: boolean;
   specialCardsData?: any;
+  hasBadge?: boolean;
+  badgeValue?: number;
   hasSubtitle?: boolean;
   isMobileView?: boolean;
-  contentClassname?: string;
-  isPendingActions?: boolean;
-  isUserProfile?: boolean;
-  isNotificationSettings?: boolean;
   specialContent?: React.ReactNode;
-  children?: React.ReactNode;
 }
 
-export function SortableUnifiedActionCard(props: UnifiedActionCardProps) {
-  const {
-    id,
-    isDraggable = false,
-    isEditing = false,
-    disableWiggleEffect = true,
-    ...rest
-  } = props;
+export const UnifiedActionCard: React.FC<ActionCardProps> = ({
+  id,
+  title,
+  subtitle,
+  iconId,
+  path,
+  color = "blue-vivid",
+  width,
+  height,
+  type = "standard",
+  isStandard = true,
+  isQuickDemand = false,
+  isSearch = false,
+  isPendingActions = false,
+  isUserProfile = false,
+  isNotificationSettings = false,
+  isTaskCard = false,
+  isNewCardButton = false,
+  isCustom = false,
+  iconSize = 'xl',
+  contentPadding = 'p-4',
+  contentClassname = '',
+  children,
+  quickDemandTitle = '',
+  onQuickDemandTitleChange,
+  onQuickDemandSubmit,
+  onSearchSubmit,
+  onEdit,
+  onDelete,
+  onHide,
+  onDragStart,
+  onDragEnd,
+  isDraggable = false,
+  isEditing = false,
+  showSpecialFeatures = true,
+  disableWiggleEffect = false,
+  specialCardsData,
+  hasBadge = false,
+  badgeValue = 0,
+  hasSubtitle = false,
+  isMobileView = false,
+  specialContent,
+}) => {
+  const navigate = useNavigate();
+  const [isHovered, setIsHovered] = useState(false);
+  
+  // Dynamic icon size class
+  const iconSizeClass = {
+    'sm': 'h-5 w-5',
+    'md': 'h-6 w-6',
+    'lg': 'h-8 w-8',
+    'xl': 'h-10 w-10',
+    '2xl': 'h-12 w-12'
+  }[iconSize] || 'h-10 w-10';
+
+  const handleCardClick = () => {
+    if (!path || isEditing) return;
+    navigate(path);
+  };
+
+  // Check for direct Lucide icon first
+  let IconComponent: React.ElementType | null = null;
+  if (iconId && (LucideIcons as any)[iconId]) {
+    IconComponent = (LucideIcons as any)[iconId];
+  } else if (iconId) {
+    // Fallback to custom icon logic
+    console.log('No icon found for:', iconId);
+    IconComponent = (LucideIcons as any)['Layout']; // Default icon
+  }
+
+  // Color classes mapping for background and text
+  const colorClasses: Record<string, { bg: string, text: string, hover: string }> = {
+    'blue-vivid': { bg: 'bg-[#0066FF]', text: 'text-white', hover: 'hover:bg-[#0055dd]' },
+    'blue-light': { bg: 'bg-[#66B2FF]', text: 'text-white', hover: 'hover:bg-[#55a1ee]' },
+    'blue-dark': { bg: 'bg-[#1D4ED8]', text: 'text-white', hover: 'hover:bg-[#1c3dc7]' },
+    'green-neon': { bg: 'bg-[#66FF66]', text: 'text-gray-900', hover: 'hover:bg-[#55ee55]' },
+    'green-dark': { bg: 'bg-[#00CC00]', text: 'text-white', hover: 'hover:bg-[#00bb00]' },
+    'gray-light': { bg: 'bg-[#F5F5F5]', text: 'text-gray-900', hover: 'hover:bg-[#e5e5e5]' },
+    'gray-medium': { bg: 'bg-[#D4D4D4]', text: 'text-gray-900', hover: 'hover:bg-[#c4c4c4]' },
+    'orange-dark': { bg: 'bg-[#F25C05]', text: 'text-white', hover: 'hover:bg-[#e24b04]' },
+    'orange-light': { bg: 'bg-[#F89E66]', text: 'text-white', hover: 'hover:bg-[#e78d55]' },
+    'deep-blue': { bg: 'bg-[#051A2C]', text: 'text-white', hover: 'hover:bg-[#04162a]' },
+    'neutral-800': { bg: 'bg-neutral-800', text: 'text-white', hover: 'hover:bg-neutral-700' },
+  };
+
+  // Get color classes for the current color
+  const { bg = 'bg-blue-500', text = 'text-white', hover = 'hover:bg-blue-600' } = 
+    colorClasses[color as string] || {};
+
+  const cardBodyClassNames = cn(
+    "h-full w-full rounded-xl transition-all border border-gray-200 relative overflow-hidden group",
+    contentClassname,
+    bg,
+    text,
+    hover
+  );
+
+  // Render the card content
+  const renderCardContent = () => {
+    // If children are provided, render them directly
+    if (children) {
+      return children;
+    }
+    
+    // If special content is provided from parent, render it
+    if (specialContent) {
+      return specialContent;
+    }
+    
+    // Otherwise, render default card content
+    return (
+      <div className={`${contentPadding} flex h-full flex-col items-start justify-center`}>
+        {IconComponent && (
+          <div className="mb-4">
+            <IconComponent className={iconSizeClass} />
+          </div>
+        )}
+        
+        <div>
+          <h3 className="text-lg font-bold">{title}</h3>
+          {hasSubtitle && subtitle && (
+            <p className="text-sm opacity-80 mt-1">{subtitle}</p>
+          )}
+        </div>
+      </div>
+    );
+  };
+
+  return (
+    <div 
+      className="h-full w-full cursor-pointer"
+      onClick={handleCardClick}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      <div className={cardBodyClassNames}>
+        {/* Hover Controls */}
+        {(isHovered || isEditing) && !isMobileView && (
+          <div className="absolute top-2 right-2 z-10 bg-white/10 backdrop-blur-sm rounded-full px-1 py-1 flex gap-1">
+            {onEdit && (
+              <CardControls 
+                onEdit={() => onEdit(id)} 
+                onHide={onHide ? () => onHide(id) : undefined} 
+              />
+            )}
+          </div>
+        )}
+        
+        {/* Badge if needed */}
+        {hasBadge && badgeValue > 0 && (
+          <div className="absolute top-2 left-2">
+            <Badge variant="destructive" className="rounded-full px-2">
+              {badgeValue}
+            </Badge>
+          </div>
+        )}
+        
+        {renderCardContent()}
+      </div>
+    </div>
+  );
+};
+
+export const SortableUnifiedActionCard: React.FC<ActionCardProps> = (props) => {
   const {
     attributes,
     listeners,
@@ -89,123 +225,32 @@ export function SortableUnifiedActionCard(props: UnifiedActionCardProps) {
     transition,
     isDragging
   } = useSortable({
-    id
+    id: props.id,
+    disabled: !props.isDraggable
   });
+
   const style = {
-    transform: isDragging ? CSS.Transform.toString(transform) : undefined,
-    transition: isDragging ? transition : undefined,
-    zIndex: isDragging ? 10 : 'auto',
-    opacity: isDragging ? 0.8 : 1
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+    zIndex: isDragging ? 10 : 1,
   };
-  return <div ref={setNodeRef} style={style} className="h-full mx-0 my-0 py-0 px-0">
-      <UnifiedActionCard id={id} sortableProps={isDraggable ? {
-      attributes,
-      listeners
-    } : undefined} isEditing={isEditing} disableWiggleEffect={disableWiggleEffect} {...rest} />
-    </div>;
-}
 
-export interface SortableProps {
-  attributes: ReturnType<typeof useSortable>['attributes'];
-  listeners: ReturnType<typeof useSortable>['listeners'];
-}
+  const dragEffectClass = !props.disableWiggleEffect && props.isDraggable 
+    ? "hover:-rotate-1 hover:-translate-y-1" 
+    : "";
 
-export function UnifiedActionCard({
-  id,
-  title,
-  subtitle,
-  iconId,
-  path,
-  color,
-  width,
-  height,
-  type = 'standard',
-  isEditing = false,
-  onEdit,
-  onDelete,
-  onHide,
-  sortableProps,
-  iconSize,
-  isCustom,
-  isQuickDemand,
-  isSearch,
-  isMobileView = false,
-  showSpecialFeatures = true,
-  quickDemandTitle,
-  onQuickDemandTitleChange,
-  onQuickDemandSubmit,
-  onSearchSubmit,
-  specialCardsData,
-  disableWiggleEffect,
-  hasBadge,
-  badgeValue,
-  hasSubtitle,
-  contentClassname = '',
-  isPendingActions,
-  isUserProfile,
-  isNotificationSettings,
-  specialContent,
-  children
-}: UnifiedActionCardProps & {
-  sortableProps?: SortableProps;
-}) {
-  const navigate = useNavigate();
-  const handleCardClick = () => {
-    if (path && !isEditing && !isUserProfile && !isNotificationSettings) {
-      navigate(path);
-    }
-  };
-  
-  const renderCardContent = () => {
-    if (specialContent) {
-      return <div className="w-full h-full p-2 py-0 mx-0 px-0">
-          {specialContent}
-        </div>;
-    }
-    
-    if (children) {
-      return children;
-    }
-    
-    if (type === 'data_dynamic' && specialCardsData?.kpis) {
-      const kpis = specialCardsData.kpis;
-      if (title.includes('Solicitações de imprensa')) {
-        return <KPICard title="Solicitações de imprensa" value={kpis.pressRequests.today} previousValue={kpis.pressRequests.yesterday} percentageChange={kpis.pressRequests.percentageChange} loading={kpis.pressRequests.loading} variant={kpis.pressRequests.percentageChange > 0 ? "success" : "default"} />;
-      } else if (title.includes('Demandas em aprovação')) {
-        return <KPICard title="Demandas em aprovação" value={kpis.pendingApproval.total} secondaryValue={kpis.pendingApproval.awaitingResponse} secondaryLabel="aguardando resposta" loading={kpis.pendingApproval.loading} variant="warning" />;
-      } else if (title.includes('Notas produzidas')) {
-        return <KPICard title="Notas produzidas" value={kpis.notesProduced.total} secondaryValue={kpis.notesProduced.approved} secondaryLabel={`aprovadas | ${kpis.notesProduced.rejected} recusadas`} loading={kpis.notesProduced.loading} variant="success" />;
-      }
-    }
-    
-    if (type === 'in_progress_demands' && specialCardsData?.lists) {
-      return <DynamicListCard title="Demandas em andamento" items={specialCardsData.lists.recentDemands.items || []} loading={specialCardsData.lists.recentDemands.loading} emptyMessage="Nenhuma demanda em andamento" viewAllPath="/dashboard/comunicacao/demandas" viewAllLabel="Ver todas as demandas" />;
-    }
-    
-    if (type === 'recent_notes' && specialCardsData?.lists) {
-      return <DynamicListCard title="Notas de imprensa" items={specialCardsData.lists.recentNotes.items || []} loading={specialCardsData.lists.recentNotes.loading} emptyMessage="Nenhuma nota de imprensa" viewAllPath="/dashboard/comunicacao/notas" viewAllLabel="Ver todas as notas" />;
-    }
-    
-    if (type === 'origin_selection' && specialCardsData?.originOptions) {
-      return <OriginSelectionCard title="Cadastro de nova solicitação de imprensa" options={specialCardsData.originOptions || []} />;
-    }
-    
-    if (type === 'smart_search') {
-      return <SmartSearchCard placeholder="O que vamos fazer?" onSearch={onSearchSubmit} />;
-    }
-    
-    return <div className="h-full" onClick={handleCardClick}>
-        <ActionCard id={id} title={title} iconId={iconId} path={path} color={color} isDraggable={isEditing} onEdit={undefined} onDelete={undefined} onHide={undefined} isCustom={isCustom} iconSize={iconSize} isMobileView={isMobileView} showControls={false} subtitle={subtitle} />
-      </div>;
-  };
-  
-  return <div onClick={isEditing ? undefined : handleCardClick} className="py-0 my-0 px-0">
-      {renderCardContent()}
-      
-      {(isEditing || onEdit) && <div className="absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-          <CardControls onEdit={onEdit ? () => onEdit(id) : undefined} onDelete={onDelete ? () => onDelete(id) : undefined} onHide={onHide ? () => onHide(id) : undefined} />
-        </div>}
-    </div>;
-}
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={`h-full transition-all duration-200 ${dragEffectClass}`}
+      {...attributes}
+      {...listeners}
+    >
+      <UnifiedActionCard {...props} />
+    </div>
+  );
+};
 
 export default UnifiedActionCard;
