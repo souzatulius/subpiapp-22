@@ -74,7 +74,7 @@ const ActionCard = memo(({
     if (!iconId) return null;
     const LucideIcon = (LucideIcons as any)[iconId];
     if (LucideIcon) {
-      return <LucideIcon className={getIconSize(iconSize)} />;
+      return <LucideIcon className="text-white h-10 w-10" />;
     }
     const FallbackIcon = getIconComponentFromId(iconId);
     return FallbackIcon ? <FallbackIcon className={getIconSize(iconSize)} /> : null;
