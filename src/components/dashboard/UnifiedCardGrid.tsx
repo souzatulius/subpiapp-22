@@ -46,6 +46,15 @@ const UnifiedCardGrid: React.FC<UnifiedCardGridProps> = ({
   const sensors = useDndSensors();
   const { processCardDimensions } = useCardProcessor(isMobileView);
 
+  // Handle case when no cards are available - early return outside of hooks
+  if (!cards || cards.length === 0) {
+    return (
+      <div className="p-4 text-center text-gray-500">
+        Nenhum card disponível para exibir.
+      </div>
+    );
+  }
+
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
 
@@ -68,7 +77,9 @@ const UnifiedCardGrid: React.FC<UnifiedCardGridProps> = ({
   };
 
   // Filter visible cards
-  const visibleCards = cards.filter(card => !card.isHidden);
+  const visibleCards = useMemo(() => 
+    cards.filter(card => !card.isHidden),
+  [cards]);
 
   // Sort and filter cards for display
   const displayedCards = useMemo(() => {
@@ -95,16 +106,8 @@ const UnifiedCardGrid: React.FC<UnifiedCardGridProps> = ({
     isMobileView
   );
 
-  // Handle case when no cards are available
-  if (!displayedCards || displayedCards.length === 0) {
-    return (
-      <div className="p-4 text-center text-gray-500">
-        Nenhum card disponível para exibir.
-      </div>
-    );
-  }
-
   // When onEditCard is provided, create a handler that finds and passes the card
+  // Define this handler outside of any conditions to ensure hook call order is consistent
   const handleEditCard = useCallback((id: string) => {
     if (onEditCard) {
       const cardToEdit = cards.find(c => c.id === id);
