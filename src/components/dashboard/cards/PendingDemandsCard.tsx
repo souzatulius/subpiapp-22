@@ -72,14 +72,14 @@ const PendingDemandsCard: React.FC<PendingDemandsCardProps> = ({
         <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
       </div>;
   }
-  return <div className="h-full w-full border border-slate-300 rounded-3xl mx-[10px] my-0 px-0 bg-blue-400">
-      <div className="flex flex-col h-full my-0 py-[10px] mx-0 px-[5px]">
+  return <div className="h-full w-full border border-slate-300 rounded-3xl mx-[10px] my-0 px-0 bg-sky-200">
+      <div className="flex flex-col h-full my-0 py-[10px] mx-0 px-[14px] bg-transparent">
         <h3 className="mb-2 text-center my-[7px] text-white font-medium text-xl">Últimas Demandas</h3>
         <div className="overflow-auto flex-1 px-[13px]">
           {demands.length === 0 ? <div className="text-center text-gray-500 p-4">
               Nenhuma demanda disponível
             </div> : <ul className="space-y-2 py-0 my-0 px-0">
-              {demands.map(demand => <li key={demand.id} onClick={() => handleDemandClick(demand.id)} className="p-2 cursor-pointer transition-all rounded-2xl mx-0 px-[9px] py-0 my-[8px] bg-blue-300">
+              {demands.map(demand => <li key={demand.id} onClick={() => handleDemandClick(demand.id)} className="p-2 cursor-pointer transition-all rounded-2xl mx-0 px-[9px] py-0 my-[8px] bg-blue-100">
                   <div className="flex flex-col px-0 py-0">
                     <span className="text-sm font-medium truncate text-gray-800 w-full py-[4px] px-[9px]">
                       {demand.titulo}
