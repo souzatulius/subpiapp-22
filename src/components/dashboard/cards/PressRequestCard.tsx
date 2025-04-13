@@ -79,7 +79,7 @@ const PressRequestCard: React.FC = () => {
       </div>;
   }, [origens, isLoading, selectedId]);
   return <Card className="h-full w-full bg-orange-100 border-orange-200">
-      <CardHeader className="bg-transparent py-0 rounded-none">
+      <CardHeader className="">
         <CardTitle className="">
           <Newspaper className="mr-2 h-5 w-5 text-orange-500" />
           Nova Solicitação da Imprensa
