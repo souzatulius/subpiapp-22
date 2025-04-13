@@ -1,9 +1,7 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { RotateCcw, Home } from 'lucide-react';
 import { cn } from '@/utils/cn';
-
 interface WelcomeCardProps {
   title: string;
   description: string;
@@ -24,7 +22,6 @@ interface WelcomeCardProps {
   spacingClassName?: string;
   rightContent?: React.ReactNode;
 }
-
 const WelcomeCard: React.FC<WelcomeCardProps> = ({
   title,
   description,
@@ -54,7 +51,7 @@ const WelcomeCard: React.FC<WelcomeCardProps> = ({
               <div>
                 {greeting && userName && <div className="flex items-center">
                     <Home className="h-12 w-12 mr-2 text-blue-200" strokeWidth={2} />
-                    <h2 className="text-3xl font-bold py-[13px] text-blue-950">
+                    <h2 className="text-3xl font-bold text-blue-950 py-[23px] px-[17px]">
                       Olá, {userName}!
                     </h2>
                   </div>}
@@ -89,5 +86,4 @@ const WelcomeCard: React.FC<WelcomeCardProps> = ({
         </div>}
     </div>;
 };
-
 export default WelcomeCard;
