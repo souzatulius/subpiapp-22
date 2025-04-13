@@ -1,10 +1,8 @@
-
 import React, { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
 import { Loader2 } from 'lucide-react';
-
 interface Note {
   id: string;
   titulo: string;
@@ -18,18 +16,15 @@ interface Note {
     descricao?: string;
   } | null;
 }
-
 interface NotesApprovalCardProps {
   maxNotes?: number;
 }
-
 const NotesApprovalCard: React.FC<NotesApprovalCardProps> = ({
   maxNotes = 5
 }) => {
   const [notes, setNotes] = useState<Note[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
-
   useEffect(() => {
     const fetchNotes = async () => {
       setIsLoading(true);
@@ -51,9 +46,7 @@ const NotesApprovalCard: React.FC<NotesApprovalCardProps> = ({
           `).order('criado_em', {
           ascending: false
         }).limit(maxNotes);
-        
         if (error) throw error;
-
         const processedNotes: Note[] = (data || []).map(note => {
           return {
             id: note.id,
@@ -64,7 +57,6 @@ const NotesApprovalCard: React.FC<NotesApprovalCardProps> = ({
             coordenacao: note.problema?.coordenacao || null
           };
         });
-        
         setNotes(processedNotes);
       } catch (err) {
         console.error('Error fetching notes:', err);
@@ -73,16 +65,13 @@ const NotesApprovalCard: React.FC<NotesApprovalCardProps> = ({
         setIsLoading(false);
       }
     };
-    
     fetchNotes();
     const interval = setInterval(fetchNotes, 2 * 60 * 1000);
     return () => clearInterval(interval);
   }, [maxNotes]);
-
   const handleNoteClick = (noteId: string) => {
     navigate(`/dashboard/comunicacao/notas/detalhe?id=${noteId}`);
   };
-
   const getStatusColor = (status: string): string => {
     switch (status.toLowerCase()) {
       case 'pendente':
@@ -95,7 +84,6 @@ const NotesApprovalCard: React.FC<NotesApprovalCardProps> = ({
         return 'bg-gray-500 hover:bg-gray-600';
     }
   };
-
   const getStatusLabel = (status: string): string => {
     switch (status.toLowerCase()) {
       case 'pendente':
@@ -108,7 +96,6 @@ const NotesApprovalCard: React.FC<NotesApprovalCardProps> = ({
         return status.charAt(0).toUpperCase() + status.slice(1);
     }
   };
-
   const formatDate = (dateString: string): string => {
     if (!dateString) return '';
     try {
@@ -122,18 +109,16 @@ const NotesApprovalCard: React.FC<NotesApprovalCardProps> = ({
       return '';
     }
   };
-
   if (isLoading) {
     return <div className="h-full w-full flex justify-center items-center">
         <Loader2 className="h-8 w-8 animate-spin text-orange-500" />
       </div>;
   }
-
   return <div className="h-full w-full">
-      <div className="flex flex-col h-full">
-        <h3 className="text-lg font-semibold mb-2 text-center py-[22px] text-orange-600">Últimas Notas</h3>
-        <div className="overflow-auto flex-1">
-          {notes.length === 0 ? <div className="text-center text-gray-500 p-4">
+      <div className="flex flex-col h-full bg-gray-400">
+        <h3 className="text-lg font-semibold mb-2 text-center py-[6px] my-[12px] text-gray-950">Últimas Notas</h3>
+        <div className="overflow-auto flex-1 bg-gray-500">
+          {notes.length === 0 ? <div className="text-sm bg-gray-300 my-0 px-[8px] mx-[5px] py-[5px] rounded-xl">
               Nenhuma nota disponível
             </div> : <ul className="space-y-2 px-1">
               {notes.map(note => <li key={note.id} onClick={() => handleNoteClick(note.id)} className="p-2 rounded-lg cursor-pointer transition-all bg-gray-100 hover:bg-gray-200">
@@ -156,5 +141,4 @@ const NotesApprovalCard: React.FC<NotesApprovalCardProps> = ({
       </div>
     </div>;
 };
-
 export default NotesApprovalCard;

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Home, RotateCcw } from 'lucide-react';
 import { useDashboardCards } from '@/hooks/dashboard/useDashboardCards';
@@ -23,7 +22,6 @@ import ComunicadosCard from '@/components/dashboard/cards/ComunicadosCard';
 import NotesApprovalCard from '@/components/dashboard/cards/NotesApprovalCard';
 import PendingDemandsCard from '@/components/dashboard/cards/PendingDemandsCard';
 import SmartSearchCard from '@/components/dashboard/SmartSearchCard';
-
 const DashboardPage: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
@@ -50,20 +48,16 @@ const DashboardPage: React.FC = () => {
     saveCardConfig,
     isSaving
   } = useCardStorage(user, userCoordenaticaoId);
-
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
   };
-
   const toggleEditMode = () => {
     setIsEditMode(!isEditMode);
   };
-
   const handleCardEdit = (card: ActionCardItem) => {
     setSelectedCard(card);
     setIsEditCardModalOpen(true);
   };
-
   const handleSaveCard = async (updatedCard: Partial<ActionCardItem>) => {
     saveCardEdit(updatedCard as ActionCardItem);
     setIsEditCardModalOpen(false);
@@ -75,14 +69,12 @@ const DashboardPage: React.FC = () => {
       await saveCardConfig(updatedCards);
     }
   };
-
   const handleCardsChange = async (updatedCards: ActionCardItem[]) => {
     handleCardsReorder(updatedCards);
     if (user) {
       await saveCardConfig(updatedCards);
     }
   };
-
   const handleHideCard = async (cardId: string) => {
     handleCardHide(cardId);
     if (user && cards) {
@@ -93,7 +85,6 @@ const DashboardPage: React.FC = () => {
       await saveCardConfig(updatedCards);
     }
   };
-
   const handleResetDashboard = async () => {
     resetDashboard();
     if (user) {
@@ -106,42 +97,32 @@ const DashboardPage: React.FC = () => {
       variant: "default"
     });
   };
-  
   const renderSpecialCardContent = useCallback((cardId: string) => {
     const card = cards.find(c => c.id === cardId);
     if (!card) return null;
-    
     if (cardId === 'busca-rapida' || card.isSearch || card.type === 'smart_search') {
       return <SmartSearchCard className="w-full h-full" />;
     }
-    
     if (cardId === 'acoes-pendentes-card' || cardId.includes('acoes-pendentes') || card.isPendingTasks || card.type === 'pending_tasks') {
       return <PendingTasksCard id={card.id} title={card.title} userDepartmentId={userCoordenaticaoId} isComunicacao={userCoordenaticaoId === 'comunicacao'} />;
     }
-    
     if (cardId === 'comunicados-card' || cardId.includes('comunicados') || card.isComunicados || card.type === 'communications') {
       return <ComunicadosCard id={card.id} title={card.title} className="w-full h-full" />;
     }
-    
     if (cardId === 'aprovar-notas' || card.type === 'recent_notes') {
       return <NotesApprovalCard maxNotes={5} />;
     }
-    
     if (cardId === 'responder-demandas' || card.type === 'in_progress_demands') {
       return <PendingDemandsCard maxDemands={5} />;
     }
-    
     return null;
   }, [cards, userCoordenaticaoId]);
-
   const filteredCards = useMemo(() => {
     return cards ? cards.filter(card => !card.isHidden) : [];
   }, [cards]);
-
   if (!user) {
     return <LoadingIndicator message="Carregando..." />;
   }
-
   return <div className="flex flex-col h-screen bg-[#FFFAFA]">
       <Header showControls={true} toggleSidebar={toggleSidebar} className="flex-shrink-0" />
       
@@ -175,7 +156,7 @@ const DashboardPage: React.FC = () => {
                       {Array.from({
                     length: 8
                   }).map((_, index) => <Skeleton key={index} className="h-32 w-full rounded-lg" />)}
-                    </div> : filteredCards.length > 0 ? <div className="px-2 py-0">
+                    </div> : filteredCards.length > 0 ? <div className="py-0 px-0">
                       <CardGridContainer cards={filteredCards} onCardsChange={handleCardsChange} onEditCard={handleCardEdit} onHideCard={handleHideCard} isMobileView={isMobile} isEditMode={isEditMode} renderSpecialCardContent={renderSpecialCardContent} disableWiggleEffect={true} showSpecialFeatures={true} />
                     </div> : <div className="p-4 text-center text-gray-500">
                       Nenhum card disponível.
@@ -192,5 +173,4 @@ const DashboardPage: React.FC = () => {
       {isMobile && <MobileBottomNav />}
     </div>;
 };
-
 export default DashboardPage;
