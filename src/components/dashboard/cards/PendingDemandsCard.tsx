@@ -72,14 +72,14 @@ const PendingDemandsCard: React.FC<PendingDemandsCardProps> = ({
         <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
       </div>;
   }
-  return <div className="">
-      <div className="">
-        <h3 className="font-semibold mb-2 text-center py-[12px] text-white text-xl">Últimas Demandas</h3>
+  return <div className="rounded-3xl">
+      <div className="rounded-none">
+        <h3 className="font-semibold mb-2 text-center text-white text-2xl py-[2px]">Últimas Demandas</h3>
         <div className="">
           {demands.length === 0 ? <div className="text-center text-gray-500 p-4">
               Nenhuma demanda disponível
             </div> : <ul className="">
-              {demands.map(demand => <li key={demand.id} onClick={() => handleDemandClick(demand.id)} className="rounded-2xl bg-gray-300">
+              {demands.map(demand => <li key={demand.id} onClick={() => handleDemandClick(demand.id)} className="bg-gray-300 rounded-2xl">
                   <div className="">
                     <span className="">
                       {demand.titulo}
@@ -88,7 +88,7 @@ const PendingDemandsCard: React.FC<PendingDemandsCardProps> = ({
                       <span className="text-xs text-gray-600">
                         {demand.coordenacao?.sigla || demand.coordenacao?.descricao || 'Coordenação'}
                       </span>
-                      <Badge className="bg-slate-200 text-[10px] text-gray-500 leading-tight py-0 rounded-xl px-[3px] mx-[11px]">
+                      <Badge className="bg-slate-200 text-[10px] text-gray-500 leading-tight py-0 rounded-xl px-[8px] mx-[12px]">
                         {formatStatusLabel(demand.status)}
                       </Badge>
                     </div>
