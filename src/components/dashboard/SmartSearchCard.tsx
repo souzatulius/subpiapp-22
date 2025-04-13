@@ -63,7 +63,7 @@ const SmartSearchCard: React.FC<SmartSearchCardProps> = ({
         <form onSubmit={handleSubmit} className="relative">
           <div className="relative">
             <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 h-8 w-8" />
-            <Input ref={inputRef} type="text" placeholder={placeholder} value={query} onChange={handleInputChange} onFocus={() => setShowSuggestions(suggestions.length > 0)} onBlur={() => setTimeout(() => setShowSuggestions(false), 200)} className="pl-14 pr-4 rounded-xl border border-gray-300 w-full bg-transparent text-lg font-medium text-gray-800 placeholder:text-gray-400 placeholder:font-normal py-[30px]" />
+            <Input ref={inputRef} type="text" placeholder={placeholder} value={query} onChange={handleInputChange} onFocus={() => setShowSuggestions(suggestions.length > 0)} onBlur={() => setTimeout(() => setShowSuggestions(false), 200)} className="pl-14 pr-4 rounded-xl border border-gray-300 w-full bg-transparent text-lg font-medium text-gray-800 placeholder:text-gray-400 placeholder:font-normal py-[27px]" />
           </div>
           
           {showSuggestions && <SearchSuggestionsPortal suggestions={suggestions} isOpen={showSuggestions} anchorRef={inputRef} onSelect={handleSelectSuggestion} />}

@@ -72,16 +72,16 @@ const PendingDemandsCard: React.FC<PendingDemandsCardProps> = ({
         <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
       </div>;
   }
-  return <div className="h-full w-full border border-slate-300 rounded-3xl">
-      <div className="flex flex-col h-full px-[7px] mx-[12px] my-0 py-[10px]">
-        <h3 className="text-lg font-semibold mb-2 text-center my-[7px]">Últimas Demandas</h3>
-        <div className="overflow-auto flex-1">
+  return <div className="h-full w-full border border-slate-300 rounded-3xl mx-[10px] my-0 px-0 bg-blue-400">
+      <div className="flex flex-col h-full my-0 py-[10px] mx-0 px-[5px]">
+        <h3 className="mb-2 text-center my-[7px] text-white font-medium text-xl">Últimas Demandas</h3>
+        <div className="overflow-auto flex-1 px-[13px]">
           {demands.length === 0 ? <div className="text-center text-gray-500 p-4">
               Nenhuma demanda disponível
-            </div> : <ul className="space-y-2 px-0">
-              {demands.map(demand => <li key={demand.id} onClick={() => handleDemandClick(demand.id)} className="p-2 cursor-pointer transition-all bg-gray-100 hover:bg-gray-200 rounded-2xl py-[11px] my-[19px]">
-                  <div className="flex flex-col px-0 py-[5px]">
-                    <span className="text-sm font-medium truncate text-gray-800 w-full px-0 py-[4px]">
+            </div> : <ul className="space-y-2 py-0 my-0 px-0">
+              {demands.map(demand => <li key={demand.id} onClick={() => handleDemandClick(demand.id)} className="p-2 cursor-pointer transition-all rounded-2xl mx-0 px-[9px] py-0 my-[8px] bg-blue-300">
+                  <div className="flex flex-col px-0 py-0">
+                    <span className="text-sm font-medium truncate text-gray-800 w-full py-[4px] px-[9px]">
                       {demand.titulo}
                     </span>
                     <div className="flex justify-between items-center mt-1 py-[8px] my-[3px]">

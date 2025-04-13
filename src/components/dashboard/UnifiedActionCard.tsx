@@ -151,7 +151,7 @@ export function UnifiedActionCard({
   };
   const renderCardContent = () => {
     if (specialContent) {
-      return <div className="w-full h-full p-2 px-0 py-0">
+      return <div className="w-full h-full p-2 py-0 mx-0 px-0">
           {specialContent}
         </div>;
     }
@@ -184,7 +184,7 @@ export function UnifiedActionCard({
         <ActionCard id={id} title={title} iconId={iconId} path={path} color={color} isDraggable={isEditing} onEdit={undefined} onDelete={undefined} onHide={undefined} isCustom={isCustom} iconSize={iconSize} isMobileView={isMobileView} showControls={false} subtitle={subtitle} />
       </div>;
   };
-  return <div className={`h-full relative group ${contentClassname} ${specialContent ? 'overflow-hidden rounded-xl' : ''}`} onClick={isEditing ? undefined : handleCardClick}>
+  return <div onClick={isEditing ? undefined : handleCardClick} className="py-0 my-0 px-0">
       {renderCardContent()}
       
       {(isEditing || onEdit) && <div className="absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
