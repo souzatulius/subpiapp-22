@@ -109,11 +109,9 @@ const ChartCard: React.FC<ChartCardProps> = ({
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 0.3 }}
-              className="p-4 bg-orange-50 rounded-xl h-full"
+              className="mt-4 p-3 bg-orange-50 rounded-lg text-sm text-gray-700"
             >
-              <h4 className="font-medium text-orange-800 mb-2">Análise do gráfico</h4>
-              <p className="text-sm text-gray-700">{analysis}</p>
+              {analysis}
             </motion.div>
           </AnimatePresence>
         ) : (
