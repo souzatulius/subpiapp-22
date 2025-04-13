@@ -68,14 +68,14 @@ const UnifiedCardGrid: React.FC<UnifiedCardGridProps> = ({
     }
   }, [cards, onCardsChange, isMobileView]);
 
-  // Early return placeholder - ensure this is defined using hooks
+  // Always define emptyStateContent with useMemo, regardless of whether it's used
   const emptyStateContent = useMemo(() => (
     <div className="p-4 text-center text-gray-500">
       Nenhum card disponível para exibir.
     </div>
   ), []);
 
-  // Filter visible cards - all hooks must be called unconditionally
+  // Filter visible cards - always call this hook
   const visibleCards = useMemo(() => 
     cards.filter(card => !card.isHidden),
   [cards]);
@@ -94,7 +94,7 @@ const UnifiedCardGrid: React.FC<UnifiedCardGridProps> = ({
     return displayedCards.map(card => processCardDimensions(card));
   }, [displayedCards, processCardDimensions]);
 
-  // Use the grid occupancy hook
+  // Use the grid occupancy hook - always call this hook
   const { occupiedSlots } = useGridOccupancy(
     processedCards.map(card => ({
       id: card.id,
@@ -113,7 +113,7 @@ const UnifiedCardGrid: React.FC<UnifiedCardGridProps> = ({
     }
   }, [cards, onEditCard]);
 
-  // Now we can safely check if there are no cards to display
+  // Only check if there are no cards to display after all hooks have been called
   if (!cards || cards.length === 0) {
     return emptyStateContent;
   }

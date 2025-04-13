@@ -13,7 +13,7 @@ interface GetSpecialContentProps {
 const getSpecialContent = ({ 
   card, 
   renderSpecialCardContent, 
-  specialCardsData 
+  specialCardsData = {} // Provide default empty object
 }: GetSpecialContentProps): React.ReactNode | null => {
   
   // First check if there's a custom render function provided
@@ -24,7 +24,7 @@ const getSpecialContent = ({
 
   // For cards with dataSourceKey
   if (card.dataSourceKey) {
-    // Static mock data since we're not using hooks in this utility function
+    // Always define these variables, even if they're empty arrays or default values
     const notasItems = specialCardsData?.notasItems || [];
     const demandasItems = specialCardsData?.demandasItems || [];
     const isLoading = specialCardsData?.isLoading || false;
@@ -95,6 +95,9 @@ const getSpecialContent = ({
             />
           </div>
         );
+        
+      default:
+        return null;
     }
   }
 
@@ -118,6 +121,8 @@ const getSpecialContent = ({
         );
 
       // Add other card types as needed
+      default:
+        return null;
     }
   }
 

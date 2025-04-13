@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { getWidthClass, getHeightClass } from '../GridUtilities';
 import { ActionCardItem } from '@/types/dashboard';
@@ -38,17 +37,18 @@ export const CardRenderer: React.FC<CardRendererProps> = ({
   specialCardsData,
   renderSpecialCardContent
 }) => {
-  let specialContent: React.ReactNode | null = null;
-  
-  if (renderSpecialCardContent) {
-    specialContent = renderSpecialCardContent(card.id);
-  } else if (card) {
-    specialContent = getSpecialContent({
+  const specialContent = React.useMemo(() => {
+    if (renderSpecialCardContent) {
+      const customContent = renderSpecialCardContent(card.id);
+      if (customContent) return customContent;
+    }
+    
+    return getSpecialContent({
       card,
       renderSpecialCardContent,
       specialCardsData
     });
-  }
+  }, [card, renderSpecialCardContent, specialCardsData]);
   
   return (
     <div

@@ -8,7 +8,7 @@ interface TimelineItemProps {
   id: string;
   title: string;
   description?: string;
-  date: string; // Changed from Date to string
+  date: string; // Using string for date
   tag?: string;
   link?: string;
   coordenacao?: string;
@@ -20,7 +20,11 @@ interface DynamicContentCardProps {
   isLoading?: boolean;
 }
 
-const DynamicContentCard: React.FC<DynamicContentCardProps> = ({ items, type, isLoading = false }) => {
+const DynamicContentCard: React.FC<DynamicContentCardProps> = ({ 
+  items = [], // Provide default empty array
+  type, 
+  isLoading = false 
+}) => {
   if (isLoading) {
     return (
       <div className="animate-pulse flex flex-col space-y-4 p-4">
@@ -56,9 +60,25 @@ const DynamicContentCard: React.FC<DynamicContentCardProps> = ({ items, type, is
   );
 };
 
-const ItemCard: React.FC<{ item: TimelineItemProps, type: 'notes' | 'demands' | 'news' }> = ({ item, type }) => {
-  // Parse the date string to Date object for formatting
-  const timeAgo = formatDistanceToNow(new Date(item.date), { addSuffix: true, locale: ptBR });
+const ItemCard: React.FC<{ 
+  item: TimelineItemProps, 
+  type: 'notes' | 'demands' | 'news' 
+}> = ({ item, type }) => {
+  // Safely parse the date string to Date object for formatting
+  // Handle potential invalid dates gracefully
+  const timeAgo = (() => {
+    try {
+      const date = new Date(item.date);
+      // Check if date is valid
+      if (!isNaN(date.getTime())) {
+        return formatDistanceToNow(date, { addSuffix: true, locale: ptBR });
+      }
+      return "Data inválida";
+    } catch (error) {
+      console.error("Error formatting date:", error);
+      return "Data desconhecida";
+    }
+  })();
   
   return (
     <Card className="p-3 hover:bg-gray-50 transition-colors">
