@@ -12,7 +12,7 @@ interface Note {
   criado_em: string;
   autor?: {
     nome_completo: string;
-  };
+  } | null;
 }
 
 interface NotesApprovalCardProps {
@@ -41,7 +41,14 @@ const NotesApprovalCard: React.FC<NotesApprovalCardProps> = ({ maxNotes = 5 }) =
           .limit(maxNotes);
         
         if (error) throw error;
-        setNotes(data || []);
+        
+        // Make sure we handle potentially null autor values
+        const processedNotes = data?.map(note => ({
+          ...note,
+          autor: note.autor || { nome_completo: 'Usuário' }
+        })) || [];
+        
+        setNotes(processedNotes);
       } catch (err) {
         console.error('Error fetching notes:', err);
       } finally {

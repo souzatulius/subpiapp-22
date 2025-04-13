@@ -1,3 +1,4 @@
+
 import { v4 as uuidv4 } from 'uuid';
 import { ActionCardItem } from '@/types/dashboard';
 import React from 'react';
@@ -71,34 +72,46 @@ export const getDefaultCards = (): ActionCardItem[] => {
       path: '/dashboard/ranking-subs',
       color: 'bg-orange-500',
       width: '25',
-      height: '3',
+      height: '1.5',
       type: 'standard',
       displayMobile: true,
       mobileOrder: 2
     },
     {
-      id: 'aprovar-notas',
-      title: 'Aprovar Notas de Imprensa',
-      iconId: 'FileText',
-      path: '/dashboard/comunicacao/aprovar-nota',
+      id: 'relatorios-comunicacao',
+      title: 'Relatórios da Comunicação',
+      iconId: 'PieChart',
+      path: '/dashboard/relatorios',
       color: 'bg-orange-500',
       width: '25',
-      height: '3',
+      height: '1.5',
       type: 'standard',
       displayMobile: true,
       mobileOrder: 3
     },
     {
-      id: 'responder-demandas',
-      title: 'Responder Demandas',
+      id: 'aprovar-notas',
+      title: 'Últimas Notas',
       iconId: 'FileText',
+      path: '/dashboard/comunicacao/aprovar-nota',
+      color: 'bg-orange-500',
+      width: '25',
+      height: '3',
+      type: 'recent_notes',
+      displayMobile: true,
+      mobileOrder: 4
+    },
+    {
+      id: 'responder-demandas',
+      title: 'Últimas Demandas',
+      iconId: 'MessageSquare',
       path: '/dashboard/comunicacao/responder',
       color: 'bg-blue-500',
       width: '25',
       height: '3',
-      type: 'standard',
+      type: 'in_progress_demands',
       displayMobile: true,
-      mobileOrder: 4
+      mobileOrder: 5
     },
     {
       id: 'noticias-site',
@@ -110,7 +123,7 @@ export const getDefaultCards = (): ActionCardItem[] => {
       height: '0.5',
       type: 'standard',
       displayMobile: true,
-      mobileOrder: 5
+      mobileOrder: 6
     },
     {
       id: 'esic-processos',
@@ -122,18 +135,6 @@ export const getDefaultCards = (): ActionCardItem[] => {
       height: '0.5',
       type: 'standard',
       displayMobile: true,
-      mobileOrder: 6
-    },
-    {
-      id: 'relatorios-comunicacao',
-      title: 'Relatórios da Comunicação',
-      iconId: 'PieChart',
-      path: '/dashboard/relatorios',
-      color: 'bg-orange-500',
-      width: '25',
-      height: '3',
-      type: 'standard',
-      displayMobile: true,
       mobileOrder: 7
     },
     {
@@ -142,8 +143,8 @@ export const getDefaultCards = (): ActionCardItem[] => {
       iconId: 'AlertTriangle',
       path: '/dashboard/pendentes',
       color: 'bg-white',
-      width: '25',
-      height: '3',
+      width: '50',
+      height: '2',
       type: 'pending_tasks',
       isPendingTasks: true,
       displayMobile: true,

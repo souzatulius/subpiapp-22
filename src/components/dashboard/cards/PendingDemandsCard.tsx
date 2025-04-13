@@ -12,7 +12,7 @@ interface Demand {
   criado_em: string;
   autor?: {
     nome_completo: string;
-  };
+  } | null;
 }
 
 interface PendingDemandsCardProps {
@@ -41,7 +41,14 @@ const PendingDemandsCard: React.FC<PendingDemandsCardProps> = ({ maxDemands = 5 
           .limit(maxDemands);
         
         if (error) throw error;
-        setDemands(data || []);
+        
+        // Process the data to ensure autor is never null
+        const processedDemands = data?.map(demand => ({
+          ...demand,
+          autor: demand.autor || { nome_completo: 'Usuário' }
+        })) || [];
+        
+        setDemands(processedDemands);
       } catch (err) {
         console.error('Error fetching demands:', err);
       } finally {
