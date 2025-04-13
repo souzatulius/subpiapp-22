@@ -1,17 +1,22 @@
+
 import React, { useState, useRef } from 'react';
 import { Search } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import SearchSuggestionsPortal from '@/components/dashboard/search/SearchSuggestionsPortal';
+import { useNavigate } from 'react-router-dom';
+
 interface SearchSuggestion {
   title: string;
   route: string;
 }
+
 interface SmartSearchCardProps {
   placeholder?: string;
   onSearch?: (query: string) => void;
   className?: string;
 }
+
 const SmartSearchCard: React.FC<SmartSearchCardProps> = ({
   placeholder = "Pesquisar no dashboard...",
   onSearch,
@@ -21,6 +26,8 @@ const SmartSearchCard: React.FC<SmartSearchCardProps> = ({
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [suggestions, setSuggestions] = useState<SearchSuggestion[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
+  const navigate = useNavigate();
+  
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setQuery(value);
@@ -44,20 +51,31 @@ const SmartSearchCard: React.FC<SmartSearchCardProps> = ({
       setShowSuggestions(false);
     }
   };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (query.trim() && onSearch) {
-      onSearch(query);
+    if (query.trim()) {
+      if (onSearch) {
+        onSearch(query);
+      } else {
+        // Direct navigation to search page if onSearch prop isn't provided
+        navigate(`/search?q=${encodeURIComponent(query)}`);
+      }
       setShowSuggestions(false);
     }
   };
+
   const handleSelectSuggestion = (suggestion: SearchSuggestion) => {
     setQuery(suggestion.title);
     setShowSuggestions(false);
     if (onSearch) {
       onSearch(suggestion.title);
+    } else {
+      // Direct navigation to the suggestion route
+      navigate(suggestion.route);
     }
   };
+
   return <Card className={`w-full bg-transparent border-0 shadow-none ${className}`}>
       <CardContent className="p-4 bg-transparent px-0 my-[22px] py-0">
         <form onSubmit={handleSubmit} className="relative">
@@ -71,4 +89,5 @@ const SmartSearchCard: React.FC<SmartSearchCardProps> = ({
       </CardContent>
     </Card>;
 };
+
 export default SmartSearchCard;

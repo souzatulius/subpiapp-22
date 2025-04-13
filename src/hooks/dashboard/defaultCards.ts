@@ -1,3 +1,4 @@
+
 import { v4 as uuidv4 } from 'uuid';
 import { ActionCardItem } from '@/types/dashboard';
 import React from 'react';
@@ -81,7 +82,7 @@ export const getDefaultCards = (): ActionCardItem[] => {
       title: 'Relatórios da Comunicação',
       iconId: 'PieChart',
       path: '/dashboard/relatorios',
-      color: 'bg-orange-500',
+      color: 'orange-800',  // Changed from bg-orange-500 to orange-800
       width: '25',
       height: '1',
       type: 'standard',
@@ -142,7 +143,7 @@ export const getDefaultCards = (): ActionCardItem[] => {
       title: 'Processos e-SIC',
       iconId: 'FileSearch',
       path: '/dashboard/esic',
-      color: 'bg-gray-500',
+      color: 'deep-blue',  // Changed from bg-gray-500 to deep-blue
       width: '25',
       height: '1',
       type: 'standard',
