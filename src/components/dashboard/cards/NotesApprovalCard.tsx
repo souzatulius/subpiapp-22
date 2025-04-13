@@ -113,7 +113,7 @@ const NotesApprovalCard: React.FC<NotesApprovalCardProps> = ({
       </div>;
   }
   return <div className="h-full w-full">
-      <div className="flex flex-col h-full border border-slate-300 rounded-3xl bg-zinc-200">
+      <div className="flex flex-col h-full border border-slate-300 rounded-3xl bg-zinc-200 py-[20px] px-[10px]">
         <h3 className="text-lg font-semibold mb-2 text-center py-[6px] my-[12px] text-gray-950">Últimas Notas</h3>
         <div className="overflow-auto flex-1">
           {notes.length === 0 ? <div className="text-sm bg-gray-300 my-0 px-[8px] mx-[5px] py-[5px] rounded-xl">

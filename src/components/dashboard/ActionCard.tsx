@@ -94,7 +94,7 @@ const ActionCard = memo(({
           <CardControls onEdit={onEdit ? () => onEdit(id) : undefined} onDelete={onDelete ? () => onDelete(id) : undefined} onHide={onHide ? () => onHide(id) : undefined} />
         </div>}
 
-      <div className="relative h-full flex flex-col items-center justify-center text-center px-[10px] py-[20px] my-px bg-transparent">
+      <div className="relative h-full flex flex-col items-center justify-center text-center px-[10px] py-[20px] bg-transparent my-0">
         {specialContent ? <div className="w-full h-full">{specialContent}</div> : isNotesApprovalCard ? <NotesApprovalCard /> : isPendingDemandsCard ? <PendingDemandsCard /> : children ? children : chartId ? <div className="w-full h-full flex flex-col">
             <ChartPreview chartId={chartId} />
           </div> : <>

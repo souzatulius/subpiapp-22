@@ -73,9 +73,9 @@ const PendingDemandsCard: React.FC<PendingDemandsCardProps> = ({
       </div>;
   }
   return <div className="h-full w-full border border-slate-300 rounded-3xl mx-[10px] my-0 px-0 bg-sky-200">
-      <div className="flex flex-col h-full my-0 py-[10px] mx-0 px-[14px] bg-transparent">
+      <div className="flex flex-col h-full my-0 mx-0 bg-transparent py-[20px] px-[10px]">
         <h3 className="mb-2 text-center my-[7px] text-white font-medium text-xl">Últimas Demandas</h3>
-        <div className="overflow-auto flex-1 px-[13px]">
+        <div className="overflow-auto flex-1 py-[20px] px-[10px]">
           {demands.length === 0 ? <div className="text-center text-gray-500 p-4">
               Nenhuma demanda disponível
             </div> : <ul className="space-y-2 py-0 my-0 px-0">
