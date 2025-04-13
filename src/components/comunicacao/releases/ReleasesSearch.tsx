@@ -20,7 +20,7 @@ const ReleasesSearch: React.FC<ReleasesSearchProps> = ({ searchTerm, setSearchTe
       <input
         type="text"
         placeholder="Pesquisar por título ou conteúdo..."
-        className="w-full pl-10 pr-4 py-3 bg-white border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" // Updated to rounded-xl
+        className="w-full pl-10 pr-4 py-3 bg-white border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
         onKeyDown={handleKeyDown}

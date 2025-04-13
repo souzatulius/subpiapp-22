@@ -109,6 +109,7 @@ function EditCardModal({ isOpen, onClose, onSave, card }: EditCardModalProps) {
                     form={form}
                     selectedIconId={selectedIconId}
                     setSelectedIconId={setSelectedIconId}
+                    hideExtraFields={true}
                   />
                 </div>
               </div>

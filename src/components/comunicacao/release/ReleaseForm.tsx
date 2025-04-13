@@ -30,7 +30,7 @@ const ReleaseForm: React.FC<ReleaseFormProps> = ({
           value={releaseContent}
           onChange={(e) => onReleaseContentChange(e.target.value)}
           placeholder="Cole aqui o texto do release recebido por e-mail"
-          className="min-h-[400px] w-full"
+          className="min-h-[400px] w-full rounded-xl"
         />
       </div>
       
@@ -39,7 +39,7 @@ const ReleaseForm: React.FC<ReleaseFormProps> = ({
           variant="default" 
           onClick={onSave}
           disabled={isSubmitting}
-          className="flex items-center gap-2"
+          className="flex items-center gap-2 rounded-xl"
         >
           <Save className="h-4 w-4" />
           Salvar
@@ -49,7 +49,7 @@ const ReleaseForm: React.FC<ReleaseFormProps> = ({
           variant="action" 
           onClick={onGenerate}
           disabled={isGenerating}
-          className="flex items-center gap-2"
+          className="flex items-center gap-2 rounded-xl bg-orange-500 hover:bg-orange-600"
         >
           <Wand2 className="h-4 w-4" />
           Gerar Notícia

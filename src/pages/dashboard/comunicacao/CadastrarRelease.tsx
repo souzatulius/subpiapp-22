@@ -68,8 +68,8 @@ const CadastrarRelease = () => {
   return (
     <div className="space-y-6">
       <WelcomeCard
-        title="Nova Notícia"
-        description="Crie e publique novas notícias e releases para divulgação na imprensa"
+        title="Cadastrar Release"
+        description="Crie e publique releases para divulgação na imprensa"
         icon={<FileText className="h-6 w-6 mr-2 text-white" />}
         color="bg-gradient-to-r from-blue-500 to-blue-700"
       />

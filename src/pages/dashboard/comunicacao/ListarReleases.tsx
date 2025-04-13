@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '@/hooks/useSupabaseAuth';
 import { toast } from '@/components/ui/use-toast';
@@ -45,7 +46,8 @@ import {
   Check, 
   Search, 
   X,
-  Link
+  Link,
+  Filter
 } from 'lucide-react';
 import WelcomeCard from '@/components/shared/WelcomeCard';
 import { motion } from 'framer-motion';
@@ -530,7 +532,7 @@ const ListarReleases = () => {
         </div>
         <input
           type="text"
-          className="pl-10 pr-10 py-2 w-full rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          className="pl-10 pr-10 py-2 w-full rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           placeholder={placeholder}
           value={value}
           onChange={onChange}
@@ -564,18 +566,18 @@ const ListarReleases = () => {
       <div className="mt-5">
         <Tabs defaultValue={activeTab} onValueChange={setActiveTab} className="w-full">
           <div className="flex items-center justify-between mb-4">
-            <TabsList>
-              <TabsTrigger value="noticias">Notícias</TabsTrigger>
-              <TabsTrigger value="releases">Releases</TabsTrigger>
+            <TabsList className="rounded-xl">
+              <TabsTrigger value="noticias" className="rounded-l-xl">Notícias</TabsTrigger>
+              <TabsTrigger value="releases" className="rounded-r-xl">Releases</TabsTrigger>
             </TabsList>
             
             <div className="flex items-center gap-2">
-              <div className="flex bg-muted rounded-md p-1">
+              <div className="flex bg-muted rounded-xl p-1">
                 <Button 
                   variant={viewMode === 'card' ? 'default' : 'ghost'} 
                   size="sm"
                   onClick={() => setViewMode('card')}
-                  className="px-3"
+                  className="px-3 rounded-l-xl"
                 >
                   <Layout className="h-4 w-4 mr-1" />
                   Cards
@@ -584,15 +586,28 @@ const ListarReleases = () => {
                   variant={viewMode === 'list' ? 'default' : 'ghost'} 
                   size="sm"
                   onClick={() => setViewMode('list')}
-                  className="px-3"
+                  className="px-3 rounded-r-xl"
                 >
                   <List className="h-4 w-4 mr-1" />
                   Lista
                 </Button>
               </div>
-              <Button onClick={() => navigate('/dashboard/comunicacao/cadastrar-release')}>
-                {activeTab === 'noticias' ? "Nova Notícia" : "Novo Release"}
-              </Button>
+              {activeTab === 'noticias' ? (
+                <Button 
+                  onClick={() => navigate('/dashboard/comunicacao/cadastrar-release')}
+                  variant="action" 
+                  className="rounded-xl bg-orange-500 hover:bg-orange-600"
+                >
+                  Nova Notícia
+                </Button>
+              ) : (
+                <Button 
+                  onClick={() => navigate('/dashboard/comunicacao/cadastrar-release')}
+                  className="rounded-xl"
+                >
+                  Novo Release
+                </Button>
+              )}
             </div>
           </div>
 

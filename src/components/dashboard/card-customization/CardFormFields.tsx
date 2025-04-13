@@ -1,38 +1,60 @@
+
+import React from "react";
 import { UseFormReturn } from "react-hook-form";
-import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
+import {
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
+import { Textarea } from "@/components/ui/textarea";
+import { CardTypeSelector } from "./CardTypeSelector";
+import { ColorSelector } from "./ColorSelector";
+import { IconSelector } from "./IconSelector";
+import { CardSizeSelector } from "./CardSizeSelector";
 import { FormSchema } from "@/types/formSchema";
-import IconSelector from "./IconSelector";
-import ColorOptions from "./ColorOptions";
-import DimensionOptions from "./DimensionOptions";
+import { MultiSelect } from "@/components/ui/multi-select";
 
 interface CardFormFieldsProps {
   form: UseFormReturn<FormSchema>;
   selectedIconId: string;
-  setSelectedIconId: (id: string) => void;
+  setSelectedIconId: React.Dispatch<React.SetStateAction<string>>;
+  hideExtraFields?: boolean;
 }
 
-export default function CardFormFields({
-  form,
-  selectedIconId,
+const CardFormFields: React.FC<CardFormFieldsProps> = ({ 
+  form, 
+  selectedIconId, 
   setSelectedIconId,
-}: CardFormFieldsProps) {
+  hideExtraFields = false
+}) => {
+  const departments = [
+    { value: 'coordenacao', label: 'Coordenação' },
+    { value: 'supervisao', label: 'Supervisão' },
+    { value: 'zeladoria', label: 'Zeladoria' },
+    { value: 'comunicacao', label: 'Comunicação' }
+  ];
+
+  const roles = [
+    { value: 'admin', label: 'Admin' },
+    { value: 'coordenador', label: 'Coordenador' },
+    { value: 'supervisor', label: 'Supervisor' },
+    { value: 'tecnico', label: 'Técnico' }
+  ];
+
   return (
-    <div className="space-y-5">
+    <>
       <FormField
         control={form.control}
         name="title"
         render={({ field }) => (
           <FormItem>
-            <FormLabel className="text-gray-700">Título</FormLabel>
+            <FormLabel>Título</FormLabel>
             <FormControl>
-              <Input
-                placeholder="Digite o título do card"
-                className="border-gray-300"
-                {...field}
-              />
+              <Input placeholder="Título do card" {...field} />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -44,13 +66,9 @@ export default function CardFormFields({
         name="subtitle"
         render={({ field }) => (
           <FormItem>
-            <FormLabel className="text-gray-700">Subtítulo (opcional)</FormLabel>
+            <FormLabel>Subtítulo</FormLabel>
             <FormControl>
-              <Input
-                placeholder="Digite um subtítulo"
-                className="border-gray-300"
-                {...field}
-              />
+              <Textarea placeholder="Descrição breve (opcional)" rows={1} {...field} />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -62,154 +80,168 @@ export default function CardFormFields({
         name="path"
         render={({ field }) => (
           <FormItem>
-            <FormLabel className="text-gray-700">Caminho (URL)</FormLabel>
+            <FormLabel>Link (Path)</FormLabel>
             <FormControl>
-              <Input
-                placeholder="/dashboard/caminho"
-                className="border-gray-300"
-                {...field}
-              />
+              <Input placeholder="/dashboard/pagina" {...field} />
             </FormControl>
+            <FormDescription>
+              Caminho para onde o card irá direcionar o usuário
+            </FormDescription>
             <FormMessage />
           </FormItem>
         )}
       />
 
-      <FormField
-        control={form.control}
-        name="type"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel className="text-gray-700">Tipo</FormLabel>
-            <Select
-              onValueChange={field.onChange}
-              defaultValue={field.value}
-              value={field.value}
-            >
-              <FormControl>
-                <SelectTrigger className="border-gray-300">
-                  <SelectValue placeholder="Selecione o tipo" />
-                </SelectTrigger>
-              </FormControl>
-              <SelectContent>
-                <SelectItem value="standard">Padrão</SelectItem>
-                <SelectItem value="data_dynamic">Dinâmico</SelectItem>
-                <SelectItem value="in_progress_demands">Demandas em Andamento</SelectItem>
-                <SelectItem value="recent_notes">Notas Recentes</SelectItem>
-                <SelectItem value="origin_selection">Seleção de Origem</SelectItem>
-                <SelectItem value="smart_search">Busca Inteligente</SelectItem>
-                <SelectItem value="origin_demand_chart">Gráfico de Demandas</SelectItem>
-                <SelectItem value="communications">Comunicações</SelectItem>
-                <SelectItem value="pending_activities">Atividades Pendentes</SelectItem>
-              </SelectContent>
-            </Select>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-
-      <div>
-        <FormLabel className="text-gray-700 block mb-2">Ícone</FormLabel>
-        <IconSelector
-          selectedIcon={selectedIconId}
-          onIconSelect={setSelectedIconId}
-        />
+      <div className="flex flex-col md:flex-row gap-4">
+        <div className="w-full md:w-1/2">
+          <IconSelector 
+            selectedIconId={selectedIconId} 
+            onSelectIcon={setSelectedIconId} 
+          />
+        </div>
+        
+        <div className="w-full md:w-1/2">
+          <FormField
+            control={form.control}
+            name="color"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Cor do card</FormLabel>
+                <FormControl>
+                  <ColorSelector value={field.value} onChange={field.onChange} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
       </div>
 
-      <FormField
-        control={form.control}
-        name="color"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel className="text-gray-700">Cor</FormLabel>
-            <FormControl>
-              <ColorOptions
-                selectedColor={field.value}
-                onColorSelect={(color) => field.onChange(color)}
-              />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-
-      <div className="grid grid-cols-2 gap-4">
-        <FormField
-          control={form.control}
-          name="width"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel className="text-gray-700">Largura</FormLabel>
-              <FormControl>
-                <DimensionOptions
-                  type="width"
-                  selectedValue={field.value}
-                  onValueSelect={(width) => field.onChange(width)}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="height"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel className="text-gray-700">Altura</FormLabel>
-              <FormControl>
-                <DimensionOptions
-                  type="height"
-                  selectedValue={field.value}
-                  onValueSelect={(height) => field.onChange(height)}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+      <div className="flex flex-col md:flex-row gap-4">
+        <div className="w-full md:w-1/2">
+          <FormField
+            control={form.control}
+            name="width"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Largura</FormLabel>
+                <FormControl>
+                  <CardSizeSelector 
+                    type="width" 
+                    value={field.value} 
+                    onChange={field.onChange} 
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+        
+        <div className="w-full md:w-1/2">
+          <FormField
+            control={form.control}
+            name="height"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Altura</FormLabel>
+                <FormControl>
+                  <CardSizeSelector 
+                    type="height" 
+                    value={field.value} 
+                    onChange={field.onChange} 
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
       </div>
 
-      <FormField
-        control={form.control}
-        name="displayMobile"
-        render={({ field }) => (
-          <FormItem className="flex flex-row items-center justify-between rounded-lg border border-gray-200 p-3">
-            <div className="space-y-0.5">
-              <FormLabel className="text-gray-700">Exibir no mobile</FormLabel>
-            </div>
-            <FormControl>
-              <Switch
-                checked={field.value}
-                onCheckedChange={field.onChange}
-              />
-            </FormControl>
-          </FormItem>
-        )}
-      />
+      {!hideExtraFields && (
+        <>
+          <FormField
+            control={form.control}
+            name="type"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Tipo do card</FormLabel>
+                <FormControl>
+                  <CardTypeSelector value={field.value} onChange={field.onChange} />
+                </FormControl>
+                <FormDescription>
+                  Define o comportamento e funcionalidades do card
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-      {form.watch("displayMobile") && (
-        <FormField
-          control={form.control}
-          name="mobileOrder"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel className="text-gray-700">Ordem no Mobile</FormLabel>
-              <FormControl>
-                <Input
-                  type="number"
-                  min={0}
-                  className="border-gray-300"
-                  {...field}
-                  onChange={(e) => field.onChange(Number(e.target.value))}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+          <FormField
+            control={form.control}
+            name="dataSourceKey"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Fonte de dados</FormLabel>
+                <FormControl>
+                  <Input placeholder="Chave para fonte de dados dinâmicos" {...field} />
+                </FormControl>
+                <FormDescription>
+                  Usado para cards de dados dinâmicos
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="allowedDepartments"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Departamentos permitidos</FormLabel>
+                <FormControl>
+                  <MultiSelect
+                    options={departments}
+                    value={field.value?.map(dept => ({ value: dept, label: departments.find(d => d.value === dept)?.label || dept }))}
+                    onChange={(selected) => field.onChange(selected.map(item => item.value))}
+                    placeholder="Todos os departamentos"
+                  />
+                </FormControl>
+                <FormDescription>
+                  Deixe vazio para permitir todos os departamentos
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="allowedRoles"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Cargos permitidos</FormLabel>
+                <FormControl>
+                  <MultiSelect
+                    options={roles}
+                    value={field.value?.map(role => ({ value: role, label: roles.find(r => r.value === role)?.label || role }))}
+                    onChange={(selected) => field.onChange(selected.map(item => item.value))}
+                    placeholder="Todos os cargos"
+                  />
+                </FormControl>
+                <FormDescription>
+                  Deixe vazio para permitir todos os cargos
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </>
       )}
-    </div>
+    </>
   );
-}
+};
+
+export default CardFormFields;

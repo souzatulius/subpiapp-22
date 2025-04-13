@@ -19,7 +19,7 @@ const ReleasesList: React.FC<ReleasesListProps> = ({ releases, isLoading, onSele
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {Array.from({ length: 6 }).map((_, i) => (
-          <Card key={i} className="border-gray-200 rounded-xl"> {/* Updated to rounded-xl */}
+          <Card key={i} className="border-gray-200 rounded-xl">
             <CardContent className="p-5">
               <Skeleton className="h-6 w-3/4 mb-2" />
               <Skeleton className="h-4 w-full mb-4" />
@@ -36,7 +36,7 @@ const ReleasesList: React.FC<ReleasesListProps> = ({ releases, isLoading, onSele
 
   if (releases.length === 0) {
     return (
-      <Card className="border-gray-200 rounded-xl"> {/* Updated to rounded-xl */}
+      <Card className="border-gray-200 rounded-xl">
         <CardContent className="p-8 text-center">
           <p className="text-gray-500">Nenhum release encontrado.</p>
         </CardContent>
@@ -49,7 +49,7 @@ const ReleasesList: React.FC<ReleasesListProps> = ({ releases, isLoading, onSele
       {releases.map((release) => (
         <Card 
           key={release.id} 
-          className="border-gray-200 hover:shadow-md transition-shadow cursor-pointer rounded-xl" // Updated to rounded-xl
+          className="border-gray-200 hover:shadow-md transition-shadow cursor-pointer rounded-xl"
           onClick={() => onSelectRelease(release)}
         >
           <CardContent className="p-5">
