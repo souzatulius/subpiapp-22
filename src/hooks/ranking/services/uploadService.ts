@@ -11,7 +11,7 @@ type ProgressCallback = (progress: number) => void;
 type StatsCallback = (stats: any) => void;
 
 /**
- * Process SGZ file upload with improved validation, error handling, and incremental updates
+ * Process SGZ file upload with improved validation and error handling
  */
 export const handleFileUpload = async (
   file: File,
@@ -112,98 +112,21 @@ export const handleFileUpload = async (
       }
     }
     
-    // Format data for insertion and update
+    // Format data for insertion
     const formattedData = data.map(item => mapExcelRowToSGZOrdem(item, uploadId));
     
-    // Check for existing records to decide between update and insert
-    let existingRecords = new Map();
-    let insertCount = 0;
-    let updateCount = 0;
+    // Insert data in batches to prevent oversized payload
+    const batchSize = 100;
+    let insertedCount = 0;
     let insertErrors = 0;
     
-    // First, query for existing records by ordem_servico
-    const ordersList = formattedData.map(item => item.ordem_servico).filter(Boolean);
-    
-    if (ordersList.length > 0) {
-      // Split into batches to avoid query parameter limits
-      const batchSize = 100;
-      for (let i = 0; i < ordersList.length; i += batchSize) {
-        const batchOrders = ordersList.slice(i, i + batchSize);
-        
-        const { data: existingItems } = await supabase
-          .from('sgz_ordens_servico')
-          .select('ordem_servico, id')
-          .in('ordem_servico', batchOrders);
-        
-        if (existingItems) {
-          existingItems.forEach(item => {
-            existingRecords.set(item.ordem_servico, item.id);
-          });
-        }
-      }
-    }
-    
-    console.log(`Found ${existingRecords.size} existing records out of ${formattedData.length} total`);
-    
-    // Separate into records to update and records to insert
-    const recordsToInsert = [];
-    const recordsToUpdate = [];
-    
-    formattedData.forEach(item => {
-      if (existingRecords.has(item.ordem_servico)) {
-        // For update
-        recordsToUpdate.push({
-          id: existingRecords.get(item.ordem_servico),
-          ...item,
-          updated_at: new Date().toISOString()
-        });
-      } else {
-        // For insert
-        recordsToInsert.push(item);
-      }
-    });
-    
-    // Process updates first
-    const updateBatchSize = 50;
-    for (let i = 0; i < recordsToUpdate.length; i += updateBatchSize) {
-      const batch = recordsToUpdate.slice(i, i + updateBatchSize);
-      
-      for (const record of batch) {
-        const { error: updateError } = await supabase
-          .from('sgz_ordens_servico')
-          .update(record)
-          .eq('id', record.id);
-        
-        if (updateError) {
-          console.error(`Error updating record ${record.ordem_servico}:`, updateError);
-          insertErrors++;
-        } else {
-          updateCount++;
-        }
-      }
-      
-      // Update progress during processing
-      const progressPercent = 60 + Math.floor((i / recordsToUpdate.length) * 20);
-      onProgress?.(progressPercent);
-      onStatsUpdate?.({
-        totalRows: formattedData.length,
-        processedRows: i + updateCount,
-        updatedRows: updateCount,
-        newRows: insertCount,
-        errorCount: stats.errorCount + insertErrors,
-        processingStatus: 'processing',
-        message: `Atualizando registros... (${i + batch.length} de ${recordsToUpdate.length})`,
-      });
-    }
-    
-    // Insert new records
-    const insertBatchSize = 100;
-    for (let i = 0; i < recordsToInsert.length; i += insertBatchSize) {
-      const batch = recordsToInsert.slice(i, i + insertBatchSize);
-      
-      const { error: insertError } = await supabase
+    for (let i = 0; i < formattedData.length; i += batchSize) {
+      const batch = formattedData.slice(i, i + batchSize);
+      // Insert data
+      const { error: insertError, data: insertedData } = await supabase
         .from('sgz_ordens_servico')
-        .insert(batch);
+        .insert(batch)
+        .select();
         
       if (insertError) {
         console.error('Error inserting data batch:', insertError);
@@ -212,82 +135,52 @@ export const handleFileUpload = async (
         if (insertError.message.includes('violates foreign key constraint')) {
           return {
             success: false,
-            recordCount: insertCount + updateCount,
+            recordCount: insertedCount,
             message: 'Erro com os departamentos técnicos. Verifique se todos os departamentos existem no sistema.',
             errors: [...errors, {
               row: -1,
               column: 'sgz_departamento_tecnico',
               message: insertError.message,
-              type: 'error'
+              type: 'error' // Add the required type property
             }]
           };
         }
       } else {
-        insertCount += batch.length;
+        insertedCount += batch.length;
       }
       
       // Update progress during batch processing
-      const progressPercent = 80 + Math.floor((i / recordsToInsert.length) * 20);
+      const progressPercent = 60 + Math.floor((i / formattedData.length) * 40);
       onProgress?.(progressPercent);
       onStatsUpdate?.({
-        totalRows: formattedData.length,
-        processedRows: updateCount + i + batch.length,
-        updatedRows: updateCount,
-        newRows: insertCount,
+        totalRows: data.length,
+        processedRows: i + batch.length,
         errorCount: stats.errorCount + insertErrors,
         processingStatus: 'processing',
-        message: `Processando novos registros (${i + batch.length} de ${recordsToInsert.length})`,
+        message: `Processando registros (${i + batch.length} de ${data.length})`,
       });
     }
     
     // Final progress update
     onProgress?.(100);
     onStatsUpdate?.({
-      totalRows: formattedData.length,
-      processedRows: insertCount + updateCount,
-      updatedRows: updateCount,
-      newRows: insertCount,
+      totalRows: data.length,
+      processedRows: insertedCount,
       errorCount: stats.errorCount + insertErrors,
       processingStatus: 'success',
-      message: `${insertCount} novos registros e ${updateCount} atualizações processados com sucesso.`,
+      message: `${insertedCount} registros processados com sucesso. ${stats.errorCount} erros.`,
     });
-    
-    // Save the processed data to localStorage for persistence
-    try {
-      // Merge with existing data if available
-      let existingData = [];
-      try {
-        const storedData = localStorage.getItem('demo-sgz-data');
-        if (storedData) {
-          existingData = JSON.parse(storedData);
-          
-          // Remove duplicates by ordem_servico
-          const uniqueOrders = new Set(formattedData.map(item => item.ordem_servico));
-          existingData = existingData.filter(item => !uniqueOrders.has(item.ordem_servico));
-        }
-      } catch (parseError) {
-        console.warn('Error parsing stored data:', parseError);
-        existingData = [];
-      }
-      
-      // Merge and save
-      const mergedData = [...existingData, ...formattedData];
-      localStorage.setItem('demo-sgz-data', JSON.stringify(mergedData));
-      localStorage.setItem('demo-last-update', new Date().toISOString());
-    } catch (storageError) {
-      console.warn('Failed to save data to localStorage:', storageError);
-    }
     
     return {
       success: true,
       id: uploadId,
-      recordCount: insertCount + updateCount,
+      recordCount: insertedCount,
       message: stats.errorCount > 0 
-        ? `Upload realizado com ${insertCount} novos registros e ${updateCount} atualizações. ${stats.errorCount} erros ignorados.`
-        : `Upload realizado com sucesso: ${insertCount} novos registros e ${updateCount} atualizações.`,
+        ? `Upload realizado com ${insertedCount} registros. ${stats.errorCount} erros ignorados.`
+        : 'Upload realizado com sucesso',
       data: formattedData,
-      newOrders: insertCount,
-      updatedOrders: updateCount,
+      newOrders: insertedCount,
+      updatedOrders: 0,
       errors: errors
     };
   } catch (error: any) {
@@ -315,4 +208,4 @@ function summarizeErrors(errors: ValidationError[]): Record<string, number> {
 }
 
 // Export the hook instead of a non-existent function
-export { usePainelZeladoriaUpload } from '@/components/ranking/hooks/usePainelZeladoriaUpload';
+export { usePainelZeladoriaUpload } from '@/hooks/ranking/usePainelZeladoriaUpload';

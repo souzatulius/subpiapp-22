@@ -1,4 +1,3 @@
-
 import { useCallback } from 'react';
 import { User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -93,152 +92,151 @@ export const usePainelZeladoriaUpload = (user: User | null) => {
       updateProgress(50, 'processing', 'Enviando dados para processamento...', dadosPainel.length);
       updateFeedbackProgress(50, 'Enviando dados para processamento...');
       
-      // IMPROVED: Check for existing records by ID_OS to handle updates
-      const existingIds = new Map();
-      let updateCount = 0;
-      let insertCount = 0;
+      // Usar nossa Edge Function para fazer o upload com transação
+      let responseData;
+      let responseError;
       
-      // Try to get existing records from database or localStorage for demo
       try {
-        const idsList = dadosPainel.map(item => item.id_os).filter(Boolean);
+        // Initial request with detailed error logging
+        console.log('Enviando dados para Edge Function:', {
+          email: user.email,
+          fileName: file.name,
+          recordCount: dadosPainel.length
+        });
         
-        if (idsList.length > 0) {
-          // Check database first
-          const { data: existingItems } = await supabase
-            .from('painel_zeladoria_dados')
-            .select('id_os, id')
-            .in('id_os', idsList);
-          
-          if (existingItems && existingItems.length > 0) {
-            existingItems.forEach(item => {
-              existingIds.set(item.id_os, item.id);
-            });
-            console.log(`Found ${existingItems.length} existing items in database`);
-          } else {
-            // Check localStorage as fallback for demo
-            try {
-              const storedData = localStorage.getItem('demo-painel-data');
-              if (storedData) {
-                const parsedData = JSON.parse(storedData);
-                parsedData.forEach((item: any, index: number) => {
-                  if (item.id_os && idsList.includes(item.id_os)) {
-                    existingIds.set(item.id_os, index);
-                  }
-                });
-                console.log(`Found ${existingIds.size} existing items in localStorage`);
-              }
-            } catch (parseError) {
-              console.error('Error parsing stored data:', parseError);
-            }
+        const initialResponse = await supabase.functions.invoke("create_painel_upload_with_data", {
+          body: {
+            p_usuario_email: user.email,
+            p_nome_arquivo: file.name,
+            p_dados: dadosPainel
           }
+        });
+        
+        // Log detailed response information
+        console.log('Edge Function response:', {
+          data: initialResponse.data,
+          error: initialResponse.error
+        });
+        
+        responseData = initialResponse.data;
+        responseError = initialResponse.error;
+        
+        // If we got an error response but no error object, try to extract more details
+        if (!responseData && !responseError) {
+          console.error('Edge function returned no data or error object');
+          
+          responseError = {
+            message: `Error: Unknown error with edge function`
+          };
         }
-      } catch (error) {
-        console.error('Error checking existing records:', error);
-      }
-      
-      updateProgress(60, 'processing', 'Processando registros...', dadosPainel.length, 0);
-      
-      // Register the upload
-      const { data: uploadData, error: uploadError } = await supabase
-        .from('painel_zeladoria_uploads')
-        .insert({
-          usuario_email: user.email,
-          nome_arquivo: file.name
-        })
-        .select('id')
-        .single();
-
-      if (uploadError) {
-        console.error('Erro ao registrar upload:', uploadError);
-        showFeedback('error', 'Erro ao registrar upload', { duration: 3000 });
+      } catch (err: any) {
+        console.error('Exception during function invocation:', err);
+        console.error('Error details:', {
+          name: err.name,
+          message: err.message,
+          stack: err.stack,
+          cause: err.cause
+        });
+        
+        showFeedback('error', `Erro na chamada: ${err.message || 'Erro desconhecido'}`, { duration: 3000 });
         setPainelProgress({
           ...painelProgress!,
           stage: 'error',
-          message: 'Erro ao registrar upload'
+          message: `Erro na chamada: ${err.message || 'Erro desconhecido'}`
+        });
+        return null;
+      }
+
+      if (responseError) {
+        console.error('Erro na função de upload:', responseError);
+        // Check if the error is related to duplicate file
+        if (responseError.message && responseError.message.includes('já foi carregado')) {
+          // Use a modified filename to force uniqueness
+          const timestamp = new Date().toISOString().replace(/[:.-]/g, '_');
+          const ext = file.name.lastIndexOf('.') > 0 
+            ? file.name.substring(file.name.lastIndexOf('.'))
+            : '';
+          const baseName = file.name.lastIndexOf('.') > 0
+            ? file.name.substring(0, file.name.lastIndexOf('.'))
+            : file.name;
+          
+          const uniqueFileName = `${baseName}_${timestamp}${ext}`;
+          
+          console.log('Retrying with unique filename:', uniqueFileName);
+          showFeedback('loading', 'Arquivo já existe, tentando com nome único...', { duration: 1500 });
+          
+          try {
+            // Retry with unique filename
+            const retryResponse = await supabase.functions.invoke("create_painel_upload_with_data", {
+              body: {
+                p_usuario_email: user.email,
+                p_nome_arquivo: uniqueFileName,
+                p_dados: dadosPainel
+              }
+            });
+            
+            console.log('Retry response:', {
+              data: retryResponse.data,
+              error: retryResponse.error
+            });
+            
+            if (retryResponse.error) {
+              throw new Error(retryResponse.error.message || 'Erro desconhecido');
+            }
+            
+            // Use the retry data
+            responseData = retryResponse.data;
+            responseError = null;
+          } catch (retryErr: any) {
+            console.error('Error on retry:', retryErr);
+            showFeedback('error', `Erro ao processar upload: ${retryErr.message || 'Erro desconhecido'}`, { duration: 3000 });
+            setPainelProgress({
+              ...painelProgress!,
+              stage: 'error',
+              message: `Erro ao processar upload: ${retryErr.message || 'Erro desconhecido'}`
+            });
+            return null;
+          }
+        } else {
+          // For other errors, check if it's related to department constraint
+          if (responseError.message && responseError.message.includes('violates foreign key constraint')) {
+            showFeedback('error', 'Erro: Alguns departamentos no arquivo não existem no sistema. Por favor, verifique os dados.', { duration: 5000 });
+          } else {
+            // For other errors, just show the error
+            showFeedback('error', `Erro ao processar upload: ${responseError.message || 'Erro desconhecido'}`, { duration: 3000 });
+          }
+          
+          setPainelProgress({
+            ...painelProgress!,
+            stage: 'error',
+            message: `Erro ao processar upload: ${responseError.message || 'Erro desconhecido'}`
+          });
+          return null;
+        }
+      }
+      
+      if (!responseData || responseData.error) {
+        const errorMsg = responseData?.error || 'Erro desconhecido no servidor';
+        console.error('Erro retornado pela função:', errorMsg);
+        showFeedback('error', `Erro no servidor: ${errorMsg}`, { duration: 3000 });
+        setPainelProgress({
+          ...painelProgress!,
+          stage: 'error',
+          message: `Erro no servidor: ${errorMsg}`
         });
         return null;
       }
       
-      const uploadId = uploadData.id;
-      updateProgress(70, 'processing', 'Processando registros...', dadosPainel.length, dadosPainel.length * 0.3);
+      const uploadId = responseData.id;
+      const recordCount = responseData.record_count || dadosPainel.length;
       
-      // Prepare data for insertion with upload_id
-      const dadosComUpload = dadosPainel.map(item => ({
-        ...item,
-        upload_id: uploadId
-      }));
-      
-      // Process records with update or insert
-      for (let i = 0; i < dadosComUpload.length; i++) {
-        const item = dadosComUpload[i];
-        let success = false;
-        
-        if (existingIds.has(item.id_os)) {
-          // Update existing record
-          const { error: updateError } = await supabase
-            .from('painel_zeladoria_dados')
-            .update(item)
-            .eq('id', existingIds.get(item.id_os));
-          
-          if (!updateError) {
-            updateCount++;
-            success = true;
-          }
-        } else {
-          // Insert new record
-          const { error: insertError } = await supabase
-            .from('painel_zeladoria_dados')
-            .insert([item]);
-            
-          if (!insertError) {
-            insertCount++;
-            success = true;
-          }
-        }
-        
-        // Update progress during processing
-        if (i % 10 === 0 || i === dadosComUpload.length - 1) {
-          const progress = 70 + Math.floor((i / dadosComUpload.length) * 30);
-          updateProgress(
-            progress, 
-            'processing', 
-            `Processando registros (${i+1} de ${dadosComUpload.length})...`, 
-            dadosComUpload.length, 
-            i + 1
-          );
-          updateFeedbackProgress(progress, `Processando registros (${i+1} de ${dadosComUpload.length})...`);
-        }
-      }
-      
-      // Save to localStorage for demo persistence
-      try {
-        let existingData = [];
-        try {
-          const storedData = localStorage.getItem('demo-painel-data');
-          if (storedData) {
-            existingData = JSON.parse(storedData);
-            
-            // Remove duplicates before merging
-            const newIds = new Set(dadosPainel.map(item => item.id_os));
-            existingData = existingData.filter((item: any) => !newIds.has(item.id_os));
-          }
-        } catch (error) {
-          console.error('Error parsing stored data:', error);
-          existingData = [];
-        }
-        
-        // Merge and save
-        localStorage.setItem('demo-painel-data', JSON.stringify([...existingData, ...dadosPainel]));
-        localStorage.setItem('demo-last-update', new Date().toISOString());
-      } catch (storageError) {
-        console.error('Error saving to localStorage:', storageError);
-      }
-      
-      updateProgress(100, 'complete', `${insertCount} novos registros e ${updateCount} atualizações processados com sucesso`, dadosPainel.length, dadosPainel.length);
+      updateProgress(100, 'complete', `${recordCount} registros processados com sucesso`, recordCount, recordCount);
       updateFeedbackProgress(100, 'Upload finalizado com sucesso');
       
       // Set data source to upload explicitly
       localStorage.setItem('demo-data-source', 'upload');
+      localStorage.setItem('demo-painel-data', JSON.stringify(dadosPainel));
+      localStorage.setItem('demo-last-update', new Date().toISOString());
       
       // Set last refresh time
       setLastRefreshTime(new Date());
@@ -246,11 +244,9 @@ export const usePainelZeladoriaUpload = (user: User | null) => {
       return {
         success: true,
         id: uploadId,
-        recordCount: insertCount + updateCount,
-        message: `Upload realizado com sucesso: ${insertCount} novos registros e ${updateCount} atualizações`,
-        data: dadosPainel,
-        newOrders: insertCount,
-        updatedOrders: updateCount
+        recordCount: recordCount,
+        message: 'Upload realizado com sucesso',
+        data: dadosPainel
       };
     } catch (error: any) {
       console.error('Erro no processamento do upload:', error);
@@ -286,7 +282,7 @@ export const usePainelZeladoriaUpload = (user: User | null) => {
       totalRows: totalRecords,
       processedRows: processed,
       updatedRows: 0,
-      newRows: processed,
+      newRows: 0,
       totalRecords,
       processed,
       success: processed,
