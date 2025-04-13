@@ -14,7 +14,7 @@ import Register from "./pages/Register";
 import ForgotPassword from "./pages/ForgotPassword";
 import EmailVerified from "./pages/EmailVerified";
 import NotFound from "./pages/NotFound";
-import Dashboard from "./pages/Dashboard";
+import DashboardPage from "./pages/DashboardPage";
 import Settings from "./pages/Settings";
 import AuthCallback from "./components/AuthCallback";
 import ProtectedRoute from "./components/layouts/ProtectedRoute";
@@ -70,15 +70,11 @@ function App() {
                   <Route path="/email-verified" element={<EmailVerified />} />
                   <Route path="/auth/callback" element={<AuthCallback />} />
                   
-                  {/* Dashboard route */}
-                  <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-                  <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
-
-                  {/* Admin routes */}
-                  <Route path="/admin/users-permissions" element={<ProtectedRoute><UserPermissionsList /></ProtectedRoute>} />
-
                   {/* Dashboard with shared layout */}
                   <Route path="/dashboard" element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>
+                    {/* Dashboard home page as index route */}
+                    <Route index element={<DashboardPage />} />
+                    
                     {/* Comunicação routes - consistent naming and paths */}
                     <Route path="comunicacao" element={<ComunicacaoDashboard />} />
                     <Route path="comunicacao/cadastrar" element={<CadastrarDemanda />} />
@@ -101,6 +97,12 @@ function App() {
                     {/* Zeladoria routes */}
                     <Route path="zeladoria/ranking-subs" element={<RankingSubs />} />
                   </Route>
+
+                  {/* Settings route */}
+                  <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+
+                  {/* Admin routes */}
+                  <Route path="/admin/users-permissions" element={<ProtectedRoute><UserPermissionsList /></ProtectedRoute>} />
 
                   {/* Profile route */}
                   <Route path="/profile" element={<UserProfile />} />

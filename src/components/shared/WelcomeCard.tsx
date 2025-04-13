@@ -1,100 +1,101 @@
 
 import React from 'react';
-import { Settings, RotateCcw } from 'lucide-react';
-import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { RotateCcw } from 'lucide-react';
+import { cn } from '@/utils/cn';
 
 interface WelcomeCardProps {
   title: string;
   description: string;
   icon?: React.ReactNode;
   color?: string;
-  userName?: string;
   greeting?: boolean;
-  showButton?: boolean;
-  buttonText?: string;
-  buttonIcon?: React.ReactNode;
-  buttonVariant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link" | "action";
-  onButtonClick?: () => void;
+  userName?: string;
+  userNameClassName?: string;
   showResetButton?: boolean;
   onResetClick?: () => void;
   resetButtonIcon?: React.ReactNode;
-  rightContent?: React.ReactNode;
+  showButton?: boolean;
+  buttonText?: string;
+  buttonVariant?: 'default' | 'outline' | 'secondary' | 'destructive' | 'link';
+  onButtonClick?: () => void;
+  className?: string;
+  spacingClassName?: string;
 }
 
 const WelcomeCard: React.FC<WelcomeCardProps> = ({
   title,
   description,
-  icon = <Settings className="h-8 w-8 mr-4 text-gray-800" />,
-  color = "bg-transparent",
-  showButton = false,
-  buttonText = "Filtros e Configurações",
-  buttonIcon,
-  buttonVariant = "outline",
-  onButtonClick,
-  userName,
+  icon,
+  color = 'bg-gradient-to-r from-blue-600 to-blue-800',
   greeting = false,
+  userName,
+  userNameClassName,
   showResetButton = false,
   onResetClick,
-  resetButtonIcon = <RotateCcw className="h-4 w-4 text-white" />,
-  rightContent
+  resetButtonIcon,
+  showButton = false,
+  buttonText = 'Personalizar',
+  buttonVariant = 'default',
+  onButtonClick,
+  className,
+  spacingClassName,
 }) => {
-  // Ensure userName is treated as a string even if it's undefined
-  const displayName = userName || '';
-  
   return (
-    <div className="py-0 mx-0 px-0">
-      <div className="flex justify-between items-start">
-        <div className="flex flex-col">
-          <h2 className={`${greeting && displayName ? 'text-3xl' : 'text-2xl'} font-bold flex items-center text-gray-950`}>
-            {icon}
-            {greeting && displayName ? `Olá, ${displayName}!` : title}
-          </h2>
-          <p className="text-gray-600 mt-4 mb-6">
-            {description}{!description.endsWith('.') && '.'}
-          </p>
+    <div className={cn("relative rounded-xl overflow-hidden shadow-md", className)}>
+      <div className={`${color} p-6 text-white relative overflow-hidden`}>
+        <div className={cn("relative z-10 space-y-2", spacingClassName)}>
+          <div className="flex items-center">
+            {icon && <div className="flex-shrink-0">{icon}</div>}
+            <div>
+              {greeting && userName && (
+                <h2 className={cn("text-xl font-semibold mb-1", userNameClassName || "text-white")}>
+                  Olá, {userName}!
+                </h2>
+              )}
+              <h3 className="text-2xl font-bold">{title}</h3>
+              <p className="text-sm mt-2 opacity-90">{description}</p>
+            </div>
+          </div>
         </div>
-        
-        <div className="flex items-center">
+
+        {/* Background pattern */}
+        <div className="absolute right-0 top-0 w-1/3 h-full opacity-10">
+          <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="none">
+            <path 
+              d="M0,0 L100,0 L80,100 L0,100 Z" 
+              fill="currentColor" 
+            />
+          </svg>
+        </div>
+      </div>
+
+      {/* Actions row */}
+      {(showButton || showResetButton) && (
+        <div className="bg-white p-4 flex justify-end items-center border-t border-gray-100">
           {showResetButton && (
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button 
-                    variant="default" 
-                    size="icon" 
-                    onClick={onResetClick} 
-                    className="rounded-full bg-blue-600 hover:bg-blue-700 mr-2"
-                  >
-                    {resetButtonIcon}
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Resetar Dashboard</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
+            <Button 
+              variant="secondary"
+              size="sm"
+              onClick={onResetClick}
+              className="mr-auto bg-blue-600 text-white hover:bg-blue-700 rounded-md"
+            >
+              {resetButtonIcon || <RotateCcw className="h-4 w-4 mr-2" />}
+              Restaurar Padrão
+            </Button>
           )}
           
           {showButton && (
             <Button 
-              variant={buttonVariant} 
-              onClick={onButtonClick} 
-              className="bg-transparent hover:bg-gray-100 focus:ring-0 shadow-none"
+              variant={buttonVariant}
+              size="sm"
+              onClick={onButtonClick}
             >
-              {buttonIcon && <span className="mr-2">{buttonIcon}</span>}
               {buttonText}
             </Button>
           )}
-          
-          {rightContent && (
-            <div className="ml-2">
-              {rightContent}
-            </div>
-          )}
         </div>
-      </div>
+      )}
     </div>
   );
 };

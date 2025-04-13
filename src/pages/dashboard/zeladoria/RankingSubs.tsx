@@ -37,21 +37,22 @@ const RankingSubs = () => {
 
   return (
     <div className="space-y-6">
-      <RankingContent
-        filterDialogOpen={filterDialogOpen}
-        setFilterDialogOpen={setFilterDialogOpen}
-        buttonText="Filtrar Ranking"
-        lastUpdateText={lastUpdateText || "Nunca atualizado"}
-        onRefreshData={refreshChartData}
-      />
+      <ErrorBoundary fallback={<div>Erro ao carregar o ranking.</div>} onError={handleError}>
+        <RankingContent
+          filterDialogOpen={filterDialogOpen}
+          setFilterDialogOpen={setFilterDialogOpen}
+          buttonText="Filtrar Ranking"
+          lastUpdateText={lastUpdateText || "Nunca atualizado"}
+          onRefreshData={refreshChartData}
+          onUpload={handleUpload}
+        />
+      </ErrorBoundary>
       
-      <style>
-        {`
-          .chart-progress-container {
-            display: none;
-          }
-        `}
-      </style>
+      <style jsx>{`
+        .chart-progress-container {
+          display: none;
+        }
+      `}</style>
     </div>
   );
 };

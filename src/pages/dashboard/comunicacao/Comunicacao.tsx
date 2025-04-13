@@ -92,7 +92,48 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
   // Use useMemo for card processing to prevent unnecessary re-renders
   const processedCards = useMemo(() => {
     if (!cards || cards.length === 0) return [];
-    return cards.filter(card => !card.isHidden);
+    
+    return cards
+      .filter(card => !card.isHidden)
+      .map(card => {
+        // Apply card renaming based on checklist
+        if (card.title === "Ver Notas de Imprensa") {
+          return {
+            ...card,
+            title: "Notas de Imprensa",
+            iconColor: "text-white"
+          };
+        }
+        
+        // Update e-SIC cards
+        if (card.title === "Processos e-SIC" && card.color?.includes("blue")) {
+          return {
+            ...card,
+            title: "Notícias e Releases",
+            path: "/dashboard/comunicacao/releases",
+            iconColor: "text-white"
+          };
+        }
+        
+        // Adjust second e-SIC card
+        if (card.title === "Processos e-SIC" && card.color?.includes("gray")) {
+          return {
+            ...card,
+            iconColor: "text-blue-900"
+          };
+        }
+        
+        // Remove unwanted card
+        if (card.title === "Novo Card 11") {
+          return {
+            ...card,
+            isHidden: true
+          };
+        }
+        
+        return card;
+      })
+      .filter(card => !card.isHidden);
   }, [cards]);
 
   // Creating a memoized function to handle reset dashboard

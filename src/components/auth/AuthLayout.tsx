@@ -24,6 +24,13 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ children, title, subtitle }) =>
       
       {/* Right side with background image */}
       <div className="hidden md:block md:w-1/2 login-bg-image bg-cover bg-center" />
+      
+      {/* Add global styles to hide chart progress container */}
+      <style jsx global>{`
+        .chart-progress-container {
+          display: none;
+        }
+      `}</style>
     </div>
   );
 };

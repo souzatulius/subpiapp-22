@@ -128,13 +128,15 @@ const DashboardPage: React.FC = () => {
           description="Acompanhe indicadores e acesse as principais funcionalidades do sistema"
           greeting={true}
           userName={firstName}
+          userNameClassName="text-gray-950"
           showResetButton={isEditMode}
           onResetClick={resetDashboard}
           showButton={true}
           buttonText={isEditMode ? "Concluir Edição" : "Personalizar Dashboard"}
           buttonVariant="outline"
           onButtonClick={toggleEditMode}
-          icon={<div className="h-8 w-8 mr-4 text-gray-800" />}
+          icon={<div className="h-8 w-8 mr-6 text-gray-800" />}
+          spacingClassName="space-y-3"
         />
       </div>
 

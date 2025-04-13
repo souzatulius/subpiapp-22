@@ -1,168 +1,91 @@
 
 import { useState, useEffect, useCallback } from 'react';
-import { ChartVisibility } from '@/components/ranking/types';
 
 export const useRankingCharts = () => {
-  // Chart visibility state
-  const [chartVisibility, setChartVisibility] = useState<ChartVisibility>({
-    statusDistribution: true,
-    statusTransition: true,
-    districtEfficiencyRadar: true,
-    resolutionTime: true,
-    districtPerformance: true,
-    serviceTypes: true,
-    responsibility: true,
-    sgzPainel: true,
-    oldestPendingList: true,
-    evolution: true,
-    departmentComparison: true,
-    topCompanies: true,
-    districtDistribution: true,
-    servicesByDepartment: true,
-    servicesByDistrict: true,
-    timeComparison: true,
-    dailyDemands: true,
-    closureTime: true,
-    neighborhoodComparison: true,
-    externalDistricts: true,
-    efficiencyImpact: true,
-    criticalStatus: true,
-    serviceDiversity: true
-  });
-
-  // Data state
-  const [uploadId, setUploadId] = useState<string | null>(null);
-  const [planilhaData, setPlanilhaData] = useState<any[]>([]);
-  const [sgzData, setSgzData] = useState<any[] | null>(null);
-  const [painelData, setPainelData] = useState<any[] | null>(null);
+  const [data, setData] = useState<any[]>([]);
+  const [filteredData, setFilteredData] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
-  const [isMockData, setIsMockData] = useState<boolean>(true);
-  const [dataSource, setDataSource] = useState<'mock' | 'upload' | 'supabase'>('mock');
-  const [isInsightsLoading, setIsInsightsLoading] = useState<boolean>(false);
+  const [error, setError] = useState<Error | null>(null);
+  const [insightsProgress, setInsightsProgress] = useState(0);
+  const [chartsProgress, setChartsProgress] = useState(0);
+  const [isChartsLoading, setIsChartsLoading] = useState(false);
   
-  // Add progress tracking states
-  const [insightsProgress, setInsightsProgress] = useState<number>(0); 
-  const [chartsProgress, setChartsProgress] = useState<number>(0);
-  const [isChartsLoading, setIsChartsLoading] = useState<boolean>(false);
-  
-  // Toggle chart visibility function
-  const toggleChartVisibility = useCallback((chartId: keyof ChartVisibility) => {
-    setChartVisibility(prevState => {
-      const newState = { ...prevState };
-      newState[chartId] = !newState[chartId];
-      
-      // Save to localStorage for persistence
-      try {
-        localStorage.setItem('chart-visibility', JSON.stringify(newState));
-      } catch (e) {
-        console.warn('Failed to save chart visibility to localStorage:', e);
-      }
-      
-      return newState;
-    });
+  // Load chart data on mount
+  useEffect(() => {
+    refreshChartData();
   }, []);
+  
+  // Reset filters
+  const resetFilters = useCallback(() => {
+    setFilteredData(data);
+  }, [data]);
   
   // Refresh chart data
   const refreshChartData = useCallback(async () => {
-    setIsRefreshing(true);
     setIsLoading(true);
-    setChartsProgress(0); // Reset progress
+    setError(null);
     
     try {
-      // Check localStorage for saved data
-      const savedSource = localStorage.getItem('demo-data-source') || 'mock';
+      // For demonstration, we're loading mock data
+      const response = await fetch('/mock/zeladoria_mock_data.json');
       
-      if (savedSource === 'upload') {
-        console.log('Loading data from localStorage...');
-        
-        try {
-          // Try to load SGZ data
-          const sgzDataString = localStorage.getItem('demo-sgz-data');
-          if (sgzDataString) {
-            const parsedSgzData = JSON.parse(sgzDataString);
-            setSgzData(parsedSgzData);
-            setPlanilhaData(parsedSgzData);
-            console.log(`Loaded ${parsedSgzData.length} SGZ records from localStorage`);
-            setChartsProgress(50); // Update progress
-          }
-          
-          // Try to load Painel data
-          const painelDataString = localStorage.getItem('demo-painel-data');
-          if (painelDataString) {
-            const parsedPainelData = JSON.parse(painelDataString);
-            setPainelData(parsedPainelData);
-            console.log(`Loaded ${parsedPainelData.length} Painel records from localStorage`);
-            setChartsProgress(100); // Complete progress
-          }
-          
-          setDataSource('upload');
-          setIsMockData(false);
-        } catch (e) {
-          console.error('Failed to load data from localStorage:', e);
-          setDataSource('mock');
-          setIsMockData(true);
-        }
-      } else {
-        // Default to mock data
-        console.log('Using mock data...');
-        setDataSource('mock');
-        setIsMockData(true);
-        setChartsProgress(100); // Complete progress for mock data
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
       }
-    } catch (e) {
-      console.error('Error refreshing chart data:', e);
+      
+      const jsonData = await response.json();
+      
+      setData(jsonData);
+      setFilteredData(jsonData);
+      console.info('Using mock data...');
+    } catch (err) {
+      setError(err instanceof Error ? err : new Error('Unknown error loading chart data'));
+      console.error('Error loading chart data:', err);
     } finally {
-      setIsRefreshing(false);
       setIsLoading(false);
     }
   }, []);
-  
-  // Load chart visibility and data on component mount
-  useEffect(() => {
-    const loadChartVisibility = () => {
-      try {
-        const savedVisibility = localStorage.getItem('chart-visibility');
-        if (savedVisibility) {
-          setChartVisibility(JSON.parse(savedVisibility));
-        }
-      } catch (e) {
-        console.warn('Failed to load chart visibility from localStorage:', e);
-      }
-    };
+
+  // Apply filters to the data
+  const applyFilters = useCallback((filters: any) => {
+    let result = [...data];
     
-    loadChartVisibility();
-    refreshChartData();
-  }, [refreshChartData]);
+    // Apply actual filtering logic based on provided filters
+    if (filters.subprefeitura && filters.subprefeitura !== 'all') {
+      result = result.filter(item => item.subprefeitura === filters.subprefeitura);
+    }
+    
+    if (filters.month && filters.month !== 'all') {
+      result = result.filter(item => {
+        const date = new Date(item.data);
+        return date.getMonth() + 1 === parseInt(filters.month);
+      });
+    }
+    
+    if (filters.year && filters.year !== 'all') {
+      result = result.filter(item => {
+        const date = new Date(item.data);
+        return date.getFullYear() === parseInt(filters.year);
+      });
+    }
+    
+    setFilteredData(result);
+  }, [data]);
 
   return {
-    chartVisibility,
-    setChartVisibility,
-    toggleChartVisibility,
-    uploadId,
-    setUploadId,
-    planilhaData,
-    setPlanilhaData,
-    sgzData,
-    setSgzData,
-    painelData,
-    setPainelData,
+    data,
+    filteredData,
     isLoading,
+    error,
+    refreshChartData,
+    applyFilters,
+    resetFilters,
     setIsLoading,
-    isRefreshing,
-    setIsRefreshing,
-    isMockData,
-    setIsMockData,
-    dataSource,
-    setDataSource,
-    isInsightsLoading,
-    setIsInsightsLoading,
     insightsProgress,
     setInsightsProgress,
     chartsProgress,
     setChartsProgress,
     isChartsLoading,
-    setIsChartsLoading,
-    refreshChartData
+    setIsChartsLoading
   };
 };
