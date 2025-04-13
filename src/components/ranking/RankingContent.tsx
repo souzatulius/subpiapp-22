@@ -191,6 +191,27 @@ const RankingContent: React.FC<RankingContentProps> = ({
     }
   };
 
+  // Safely format the lastRefreshTime for display
+  const formatLastRefreshTime = () => {
+    if (!lastRefreshTime) return null;
+    
+    try {
+      // Handle both string and Date objects
+      const date = typeof lastRefreshTime === 'string' 
+        ? new Date(lastRefreshTime) 
+        : lastRefreshTime instanceof Date 
+          ? lastRefreshTime 
+          : null;
+          
+      if (!date) return null;
+      
+      return date.toISOString();
+    } catch (e) {
+      console.error("Error formatting lastRefreshTime:", e);
+      return null;
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -241,10 +262,8 @@ const RankingContent: React.FC<RankingContentProps> = ({
           dataStatus={{
             sgzCount: sgzData?.length || 0,
             painelCount: painelData?.length || 0,
-            lastSgzUpdate: lastRefreshTime ? 
-              (typeof lastRefreshTime === 'string' ? lastRefreshTime : lastRefreshTime.toISOString()) : null,
-            lastPainelUpdate: lastRefreshTime ? 
-              (typeof lastRefreshTime === 'string' ? lastRefreshTime : lastRefreshTime.toISOString()) : null,
+            lastSgzUpdate: formatLastRefreshTime(),
+            lastPainelUpdate: formatLastRefreshTime(),
             dataSource: dataSource
           }}
           isLoading={isLoading}

@@ -23,7 +23,7 @@ interface RankingChartsState {
   insightsProgress: number;
   chartsProgress: number;
   isMockData: boolean;
-  lastRefreshTime: Date | null;
+  lastRefreshTime: Date | string | null;
   lastRefreshSuccess: boolean;
   dataSource: 'mock' | 'upload' | 'supabase';
   
@@ -40,7 +40,7 @@ interface RankingChartsState {
   setInsightsProgress: (progress: number) => void;
   setChartsProgress: (progress: number) => void;
   setIsMockData: (isMock: boolean) => void;
-  setLastRefreshTime: (time: Date | null) => void;
+  setLastRefreshTime: (time: Date | string | null) => void;
   setLastRefreshSuccess: (success: boolean) => void;
   setDataSource: (source: 'mock' | 'upload' | 'supabase') => void;
   refreshChartData: () => Promise<void>;
@@ -164,7 +164,7 @@ export const useRankingCharts = create<RankingChartsState>()(
           dataSource: isMock ? 'mock' : get().dataSource
         }),
         
-      setLastRefreshTime: (time: Date | null) =>
+      setLastRefreshTime: (time: Date | string | null) =>
         set({ lastRefreshTime: time }),
         
       setLastRefreshSuccess: (success: boolean) =>
@@ -184,7 +184,7 @@ export const useRankingCharts = create<RankingChartsState>()(
         lastRefreshTime: null,
         uploadId: null
       }),
-        
+      
       refreshChartData: async () => {
         try {
           // Prevent multiple simultaneous refreshes
@@ -462,13 +462,29 @@ export const useRankingCharts = create<RankingChartsState>()(
     {
       name: 'ranking-charts-storage',
       storage: createJSONStorage(() => localStorage),
-      partialize: (state) => ({ 
-        chartVisibility: state.chartVisibility,
-        isMockData: state.isMockData,
-        dataSource: state.dataSource,
-        uploadId: state.uploadId,
-        lastRefreshTime: state.lastRefreshTime ? state.lastRefreshTime.toISOString() : null
-      }),
+      partialize: (state) => {
+        // Safe handling of lastRefreshTime for storage
+        let serializedLastRefreshTime = null;
+        
+        if (state.lastRefreshTime) {
+          if (state.lastRefreshTime instanceof Date) {
+            // If it's a Date object, convert to ISO string
+            serializedLastRefreshTime = state.lastRefreshTime.toISOString();
+          } else if (typeof state.lastRefreshTime === 'string') {
+            // If it's already a string, use as is
+            serializedLastRefreshTime = state.lastRefreshTime;
+          }
+          // If it's neither, it will remain null
+        }
+        
+        return { 
+          chartVisibility: state.chartVisibility,
+          isMockData: state.isMockData,
+          dataSource: state.dataSource,
+          uploadId: state.uploadId,
+          lastRefreshTime: serializedLastRefreshTime
+        };
+      },
     }
   )
 );
