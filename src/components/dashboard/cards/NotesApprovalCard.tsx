@@ -13,6 +13,10 @@ interface Note {
   autor?: {
     nome_completo?: string;
   } | null;
+  coordenacao?: {
+    sigla?: string;
+    descricao?: string;
+  } | null;
 }
 
 interface NotesApprovalCardProps {
@@ -35,7 +39,8 @@ const NotesApprovalCard: React.FC<NotesApprovalCardProps> = ({ maxNotes = 5 }) =
             titulo, 
             status, 
             criado_em,
-            autor:autor_id(nome_completo)
+            autor:autor_id(nome_completo),
+            coordenacao:coordenacao_id(sigla, descricao)
           `)
           .order('criado_em', { ascending: false })
           .limit(maxNotes);
@@ -48,10 +53,8 @@ const NotesApprovalCard: React.FC<NotesApprovalCardProps> = ({ maxNotes = 5 }) =
           titulo: note.titulo,
           status: note.status,
           criado_em: note.criado_em,
-          autor: {
-            // Ensure we have a nome_completo even if it's undefined
-            nome_completo: note.autor?.nome_completo || 'Usuário'
-          }
+          autor: note.autor,
+          coordenacao: note.coordenacao
         }));
         
         setNotes(processedNotes);
@@ -86,7 +89,7 @@ const NotesApprovalCard: React.FC<NotesApprovalCardProps> = ({ maxNotes = 5 }) =
       case 'pendente': return 'Pendente';
       case 'aprovada': return 'Aprovada';
       case 'rejeitada': return 'Rejeitada';
-      default: return status;
+      default: return status.charAt(0).toUpperCase() + status.slice(1);
     }
   };
 
@@ -128,20 +131,20 @@ const NotesApprovalCard: React.FC<NotesApprovalCardProps> = ({ maxNotes = 5 }) =
                 <li 
                   key={note.id}
                   onClick={() => handleNoteClick(note.id)}
-                  className={`
-                    p-2 rounded-lg cursor-pointer transition-all
-                    ${note.status === 'pendente' ? 'bg-orange-100 hover:bg-orange-200' : 'bg-gray-100 hover:bg-gray-200'}
-                  `}
+                  className="p-2 rounded-lg cursor-pointer transition-all bg-gray-100 hover:bg-gray-200"
                 >
-                  <div className="flex justify-between items-start">
-                    <span className="text-sm font-medium truncate text-gray-800">{note.titulo}</span>
-                    <Badge className={`ml-1 shrink-0 ${getStatusColor(note.status)}`}>
-                      {getStatusLabel(note.status)}
-                    </Badge>
-                  </div>
-                  <div className="flex justify-between items-center mt-1 text-xs text-gray-600">
-                    <span>{note.autor?.nome_completo || 'Usuário'}</span>
-                    <span>{formatDate(note.criado_em)}</span>
+                  <div className="flex flex-col">
+                    <span className="text-sm font-medium truncate text-gray-800 w-full">
+                      {note.titulo}
+                    </span>
+                    <div className="flex justify-between items-center mt-1">
+                      <span className="text-xs text-gray-600">
+                        {note.coordenacao?.sigla || note.coordenacao?.descricao || 'Coordenação'}
+                      </span>
+                      <Badge className={`ml-1 shrink-0 text-xs ${getStatusColor(note.status)}`}>
+                        {getStatusLabel(note.status)}
+                      </Badge>
+                    </div>
                   </div>
                 </li>
               ))}

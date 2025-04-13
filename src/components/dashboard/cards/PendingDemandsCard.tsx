@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
@@ -12,6 +11,10 @@ interface Demand {
   horario_publicacao: string;
   autor?: {
     nome_completo: string;
+  } | null;
+  coordenacao?: {
+    sigla?: string;
+    descricao?: string;
   } | null;
 }
 
@@ -35,7 +38,8 @@ const PendingDemandsCard: React.FC<PendingDemandsCardProps> = ({ maxDemands = 5 
             titulo, 
             status, 
             horario_publicacao,
-            autor:autor_id (nome_completo)
+            autor:autor_id(nome_completo),
+            coordenacao:coordenacao_id(sigla, descricao)
           `)
           .order('horario_publicacao', { ascending: false })
           .limit(maxDemands);
@@ -48,7 +52,8 @@ const PendingDemandsCard: React.FC<PendingDemandsCardProps> = ({ maxDemands = 5 
             titulo: demand.titulo,
             status: demand.status,
             horario_publicacao: demand.horario_publicacao,
-            autor: demand.autor
+            autor: demand.autor,
+            coordenacao: demand.coordenacao
           };
         });
         
@@ -92,20 +97,20 @@ const PendingDemandsCard: React.FC<PendingDemandsCardProps> = ({ maxDemands = 5 
                 <li 
                   key={demand.id}
                   onClick={() => handleDemandClick(demand.id)}
-                  className={`
-                    p-2 rounded-lg cursor-pointer transition-all
-                    ${demand.status === 'pendente' ? 'bg-orange-100 hover:bg-orange-200' : 'bg-gray-100 hover:bg-gray-200'}
-                  `}
+                  className="p-2 rounded-lg cursor-pointer transition-all bg-gray-100 hover:bg-gray-200"
                 >
-                  <div className="flex justify-between items-start">
-                    <span className="text-sm font-medium truncate text-gray-800">{demand.titulo}</span>
-                    <Badge className={`ml-1 shrink-0 ${getStatusColor(demand.status)}`}>
-                      {getStatusLabel(demand.status)}
-                    </Badge>
-                  </div>
-                  <div className="flex justify-between items-center mt-1 text-xs text-gray-600">
-                    <span>{demand.autor?.nome_completo || 'Usuário'}</span>
-                    <span>{formatDate(demand.horario_publicacao)}</span>
+                  <div className="flex flex-col">
+                    <span className="text-sm font-medium truncate text-gray-800 w-full">
+                      {demand.titulo}
+                    </span>
+                    <div className="flex justify-between items-center mt-1">
+                      <span className="text-xs text-gray-600">
+                        {demand.coordenacao?.sigla || demand.coordenacao?.descricao || 'Coordenação'}
+                      </span>
+                      <Badge className={`ml-1 shrink-0 text-xs ${getStatusColor(demand.status)}`}>
+                        {formatStatusLabel(demand.status)}
+                      </Badge>
+                    </div>
                   </div>
                 </li>
               ))}
@@ -127,14 +132,15 @@ const getStatusColor = (status: string): string => {
   }
 };
 
-const getStatusLabel = (status: string): string => {
-  switch (status.toLowerCase()) {
-    case 'pendente': return 'Pendente';
-    case 'em_progresso': return 'Em Progresso';
-    case 'concluida': return 'Concluída';
-    case 'cancelada': return 'Cancelada';
-    default: return status;
+const formatStatusLabel = (status: string): string => {
+  if (status.includes('_')) {
+    return status
+      .split('_')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
   }
+  
+  return status.charAt(0).toUpperCase() + status.slice(1);
 };
 
 const formatDate = (dateString: string): string => {

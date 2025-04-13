@@ -15,6 +15,7 @@ export const getColorClasses = (color: CardColor): string => {
     case 'deep-blue': return 'bg-[#051A2C] text-white'; // Azul Profundo
     case 'neutral-800': return 'bg-neutral-800 text-white'; // Cinza Escuro
     case 'orange-700': return 'bg-orange-700 text-white'; // Nova cor laranja escuro
+    case 'orange-800': return 'bg-orange-800 text-white'; // Nova cor laranja escuro mais forte
     case 'bg-orange-500': return 'bg-orange-500 text-white'; // Orange 500
     default: return 'bg-[#0066FF] text-white'; // Default to Azul Vivo
   };
@@ -34,6 +35,7 @@ export const getHoverColorClasses = (color: CardColor): string => {
     case 'deep-blue': return 'hover:bg-[#03111D]'; // Darker Azul Profundo
     case 'neutral-800': return 'hover:bg-neutral-900'; // Darker Cinza Escuro
     case 'orange-700': return 'hover:bg-orange-800'; // Darker Orange-700
+    case 'orange-800': return 'hover:bg-orange-900'; // Darker Orange-800
     case 'bg-orange-500': return 'hover:bg-orange-600'; // Darker Orange-500
     default: return 'hover:bg-[#0055D4]'; // Default to darker Azul Vivo
   };
@@ -58,6 +60,7 @@ export const getTextColorClass = (color: CardColor, cardId?: string): string => 
     case 'green-dark':
       return 'text-white'; // White text for green backgrounds
     case 'bg-orange-500':
+    case 'orange-800':
       return 'text-white'; // White text on orange background
     default:
       return 'text-white'; // White text on dark backgrounds
