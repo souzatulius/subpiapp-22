@@ -39,8 +39,9 @@ const InsightCard: React.FC<InsightCardProps> = ({
       transition={{ duration: 0.3 }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
+      className="w-full"
     >
-      <Card className={`overflow-hidden rounded-xl shadow-sm hover:shadow-md transition-all ${isSimulated ? 'border-orange-300 bg-orange-50' : 'border-blue-100'} relative h-full`}>
+      <Card className={`overflow-hidden rounded-lg shadow-sm hover:shadow-md transition-all ${isSimulated ? 'border-orange-300 bg-orange-50' : 'border-blue-100'} relative h-full`}>
         {/* Action buttons on hover */}
         <AnimatePresence>
           {isHovered && !isLoading && (
@@ -72,7 +73,7 @@ const InsightCard: React.FC<InsightCardProps> = ({
           )}
         </AnimatePresence>
         
-        <div className="p-3">
+        <div className="p-2">
           <div className="flex items-center justify-between">
             <h3 className="text-xs font-medium truncate">
               {title}
@@ -91,12 +92,12 @@ const InsightCard: React.FC<InsightCardProps> = ({
           </div>
           
           {isLoading ? (
-            <div className="mt-2 space-y-2">
+            <div className="mt-1 space-y-1">
               <div className="flex items-center">
-                <Skeleton className="h-7 w-20 bg-blue-50 rounded-full" />
+                <Skeleton className="h-6 w-16 bg-blue-50 rounded-full" />
                 <Loader2 size={14} className="ml-2 animate-spin text-blue-500" />
               </div>
-              <Skeleton className="h-3 w-full mt-2 bg-blue-50 rounded-full" />
+              <Skeleton className="h-2.5 w-full mt-1 bg-blue-50 rounded-full" />
             </div>
           ) : (
             <AnimatePresence mode="wait">
@@ -107,10 +108,10 @@ const InsightCard: React.FC<InsightCardProps> = ({
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
                   transition={{ duration: 0.3 }}
-                  className="mt-2"
+                  className="mt-1"
                 >
-                  <div className="bg-blue-50 p-2 rounded-lg">
-                    <p className="text-xs text-blue-800">{analysis}</p>
+                  <div className="bg-blue-50 p-1.5 rounded-lg">
+                    <p className="text-xs text-blue-800 leading-tight">{analysis}</p>
                   </div>
                   <button
                     onClick={() => setShowAnalysis(false)}
@@ -127,10 +128,10 @@ const InsightCard: React.FC<InsightCardProps> = ({
                   exit={{ opacity: 0 }}
                   transition={{ delay: 0.2, duration: 0.3 }}
                 >
-                  <p className={`text-xl font-bold mt-1 text-orange-500`}>
+                  <p className={`text-lg font-bold mt-1 text-orange-500`}>
                     {isSimulated ? formatValue(value) : value}
                   </p>
-                  <p className="text-xs mt-1 text-gray-500 truncate">{comment}</p>
+                  <p className="text-xs mt-0.5 text-gray-500 truncate">{comment}</p>
                 </motion.div>
               )}
             </AnimatePresence>
