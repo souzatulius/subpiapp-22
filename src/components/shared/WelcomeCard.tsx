@@ -43,8 +43,8 @@ const WelcomeCard: React.FC<WelcomeCardProps> = ({
   // Ensure userName is treated as a string even if it's undefined
   const displayName = userName || '';
 
-  // Text color is now fixed to gray-950
-  const textColorClass = 'text-gray-950';
+  // Text color is now fixed to gray-900 for the greeting
+  const textColorClass = 'text-gray-900';
 
   // Description text color
   const descriptionColorClass = 'text-gray-600';
@@ -58,7 +58,7 @@ const WelcomeCard: React.FC<WelcomeCardProps> = ({
               {greeting && displayName ? `Olá, ${displayName}!` : title}
             </h2>
             <p className={descriptionColorClass}>
-              {description}
+              {description}{!description.endsWith('.') && '.'}
             </p>
           </div>
           

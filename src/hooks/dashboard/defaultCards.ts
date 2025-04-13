@@ -1,4 +1,3 @@
-
 import { v4 as uuidv4 } from 'uuid';
 import { ActionCardItem } from '@/types/dashboard';
 import React from 'react';
@@ -66,12 +65,12 @@ export const getDefaultCards = (): ActionCardItem[] => {
     },
     {
       id: 'comunicacao-area-card',
-      title: 'Área da Comunicação',
-      iconId: 'Bell',
+      title: 'Notícias e Releases',
+      iconId: 'FileText',
       path: '/dashboard/comunicacao',
       color: 'deep-blue',
       width: '25',
-      height: '1',
+      height: '0.5',
       type: 'standard',
       displayMobile: true,
       mobileOrder: 2

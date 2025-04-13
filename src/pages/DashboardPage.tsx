@@ -17,10 +17,9 @@ import { toast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
 import { motion } from 'framer-motion';
 import { useCardStorage } from '@/hooks/dashboard/useCardStorage';
-import OriginsDemandChartCompact from '@/components/dashboard/cards/OriginsDemandChartCompact';
-import OriginsDemandCardWrapper from '@/components/dashboard/cards/OriginsDemandCardWrapper';
 import PendingTasksCard from '@/components/dashboard/cards/PendingTasksCard';
 import ComunicadosCard from '@/components/dashboard/cards/ComunicadosCard';
+
 const DashboardPage: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
@@ -47,16 +46,20 @@ const DashboardPage: React.FC = () => {
     saveCardConfig,
     isSaving
   } = useCardStorage(user, userCoordenaticaoId);
+
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
   };
+
   const toggleEditMode = () => {
     setIsEditMode(!isEditMode);
   };
+
   const handleCardEdit = (card: ActionCardItem) => {
     setSelectedCard(card);
     setIsEditCardModalOpen(true);
   };
+
   const handleSaveCard = async (updatedCard: Partial<ActionCardItem>) => {
     saveCardEdit(updatedCard as ActionCardItem);
     setIsEditCardModalOpen(false);
@@ -68,12 +71,14 @@ const DashboardPage: React.FC = () => {
       await saveCardConfig(updatedCards);
     }
   };
+
   const handleCardsChange = async (updatedCards: ActionCardItem[]) => {
     handleCardsReorder(updatedCards);
     if (user) {
       await saveCardConfig(updatedCards);
     }
   };
+
   const handleHideCard = async (cardId: string) => {
     handleCardHide(cardId);
     if (user && cards) {
@@ -84,6 +89,7 @@ const DashboardPage: React.FC = () => {
       await saveCardConfig(updatedCards);
     }
   };
+
   const handleResetDashboard = async () => {
     resetDashboard();
     if (user) {
@@ -96,6 +102,7 @@ const DashboardPage: React.FC = () => {
       variant: "default"
     });
   };
+
   useEffect(() => {
     if (!cards || cards.length === 0) return;
     const searchCardExists = cards.some(card => card.id === 'dashboard-search-card');
@@ -140,12 +147,11 @@ const DashboardPage: React.FC = () => {
       handleCardsChange(updatedCards);
     }
   }, [cards, isMobile, handleCardsChange]);
+
   const renderSpecialCardContent = useCallback((cardId: string) => {
     const card = cards.find(c => c.id === cardId);
     if (!card) return null;
-    if (cardId === 'origem-demandas-card' || cardId.includes('origem-demandas') || cardId.includes('origemDemandas') || cardId.includes('origin-demand-chart') || cardId.includes('origin_demand_chart')) {
-      return <OriginsDemandCardWrapper className="w-full h-full" color={card.color} title={card.title} subtitle={card.subtitle} />;
-    }
+    
     if (cardId === 'acoes-pendentes-card' || cardId.includes('acoes-pendentes') || card.isPendingTasks || card.type === 'pending_tasks') {
       return <PendingTasksCard id={card.id} title={card.title} userDepartmentId={userCoordenaticaoId} isComunicacao={userCoordenaticaoId === 'comunicacao'} />;
     }
@@ -154,12 +160,15 @@ const DashboardPage: React.FC = () => {
     }
     return null;
   }, [cards, userCoordenaticaoId]);
+
   const filteredCards = useMemo(() => {
     return cards ? cards.filter(card => !card.isHidden) : [];
   }, [cards]);
+
   if (!user) {
     return <LoadingIndicator message="Carregando..." />;
   }
+
   return <div className="flex flex-col h-screen bg-[#FFFAFA]">
       <Header showControls={true} toggleSidebar={toggleSidebar} className="flex-shrink-0" />
       
@@ -210,4 +219,5 @@ const DashboardPage: React.FC = () => {
       {isMobile && <MobileBottomNav />}
     </div>;
 };
+
 export default DashboardPage;
