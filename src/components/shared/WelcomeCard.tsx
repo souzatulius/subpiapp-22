@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { RotateCcw, Home } from 'lucide-react';
@@ -20,6 +21,7 @@ interface WelcomeCardProps {
   onButtonClick?: () => void;
   className?: string;
   spacingClassName?: string;
+  rightContent?: React.ReactNode; // Added the missing rightContent property
 }
 
 const WelcomeCard: React.FC<WelcomeCardProps> = ({
@@ -38,28 +40,38 @@ const WelcomeCard: React.FC<WelcomeCardProps> = ({
   buttonVariant = 'default',
   onButtonClick,
   className,
-  spacingClassName
+  spacingClassName,
+  rightContent  // Add the rightContent prop
 }) => {
   return <div className="bg-transparent">
       <div className="bg-transparent">
         <div className="bg-transparent">
-          <div className="flex items-center bg-transparent my-[24px]">
-            {icon}
-            <div>
-              {greeting && userName && (
-                <div className="flex items-center">
-                  <Home 
-                    className="h-6 w-6 mr-2 text-blue-900"
-                    strokeWidth={2} 
-                  />
-                  <h2 className="text-3xl font-bold py-[13px] text-blue-950">
-                    Olá, {userName}!
-                  </h2>
-                </div>
-              )}
-              
-              <p className="mt-2 opacity-90 text-lg">{description}</p>
+          <div className="flex items-center justify-between bg-transparent my-[24px]">
+            <div className="flex items-center bg-transparent">
+              {icon}
+              <div>
+                {greeting && userName && (
+                  <div className="flex items-center">
+                    <Home 
+                      className="h-6 w-6 mr-2 text-blue-900"
+                      strokeWidth={2} 
+                    />
+                    <h2 className="text-3xl font-bold py-[13px] text-blue-950">
+                      Olá, {userName}!
+                    </h2>
+                  </div>
+                )}
+                
+                <p className="mt-2 opacity-90 text-lg">{description}</p>
+              </div>
             </div>
+
+            {/* Add the rightContent here */}
+            {rightContent && (
+              <div className="flex-shrink-0">
+                {rightContent}
+              </div>
+            )}
           </div>
         </div>
 

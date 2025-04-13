@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import Header from '@/components/layouts/Header';
 import DashboardSidebar from '@/components/dashboard/DashboardSidebar';
@@ -14,7 +13,6 @@ import { useScrollFade } from '@/hooks/useScrollFade';
 import { ReportFilters } from '@/components/relatorios/hooks/useReportsData';
 import { useLocalStorage } from '@/hooks/use-local-storage';
 import { toast } from '@/hooks/use-toast';
-// Import Chart registration to ensure scales are registered
 import '@/components/ranking/charts/ChartRegistration';
 
 const Relatorios = () => {
@@ -45,7 +43,6 @@ const Relatorios = () => {
   };
   
   const handleResetDashboard = () => {
-    // Reset chart visibility in localStorage
     setChartVisibility({
       origemDemandas: true,
       distribuicaoPorTemas: true,
@@ -59,7 +56,6 @@ const Relatorios = () => {
       processosCadastrados: true
     });
     
-    // Force a reload of the page with a reset parameter
     window.location.href = window.location.pathname + '?reset=true';
 
     toast({
@@ -71,11 +67,9 @@ const Relatorios = () => {
 
   return (
     <div className="flex flex-col min-h-screen bg-[#FFFAFA]">
-      {/* Header */}
       <div className="flex-shrink-0">
         <Header showControls={true} toggleSidebar={toggleSidebar} />
         
-        {/* Mobile breadcrumb directly below header */}
         {isMobile && (
           <div className="bg-white">
             <BreadcrumbBar />
@@ -91,8 +85,11 @@ const Relatorios = () => {
         )}
         
         <main className="flex-1 flex flex-col overflow-hidden">
-          {/* Desktop breadcrumb */}
-          {!isMobile && <BreadcrumbBar className="flex-shrink-0" />}
+          {!isMobile && (
+            <div className="flex-shrink-0">
+              <BreadcrumbBar />
+            </div>
+          )}
           
           <div className="flex-1 max-w-full mx-auto w-full overflow-y-auto">
             <div className={`p-4 ${isMobile ? 'pb-24' : 'pb-16'}`}>
@@ -110,14 +107,13 @@ const Relatorios = () => {
                     showButton={true}
                     buttonText="Filtros e Visualização"
                     buttonIcon={<SlidersHorizontal className="h-4 w-4" />}
-                    buttonVariant="action"
+                    buttonVariant="default"
                     onButtonClick={() => setFilterDialogOpen(true)}
                     showResetButton={true}
                     onResetClick={handleResetDashboard}
                   />
                 </div>
                
-                {/* Fix the mobile breadcrumb placement to be after WelcomeCard */}
                 {isMobile && (
                   <div className="bg-white rounded-md shadow-sm mt-4">
                     <BreadcrumbBar />
