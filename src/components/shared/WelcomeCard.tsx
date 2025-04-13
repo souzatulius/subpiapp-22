@@ -1,10 +1,8 @@
-
 import React from 'react';
 import { Settings, RotateCcw } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-
 interface WelcomeCardProps {
   title: string;
   description: string;
@@ -22,12 +20,13 @@ interface WelcomeCardProps {
   resetButtonIcon?: React.ReactNode;
   rightContent?: React.ReactNode; // Added rightContent prop
 }
-
 const WelcomeCard: React.FC<WelcomeCardProps> = ({
   title,
   description,
-  icon = <Settings className="h-8 w-8 mr-2" />, // Updated icon size
-  color = "bg-transparent", // Updated to transparent background
+  icon = <Settings className="h-8 w-8 mr-2" />,
+  // Updated icon size
+  color = "bg-transparent",
+  // Updated to transparent background
   showButton = false,
   buttonText = "Filtros e Configurações",
   buttonIcon,
@@ -42,16 +41,14 @@ const WelcomeCard: React.FC<WelcomeCardProps> = ({
 }) => {
   // Ensure userName is treated as a string even if it's undefined
   const displayName = userName || '';
-  
+
   // Text color is now fixed to gray-950
   const textColorClass = 'text-gray-950';
-  
+
   // Description text color
   const descriptionColorClass = 'text-gray-950';
-  
-  return (
-    <Card className={`${color} ${textColorClass} shadow-lg overflow-hidden`}>
-      <CardContent className="p-4">
+  return <Card className="">
+      <CardContent className="p-4 bg-inherit">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
           <div>
             <h2 className={`${greeting && displayName ? 'text-3xl' : 'text-2xl'} font-bold mb-3 flex items-center`}>
@@ -64,16 +61,10 @@ const WelcomeCard: React.FC<WelcomeCardProps> = ({
           </div>
           
           <div className="flex items-center gap-2">
-            {showResetButton && (
-              <TooltipProvider>
+            {showResetButton && <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={onResetClick}
-                      className="bg-white/10 border-white/20 hover:bg-white/20"
-                    >
+                    <Button variant="ghost" size="icon" onClick={onResetClick} className="bg-white/10 border-white/20 hover:bg-white/20">
                       {resetButtonIcon}
                     </Button>
                   </TooltipTrigger>
@@ -81,30 +72,19 @@ const WelcomeCard: React.FC<WelcomeCardProps> = ({
                     <p>Resetar Dashboard</p>
                   </TooltipContent>
                 </Tooltip>
-              </TooltipProvider>
-            )}
+              </TooltipProvider>}
             
-            {showButton && (
-              <Button
-                variant={buttonVariant}
-                onClick={onButtonClick}
-                className="bg-white/10 border-white/20 hover:bg-white/20"
-              >
+            {showButton && <Button variant={buttonVariant} onClick={onButtonClick} className="bg-white/10 border-white/20 hover:bg-white/20">
                 {buttonIcon && <span className="mr-2">{buttonIcon}</span>}
                 {buttonText}
-              </Button>
-            )}
+              </Button>}
             
-            {rightContent && (
-              <div className="ml-2">
+            {rightContent && <div className="ml-2">
                 {rightContent}
-              </div>
-            )}
+              </div>}
           </div>
         </div>
       </CardContent>
-    </Card>
-  );
+    </Card>;
 };
-
 export default WelcomeCard;
