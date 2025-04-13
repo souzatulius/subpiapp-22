@@ -46,7 +46,7 @@ const WelcomeCard: React.FC<WelcomeCardProps> = ({
   // Description text color
   const descriptionColorClass = 'text-gray-600';
   return <Card className="border-0 shadow-none bg-transparent">
-      <CardContent className="p-4 bg-transparent px-0 py-0">
+      <CardContent className="border border-none bg-transparent">
         <div className="border border-none bg-transparent rounded-none">
           <div className="px-0 py-0">
             <h2 className={`${greeting && displayName ? 'text-3xl' : 'text-2xl'} font-bold mb-3 flex items-center text-gray-900`}>
