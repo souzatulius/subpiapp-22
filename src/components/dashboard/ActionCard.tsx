@@ -1,101 +1,145 @@
 
-import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { CardColor } from '@/types/dashboard';
-import { getBgColor } from '@/hooks/dashboard/defaultCards';
+import { CardColor, CardWidth, CardHeight, CardType } from '@/types/dashboard';
 import { getIconComponentFromId } from '@/hooks/dashboard/defaultCards';
+import CardControls from './card-parts/CardControls';
+import { MoveIcon } from 'lucide-react';
+import * as LucideIcons from 'lucide-react';
+import { getColorClasses, getTextColorClass } from './utils/cardColorUtils';
+import ChartPreview from './charts/ChartPreview';
+import { memo } from 'react';
 
-interface ActionCardProps {
+export interface ActionCardProps {
   id: string;
   title: string;
-  subtitle?: string;
   iconId: string;
   path: string;
   color: CardColor;
+  isDraggable?: boolean;
+  width?: CardWidth;
+  height?: CardHeight;
+  type?: CardType;
   onEdit?: (id: string) => void;
   onDelete?: (id: string) => void;
   onHide?: (id: string) => void;
-  isDraggable?: boolean;
   isCustom?: boolean;
+  dataSourceKey?: string;
+  displayMobile?: boolean;
+  mobileOrder?: number;
+  children?: React.ReactNode;
   iconSize?: 'sm' | 'md' | 'lg' | 'xl';
-  showControls?: boolean;
-  hasBadge?: boolean;
-  badgeValue?: number;
   isMobileView?: boolean;
+  showControls?: boolean;
+  subtitle?: string;
+  chartId?: string;
+  specialContent?: React.ReactNode;
 }
 
-const ActionCard: React.FC<ActionCardProps> = ({
+const getIconSize = (size?: 'sm' | 'md' | 'lg' | 'xl'): string => {
+  switch (size) {
+    case 'sm': return 'w-6 h-6';
+    case 'lg': return 'w-10 h-10';
+    case 'xl': return 'w-10 h-10';
+    case 'md':
+    default: return 'w-10 h-10';
+  }
+};
+
+// Memoize the component to prevent unnecessary re-renders
+const ActionCard = memo(({
   id,
   title,
   subtitle,
   iconId,
   path,
   color,
+  isDraggable = false,
   onEdit,
   onDelete,
   onHide,
-  isDraggable = false,
   isCustom = false,
   iconSize = 'md',
+  isMobileView = false,
+  children,
   showControls = true,
-  hasBadge = false,
-  badgeValue = 0,
-  isMobileView = false
-}) => {
+  chartId,
+  specialContent
+}: ActionCardProps) => {
   const navigate = useNavigate();
-  const IconComponent = getIconComponentFromId(iconId);
+  const colorClasses = getColorClasses(color);
+  const textColorClass = getTextColorClass(color, id);
   
-  const bgColorClass = color.startsWith('bg-') ? color : getBgColor(color);
-  const textColorClass = color === 'bg-white' || color === 'gray-light' ? 'text-gray-800' : 'text-white';
-  
-  // Calculate icon size based on the iconSize prop
-  const getIconSizeClass = (size: string) => {
-    switch (size) {
-      case 'sm': return 'w-8 h-8';
-      case 'md': return 'w-10 h-10';
-      case 'lg': return 'w-12 h-12';
-      case 'xl': return 'w-16 h-16';
-      default: return 'w-10 h-10';
+  const renderIcon = () => {
+    if (!iconId) return null;
+    
+    // Direct check for Lucide icon by name
+    const LucideIcon = (LucideIcons as any)[iconId];
+    if (LucideIcon) {
+      return <LucideIcon className={getIconSize(iconSize)} />;
     }
-  };
-  
-  const iconSizeClass = getIconSizeClass(iconSize);
-  
-  const handleCardClick = () => {
-    if (path && !isDraggable) {
-      navigate(path);
-    } else if (onEdit) {
-      onEdit(id);
-    }
+    
+    // Fallback to our custom icon loader
+    const FallbackIcon = getIconComponentFromId(iconId);
+    return FallbackIcon ? <FallbackIcon className={getIconSize(iconSize)} /> : null;
   };
 
+  // Removed the animation classes causing flashing: hover:-translate-y-1, active:scale-95
+  // Kept shadow and cursor effects which are less likely to cause flashing
   return (
     <div 
-      className={`h-full rounded-xl shadow-md hover:shadow-lg transition-all duration-300 cursor-pointer ${bgColorClass}`}
-      onClick={handleCardClick}
+      className={`w-full h-full rounded-xl shadow-md overflow-hidden 
+        ${!isDraggable ? 'cursor-pointer' : 'cursor-grab'} 
+        hover:shadow-lg ${colorClasses} group relative`}
     >
-      <div className="h-full w-full py-2.5 px-2 flex flex-col items-center justify-center">
-        <div className="relative">
-          {hasBadge && badgeValue > 0 && (
-            <div className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold">
-              {badgeValue > 99 ? '99+' : badgeValue}
-            </div>
-          )}
-          {IconComponent && (
-            <IconComponent className={`${iconSizeClass} ${textColorClass} mb-2`} />
-          )}
+      {isDraggable && (
+        <div className="absolute top-2 left-2 z-10 opacity-0 group-hover:opacity-80 transition-opacity duration-200">
+          <div className="p-1.5 rounded-full bg-white bg-opacity-60 text-gray-600">
+            <MoveIcon className="h-3.5 w-3.5" />
+          </div>
         </div>
-        <h3 className={`text-lg font-semibold text-center ${textColorClass} mt-1`}>
-          {title}
-        </h3>
-        {subtitle && (
-          <p className={`text-sm text-center ${textColorClass} opacity-80 mt-0.5 px-2`}>
-            {subtitle}
-          </p>
+      )}
+
+      {showControls && (onEdit || onDelete || onHide) && (
+        <div className="absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+          <CardControls 
+            onEdit={onEdit ? () => onEdit(id) : undefined} 
+            onDelete={onDelete ? () => onDelete(id) : undefined} 
+            onHide={onHide ? () => onHide(id) : undefined} 
+          />
+        </div>
+      )}
+
+      <div className="relative h-full flex flex-col items-center justify-center text-center py-2.5 px-2">
+        {specialContent ? (
+          <div className="w-full h-full">{specialContent}</div>
+        ) : children ? (
+          children
+        ) : chartId ? (
+          <div className="w-full h-full flex flex-col">
+            <ChartPreview chartId={chartId} />
+          </div>
+        ) : (
+          <>
+            <div className={`mb-2.5 ${textColorClass}`}>
+              {renderIcon()}
+            </div>
+            <div className="line-clamp-2 max-w-[90%]">
+              <h3 className={`font-semibold ${textColorClass} text-lg leading-tight break-words text-balance`}>
+                {title}
+              </h3>
+              {subtitle && (
+                <p className={`text-sm ${textColorClass} opacity-80 mt-1 line-clamp-2`}>
+                  {subtitle}
+                </p>
+              )}
+            </div>
+          </>
         )}
       </div>
     </div>
   );
-};
+});
+
+ActionCard.displayName = 'ActionCard';
 
 export default ActionCard;

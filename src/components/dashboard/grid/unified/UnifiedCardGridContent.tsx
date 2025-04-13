@@ -41,7 +41,7 @@ const UnifiedCardGridContent: React.FC<UnifiedCardGridContentProps> = ({
 
   return (
     <SortableContext items={cardIds}>
-      <div className={`grid gap-4 ${isMobileView ? 'grid-cols-2' : 'grid-cols-4'}`}>
+      <div className={`grid grid-cols-4 gap-4 ${isMobileView ? 'grid-cols-2' : ''}`}>
         {processedCards.map((card) => (
           <CardRenderer
             key={card.id}
