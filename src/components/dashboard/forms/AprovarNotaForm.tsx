@@ -190,6 +190,8 @@ const AprovarNotaForm: React.FC<AprovarNotaFormProps> = () => {
       searchPlaceholder="Buscar notas..."
       defaultViewMode="list"
       gridColumns={{ sm: 1, md: 2, lg: 3 }}
+      className="rounded-xl"
+      cardContentClassName="p-6 rounded-xl"
     />
   );
 };

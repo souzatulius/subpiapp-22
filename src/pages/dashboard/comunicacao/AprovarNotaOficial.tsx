@@ -8,7 +8,7 @@ const AprovarNotaOficial = () => {
   return (
     <div className="max-w-7xl mx-auto">
       <WelcomeCard
-        title="Aprovar Nota Oficial"
+        title="Aprovar Nota"
         description="Revise e aprove notas oficiais pendentes"
         icon={<CheckCircle className="h-6 w-6 mr-2" />}
         color="bg-gradient-to-r from-blue-800 to-blue-950"

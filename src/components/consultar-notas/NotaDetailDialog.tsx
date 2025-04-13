@@ -109,11 +109,11 @@ const NotaDetailDialog: React.FC<NotaDetailDialogProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[85vh] overflow-y-auto">
+      <DialogContent className="max-w-4xl max-h-[85vh] overflow-y-auto rounded-xl">
         <DialogHeader>
           <div className="flex justify-between items-start">
             <DialogTitle className="text-xl font-semibold">{nota.titulo}</DialogTitle>
-            <Badge>{nota.status}</Badge>
+            <Badge className="rounded-full">{nota.status}</Badge>
           </div>
         </DialogHeader>
         
@@ -139,7 +139,7 @@ const NotaDetailDialog: React.FC<NotaDetailDialogProps> = ({
           
           <div className="prose max-w-none pt-4 border-t">
             <div
-              className="whitespace-pre-wrap"
+              className="whitespace-pre-wrap rounded-xl p-4 bg-gray-50"
               dangerouslySetInnerHTML={{ __html: nota.texto.replace(/\n/g, '<br/>') }}
             />
           </div>
@@ -150,7 +150,7 @@ const NotaDetailDialog: React.FC<NotaDetailDialogProps> = ({
             <Button 
               variant="outline"
               onClick={handleEdit}
-              className="gap-1"
+              className="gap-1 rounded-xl"
             >
               <Edit className="h-4 w-4" /> Editar
             </Button>
@@ -163,7 +163,7 @@ const NotaDetailDialog: React.FC<NotaDetailDialogProps> = ({
                   variant="destructive" 
                   onClick={() => updateNotaStatus('rejeitada')}
                   disabled={isUpdating}
-                  className="gap-1"
+                  className="gap-1 rounded-xl"
                 >
                   <X className="h-4 w-4" /> Recusar
                 </Button>
@@ -172,14 +172,14 @@ const NotaDetailDialog: React.FC<NotaDetailDialogProps> = ({
                   variant="default" 
                   onClick={() => updateNotaStatus('aprovada')}
                   disabled={isUpdating}
-                  className="gap-1"
+                  className="gap-1 rounded-xl"
                 >
                   <CheckCircle className="h-4 w-4" /> Aprovar
                 </Button>
               </>
             )}
             
-            <Button variant="outline" onClick={onClose}>
+            <Button variant="outline" onClick={onClose} className="rounded-xl">
               Fechar
             </Button>
           </div>

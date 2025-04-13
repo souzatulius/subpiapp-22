@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { ActionCardItem } from '@/types/dashboard';
 import DynamicContentCard from '../../cards/DynamicContentCard';
@@ -5,6 +6,7 @@ import StatisticsCard from '../../cards/StatisticsCard';
 import OriginDemandStatistics from '../../cards/OriginDemandStatistics';
 import PendingActionsCard from '../../cards/PendingActionsCard';
 import { Search } from 'lucide-react';
+
 interface GetSpecialContentProps {
   card: ActionCardItem;
   renderSpecialCardContent?: (cardId: string) => React.ReactNode | null;
@@ -58,6 +60,7 @@ const DEFAULT_MOCK_STATISTICS = {
     color: '#10B981'
   }]
 };
+
 const getSpecialContent = ({
   card,
   renderSpecialCardContent,
@@ -73,16 +76,30 @@ const getSpecialContent = ({
   if (card.id === 'origem-demandas') {
     return <OriginDemandStatistics />;
   }
+
   if (card.id === 'acoes-pendentes') {
     return <PendingActionsCard />;
   }
+
+  if (card.id === 'atividades-andamento') {
+    return (
+      <div className="p-4 h-full">
+        <h3 className="font-medium mb-2">Atividades em Andamento</h3>
+        <ul className="space-y-2">
+          <li className="p-2 bg-blue-50 rounded-lg text-sm">Análise de demanda de imprensa</li>
+          <li className="p-2 bg-orange-50 rounded-lg text-sm">Preparação de nota oficial</li>
+          <li className="p-2 bg-green-50 rounded-lg text-sm">Notificação de equipe</li>
+        </ul>
+      </div>
+    );
+  }
+
   if (card.id === 'busca-rapida') {
     return <div className="p-4 flex items-center justify-center w-full h-full">
         <div className="bg-white rounded-lg w-full flex items-center shadow-sm border border-gray-200">
           <Search className="h-5 w-5 ml-3 text-gray-500" />
           <input type="text" placeholder="Pesquisar..." className="w-full p-2 border-none focus:outline-none focus:ring-0 rounded-lg" onClick={e => {
           e.preventDefault();
-          window.location.href = '/search';
         }} />
         </div>
       </div>;
@@ -133,7 +150,6 @@ const getSpecialContent = ({
               <input type="text" placeholder="Pesquisar..." onClick={e => {
               e.preventDefault();
               e.stopPropagation();
-              window.location.href = '/search';
             }} className="w-full p-2 border-none focus:outline-none focus:ring-0 rounded-lg text-2xl py-[17px]" />
             </div>
           </div>;
@@ -145,4 +161,5 @@ const getSpecialContent = ({
   }
   return null;
 };
+
 export default getSpecialContent;

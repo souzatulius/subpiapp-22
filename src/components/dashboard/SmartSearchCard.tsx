@@ -25,7 +25,7 @@ const SmartSearchCard: React.FC<SmartSearchCardProps> = ({
   onSearch,
   className = "",
   isEditMode = false,
-  disableNavigation = false
+  disableNavigation = true // Changed default to true to prevent navigation
 }) => {
   const { 
     query, 

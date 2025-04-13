@@ -40,7 +40,7 @@ export interface ButtonProps
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant, size, asChild = false, ...props }, ref) => {
-    // Se o botão tiver uma classe bg-orange-500, modificamos o variant para 'action' para melhorar transições
+    // If the button has a class bg-orange-500, modify the variant to 'action' to improve transitions
     const hasOrangeClass = className?.includes('bg-orange-500');
     const effectiveVariant = hasOrangeClass ? 'action' : variant;
     

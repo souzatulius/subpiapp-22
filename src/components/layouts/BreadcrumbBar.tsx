@@ -1,10 +1,13 @@
+
 import React from 'react';
 import { ChevronRight, Home } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
+
 export interface BreadcrumbBarProps {
   onSettingsClick?: () => void;
   className?: string;
 }
+
 const BreadcrumbBar: React.FC<BreadcrumbBarProps> = ({
   onSettingsClick,
   className = ""
@@ -31,9 +34,11 @@ const BreadcrumbBar: React.FC<BreadcrumbBarProps> = ({
       'edit': 'Editar',
       'view': 'Visualizar',
       'create': 'Novo',
-      'zeladoria': 'Zeladoria'
+      'zeladoria': 'Zeladoria',
+      'aprovar-nota': 'Aprovar Nota',
+      'criar-nota': 'Criar Nota',
     };
-    return pathMap[path] || path.charAt(0).toUpperCase() + path.slice(1);
+    return pathMap[path] || path.charAt(0).toUpperCase() + path.slice(1).toLowerCase();
   };
 
   // Check if path is non-clickable (like 'zeladoria')
@@ -43,22 +48,31 @@ const BreadcrumbBar: React.FC<BreadcrumbBarProps> = ({
 
   // Hide Dashboard from breadcrumb
   const filteredPaths = paths.filter(path => path !== 'dashboard');
-  return <div className={`bg-white border-b border-gray-200 py-2 px-4 ${className}`}>
+  return (
+    <div className={`bg-white border-b border-gray-200 py-2 px-4 ${className}`}>
       <div className="flex items-center text-sm text-gray-500">
         <Link to="/dashboard" className="flex items-center hover:text-primary transition-colors px-0 mx-[15px]">
           <Home className="h-4 w-4 mr-1" />
           <span>Início</span>
         </Link>
 
-        {filteredPaths.map((path, i) => <React.Fragment key={i}>
+        {filteredPaths.map((path, i) => (
+          <React.Fragment key={i}>
             <ChevronRight className="h-4 w-4 mx-1" />
-            {i === filteredPaths.length - 1 || onSettingsClick && path === 'settings' || isNonClickable(path) ? <span className={`${onSettingsClick && path === 'settings' ? 'cursor-pointer hover:text-primary' : ''}`} onClick={onSettingsClick && path === 'settings' ? onSettingsClick : undefined}>
+            {i === filteredPaths.length - 1 || onSettingsClick && path === 'settings' || isNonClickable(path) ? (
+              <span className={`${onSettingsClick && path === 'settings' ? 'cursor-pointer hover:text-primary' : ''}`} onClick={onSettingsClick && path === 'settings' ? onSettingsClick : undefined}>
                 {getLabel(path)}
-              </span> : <Link to={`/${['dashboard', ...filteredPaths.slice(0, i + 1)].join('/')}`} className="hover:text-primary transition-colors">
+              </span>
+            ) : (
+              <Link to={`/${['dashboard', ...filteredPaths.slice(0, i + 1)].join('/')}`} className="hover:text-primary transition-colors">
                 {getLabel(path)}
-              </Link>}
-          </React.Fragment>)}
+              </Link>
+            )}
+          </React.Fragment>
+        ))}
       </div>
-    </div>;
+    </div>
+  );
 };
+
 export default BreadcrumbBar;

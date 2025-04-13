@@ -71,7 +71,7 @@ function UnifiedViewContainer<T>({
 
   return (
     <Card className={`border border-gray-200 shadow-sm rounded-xl overflow-hidden ${className}`}>
-      <CardContent className={cardContentClassName}>
+      <CardContent className={`${cardContentClassName} rounded-xl`}>
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
           <div className="flex-1">
             <UnifiedFilterBar
