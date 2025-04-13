@@ -180,7 +180,7 @@ export function UnifiedActionCard({
     if (type === 'smart_search') {
       return <SmartSearchCard placeholder="O que vamos fazer?" onSearch={onSearchSubmit} />;
     }
-    return <div className="h-full" onClick={handleCardClick}>
+    return <div onClick={handleCardClick} className="">
         <ActionCard id={id} title={title} iconId={iconId} path={path} color={color} isDraggable={isEditing} onEdit={undefined} onDelete={undefined} onHide={undefined} isCustom={isCustom} iconSize={iconSize} isMobileView={isMobileView} showControls={false} subtitle={subtitle} />
       </div>;
   };
