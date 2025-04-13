@@ -1,5 +1,5 @@
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { getWidthClass, getHeightClass } from '../GridUtilities';
 import { ActionCardItem } from '@/types/dashboard';
 import { SortableUnifiedActionCard } from '../../UnifiedActionCard';
@@ -38,35 +38,16 @@ export const CardRenderer: React.FC<CardRendererProps> = ({
   specialCardsData,
   renderSpecialCardContent
 }) => {
-  // Always use useMemo for specialContent calculation
-  const specialContent = useMemo(() => {
-    if (renderSpecialCardContent) {
-      const customContent = renderSpecialCardContent(card.id);
-      if (customContent) return customContent;
-    }
-    
-    return getSpecialContent({
-      card,
-      renderSpecialCardContent,
-      specialCardsData
-    });
-  }, [card, renderSpecialCardContent, specialCardsData]);
-  
-  // Get width and height classes
-  const widthClass = useMemo(() => getWidthClass(card.width, isMobileView), [card.width, isMobileView]);
-  const heightClass = useMemo(() => getHeightClass(card.height, isMobileView), [card.height, isMobileView]);
-  
-  // Create a safe edit handler that won't crash if onEditCard is undefined
-  const handleEdit = useMemo(() => {
-    return onEditCard ? (id: string) => {
-      if (onEditCard) onEditCard(id);
-    } : undefined;
-  }, [onEditCard]);
+  const specialContent = getSpecialContent({
+    card,
+    renderSpecialCardContent,
+    specialCardsData
+  });
   
   return (
     <div
       key={card.id}
-      className={`${widthClass} ${heightClass}`}
+      className={`${getWidthClass(card.width, isMobileView)} ${getHeightClass(card.height, isMobileView)}`}
     >
       <SortableUnifiedActionCard
         id={card.id}
@@ -79,7 +60,11 @@ export const CardRenderer: React.FC<CardRendererProps> = ({
         height={card.height}
         isDraggable={isEditMode}
         isEditing={isEditMode}
-        onEdit={handleEdit}
+        onEdit={onEditCard ? (id) => {
+          if (onEditCard) {
+            onEditCard(id);
+          }
+        } : undefined}
         onDelete={onDeleteCard}
         onHide={onHideCard}
         iconSize={isMobileView ? 'lg' : 'xl'}

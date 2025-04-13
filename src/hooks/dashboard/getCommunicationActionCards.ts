@@ -1,4 +1,3 @@
-
 import { v4 as uuidv4 } from 'uuid';
 import { ActionCardItem } from '@/types/dashboard';
 
@@ -66,10 +65,10 @@ export const getCommunicationActionCards = (): ActionCardItem[] => {
       mobileOrder: 5
     },
     {
-      id: 'noticias-releases-card', // Renamed from esic-card
-      title: 'Notícias e Releases', // Changed from Processos e-SIC
-      iconId: 'Newspaper',
-      path: '/dashboard/releases', // Changed from /dashboard/esic
+      id: 'esic-card',
+      title: 'Processos e-SIC',
+      iconId: 'FileSearch',
+      path: '/dashboard/esic',
       color: 'deep-blue',
       width: '25',
       height: '2',
@@ -91,7 +90,7 @@ export const getCommunicationActionCards = (): ActionCardItem[] => {
     },
     {
       id: 'ver-notas-card',
-      title: 'Notas de Imprensa', // Changed from Ver Notas de Imprensa
+      title: 'Ver Notas de Imprensa',
       iconId: 'FileText',
       path: '/dashboard/comunicacao/notas',
       color: 'orange-dark',
@@ -124,20 +123,7 @@ export const getCommunicationActionCards = (): ActionCardItem[] => {
       type: 'press_request_card',
       displayMobile: true,
       mobileOrder: 10
-    },
-    {
-      id: 'processos-esic-card', // Updated from duplicate esic-card
-      title: 'Processos e-SIC', 
-      iconId: 'FileSearch',
-      path: '/dashboard/esic',
-      color: 'gray-light', // Changed to gray-light
-      width: '25',
-      height: '2',
-      type: 'standard',
-      displayMobile: true,
-      mobileOrder: 11
     }
-    // Removed "Novo Card 11" as requested in the checklist
   ];
 };
 

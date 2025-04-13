@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import WelcomeCard from '@/components/shared/WelcomeCard';
 import CardGridContainer from '@/components/dashboard/CardGridContainer';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -9,7 +9,6 @@ import { Button } from '@/components/ui/button';
 import { ActionCardItem } from '@/types/dashboard';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import EditCardModal from '@/components/dashboard/EditCardModal';
 
 const DashboardPage: React.FC = () => {
   const { 
@@ -50,16 +49,6 @@ const DashboardPage: React.FC = () => {
     setActionCards(reorderedCards);
     saveCardsToSupabase(reorderedCards);
   };
-  
-  const handleSaveCardEdit = (editedCard: ActionCardItem) => {
-    const updatedCards = actionCards.map(card => 
-      card.id === editedCard.id ? editedCard : card
-    );
-    setActionCards(updatedCards);
-    setIsCardEditModalOpen(false);
-    setSelectedCard(null);
-    saveCardsToSupabase(updatedCards);
-  };
 
   const saveCardsToSupabase = async (cards: ActionCardItem[]) => {
     if (!user || !user.id) return;
@@ -79,7 +68,6 @@ const DashboardPage: React.FC = () => {
         
       if (error) throw error;
       setLastSaved(new Date());
-      toast.success("Dashboard salvo com sucesso");
     } catch (error) {
       console.error('Error saving dashboard configuration:', error);
       toast.error('Erro ao salvar as configurações do dashboard');
@@ -91,37 +79,14 @@ const DashboardPage: React.FC = () => {
   const resetDashboard = async () => {
     if (!user || !user.id) return;
     
-    try {
-      // Fetch the default department dashboard config
-      const { data, error } = await supabase
-        .from('department_dashboard')
-        .select('cards_config')
-        .eq('department', 'main')
-        .single();
-        
-      if (error) throw error;
-      
-      if (data && data.cards_config) {
-        const defaultCards = JSON.parse(data.cards_config);
-        setActionCards(defaultCards);
-        saveCardsToSupabase(defaultCards);
-        toast.success("Dashboard resetado com sucesso");
-      }
-    } catch (error) {
-      console.error('Error resetting dashboard:', error);
-      toast.error('Erro ao resetar o dashboard');
-      window.location.reload();
-    }
+    // Reset to default cards
+    // This would typically come from a default configuration
+    // For now we'll just reload the page
+    window.location.reload();
   };
 
-  // Render specialized content for specific cards
-  const renderSpecialCardContent = useCallback((cardId: string) => {
-    // You can add special card content rendering logic here if needed
-    return null;
-  }, []);
-
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <div className="mb-8">
         <WelcomeCard
           title="Dashboard"
@@ -138,13 +103,6 @@ const DashboardPage: React.FC = () => {
         />
       </div>
 
-      {isSaving && (
-        <div className="bg-blue-50 text-blue-700 p-2 rounded-lg mb-4 flex items-center">
-          <div className="animate-spin h-4 w-4 border-2 border-blue-700 border-t-transparent rounded-full mr-2"></div>
-          Salvando alterações...
-        </div>
-      )}
-
       <CardGridContainer
         cards={actionCards}
         onCardsChange={handleCardsReorder}
@@ -153,17 +111,7 @@ const DashboardPage: React.FC = () => {
         isMobileView={isMobileView}
         isEditMode={isEditMode}
         disableWiggleEffect={!isEditMode}
-        renderSpecialCardContent={renderSpecialCardContent}
       />
-      
-      {selectedCard && (
-        <EditCardModal
-          isOpen={isCardEditModalOpen}
-          onClose={() => setIsCardEditModalOpen(false)}
-          onSave={handleSaveCardEdit}
-          card={selectedCard}
-        />
-      )}
     </div>
   );
 };

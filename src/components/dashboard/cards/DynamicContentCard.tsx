@@ -1,15 +1,14 @@
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { Card } from '@/components/ui/card';
 import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { useNavigate } from 'react-router-dom';
 
 interface TimelineItemProps {
   id: string;
   title: string;
   description?: string;
-  date: string; // Using string for date
+  date: Date;
   tag?: string;
   link?: string;
   coordenacao?: string;
@@ -21,11 +20,7 @@ interface DynamicContentCardProps {
   isLoading?: boolean;
 }
 
-const DynamicContentCard: React.FC<DynamicContentCardProps> = ({ 
-  items = [], // Provide default empty array
-  type, 
-  isLoading = false 
-}) => {
+const DynamicContentCard: React.FC<DynamicContentCardProps> = ({ items, type, isLoading = false }) => {
   if (isLoading) {
     return (
       <div className="animate-pulse flex flex-col space-y-4 p-4">
@@ -61,41 +56,11 @@ const DynamicContentCard: React.FC<DynamicContentCardProps> = ({
   );
 };
 
-const ItemCard: React.FC<{ 
-  item: TimelineItemProps, 
-  type: 'notes' | 'demands' | 'news' 
-}> = ({ item, type }) => {
-  const navigate = useNavigate();
-  
-  // Use useMemo for the date formatting to ensure consistent hook usage
-  const timeAgo = useMemo(() => {
-    try {
-      const date = new Date(item.date);
-      // Check if date is valid
-      if (!isNaN(date.getTime())) {
-        return formatDistanceToNow(date, { addSuffix: true, locale: ptBR });
-      }
-      return "Data inválida";
-    } catch (error) {
-      console.error("Error formatting date:", error);
-      return "Data desconhecida";
-    }
-  }, [item.date]);
-  
-  // Handle navigation when clicking on an item
-  const handleClick = () => {
-    if (type === 'notes' && item.id) {
-      navigate(`/notas/${item.id}`);
-    } else if (item.link) {
-      navigate(item.link);
-    }
-  };
+const ItemCard: React.FC<{ item: TimelineItemProps, type: 'notes' | 'demands' | 'news' }> = ({ item, type }) => {
+  const timeAgo = formatDistanceToNow(new Date(item.date), { addSuffix: true, locale: ptBR });
   
   return (
-    <Card 
-      className="p-3 hover:bg-gray-50 transition-colors cursor-pointer" 
-      onClick={handleClick}
-    >
+    <Card className="p-3 hover:bg-gray-50 transition-colors">
       <div className="flex flex-col space-y-1">
         <div className="flex justify-between items-start">
           <h4 className="font-medium text-gray-800 line-clamp-1">{item.title}</h4>

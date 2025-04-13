@@ -3,6 +3,7 @@ import React from 'react';
 import { ActionCardItem } from '@/types/dashboard';
 import DynamicContentCard from '../../cards/DynamicContentCard';
 import StatisticsCard from '../../cards/StatisticsCard';
+import { useDynamicDashboardContent } from '@/hooks/dashboard/useDynamicDashboardContent';
 
 interface GetSpecialContentProps {
   card: ActionCardItem;
@@ -10,28 +11,10 @@ interface GetSpecialContentProps {
   specialCardsData?: any;
 }
 
-// Default mock data for statistics to ensure consistent rendering
-const DEFAULT_MOCK_STATISTICS = {
-  demands: [
-    { name: 'Pendentes', value: 25, color: '#3B82F6' },
-    { name: 'Em andamento', value: 15, color: '#F59E0B' },
-    { name: 'Concluídas', value: 45, color: '#10B981' }
-  ],
-  notes: [
-    { name: 'Aprovadas', value: 30, color: '#10B981' },
-    { name: 'Pendentes', value: 12, color: '#F59E0B' },
-    { name: 'Rejeitadas', value: 8, color: '#EF4444' }
-  ],
-  news: [
-    { name: 'Publicadas', value: 22, color: '#3B82F6' },
-    { name: 'Rascunhos', value: 10, color: '#9CA3AF' }
-  ]
-};
-
 const getSpecialContent = ({ 
   card, 
   renderSpecialCardContent, 
-  specialCardsData = {} // Provide default empty object
+  specialCardsData 
 }: GetSpecialContentProps): React.ReactNode | null => {
   
   // First check if there's a custom render function provided
@@ -39,20 +22,16 @@ const getSpecialContent = ({
     const customContent = renderSpecialCardContent(card.id);
     if (customContent) return customContent;
   }
-  
-  // Safely access data with defaults
-  const safeSpecialCardsData = specialCardsData || {};
-  const notasItems = safeSpecialCardsData.notasItems || [];
-  const demandasItems = safeSpecialCardsData.demandasItems || [];
-  const isLoading = safeSpecialCardsData.isLoading || false;
 
   // For cards with dataSourceKey
   if (card.dataSourceKey) {
+    const { latestNotes, latestDemands, statistics, isLoading } = useDynamicDashboardContent();
+    
     switch (card.dataSourceKey) {
       case 'ultimas_notas':
         return (
           <DynamicContentCard 
-            items={notasItems} 
+            items={latestNotes} 
             type="notes" 
             isLoading={isLoading} 
           />
@@ -61,7 +40,7 @@ const getSpecialContent = ({
       case 'ultimas_demandas':
         return (
           <DynamicContentCard 
-            items={demandasItems} 
+            items={latestDemands} 
             type="demands" 
             isLoading={isLoading} 
           />
@@ -76,32 +55,26 @@ const getSpecialContent = ({
           );
         }
         
-        // Use mock or provided statistics data
-        const mockStatistics = safeSpecialCardsData.statistics || DEFAULT_MOCK_STATISTICS;
-        
         // Create a dynamic charts view based on available statistics
         return (
           <div className="grid grid-cols-3 gap-4 p-4 h-full">
             <StatisticsCard 
-              data={mockStatistics.demands} 
+              data={statistics.demands} 
               title="Demandas por Status" 
               chartType="pie" 
             />
             <StatisticsCard 
-              data={mockStatistics.notes} 
+              data={statistics.notes} 
               title="Notas por Status" 
               chartType="bar" 
             />
             <StatisticsCard 
-              data={mockStatistics.news} 
+              data={statistics.news} 
               title="Notícias" 
               chartType="pie" 
             />
           </div>
         );
-        
-      default:
-        return null;
     }
   }
 
@@ -125,8 +98,6 @@ const getSpecialContent = ({
         );
 
       // Add other card types as needed
-      default:
-        return null;
     }
   }
 
