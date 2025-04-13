@@ -93,7 +93,7 @@ export function SortableUnifiedActionCard(props: UnifiedActionCardProps) {
     zIndex: isDragging ? 10 : 'auto',
     opacity: isDragging ? 0.8 : 1
   };
-  return <div ref={setNodeRef} style={style} className="">
+  return <div ref={setNodeRef} style={style} className="py-0 my-0">
       <UnifiedActionCard id={id} sortableProps={isDraggable ? {
       attributes,
       listeners
@@ -180,7 +180,7 @@ export function UnifiedActionCard({
     if (type === 'smart_search') {
       return <SmartSearchCard placeholder="O que vamos fazer?" onSearch={onSearchSubmit} />;
     }
-    return <div className="h-full" onClick={handleCardClick}>
+    return <div onClick={handleCardClick} className="h-full py-0">
         <ActionCard id={id} title={title} iconId={iconId} path={path} color={color} isDraggable={isEditing} onEdit={undefined} onDelete={undefined} onHide={undefined} isCustom={isCustom} iconSize={iconSize} isMobileView={isMobileView} showControls={false} subtitle={subtitle} />
       </div>;
   };

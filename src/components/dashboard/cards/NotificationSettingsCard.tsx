@@ -48,7 +48,7 @@ const NotificationSettingsCard: React.FC<NotificationSettingsCardProps> = ({
   return <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
         <div className="h-full cursor-pointer">
-          <Card className="h-full flex flex-col items-center justify-center p-4 shadow-md border border-gray-100 hover:shadow-lg transition-all bg-gray-300">
+          <Card className="h-full flex flex-col items-center justify-center p-4 shadow-md border border-gray-100 hover:shadow-lg transition-all bg-gray-300 py-[30px] px-0">
             <Bell className="h-12 w-12 text-gray-600 mb-3" />
             <h3 className="font-semibold text-lg text-center py-0">{title}</h3>
             <p className="text-gray-500 mt-2 text-center text-xs">Configure suas notificações</p>
