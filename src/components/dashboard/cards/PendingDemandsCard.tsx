@@ -73,7 +73,7 @@ const PendingDemandsCard: React.FC<PendingDemandsCardProps> = ({
       </div>;
   }
   return <div className="border border-slate-300 bg-gray-400 mx-0 px-0">
-      <div className="px-0 mx-0 my-0 py-[30px]">
+      <div className="px-0 mx-0 my-0 py-[28px]">
         <h3 className="text-lg font-semibold mb-2 text-center py-[12px]">Últimas Demandas</h3>
         <div className="mx-0 bg-transparent px-[14px]">
           {demands.length === 0 ? <div className="text-center text-gray-500 p-4">
