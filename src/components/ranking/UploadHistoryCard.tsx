@@ -1,8 +1,9 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Calendar, Upload, Clock, Database, RefreshCw } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { useUploadState } from '@/hooks/ranking/useUploadState';
 
 interface UploadHistoryCardProps {
   sgzData: any[] | null;
@@ -35,20 +36,41 @@ const UploadHistoryCard: React.FC<UploadHistoryCardProps> = ({
   lastUpdate,
   isRefreshing = false
 }) => {
-  // Read data source directly from localStorage for consistent display
-  const dataSource = localStorage.getItem('demo-data-source') || 'unknown';
+  // State to store the actual data counts
+  const [sgzCount, setSgzCount] = useState<number>(0);
+  const [painelCount, setPainelCount] = useState<number>(0);
+  const { lastRefreshTime, dataSource } = useUploadState();
+  
+  // Format last update time from the uploadState
+  const formattedLastRefresh = lastRefreshTime 
+    ? formatDate(lastRefreshTime.toISOString())
+    : formatDate(lastUpdate);
+  
+  // Update counts when data changes
+  useEffect(() => {
+    if (Array.isArray(sgzData)) {
+      setSgzCount(sgzData.length);
+    }
+    
+    if (Array.isArray(painelData)) {
+      setPainelCount(painelData.length);
+    }
+  }, [sgzData, painelData]);
+  
+  // Read data source with fallback to localStorage
+  const currentDataSource = dataSource || localStorage.getItem('demo-data-source') || 'unknown';
   
   // Determine the source badge color and text
   let sourceColor = 'bg-gray-500';
   let sourceText = 'Desconhecida';
   
-  if (dataSource === 'mock') {
+  if (currentDataSource === 'mock') {
     sourceColor = 'bg-amber-500';
     sourceText = 'Demonstração';
-  } else if (dataSource === 'upload') {
+  } else if (currentDataSource === 'upload') {
     sourceColor = 'bg-green-500';
     sourceText = 'Upload Manual';
-  } else if (dataSource === 'supabase') {
+  } else if (currentDataSource === 'supabase') {
     sourceColor = 'bg-blue-500';
     sourceText = 'Base de Dados';
   }
@@ -71,14 +93,14 @@ const UploadHistoryCard: React.FC<UploadHistoryCardProps> = ({
               <Database className="h-4 w-4 mr-2 text-gray-500" />
               SGZ Registros
             </span>
-            <span className="font-medium">{isRefreshing ? '...' : sgzData?.length || 0}</span>
+            <span className="font-medium">{isRefreshing ? '...' : sgzCount}</span>
           </li>
           <li className="flex justify-between items-center text-sm py-1 border-b border-gray-100">
             <span className="text-gray-600 flex items-center">
               <Database className="h-4 w-4 mr-2 text-gray-500" />
               Painel Registros
             </span>
-            <span className="font-medium">{isRefreshing ? '...' : painelData?.length || 0}</span>
+            <span className="font-medium">{isRefreshing ? '...' : painelCount}</span>
           </li>
           <li className="flex justify-between items-center text-sm py-1">
             <span className="text-gray-600 flex items-center">
@@ -89,7 +111,7 @@ const UploadHistoryCard: React.FC<UploadHistoryCardProps> = ({
               {isRefreshing ? (
                 <RefreshCw className="h-3 w-3 animate-spin" />
               ) : (
-                formatDate(lastUpdate)
+                formattedLastRefresh
               )}
             </span>
           </li>
@@ -98,7 +120,7 @@ const UploadHistoryCard: React.FC<UploadHistoryCardProps> = ({
               <Clock className="h-4 w-4 mr-2 text-gray-500" />
               Fonte de Dados
             </span>
-            <span className="font-medium text-xs capitalize">{dataSource}</span>
+            <span className="font-medium text-xs capitalize">{currentDataSource}</span>
           </li>
         </ul>
       </CardContent>

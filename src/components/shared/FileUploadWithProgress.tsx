@@ -32,15 +32,21 @@ const FileUploadWithProgress: React.FC<FileUploadWithProgressProps> = ({
   const inputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
   
-  // Reset state when disabled prop changes
+  // Reset state when disabled prop or isLoading changes
   useEffect(() => {
-    if (!disabled && isLoading === false && selectedFile === null) {
-      // Clear the input value to allow selecting the same file again
-      if (inputRef.current) {
-        inputRef.current.value = '';
+    if (disabled || isLoading) {
+      // Don't clear the file when loading, only when disabled or done loading
+      if (disabled || (isLoading === false && progress === 100)) {
+        setSelectedFile(null);
+        setError(null);
+        
+        // Clear the input value to allow selecting the same file again
+        if (inputRef.current) {
+          inputRef.current.value = '';
+        }
       }
     }
-  }, [disabled, isLoading, selectedFile]);
+  }, [disabled, isLoading, progress]);
 
   const handleDrag = (e: React.DragEvent<HTMLDivElement>) => {
     if (disabled) return;
@@ -125,7 +131,7 @@ const FileUploadWithProgress: React.FC<FileUploadWithProgressProps> = ({
   };
   
   const handleClick = () => {
-    if (inputRef.current && !disabled) {
+    if (inputRef.current && !disabled && !isLoading) {
       inputRef.current.click();
     }
   };
@@ -143,6 +149,9 @@ const FileUploadWithProgress: React.FC<FileUploadWithProgressProps> = ({
     if (inputRef.current) {
       inputRef.current.value = '';
     }
+    
+    // Notify parent that file has been cleared
+    onFileSelected(null);
   };
 
   return (
@@ -157,7 +166,7 @@ const FileUploadWithProgress: React.FC<FileUploadWithProgressProps> = ({
         onDragOver={handleDrag}
         onDragLeave={handleDrag}
         onDrop={handleDrop}
-        onClick={disabled ? undefined : handleClick}
+        onClick={disabled || isLoading ? undefined : handleClick}
       >
         <input
           ref={inputRef}

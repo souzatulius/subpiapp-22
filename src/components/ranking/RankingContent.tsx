@@ -32,14 +32,53 @@ const RankingContent: React.FC<RankingContentProps> = ({
 }) => {
   const [isSimulationActive, setIsSimulationActive] = useState(false);
   const [isDebugVisible, setIsDebugVisible] = useState(process.env.NODE_ENV === 'development');
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  
   const { 
     chartVisibility, toggleChartVisibility, setChartVisibility,
     planilhaData, sgzData, painelData, isLoading, setIsInsightsLoading,
     refreshChartData, isMockData, dataSource, setDataSource
   } = useRankingCharts();
   
-  const { lastRefreshTime } = useUploadState();
+  const { lastRefreshTime, dataSource: uploadDataSource, setDataSource: setUploadDataSource } = useUploadState();
   const { showFeedback } = useAnimatedFeedback();
+
+  // Synchronize data sources on mount and when they change
+  useEffect(() => {
+    const localDataSource = localStorage.getItem('demo-data-source');
+    if (localDataSource && (localDataSource === 'mock' || localDataSource === 'upload' || localDataSource === 'supabase')) {
+      if (dataSource !== localDataSource) {
+        console.log(`Syncing data source: localStorage: ${localDataSource}, state: ${dataSource}`);
+        setDataSource(localDataSource as 'mock' | 'upload' | 'supabase');
+      }
+      
+      if (uploadDataSource !== localDataSource) {
+        setUploadDataSource(localDataSource as 'mock' | 'upload' | 'supabase');
+      }
+      
+      // Set isMockData based on the data source
+      if (localDataSource === 'mock' && !isMockData) {
+        console.log('Setting isMockData to true because localDataSource is mock');
+      } else if (localDataSource !== 'mock' && isMockData) {
+        console.log('Setting isMockData to false because localDataSource is not mock');
+      }
+    }
+    
+    // Load data from localStorage if needed
+    if ((!sgzData || sgzData.length === 0) && (!planilhaData || planilhaData.length === 0)) {
+      try {
+        const sgzDataFromLocalStorage = localStorage.getItem('demo-sgz-data');
+        if (sgzDataFromLocalStorage) {
+          const data = JSON.parse(sgzDataFromLocalStorage);
+          if (Array.isArray(data) && data.length > 0) {
+            console.log(`Loading ${data.length} SGZ items from localStorage`);
+          }
+        }
+      } catch (e) {
+        console.error('Error loading SGZ data from localStorage:', e);
+      }
+    }
+  }, [dataSource, uploadDataSource, isMockData, sgzData, planilhaData, setDataSource, setUploadDataSource]);
 
   // Log data availability for debugging
   useEffect(() => {
@@ -51,9 +90,10 @@ const RankingContent: React.FC<RankingContentProps> = ({
       dataSource,
       isLoading,
       localStorageDataSource: localStorage.getItem('demo-data-source') || 'unknown',
-      lastUpdate: localStorage.getItem('demo-last-update') || 'never'
+      lastUpdate: localStorage.getItem('demo-last-update') || 'never',
+      uploadDataSource
     });
-  }, [planilhaData, sgzData, painelData, isMockData, isLoading, dataSource]);
+  }, [planilhaData, sgzData, painelData, isMockData, isLoading, dataSource, uploadDataSource]);
 
   const handleSimulateIdealRanking = () => {
     const wasActive = isSimulationActive;
@@ -81,9 +121,13 @@ const RankingContent: React.FC<RankingContentProps> = ({
   useEffect(() => {
     if (onRefreshData) {
       console.log("RankingContent: Calling onRefreshData on mount");
+      setIsRefreshing(true);
+      
       onRefreshData().catch(err => {
         console.error("Error refreshing data on mount:", err);
         toast.error("Erro ao carregar dados iniciais");
+      }).finally(() => {
+        setIsRefreshing(false);
       });
     }
   }, [onRefreshData]);
@@ -124,6 +168,7 @@ const RankingContent: React.FC<RankingContentProps> = ({
       // Always set to mock when manually updating mock data
       localStorage.setItem('demo-data-source', 'mock');
       setDataSource('mock');
+      setUploadDataSource('mock');
       
       // Refresh charts after updating mock data
       if (onRefreshData) {
@@ -156,6 +201,7 @@ const RankingContent: React.FC<RankingContentProps> = ({
             sgzData={sgzData || planilhaData}
             painelData={painelData}
             lastUpdate={localStorage.getItem('demo-last-update')}
+            isRefreshing={isRefreshing}
           />
         </div>
       </div>

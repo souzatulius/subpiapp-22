@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { usePainelZeladoriaUpload } from '@/hooks/ranking/usePainelZeladoriaUpload';
 import { handleFileUpload } from '@/hooks/ranking/services/uploadService';
@@ -10,6 +11,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import FileUploadWithProgress from '@/components/shared/FileUploadWithProgress';
 import { Button } from '@/components/ui/button';
 import UploadProgressDisplay from '@/components/ranking/UploadProgressDisplay';
+import { useRankingCharts } from '@/hooks/ranking/useRankingCharts';
 
 interface UploadSectionProps {
   onUploadStart: () => void;
@@ -38,8 +40,18 @@ const UploadSection: React.FC<UploadSectionProps> = ({
     setPainelProgress, 
     validationErrors, 
     setValidationErrors,
-    resetProgress
+    resetProgress,
+    setDataSource,
+    setLastRefreshTime
   } = useUploadState();
+  
+  const { 
+    setSgzData, 
+    setPainelData, 
+    setIsMockData,
+    setDataSource: setRankingDataSource,
+    refreshChartData
+  } = useRankingCharts();
   
   const { handleUploadPainel } = usePainelZeladoriaUpload(user);
   
@@ -119,11 +131,22 @@ const UploadSection: React.FC<UploadSectionProps> = ({
           setValidationErrors([]);
         }
         
+        // Update data source and isMockData state in both stores
+        setDataSource('upload');
+        setRankingDataSource('upload');
+        setIsMockData(false);
+        setLastRefreshTime(new Date());
+        
         try {
+          // Store the data in localStorage
           localStorage.setItem('demo-data-source', 'upload');
           localStorage.setItem('demo-sgz-data', JSON.stringify(uploadResult.data || []));
           localStorage.setItem('demo-last-update', new Date().toISOString());
-          localStorage.setItem('isMockData', 'false');
+          
+          // Update data in the ranking charts store
+          if (uploadResult.data && uploadResult.data.length > 0) {
+            setSgzData(uploadResult.data);
+          }
         } catch (error) {
           console.error("Error saving upload source to localStorage:", error);
         }
@@ -203,11 +226,22 @@ const UploadSection: React.FC<UploadSectionProps> = ({
       if (uploadResult && uploadResult.success) {
         toast.success(uploadResult.message);
         
+        // Update data source and isMockData state in both stores
+        setDataSource('upload');
+        setRankingDataSource('upload');
+        setIsMockData(false);
+        setLastRefreshTime(new Date());
+        
         try {
+          // Store the data in localStorage
           localStorage.setItem('demo-data-source', 'upload');
           localStorage.setItem('demo-painel-data', JSON.stringify(uploadResult.data || []));
           localStorage.setItem('demo-last-update', new Date().toISOString());
-          localStorage.setItem('isMockData', 'false');
+          
+          // Update data in the ranking charts store
+          if (uploadResult.data && uploadResult.data.length > 0) {
+            setPainelData(uploadResult.data);
+          }
         } catch (error) {
           console.error("Error saving upload source to localStorage:", error);
         }
@@ -256,9 +290,14 @@ const UploadSection: React.FC<UploadSectionProps> = ({
     }
   };
   
+  // Check if we have active uploads or their stages indicate they're complete or in error state
   const showSgzProgress = sgzProgress && (sgzProgress.stage === 'uploading' || sgzProgress.stage === 'processing');
   const showPainelProgress = painelProgress && (painelProgress.stage === 'uploading' || painelProgress.stage === 'processing');
   const isCompleteOrError = (progress: any) => progress && (progress.stage === 'complete' || progress.stage === 'error');
+
+  // Calculate if uploads should be disabled
+  const sgzUploadDisabled = isUploading || !sgzFile || showSgzProgress || showPainelProgress;
+  const painelUploadDisabled = isUploading || !painelFile || showSgzProgress || showPainelProgress;
   
   return (
     <div className="space-y-4">
@@ -277,14 +316,14 @@ const UploadSection: React.FC<UploadSectionProps> = ({
               progress={sgzProgress?.processedRows || 0}
               label={sgzFile ? sgzFile.name : "Selecionar arquivo SGZ"}
               helperText="Clique para selecionar ou arraste o arquivo"
-              disabled={isUploading || showSgzProgress || showPainelProgress}
+              disabled={isUploading && !sgzFile && (showSgzProgress || showPainelProgress)}
             />
             
             <div className="flex justify-end mt-3">
               <Button
                 onClick={uploadSgzFile}
-                disabled={isUploading || !sgzFile || showSgzProgress || showPainelProgress}
-                className="bg-blue-500 hover:bg-blue-700 text-white"
+                disabled={sgzUploadDisabled}
+                className={`bg-blue-500 hover:bg-blue-700 text-white ${sgzUploadDisabled ? 'opacity-50' : ''}`}
               >
                 {isUploading && sgzFile ? 'Enviando...' : 'Enviar SGZ'}
               </Button>
@@ -324,14 +363,14 @@ const UploadSection: React.FC<UploadSectionProps> = ({
               progress={painelProgress?.processedRows || 0}
               label={painelFile ? painelFile.name : "Selecionar arquivo Painel"}
               helperText="Clique para selecionar ou arraste o arquivo"
-              disabled={isUploading || showSgzProgress || showPainelProgress}
+              disabled={isUploading && !painelFile && (showSgzProgress || showPainelProgress)}
             />
             
             <div className="flex justify-end mt-3">
               <Button
                 onClick={handlePainelUpload}
-                disabled={isUploading || !painelFile || showSgzProgress || showPainelProgress}
-                className="bg-blue-500 hover:bg-blue-700 text-white"
+                disabled={painelUploadDisabled}
+                className={`bg-blue-500 hover:bg-blue-700 text-white ${painelUploadDisabled ? 'opacity-50' : ''}`}
               >
                 {isUploading && painelFile ? 'Enviando...' : 'Enviar Painel'}
               </Button>
