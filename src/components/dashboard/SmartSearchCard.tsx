@@ -31,7 +31,7 @@ const SmartSearchCard: React.FC<SmartSearchCardProps> = ({
   };
   return <div className={`w-full h-full ${className}`}>
       <Card className="w-full h-full border-0 rounded-xl bg-transparent shadow-none">
-        <CardContent className="p-3 h-full bg-transparent px-0 py-[5px] my-[6px]">
+        <CardContent className="p-3 h-full bg-transparent px-0 my-0 py-0">
           <SearchInput placeholder={placeholder} onSearch={handleLocalSearch} suggestions={suggestions.map(suggestion => ({
           title: suggestion.title || 'Sugestão',
           route: suggestion.route
