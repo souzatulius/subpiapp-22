@@ -1,8 +1,6 @@
-
 import React from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Card } from '@/components/ui/card';
-
 interface StatsCardProps {
   title: string;
   value: string | number;
@@ -11,7 +9,6 @@ interface StatsCardProps {
   isLoading?: boolean;
   description?: string;
 }
-
 export const StatsCard: React.FC<StatsCardProps> = ({
   title,
   value,
@@ -23,41 +20,29 @@ export const StatsCard: React.FC<StatsCardProps> = ({
   // Format value with comma as decimal separator
   const formatValue = (val: string | number): string => {
     if (val === undefined || val === null) return '0';
-    
     const stringValue = val.toString();
     if (stringValue.includes('.')) {
       return stringValue.replace('.', ',');
     }
     return stringValue;
   };
-  
-  return (
-    <Card className="p-3 border border-blue-200 hover:shadow-md transition-all rounded-xl">
+  return <Card className="p-3 border border-blue-200 hover:shadow-md transition-all rounded-xl">
       <div className="flex items-center justify-between mb-1">
-        <h3 className="text-sm font-medium text-zinc-500">{title}</h3>
+        <h3 className="text-sm font-medium text-gray-800">{title}</h3>
       </div>
       
-      {isLoading ? (
-        <>
+      {isLoading ? <>
           <Skeleton className="h-7 w-24 bg-gray-200 mb-2 rounded-lg" />
           <Skeleton className="h-4 w-full bg-gray-100 mb-1 rounded-lg" />
           <Skeleton className="h-4 w-3/4 bg-gray-100 rounded-lg" />
-        </>
-      ) : (
-        <>
-          <p className="text-2xl font-bold text-blue-600 mb-1">{formatValue(value)}</p>
-          {description && (
-            <p className="text-xs text-gray-600 line-clamp-1">
+        </> : <>
+          <p className="text-2xl font-bold mb-1 text-blue-900">{formatValue(value)}</p>
+          {description && <p className=" text-xs text-gray-500">
               {description}
-            </p>
-          )}
-          {comparison && (
-            <p className="text-xs text-orange-600 font-medium mt-1">
+            </p>}
+          {comparison && <p className="text-xs text-orange-600 font-medium mt-1 py-[5px]">
               {comparison}
-            </p>
-          )}
-        </>
-      )}
-    </Card>
-  );
+            </p>}
+        </>}
+    </Card>;
 };

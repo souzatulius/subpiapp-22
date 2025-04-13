@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BarChart } from '@/components/relatorios/charts/BarChart';
@@ -6,11 +5,9 @@ import { PieChart } from '@/components/relatorios/charts/PieChart';
 import { LineChart } from '@/components/relatorios/charts/LineChart';
 import { ArrowDown, Search, EyeOff } from "lucide-react";
 import { toast } from '@/components/ui/use-toast';
-
 interface RelatoriosGraphCardsProps {
   chartVisibility?: Record<string, boolean>;
 }
-
 const RelatoriosGraphCards: React.FC<RelatoriosGraphCardsProps> = ({
   chartVisibility = {
     origemDemandas: true,
@@ -28,7 +25,7 @@ const RelatoriosGraphCards: React.FC<RelatoriosGraphCardsProps> = ({
   // State for tracking which charts should show their analysis and visibility
   const [analysisVisibility, setAnalysisVisibility] = useState<Record<string, boolean>>({});
   const [localVisibility, setLocalVisibility] = useState<Record<string, boolean>>(chartVisibility);
-  
+
   // Toggle analysis visibility for a specific chart
   const toggleAnalysis = (chartId: string) => {
     setAnalysisVisibility(prev => ({
@@ -40,16 +37,19 @@ const RelatoriosGraphCards: React.FC<RelatoriosGraphCardsProps> = ({
   // Toggle chart visibility
   const toggleChartVisibility = (chartId: string) => {
     setLocalVisibility(prev => {
-      const updated = { ...prev, [chartId]: !prev[chartId] };
+      const updated = {
+        ...prev,
+        [chartId]: !prev[chartId]
+      };
       toast({
         title: updated[chartId] ? "Card visível" : "Card ocultado",
         description: updated[chartId] ? "O card foi restaurado na visualização." : "O card foi ocultado da visualização. Use o botão de filtros para restaurá-lo.",
-        duration: 2000,
+        duration: 2000
       });
       return updated;
     });
   };
-  
+
   // Dados para o gráfico de problemas mais frequentes
   const problemasMaisFrequentes = [{
     name: 'Iluminação',
@@ -161,7 +161,7 @@ const RelatoriosGraphCards: React.FC<RelatoriosGraphCardsProps> = ({
     name: 'Com Justificativa',
     value: 35
   }];
-  
+
   // Análises dos gráficos
   const analyses = {
     problemasFrequentes: "Iluminação e buracos lideram as queixas, indicando foco da população em infraestrutura urbana básica. Poda e limpeza aparecem em menor volume, sugerindo menor impacto ou maior eficiência dessas áreas.",
@@ -173,262 +173,117 @@ const RelatoriosGraphCards: React.FC<RelatoriosGraphCardsProps> = ({
     resolucaoEsic: "75% das demandas e-SIC são respondidas completamente, enquanto 25% recebem justificativas para não fornecimento integral dos dados. Esta taxa de resposta completa está acima da média nacional (68%), indicando bom desempenho da equipe. Ainda assim, há espaço para melhoria, com meta para alcançar 85% de respostas completas nos próximos 3 meses.",
     processosCadastrados: "Do total de 120 processos cadastrados no sistema, apenas 35 (29%) possuem justificativas formais registradas. O alto índice de processos sem justificativa (71%) indica uma oportunidade de melhoria no fluxo documental e na transparência das decisões administrativas."
   };
-  
+
   // Componente de gráfico com hover controls
-  const ChartCard = ({ 
-    id, 
-    title, 
+  const ChartCard = ({
+    id,
+    title,
     value,
-    description, 
-    children, 
-    analysis 
-  }: { 
-    id: string, 
-    title: string, 
-    value?: string | number,
-    description: string, 
-    children: React.ReactNode, 
-    analysis: string 
+    description,
+    children,
+    analysis
+  }: {
+    id: string;
+    title: string;
+    value?: string | number;
+    description: string;
+    children: React.ReactNode;
+    analysis: string;
   }) => {
     const [isHovering, setIsHovering] = useState(false);
     const isShowingAnalysis = analysisVisibility[id] || false;
     const isVisible = localVisibility[id] !== false;
-    
     if (!isVisible) return null;
-    
-    return (
-      <Card className="shadow-sm hover:shadow-md transition-all rounded-xl" 
-        onMouseEnter={() => setIsHovering(true)}
-        onMouseLeave={() => setIsHovering(false)}
-      >
+    return <Card className="shadow-sm hover:shadow-md transition-all rounded-xl" onMouseEnter={() => setIsHovering(true)} onMouseLeave={() => setIsHovering(false)}>
         <CardHeader className="pb-1 pt-4 relative">
-          <CardTitle className="text-lg font-semibold text-gray-800">{title}</CardTitle>
-          {value !== undefined && (
-            <p className="text-2xl font-bold text-blue-700">{value}</p>
-          )}
+          <CardTitle className="text-sm font-medium text-gray-800">{title}</CardTitle>
+          {value !== undefined && <p className="font-semibold mt-1 text-xl text-blue-900">{value}</p>}
           <div>
-            <p className="text-sm text-gray-600">{description}</p>
+            <p className=" text-xs text-gray-500">{description}</p>
           </div>
           
           {/* Hover controls */}
-          <div className={`absolute top-3 right-3 flex space-x-2 transition-opacity duration-200 ${
-            isHovering ? 'opacity-100' : 'opacity-0'
-          }`}>
-            <button
-              onClick={() => toggleAnalysis(id)}
-              className="p-1.5 rounded-full hover:bg-gray-100 text-orange-500 hover:text-orange-700 transition-colors"
-              title={isShowingAnalysis ? "Mostrar gráfico" : "Mostrar análise"}
-            >
+          <div className={`absolute top-3 right-3 flex space-x-2 transition-opacity duration-200 ${isHovering ? 'opacity-100' : 'opacity-0'}`}>
+            <button onClick={() => toggleAnalysis(id)} className="p-1.5 rounded-full hover:bg-gray-100 text-orange-500 hover:text-orange-700 transition-colors" title={isShowingAnalysis ? "Mostrar gráfico" : "Mostrar análise"}>
               <Search size={16} />
             </button>
-            <button
-              onClick={() => toggleChartVisibility(id)}
-              className="p-1.5 rounded-full hover:bg-gray-100 text-orange-500 hover:text-orange-700 transition-colors"
-              title="Ocultar card"
-            >
+            <button onClick={() => toggleChartVisibility(id)} className="p-1.5 rounded-full hover:bg-gray-100 text-orange-500 hover:text-orange-700 transition-colors" title="Ocultar card">
               <EyeOff size={16} />
             </button>
           </div>
         </CardHeader>
         <CardContent className="h-[280px] pt-1 pb-3">
-          {isShowingAnalysis ? (
-            <div className="bg-gray-50 rounded-lg p-4 h-full overflow-auto">
+          {isShowingAnalysis ? <div className="bg-gray-50 rounded-lg p-4 h-full overflow-auto">
               <h4 className="font-medium text-gray-700 mb-2">Análise de dados</h4>
               <p className="text-gray-600 text-sm">{analysis}</p>
-            </div>
-          ) : (
-            children
-          )}
+            </div> : children}
         </CardContent>
-      </Card>
-    );
+      </Card>;
   };
-  
-  return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+  return <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
       {/* Problemas Frequentes */}
-      {chartVisibility.distribuicaoPorTemas && (
-        <ChartCard 
-          id="problemasFrequentes"
-          title="Problemas frequentes"
-          value="128"
-          description="Serviços mais questionados"
-          analysis={analyses.problemasFrequentes}
-        >
-          <BarChart 
-            data={problemasMaisFrequentes} 
-            xAxisDataKey="name" 
-            bars={[{
-              dataKey: 'value',
-              name: 'Quantidade',
-              color: '#0066FF'
-            }]} 
-            multiColorBars={true} 
-            barColors={['#F97316', '#EA580C', '#0066FF', '#64748B']} 
-            showLegend={false} 
-          />
-        </ChartCard>
-      )}
+      {chartVisibility.distribuicaoPorTemas && <ChartCard id="problemasFrequentes" title="Problemas frequentes" value="128" description="Serviços mais questionados" analysis={analyses.problemasFrequentes}>
+          <BarChart data={problemasMaisFrequentes} xAxisDataKey="name" bars={[{
+        dataKey: 'value',
+        name: 'Quantidade',
+        color: '#0066FF'
+      }]} multiColorBars={true} barColors={['#F97316', '#EA580C', '#0066FF', '#64748B']} showLegend={false} />
+        </ChartCard>}
 
       {/* Origem das Demandas */}
-      {chartVisibility.origemDemandas && (
-        <ChartCard 
-          id="origemDemandas"
-          title="Origem das Demandas"
-          value="42%"
-          description="De onde chegam as solicitações"
-          analysis={analyses.origemDemandas}
-        >
-          <PieChart 
-            data={origemDemandas} 
-            colorSet="orange" 
-            showOnlyPercentage={true} 
-            showLabels={false} 
-            legendPosition="none" 
-            largePercentage={true} 
-          />
-        </ChartCard>
-      )}
+      {chartVisibility.origemDemandas && <ChartCard id="origemDemandas" title="Origem das Demandas" value="42%" description="De onde chegam as solicitações" analysis={analyses.origemDemandas}>
+          <PieChart data={origemDemandas} colorSet="orange" showOnlyPercentage={true} showLabels={false} legendPosition="none" largePercentage={true} />
+        </ChartCard>}
 
       {/* Áreas Técnicas Acionadas */}
-      {chartVisibility.performanceArea && (
-        <ChartCard 
-          id="areasTecnicas"
-          title="Áreas técnicas acionadas"
-          value="38"
-          description="Coordenações da Subprefeitura que trazem respostas"
-          analysis={analyses.areasTecnicas}
-        >
-          <BarChart 
-            data={areasTecnicas} 
-            xAxisDataKey="nome" 
-            bars={[{
-              dataKey: 'valor',
-              name: 'Quantidade',
-              color: '#0066FF'
-            }]} 
-            multiColorBars={true} 
-            barColors={['#F97316', '#334155', '#EA580C', '#0066FF']} 
-            horizontal={true} 
-            showLegend={false} 
-          />
-        </ChartCard>
-      )}
+      {chartVisibility.performanceArea && <ChartCard id="areasTecnicas" title="Áreas técnicas acionadas" value="38" description="Coordenações da Subprefeitura que trazem respostas" analysis={analyses.areasTecnicas}>
+          <BarChart data={areasTecnicas} xAxisDataKey="nome" bars={[{
+        dataKey: 'valor',
+        name: 'Quantidade',
+        color: '#0066FF'
+      }]} multiColorBars={true} barColors={['#F97316', '#334155', '#EA580C', '#0066FF']} horizontal={true} showLegend={false} />
+        </ChartCard>}
 
       {/* Notas de Imprensa */}
-      {chartVisibility.notasEmitidas && (
-        <ChartCard 
-          id="notasImprensa"
-          title="Notas Imprensa"
-          value="87"
-          description="Posicionamentos enviados pela Subprefeitura"
-          analysis={analyses.notasImprensa}
-        >
-          <LineChart 
-            data={notasImprensaPorDia} 
-            xAxisDataKey="dia" 
-            yAxisTicks={[0, 1, 2, 3, 4, 5]} 
-            lines={[{
-              dataKey: 'quantidade',
-              name: 'Notas Emitidas',
-              color: '#0066FF'
-            }]} 
-            showLegend={false} 
-          />
-        </ChartCard>
-      )}
+      {chartVisibility.notasEmitidas && <ChartCard id="notasImprensa" title="Notas Imprensa" value="87" description="Posicionamentos enviados pela Subprefeitura" analysis={analyses.notasImprensa}>
+          <LineChart data={notasImprensaPorDia} xAxisDataKey="dia" yAxisTicks={[0, 1, 2, 3, 4, 5]} lines={[{
+        dataKey: 'quantidade',
+        name: 'Notas Emitidas',
+        color: '#0066FF'
+      }]} showLegend={false} />
+        </ChartCard>}
 
       {/* Notícias vs Releases */}
-      {chartVisibility.noticiasVsReleases && (
-        <ChartCard 
-          id="noticiasReleases"
-          title="Notícias vs Releases"
-          value="42/32"
-          description="Emails recebidos publicados como notícias do site"
-          analysis={analyses.noticiasReleases}
-        >
-          <LineChart 
-            data={noticiasVsReleases} 
-            xAxisDataKey="mes" 
-            lines={[{
-              dataKey: 'noticias',
-              name: 'Notícias',
-              color: '#0066FF'
-            }, {
-              dataKey: 'releases',
-              name: 'Releases',
-              color: '#F97316'
-            }]} 
-            showLegend={true} 
-          />
-        </ChartCard>
-      )}
+      {chartVisibility.noticiasVsReleases && <ChartCard id="noticiasReleases" title="Notícias vs Releases" value="42/32" description="Emails recebidos publicados como notícias do site" analysis={analyses.noticiasReleases}>
+          <LineChart data={noticiasVsReleases} xAxisDataKey="mes" lines={[{
+        dataKey: 'noticias',
+        name: 'Notícias',
+        color: '#0066FF'
+      }, {
+        dataKey: 'releases',
+        name: 'Releases',
+        color: '#F97316'
+      }]} showLegend={true} />
+        </ChartCard>}
 
       {/* Demandas do e-SIC */}
-      {chartVisibility.demandasEsic && (
-        <ChartCard 
-          id="demandasEsic"
-          title="Demandas do e-SIC: Temas"
-          value="35%"
-          description="Principais assuntos solicitados"
-          analysis={analyses.demandasEsic}
-        >
-          <PieChart 
-            data={demandasEsic} 
-            colorSet="mixed" 
-            showOnlyPercentage={true} 
-            showLabels={false} 
-            legendPosition="none" 
-            largePercentage={true} 
-          />
-        </ChartCard>
-      )}
+      {chartVisibility.demandasEsic && <ChartCard id="demandasEsic" title="Demandas do e-SIC: Temas" value="35%" description="Principais assuntos solicitados" analysis={analyses.demandasEsic}>
+          <PieChart data={demandasEsic} colorSet="mixed" showOnlyPercentage={true} showLabels={false} legendPosition="none" largePercentage={true} />
+        </ChartCard>}
 
       {/* Resolução do e-SIC */}
-      {chartVisibility.resolucaoEsic && (
-        <ChartCard 
-          id="resolucaoEsic"
-          title="Resolução do e-SIC"
-          value="75%"
-          description="Porcentagem de processos e justificativas"
-          analysis={analyses.resolucaoEsic}
-        >
-          <PieChart 
-            data={resolucaoEsic} 
-            colorSet="blue" 
-            showOnlyPercentage={true} 
-            showLabels={false} 
-            legendPosition="right" 
-            largePercentage={true} 
-          />
-        </ChartCard>
-      )}
+      {chartVisibility.resolucaoEsic && <ChartCard id="resolucaoEsic" title="Resolução do e-SIC" value="75%" description="Porcentagem de processos e justificativas" analysis={analyses.resolucaoEsic}>
+          <PieChart data={resolucaoEsic} colorSet="blue" showOnlyPercentage={true} showLabels={false} legendPosition="right" largePercentage={true} />
+        </ChartCard>}
       
       {/* Novo gráfico: Processos cadastrados x com justificativa */}
-      {chartVisibility.processosCadastrados && (
-        <ChartCard 
-          id="processosCadastrados"
-          title="Processos Cadastrados"
-          value="120"
-          description="Total de processos vs processos com justificativa"
-          analysis={analyses.processosCadastrados}
-        >
-          <BarChart 
-            data={processosCadastrados} 
-            xAxisDataKey="name" 
-            bars={[{
-              dataKey: 'value',
-              name: 'Quantidade',
-              color: '#0066FF'
-            }]} 
-            multiColorBars={true} 
-            barColors={['#0066FF', '#F97316']} 
-            showLegend={true} 
-          />
-        </ChartCard>
-      )}
-    </div>
-  );
+      {chartVisibility.processosCadastrados && <ChartCard id="processosCadastrados" title="Processos Cadastrados" value="120" description="Total de processos vs processos com justificativa" analysis={analyses.processosCadastrados}>
+          <BarChart data={processosCadastrados} xAxisDataKey="name" bars={[{
+        dataKey: 'value',
+        name: 'Quantidade',
+        color: '#0066FF'
+      }]} multiColorBars={true} barColors={['#0066FF', '#F97316']} showLegend={true} />
+        </ChartCard>}
+    </div>;
 };
-
 export default RelatoriosGraphCards;
