@@ -134,7 +134,7 @@ const DashboardCards: React.FC<DashboardCardsProps> = ({
       opacity: 1
     }} transition={{
       duration: 0.5
-    }} className="grid grid-cols-5 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+    }} className="grid grid-cols-5 sm:grid-cols-5 md:grid-cols-3 lg:grid-cols-5 gap-4">
         <InsightCard title="OS Fechadas" value={simulatedIndicadores?.fechadas?.valor || '0%'} comment={simulatedIndicadores?.fechadas?.comentario || 'Finalizadas oficialmente'} isLoading={isLoading || isRefreshing} isSimulated={isSimulationActive} trend={simulatedIndicadores?.fechadas?.trend} analysis={cardAnalyses.fechadas} />
         <InsightCard title="OS Pendentes" value={simulatedIndicadores?.pendentes?.valor || '0%'} comment={simulatedIndicadores?.pendentes?.comentario || 'Aguardando solução'} isLoading={isLoading || isRefreshing} isSimulated={isSimulationActive} trend={simulatedIndicadores?.pendentes?.trend} analysis={cardAnalyses.pendentes} />
         <InsightCard title="OS Canceladas" value={simulatedIndicadores?.canceladas?.valor || '0%'} comment={simulatedIndicadores?.canceladas?.comentario || 'Encerradas sem execução'} isLoading={isLoading || isRefreshing} isSimulated={isSimulationActive} trend={simulatedIndicadores?.canceladas?.trend} analysis={cardAnalyses.canceladas} />
