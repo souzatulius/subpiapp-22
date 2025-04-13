@@ -1,3 +1,4 @@
+
 import { useNavigate } from 'react-router-dom';
 import { CardColor, CardWidth, CardHeight, CardType } from '@/types/dashboard';
 import { getIconComponentFromId } from '@/hooks/dashboard/defaultCards';
@@ -8,6 +9,7 @@ import { getColorClasses, getTextColorClass } from './utils/cardColorUtils';
 import ChartPreview from './charts/ChartPreview';
 import { memo } from 'react';
 import NotesApprovalCard from './cards/NotesApprovalCard';
+import PendingDemandsCard from './cards/PendingDemandsCard';
 
 export interface ActionCardProps {
   id: string;
@@ -81,7 +83,11 @@ const ActionCard = memo(({
     return FallbackIcon ? <FallbackIcon className={getIconSize(iconSize)} /> : null;
   };
 
-  const isNotesApprovalCard = id === 'aprovar-notas' || type === 'tasks_notes';
+  // Check if this is the notes approval card
+  const isNotesApprovalCard = id === 'aprovar-notas';
+  
+  // Check if this is the pending demands card
+  const isPendingDemandsCard = id === 'responder-demandas';
 
   return (
     <div 
@@ -112,6 +118,8 @@ const ActionCard = memo(({
           <div className="w-full h-full">{specialContent}</div>
         ) : isNotesApprovalCard ? (
           <NotesApprovalCard />
+        ) : isPendingDemandsCard ? (
+          <PendingDemandsCard />
         ) : children ? (
           children
         ) : chartId ? (
