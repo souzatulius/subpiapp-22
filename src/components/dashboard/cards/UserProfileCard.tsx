@@ -65,7 +65,7 @@ const UserProfileCard: React.FC<UserProfileCardProps> = ({
           <Card className="h-full flex flex-col items-center justify-center p-4 shadow-md border border-gray-100 hover:shadow-lg transition-all bg-orange-200">
             <User className="h-12 w-12 text-orange-700 mb-3" />
             <h3 className="font-semibold text-lg text-orange-900">{title}</h3>
-            <p className="text-sm mt-2 text-center text-neutral-500">Clique para editar seu perfil</p>
+            <p className="mt-2 text-center text-sm text-orange-700">Clique para editar seu perfil</p>
           </Card>
         </div>
       </DialogTrigger>
