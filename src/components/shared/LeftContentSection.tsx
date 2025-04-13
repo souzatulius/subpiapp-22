@@ -1,11 +1,9 @@
-
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import FeatureCard from '@/components/FeatureCard';
 import { useAuth } from '@/hooks/useSupabaseAuth';
-
 const LeftContentSection: React.FC = () => {
   const {
     user
@@ -15,12 +13,10 @@ const LeftContentSection: React.FC = () => {
   // Check if the current page is login or register
   const isLoginPage = location.pathname === '/login';
   const isRegisterPage = location.pathname === '/register';
-  
-  return (
-    <div className="max-w-2xl mx-auto md:mx-auto flex flex-col items-center text-center">
+  return <div className="max-w-2xl mx-auto md:mx-auto flex flex-col items-center text-center">
       <h1 className="text-6xl md:text-6xl font-bold leading-[1.1] md:leading-[1.1] mb-6 lg:text-8xl">
         <div className="text-[#002855] bg-transparent">Demandas com mais</div>
-        <div className="text-[#f57c35]">eficiência</div>
+        <div className="text-[#f57c35] bg-slate-950">eficiência</div>
       </h1>
       
       <p className="text-gray-600 text-lg mb-8 max-w-xl">
@@ -28,14 +24,11 @@ const LeftContentSection: React.FC = () => {
       </p>
       
       <div className="flex flex-wrap gap-4 mb-12 transition-all duration-300 justify-center">
-        {user ? (
-          <Button asChild className="rounded-xl bg-[#002855] hover:bg-[#001f40] text-white py-2 px-6 flex items-center shadow-md hover:shadow-lg transition-all duration-300">
+        {user ? <Button asChild className="rounded-xl bg-[#002855] hover:bg-[#001f40] text-white py-2 px-6 flex items-center shadow-md hover:shadow-lg transition-all duration-300">
             <Link to="/dashboard" className="text-lg">
               Acessar <ArrowRight className="ml-2 h-5 w-5" />
             </Link>
-          </Button>
-        ) : (
-          <>
+          </Button> : <>
             <Button asChild className={`rounded-xl py-2 px-6 flex items-center shadow-md transition-all duration-300 ${isLoginPage ? "bg-gray-400 text-gray-100 cursor-not-allowed hover:bg-gray-400 hover:shadow-md" : "bg-[#002855] hover:bg-[#001f40] text-white hover:shadow-lg"}`} disabled={isLoginPage}>
               <Link to={isLoginPage ? "#" : "/login"} className="h-12 text-lg">
                 Acessar <ArrowRight className="ml-2 h-5 w-5" />
@@ -46,8 +39,7 @@ const LeftContentSection: React.FC = () => {
                 Solicitar Acesso
               </Link>
             </Button>
-          </>
-        )}
+          </>}
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -55,8 +47,6 @@ const LeftContentSection: React.FC = () => {
         <FeatureCard type="acoes" />
         <FeatureCard type="relatorios" />
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default LeftContentSection;
