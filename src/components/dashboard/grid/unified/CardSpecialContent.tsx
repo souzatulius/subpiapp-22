@@ -3,6 +3,7 @@ import React from 'react';
 import { ActionCardItem } from '@/types/dashboard';
 import DynamicContentCard from '../../cards/DynamicContentCard';
 import StatisticsCard from '../../cards/StatisticsCard';
+import { useDynamicDashboardContent } from '@/hooks/dashboard/useDynamicDashboardContent';
 
 interface GetSpecialContentProps {
   card: ActionCardItem;
@@ -13,7 +14,7 @@ interface GetSpecialContentProps {
 const getSpecialContent = ({ 
   card, 
   renderSpecialCardContent, 
-  specialCardsData = {} // Provide default empty object
+  specialCardsData 
 }: GetSpecialContentProps): React.ReactNode | null => {
   
   // First check if there's a custom render function provided
@@ -24,10 +25,8 @@ const getSpecialContent = ({
 
   // For cards with dataSourceKey
   if (card.dataSourceKey) {
-    // Always define these variables, even if they're empty arrays or default values
-    const notasItems = specialCardsData?.notasItems || [];
-    const demandasItems = specialCardsData?.demandasItems || [];
-    const isLoading = specialCardsData?.isLoading || false;
+    const dashboardContent = useDynamicDashboardContent();
+    const { notasItems, demandasItems, isLoading } = dashboardContent;
     
     switch (card.dataSourceKey) {
       case 'ultimas_notas':
@@ -95,9 +94,6 @@ const getSpecialContent = ({
             />
           </div>
         );
-        
-      default:
-        return null;
     }
   }
 
@@ -121,8 +117,6 @@ const getSpecialContent = ({
         );
 
       // Add other card types as needed
-      default:
-        return null;
     }
   }
 
