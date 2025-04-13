@@ -38,10 +38,9 @@ const SmartSearchPopover: React.FC = () => {
 
   // Only show suggestions when the user types 4 or more characters
   const filteredSuggestions = searchQuery.length >= 4 
-    ? suggestions.map(suggestion => ({
-        title: suggestion.title || 'Sugestão',
-        route: suggestion.route
-      }))
+    ? suggestions.filter(suggestion => 
+        suggestion.title.toLowerCase().includes(searchQuery.toLowerCase())
+      )
     : [];
 
   return (
@@ -51,8 +50,8 @@ const SmartSearchPopover: React.FC = () => {
           <Search className="h-5 w-5" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent align="end" className="w-[300px] p-0 rounded-xl bg-transparent border-none shadow-none">
-        <div className="p-3 bg-transparent w-full h-full">
+      <PopoverContent align="end" className="w-[300px] p-0 rounded-xl bg-white border shadow-md">
+        <div className="p-3 w-full h-full">
           <SearchInput
             placeholder="O que vamos fazer?"
             onSearch={handleSearch}

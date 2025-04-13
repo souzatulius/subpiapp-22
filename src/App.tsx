@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -78,7 +79,7 @@ function App() {
 
                   {/* Dashboard with shared layout */}
                   <Route path="/dashboard" element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>
-                    {/* Comunicação routes - updated paths */}
+                    {/* Comunicação routes - consistent naming and paths */}
                     <Route path="comunicacao" element={<ComunicacaoDashboard />} />
                     <Route path="comunicacao/cadastrar" element={<CadastrarDemanda />} />
                     <Route path="comunicacao/responder" element={<ResponderDemandas />} />
@@ -88,12 +89,14 @@ function App() {
                     <Route path="comunicacao/notas" element={<ConsultarNotas />} />
                     <Route path="comunicacao/relatorios" element={<RelatoriosPage />} />
                     
-                    {/* New Release routes */}
+                    {/* Release routes */}
                     <Route path="comunicacao/cadastrar-release" element={<CadastrarRelease />} />
                     <Route path="comunicacao/releases" element={<ListarReleases />} />
                     
                     {/* e-SIC routes */}
                     <Route path="esic" element={<ESICPage />} />
+                    <Route path="esic/cadastrar" element={<ESICPage />} />
+                    <Route path="esic/consultar" element={<ESICPage />} />
                     
                     {/* Zeladoria routes */}
                     <Route path="zeladoria/ranking-subs" element={<RankingSubs />} />
@@ -101,6 +104,11 @@ function App() {
 
                   {/* Profile route */}
                   <Route path="/profile" element={<UserProfile />} />
+                  
+                  {/* Search route */}
+                  <Route path="/search" element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>
+                    <Route index element={<div className="p-6">Resultados da Pesquisa</div>} />
+                  </Route>
 
                   {/* 404 route */}
                   <Route path="*" element={<NotFound />} />

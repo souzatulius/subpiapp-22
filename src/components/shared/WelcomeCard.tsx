@@ -4,6 +4,7 @@ import { Settings, RotateCcw } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+
 interface WelcomeCardProps {
   title: string;
   description: string;
@@ -21,6 +22,7 @@ interface WelcomeCardProps {
   resetButtonIcon?: React.ReactNode;
   rightContent?: React.ReactNode;
 }
+
 const WelcomeCard: React.FC<WelcomeCardProps> = ({
   title,
   description,
@@ -95,4 +97,5 @@ const WelcomeCard: React.FC<WelcomeCardProps> = ({
     </Card>
   );
 };
+
 export default WelcomeCard;

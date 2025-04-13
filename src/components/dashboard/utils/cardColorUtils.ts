@@ -17,7 +17,7 @@ export const getColorClasses = (color: CardColor): string => {
     case 'orange-700': return 'bg-orange-700 text-white'; // Nova cor laranja escuro
     case 'bg-orange-500': return 'bg-orange-500 text-white'; // Orange 500
     default: return 'bg-[#0066FF] text-white'; // Default to Azul Vivo
-  }
+  };
 };
 
 export const getHoverColorClasses = (color: CardColor): string => {
@@ -36,12 +36,13 @@ export const getHoverColorClasses = (color: CardColor): string => {
     case 'orange-700': return 'hover:bg-orange-800'; // Darker Orange-700
     case 'bg-orange-500': return 'hover:bg-orange-600'; // Darker Orange-500
     default: return 'hover:bg-[#0055D4]'; // Default to darker Azul Vivo
-  }
+  };
 };
 
 export const getTextColorClass = (color: CardColor, cardId?: string): string => {
   // Special cases for ranking related cards - always use white text
   if (cardId === 'ranking-zeladoria' || cardId === 'relatorios-comunicacao' || 
+      cardId === 'ranking-comunicacao' || 
       (cardId && cardId.includes('ranking'))) {
     return 'text-white';
   }

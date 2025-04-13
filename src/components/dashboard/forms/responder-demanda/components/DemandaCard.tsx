@@ -1,13 +1,9 @@
 
 import React from 'react';
-import { formatDistanceToNow, format } from 'date-fns';
+import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { CalendarClock, MapPin } from 'lucide-react';
-import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Demanda } from '../types';
-import { getPriorityColor } from '@/utils/priorityUtils';
-import { DemandaStatusBadge, PrioridadeBadge, CoordenacaoBadge } from '@/components/ui/status-badge';
+import { DemandaStatusBadge, PrioridadeBadge } from '@/components/ui/status-badge';
 
 interface DemandaCardProps {
   demanda: Demanda;
@@ -16,85 +12,53 @@ interface DemandaCardProps {
 }
 
 const DemandaCard: React.FC<DemandaCardProps> = ({ demanda, isSelected, onClick }) => {
-  const priorityColors = getPriorityColor(demanda.prioridade);
-  
-  // Extraindo a sigla da coordenação associada ao tema/problema
+  // Format the date
+  const formattedDate = demanda.horario_publicacao
+    ? format(new Date(demanda.horario_publicacao), "dd/MM/yyyy", { locale: ptBR })
+    : "";
+    
+  // Get the coordenação name/sigla
   const coordenacaoSigla = demanda.tema?.coordenacao?.sigla || 
-                           demanda.problema?.coordenacao?.sigla || 
-                           (demanda.coordenacao?.sigla || '');
-  
-  // Format relative time
-  const relativeTime = demanda.horario_publicacao ? 
-    formatDistanceToNow(new Date(demanda.horario_publicacao), { addSuffix: true, locale: ptBR }) : 
-    'Data não disponível';
-
-  // Format deadline with 2-digit year
-  const prazoFormatado = demanda.prazo_resposta ? 
-    format(new Date(demanda.prazo_resposta), "dd/MM/yy HH:mm", { locale: ptBR }) : 
-    'Sem prazo definido';
+                          demanda.problema?.coordenacao?.sigla || 
+                          (demanda.coordenacao?.sigla || '');
 
   return (
-    <Card 
-      className={`border transition-all duration-200 hover:shadow-md cursor-pointer ${
-        isSelected 
-          ? 'border-orange-500 ring-2 ring-orange-200 bg-orange-50' 
-          : 'border-gray-200 hover:border-orange-300'
-      }`}
+    <div 
+      className={`
+        p-4 rounded-xl border ${isSelected ? 'border-orange-500 ring-2 ring-orange-200' : 'border-gray-200'} 
+        hover:bg-gray-50 transition-colors duration-150 cursor-pointer 
+        bg-white shadow-sm
+      `}
       onClick={onClick}
     >
-      <CardContent className="p-4">
-        <div className="flex flex-col gap-3">
-          <div className="flex justify-between items-start">
-            <h3 className="font-medium text-gray-900 line-clamp-2">{demanda.titulo || "Sem título"}</h3>
+      <div className="flex flex-col h-full">
+        <div className="flex justify-between items-start mb-2">
+          <h3 className="font-medium text-gray-800 line-clamp-2">{demanda.titulo || 'Sem título'}</h3>
+          <div className="flex flex-shrink-0 gap-2 ml-2">
+            <PrioridadeBadge prioridade={demanda.prioridade} size="sm" />
           </div>
-          
-          <div className="flex flex-wrap gap-2 items-center">
-            <PrioridadeBadge 
-              prioridade={demanda.prioridade}
-              size="sm"
-            />
-            
-            <DemandaStatusBadge 
-              status={demanda.status} 
-              size="sm"
-              className="px-2.5 py-1"
-              showIcon={true}
-            />
-            
-            {coordenacaoSigla && (
-              <CoordenacaoBadge 
-                texto={coordenacaoSigla}
-                size="sm"
-              />
-            )}
-          </div>
-          
-          <div className="flex flex-col gap-1">
-            <div className="text-sm flex items-center text-gray-600 justify-between">
-              <div className="flex items-center gap-1">
-                <CalendarClock className="h-4 w-4 flex-shrink-0" /> 
-                {relativeTime}
-              </div>
-              {demanda.prazo_resposta && (
-                <div className="text-xs text-orange-600 font-medium">
-                  Prazo: {prazoFormatado}
-                </div>
-              )}
-            </div>
-          </div>
-          
-          {(demanda.endereco || (demanda.bairros && demanda.bairros.nome)) && (
-            <div className="text-sm flex items-start text-gray-600">
-              <MapPin className="h-4 w-4 mr-1 mt-0.5 flex-shrink-0" />
-              <span className="line-clamp-2">
-                {demanda.endereco}{demanda.endereco && demanda.bairros?.nome ? ', ' : ''}
-                {demanda.bairros?.nome}
-              </span>
-            </div>
-          )}
         </div>
-      </CardContent>
-    </Card>
+        
+        <div className="text-sm text-gray-600 line-clamp-2 mb-3">
+          {demanda.detalhes_solicitacao || 'Sem detalhes'}
+        </div>
+        
+        <div className="mt-auto flex justify-between items-center text-xs text-gray-500">
+          <div className="flex items-center">
+            {coordenacaoSigla && (
+              <span className="bg-gray-100 text-gray-800 px-2 py-0.5 rounded mr-2">
+                {coordenacaoSigla}
+              </span>
+            )}
+            <span>{demanda.autor?.nome_completo || 'Usuário'}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span>{formattedDate}</span>
+            <DemandaStatusBadge status={demanda.status} showIcon={false} size="xs" />
+          </div>
+        </div>
+      </div>
+    </div>
   );
 };
 

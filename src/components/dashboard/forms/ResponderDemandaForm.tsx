@@ -25,7 +25,7 @@ const ResponderDemandaForm: React.FC<ResponderDemandaFormProps> = ({ onClose }) 
     }
   }, [demandaId, demandas, setSelectedDemanda]);
   
-  // Removendo a div com border e shadow desnecessária
+  // Return just the content component with no container
   return <ResponderDemandaContent />;
 };
 
