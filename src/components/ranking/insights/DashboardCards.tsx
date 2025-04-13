@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import InsightCard from './InsightCard';
 import { useChatGPTInsight } from '@/hooks/ranking/useChatGPTInsight';
@@ -92,8 +93,8 @@ const DashboardCards: React.FC<DashboardCardsProps> = ({
   };
 
   return (
-    <div className="mb-6">
-      <div className="flex justify-between items-center mb-4">
+    <div className="mb-4">
+      <div className="flex justify-between items-center mb-3">
         <div className="flex items-center gap-2">
           {isSimulationActive ? (
             <Lightbulb className="h-5 w-5 text-orange-600" />
@@ -140,7 +141,7 @@ const DashboardCards: React.FC<DashboardCardsProps> = ({
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.5 }}
-        className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3"
+        className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2"
       >
         <InsightCard 
           title="OS Fechadas" 
