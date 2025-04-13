@@ -1,4 +1,3 @@
-
 import { useNavigate } from 'react-router-dom';
 import { CardColor, CardWidth, CardHeight, CardType } from '@/types/dashboard';
 import { getIconComponentFromId } from '@/hooks/dashboard/defaultCards';
@@ -10,7 +9,6 @@ import ChartPreview from './charts/ChartPreview';
 import { memo } from 'react';
 import NotesApprovalCard from './cards/NotesApprovalCard';
 import PendingDemandsCard from './cards/PendingDemandsCard';
-
 export interface ActionCardProps {
   id: string;
   title: string;
@@ -36,17 +34,19 @@ export interface ActionCardProps {
   chartId?: string;
   specialContent?: React.ReactNode;
 }
-
 const getIconSize = (size?: 'sm' | 'md' | 'lg' | 'xl'): string => {
   switch (size) {
-    case 'sm': return 'w-6 h-6';
-    case 'lg': return 'w-10 h-10';
-    case 'xl': return 'w-10 h-10';
+    case 'sm':
+      return 'w-6 h-6';
+    case 'lg':
+      return 'w-10 h-10';
+    case 'xl':
+      return 'w-10 h-10';
     case 'md':
-    default: return 'w-10 h-10';
+    default:
+      return 'w-10 h-10';
   }
 };
-
 const ActionCard = memo(({
   id,
   title,
@@ -70,64 +70,38 @@ const ActionCard = memo(({
   const navigate = useNavigate();
   const colorClasses = getColorClasses(color);
   const textColorClass = getTextColorClass(color, id);
-  
   const renderIcon = () => {
     if (!iconId) return null;
-    
     const LucideIcon = (LucideIcons as any)[iconId];
     if (LucideIcon) {
       return <LucideIcon className={getIconSize(iconSize)} />;
     }
-    
     const FallbackIcon = getIconComponentFromId(iconId);
     return FallbackIcon ? <FallbackIcon className={getIconSize(iconSize)} /> : null;
   };
 
   // Check if this is the notes approval card
   const isNotesApprovalCard = id === 'aprovar-notas';
-  
+
   // Check if this is the pending demands card
   const isPendingDemandsCard = id === 'responder-demandas';
-
-  return (
-    <div 
-      className={`w-full h-full rounded-xl shadow-md overflow-hidden 
+  return <div className={`w-full h-full rounded-xl shadow-md overflow-hidden 
         ${!isDraggable ? 'cursor-pointer' : 'cursor-grab'} 
-        hover:shadow-lg ${colorClasses} group relative`}
-    >
-      {isDraggable && (
-        <div className="absolute top-2 left-2 z-10 opacity-0 group-hover:opacity-80 transition-opacity duration-200">
+        hover:shadow-lg ${colorClasses} group relative`}>
+      {isDraggable && <div className="absolute top-2 left-2 z-10 opacity-0 group-hover:opacity-80 transition-opacity duration-200">
           <div className="p-1.5 rounded-full bg-white bg-opacity-60 text-gray-600">
             <MoveIcon className="h-3.5 w-3.5" />
           </div>
-        </div>
-      )}
+        </div>}
 
-      {showControls && (onEdit || onDelete || onHide) && (
-        <div className="absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-          <CardControls 
-            onEdit={onEdit ? () => onEdit(id) : undefined} 
-            onDelete={onDelete ? () => onDelete(id) : undefined} 
-            onHide={onHide ? () => onHide(id) : undefined} 
-          />
-        </div>
-      )}
+      {showControls && (onEdit || onDelete || onHide) && <div className="absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+          <CardControls onEdit={onEdit ? () => onEdit(id) : undefined} onDelete={onDelete ? () => onDelete(id) : undefined} onHide={onHide ? () => onHide(id) : undefined} />
+        </div>}
 
-      <div className="relative h-full flex flex-col items-center justify-center text-center py-2.5 px-2">
-        {specialContent ? (
-          <div className="w-full h-full">{specialContent}</div>
-        ) : isNotesApprovalCard ? (
-          <NotesApprovalCard />
-        ) : isPendingDemandsCard ? (
-          <PendingDemandsCard />
-        ) : children ? (
-          children
-        ) : chartId ? (
-          <div className="w-full h-full flex flex-col">
+      <div className="relative h-full flex flex-col items-center justify-center text-center px-2 py-[19px]">
+        {specialContent ? <div className="w-full h-full">{specialContent}</div> : isNotesApprovalCard ? <NotesApprovalCard /> : isPendingDemandsCard ? <PendingDemandsCard /> : children ? children : chartId ? <div className="w-full h-full flex flex-col">
             <ChartPreview chartId={chartId} />
-          </div>
-        ) : (
-          <>
+          </div> : <>
             <div className={`mb-2.5 ${textColorClass}`}>
               {renderIcon()}
             </div>
@@ -135,19 +109,13 @@ const ActionCard = memo(({
               <h3 className={`font-semibold ${textColorClass} text-lg leading-tight break-words text-balance`}>
                 {title}
               </h3>
-              {subtitle && (
-                <p className={`text-sm ${textColorClass} opacity-80 mt-1 line-clamp-2`}>
+              {subtitle && <p className={`text-sm ${textColorClass} opacity-80 mt-1 line-clamp-2`}>
                   {subtitle}
-                </p>
-              )}
+                </p>}
             </div>
-          </>
-        )}
+          </>}
       </div>
-    </div>
-  );
+    </div>;
 });
-
 ActionCard.displayName = 'ActionCard';
-
 export default ActionCard;

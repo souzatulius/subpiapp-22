@@ -50,7 +50,7 @@ const NotificationSettingsCard: React.FC<NotificationSettingsCardProps> = ({
         <div className="h-full cursor-pointer">
           <Card className="h-full flex flex-col items-center justify-center p-4 shadow-md border border-gray-100 hover:shadow-lg transition-all">
             <Bell className="h-12 w-12 text-gray-600 mb-3" />
-            <h3 className="font-semibold text-lg text-center">{title}</h3>
+            <h3 className="font-semibold text-lg text-center py-[10px]">{title}</h3>
             <p className="text-sm text-gray-500 mt-2 text-center">Configure suas notificações</p>
           </Card>
         </div>
