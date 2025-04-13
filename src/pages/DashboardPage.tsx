@@ -22,6 +22,7 @@ import ComunicadosCard from '@/components/dashboard/cards/ComunicadosCard';
 import NotesApprovalCard from '@/components/dashboard/cards/NotesApprovalCard';
 import PendingDemandsCard from '@/components/dashboard/cards/PendingDemandsCard';
 import SmartSearchCard from '@/components/dashboard/SmartSearchCard';
+
 const DashboardPage: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
@@ -48,16 +49,20 @@ const DashboardPage: React.FC = () => {
     saveCardConfig,
     isSaving
   } = useCardStorage(user, userCoordenaticaoId);
+
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
   };
+
   const toggleEditMode = () => {
     setIsEditMode(!isEditMode);
   };
+
   const handleCardEdit = (card: ActionCardItem) => {
     setSelectedCard(card);
     setIsEditCardModalOpen(true);
   };
+
   const handleSaveCard = async (updatedCard: Partial<ActionCardItem>) => {
     saveCardEdit(updatedCard as ActionCardItem);
     setIsEditCardModalOpen(false);
@@ -69,12 +74,14 @@ const DashboardPage: React.FC = () => {
       await saveCardConfig(updatedCards);
     }
   };
+
   const handleCardsChange = async (updatedCards: ActionCardItem[]) => {
     handleCardsReorder(updatedCards);
     if (user) {
       await saveCardConfig(updatedCards);
     }
   };
+
   const handleHideCard = async (cardId: string) => {
     handleCardHide(cardId);
     if (user && cards) {
@@ -85,6 +92,7 @@ const DashboardPage: React.FC = () => {
       await saveCardConfig(updatedCards);
     }
   };
+
   const handleResetDashboard = async () => {
     resetDashboard();
     if (user) {
@@ -97,6 +105,7 @@ const DashboardPage: React.FC = () => {
       variant: "default"
     });
   };
+
   const renderSpecialCardContent = useCallback((cardId: string) => {
     const card = cards.find(c => c.id === cardId);
     if (!card) return null;
@@ -117,50 +126,80 @@ const DashboardPage: React.FC = () => {
     }
     return null;
   }, [cards, userCoordenaticaoId]);
+
   const filteredCards = useMemo(() => {
     return cards ? cards.filter(card => !card.isHidden) : [];
   }, [cards]);
+
   if (!user) {
     return <LoadingIndicator message="Carregando..." />;
   }
-  return <div className="flex flex-col h-screen bg-[#FFFAFA]">
+
+  return (
+    <div className="flex flex-col h-screen bg-[#FFFAFA]">
       <Header showControls={true} toggleSidebar={toggleSidebar} className="flex-shrink-0" />
       
       <div className="flex flex-1 overflow-hidden">
-        {!isMobile && <div className="h-full flex-shrink-0">
+        {!isMobile && (
+          <div className="h-full flex-shrink-0">
             <DashboardSidebar isOpen={sidebarOpen} />
-          </div>}
+          </div>
+        )}
         
         <main className="flex-1 flex flex-col overflow-auto">
-          {!isMobile ? <BreadcrumbBar className="flex-shrink-0" /> : <div className="sticky top-0 z-10 bg-white">
+          {!isMobile ? (
+            <BreadcrumbBar className="flex-shrink-0" />
+          ) : (
+            <div className="sticky top-0 z-10 bg-white">
               <BreadcrumbBar className="flex-shrink-0" />
-            </div>}
+            </div>
+          )}
           
           <div className="flex-1 overflow-auto">
-            <motion.div initial={{
-            opacity: 0,
-            y: 20
-          }} animate={{
-            opacity: 1,
-            y: 0
-          }} transition={{
-            duration: 0.5
-          }} className="max-w-7xl mx-auto p-4 px-[30px]">
-              <div className="border border-none bg-transparent">
-                <div className="border border-none bg-transparent">
-                  <WelcomeCard title="Dashboard" description="Arraste e edite os cards para personalizar a sua tela" icon={<Home className="h-8 w-8 mr-2 text-gray-500" />} color="bg-gradient-to-r from-blue-800 to-blue-950" userName={firstName || ''} greeting={true} showResetButton={true} resetButtonIcon={<RotateCcw className="h-4 w-4" />} onResetClick={handleResetDashboard} />
-                </div>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              className="max-w-7xl mx-auto p-4 px-[30px]"
+            >
+              <div>
+                <WelcomeCard
+                  title="Dashboard"
+                  description="Arraste e edite os cards para personalizar a sua tela"
+                  icon={<Home className="h-8 w-8 mr-2 text-gray-500" />}
+                  userName={firstName || ''}
+                  greeting={true}
+                  showResetButton={true}
+                  resetButtonIcon={<RotateCcw className="h-4 w-4" />}
+                  onResetClick={handleResetDashboard}
+                />
                 
                 <div className={`relative ${isMobile ? 'pb-32' : ''}`}>
-                  {isLoading ? <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                      {Array.from({
-                    length: 8
-                  }).map((_, index) => <Skeleton key={index} className="h-32 w-full rounded-lg" />)}
-                    </div> : filteredCards.length > 0 ? <div className="py-0 px-0">
-                      <CardGridContainer cards={filteredCards} onCardsChange={handleCardsChange} onEditCard={handleCardEdit} onHideCard={handleHideCard} isMobileView={isMobile} isEditMode={isEditMode} renderSpecialCardContent={renderSpecialCardContent} disableWiggleEffect={true} showSpecialFeatures={true} />
-                    </div> : <div className="p-4 text-center text-gray-500">
+                  {isLoading ? (
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                      {Array.from({ length: 8 }).map((_, index) => (
+                        <Skeleton key={index} className="h-32 w-full rounded-lg" />
+                      ))}
+                    </div>
+                  ) : filteredCards.length > 0 ? (
+                    <div className="py-0 px-0">
+                      <CardGridContainer
+                        cards={filteredCards}
+                        onCardsChange={handleCardsChange}
+                        onEditCard={handleCardEdit}
+                        onHideCard={handleHideCard}
+                        isMobileView={isMobile}
+                        isEditMode={isEditMode}
+                        renderSpecialCardContent={renderSpecialCardContent}
+                        disableWiggleEffect={true}
+                        showSpecialFeatures={true}
+                      />
+                    </div>
+                  ) : (
+                    <div className="p-4 text-center text-gray-500">
                       Nenhum card disponível.
-                    </div>}
+                    </div>
+                  )}
                 </div>
               </div>
             </motion.div>
@@ -168,9 +207,18 @@ const DashboardPage: React.FC = () => {
         </main>
       </div>
       
-      {selectedCard && <EditCardModal isOpen={isEditCardModalOpen} onClose={() => setIsEditCardModalOpen(false)} onSave={handleSaveCard} card={selectedCard} />}
+      {selectedCard && (
+        <EditCardModal
+          isOpen={isEditCardModalOpen}
+          onClose={() => setIsEditCardModalOpen(false)}
+          onSave={handleSaveCard}
+          card={selectedCard}
+        />
+      )}
       
       {isMobile && <MobileBottomNav />}
-    </div>;
+    </div>
+  );
 };
+
 export default DashboardPage;

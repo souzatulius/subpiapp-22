@@ -1,8 +1,10 @@
+
 import React from 'react';
 import { Settings, RotateCcw } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+
 interface WelcomeCardProps {
   title: string;
   description: string;
@@ -20,6 +22,7 @@ interface WelcomeCardProps {
   resetButtonIcon?: React.ReactNode;
   rightContent?: React.ReactNode;
 }
+
 const WelcomeCard: React.FC<WelcomeCardProps> = ({
   title,
   description,
@@ -39,50 +42,61 @@ const WelcomeCard: React.FC<WelcomeCardProps> = ({
 }) => {
   // Ensure userName is treated as a string even if it's undefined
   const displayName = userName || '';
-
-  // Text color is now fixed to gray-900 for the greeting
-  const textColorClass = 'text-gray-900';
-
-  // Description text color
-  const descriptionColorClass = 'text-gray-600';
-  return <Card className="border-0 shadow-none bg-transparent">
-      <CardContent className="px-0 py-0">
-        <div className="">
-          <div className="py-0 mx-0 px-0">
-            <h2 className={`${greeting && displayName ? 'text-3xl' : 'text-2xl'} font-bold mb-3 flex items-center text-gray-900`}>
-              {icon}
-              {greeting && displayName ? `Olá, ${displayName}!` : title}
-            </h2>
-            <p className={descriptionColorClass}>
-              {description}{!description.endsWith('.') && '.'}
-            </p>
-          </div>
-          
-          <div className="col-span-6 h-32 flex items-center justify-center hover:shadow-none hover:border-none hover:outline-none rounded-none bg-transparent">
-            {showResetButton && <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button variant="ghost" size="icon" onClick={onResetClick} className="bg-gray-100 py-0 my-[33px] text-center">
-                      {resetButtonIcon}
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Resetar Dashboard</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>}
-            
-            {showButton && <Button variant={buttonVariant} onClick={onButtonClick} className="bg-gray-100">
-                {buttonIcon && <span className="mr-2">{buttonIcon}</span>}
-                {buttonText}
-              </Button>}
-            
-            {rightContent && <div className="ml-2">
-                {rightContent}
-              </div>}
-          </div>
+  
+  return (
+    <div className="py-0 mx-0 px-0">
+      <div className="flex justify-between items-start">
+        <div className="flex flex-col">
+          <h2 className={`${greeting && displayName ? 'text-3xl' : 'text-2xl'} font-bold flex items-center text-gray-900`}>
+            {icon}
+            {greeting && displayName ? `Olá, ${displayName}!` : title}
+          </h2>
+          <p className="text-gray-600 mt-1">
+            {description}{!description.endsWith('.') && '.'}
+          </p>
         </div>
-      </CardContent>
-    </Card>;
+        
+        <div className="flex items-center">
+          {showResetButton && (
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    onClick={onResetClick} 
+                    className="bg-transparent hover:bg-transparent focus:ring-0 border-0 shadow-none p-2"
+                  >
+                    {resetButtonIcon}
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Resetar Dashboard</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          )}
+          
+          {showButton && (
+            <Button 
+              variant={buttonVariant} 
+              onClick={onButtonClick} 
+              className="bg-transparent hover:bg-transparent focus:ring-0 border-0 shadow-none"
+            >
+              {buttonIcon && <span className="mr-2">{buttonIcon}</span>}
+              {buttonText}
+            </Button>
+          )}
+          
+          {rightContent && (
+            <div className="ml-2">
+              {rightContent}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
 };
+
 export default WelcomeCard;
