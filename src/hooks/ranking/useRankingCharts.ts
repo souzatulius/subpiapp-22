@@ -67,6 +67,7 @@ export const useRankingCharts = () => {
   const refreshChartData = useCallback(async () => {
     setIsRefreshing(true);
     setIsLoading(true);
+    setChartsProgress(0); // Reset progress
     
     try {
       // Check localStorage for saved data
@@ -83,6 +84,7 @@ export const useRankingCharts = () => {
             setSgzData(parsedSgzData);
             setPlanilhaData(parsedSgzData);
             console.log(`Loaded ${parsedSgzData.length} SGZ records from localStorage`);
+            setChartsProgress(50); // Update progress
           }
           
           // Try to load Painel data
@@ -91,6 +93,7 @@ export const useRankingCharts = () => {
             const parsedPainelData = JSON.parse(painelDataString);
             setPainelData(parsedPainelData);
             console.log(`Loaded ${parsedPainelData.length} Painel records from localStorage`);
+            setChartsProgress(100); // Complete progress
           }
           
           setDataSource('upload');
@@ -105,6 +108,7 @@ export const useRankingCharts = () => {
         console.log('Using mock data...');
         setDataSource('mock');
         setIsMockData(true);
+        setChartsProgress(100); // Complete progress for mock data
       }
     } catch (e) {
       console.error('Error refreshing chart data:', e);
