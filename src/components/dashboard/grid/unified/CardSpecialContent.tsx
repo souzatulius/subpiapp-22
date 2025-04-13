@@ -100,7 +100,7 @@ const getSpecialContent = ({
             e.preventDefault();
             e.stopPropagation();
             window.location.href = '/search';
-          }} className="w-full p-2 border border-orange-300 focus:outline-none focus:ring-2 focus:ring-blue-500 py-[20px] px-[36px] text-xl rounded-2xl" />
+          }} className="w-full p-2 border border-orange-300 focus:outline-none focus:ring-2 focus:ring-blue-500 px-[36px] text-2xl rounded-2xl bg-gray-25 py-[15px] my-[24px]" />
           </div>;
 
       // Add other card types as needed

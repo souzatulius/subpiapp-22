@@ -41,14 +41,14 @@ const WelcomeCard: React.FC<WelcomeCardProps> = ({
   return <div className="bg-transparent">
       <div className="bg-transparent">
         <div className="bg-transparent">
-          <div className="flex items-center bg-transparent">
+          <div className="flex items-center bg-transparent my-[24px]">
             {icon}
             <div>
-              {greeting && userName && <h2 className={cn("text-xl font-semibold mb-1", userNameClassName || "text-white")}>
+              {greeting && userName && <h2 className="text-3xl font-bold py-[13px] text-blue-950">
                   Olá, {userName}!
                 </h2>}
-              <h3 className="text-2xl font-bold">{title}</h3>
-              <p className="text-sm mt-2 opacity-90">{description}</p>
+              
+              <p className="mt-2 opacity-90 text-base">{description}</p>
             </div>
           </div>
         </div>
