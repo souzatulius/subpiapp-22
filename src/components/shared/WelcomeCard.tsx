@@ -44,7 +44,7 @@ const WelcomeCard: React.FC<WelcomeCardProps> = ({
 }) => {
   return <div className="bg-transparent">
       <div className="bg-transparent">
-        <div className="bg-transparent">
+        <div className="bg-transparent py-0 text-3xl font-bold text-blue-950">
           <div className="flex items-center justify-between bg-transparent my-[24px] text-lg">
             <div className="flex items-center bg-transparent">
               {icon}
