@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import InsightCard from './InsightCard';
 import { useChatGPTInsight } from '@/hooks/ranking/useChatGPTInsight';
@@ -27,7 +26,6 @@ const DashboardCards: React.FC<DashboardCardsProps> = ({
     error
   } = useChatGPTInsight(dadosPlanilha, uploadId);
 
-  // Predefined analyses for each card
   const cardAnalyses = {
     fechadas: "Este indicador mostra quantas ordens de serviço foram concluídas oficialmente. Uma alta taxa indica boa eficiência operacional na finalização das solicitações.",
     pendentes: "Representa solicitações ainda não resolvidas ou em andamento. Um número alto pode indicar acúmulo de demanda ou gargalos operacionais.",
@@ -36,50 +34,42 @@ const DashboardCards: React.FC<DashboardCardsProps> = ({
     fora_do_prazo: "Solicitações que excederam o tempo previsto para conclusão. Alto volume indica necessidade de revisão de processos ou alocação de recursos."
   };
 
-  // Apply simulation adjustments to indicators if simulation is active
   const simulatedIndicadores = React.useMemo(() => {
     if (!isSimulationActive || !indicadores) return indicadores;
 
-    // Create a deep copy to avoid mutating the original
     const simulated = JSON.parse(JSON.stringify(indicadores));
 
-    // Apply improvements in the "ideal" scenario
     if (simulated.fechadas) {
-      // Increase closed percentage by 15-20%
       const currentValue = parseFloat(simulated.fechadas.valor) || 0;
-      const newValue = Math.min(currentValue + 15, 100); // Cap at 100%
+      const newValue = Math.min(currentValue + 15, 100);
       simulated.fechadas.valor = `${newValue.toFixed(1)}%`;
       simulated.fechadas.comentario = "Finalizadas oficialmente";
       simulated.fechadas.trend = "up";
     }
     if (simulated.pendentes) {
-      // Decrease pending percentage
       const currentValue = parseFloat(simulated.pendentes.valor) || 0;
-      const newValue = Math.max(currentValue - 10, 0); // Minimum 0%
+      const newValue = Math.max(currentValue - 10, 0);
       simulated.pendentes.valor = `${newValue.toFixed(1)}%`;
       simulated.pendentes.comentario = "Aguardando solução";
       simulated.pendentes.trend = "down";
     }
     if (simulated.canceladas) {
-      // Adjust canceled percentage
       const currentValue = parseFloat(simulated.canceladas.valor) || 0;
-      const newValue = Math.max(currentValue - 5, 0); // Minimum 0%
+      const newValue = Math.max(currentValue - 5, 0);
       simulated.canceladas.valor = `${newValue.toFixed(1)}%`;
       simulated.canceladas.comentario = "Encerradas sem execução";
       simulated.canceladas.trend = "down";
     }
     if (simulated.prazo_medio) {
-      // Improve average resolution time by 30%
       const currentValue = parseFloat(simulated.prazo_medio.valor.split(' ')[0]) || 0;
-      const newValue = Math.max(currentValue * 0.7, 1); // At least 1 day
+      const newValue = Math.max(currentValue * 0.7, 1);
       simulated.prazo_medio.valor = `${newValue.toFixed(1)} dias`;
       simulated.prazo_medio.comentario = "Tempo médio até execução";
       simulated.prazo_medio.trend = "down";
     }
     if (simulated.fora_do_prazo) {
-      // Reduce overdue orders by 40%
       const currentValue = parseFloat(simulated.fora_do_prazo.valor.split(' ')[0]) || 0;
-      const newValue = Math.max(currentValue * 0.6, 0); // Minimum 0
+      const newValue = Math.max(currentValue * 0.6, 0);
       simulated.fora_do_prazo.valor = `${newValue.toFixed(0)}`;
       simulated.fora_do_prazo.comentario = "Ultrapassaram período";
       simulated.fora_do_prazo.trend = "down";
@@ -96,7 +86,6 @@ const DashboardCards: React.FC<DashboardCardsProps> = ({
     setIsRefreshing(true);
     toast.info('Atualizando análises...');
 
-    // Force re-render of the component to trigger the useChatGPTInsight hook
     setTimeout(() => {
       setIsRefreshing(false);
     }, 2000);
@@ -151,7 +140,7 @@ const DashboardCards: React.FC<DashboardCardsProps> = ({
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.5 }}
-        className="grid grid-cols-5 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4"
+        className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3"
       >
         <InsightCard 
           title="OS Fechadas" 
