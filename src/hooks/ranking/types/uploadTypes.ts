@@ -18,9 +18,12 @@ export interface SGZProgressStats {
   progress: number;
   stage: string;
   validationErrors?: string[];
-  message?: string; // Added to match usage in code
-  totalRows?: number; // For compatibility
-  processedRows?: number; // For compatibility
+  message: string; // Required to match usage in code
+  totalRows: number; // For compatibility
+  processedRows: number; // For compatibility
+  updatedRows: number; // For compatibility
+  newRows: number; // For compatibility
+  errorCount?: number; // For compatibility
 }
 
 export interface ValidationError {

@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
@@ -33,41 +34,29 @@ const PendingDemandsCard: React.FC<PendingDemandsCardProps> = ({ maxDemands = 5 
             id, 
             titulo, 
             status, 
-            horario_publicacao,
-            autor_id
+            criado_em,
+            autor_id (nome_completo)
           `)
-          .order('horario_publicacao', { ascending: false })
+          .order('criado_em', { ascending: false })
           .limit(maxDemands);
         
         if (error) throw error;
         
-        // Process the data to match our interface
+        // Process the data to ensure we match the Demand interface
         const processedDemands: Demand[] = (data || []).map(demand => {
+          // Ensure autor is an object with nome_completo
+          const autorObj = demand.autor_id 
+            ? { nome_completo: demand.autor_id.nome_completo || 'Usuário' }
+            : { nome_completo: 'Usuário' };
+          
           return {
             id: demand.id,
-            titulo: demand.titulo || 'Sem título',
-            status: demand.status || 'pendente',
-            criado_em: demand.horario_publicacao,
-            autor: { nome_completo: 'Usuário' } // Default value
+            titulo: demand.titulo,
+            status: demand.status,
+            criado_em: demand.criado_em,
+            autor: autorObj
           };
         });
-        
-        // If we have autor_ids, fetch user details
-        if (processedDemands.length > 0) {
-          for (let i = 0; i < processedDemands.length; i++) {
-            if (data && data[i] && data[i].autor_id) {
-              const { data: userData } = await supabase
-                .from('usuarios')
-                .select('nome_completo')
-                .eq('id', data[i].autor_id)
-                .single();
-              
-              if (userData) {
-                processedDemands[i].autor = { nome_completo: userData.nome_completo };
-              }
-            }
-          }
-        }
         
         setDemands(processedDemands);
       } catch (err) {
@@ -84,13 +73,13 @@ const PendingDemandsCard: React.FC<PendingDemandsCardProps> = ({ maxDemands = 5 
   }, [maxDemands]);
 
   const handleDemandClick = (demandId: string) => {
-    navigate(`/dashboard/comunicacao/responder?demanda_id=${demandId}`);
+    navigate(`/dashboard/comunicacao/demandas/${demandId}`);
   };
 
   if (isLoading) {
     return (
       <div className="h-full w-full flex justify-center items-center">
-        <Loader2 className="h-8 w-8 animate-spin text-orange-500" />
+        <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
       </div>
     );
   }
@@ -112,7 +101,7 @@ const PendingDemandsCard: React.FC<PendingDemandsCardProps> = ({ maxDemands = 5 
                   onClick={() => handleDemandClick(demand.id)}
                   className={`
                     p-2 rounded-lg cursor-pointer transition-all
-                    ${demand.status === 'pendente' ? 'bg-orange-100 hover:bg-orange-200' : 'bg-gray-100 hover:bg-gray-200'}
+                    ${demand.status === 'pendente' ? 'bg-blue-100 hover:bg-blue-200' : 'bg-gray-100 hover:bg-gray-200'}
                   `}
                 >
                   <div className="flex justify-between items-start">
@@ -138,9 +127,9 @@ const PendingDemandsCard: React.FC<PendingDemandsCardProps> = ({ maxDemands = 5 
 const getStatusColor = (status: string): string => {
   switch (status.toLowerCase()) {
     case 'pendente': return 'bg-yellow-500 hover:bg-yellow-600';
-    case 'em_andamento': return 'bg-blue-500 hover:bg-blue-600';
-    case 'aprovada': return 'bg-green-500 hover:bg-green-600';
-    case 'rejeitada': return 'bg-red-500 hover:bg-red-600';
+    case 'em_progresso': return 'bg-blue-500 hover:bg-blue-600';
+    case 'concluida': return 'bg-green-500 hover:bg-green-600';
+    case 'cancelada': return 'bg-red-500 hover:bg-red-600';
     default: return 'bg-gray-500 hover:bg-gray-600';
   }
 };
@@ -148,9 +137,9 @@ const getStatusColor = (status: string): string => {
 const getStatusLabel = (status: string): string => {
   switch (status.toLowerCase()) {
     case 'pendente': return 'Pendente';
-    case 'em_andamento': return 'Em Andamento';
-    case 'aprovada': return 'Aprovada';
-    case 'rejeitada': return 'Rejeitada';
+    case 'em_progresso': return 'Em Progresso';
+    case 'concluida': return 'Concluída';
+    case 'cancelada': return 'Cancelada';
     default: return status;
   }
 };
