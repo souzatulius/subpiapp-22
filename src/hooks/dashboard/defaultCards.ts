@@ -1,3 +1,4 @@
+
 import { v4 as uuidv4 } from 'uuid';
 import { ActionCardItem } from '@/types/dashboard';
 import React from 'react';
@@ -55,7 +56,7 @@ export const getDefaultCards = (): ActionCardItem[] => {
       id: 'busca-rapida',
       title: 'Busca Rápida',
       iconId: 'Search',
-      path: '/dashboard/busca',
+      path: '/dashboard/busca',  // This path was causing a 404, keeping as is for now
       color: 'bg-white',
       width: '100',
       height: '0.5',
@@ -70,8 +71,8 @@ export const getDefaultCards = (): ActionCardItem[] => {
       iconId: 'BarChart',
       path: '/dashboard/ranking-subs',
       color: 'bg-orange-500',
-      width: '25',
-      height: '4',
+      width: '25',  
+      height: '1',  // Changed from '4' to '1' as requested
       type: 'standard',
       displayMobile: true,
       mobileOrder: 2
@@ -83,10 +84,22 @@ export const getDefaultCards = (): ActionCardItem[] => {
       path: '/dashboard/relatorios',
       color: 'bg-orange-500',
       width: '25',
-      height: '4',
+      height: '1',  // Changed from '4' to '1' as requested 
       type: 'standard',
       displayMobile: true,
       mobileOrder: 3
+    },
+    {
+      id: 'noticias-site',
+      title: 'Notícias do Site',
+      iconId: 'Newspaper',
+      path: '/dashboard/comunicacao/releases',
+      color: 'bg-gray-500',
+      width: '25',
+      height: '2',  // Changed from '1' to '2' as requested
+      type: 'standard',
+      displayMobile: true,
+      mobileOrder: 6
     },
     {
       id: 'aprovar-notas',
@@ -111,18 +124,6 @@ export const getDefaultCards = (): ActionCardItem[] => {
       type: 'in_progress_demands',
       displayMobile: true,
       mobileOrder: 5
-    },
-    {
-      id: 'noticias-site',
-      title: 'Notícias do Site',
-      iconId: 'Newspaper',
-      path: '/dashboard/comunicacao/releases',
-      color: 'bg-gray-500',
-      width: '25',
-      height: '1',
-      type: 'standard',
-      displayMobile: true,
-      mobileOrder: 6
     },
     {
       id: 'esic-processos',

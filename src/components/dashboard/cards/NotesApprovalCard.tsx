@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
@@ -41,13 +42,13 @@ const NotesApprovalCard: React.FC<NotesApprovalCardProps> = ({ maxNotes = 5 }) =
         
         if (error) throw error;
         
-        const processedNotes: Note[] = (data || []).map(note => ({
+        const processedNotes: Note[] = data?.map(note => ({
           id: note.id,
           titulo: note.titulo,
           status: note.status,
           criado_em: note.criado_em,
           autor: note.autor
-        }));
+        })) || [];
         
         setNotes(processedNotes);
       } catch (err) {

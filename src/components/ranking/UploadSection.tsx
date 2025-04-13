@@ -177,6 +177,10 @@ const UploadSection: React.FC<UploadSectionProps> = ({
         }
         
         setSGZProgress({
+          totalRows: 0,
+          processedRows: 0,
+          updatedRows: 0,
+          newRows: 0,
           totalRecords: 0,
           processed: 0,
           success: 0,
@@ -195,6 +199,10 @@ const UploadSection: React.FC<UploadSectionProps> = ({
       toast.error(`Ocorreu um erro inesperado: ${error.message}`);
       
       setSGZProgress({
+        totalRows: 0,
+        processedRows: 0,
+        updatedRows: 0,
+        newRows: 0,
         totalRecords: 0,
         processed: 0,
         success: 0,

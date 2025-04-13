@@ -1,17 +1,22 @@
+
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import SearchInput from '@/components/dashboard/search/SearchInput';
 import { useSmartSearch } from '@/hooks/dashboard/useSmartSearch';
+import { useNavigate } from 'react-router-dom';
+
 interface SmartSearchCardProps {
   placeholder?: string;
   onSearch?: (query: string) => void;
   className?: string;
 }
+
 const SmartSearchCard: React.FC<SmartSearchCardProps> = ({
   placeholder = "Pesquisar no dashboard...",
   onSearch,
   className = ""
 }) => {
+  const navigate = useNavigate();
   const {
     query,
     setQuery,
@@ -22,22 +27,34 @@ const SmartSearchCard: React.FC<SmartSearchCardProps> = ({
     handleSelectSuggestion,
     handleSearch
   } = useSmartSearch();
+  
   const handleLocalSearch = (searchQuery: string) => {
     if (onSearch) {
       onSearch(searchQuery);
     } else {
-      handleSearch(searchQuery);
+      // Use /search instead of /busca to prevent 404
+      navigate(`/search?q=${encodeURIComponent(searchQuery)}`);
     }
   };
-  return <div className={`w-full h-full ${className}`}>
+  
+  return (
+    <div className={`w-full h-full ${className}`}>
       <Card className="w-full h-full border-0 rounded-xl bg-transparent shadow-none">
         <CardContent className="p-3 h-full bg-transparent px-0 my-0 py-0">
-          <SearchInput placeholder={placeholder} onSearch={handleLocalSearch} suggestions={suggestions.map(suggestion => ({
-          title: suggestion.title || 'Sugestão',
-          route: suggestion.route
-        }))} onChange={value => setQuery(value)} className="w-full h-full" />
+          <SearchInput
+            placeholder={placeholder}
+            onSearch={handleLocalSearch}
+            suggestions={suggestions.map(suggestion => ({
+              title: suggestion.title || 'Sugestão',
+              route: suggestion.route
+            }))}
+            onChange={value => setQuery(value)}
+            className="w-full h-full"
+          />
         </CardContent>
       </Card>
-    </div>;
+    </div>
+  );
 };
+
 export default SmartSearchCard;
