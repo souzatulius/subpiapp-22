@@ -54,6 +54,13 @@ const searchActions: SearchAction[] = [
   }
 ];
 
+// Keywords to ignore in natural language search
+const ignoreWords = [
+  "eu", "gostaria", "de", "como", "fazer", "por", "favor", "quero", 
+  "preciso", "onde", "está", "o", "a", "os", "as", "um", "uma", "para",
+  "olá", "oi", "bom", "dia", "tarde", "noite"
+];
+
 export const useSmartSearch = () => {
   const [query, setQuery] = useState('');
   const [suggestions, setSuggestions] = useState<SearchAction[]>([]);
@@ -70,6 +77,18 @@ export const useSmartSearch = () => {
     useExtendedSearch: true, // Enable extended search for better phrase matching
   }), []);
 
+  // Function to process natural language queries
+  const processNaturalLanguageQuery = (inputQuery: string): string[] => {
+    // Convert to lowercase and split by spaces or common punctuation
+    const words = inputQuery.toLowerCase()
+      .replace(/[,.?!;:]/g, ' ')
+      .split(/\s+/)
+      .filter(word => word.length > 2 && !ignoreWords.includes(word));
+    
+    // Return unique words
+    return Array.from(new Set(words));
+  };
+
   // Update suggestions when the query changes
   useEffect(() => {
     if (query.trim().length === 0) {
@@ -82,23 +101,28 @@ export const useSmartSearch = () => {
     
     // Simulate a small delay for better UX
     const timer = setTimeout(() => {
-      // Preserve internal spaces for better phrase matching
-      const searchQuery = query;
-      
-      // Split the query into individual words for better matching
-      const queryWords = searchQuery.toLowerCase().split(/\s+/);
+      // Process the natural language query
+      const searchQuery = query.trim();
+      const processedWords = processNaturalLanguageQuery(searchQuery);
       
       // Log the search query for debugging
-      console.log('Searching for:', searchQuery);
-      console.log('Query words:', queryWords);
+      console.log('Original query:', searchQuery);
+      console.log('Processed words:', processedWords);
+      
+      // No meaningful words found
+      if (processedWords.length === 0) {
+        setIsLoading(false);
+        setSuggestions([]);
+        return;
+      }
       
       // Perform a direct search with the full query
       let results = fuse.search(searchQuery);
       
-      // If no direct results or few results, enhance with individual word matching
-      if (results.length < 3 && queryWords.length > 1) {
-        // Create a combined search using individual words
-        const wordResults = queryWords.flatMap(word => {
+      // Search with individual processed words for better matching
+      if (results.length < 3 && processedWords.length > 0) {
+        // Create a combined search using processed words
+        const wordResults = processedWords.flatMap(word => {
           if (word.length > 2) { // Only use words with 3+ characters
             return fuse.search(word);
           }
@@ -125,7 +149,7 @@ export const useSmartSearch = () => {
       console.log('Suggestions:', filteredSuggestions);
       
       setSuggestions(filteredSuggestions);
-      setShowSuggestions(true);
+      setShowSuggestions(filteredSuggestions.length > 0);
       setIsLoading(false);
     }, 150);
 

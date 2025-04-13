@@ -7,6 +7,7 @@ export interface UploadProgressStats {
   stage: 'idle' | 'uploading' | 'processing' | 'complete' | 'error';
   message: string;
   errorCount?: number;
+  estimatedTimeRemaining?: number; // Added for time estimation
 }
 
 export interface ValidationError {
@@ -23,4 +24,7 @@ export interface UploadResult {
   data?: any[];
   errors?: ValidationError[];
   id?: string;
+  recordCount?: number; // Added to support existing code
+  newOrders?: number;
+  updatedOrders?: number;
 }

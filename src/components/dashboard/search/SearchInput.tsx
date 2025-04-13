@@ -49,9 +49,11 @@ const SearchInput: React.FC<SearchInputProps> = ({
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
       handleSubmit();
+      setShowSuggestions(false);
     } else if (e.key === 'Escape') {
       setShowSuggestions(false);
     }
+    // Removed any special handling for space key
   };
 
   const handleSelectSuggestion = (suggestion: SearchSuggestion) => {
@@ -63,6 +65,16 @@ const SearchInput: React.FC<SearchInputProps> = ({
     }
     setShowSuggestions(false);
   };
+
+  // Show suggestions automatically when typing
+  useEffect(() => {
+    // Only show suggestions if query is at least 4 characters
+    if (query.length >= 4 && suggestions.length > 0) {
+      setShowSuggestions(true);
+    } else if (query.length === 0) {
+      setShowSuggestions(false);
+    }
+  }, [query, suggestions]);
 
   // Close suggestions when clicking outside
   useEffect(() => {
@@ -79,8 +91,8 @@ const SearchInput: React.FC<SearchInputProps> = ({
   }, []);
 
   return (
-    <div ref={containerRef} className={`relative w-full ${className}`}>
-      <form onSubmit={handleSubmit} className="relative">
+    <div ref={containerRef} className={`relative w-full h-full ${className}`}>
+      <form onSubmit={handleSubmit} className="relative h-full">
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
         <Input
           ref={inputRef}
@@ -90,7 +102,7 @@ const SearchInput: React.FC<SearchInputProps> = ({
           onChange={handleInputChange}
           onFocus={() => setShowSuggestions(suggestions.length > 0)}
           onKeyDown={handleKeyDown}
-          className="pl-9 pr-4 w-full"
+          className="pl-9 pr-4 w-full h-full"
         />
       </form>
 

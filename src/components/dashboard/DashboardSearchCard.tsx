@@ -47,9 +47,9 @@ const DashboardSearchCard: React.FC<DashboardSearchCardProps> = ({ isEditMode = 
 
   if (isEditMode) {
     return (
-      <Card className="border border-blue-100 rounded-xl">
-        <CardContent className="p-4">
-          <div className="flex items-center">
+      <Card className="border border-blue-100 rounded-xl h-full">
+        <CardContent className="p-4 h-full">
+          <div className="flex items-center h-full">
             <p className="text-gray-500">Busca rápida no dashboard</p>
           </div>
         </CardContent>
@@ -58,15 +58,15 @@ const DashboardSearchCard: React.FC<DashboardSearchCardProps> = ({ isEditMode = 
   }
 
   return (
-    <div className="w-full">
-      <Card className="w-full border border-blue-100 rounded-xl">
-        <CardContent className="p-3">
+    <div className="w-full h-full">
+      <Card className="w-full h-full border border-blue-100 rounded-xl">
+        <CardContent className="p-3 h-full">
           <SearchInput
             placeholder="Pesquisar no dashboard..."
             onSearch={handleSearch}
             suggestions={suggestions}
             onChange={handleSearchInputChange}
-            className="w-full"
+            className="w-full h-full"
           />
         </CardContent>
       </Card>

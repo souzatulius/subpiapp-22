@@ -14,6 +14,7 @@ const SearchCard: React.FC<SearchCardProps> = ({ card, onSearchSubmit }) => {
       <SmartSearchCard
         placeholder={card.title}
         onSearch={onSearchSubmit}
+        className="h-full"
       />
     </div>
   );

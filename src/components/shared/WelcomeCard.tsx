@@ -26,8 +26,8 @@ interface WelcomeCardProps {
 const WelcomeCard: React.FC<WelcomeCardProps> = ({
   title,
   description,
-  icon = <Settings className="h-6 w-6 mr-2" />,
-  color = "bg-gradient-to-r from-blue-100 via-orange-100 to-gray-100", // Updated default gradient
+  icon = <Settings className="h-8 w-8 mr-2" />, // Updated icon size
+  color = "bg-transparent", // Updated to transparent background
   showButton = false,
   buttonText = "Filtros e Configurações",
   buttonIcon,
@@ -43,22 +43,18 @@ const WelcomeCard: React.FC<WelcomeCardProps> = ({
   // Ensure userName is treated as a string even if it's undefined
   const displayName = userName || '';
   
-  // Determine text color based on background - for light gradients use dark text
-  const textColorClass = color.includes('blue-100') || color.includes('orange-100') || color.includes('gray-100') 
-    ? 'text-gray-800' 
-    : 'text-white';
+  // Text color is now fixed to gray-950
+  const textColorClass = 'text-gray-950';
   
-  // Determine description text color
-  const descriptionColorClass = color.includes('blue-100') || color.includes('orange-100') || color.includes('gray-100')
-    ? 'text-gray-600'
-    : 'text-blue-100';
+  // Description text color
+  const descriptionColorClass = 'text-gray-950';
   
   return (
     <Card className={`${color} ${textColorClass} shadow-lg overflow-hidden`}>
       <CardContent className="p-4">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
           <div>
-            <h2 className="text-2xl font-bold mb-3 flex items-center">
+            <h2 className={`${greeting && displayName ? 'text-3xl' : 'text-2xl'} font-bold mb-3 flex items-center`}>
               {icon}
               {greeting && displayName ? `Olá, ${displayName}!` : title}
             </h2>

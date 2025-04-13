@@ -1,87 +1,52 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import SearchInput from './search/SearchInput';
+
+import React from 'react';
+import { Card, CardContent } from '@/components/ui/card';
+import SearchInput from '@/components/dashboard/search/SearchInput';
+import { useSmartSearch } from '@/hooks/dashboard/useSmartSearch';
 
 interface SmartSearchCardProps {
   placeholder?: string;
   onSearch?: (query: string) => void;
+  className?: string;
 }
 
 const SmartSearchCard: React.FC<SmartSearchCardProps> = ({
-  placeholder = "O que deseja fazer?",
-  onSearch
+  placeholder = "Pesquisar no dashboard...",
+  onSearch,
+  className = ""
 }) => {
-  const navigate = useNavigate();
-  const [searchQuery, setSearchQuery] = useState('');
+  const {
+    query,
+    setQuery,
+    suggestions,
+    isLoading,
+    showSuggestions,
+    setShowSuggestions,
+    handleSelectSuggestion,
+    handleSearch
+  } = useSmartSearch();
   
-  // Keywords to route mapping
-  const keywordRoutes = {
-    "nota": "/dashboard/comunicacao/notas",
-    "notas": "/dashboard/comunicacao/notas",
-    "demanda": "/dashboard/comunicacao/demandas",
-    "demandas": "/dashboard/comunicacao/demandas",
-    "nova": "/dashboard/comunicacao/cadastrar",
-    "cadastrar": "/dashboard/comunicacao/cadastrar",
-    "criar": "/dashboard/comunicacao/criar-nota",
-    "aprovar": "/dashboard/comunicacao/aprovar-nota",
-    "release": "/dashboard/comunicacao/cadastrar-release",
-    "notícia": "/dashboard/comunicacao/releases",
-    "noticia": "/dashboard/comunicacao/releases",
-    "esic": "/dashboard/esic",
-    "ranking": "/dashboard/zeladoria/ranking-subs",
-    "relatório": "/dashboard/comunicacao/relatorios",
-    "relatorio": "/dashboard/comunicacao/relatorios",
-    "ajuste": "/perfil",
-    "perfil": "/perfil",
-    "responder": "/dashboard/comunicacao/responder",
-    "subs": "/dashboard/zeladoria/ranking-subs",
-    "zeladoria": "/dashboard/zeladoria/ranking-subs",
-    "recusar": "/dashboard/comunicacao/aprovar-nota",
-    "reprovar": "/dashboard/comunicacao/aprovar-nota",
-    "editar": "/dashboard/comunicacao/notas",
-    "avisos": "/dashboard/comunicacao",
-    "coordenação": "/dashboard/comunicacao",
-    "coordenacao": "/dashboard/comunicacao",
-    "notificações": "/dashboard/notificacoes",
-    "notificacoes": "/dashboard/notificacoes"
-  };
-
-  // Generate suggestions based on input query
-  const suggestions = React.useMemo(() => {
-    if (searchQuery.length < 4) return [];
-    
-    return Object.entries(keywordRoutes)
-      .filter(([keyword]) => keyword.includes(searchQuery.toLowerCase()))
-      .map(([keyword, route]) => ({
-        title: keyword.charAt(0).toUpperCase() + keyword.slice(1),
-        route
-      }));
-  }, [searchQuery]);
-
-  const handleSearch = (query: string) => {
+  const handleLocalSearch = (searchQuery: string) => {
     if (onSearch) {
-      onSearch(query);
+      onSearch(searchQuery);
+    } else {
+      handleSearch(searchQuery);
     }
-    navigate(`/search?q=${encodeURIComponent(query)}`);
-  };
-
-  const handleSelectSuggestion = (suggestion: { title: string; route: string }) => {
-    navigate(suggestion.route);
   };
   
-  const handleSearchChange = (value: string) => {
-    setSearchQuery(value);
-  };
-
   return (
-    <div className="w-full h-full">
-      <SearchInput
-        placeholder={placeholder}
-        onSearch={handleSearch}
-        onSelectSuggestion={handleSelectSuggestion}
-        suggestions={suggestions}
-        onChange={handleSearchChange}
-      />
+    <div className={`w-full h-full ${className}`}>
+      <Card className="w-full h-full border border-blue-100 rounded-xl">
+        <CardContent className="p-3 h-full">
+          <SearchInput
+            placeholder={placeholder}
+            onSearch={handleLocalSearch}
+            suggestions={suggestions}
+            onChange={(value) => setQuery(value)}
+            className="w-full h-full"
+          />
+        </CardContent>
+      </Card>
     </div>
   );
 };
