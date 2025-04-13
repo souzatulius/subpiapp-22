@@ -1,8 +1,10 @@
+
 import React from 'react';
 import { Settings, RotateCcw } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+
 interface WelcomeCardProps {
   title: string;
   description: string;
@@ -20,6 +22,7 @@ interface WelcomeCardProps {
   resetButtonIcon?: React.ReactNode;
   rightContent?: React.ReactNode;
 }
+
 const WelcomeCard: React.FC<WelcomeCardProps> = ({
   title,
   description,
@@ -45,11 +48,12 @@ const WelcomeCard: React.FC<WelcomeCardProps> = ({
 
   // Description text color
   const descriptionColorClass = 'text-gray-600';
+
   return <Card className="border-0 shadow-none bg-transparent">
       <CardContent className="p-4 bg-transparent">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
           <div>
-            <h2 className={`${greeting && displayName ? 'text-3xl' : 'text-2xl'} font-bold mb-3 flex items-center text-gray-950`}>
+            <h2 className={`${greeting && displayName ? 'text-3xl' : 'text-2xl'} font-bold mb-3 flex items-center text-gray-900`}>
               {icon}
               {greeting && displayName ? `Olá, ${displayName}!` : title}
             </h2>
@@ -85,4 +89,5 @@ const WelcomeCard: React.FC<WelcomeCardProps> = ({
       </CardContent>
     </Card>;
 };
+
 export default WelcomeCard;
