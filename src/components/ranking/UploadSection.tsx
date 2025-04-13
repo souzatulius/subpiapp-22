@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { usePainelZeladoriaUpload } from '@/hooks/ranking/usePainelZeladoriaUpload';
 import { handleFileUpload } from '@/hooks/ranking/services/uploadService';
@@ -36,7 +35,7 @@ const UploadSection: React.FC<UploadSectionProps> = ({
   const { 
     sgzProgress, 
     painelProgress, 
-    setSgzProgress, 
+    setSGZProgress, 
     setPainelProgress, 
     validationErrors, 
     setValidationErrors,
@@ -56,7 +55,6 @@ const UploadSection: React.FC<UploadSectionProps> = ({
   const { handleUploadPainel } = usePainelZeladoriaUpload(user);
   
   useEffect(() => {
-    // Only auto-reset progress 3 seconds after completion, not during active uploads
     if (!isUploading) {
       if (sgzProgress?.stage === 'complete' || painelProgress?.stage === 'complete') {
         setTimeout(() => {
@@ -93,30 +91,32 @@ const UploadSection: React.FC<UploadSectionProps> = ({
     try {
       console.log("Starting SGZ file upload:", sgzFile.name);
       
-      setSgzProgress({
-        totalRows: 0,
-        processedRows: 0,
-        updatedRows: 0,
-        newRows: 0,
+      setSGZProgress({
+        totalRecords: 0,
+        processed: 0,
+        success: 0,
+        failed: 0,
+        progress: 0,
         stage: 'uploading',
-        message: 'Iniciando upload...',
+        message: 'Iniciando upload...'
       });
       
       const uploadResult = await handleFileUpload(
         sgzFile,
         user,
         (progress: number) => {
-          setSgzProgress({
-            totalRows: 0,
-            processedRows: Math.round((progress/100) * 100),
-            updatedRows: 0,
-            newRows: 0,
+          setSGZProgress({
+            totalRecords: 0,
+            processed: Math.round((progress/100) * 100),
+            success: 0,
+            failed: 0,
+            progress: progress,
             stage: 'uploading',
             message: `Processando... ${progress.toFixed(0)}%`,
           });
         },
         (stats: any) => {
-          setSgzProgress(stats);
+          setSGZProgress(stats);
         }
       );
       
@@ -132,19 +132,16 @@ const UploadSection: React.FC<UploadSectionProps> = ({
           setValidationErrors([]);
         }
         
-        // Update data source and isMockData state in both stores
         setDataSource('upload');
         setRankingDataSource('upload');
         setIsMockData(false);
         setLastRefreshTime(new Date());
         
         try {
-          // Store the data in localStorage
           localStorage.setItem('demo-data-source', 'upload');
           localStorage.setItem('demo-sgz-data', JSON.stringify(uploadResult.data || []));
           localStorage.setItem('demo-last-update', new Date().toISOString());
           
-          // Update data in the ranking charts store
           if (uploadResult.data && uploadResult.data.length > 0) {
             setSgzData(uploadResult.data);
           }
@@ -171,11 +168,12 @@ const UploadSection: React.FC<UploadSectionProps> = ({
           setValidationErrors(uploadResult.errors);
         }
         
-        setSgzProgress({
-          totalRows: 0,
-          processedRows: 0,
-          updatedRows: 0,
-          newRows: 0,
+        setSGZProgress({
+          totalRecords: 0,
+          processed: 0,
+          success: 0,
+          failed: 0,
+          progress: 0,
           stage: 'error',
           message: uploadResult?.message || 'Erro no upload',
           errorCount: uploadResult?.errors?.length || 0
@@ -188,11 +186,12 @@ const UploadSection: React.FC<UploadSectionProps> = ({
       
       toast.error(`Ocorreu um erro inesperado: ${error.message}`);
       
-      setSgzProgress({
-        totalRows: 0,
-        processedRows: 0,
-        updatedRows: 0,
-        newRows: 0,
+      setSGZProgress({
+        totalRecords: 0,
+        processed: 0,
+        success: 0,
+        failed: 0,
+        progress: 0,
         stage: 'error',
         message: `Erro: ${error.message}`,
       });
@@ -227,19 +226,16 @@ const UploadSection: React.FC<UploadSectionProps> = ({
       if (uploadResult && uploadResult.success) {
         toast.success(uploadResult.message);
         
-        // Update data source and isMockData state in both stores
         setDataSource('upload');
         setRankingDataSource('upload');
         setIsMockData(false);
         setLastRefreshTime(new Date());
         
         try {
-          // Store the data in localStorage
           localStorage.setItem('demo-data-source', 'upload');
           localStorage.setItem('demo-painel-data', JSON.stringify(uploadResult.data || []));
           localStorage.setItem('demo-last-update', new Date().toISOString());
           
-          // Update data in the ranking charts store
           if (uploadResult.data && uploadResult.data.length > 0) {
             setPainelData(uploadResult.data);
           }
@@ -291,11 +287,9 @@ const UploadSection: React.FC<UploadSectionProps> = ({
     }
   };
   
-  // Check if we have active uploads that are in progress
   const isActiveUpload = (progress: any) => 
     progress && (progress.stage === 'uploading' || progress.stage === 'processing');
   
-  // Calculate if uploads should be disabled - only when another upload is in progress
   const isUploadingNow = isActiveUpload(sgzProgress) || isActiveUpload(painelProgress);
   const canUploadSGZ = !isUploadingNow && !!sgzFile;
   const canUploadPainel = !isUploadingNow && !!painelFile;
@@ -314,7 +308,7 @@ const UploadSection: React.FC<UploadSectionProps> = ({
               accept=".xlsx, .xls"
               maxSize={10}
               isLoading={isUploadingNow && isActiveUpload(sgzProgress)}
-              progress={sgzProgress?.processedRows || 0}
+              progress={sgzProgress?.progress || 0}
               label={sgzFile ? sgzFile.name : "Selecionar arquivo SGZ"}
               helperText="Clique para selecionar ou arraste o arquivo"
               disabled={isUploadingNow && !sgzFile}

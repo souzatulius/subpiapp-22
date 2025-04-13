@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
@@ -34,19 +33,41 @@ const PendingDemandsCard: React.FC<PendingDemandsCardProps> = ({ maxDemands = 5 
             id, 
             titulo, 
             status, 
-            horario_publicacao as criado_em,
-            autor:autor_id (nome_completo)
+            horario_publicacao,
+            autor_id
           `)
           .order('horario_publicacao', { ascending: false })
           .limit(maxDemands);
         
         if (error) throw error;
         
-        // Process the data to ensure autor is never null
-        const processedDemands = data?.map(demand => ({
-          ...demand,
-          autor: demand.autor || { nome_completo: 'Usuário' }
-        })) || [];
+        // Process the data to match our interface
+        const processedDemands: Demand[] = (data || []).map(demand => {
+          return {
+            id: demand.id,
+            titulo: demand.titulo || 'Sem título',
+            status: demand.status || 'pendente',
+            criado_em: demand.horario_publicacao,
+            autor: { nome_completo: 'Usuário' } // Default value
+          };
+        });
+        
+        // If we have autor_ids, fetch user details
+        if (processedDemands.length > 0) {
+          for (let i = 0; i < processedDemands.length; i++) {
+            if (data && data[i] && data[i].autor_id) {
+              const { data: userData } = await supabase
+                .from('usuarios')
+                .select('nome_completo')
+                .eq('id', data[i].autor_id)
+                .single();
+              
+              if (userData) {
+                processedDemands[i].autor = { nome_completo: userData.nome_completo };
+              }
+            }
+          }
+        }
         
         setDemands(processedDemands);
       } catch (err) {

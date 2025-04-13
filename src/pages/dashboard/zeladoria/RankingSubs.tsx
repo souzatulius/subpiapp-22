@@ -1,13 +1,10 @@
-
 import React, { useState, useEffect } from 'react';
 import { BarChart3, SlidersHorizontal, Printer, FileText, Trash2, RefreshCw } from 'lucide-react';
 import RankingContent from '@/components/ranking/RankingContent';
 import { motion, AnimatePresence } from 'framer-motion';
 import WelcomeCard from '@/components/shared/WelcomeCard';
 import { Button } from '@/components/ui/button';
-// Import Chart registration to ensure scales are registered
 import '@/components/ranking/charts/ChartRegistration';
-// Import our real data provider
 import RealDataProvider, { useRealData } from '@/components/ranking/RealDataProvider';
 import { exportToPDF, printWithStyles } from '@/utils/pdfExport';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -32,14 +29,12 @@ const RankingSubs = () => {
   const { showFeedback } = useAnimatedFeedback();
   const { resetProgress } = useUploadState();
   
-  // Get current user on component mount
   useEffect(() => {
     const fetchUser = async () => {
       const { data } = await supabase.auth.getSession();
       if (data?.session?.user) {
         setCurrentUser(data.session.user);
         
-        // Check if user is admin
         try {
           const { data: isAdminData } = await supabase.rpc('is_admin', {
             user_id: data.session.user.id
@@ -70,9 +65,7 @@ const RankingSubs = () => {
   
   const handleUploadStart = () => {
     setIsUploading(true);
-    // Reset progress first
     resetProgress();
-    // Show feedback to user
     showFeedback('loading', 'Iniciando upload da planilha...', { 
       duration: 0, 
       progress: 10,
@@ -83,19 +76,16 @@ const RankingSubs = () => {
   const handleUploadComplete = (id: string, data: any[]) => {
     console.log(`SGZ upload complete, ID: ${id}, Records: ${data.length}`);
     showFeedback('success', `Upload concluído: ${data.length} registros processados`, { duration: 3000 });
-    // Don't reset isUploading immediately to allow for background processing
     setTimeout(() => setIsUploading(false), 1500);
   };
 
   const handlePainelUploadComplete = (id: string, data: any[]) => {
     console.log(`Painel upload complete, ID: ${id}, Records: ${data.length}`);
     showFeedback('success', `Upload concluído: ${data.length} registros processados`, { duration: 3000 });
-    // Don't reset isUploading immediately to allow for background processing
     setTimeout(() => setIsUploading(false), 1500);
   };
   
   const handleCleanDataSuccess = () => {
-    // We'll reload the data in the child component
     setCleanDataDialogOpen(false);
     showFeedback('success', 'Dados limpos com sucesso', { duration: 2000 });
   };
@@ -127,7 +117,6 @@ const RankingSubs = () => {
   );
 };
 
-// Separate content component to use the data context
 const RankingSubsContent = ({
   filterDialogOpen,
   setFilterDialogOpen,
@@ -151,10 +140,10 @@ const RankingSubsContent = ({
   const { sgzProgress, painelProgress } = useUploadState();
   const { showFeedback, updateFeedbackProgress } = useAnimatedFeedback();
   
-  // Active uploads detection
-  const hasActiveUploads = sgzProgress || painelProgress;
+  const hasActiveUploads = 
+    (sgzProgress && (sgzProgress.stage === 'uploading' || sgzProgress.stage === 'processing')) || 
+    (painelProgress && (painelProgress.stage === 'uploading' || painelProgress.stage === 'processing'));
 
-  // Handle refresh with feedback
   const handleRefreshData = async () => {
     showFeedback('loading', 'Atualizando dados...', {
       duration: 0,
@@ -199,7 +188,6 @@ const RankingSubsContent = ({
         }
       />
       
-      {/* Last Updated Indicator */}
       {formattedLastUpdated && (
         <div className="mt-2 text-xs text-gray-500 flex items-center">
           <span className="mr-1">Última atualização:</span>
@@ -211,7 +199,6 @@ const RankingSubsContent = ({
         </div>
       )}
       
-      {/* Action buttons row */}
       <div className="flex justify-end mt-4 space-x-2">
         <Button
           variant="outline"
@@ -243,7 +230,6 @@ const RankingSubsContent = ({
           <SlidersHorizontal className="h-5 w-5 text-gray-600" />
         </Button>
         
-        {/* Upload button with animation */}
         <motion.div
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
@@ -269,7 +255,6 @@ const RankingSubsContent = ({
         </motion.div>
       </div>
       
-      {/* Show progress indicators when uploads are active */}
       {(sgzProgress || painelProgress) && (
         <div className="mt-4 p-4 bg-white rounded-lg shadow-sm border border-gray-200 animate-fade-in">
           <h3 className="text-sm font-medium mb-3">Importação em Andamento</h3>
@@ -288,7 +273,6 @@ const RankingSubsContent = ({
         </div>
       )}
       
-      {/* Upload section - now shown below the buttons */}
       <AnimatePresence>
         {showUploadSection && !hasActiveUploads && (
           <motion.div 
@@ -339,14 +323,12 @@ const RankingSubsContent = ({
         />
       </div>
 
-      {/* Clean Data Dialog */}
       <CleanDataDialog
         isOpen={cleanDataDialogOpen}
         onClose={() => setCleanDataDialogOpen(false)}
         onSuccess={handleCleanDataSuccess}
       />
 
-      {/* Add CSS for mobile KPI grid */}
       <style>
         {`
           @media (max-width: 767px) {

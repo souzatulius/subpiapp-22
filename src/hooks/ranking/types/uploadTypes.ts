@@ -10,6 +10,19 @@ export interface UploadProgressStats {
   estimatedTimeRemaining?: number; // Added for time estimation
 }
 
+export interface SGZProgressStats {
+  totalRecords: number;
+  processed: number;
+  success: number;
+  failed: number;
+  progress: number;
+  stage: string;
+  validationErrors?: string[];
+  message?: string; // Added to match usage in code
+  totalRows?: number; // For compatibility
+  processedRows?: number; // For compatibility
+}
+
 export interface ValidationError {
   row?: number;
   column?: string;
@@ -24,7 +37,7 @@ export interface UploadResult {
   data?: any[];
   errors?: ValidationError[];
   id?: string;
-  recordCount?: number; // Added to support existing code
+  recordCount?: number; 
   newOrders?: number;
   updatedOrders?: number;
 }

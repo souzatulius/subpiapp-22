@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import AnimatedFeedback from './animated-feedback';
 import { useAnimatedFeedback } from '@/hooks/use-animated-feedback';
@@ -22,9 +21,7 @@ export const FeedbackProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   // Monitor upload progress and show feedback
   useEffect(() => {
     if (sgzProgress?.stage === 'uploading' || sgzProgress?.stage === 'processing') {
-      const progress = sgzProgress.processedRows && sgzProgress.totalRows 
-        ? Math.floor((sgzProgress.processedRows / sgzProgress.totalRows) * 100) 
-        : 10;
+      const progress = sgzProgress.progress || 10; 
         
       const message = sgzProgress.stage === 'uploading' 
         ? 'Enviando arquivo SGZ...'
@@ -36,9 +33,7 @@ export const FeedbackProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         duration: 0
       });
     } else if (painelProgress?.stage === 'uploading' || painelProgress?.stage === 'processing') {
-      const progress = painelProgress.processedRows && painelProgress.totalRows 
-        ? Math.floor((painelProgress.processedRows / painelProgress.totalRows) * 100) 
-        : 10;
+      const progress = painelProgress.progress || 10;
         
       const message = painelProgress.stage === 'uploading' 
         ? 'Enviando arquivo do Painel...'

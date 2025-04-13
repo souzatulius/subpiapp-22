@@ -3,14 +3,13 @@ import { User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import * as XLSX from 'xlsx';
 import { useUploadState } from './useUploadState';
-import { UploadResult, UploadProgressStats } from '@/hooks/ranking/types/uploadTypes';
+import { UploadResult } from '@/hooks/ranking/types/uploadTypes';
 import { useAnimatedFeedback } from '@/hooks/use-animated-feedback';
 
 export const usePainelZeladoriaUpload = (user: User | null) => {
   const { 
     painelProgress, 
-    setPainelProgress, 
-    setIsUploading,
+    setPainelProgress,
     setLastRefreshTime
   } = useUploadState();
   
@@ -23,12 +22,12 @@ export const usePainelZeladoriaUpload = (user: User | null) => {
     }
 
     try {
-      setIsUploading(true);
       setPainelProgress({
-        totalRows: 0,
-        processedRows: 0,
-        updatedRows: 0,
-        newRows: 0,
+        totalRecords: 0,
+        processed: 0,
+        success: 0,
+        failed: 0,
+        progress: 0,
         stage: 'uploading',
         message: 'Iniciando upload do arquivo do Painel...'
       });
@@ -137,7 +136,6 @@ export const usePainelZeladoriaUpload = (user: User | null) => {
           stage: 'error',
           message: `Erro na chamada: ${err.message || 'Erro desconhecido'}`
         });
-        setIsUploading(false);
         return null;
       }
 
@@ -189,7 +187,6 @@ export const usePainelZeladoriaUpload = (user: User | null) => {
               stage: 'error',
               message: `Erro ao processar upload: ${retryErr.message || 'Erro desconhecido'}`
             });
-            setIsUploading(false);
             return null;
           }
         } else {
@@ -206,7 +203,6 @@ export const usePainelZeladoriaUpload = (user: User | null) => {
             stage: 'error',
             message: `Erro ao processar upload: ${responseError.message || 'Erro desconhecido'}`
           });
-          setIsUploading(false);
           return null;
         }
       }
@@ -220,7 +216,6 @@ export const usePainelZeladoriaUpload = (user: User | null) => {
           stage: 'error',
           message: `Erro no servidor: ${errorMsg}`
         });
-        setIsUploading(false);
         return null;
       }
       
@@ -253,31 +248,30 @@ export const usePainelZeladoriaUpload = (user: User | null) => {
         stage: 'error',
         message: `Erro ao processar arquivo: ${error.message || 'Erro desconhecido'}`
       });
-      setIsUploading(false);
+      
       return {
         success: false,
         recordCount: 0,
         message: `Erro ao processar arquivo: ${error.message || 'Erro desconhecido'}`
       };
-    } finally {
-      setIsUploading(false);
     }
-  }, [user, painelProgress, setPainelProgress, setIsUploading, setLastRefreshTime, showFeedback, updateFeedbackProgress]);
+  }, [user, painelProgress, setPainelProgress, setLastRefreshTime, showFeedback, updateFeedbackProgress]);
 
   const updateProgress = (
     progressValue: number,
     stage: 'uploading' | 'processing' | 'complete' | 'error',
     message: string,
-    totalRows: number = 0,
-    processedRows: number = 0
+    totalRecords: number = 0,
+    processed: number = 0
   ) => {
     setPainelProgress({
       stage,
       message,
-      totalRows,
-      processedRows,
-      newRows: processedRows,
-      updatedRows: 0,
+      totalRecords,
+      processed,
+      success: processed,
+      failed: 0,
+      progress: progressValue,
     });
   };
 
@@ -365,12 +359,11 @@ export const usePainelZeladoriaUpload = (user: User | null) => {
 
   return {
     isLoading: !!painelProgress && ['uploading', 'processing'].includes(painelProgress.stage),
-    uploadProgress: painelProgress?.stage === 'complete' ? 100 : painelProgress?.processedRows && painelProgress?.totalRows ? 
-      Math.round((painelProgress.processedRows / painelProgress.totalRows) * 100) : 0,
+    uploadProgress: painelProgress?.progress || 0,
     processamentoPainel: {
       status: painelProgress?.stage || 'uploading',
       message: painelProgress?.message || '',
-      recordCount: painelProgress?.processedRows || 0
+      recordCount: painelProgress?.processed || 0
     },
     handleUploadPainel
   };

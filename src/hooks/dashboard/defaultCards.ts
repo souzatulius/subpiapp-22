@@ -1,4 +1,3 @@
-
 import { v4 as uuidv4 } from 'uuid';
 import { ActionCardItem } from '@/types/dashboard';
 import React from 'react';
@@ -72,7 +71,7 @@ export const getDefaultCards = (): ActionCardItem[] => {
       path: '/dashboard/ranking-subs',
       color: 'bg-orange-500',
       width: '25',
-      height: '1.5',
+      height: '1',
       type: 'standard',
       displayMobile: true,
       mobileOrder: 2
@@ -84,7 +83,7 @@ export const getDefaultCards = (): ActionCardItem[] => {
       path: '/dashboard/relatorios',
       color: 'bg-orange-500',
       width: '25',
-      height: '1.5',
+      height: '1',
       type: 'standard',
       displayMobile: true,
       mobileOrder: 3

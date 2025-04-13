@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
@@ -42,11 +41,21 @@ const NotesApprovalCard: React.FC<NotesApprovalCardProps> = ({ maxNotes = 5 }) =
         
         if (error) throw error;
         
-        // Make sure we handle potentially null autor values
-        const processedNotes = data?.map(note => ({
-          ...note,
-          autor: note.autor || { nome_completo: 'Usuário' }
-        })) || [];
+        // Process the data to ensure we match the Note interface
+        const processedNotes: Note[] = (data || []).map(note => {
+          // Ensure autor is an object with nome_completo
+          const autorObj = typeof note.autor === 'object' && note.autor 
+            ? note.autor 
+            : { nome_completo: 'Usuário' };
+          
+          return {
+            id: note.id,
+            titulo: note.titulo,
+            status: note.status,
+            criado_em: note.criado_em,
+            autor: autorObj
+          };
+        });
         
         setNotes(processedNotes);
       } catch (err) {
