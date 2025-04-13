@@ -116,7 +116,7 @@ const CardGrid: React.FC<CardGridProps> = ({
   showSpecialFeatures
 }) => {
   // Filter out "Novo Card 11"
-  const filteredCards = cards.filter(card => card.title !== "Novo Card 11");
+  const filteredCards = cards.filter(card => card.title !== "Novo Card 11" && card.isVisible !== false);
   
   // For mobile view, use two columns instead of one
   const gridClass = isMobileView 

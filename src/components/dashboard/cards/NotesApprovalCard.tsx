@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
@@ -41,7 +42,7 @@ const NotesApprovalCard: React.FC<NotesApprovalCardProps> = ({
             titulo, 
             status, 
             criado_em,
-            autor:autor_id(nome_completo),
+            autor:autor_id(id, nome_completo),
             coordenacao:coordenacao_id(sigla, descricao)
           `).order('criado_em', {
           ascending: false
