@@ -55,7 +55,7 @@ const WelcomeCard: React.FC<WelcomeCardProps> = ({
                 {greeting && userName && (
                   <div className="flex items-center">
                     <Home 
-                      className="h-6 w-6 mr-2 text-blue-900"
+                      className="h-12 w-12 mr-2 text-blue-200"
                       strokeWidth={2} 
                     />
                     <h2 className="text-3xl font-bold py-[13px] text-blue-950">

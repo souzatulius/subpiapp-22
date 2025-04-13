@@ -1,14 +1,18 @@
+
 import React, { useState, useEffect, useCallback } from 'react';
 import WelcomeCard from '@/components/shared/WelcomeCard';
 import CardGridContainer from '@/components/dashboard/CardGridContainer';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useDashboardState } from '@/hooks/useDashboardState';
-import { RotateCcw } from 'lucide-react';
+import { RotateCcw, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ActionCardItem } from '@/types/dashboard';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import EditCardModal from '@/components/dashboard/EditCardModal';
+import PendingActionsCard from '@/components/dashboard/cards/PendingActionsCard';
+import OriginDemandStatistics from '@/components/dashboard/cards/OriginDemandStatistics';
+
 const DashboardPage: React.FC = () => {
   const {
     viewType,
@@ -24,13 +28,16 @@ const DashboardPage: React.FC = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const isMobileView = useIsMobile();
+  
   const toggleEditMode = () => {
     setIsEditMode(prev => !prev);
   };
+  
   const handleCardEdit = (card: ActionCardItem) => {
     setSelectedCard(card);
     setIsCardEditModalOpen(true);
   };
+  
   const handleCardHide = (cardId: string) => {
     const updatedCards = actionCards.map(card => card.id === cardId ? {
       ...card,
@@ -39,10 +46,12 @@ const DashboardPage: React.FC = () => {
     setActionCards(updatedCards);
     saveCardsToSupabase(updatedCards);
   };
+  
   const handleCardsReorder = (reorderedCards: ActionCardItem[]) => {
     setActionCards(reorderedCards);
     saveCardsToSupabase(reorderedCards);
   };
+  
   const handleSaveCardEdit = (editedCard: ActionCardItem) => {
     const updatedCards = actionCards.map(card => card.id === editedCard.id ? editedCard : card);
     setActionCards(updatedCards);
@@ -50,6 +59,7 @@ const DashboardPage: React.FC = () => {
     setSelectedCard(null);
     saveCardsToSupabase(updatedCards);
   };
+  
   const saveCardsToSupabase = async (cards: ActionCardItem[]) => {
     if (!user || !user.id) return;
     setIsSaving(true);
@@ -73,6 +83,7 @@ const DashboardPage: React.FC = () => {
       setIsSaving(false);
     }
   };
+  
   const resetDashboard = async () => {
     if (!user || !user.id) return;
     try {
@@ -97,12 +108,52 @@ const DashboardPage: React.FC = () => {
 
   // Render specialized content for specific cards
   const renderSpecialCardContent = useCallback((cardId: string) => {
-    // You can add special card content rendering logic here if needed
+    if (cardId === 'origem-demandas') {
+      return <OriginDemandStatistics />;
+    }
+    
+    if (cardId === 'acoes-pendentes') {
+      return <PendingActionsCard />;
+    }
+    
+    if (cardId === 'busca-rapida') {
+      return (
+        <div className="p-4 flex items-center justify-center w-full h-full">
+          <div className="bg-white rounded-lg w-full flex items-center shadow-sm border border-gray-200">
+            <Search className="h-5 w-5 ml-3 text-gray-500" />
+            <input
+              type="text"
+              placeholder="Pesquisar..."
+              className="w-full p-2 border-none focus:outline-none focus:ring-0 rounded-lg"
+              onClick={(e) => {
+                e.preventDefault();
+                window.location.href = '/search';
+              }}
+            />
+          </div>
+        </div>
+      );
+    }
+    
     return null;
   }, []);
+  
   return <div className="space-y-6">
       <div className="mb-8">
-        <WelcomeCard title="Dashboard" description="Acompanhe indicadores e acesse as principais funcionalidades do sistema" greeting={true} userName={firstName} userNameClassName="text-gray-950" showResetButton={isEditMode} onResetClick={resetDashboard} showButton={true} buttonText={isEditMode ? "Concluir Edição" : "Personalizar Dashboard"} buttonVariant="outline" onButtonClick={toggleEditMode} icon={<div className="h-8 w-8 mr-6 text-gray-800" />} spacingClassName="space-y-3" />
+        <WelcomeCard 
+          title="Dashboard" 
+          description="Acompanhe indicadores e acesse as principais funcionalidades do sistema" 
+          greeting={true} 
+          userName={firstName} 
+          userNameClassName="text-gray-950" 
+          showResetButton={isEditMode} 
+          onResetClick={resetDashboard} 
+          showButton={true} 
+          buttonText={isEditMode ? "Concluir Edição" : "Personalizar Dashboard"} 
+          buttonVariant="outline" 
+          onButtonClick={toggleEditMode} 
+          spacingClassName="space-y-3" 
+        />
       </div>
 
       {isSaving && <div className="bg-blue-50 text-blue-700 p-2 rounded-lg mb-4 flex items-center">
@@ -110,9 +161,19 @@ const DashboardPage: React.FC = () => {
           Salvando alterações...
         </div>}
 
-      <CardGridContainer cards={actionCards} onCardsChange={handleCardsReorder} onEditCard={handleCardEdit} onHideCard={handleCardHide} isMobileView={isMobileView} isEditMode={isEditMode} disableWiggleEffect={!isEditMode} renderSpecialCardContent={renderSpecialCardContent} />
+      <CardGridContainer 
+        cards={actionCards} 
+        onCardsChange={handleCardsReorder} 
+        onEditCard={handleCardEdit} 
+        onHideCard={handleCardHide} 
+        isMobileView={isMobileView} 
+        isEditMode={isEditMode} 
+        disableWiggleEffect={!isEditMode} 
+        renderSpecialCardContent={renderSpecialCardContent} 
+      />
       
       {selectedCard && <EditCardModal isOpen={isCardEditModalOpen} onClose={() => setIsCardEditModalOpen(false)} onSave={handleSaveCardEdit} card={selectedCard} />}
     </div>;
 };
+
 export default DashboardPage;

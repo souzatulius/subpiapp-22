@@ -1,7 +1,12 @@
+
 import React from 'react';
 import { ActionCardItem } from '@/types/dashboard';
 import DynamicContentCard from '../../cards/DynamicContentCard';
 import StatisticsCard from '../../cards/StatisticsCard';
+import OriginDemandStatistics from '../../cards/OriginDemandStatistics';
+import PendingActionsCard from '../../cards/PendingActionsCard';
+import { Search } from 'lucide-react';
+
 interface GetSpecialContentProps {
   card: ActionCardItem;
   renderSpecialCardContent?: (cardId: string) => React.ReactNode | null;
@@ -46,6 +51,7 @@ const DEFAULT_MOCK_STATISTICS = {
     color: '#9CA3AF'
   }]
 };
+
 const getSpecialContent = ({
   card,
   renderSpecialCardContent,
@@ -55,6 +61,34 @@ const getSpecialContent = ({
   if (renderSpecialCardContent) {
     const customContent = renderSpecialCardContent(card.id);
     if (customContent) return customContent;
+  }
+
+  // Check for specific card IDs
+  if (card.id === 'origem-demandas') {
+    return <OriginDemandStatistics />;
+  }
+  
+  if (card.id === 'acoes-pendentes') {
+    return <PendingActionsCard />;
+  }
+  
+  if (card.id === 'busca-rapida') {
+    return (
+      <div className="p-4 flex items-center justify-center w-full h-full">
+        <div className="bg-white rounded-lg w-full flex items-center shadow-sm border border-gray-200">
+          <Search className="h-5 w-5 ml-3 text-gray-500" />
+          <input
+            type="text"
+            placeholder="Pesquisar..."
+            className="w-full p-2 border-none focus:outline-none focus:ring-0 rounded-lg"
+            onClick={(e) => {
+              e.preventDefault();
+              window.location.href = '/search';
+            }}
+          />
+        </div>
+      </div>
+    );
   }
 
   // Safely access data with defaults
@@ -96,11 +130,19 @@ const getSpecialContent = ({
     switch (card.type) {
       case 'smart_search':
         return <div className="p-4 flex items-center justify-center h-full py-0 rounded-3xl border-orange-600 mx-0 px-0">
-            <input type="text" placeholder="Pesquisar..." onClick={e => {
-            e.preventDefault();
-            e.stopPropagation();
-            window.location.href = '/search';
-          }} className="w-full p-2 border border-orange-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-2xl rounded-2xl bg-gray-25 py-[15px] my-[24px] px-[58px]" />
+            <div className="bg-white rounded-lg w-full flex items-center shadow-sm border border-gray-200">
+              <Search className="h-5 w-5 ml-3 text-gray-500" />
+              <input
+                type="text"
+                placeholder="Pesquisar..."
+                className="w-full p-2 border-none focus:outline-none focus:ring-0 rounded-lg"
+                onClick={e => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  window.location.href = '/search';
+                }}
+              />
+            </div>
           </div>;
 
       // Add other card types as needed
@@ -110,4 +152,5 @@ const getSpecialContent = ({
   }
   return null;
 };
+
 export default getSpecialContent;

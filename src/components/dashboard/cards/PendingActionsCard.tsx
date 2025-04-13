@@ -1,223 +1,132 @@
 
-import React, { useEffect, useState } from 'react';
-import { Card, CardContent } from '@/components/ui/card';
-import { AlertTriangle, CheckCircle, ArrowRight } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
-import { supabase } from '@/integrations/supabase/client';
+import React from 'react';
+import { Clock, AlertTriangle } from 'lucide-react';
+import { format } from 'date-fns';
+import { Badge } from '@/components/ui/badge';
 
-interface PendingActionsProps {
+interface PendingItem {
   id: string;
-  notesToApprove: number;
-  responsesToDo: number;
-  isComunicacao?: boolean;
-  userDepartmentId?: string;
+  title: string;
+  department: string;
+  deadline: Date;
+  priority: 'high' | 'medium' | 'low';
+  type: 'note' | 'demand';
 }
 
-interface PendingDemand {
-  id: string;
-  titulo: string;
-  prazo: string;
-}
-
-interface PendingNote {
-  id: string;
-  titulo: string;
-  criado_em: string;
-}
-
-const PendingActionsCard: React.FC<PendingActionsProps> = ({ 
-  id, 
-  notesToApprove, 
-  responsesToDo,
-  isComunicacao = false,
-  userDepartmentId = ''
-}) => {
-  const navigate = useNavigate();
-  const [demandsNeedingNota, setDemandsNeedingNota] = useState<number>(0);
-  const [pendingDemands, setPendingDemands] = useState<PendingDemand[]>([]);
-  const [pendingNotes, setPendingNotes] = useState<PendingNote[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+const PendingActionsCard: React.FC = () => {
+  // Mock data - in production, this would come from an API call
+  const pendingItems: PendingItem[] = [
+    {
+      id: '1',
+      title: 'Nota sobre obras na zona leste',
+      department: 'Infraestrutura',
+      deadline: new Date(2025, 3, 15),
+      priority: 'high',
+      type: 'note'
+    },
+    {
+      id: '2',
+      title: 'Demanda sobre segurança pública',
+      department: 'Segurança',
+      deadline: new Date(2025, 3, 16),
+      priority: 'medium',
+      type: 'demand'
+    },
+    {
+      id: '3',
+      title: 'Resposta para imprensa - evento cultural',
+      department: 'Cultura',
+      deadline: new Date(2025, 3, 14),
+      priority: 'low',
+      type: 'demand'
+    },
+    {
+      id: '4',
+      title: 'Nota oficial - novo programa educacional',
+      department: 'Educação',
+      deadline: new Date(2025, 3, 13),
+      priority: 'high',
+      type: 'note'
+    }
+  ];
   
-  useEffect(() => {
-    const fetchPendingActions = async () => {
-      setIsLoading(true);
-      try {
-        // Fetch pending demands
-        const { data: demandData, error: demandError } = await supabase
-          .from('demandas')
-          .select('id, titulo, prazo_resposta')
-          .in('status', isComunicacao ? ['em_analise', 'aberta'] : ['em_analise'])
-          .eq(isComunicacao ? 'id' : 'coordenacao_id', isComunicacao ? 'id' : userDepartmentId)
-          .order('prazo_resposta', { ascending: true })
-          .limit(5);
-        
-        if (demandError) throw demandError;
-        
-        // Format demands with readable dates
-        const formattedDemands = (demandData || []).map(demand => ({
-          id: demand.id,
-          titulo: demand.titulo,
-          prazo: new Date(demand.prazo_resposta).toLocaleDateString('pt-BR')
-        }));
-        
-        setPendingDemands(formattedDemands);
-        
-        // Fetch pending notes
-        const { data: notesData, error: notesError } = await supabase
-          .from('notas_oficiais')
-          .select('id, titulo, criado_em')
-          .eq('status', 'pendente')
-          .order('criado_em', { ascending: false })
-          .limit(5);
-        
-        if (notesError) throw notesError;
-        
-        // Format notes with readable dates
-        const formattedNotes = (notesData || []).map(note => ({
-          id: note.id,
-          titulo: note.titulo,
-          criado_em: new Date(note.criado_em).toLocaleDateString('pt-BR')
-        }));
-        
-        setPendingNotes(formattedNotes);
-        
-        if (isComunicacao) {
-          // Additionally for comms team: get demands that need notes
-          const { data: notaData, error: notaError } = await supabase
-            .from('demandas')
-            .select('id')
-            .eq('status', 'respondida')
-            .is('nota_oficial_id', null);
-          
-          if (notaError) throw notaError;
-          setDemandsNeedingNota(notaData?.length || 0);
-        }
-      } catch (err) {
-        console.error("Error fetching pending actions:", err);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    
-    fetchPendingActions();
-  }, [isComunicacao, userDepartmentId]);
+  // Sort by deadline, with closest deadlines first
+  const sortedItems = [...pendingItems].sort((a, b) => a.deadline.getTime() - b.deadline.getTime());
   
-  // Calculate pending items based on user role
-  const hasPendingDemands = pendingDemands.length > 0;
-  const hasPendingNotes = pendingNotes.length > 0;
-  const hasPendingItems = hasPendingDemands || hasPendingNotes || demandsNeedingNota > 0;
-  
-  const handleViewAll = () => {
-    if (hasPendingDemands) {
-      navigate('/dashboard/comunicacao/responder');
-    } else if (hasPendingNotes) {
-      navigate('/dashboard/comunicacao/aprovar-nota');
-    } else if (demandsNeedingNota > 0) {
-      navigate('/dashboard/comunicacao/criar-nota');
+  const getPriorityColor = (priority: string) => {
+    switch (priority) {
+      case 'high': return 'bg-red-500';
+      case 'medium': return 'bg-yellow-500';
+      case 'low': return 'bg-green-500';
+      default: return 'bg-gray-500';
     }
   };
-
-  const handleDemandClick = (id: string) => {
-    navigate(`/dashboard/comunicacao/responder/${id}`);
+  
+  const getPriorityLabel = (priority: string) => {
+    switch (priority) {
+      case 'high': return 'Alta';
+      case 'medium': return 'Média';
+      case 'low': return 'Baixa';
+      default: return 'Normal';
+    }
   };
-
-  const handleNoteClick = (id: string) => {
-    navigate(`/dashboard/comunicacao/aprovar-nota/${id}`);
+  
+  const getTypeLabel = (type: string) => {
+    switch (type) {
+      case 'note': return 'Nota';
+      case 'demand': return 'Demanda';
+      default: return 'Item';
+    }
   };
-
+  
   return (
-    <Card 
-      className={`w-full h-full ${hasPendingItems 
-        ? 'bg-yellow-50 text-yellow-800 border border-yellow-200' 
-        : 'bg-green-50 text-green-800 border border-green-200'} 
-        rounded-xl shadow-md overflow-hidden transition-all duration-300`}
-    >
-      <CardContent className="flex flex-col justify-between h-full p-4">
-        <div className="flex items-center justify-between">
-          <h3 className="text-lg font-medium">
-            {hasPendingItems ? 'Ações Pendentes' : 'Tudo em dia'}
-          </h3>
-          {hasPendingItems 
-            ? <AlertTriangle className="h-5 w-5" /> 
-            : <CheckCircle className="h-5 w-5" />
-          }
-        </div>
-        
-        <div className="mt-2 flex-1 overflow-auto">
-          {isLoading ? (
-            <p className="text-sm italic">Carregando...</p>
-          ) : hasPendingItems ? (
-            <div className="space-y-4">
-              {/* Pending Demands Section */}
-              {hasPendingDemands && (
-                <div className="space-y-1">
-                  <p className="text-sm font-medium">Demandas pendentes:</p>
-                  <ul className="text-xs space-y-1 max-h-24 overflow-y-auto">
-                    {pendingDemands.slice(0, 3).map(demand => (
-                      <li 
-                        key={demand.id} 
-                        className="p-1 hover:bg-yellow-100 rounded cursor-pointer flex justify-between"
-                        onClick={() => handleDemandClick(demand.id)}
-                      >
-                        <span className="truncate flex-1">{demand.titulo}</span>
-                        <span className="whitespace-nowrap text-yellow-600 ml-2">{demand.prazo}</span>
-                      </li>
-                    ))}
-                    {pendingDemands.length > 3 && (
-                      <li className="text-xs italic">
-                        + {pendingDemands.length - 3} outras demandas
-                      </li>
-                    )}
-                  </ul>
+    <div className="w-full h-full bg-gray-100 p-4 rounded-xl">
+      <div className="flex justify-between mb-3 items-center">
+        <h3 className="font-medium text-gray-800">Ações Pendentes</h3>
+      </div>
+      
+      <div className="space-y-3 overflow-auto max-h-[calc(100%-2rem)]">
+        {sortedItems.map((item) => {
+          const isOverdue = item.deadline < new Date();
+          const formattedDate = format(item.deadline, 'dd/MM');
+          
+          return (
+            <div 
+              key={item.id}
+              className="bg-white p-3 rounded-lg shadow-sm"
+            >
+              <div className="flex justify-between items-start">
+                <div>
+                  <div className="flex items-center space-x-1">
+                    <Badge variant="outline">{getTypeLabel(item.type)}</Badge>
+                    <span className="text-xs text-gray-500">{item.department}</span>
+                  </div>
+                  <h4 className="text-sm font-medium text-gray-800 mt-1">
+                    {item.title}
+                  </h4>
                 </div>
-              )}
-              
-              {/* Pending Notes Section */}
-              {hasPendingNotes && (
-                <div className="space-y-1">
-                  <p className="text-sm font-medium">Notas para aprovação:</p>
-                  <ul className="text-xs space-y-1 max-h-24 overflow-y-auto">
-                    {pendingNotes.slice(0, 3).map(note => (
-                      <li 
-                        key={note.id} 
-                        className="p-1 hover:bg-yellow-100 rounded cursor-pointer flex justify-between"
-                        onClick={() => handleNoteClick(note.id)}
-                      >
-                        <span className="truncate flex-1">{note.titulo}</span>
-                        <span className="whitespace-nowrap text-yellow-600 ml-2">{note.criado_em}</span>
-                      </li>
-                    ))}
-                    {pendingNotes.length > 3 && (
-                      <li className="text-xs italic">
-                        + {pendingNotes.length - 3} outras notas
-                      </li>
+                
+                <div className="flex flex-col items-end">
+                  <div className={`flex items-center ${isOverdue ? 'text-red-600' : 'text-gray-600'}`}>
+                    {isOverdue ? (
+                      <AlertTriangle className="h-3.5 w-3.5 mr-1" />
+                    ) : (
+                      <Clock className="h-3.5 w-3.5 mr-1" />
                     )}
-                  </ul>
+                    <span className="text-xs">{formattedDate}</span>
+                  </div>
+                  
+                  <div className="mt-1 flex items-center">
+                    <div className={`w-2 h-2 rounded-full ${getPriorityColor(item.priority)} mr-1`}></div>
+                    <span className="text-xs">{getPriorityLabel(item.priority)}</span>
+                  </div>
                 </div>
-              )}
-              
-              {/* For communications team: demands needing notes */}
-              {isComunicacao && demandsNeedingNota > 0 && (
-                <p className="text-sm mt-1">
-                  {`${demandsNeedingNota} demanda${demandsNeedingNota !== 1 ? 's' : ''} aguardando criação de nota oficial`}
-                </p>
-              )}
+              </div>
             </div>
-          ) : (
-            <p className="text-sm">Você não tem nenhuma ação pendente no momento.</p>
-          )}
-        </div>
-        
-        {hasPendingItems && !isLoading && (
-          <button 
-            onClick={handleViewAll}
-            className="text-xs self-end mt-2 px-3 py-1 bg-yellow-100 hover:bg-yellow-200 text-yellow-800 rounded transition-colors flex items-center"
-          >
-            Ver todas <ArrowRight className="h-3 w-3 ml-1" />
-          </button>
-        )}
-      </CardContent>
-    </Card>
+          );
+        })}
+      </div>
+    </div>
   );
 };
 

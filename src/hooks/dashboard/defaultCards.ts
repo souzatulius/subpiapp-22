@@ -27,6 +27,7 @@ export const getIconComponentFromId = (iconId: string) => {
     'file-search': () => import('lucide-react').then(mod => mod.FileSearch),
     'list': () => import('lucide-react').then(mod => mod.List),
     'bar-chart': () => import('lucide-react').then(mod => mod.BarChart),
+    'search': () => import('lucide-react').then(mod => mod.Search),
   };
   
   const LoadedIcon = React.lazy(() => 
@@ -102,28 +103,40 @@ export const getDefaultCards = (): ActionCardItem[] => {
       mobileOrder: 4
     },
     {
-      id: 'responder-demandas',
-      title: 'Últimas Demandas',
-      iconId: 'MessageSquare',
-      path: '/dashboard/comunicacao/responder',
-      color: 'bg-blue-500',
-      width: '25',
-      height: '3',
-      type: 'in_progress_demands',
+      id: 'origem-demandas',
+      title: 'Origem das Demandas',
+      iconId: 'PieChart',
+      path: '/dashboard/comunicacao/origem',
+      color: 'bg-gray-100',
+      width: '50',
+      height: '2',
+      type: 'origin_demand_chart',
       displayMobile: true,
       mobileOrder: 5
     },
     {
+      id: 'acoes-pendentes',
+      title: 'Ações Pendentes',
+      iconId: 'Clock',
+      path: '/dashboard/comunicacao/pendentes',
+      color: 'bg-gray-100',
+      width: '50',
+      height: '2',
+      type: 'pending_actions',
+      displayMobile: true,
+      mobileOrder: 6
+    },
+    {
       id: 'aprovar-notas',
-      title: 'Últimas Notas',
+      title: 'Aprovar Notas de Imprensa',
       iconId: 'FileText',
       path: '/dashboard/comunicacao/aprovar-nota',
       color: 'bg-orange-500',
       width: '25',
-      height: '3',
+      height: '1',
       type: 'recent_notes',
       displayMobile: true,
-      mobileOrder: 6
+      mobileOrder: 7
     },
     {
       id: 'noticias-site',
@@ -135,19 +148,19 @@ export const getDefaultCards = (): ActionCardItem[] => {
       height: '1',
       type: 'standard',
       displayMobile: true,
-      mobileOrder: 7
+      mobileOrder: 8
     },
     {
-      id: 'esic-processos',
-      title: 'Processos e-SIC',
-      iconId: 'FileSearch',
-      path: '/dashboard/esic',
-      color: 'deep-blue',  // Changed from bg-gray-500 to deep-blue
+      id: 'comunicacao',
+      title: 'Área da Comunicação',
+      iconId: 'MessageSquare',
+      path: '/dashboard/comunicacao',
+      color: 'bg-blue-600',
       width: '25',
       height: '1',
       type: 'standard',
       displayMobile: true,
-      mobileOrder: 8
+      mobileOrder: 9
     },
     {
       id: 'perfil-usuario',

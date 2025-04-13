@@ -1,14 +1,16 @@
+
 import { useNavigate } from 'react-router-dom';
 import { CardColor, CardWidth, CardHeight, CardType } from '@/types/dashboard';
 import { getIconComponentFromId } from '@/hooks/dashboard/defaultCards';
 import CardControls from './card-parts/CardControls';
-import { MoveIcon } from 'lucide-react';
+import { MoveIcon, Search } from 'lucide-react';
 import * as LucideIcons from 'lucide-react';
 import { getColorClasses, getTextColorClass } from './utils/cardColorUtils';
 import ChartPreview from './charts/ChartPreview';
 import { memo } from 'react';
 import NotesApprovalCard from './cards/NotesApprovalCard';
 import PendingDemandsCard from './cards/PendingDemandsCard';
+
 export interface ActionCardProps {
   id: string;
   title: string;
@@ -34,6 +36,7 @@ export interface ActionCardProps {
   chartId?: string;
   specialContent?: React.ReactNode;
 }
+
 const getIconSize = (size?: 'sm' | 'md' | 'lg' | 'xl'): string => {
   switch (size) {
     case 'sm':
@@ -47,6 +50,7 @@ const getIconSize = (size?: 'sm' | 'md' | 'lg' | 'xl'): string => {
       return 'w-10 h-10';
   }
 };
+
 const ActionCard = memo(({
   id,
   title,
@@ -70,17 +74,41 @@ const ActionCard = memo(({
   const navigate = useNavigate();
   const colorClasses = getColorClasses(color);
   const textColorClass = getTextColorClass(color, id);
+  
   const renderIcon = () => {
     if (!iconId) return null;
+    
+    // Special case for search icon in busca-rapida card
+    if (id === 'busca-rapida') {
+      return <Search className="h-10 w-10 text-white" />;
+    }
+    
+    // Check if using specific white icons based on card ID
+    const useWhiteIcon = ['comunicacao', 'perfil-usuario', 'ajustes-notificacao'].includes(id);
+    const iconColorClass = useWhiteIcon ? "text-white" : textColorClass;
+    
     const LucideIcon = (LucideIcons as any)[iconId];
     if (LucideIcon) {
-      return <LucideIcon className="h-10 w-10" />;
+      return <LucideIcon className={`${getIconSize(iconSize)} ${iconColorClass}`} />;
     }
+    
     const FallbackIcon = getIconComponentFromId(iconId);
-    return FallbackIcon ? <FallbackIcon className={getIconSize(iconSize)} /> : null;
+    return FallbackIcon ? <FallbackIcon className={`${getIconSize(iconSize)} ${iconColorClass}`} /> : null;
   };
+
+  // Special treatment for specific cards
   const isNotesApprovalCard = id === 'aprovar-notas';
   const isPendingDemandsCard = id === 'responder-demandas';
+  
+  // Update text color for specific cards
+  let titleTextClass = "text-slate-50"; // default
+  if (id === 'aprovar-notas-imprensa' || id === 'aprovar-notas') {
+    titleTextClass = "text-orange-950"; // Same color as icon
+  }
+  if (id === 'noticias-site') {
+    titleTextClass = "text-gray-950"; // Same color as icon
+  }
+
   return <div className={`w-full h-full rounded-xl shadow-md overflow-hidden 
         ${!isDraggable ? 'cursor-pointer' : 'cursor-grab'} 
         hover:shadow-lg ${colorClasses} group relative`}>
@@ -102,7 +130,7 @@ const ActionCard = memo(({
               {renderIcon()}
             </div>
             <div className="line-clamp-2 max-w-[90%] py-[6px] my-[5px]">
-              <h3 className="font-semibold text-lg leading-tight break-words text-balance text-slate-50">
+              <h3 className={`font-semibold text-lg leading-tight break-words text-balance ${titleTextClass}`}>
                 {title}
               </h3>
               {subtitle && <p className="text-sm text-gray-700 opacity-80 mt-1 line-clamp-2">
@@ -113,5 +141,6 @@ const ActionCard = memo(({
       </div>
     </div>;
 });
+
 ActionCard.displayName = 'ActionCard';
 export default ActionCard;
