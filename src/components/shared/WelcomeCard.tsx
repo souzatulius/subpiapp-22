@@ -72,7 +72,7 @@ const WelcomeCard: React.FC<WelcomeCardProps> = ({
                       variant="ghost" 
                       size="icon" 
                       onClick={onResetClick} 
-                      className="bg-gradient-to-r from-blue-500/30 via-gray-300/30 to-transparent hover:bg-blue-500/20"
+                      className="bg-gray-100"
                     >
                       {resetButtonIcon}
                     </Button>
@@ -88,7 +88,7 @@ const WelcomeCard: React.FC<WelcomeCardProps> = ({
               <Button 
                 variant={buttonVariant} 
                 onClick={onButtonClick} 
-                className="bg-gradient-to-r from-blue-500/30 via-gray-300/30 to-transparent hover:bg-blue-500/20"
+                className="bg-gray-100"
               >
                 {buttonIcon && <span className="mr-2">{buttonIcon}</span>}
                 {buttonText}

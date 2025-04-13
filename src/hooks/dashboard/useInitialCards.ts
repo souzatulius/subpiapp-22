@@ -40,7 +40,7 @@ export const useInitialCards = (userDepartment: string | null) => {
       },
       {
         id: 'consultar-demandas',
-        title: "Todas as Demandas", // Changed from "Demandas" to "Todas as Demandas"
+        title: "Todas as Demandas",
         path: "/dashboard/comunicacao/demandas",
         iconId: "FileText", 
         color: getBgColor('blue-dark'),
@@ -55,7 +55,7 @@ export const useInitialCards = (userDepartment: string | null) => {
         title: "Responder Demandas",
         path: "/dashboard/comunicacao/responder",
         iconId: "MessageSquare", 
-        color: getBgColor('gray-medium'), // Already gray-medium
+        color: getBgColor('gray-medium'),
         width: "25",
         height: "1",
         type: "standard",
@@ -137,7 +137,7 @@ export const useInitialCards = (userDepartment: string | null) => {
         iconId: 'FileSearch',
         color: getBgColor('deep-blue'),
         width: '25',
-        height: '1',
+        height: '0.5',
         type: 'standard',
         displayMobile: true,
         mobileOrder: 9,
@@ -170,12 +170,12 @@ export const useInitialCards = (userDepartment: string | null) => {
       },
       {
         id: 'ver-releases',
-        title: 'Releases e Notícias',
+        title: 'Notícias do Site',
         path: '/dashboard/comunicacao/releases',
         iconId: 'Newspaper',
         color: getBgColor('blue-light'),
         width: '25',
-        height: '1',
+        height: '0.5',
         type: 'standard',
         displayMobile: true,
         mobileOrder: 10

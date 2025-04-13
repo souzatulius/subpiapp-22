@@ -1,3 +1,4 @@
+
 import { v4 as uuidv4 } from 'uuid';
 import { ActionCardItem } from '@/types/dashboard';
 import React from 'react';
@@ -107,10 +108,22 @@ export const getDefaultCards = (): ActionCardItem[] => {
       path: '/dashboard/comunicacao/releases',
       color: 'blue-light',
       width: '25',
-      height: '1',
+      height: '0.5',
       type: 'standard',
       displayMobile: true,
       mobileOrder: 6
+    },
+    {
+      id: 'esic-card',
+      title: 'Processos e-SIC',
+      iconId: 'FileSearch',
+      path: '/dashboard/esic',
+      color: 'deep-blue',
+      width: '25',
+      height: '0.5',
+      type: 'standard',
+      displayMobile: true,
+      mobileOrder: 7
     },
     {
       id: 'perfil-usuario-card',
