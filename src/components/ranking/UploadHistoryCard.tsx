@@ -1,13 +1,14 @@
 
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Calendar, Upload, Clock, Database } from 'lucide-react';
+import { Calendar, Upload, Clock, Database, RefreshCw } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 
 interface UploadHistoryCardProps {
   sgzData: any[] | null;
   painelData: any[] | null;
   lastUpdate: string | null;
+  isRefreshing?: boolean;
 }
 
 const formatDate = (dateString: string | null): string => {
@@ -31,8 +32,10 @@ const formatDate = (dateString: string | null): string => {
 const UploadHistoryCard: React.FC<UploadHistoryCardProps> = ({ 
   sgzData, 
   painelData,
-  lastUpdate
+  lastUpdate,
+  isRefreshing = false
 }) => {
+  // Read data source directly from localStorage for consistent display
   const dataSource = localStorage.getItem('demo-data-source') || 'unknown';
   
   // Determine the source badge color and text
@@ -68,21 +71,27 @@ const UploadHistoryCard: React.FC<UploadHistoryCardProps> = ({
               <Database className="h-4 w-4 mr-2 text-gray-500" />
               SGZ Registros
             </span>
-            <span className="font-medium">{sgzData?.length || 0}</span>
+            <span className="font-medium">{isRefreshing ? '...' : sgzData?.length || 0}</span>
           </li>
           <li className="flex justify-between items-center text-sm py-1 border-b border-gray-100">
             <span className="text-gray-600 flex items-center">
               <Database className="h-4 w-4 mr-2 text-gray-500" />
               Painel Registros
             </span>
-            <span className="font-medium">{painelData?.length || 0}</span>
+            <span className="font-medium">{isRefreshing ? '...' : painelData?.length || 0}</span>
           </li>
           <li className="flex justify-between items-center text-sm py-1">
             <span className="text-gray-600 flex items-center">
               <Calendar className="h-4 w-4 mr-2 text-gray-500" />
               Última Atualização
             </span>
-            <span className="font-medium text-xs">{formatDate(lastUpdate)}</span>
+            <span className="font-medium text-xs">
+              {isRefreshing ? (
+                <RefreshCw className="h-3 w-3 animate-spin" />
+              ) : (
+                formatDate(lastUpdate)
+              )}
+            </span>
           </li>
           <li className="flex justify-between items-center text-sm py-1">
             <span className="text-gray-600 flex items-center">

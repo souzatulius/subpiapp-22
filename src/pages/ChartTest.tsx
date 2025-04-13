@@ -1,5 +1,5 @@
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import ChartDataDebugger from '@/components/ranking/debug/ChartDataDebugger';
 import { Card } from '@/components/ui/card';
 import StatusDistributionChart from '@/components/ranking/charts/StatusDistributionChart';
@@ -9,6 +9,8 @@ import ChartDebugPanel from '@/components/ranking/charts/ChartDebugPanel';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { compararBases } from '@/hooks/ranking/utils/compararBases';
+import { toast } from 'sonner';
+import UploadSection from '@/components/ranking/UploadSection';
 
 export default function ChartTest() {
   const { 
@@ -19,8 +21,12 @@ export default function ChartTest() {
     isLoading, 
     setIsLoading,
     setIsMockData,
-    dataSource
+    dataSource,
+    setDataSource,
+    refreshChartData
   } = useRankingCharts();
+  
+  const [showUploadSection, setShowUploadSection] = useState(false);
   
   // Load mock data from the JSON files immediately when component mounts
   useEffect(() => {
@@ -52,6 +58,14 @@ export default function ChartTest() {
         
         // Set mock data flag to true
         setIsMockData(true);
+        setDataSource('mock');
+        
+        // Store in localStorage
+        localStorage.setItem('demo-data-source', 'mock');
+        localStorage.setItem('demo-sgz-data', JSON.stringify(sgzData));
+        localStorage.setItem('demo-painel-data', JSON.stringify(painelData));
+        localStorage.setItem('demo-last-update', new Date().toISOString());
+        localStorage.setItem('isMockData', 'true');
         
         // Compare data to verify integration
         if (sgzData.length > 0 && painelData.length > 0) {
@@ -68,11 +82,15 @@ export default function ChartTest() {
       } catch (error) {
         console.error("ChartTest: Error loading mock data:", error);
         setIsLoading(false);
+        toast.error("Erro ao carregar dados de demonstração");
       }
     }
     
     loadMockData();
-  }, [setSgzData, setPainelData, setIsLoading, setIsMockData]);
+  }, [setSgzData, setPainelData, setIsLoading, setIsMockData, setDataSource]);
+  
+  // Mock user for upload functionality
+  const mockUser = { id: 'test-user', email: 'test@example.com' };
   
   // Function to reload data
   const reloadData = async () => {
@@ -91,12 +109,62 @@ export default function ChartTest() {
       
       // Set mock data flag to true
       setIsMockData(true);
+      setDataSource('mock');
+      
+      // Store in localStorage
+      localStorage.setItem('demo-data-source', 'mock');
+      localStorage.setItem('demo-sgz-data', JSON.stringify(sgzData));
+      localStorage.setItem('demo-painel-data', JSON.stringify(painelData));
+      localStorage.setItem('demo-last-update', new Date().toISOString());
+      localStorage.setItem('isMockData', 'true');
       
       console.log("Data reloaded successfully!");
+      toast.success("Dados recarregados com sucesso!");
       setIsLoading(false);
     } catch (error) {
       console.error("Error reloading data:", error);
+      toast.error("Erro ao recarregar dados");
       setIsLoading(false);
+    }
+  };
+  
+  // Handle file upload state
+  const [isUploading, setIsUploading] = useState(false);
+  
+  const handleUploadStart = () => {
+    setIsUploading(true);
+  };
+  
+  const handleUploadComplete = (id: string, data: any[]) => {
+    console.log(`Upload complete, ID: ${id}, Records: ${data.length}`);
+    toast.success(`Upload concluído: ${data.length} registros`);
+    setIsUploading(false);
+    refreshChartData();
+  };
+  
+  // Handle mock data updates for debug panel
+  const handleUpdateMockData = async (type: 'sgz' | 'painel', data: any[]): Promise<boolean> => {
+    try {
+      if (type === 'sgz') {
+        setSgzData(data);
+      } else if (type === 'painel') {
+        setPainelData(data);
+      }
+      
+      // Update localStorage
+      const dataSourceType = data.length === 0 ? 'unknown' : localStorage.getItem('demo-data-source') || 'mock';
+      
+      if (dataSourceType !== 'unknown' || data.length > 0) {
+        localStorage.setItem(`demo-${type}-data`, JSON.stringify(data));
+        localStorage.setItem('demo-last-update', new Date().toISOString());
+      }
+      
+      toast.success(`Dados de ${type} atualizados com sucesso`);
+      return true;
+    } catch (error) {
+      console.error(`Error updating ${type} data:`, error);
+      toast.error(`Erro ao atualizar dados de ${type}`);
+      return false;
     }
   };
 
@@ -104,10 +172,36 @@ export default function ChartTest() {
     <div className="p-6 max-w-6xl mx-auto space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold">Chart Testing Page</h1>
-        <Button onClick={reloadData} variant="outline" disabled={isLoading}>
-          {isLoading ? 'Loading...' : 'Reload Mock Data'}
-        </Button>
+        <div className="flex gap-2">
+          <Button 
+            onClick={() => setShowUploadSection(!showUploadSection)} 
+            variant="outline"
+          >
+            {showUploadSection ? 'Ocultar Upload' : 'Mostrar Upload'}
+          </Button>
+          <Button 
+            onClick={reloadData} 
+            variant="default" 
+            disabled={isLoading}
+          >
+            {isLoading ? 'Loading...' : 'Reload Mock Data'}
+          </Button>
+        </div>
       </div>
+      
+      {showUploadSection && (
+        <div className="mb-6 p-4 border border-gray-200 bg-white rounded-lg shadow-sm">
+          <h2 className="text-lg font-semibold mb-4">Upload de Arquivos</h2>
+          <UploadSection
+            onUploadStart={handleUploadStart}
+            onUploadComplete={handleUploadComplete}
+            onPainelUploadComplete={handleUploadComplete}
+            isUploading={isUploading}
+            user={mockUser}
+            onRefreshData={refreshChartData}
+          />
+        </div>
+      )}
       
       <ChartDataDebugger />
       <ChartDebugPanel 
@@ -115,6 +209,7 @@ export default function ChartTest() {
         painelData={painelData} 
         isVisible={true} 
         isLoading={isLoading}
+        onUpdateMockData={handleUpdateMockData}
         dataSource={dataSource || 'mock'}
         dataStatus={{
           sgzCount: sgzData?.length || 0,
@@ -159,7 +254,7 @@ export default function ChartTest() {
         <TabsContent value="data">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <Card className="p-4">
-              <h2 className="text-lg font-semibold mb-4">SGZ Mock Data</h2>
+              <h2 className="text-lg font-semibold mb-4">SGZ Data</h2>
               {!sgzData ? (
                 <p>No SGZ data available</p>
               ) : (
@@ -174,7 +269,7 @@ export default function ChartTest() {
             </Card>
             
             <Card className="p-4">
-              <h2 className="text-lg font-semibold mb-4">Painel Mock Data</h2>
+              <h2 className="text-lg font-semibold mb-4">Painel Data</h2>
               {!painelData ? (
                 <p>No Painel data available</p>
               ) : (

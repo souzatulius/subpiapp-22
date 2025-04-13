@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
+import { toast } from 'sonner';
 
 interface ChartDebugPanelProps {
   sgzData: any[] | null;
@@ -33,6 +34,7 @@ const ChartDebugPanel: React.FC<ChartDebugPanelProps> = ({
   const [activeTab, setActiveTab] = useState<string>('sgz');
   const [jsonView, setJsonView] = useState<boolean>(false);
   const [selectedItem, setSelectedItem] = useState<any>(null);
+  const [mockSimulation, setMockSimulation] = useState<boolean>(false);
   
   if (!isVisible) return null;
   
@@ -75,6 +77,201 @@ const ChartDebugPanel: React.FC<ChartDebugPanelProps> = ({
     }
   };
   
+  const handleSimulateProgress = () => {
+    toast.info("Simulação de progresso iniciada");
+    setMockSimulation(true);
+    
+    // Example simulation - just for demonstration
+    const simulatedSgz = sgzData?.map(item => ({
+      ...item,
+      sgz_status: Math.random() > 0.5 ? 'CONCLUIDO' : 'EM_ANDAMENTO'
+    }));
+    
+    if (onUpdateMockData && simulatedSgz) {
+      onUpdateMockData('sgz', simulatedSgz)
+        .then(success => {
+          if (success) {
+            toast.success("Simulação aplicada com sucesso");
+          }
+        })
+        .catch(error => {
+          console.error("Error simulating progress:", error);
+          toast.error("Erro ao simular progresso");
+        })
+        .finally(() => {
+          setMockSimulation(false);
+        });
+    } else {
+      toast.error("Não foi possível iniciar simulação");
+      setMockSimulation(false);
+    }
+  };
+  
+  const handleForceMockData = () => {
+    // Load sample data from the mock files
+    Promise.all([
+      fetch('/mock/sgz_data_mock.json'),
+      fetch('/mock/painel_data_mock.json')
+    ])
+    .then(responses => Promise.all(responses.map(res => res.json())))
+    .then(([sgzMock, painelMock]) => {
+      // Store in localStorage
+      localStorage.setItem('demo-sgz-data', JSON.stringify(sgzMock));
+      localStorage.setItem('demo-painel-data', JSON.stringify(painelMock));
+      localStorage.setItem('demo-data-source', 'mock');
+      localStorage.setItem('demo-last-update', new Date().toISOString());
+      localStorage.setItem('isMockData', 'true');
+      
+      // Update via callback if available
+      if (onUpdateMockData) {
+        onUpdateMockData('sgz', sgzMock)
+          .then(() => onUpdateMockData('painel', painelMock))
+          .then(() => {
+            toast.success("Dados de demonstração carregados com sucesso");
+          })
+          .catch(error => {
+            console.error("Error loading mock data:", error);
+            toast.error("Erro ao carregar dados de demonstração");
+          });
+      } else {
+        toast.success("Dados de demonstração carregados. Recarregue a página para ver as alterações.");
+      }
+    })
+    .catch(error => {
+      console.error("Error fetching mock data:", error);
+      toast.error("Erro ao carregar dados de demonstração");
+    });
+  };
+  
+  const handleClearCache = () => {
+    try {
+      // Clear only demo data from localStorage
+      localStorage.removeItem('demo-sgz-data');
+      localStorage.removeItem('demo-painel-data');
+      localStorage.setItem('demo-data-source', 'unknown');
+      localStorage.removeItem('demo-last-update');
+      localStorage.setItem('isMockData', 'false');
+      
+      toast.success("Cache local limpo com sucesso. Recarregue a página para ver as alterações.");
+      
+      // Update via callback if available
+      if (onUpdateMockData) {
+        onUpdateMockData('sgz', [])
+          .then(() => onUpdateMockData('painel', []))
+          .then(() => {
+            toast.success("Dados removidos com sucesso");
+          })
+          .catch(error => {
+            console.error("Error clearing data:", error);
+          });
+      }
+    } catch (error) {
+      console.error("Error clearing cache:", error);
+      toast.error("Erro ao limpar cache local");
+    }
+  };
+  
+  const showCurrentLocalStorage = () => {
+    try {
+      const state = {
+        total: 0,
+        items: {} as Record<string, any>
+      };
+      
+      let totalSize = 0;
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key) {
+          const value = localStorage.getItem(key);
+          if (value) {
+            const size = value.length * 2; // rough estimate in bytes
+            totalSize += size;
+            
+            if (key.startsWith('demo-')) {
+              try {
+                state.items[key] = JSON.parse(value);
+              } catch {
+                state.items[key] = value;
+              }
+            } else {
+              state.items[key] = `[${(size / 1024).toFixed(2)}KB]`;
+            }
+          }
+        }
+      }
+      
+      state.total = totalSize / (1024 * 1024); // MB
+      
+      // Display in an iframe for better formatting
+      const html = `
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <style>
+              body { font-family: monospace; padding: 20px; }
+              h2 { margin-top: 0; }
+              pre { background: #f1f1f1; padding: 10px; border-radius: 5px; overflow: auto; }
+            </style>
+          </head>
+          <body>
+            <h2>Estado atual do localStorage:</h2>
+            <p>Total utilizado: ~${state.total.toFixed(2)}MB</p>
+            <div>
+              <p><strong>demo-data-source:</strong> ${localStorage.getItem('demo-data-source') || 'não definido'}</p>
+              <p><strong>SGZ registros:</strong> ${(state.items['demo-sgz-data']?.length || 0)}</p>
+              <p><strong>Painel registros:</strong> ${(state.items['demo-painel-data']?.length || 0)}</p>
+              <p><strong>Última atualização:</strong> ${formatDate(localStorage.getItem('demo-last-update'))}</p>
+              <p><strong>isMockData:</strong> ${localStorage.getItem('isMockData') || 'não definido'}</p>
+            </div>
+          </body>
+        </html>
+      `;
+      
+      const iframe = document.createElement('iframe');
+      iframe.style.position = 'fixed';
+      iframe.style.top = '50%';
+      iframe.style.left = '50%';
+      iframe.style.transform = 'translate(-50%, -50%)';
+      iframe.style.width = '80%';
+      iframe.style.height = '80%';
+      iframe.style.backgroundColor = 'white';
+      iframe.style.boxShadow = '0 0 20px rgba(0,0,0,0.3)';
+      iframe.style.border = 'none';
+      iframe.style.borderRadius = '8px';
+      iframe.style.zIndex = '10000';
+      
+      const closeBtn = document.createElement('button');
+      closeBtn.innerText = 'X';
+      closeBtn.style.position = 'fixed';
+      closeBtn.style.top = '10%';
+      closeBtn.style.right = '10%';
+      closeBtn.style.zIndex = '10001';
+      closeBtn.style.backgroundColor = '#f44336';
+      closeBtn.style.color = 'white';
+      closeBtn.style.border = 'none';
+      closeBtn.style.borderRadius = '50%';
+      closeBtn.style.width = '40px';
+      closeBtn.style.height = '40px';
+      closeBtn.style.cursor = 'pointer';
+      closeBtn.style.fontSize = '20px';
+      closeBtn.onclick = () => {
+        document.body.removeChild(iframe);
+        document.body.removeChild(closeBtn);
+      };
+      
+      document.body.appendChild(iframe);
+      document.body.appendChild(closeBtn);
+      
+      iframe.contentWindow?.document.open();
+      iframe.contentWindow?.document.write(html);
+      iframe.contentWindow?.document.close();
+      
+    } catch (error) {
+      console.error("Error showing localStorage:", error);
+      toast.error("Erro ao mostrar localStorage");
+    }
+  };
+  
   return (
     <Card className="mt-4 bg-gray-50 border border-amber-300">
       <CardHeader className="pb-2 flex flex-row items-center justify-between">
@@ -105,7 +302,7 @@ const ChartDebugPanel: React.FC<ChartDebugPanelProps> = ({
             <span className="font-bold">Painel Atualização:</span> {formatDate(dataStatus.lastPainelUpdate)}
           </div>
           <div>
-            <span className="font-bold">Fonte de Dados:</span> {dataSource}
+            <span className="font-bold">Fonte de Dados:</span> {dataStatus.dataSource || dataSource}
           </div>
           <div>
             <span className="font-bold">Local Storage:</span> {localStorage.getItem('demo-data-source') || 'não definido'}
@@ -151,7 +348,7 @@ const ChartDebugPanel: React.FC<ChartDebugPanelProps> = ({
                       <td className="p-1 border">{item.sgz_status}</td>
                       <td className="p-1 border truncate max-w-xs">{item.sgz_tipo_servico}</td>
                       <td className="p-1 border">{item.sgz_distrito}</td>
-                      <td className="p-1 border">{new Date(item.sgz_criado_em).toLocaleDateString()}</td>
+                      <td className="p-1 border">{new Date(item.sgz_criado_em || Date.now()).toLocaleDateString()}</td>
                       <td className="p-1 border">
                         <Button 
                           size="sm" 
@@ -230,93 +427,81 @@ const ChartDebugPanel: React.FC<ChartDebugPanelProps> = ({
           <TabsContent value="actions" className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
               <div className="space-y-2">
-                <h3 className="text-sm font-medium">Ações para dados SGZ:</h3>
+                <h3 className="text-sm font-medium">Ações para dados:</h3>
                 <div className="flex flex-wrap gap-2">
                   <Button
                     size="sm"
                     variant="outline"
                     className="text-xs"
-                    onClick={() => {
-                      if (sgzData && onUpdateMockData) {
-                        // Update status of random items to simulate progress
-                        const updatedData = sgzData.map((item, idx) => {
-                          if (idx % 5 === 0 && item.sgz_status !== 'CONCLUIDO') {
-                            return { ...item, sgz_status: 'CONCLUIDO' };
-                          }
-                          return item;
-                        });
-                        onUpdateMockData('sgz', updatedData);
-                      }
-                    }}
+                    onClick={handleSimulateProgress}
+                    disabled={mockSimulation || isLoading || !sgzData?.length}
                   >
                     Simular Progresso
                   </Button>
-                  
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="text-xs"
+                    onClick={handleForceMockData}
+                    disabled={mockSimulation || isLoading}
+                  >
+                    Forçar Mock Data
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="text-xs bg-orange-50 hover:bg-orange-100"
+                    onClick={handleClearCache}
+                    disabled={mockSimulation || isLoading}
+                  >
+                    Limpar Cache
+                  </Button>
+                </div>
+                
+                <h3 className="text-sm font-medium">Diagnóstico:</h3>
+                <div className="flex flex-wrap gap-2">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="text-xs"
+                    onClick={showCurrentLocalStorage}
+                  >
+                    Ver LocalStorage
+                  </Button>
                   <Button
                     size="sm"
                     variant="outline"
                     className="text-xs"
                     onClick={() => {
-                      localStorage.setItem('demo-data-source', 'mock');
-                      window.location.reload();
+                      try {
+                        console.log('SGZ Data:', sgzData);
+                        console.log('Painel Data:', painelData);
+                        console.log('Data Source:', dataSource);
+                        console.log('localStorage:', {
+                          'demo-data-source': localStorage.getItem('demo-data-source'),
+                          'demo-last-update': localStorage.getItem('demo-last-update'),
+                          'isMockData': localStorage.getItem('isMockData')
+                        });
+                        toast.info("Dados no console. Pressione F12 para visualizar.");
+                      } catch (err) {
+                        console.error("Debug log error:", err);
+                      }
                     }}
                   >
-                    Forçar Mock
+                    Debug Log
                   </Button>
                 </div>
               </div>
               
-              <div className="space-y-2">
-                <h3 className="text-sm font-medium">Limpeza e Diagnóstico:</h3>
-                <div className="flex flex-wrap gap-2">
-                  <Button
-                    size="sm"
-                    variant="destructive"
-                    className="text-xs"
-                    onClick={() => {
-                      localStorage.removeItem('demo-sgz-data');
-                      localStorage.removeItem('demo-painel-data');
-                      localStorage.removeItem('demo-last-update');
-                      localStorage.removeItem('demo-data-source');
-                      localStorage.removeItem('ranking-charts-storage');
-                      window.location.reload();
-                    }}
-                  >
-                    Limpar Cache
-                  </Button>
-                  
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="text-xs"
-                    onClick={() => {
-                      const storageUsed = Object.keys(localStorage).reduce((total, key) => {
-                        return total + ((localStorage[key].length * 2) / 1024 / 1024);
-                      }, 0);
-                      alert(`Estado atual do localStorage:\n\n` + 
-                        `Total utilizado: ~${storageUsed.toFixed(2)}MB\n` +
-                        `demo-data-source: ${localStorage.getItem('demo-data-source')}\n` +
-                        `SGZ registros: ${sgzData?.length || 0}\n` +
-                        `Painel registros: ${painelData?.length || 0}\n` +
-                        `Última atualização: ${formatDate(localStorage.getItem('demo-last-update'))}\n` +
-                        `isMockData: ${dataSource === 'mock' ? 'true' : 'false'}`
-                      );
-                    }}
-                  >
-                    Diagnóstico
-                  </Button>
-                </div>
+              <div className="bg-gray-100 p-3 rounded-lg space-y-1 text-xs">
+                <h3 className="font-medium">Estado Atual:</h3>
+                <p><strong>Data Source:</strong> {dataSource}</p>
+                <p><strong>localStorage Source:</strong> {localStorage.getItem('demo-data-source') || 'não definido'}</p>
+                <p><strong>isMockData:</strong> {localStorage.getItem('isMockData') || 'não definido'}</p>
+                <p><strong>SGZ Registros:</strong> {sgzData?.length || 0}</p>
+                <p><strong>Painel Registros:</strong> {painelData?.length || 0}</p>
+                <p><strong>Última Atualização:</strong> {formatDate(localStorage.getItem('demo-last-update'))}</p>
               </div>
-            </div>
-            
-            <div className="bg-gray-100 p-3 rounded text-xs">
-              <h3 className="font-medium mb-2">Dicas:</h3>
-              <ul className="list-disc pl-4 space-y-1">
-                <li>Use Alt+D para alternar a visibilidade do painel de debug</li>
-                <li>O botão "Limpar Cache" apaga todos os dados armazenados localmente</li>
-                <li>Caso os dados não apareçam, verifique se o dataSource está correto</li>
-                <li>O botão "Forçar Mock" força o uso de dados de demonstração</li>
-              </ul>
             </div>
           </TabsContent>
         </Tabs>

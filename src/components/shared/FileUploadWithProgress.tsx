@@ -1,12 +1,12 @@
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Upload, CheckCircle2, XCircle, AlertCircle, FileX } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 interface FileUploadWithProgressProps {
-  onFileSelected: (file: File) => Promise<void>;
+  onFileSelected: (file: File) => void;
   accept?: string;
   maxSize?: number; // in MB
   isLoading?: boolean;
@@ -31,8 +31,20 @@ const FileUploadWithProgress: React.FC<FileUploadWithProgressProps> = ({
   const [error, setError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
+  
+  // Reset state when disabled prop changes
+  useEffect(() => {
+    if (!disabled && isLoading === false && selectedFile === null) {
+      // Clear the input value to allow selecting the same file again
+      if (inputRef.current) {
+        inputRef.current.value = '';
+      }
+    }
+  }, [disabled, isLoading, selectedFile]);
 
   const handleDrag = (e: React.DragEvent<HTMLDivElement>) => {
+    if (disabled) return;
+    
     e.preventDefault();
     e.stopPropagation();
     
@@ -76,6 +88,8 @@ const FileUploadWithProgress: React.FC<FileUploadWithProgressProps> = ({
   };
 
   const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    if (disabled) return;
+    
     e.preventDefault();
     e.stopPropagation();
     setDragActive(false);
@@ -95,20 +109,23 @@ const FileUploadWithProgress: React.FC<FileUploadWithProgressProps> = ({
     }
   };
   
-  const handleFile = async (file: File) => {
+  const handleFile = (file: File) => {
+    console.log("File selected:", file.name);
+    
     if (validateFile(file)) {
       setSelectedFile(file);
-      try {
-        await onFileSelected(file);
-      } catch (err) {
-        console.error("Error processing file:", err);
-        setError("Erro ao processar o arquivo.");
-      }
+      // Call the parent's onFileSelected directly
+      onFileSelected(file);
+    }
+    
+    // Always clear the input value to allow selecting the same file again
+    if (inputRef.current) {
+      inputRef.current.value = '';
     }
   };
   
   const handleClick = () => {
-    if (inputRef.current) {
+    if (inputRef.current && !disabled) {
       inputRef.current.click();
     }
   };
@@ -117,6 +134,15 @@ const FileUploadWithProgress: React.FC<FileUploadWithProgressProps> = ({
     if (bytes < 1024) return bytes + ' bytes';
     if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
     return (bytes / 1048576).toFixed(1) + ' MB';
+  };
+  
+  const handleClearFile = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setSelectedFile(null);
+    setError(null);
+    if (inputRef.current) {
+      inputRef.current.value = '';
+    }
   };
 
   return (
@@ -160,12 +186,11 @@ const FileUploadWithProgress: React.FC<FileUploadWithProgressProps> = ({
             </div>
             <p className="font-medium">{selectedFile.name}</p>
             <p className="text-sm text-gray-500">{formatFileSize(selectedFile.size)}</p>
-            <Button size="sm" variant="outline" onClick={(e) => {
-              e.stopPropagation();
-              setSelectedFile(null);
-            }}>
-              Selecionar outro arquivo
-            </Button>
+            {!disabled && (
+              <Button size="sm" variant="outline" onClick={handleClearFile}>
+                Selecionar outro arquivo
+              </Button>
+            )}
           </div>
         ) : error ? (
           <div className="space-y-2">
@@ -174,13 +199,11 @@ const FileUploadWithProgress: React.FC<FileUploadWithProgressProps> = ({
             </div>
             <p className="text-red-600 font-medium">Erro no arquivo</p>
             <p className="text-sm text-red-500">{error}</p>
-            <Button size="sm" variant="outline" className="border-red-200 text-red-700" onClick={(e) => {
-              e.stopPropagation();
-              setError(null);
-              setSelectedFile(null);
-            }}>
-              Tentar novamente
-            </Button>
+            {!disabled && (
+              <Button size="sm" variant="outline" className="border-red-200 text-red-700" onClick={handleClearFile}>
+                Tentar novamente
+              </Button>
+            )}
           </div>
         ) : (
           <div className="space-y-2">
@@ -192,7 +215,7 @@ const FileUploadWithProgress: React.FC<FileUploadWithProgressProps> = ({
               )}
             </div>
             <p className="font-medium">{label}</p>
-            <p className="text-sm text-gray-500">{helperText}</p>
+            <p className="text-sm text-gray-500">{disabled ? "Upload desativado" : helperText}</p>
             {accept && (
               <p className="text-xs text-gray-400">
                 Formatos aceitos: {accept}

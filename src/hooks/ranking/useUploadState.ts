@@ -14,6 +14,7 @@ interface UploadState {
   setLastRefreshTime: (time: Date) => void;
   setValidationErrors: (errors: ValidationError[]) => void;
   resetProgress: () => void;
+  resetAll: () => void;
 }
 
 export const useUploadState = create<UploadState>((set) => ({
@@ -31,5 +32,11 @@ export const useUploadState = create<UploadState>((set) => ({
     sgzProgress: null, 
     painelProgress: null,
     validationErrors: [] 
+  }),
+  resetAll: () => set({
+    sgzProgress: null,
+    painelProgress: null,
+    isUploading: false,
+    validationErrors: []
   })
 }));

@@ -5,9 +5,9 @@ import { useUploadState } from '@/hooks/ranking/useUploadState';
 import { ValidationError } from '@/hooks/ranking/types/uploadTypes';
 import ErrorSummary from '@/components/ranking/ErrorSummary';
 import { toast } from 'sonner';
-import { useToast } from '@/components/ui/use-toast';
+import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent } from '@/components/ui/card';
-import { FileInput } from '@/components/ui/file-input';
+import FileUploadWithProgress from '@/components/shared/FileUploadWithProgress';
 import { Button } from '@/components/ui/button';
 import UploadProgressDisplay from '@/components/ranking/UploadProgressDisplay';
 
@@ -37,19 +37,32 @@ const UploadSection: React.FC<UploadSectionProps> = ({
     setSgzProgress, 
     setPainelProgress, 
     validationErrors, 
-    setValidationErrors 
+    setValidationErrors,
+    resetProgress
   } = useUploadState();
   
   const { handleUploadPainel } = usePainelZeladoriaUpload(user);
   
-  const handleSgzFileChange = (file: File | null) => {
+  useEffect(() => {
+    if (!isUploading) {
+      if (sgzProgress?.stage === 'complete' || painelProgress?.stage === 'complete') {
+        setTimeout(() => {
+          resetProgress();
+        }, 3000);
+      }
+    }
+  }, [isUploading, sgzProgress, painelProgress, resetProgress]);
+  
+  const handleSgzFileSelect = (file: File | null) => {
     setSgzFile(file);
     setValidationErrors([]);
+    console.log("SGZ file selected:", file?.name);
   };
   
-  const handlePainelFileChange = (file: File | null) => {
+  const handlePainelFileSelect = (file: File | null) => {
     setPainelFile(file);
     setValidationErrors([]);
+    console.log("Painel file selected:", file?.name);
   };
   
   const uploadSgzFile = async () => {
@@ -82,7 +95,7 @@ const UploadSection: React.FC<UploadSectionProps> = ({
         (progress: number) => {
           setSgzProgress({
             totalRows: 0,
-            processedRows: 0,
+            processedRows: Math.round((progress/100) * 100),
             updatedRows: 0,
             newRows: 0,
             stage: 'uploading',
@@ -110,11 +123,14 @@ const UploadSection: React.FC<UploadSectionProps> = ({
           localStorage.setItem('demo-data-source', 'upload');
           localStorage.setItem('demo-sgz-data', JSON.stringify(uploadResult.data || []));
           localStorage.setItem('demo-last-update', new Date().toISOString());
+          localStorage.setItem('isMockData', 'false');
         } catch (error) {
           console.error("Error saving upload source to localStorage:", error);
         }
         
         onUploadComplete(uploadResult.id || 'no-id', uploadResult.data || []);
+        
+        setSgzFile(null);
         
         try {
           await onRefreshData();
@@ -140,6 +156,8 @@ const UploadSection: React.FC<UploadSectionProps> = ({
           message: uploadResult?.message || 'Erro no upload',
           errorCount: uploadResult?.errors?.length || 0
         });
+        
+        setSgzFile(null);
       }
     } catch (error: any) {
       console.error('Error during SGZ file upload:', error);
@@ -154,6 +172,8 @@ const UploadSection: React.FC<UploadSectionProps> = ({
         stage: 'error',
         message: `Erro: ${error.message}`,
       });
+      
+      setSgzFile(null);
     }
   };
   
@@ -187,11 +207,14 @@ const UploadSection: React.FC<UploadSectionProps> = ({
           localStorage.setItem('demo-data-source', 'upload');
           localStorage.setItem('demo-painel-data', JSON.stringify(uploadResult.data || []));
           localStorage.setItem('demo-last-update', new Date().toISOString());
+          localStorage.setItem('isMockData', 'false');
         } catch (error) {
           console.error("Error saving upload source to localStorage:", error);
         }
         
         onPainelUploadComplete(uploadResult.id || 'no-id', uploadResult.data || []);
+        
+        setPainelFile(null);
         
         try {
           await onRefreshData();
@@ -212,6 +235,8 @@ const UploadSection: React.FC<UploadSectionProps> = ({
           stage: 'error',
           message: uploadResult?.message || 'Erro no upload',
         });
+        
+        setPainelFile(null);
       }
     } catch (error: any) {
       console.error('Error during Painel file upload:', error);
@@ -226,105 +251,106 @@ const UploadSection: React.FC<UploadSectionProps> = ({
         stage: 'error',
         message: `Erro: ${error.message}`,
       });
+      
+      setPainelFile(null);
     }
   };
   
   const showSgzProgress = sgzProgress && (sgzProgress.stage === 'uploading' || sgzProgress.stage === 'processing');
   const showPainelProgress = painelProgress && (painelProgress.stage === 'uploading' || painelProgress.stage === 'processing');
+  const isCompleteOrError = (progress: any) => progress && (progress.stage === 'complete' || progress.stage === 'error');
   
   return (
-    <div className="flex flex-col space-y-4">
-      <Card>
-        <CardContent className="p-4">
-          <h3 className="text-sm font-medium text-gray-700 mb-2">
-            Importar dados do SGZ
-          </h3>
-          
-          <FileInput
-            id="sgz-upload"
-            accept=".xlsx, .xls"
-            onChange={handleSgzFileChange}
-            disabled={isUploading || showSgzProgress || showPainelProgress}
-          />
-          
-          {sgzFile && (
-            <div className="mt-2 text-sm text-gray-500">
-              Arquivo selecionado: {sgzFile.name} ({Math.round(sgzFile.size / 1024)} KB)
+    <div className="space-y-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <Card>
+          <CardContent className="p-4">
+            <h3 className="text-sm font-medium text-gray-700 mb-2">
+              Importar dados do SGZ
+            </h3>
+            
+            <FileUploadWithProgress
+              onFileSelected={handleSgzFileSelect}
+              accept=".xlsx, .xls"
+              maxSize={10}
+              isLoading={isUploading && showSgzProgress}
+              progress={sgzProgress?.processedRows || 0}
+              label={sgzFile ? sgzFile.name : "Selecionar arquivo SGZ"}
+              helperText="Clique para selecionar ou arraste o arquivo"
+              disabled={isUploading || showSgzProgress || showPainelProgress}
+            />
+            
+            <div className="flex justify-end mt-3">
+              <Button
+                onClick={uploadSgzFile}
+                disabled={isUploading || !sgzFile || showSgzProgress || showPainelProgress}
+                className="bg-blue-500 hover:bg-blue-700 text-white"
+              >
+                {isUploading && sgzFile ? 'Enviando...' : 'Enviar SGZ'}
+              </Button>
             </div>
-          )}
-          
-          <div className="flex justify-end mt-3">
-            <Button
-              onClick={uploadSgzFile}
-              disabled={isUploading || !sgzFile || showSgzProgress || showPainelProgress}
-              className="bg-blue-500 hover:bg-blue-700 text-white"
-            >
-              {isUploading && sgzFile ? 'Enviando...' : 'Enviar SGZ'}
-            </Button>
-          </div>
-          
-          {sgzProgress && sgzProgress.stage !== 'complete' && sgzProgress.stage !== 'error' && (
-            <div className="mt-4">
-              <UploadProgressDisplay stats={sgzProgress} type="sgz" />
+            
+            {showSgzProgress && (
+              <div className="mt-4">
+                <UploadProgressDisplay stats={sgzProgress} type="sgz" />
+              </div>
+            )}
+            
+            {isCompleteOrError(sgzProgress) && (
+              <div className="mt-4">
+                <UploadProgressDisplay stats={sgzProgress} type="sgz" />
+              </div>
+            )}
+            
+            {validationErrors && validationErrors.length > 0 && (
+              <div className="mt-4">
+                <ErrorSummary errors={validationErrors} maxErrors={5} />
+              </div>
+            )}
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardContent className="p-4">
+            <h3 className="text-sm font-medium text-gray-700 mb-2">
+              Importar dados do Painel da Zeladoria
+            </h3>
+            
+            <FileUploadWithProgress
+              onFileSelected={handlePainelFileSelect}
+              accept=".xlsx, .xls"
+              maxSize={10}
+              isLoading={isUploading && showPainelProgress}
+              progress={painelProgress?.processedRows || 0}
+              label={painelFile ? painelFile.name : "Selecionar arquivo Painel"}
+              helperText="Clique para selecionar ou arraste o arquivo"
+              disabled={isUploading || showSgzProgress || showPainelProgress}
+            />
+            
+            <div className="flex justify-end mt-3">
+              <Button
+                onClick={handlePainelUpload}
+                disabled={isUploading || !painelFile || showSgzProgress || showPainelProgress}
+                className="bg-blue-500 hover:bg-blue-700 text-white"
+              >
+                {isUploading && painelFile ? 'Enviando...' : 'Enviar Painel'}
+              </Button>
             </div>
-          )}
-          
-          {sgzProgress && (sgzProgress.stage === 'complete' || sgzProgress.stage === 'error') && (
-            <div className="mt-4">
-              <UploadProgressDisplay stats={sgzProgress} type="sgz" />
-            </div>
-          )}
-          
-          {validationErrors && validationErrors.length > 0 && (
-            <div className="mt-4">
-              <ErrorSummary errors={validationErrors} maxErrors={5} />
-            </div>
-          )}
-        </CardContent>
-      </Card>
-      
-      <Card>
-        <CardContent className="p-4">
-          <h3 className="text-sm font-medium text-gray-700 mb-2">
-            Importar dados do Painel da Zeladoria
-          </h3>
-          
-          <FileInput
-            id="painel-upload"
-            accept=".xlsx, .xls"
-            onChange={handlePainelFileChange}
-            disabled={isUploading || showSgzProgress || showPainelProgress}
-          />
-          
-          {painelFile && (
-            <div className="mt-2 text-sm text-gray-500">
-              Arquivo selecionado: {painelFile.name} ({Math.round(painelFile.size / 1024)} KB)
-            </div>
-          )}
-          
-          <div className="flex justify-end mt-3">
-            <Button
-              onClick={handlePainelUpload}
-              disabled={isUploading || !painelFile || showSgzProgress || showPainelProgress}
-              className="bg-blue-500 hover:bg-blue-700 text-white"
-            >
-              {isUploading && painelFile ? 'Enviando...' : 'Enviar Painel'}
-            </Button>
-          </div>
-          
-          {painelProgress && painelProgress.stage !== 'complete' && painelProgress.stage !== 'error' && (
-            <div className="mt-4">
-              <UploadProgressDisplay stats={painelProgress} type="painel" />
-            </div>
-          )}
-          
-          {painelProgress && (painelProgress.stage === 'complete' || painelProgress.stage === 'error') && (
-            <div className="mt-4">
-              <UploadProgressDisplay stats={painelProgress} type="painel" />
-            </div>
-          )}
-        </CardContent>
-      </Card>
+            
+            {showPainelProgress && (
+              <div className="mt-4">
+                <UploadProgressDisplay stats={painelProgress} type="painel" />
+              </div>
+            )}
+            
+            {isCompleteOrError(painelProgress) && (
+              <div className="mt-4">
+                <UploadProgressDisplay stats={painelProgress} type="painel" />
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 };
