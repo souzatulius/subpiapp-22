@@ -3,7 +3,6 @@ import React from 'react';
 import { ActionCardItem } from '@/types/dashboard';
 import DynamicContentCard from '../../cards/DynamicContentCard';
 import StatisticsCard from '../../cards/StatisticsCard';
-import { useDynamicDashboardContent } from '@/hooks/dashboard/useDynamicDashboardContent';
 
 interface GetSpecialContentProps {
   card: ActionCardItem;
@@ -25,8 +24,10 @@ const getSpecialContent = ({
 
   // For cards with dataSourceKey
   if (card.dataSourceKey) {
-    const dashboardContent = useDynamicDashboardContent();
-    const { notasItems, demandasItems, isLoading } = dashboardContent;
+    // Static mock data since we're not using hooks in this utility function
+    const notasItems = specialCardsData?.notasItems || [];
+    const demandasItems = specialCardsData?.demandasItems || [];
+    const isLoading = specialCardsData?.isLoading || false;
     
     switch (card.dataSourceKey) {
       case 'ultimas_notas':

@@ -8,7 +8,7 @@ interface TimelineItemProps {
   id: string;
   title: string;
   description?: string;
-  date: Date;
+  date: string; // Changed from Date to string
   tag?: string;
   link?: string;
   coordenacao?: string;
@@ -57,6 +57,7 @@ const DynamicContentCard: React.FC<DynamicContentCardProps> = ({ items, type, is
 };
 
 const ItemCard: React.FC<{ item: TimelineItemProps, type: 'notes' | 'demands' | 'news' }> = ({ item, type }) => {
+  // Parse the date string to Date object for formatting
   const timeAgo = formatDistanceToNow(new Date(item.date), { addSuffix: true, locale: ptBR });
   
   return (

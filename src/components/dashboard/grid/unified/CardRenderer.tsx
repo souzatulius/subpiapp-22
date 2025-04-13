@@ -38,11 +38,17 @@ export const CardRenderer: React.FC<CardRendererProps> = ({
   specialCardsData,
   renderSpecialCardContent
 }) => {
-  const specialContent = getSpecialContent({
-    card,
-    renderSpecialCardContent,
-    specialCardsData
-  });
+  let specialContent: React.ReactNode | null = null;
+  
+  if (renderSpecialCardContent) {
+    specialContent = renderSpecialCardContent(card.id);
+  } else if (card) {
+    specialContent = getSpecialContent({
+      card,
+      renderSpecialCardContent,
+      specialCardsData
+    });
+  }
   
   return (
     <div
