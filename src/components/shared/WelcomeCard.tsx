@@ -48,7 +48,7 @@ const WelcomeCard: React.FC<WelcomeCardProps> = ({
                   Olá, {userName}!
                 </h2>}
               
-              <p className="mt-2 opacity-90 text-base">{description}</p>
+              <p className="mt-2 opacity-90 text-lg">{description}</p>
             </div>
           </div>
         </div>

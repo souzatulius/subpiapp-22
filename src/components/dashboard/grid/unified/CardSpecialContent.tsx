@@ -95,12 +95,12 @@ const getSpecialContent = ({
   if (card.type) {
     switch (card.type) {
       case 'smart_search':
-        return <div className="p-4 flex items-center justify-center h-full px-0 py-0 rounded-3xl border-orange-600">
+        return <div className="p-4 flex items-center justify-center h-full py-0 rounded-3xl border-orange-600 mx-0 px-0">
             <input type="text" placeholder="Pesquisar..." onClick={e => {
             e.preventDefault();
             e.stopPropagation();
             window.location.href = '/search';
-          }} className="w-full p-2 border border-orange-300 focus:outline-none focus:ring-2 focus:ring-blue-500 px-[36px] text-2xl rounded-2xl bg-gray-25 py-[15px] my-[24px]" />
+          }} className="w-full p-2 border border-orange-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-2xl rounded-2xl bg-gray-25 py-[15px] my-[24px] px-[58px]" />
           </div>;
 
       // Add other card types as needed
