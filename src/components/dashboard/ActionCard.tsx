@@ -9,7 +9,6 @@ import ChartPreview from './charts/ChartPreview';
 import { memo } from 'react';
 import NotesApprovalCard from './cards/NotesApprovalCard';
 import PendingDemandsCard from './cards/PendingDemandsCard';
-
 export interface ActionCardProps {
   id: string;
   title: string;
@@ -35,7 +34,6 @@ export interface ActionCardProps {
   chartId?: string;
   specialContent?: React.ReactNode;
 }
-
 const getIconSize = (size?: 'sm' | 'md' | 'lg' | 'xl'): string => {
   switch (size) {
     case 'sm':
@@ -49,7 +47,6 @@ const getIconSize = (size?: 'sm' | 'md' | 'lg' | 'xl'): string => {
       return 'w-10 h-10';
   }
 };
-
 const ActionCard = memo(({
   id,
   title,
@@ -82,10 +79,8 @@ const ActionCard = memo(({
     const FallbackIcon = getIconComponentFromId(iconId);
     return FallbackIcon ? <FallbackIcon className={getIconSize(iconSize)} /> : null;
   };
-
   const isNotesApprovalCard = id === 'aprovar-notas';
   const isPendingDemandsCard = id === 'responder-demandas';
-
   return <div className={`w-full h-full rounded-xl shadow-md overflow-hidden 
         ${!isDraggable ? 'cursor-pointer' : 'cursor-grab'} 
         hover:shadow-lg ${colorClasses} group relative`}>
@@ -99,7 +94,7 @@ const ActionCard = memo(({
           <CardControls onEdit={onEdit ? () => onEdit(id) : undefined} onDelete={onDelete ? () => onDelete(id) : undefined} onHide={onHide ? () => onHide(id) : undefined} />
         </div>}
 
-      <div className="relative h-full flex flex-col items-center justify-center text-center px-[10px] py-[20px] bg-orange-200">
+      <div className="relative h-full flex flex-col items-center justify-center text-center px-[10px] py-[20px] bg-orange-600">
         {specialContent ? <div className="w-full h-full">{specialContent}</div> : isNotesApprovalCard ? <NotesApprovalCard /> : isPendingDemandsCard ? <PendingDemandsCard /> : children ? children : chartId ? <div className="w-full h-full flex flex-col">
             <ChartPreview chartId={chartId} />
           </div> : <>
@@ -107,7 +102,7 @@ const ActionCard = memo(({
               {renderIcon()}
             </div>
             <div className="line-clamp-2 max-w-[90%] py-[6px] my-[5px]">
-              <h3 className="font-semibold text-gray-800 text-lg leading-tight break-words text-balance">
+              <h3 className="font-semibold text-lg leading-tight break-words text-balance text-slate-50">
                 {title}
               </h3>
               {subtitle && <p className="text-sm text-gray-700 opacity-80 mt-1 line-clamp-2">
@@ -118,6 +113,5 @@ const ActionCard = memo(({
       </div>
     </div>;
 });
-
 ActionCard.displayName = 'ActionCard';
 export default ActionCard;
