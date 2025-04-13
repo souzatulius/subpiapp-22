@@ -4,6 +4,8 @@ import { ActionCardItem } from '@/types/dashboard';
 import DynamicContentCard from '../../cards/DynamicContentCard';
 import StatisticsCard from '../../cards/StatisticsCard';
 import { useDynamicDashboardContent } from '@/hooks/dashboard/useDynamicDashboardContent';
+import { format } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
 
 interface GetSpecialContentProps {
   card: ActionCardItem;
@@ -31,12 +33,16 @@ const getSpecialContent = ({
     // Items for DynamicContentCard with proper paths
     const notesWithPaths = notasItems?.map(item => ({
       ...item,
-      path: `/dashboard/comunicacao/notas/${item.id}`
+      path: `/dashboard/comunicacao/notas/${item.id}`,
+      // Convert Date object to string format
+      date: format(item.date, 'yyyy-MM-dd HH:mm:ss')
     })) || [];
     
     const demandsWithPaths = demandasItems?.map(item => ({
       ...item,
-      path: `/dashboard/comunicacao/demandas/${item.id}`
+      path: `/dashboard/comunicacao/demandas/${item.id}`,
+      // Convert Date object to string format
+      date: format(item.date, 'yyyy-MM-dd HH:mm:ss')
     })) || [];
     
     switch (card.dataSourceKey) {
