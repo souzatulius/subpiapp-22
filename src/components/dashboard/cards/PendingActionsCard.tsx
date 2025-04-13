@@ -25,10 +25,10 @@ interface PendingActionsCardProps {
 const PendingActionsCard: React.FC<PendingActionsCardProps> = ({
   id,
   title = "Ações Pendentes",
-  notesToApprove,
-  responsesToDo,
-  isComunicacao,
-  userDepartmentId
+  notesToApprove = 0,
+  responsesToDo = 0,
+  isComunicacao = false,
+  userDepartmentId = ''
 }) => {
   // Mock data - in production, this would come from an API call
   const pendingItems: PendingItem[] = [
@@ -96,7 +96,7 @@ const PendingActionsCard: React.FC<PendingActionsCardProps> = ({
   };
   
   return (
-    <div className="w-full h-full bg-gray-100 p-4 rounded-xl">
+    <div className="w-full h-full bg-gray-50 p-4 rounded-xl">
       <div className="flex justify-between mb-3 items-center">
         <h3 className="font-medium text-gray-800">{title}</h3>
       </div>

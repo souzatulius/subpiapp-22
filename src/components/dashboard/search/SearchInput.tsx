@@ -93,7 +93,7 @@ const SearchInput: React.FC<SearchInputProps> = ({
   return (
     <div ref={containerRef} className={`relative w-full h-full ${className}`}>
       <form onSubmit={handleSubmit} className="relative h-full">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
+        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-500" />
         <Input 
           ref={inputRef} 
           type="search" 
@@ -102,7 +102,7 @@ const SearchInput: React.FC<SearchInputProps> = ({
           onChange={handleInputChange} 
           onFocus={() => setShowSuggestions(suggestions.length > 0)} 
           onKeyDown={handleKeyDown} 
-          className="pl-10 pr-4 w-full h-full bg-transparent border-gray-500 px-[42px] text-2xl text-gray-800 placeholder:text-gray-800 placeholder:text-2xl" 
+          className="pl-10 pr-4 w-full h-full bg-transparent border-gray-300" 
         />
       </form>
 

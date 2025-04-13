@@ -83,8 +83,8 @@ const ActionCard = memo(({
       return <Search className="h-10 w-10 text-white" />;
     }
     
-    // Check if using specific white icons based on card ID
-    const useWhiteIcon = ['comunicacao', 'perfil-usuario', 'ajustes-notificacao'].includes(id);
+    // All these cards should use white icons
+    const useWhiteIcon = ['comunicacao', 'perfil-usuario', 'ajustes-notificacao', 'ajustes-notificacoes'].includes(id);
     const iconColorClass = useWhiteIcon ? "text-white" : textColorClass;
     
     const LucideIcon = (LucideIcons as any)[iconId];
@@ -101,12 +101,12 @@ const ActionCard = memo(({
   const isPendingDemandsCard = id === 'responder-demandas';
   
   // Update text color for specific cards
-  let titleTextClass = "text-slate-50"; // default
+  let titleTextClass = textColorClass;
   if (id === 'aprovar-notas-imprensa' || id === 'aprovar-notas') {
-    titleTextClass = "text-orange-950"; // Same color as icon
+    titleTextClass = textColorClass; // Match text color to icon color
   }
   if (id === 'noticias-site') {
-    titleTextClass = "text-gray-950"; // Same color as icon
+    titleTextClass = textColorClass; // Match text color to icon color
   }
 
   return <div className={`w-full h-full rounded-xl shadow-md overflow-hidden 

@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { ArrowUpIcon, ArrowDownIcon, TrendingUp, FileText, Inbox, Newspaper } from 'lucide-react';
+import { ArrowUpIcon, ArrowDownIcon, TrendingUp, FileText, Inbox, Newspaper, FileCog } from 'lucide-react';
 
 interface KpiItem {
   title: string;
@@ -12,7 +12,7 @@ interface KpiItem {
 }
 
 const OriginDemandStatistics: React.FC = () => {
-  // Mock data - would be replaced with real API data
+  // Enhanced mock data - would be replaced with real API data
   const kpis: KpiItem[] = [
     {
       title: 'Notícias',
@@ -45,11 +45,19 @@ const OriginDemandStatistics: React.FC = () => {
       change: 20,
       isPositive: false,
       icon: <FileText className="h-5 w-5 text-purple-500" />
+    },
+    {
+      title: 'e-SIC',
+      value: 15,
+      previousValue: 12,
+      change: 25,
+      isPositive: true,
+      icon: <FileCog className="h-5 w-5 text-indigo-500" />
     }
   ];
   
   return (
-    <div className="w-full h-full p-4">
+    <div className="w-full h-full p-4 bg-gray-50">
       <h3 className="text-base font-medium mb-4 text-gray-800">Estatísticas de Conteúdo</h3>
       
       <div className="grid grid-cols-2 gap-3">

@@ -1,3 +1,4 @@
+
 import { v4 as uuidv4 } from 'uuid';
 import { ActionCardItem } from '@/types/dashboard';
 import React from 'react';
@@ -106,7 +107,7 @@ export const getDefaultCards = (): ActionCardItem[] => {
       title: 'Origem das Demandas',
       iconId: 'PieChart',
       path: '/dashboard/comunicacao/origem',
-      color: 'bg-gray-500', 
+      color: 'gray-light', 
       width: '50',
       height: '2',
       type: 'origin_demand_chart',
@@ -118,10 +119,11 @@ export const getDefaultCards = (): ActionCardItem[] => {
       title: 'Ações Pendentes',
       iconId: 'Clock',
       path: '/dashboard/comunicacao/pendentes',
-      color: 'bg-gray-500', 
+      color: 'gray-light', 
       width: '50',
       height: '2',
       type: 'pending_actions',
+      isPendingActions: true,
       displayMobile: true,
       mobileOrder: 6
     },
@@ -315,7 +317,7 @@ export const getBgColor = (color: string): string => {
     case 'blue-light': return 'bg-blue-400';
     case 'blue-dark': return 'bg-blue-800';
     case 'blue-vivid': return 'bg-blue-500';
-    case 'gray-light': return 'bg-gray-200';
+    case 'gray-light': return 'bg-gray-100';
     case 'gray-medium': return 'bg-gray-400';
     case 'orange-light': return 'bg-orange-300';
     case 'orange-dark': return 'bg-orange-700';

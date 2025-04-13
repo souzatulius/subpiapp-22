@@ -49,6 +49,15 @@ const DEFAULT_MOCK_STATISTICS = {
     name: 'Rascunhos',
     value: 10,
     color: '#9CA3AF'
+  }],
+  esic: [{
+    name: 'Abertos',
+    value: 18,
+    color: '#F59E0B'
+  }, {
+    name: 'Finalizados',
+    value: 42,
+    color: '#10B981'
   }]
 };
 
@@ -119,6 +128,7 @@ const getSpecialContent = ({
             <StatisticsCard data={mockStatistics.demands} title="Demandas por Status" chartType="pie" />
             <StatisticsCard data={mockStatistics.notes} title="Notas por Status" chartType="bar" />
             <StatisticsCard data={mockStatistics.news} title="Notícias" chartType="pie" />
+            {mockStatistics.esic && <StatisticsCard data={mockStatistics.esic} title="Processos e-SIC" chartType="pie" />}
           </div>;
       default:
         return null;

@@ -5,18 +5,18 @@ import PendingActionsCard from '../../cards/PendingActionsCard';
 
 interface PendingActionsCardWrapperProps {
   card: ActionCardItem;
-  notesToApprove: number;
-  responsesToDo: number;
-  isComunicacao: boolean;
-  userDepartmentId: string;
+  notesToApprove?: number;
+  responsesToDo?: number;
+  isComunicacao?: boolean;
+  userDepartmentId?: string;
 }
 
 const PendingActionsCardWrapper: React.FC<PendingActionsCardWrapperProps> = ({
   card,
-  notesToApprove,
-  responsesToDo,
-  isComunicacao,
-  userDepartmentId
+  notesToApprove = 0,
+  responsesToDo = 0,
+  isComunicacao = false,
+  userDepartmentId = ''
 }) => {
   return (
     <PendingActionsCard
