@@ -72,7 +72,7 @@ const PendingDemandsCard: React.FC<PendingDemandsCardProps> = ({
         <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
       </div>;
   }
-  return <div className="h-full w-full">
+  return <div className="h-full w-full border border-slate-300 rounded-3xl">
       <div className="flex flex-col h-full px-[7px] mx-[12px] my-0 py-[10px]">
         <h3 className="text-lg font-semibold mb-2 text-center">Últimas Demandas</h3>
         <div className="overflow-auto flex-1">
