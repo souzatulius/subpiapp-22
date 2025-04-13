@@ -131,13 +131,13 @@ const DashboardPage: React.FC = () => {
             <DashboardSidebar isOpen={sidebarOpen} />
           </div>}
         
-        <main className="flex-1 flex flex-col overflow-auto px-0 py-0 my-0 mx-0">
+        <main className="flex-1 flex flex-col overflow-auto">
           {!isMobile ? <BreadcrumbBar className="flex-shrink-0" /> : <div className="sticky top-0 z-10 bg-white">
               <BreadcrumbBar className="flex-shrink-0" />
             </div>}
           
-          <div className="flex-1 overflow-auto px-0 py-0 my-0 mx-0">
-            <motion.div initial={{
+          <div className="flex-1 overflow-auto">
+            <motion.div className="max-w-7xl mx-auto p-4" initial={{
             opacity: 0,
             y: 20
           }} animate={{
@@ -145,7 +145,7 @@ const DashboardPage: React.FC = () => {
             y: 0
           }} transition={{
             duration: 0.5
-          }} className="max-w-7xl mx-auto p-4 py-0 px-[30px]">
+          }}>
               <div className="space-y-6">
                 <div className="w-full">
                   <WelcomeCard title="Dashboard" description="Arraste e edite os cards para personalizar a sua tela" icon={<Home className="h-8 w-8 mr-2 text-gray-500" />} color="bg-gradient-to-r from-blue-800 to-blue-950" userName={firstName || ''} greeting={true} showResetButton={true} resetButtonIcon={<RotateCcw className="h-4 w-4" />} onResetClick={handleResetDashboard} />

@@ -72,23 +72,23 @@ const PendingDemandsCard: React.FC<PendingDemandsCardProps> = ({
         <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
       </div>;
   }
-  return <div className="rounded-3xl">
-      <div className="rounded-none">
-        <h3 className="font-semibold mb-2 text-center text-white text-2xl py-[2px]">Últimas Demandas</h3>
-        <div className="">
+  return <div className="h-full w-full">
+      <div className="flex flex-col h-full px-[7px] mx-[12px] my-0 py-[10px]">
+        <h3 className="text-lg font-semibold mb-2 text-center">Últimas Demandas</h3>
+        <div className="overflow-auto flex-1">
           {demands.length === 0 ? <div className="text-center text-gray-500 p-4">
               Nenhuma demanda disponível
-            </div> : <ul className="">
-              {demands.map(demand => <li key={demand.id} onClick={() => handleDemandClick(demand.id)} className="bg-gray-300 rounded-xl">
-                  <div className="">
-                    <span className="">
+            </div> : <ul className="space-y-2 px-1">
+              {demands.map(demand => <li key={demand.id} onClick={() => handleDemandClick(demand.id)} className="p-2 cursor-pointer transition-all bg-gray-100 hover:bg-gray-200 rounded-2xl py-[3px] my-[17px]">
+                  <div className="flex flex-col">
+                    <span className="text-sm font-medium truncate text-gray-800 w-full">
                       {demand.titulo}
                     </span>
-                    <div className="px-0 mx-[7px]">
+                    <div className="flex justify-between items-center mt-1">
                       <span className="text-xs text-gray-600">
                         {demand.coordenacao?.sigla || demand.coordenacao?.descricao || 'Coordenação'}
                       </span>
-                      <Badge className="bg-slate-200 text-[10px] text-gray-500 leading-tight py-0 rounded-xl px-[8px] mx-[12px]">
+                      <Badge className="bg-slate-200 text-[10px] text-gray-500 leading-tight rounded-md px-[4px] py-[2px]">
                         {formatStatusLabel(demand.status)}
                       </Badge>
                     </div>

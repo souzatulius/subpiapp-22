@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
 import { Loader2 } from 'lucide-react';
+
 interface Note {
   id: string;
   titulo: string;
@@ -16,15 +17,18 @@ interface Note {
     descricao?: string;
   } | null;
 }
+
 interface NotesApprovalCardProps {
   maxNotes?: number;
 }
+
 const NotesApprovalCard: React.FC<NotesApprovalCardProps> = ({
   maxNotes = 5
 }) => {
   const [notes, setNotes] = useState<Note[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
+
   useEffect(() => {
     const fetchNotes = async () => {
       setIsLoading(true);
@@ -44,7 +48,9 @@ const NotesApprovalCard: React.FC<NotesApprovalCardProps> = ({
           `).order('criado_em', {
           ascending: false
         }).limit(maxNotes);
+
         if (error) throw error;
+        
         const processedNotes: Note[] = (data || []).map(note => {
           return {
             id: note.id,
@@ -55,6 +61,7 @@ const NotesApprovalCard: React.FC<NotesApprovalCardProps> = ({
             coordenacao: note.problema?.coordenacao || null
           };
         });
+        
         setNotes(processedNotes);
       } catch (err) {
         console.error('Error fetching notes:', err);
@@ -63,13 +70,16 @@ const NotesApprovalCard: React.FC<NotesApprovalCardProps> = ({
         setIsLoading(false);
       }
     };
+    
     fetchNotes();
     const interval = setInterval(fetchNotes, 2 * 60 * 1000);
     return () => clearInterval(interval);
   }, [maxNotes]);
+
   const handleNoteClick = (noteId: string) => {
     navigate(`/dashboard/comunicacao/notas/detalhe?id=${noteId}`);
   };
+
   const getStatusColor = (status: string): string => {
     switch (status.toLowerCase()) {
       case 'pendente':
@@ -82,6 +92,7 @@ const NotesApprovalCard: React.FC<NotesApprovalCardProps> = ({
         return 'bg-gray-500 hover:bg-gray-600';
     }
   };
+
   const getStatusLabel = (status: string): string => {
     switch (status.toLowerCase()) {
       case 'pendente':
@@ -94,6 +105,7 @@ const NotesApprovalCard: React.FC<NotesApprovalCardProps> = ({
         return status.charAt(0).toUpperCase() + status.slice(1);
     }
   };
+
   const formatDate = (dateString: string): string => {
     if (!dateString) return '';
     try {
@@ -107,28 +119,30 @@ const NotesApprovalCard: React.FC<NotesApprovalCardProps> = ({
       return '';
     }
   };
+
   if (isLoading) {
     return <div className="h-full w-full flex justify-center items-center">
         <Loader2 className="h-8 w-8 animate-spin text-orange-500" />
       </div>;
   }
-  return <div className="border-none rounded-none">
-      <div className="">
-        <h3 className="font-semibold mb-2 text-center py-0 text-gray-900 text-lg my-[20px]">Últimas Notas</h3>
+
+  return <div className="h-full w-full">
+      <div className="flex flex-col h-full">
+        <h3 className="text-lg font-semibold mb-2 text-center py-[6px] my-[12px] text-gray-950">Últimas Notas</h3>
         <div className="overflow-auto flex-1">
           {notes.length === 0 ? <div className="text-sm bg-gray-300 my-0 px-[8px] mx-[5px] py-[5px] rounded-xl">
               Nenhuma nota disponível
-            </div> : <ul className="space-y-2 px-[6px] mx-0 my-0 py-0">
-              {notes.map(note => <li key={note.id} onClick={() => handleNoteClick(note.id)} className="p-2 cursor-pointer transition-all rounded-xl mx-0 px-[16px] py-[6px] my-[5px] bg-orange-400">
+            </div> : <ul className="space-y-2 px-1">
+              {notes.map(note => <li key={note.id} onClick={() => handleNoteClick(note.id)} className="p-2 rounded-lg cursor-pointer transition-all bg-gray-100 hover:bg-gray-200">
                   <div className="flex flex-col">
-                    <span className="font-medium truncate w-full text-gray-600 text-sm">
+                    <span className="text-sm font-medium truncate text-gray-800 w-full">
                       {note.titulo}
                     </span>
                     <div className="flex justify-between items-center mt-1">
                       <span className="text-xs text-gray-600">
                         {note.coordenacao?.sigla || note.coordenacao?.descricao || 'Coordenação'}
                       </span>
-                      <Badge className="text-gray-700 text-xs bg-gray-300 rounded-xl my-px py-px">
+                      <Badge className={`ml-1 shrink-0 text-xs ${getStatusColor(note.status)}`}>
                         {getStatusLabel(note.status)}
                       </Badge>
                     </div>
@@ -139,4 +153,5 @@ const NotesApprovalCard: React.FC<NotesApprovalCardProps> = ({
       </div>
     </div>;
 };
+
 export default NotesApprovalCard;
