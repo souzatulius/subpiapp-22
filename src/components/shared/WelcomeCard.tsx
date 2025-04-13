@@ -17,11 +17,12 @@ interface WelcomeCardProps {
   resetButtonIcon?: React.ReactNode;
   showButton?: boolean;
   buttonText?: string;
+  buttonIcon?: React.ReactNode;
   buttonVariant?: 'default' | 'outline' | 'secondary' | 'destructive' | 'link';
   onButtonClick?: () => void;
   className?: string;
   spacingClassName?: string;
-  rightContent?: React.ReactNode; // Added the missing rightContent property
+  rightContent?: React.ReactNode;
 }
 
 const WelcomeCard: React.FC<WelcomeCardProps> = ({
@@ -37,11 +38,12 @@ const WelcomeCard: React.FC<WelcomeCardProps> = ({
   resetButtonIcon,
   showButton = false,
   buttonText = 'Personalizar',
+  buttonIcon,
   buttonVariant = 'default',
   onButtonClick,
   className,
   spacingClassName,
-  rightContent  // Add the rightContent prop
+  rightContent
 }) => {
   return <div className="bg-transparent">
       <div className="bg-transparent">
@@ -66,7 +68,6 @@ const WelcomeCard: React.FC<WelcomeCardProps> = ({
               </div>
             </div>
 
-            {/* Add the rightContent here */}
             {rightContent && (
               <div className="flex-shrink-0">
                 {rightContent}
@@ -82,7 +83,31 @@ const WelcomeCard: React.FC<WelcomeCardProps> = ({
         </div>
       </div>
 
-      {showButton || showResetButton}
+      {(showButton || showResetButton) && (
+        <div className="flex flex-col sm:flex-row gap-2 mt-4">
+          {showButton && (
+            <Button 
+              variant={buttonVariant} 
+              onClick={onButtonClick}
+              className="flex items-center gap-2"
+            >
+              {buttonIcon}
+              {buttonText}
+            </Button>
+          )}
+          
+          {showResetButton && (
+            <Button 
+              variant="outline" 
+              onClick={onResetClick}
+              className="flex items-center gap-2"
+            >
+              {resetButtonIcon || <RotateCcw className="h-4 w-4" />}
+              Resetar
+            </Button>
+          )}
+        </div>
+      )}
     </div>;
 };
 

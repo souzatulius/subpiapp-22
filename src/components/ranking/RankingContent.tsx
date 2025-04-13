@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import RankingFilterDialog from './filters/RankingFilterDialog';
 import RankingCharts from './RankingCharts';
@@ -33,7 +32,7 @@ const RankingContent: React.FC<RankingContentProps> = ({
   
   const { 
     chartVisibility, toggleChartVisibility, setChartVisibility,
-    planilhaData, sgzData, painelData, isLoading, setIsInsightsLoading,
+    planilhaData, sgzData, painelData, isLoading, 
     refreshChartData, isMockData, dataSource, setDataSource
   } = useRankingCharts();
   
@@ -45,7 +44,6 @@ const RankingContent: React.FC<RankingContentProps> = ({
   
   const { showFeedback } = useAnimatedFeedback();
 
-  // Synchronize data sources on mount and when they change
   useEffect(() => {
     const localDataSource = localStorage.getItem('demo-data-source');
     if (localDataSource && (localDataSource === 'mock' || localDataSource === 'upload' || localDataSource === 'supabase')) {
@@ -60,7 +58,6 @@ const RankingContent: React.FC<RankingContentProps> = ({
     }
   }, [dataSource, uploadDataSource, setDataSource, setUploadDataSource]);
 
-  // Log data availability for debugging
   useEffect(() => {
     console.log("RankingContent: Data availability check:", {
       planilhaData: planilhaData?.length || 0,
@@ -86,7 +83,6 @@ const RankingContent: React.FC<RankingContentProps> = ({
     }
   };
 
-  // Show loading feedback when insights are being generated
   useEffect(() => {
     if (isLoading) {
       showFeedback('loading', 'Gerando insights e gráficos...', { 
@@ -97,7 +93,6 @@ const RankingContent: React.FC<RankingContentProps> = ({
     }
   }, [isLoading, showFeedback]);
 
-  // Refresh data when component mounts
   useEffect(() => {
     if (onRefreshData) {
       console.log("RankingContent: Calling onRefreshData on mount");
