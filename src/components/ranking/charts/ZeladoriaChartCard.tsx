@@ -61,10 +61,10 @@ const ZeladoriaChartCard: React.FC<ZeladoriaChartCardProps> = ({
       subtitle={subtitle}
       isLoading={isLoading}
       dataSource={dataSource}
-      className={className}
+      className={`rounded-3xl ${className}`}
       analysis={analysis}
     >
-      <div style={{ height: `${height}px` }}>
+      <div style={{ height: `${height}px` }} className="rounded-xl overflow-hidden">
         {renderChart()}
       </div>
     </ChartCard>

@@ -79,7 +79,7 @@ const EnhancedChartCard: React.FC<EnhancedChartCardProps> = ({
 
   return (
     <motion.div 
-      className={`bg-white p-4 rounded-2xl shadow-sm border border-gray-100 relative hover:bg-orange-50 hover:border-orange-200 hover:shadow-md transition-all ${className}`}
+      className={`bg-white p-4 rounded-3xl shadow-sm border border-gray-100 relative hover:bg-orange-50 hover:border-orange-200 hover:shadow-md transition-all ${className}`}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
@@ -155,7 +155,7 @@ const EnhancedChartCard: React.FC<EnhancedChartCardProps> = ({
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.3 }}
-              className="bg-orange-50 rounded-xl p-4 min-h-[200px]"
+              className="bg-orange-50 rounded-2xl p-4 min-h-[200px]"
             >
               <h4 className="font-medium text-orange-800 mb-2">Análise do gráfico</h4>
               <p className="text-sm text-gray-700">{analysis}</p>
