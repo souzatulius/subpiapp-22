@@ -92,6 +92,10 @@ const UploadSection: React.FC<UploadSectionProps> = ({
       console.log("Starting SGZ file upload:", sgzFile.name);
       
       setSGZProgress({
+        totalRows: 0,
+        processedRows: 0,
+        updatedRows: 0,
+        newRows: 0,
         totalRecords: 0,
         processed: 0,
         success: 0,
@@ -106,6 +110,10 @@ const UploadSection: React.FC<UploadSectionProps> = ({
         user,
         (progress: number) => {
           setSGZProgress({
+            totalRows: 0,
+            processedRows: Math.round((progress/100) * 100),
+            updatedRows: 0,
+            newRows: 0,
             totalRecords: 0,
             processed: Math.round((progress/100) * 100),
             success: 0,
