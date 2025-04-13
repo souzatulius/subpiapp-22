@@ -110,10 +110,10 @@ const DashboardCards: React.FC<DashboardCardsProps> = ({
           {isSimulationActive ? (
             <Lightbulb className="h-5 w-5 text-orange-600" />
           ) : (
-            <BarChart3 className="h-5 w-5 text-blue-600" />
+            <BarChart3 className="h-5 w-5 text-orange-500" />
           )}
           <h2 className={`text-lg font-semibold ${
-            isSimulationActive ? 'text-orange-600' : 'text-blue-600'
+            isSimulationActive ? 'text-orange-600' : 'text-orange-800'
           }`}>
             {isSimulationActive ? 'Indicadores Simulados (Cenário Ideal)' : 'Indicadores Inteligentes'}
           </h2>

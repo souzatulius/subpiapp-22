@@ -60,7 +60,7 @@ const PressRequestCard: React.FC = () => {
     if (isLoading) {
       return (
         <div className="flex justify-center items-center p-6">
-          <Loader2 className="h-6 w-6 animate-spin text-blue-500" />
+          <Loader2 className="h-6 w-6 animate-spin text-orange-500" />
         </div>
       );
     }
@@ -74,7 +74,7 @@ const PressRequestCard: React.FC = () => {
     }
     
     return (
-      <div className="flex flex-wrap gap-2 justify-center">
+      <div className="flex flex-wrap gap-3 justify-center">
         {origens.map((origem) => {
           const Icon = useOriginIcon(origem);
           
@@ -82,18 +82,18 @@ const PressRequestCard: React.FC = () => {
             <motion.button
               key={origem.id}
               onClick={() => handleOriginClick(origem.id)}
-              className={`flex items-center p-2 rounded-lg transition-colors ${
+              className={`flex items-center p-3 rounded-lg transition-colors ${
                 selectedId === origem.id 
-                  ? "bg-blue-100 border-2 border-blue-500" 
-                  : "bg-blue-50 hover:bg-blue-100 border-2 border-transparent"
-              }`}
+                  ? "bg-orange-200 border-2 border-orange-400" 
+                  : "bg-white hover:bg-orange-50 border-2 border-orange-100"
+              } w-full`}
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
             >
-              <span className="flex justify-center items-center w-8 h-8 rounded-full bg-blue-100 text-blue-600 mr-2">
-                {Icon}
+              <span className="flex justify-center items-center w-14 h-14 rounded-full bg-orange-50 text-orange-600 mr-3">
+                {React.cloneElement(Icon as React.ReactElement, { className: "h-7 w-7" })}
               </span>
-              <span className="text-sm font-medium text-blue-700 truncate">
+              <span className="text-sm font-medium text-orange-700 truncate">
                 {origem.descricao}
               </span>
             </motion.button>
@@ -104,10 +104,10 @@ const PressRequestCard: React.FC = () => {
   }, [origens, isLoading, selectedId]);
 
   return (
-    <Card className="h-full w-full">
+    <Card className="h-full w-full bg-orange-100 border-orange-200">
       <CardHeader className="pb-2">
         <CardTitle className="text-lg flex items-center">
-          <Newspaper className="mr-2 h-5 w-5 text-blue-500" />
+          <Newspaper className="mr-2 h-5 w-5 text-orange-500" />
           Nova Solicitação da Imprensa
         </CardTitle>
       </CardHeader>

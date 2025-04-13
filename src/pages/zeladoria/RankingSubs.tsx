@@ -333,7 +333,7 @@ const RankingSubs = () => {
           title="Ranking da Zeladoria"
           description="Acompanhamento de desempenho e análises de ações, projetos e obras."
           icon={<BarChart3 className="h-6 w-6 mr-2 text-white" />}
-          color="bg-gradient-to-r from-orange-500 to-orange-700"
+          color="bg-gradient-to-r from-blue-700 to-blue-900"
           rightContent={
             <div className="flex gap-2">
               <Button

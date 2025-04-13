@@ -148,38 +148,45 @@ export const RelatoriosKPICards: React.FC = () => {
   }, []);
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
-      <StatsCard
-        title="Demandas"
-        value={kpiStats.totalDemandas}
-        comparison={`Últimos 30 dias: ${Math.abs(displayStats.demandasVariacao || 0)}% ${displayStats.demandasVariacao >= 0 ? '↑' : '↓'}`}
-        isLoading={loadingKPIs}
-        description="Total de solicitações recebidas"
-      />
+    <div className="flex flex-nowrap overflow-x-auto gap-4 pb-2">
+      <div className="flex-shrink-0 w-full sm:w-1/4">
+        <StatsCard
+          title="Demandas"
+          value={kpiStats.totalDemandas}
+          comparison={`Últimos 30 dias: ${Math.abs(displayStats.demandasVariacao || 0)}% ${displayStats.demandasVariacao >= 0 ? '↑' : '↓'}`}
+          isLoading={loadingKPIs}
+          description="Total de solicitações recebidas"
+        />
+      </div>
       
-      <StatsCard
-        title="Notícias e Releases"
-        value={kpiStats.noticiasPublicadas}
-        comparison={`${kpiStats.totalReleases} no total`}
-        isLoading={loadingKPIs}
-        description="Notícias publicadas oficialmente"
-      />
+      <div className="flex-shrink-0 w-full sm:w-1/4">
+        <StatsCard
+          title="Notícias e Releases"
+          value={kpiStats.noticiasPublicadas}
+          comparison={`${kpiStats.totalReleases} no total`}
+          isLoading={loadingKPIs}
+          description="Notícias publicadas oficialmente"
+        />
+      </div>
       
-      <StatsCard
-        title="Notas emitidas"
-        value={kpiStats.totalNotas}
-        comparison={`${Math.abs(displayStats.notasVariacao || 0)}% ${displayStats.notasVariacao >= 0 ? 'mais' : 'menos'} que período anterior`}
-        isLoading={loadingKPIs}
-        description="Comunicados oficiais publicados"
-      />
+      <div className="flex-shrink-0 w-full sm:w-1/4">
+        <StatsCard
+          title="Notas emitidas"
+          value={kpiStats.totalNotas}
+          comparison={`${Math.abs(displayStats.notasVariacao || 0)}% ${displayStats.notasVariacao >= 0 ? 'mais' : 'menos'} que período anterior`}
+          isLoading={loadingKPIs}
+          description="Comunicados oficiais publicados"
+        />
+      </div>
 
-      {/* KPI de Processos e-SIC */}
-      <ESICProcessesCard 
-        loading={loadingESIC} 
-        total={esicStats.total}
-        responded={esicStats.responded}
-        justified={esicStats.justified}
-      />
+      <div className="flex-shrink-0 w-full sm:w-1/4">
+        <ESICProcessesCard 
+          loading={loadingESIC} 
+          total={esicStats.total}
+          responded={esicStats.responded}
+          justified={esicStats.justified}
+        />
+      </div>
     </div>
   );
 };

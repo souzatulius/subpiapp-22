@@ -115,6 +115,9 @@ const CardGrid: React.FC<CardGridProps> = ({
   disableWiggleEffect,
   showSpecialFeatures
 }) => {
+  // Filter out "Novo Card 11"
+  const filteredCards = cards.filter(card => card.title !== "Novo Card 11");
+  
   // For mobile view, use two columns instead of one
   const gridClass = isMobileView 
     ? "grid grid-cols-2 gap-4" 
@@ -122,7 +125,7 @@ const CardGrid: React.FC<CardGridProps> = ({
     
   return (
     <div className={gridClass}>
-      {cards.map((card) => (
+      {filteredCards.map((card) => (
         <SortableActionCard
           key={card.id}
           card={card}

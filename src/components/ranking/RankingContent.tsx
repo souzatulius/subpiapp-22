@@ -114,8 +114,8 @@ const RankingContent: React.FC<RankingContentProps> = ({
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
-        <div className="md:col-span-1">
+      <div className="flex flex-nowrap overflow-x-auto gap-4 pb-2 max-w-full">
+        <div className="w-full">
           <DashboardCards 
             dadosPlanilha={planilhaData} 
             dadosPainel={painelData} 
