@@ -13,6 +13,7 @@ interface UploadState {
   
   setSgzProgress: (progress: UploadProgressStats) => void;
   setPainelProgress: (progress: UploadProgressStats) => void;
+  setSGZProgress: (progress: UploadProgressStats) => void; // Alias for backward compatibility
   setLastRefreshTime: (time: Date) => void;
   setIsUploading: (isUploading: boolean) => void;
   resetProgress: () => void;
@@ -32,6 +33,7 @@ export const useUploadState = create<UploadState>()(
       
       setSgzProgress: (progress) => set({ sgzProgress: progress }),
       setPainelProgress: (progress) => set({ painelProgress: progress }),
+      setSGZProgress: (progress) => set({ sgzProgress: progress }), // Alias for backward compatibility
       setLastRefreshTime: (time) => set({ lastRefreshTime: time }),
       setIsUploading: (isUploading) => set({ isUploading }),
       resetProgress: () => set({ 

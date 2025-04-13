@@ -1,5 +1,7 @@
 
+// Unified progress stats interface that combines both SGZProgressStats and UploadProgressStats
 export interface UploadProgressStats {
+  // Common fields for progress tracking
   totalRows: number;
   processedRows: number;
   updatedRows: number;
@@ -8,22 +10,19 @@ export interface UploadProgressStats {
   message: string;
   errorCount?: number;
   estimatedTimeRemaining?: number; // Added for time estimation
+
+  // Fields from SGZProgressStats for compatibility
+  totalRecords?: number;
+  processed?: number;
+  success?: number;
+  failed?: number;
+  progress?: number;
+  validationErrors?: string[];
 }
 
-export interface SGZProgressStats {
-  totalRecords: number;
-  processed: number;
-  success: number;
-  failed: number;
-  progress: number;
-  stage: string;
-  validationErrors?: string[];
-  message: string; // Required to match usage in code
-  totalRows: number; // For compatibility
-  processedRows: number; // For compatibility
-  updatedRows: number; // For compatibility
-  newRows: number; // For compatibility
-  errorCount?: number; // For compatibility
+// This interface is now an alias to UploadProgressStats for backward compatibility
+export interface SGZProgressStats extends UploadProgressStats {
+  // No additional properties needed as we've unified the interfaces
 }
 
 export interface ValidationError {

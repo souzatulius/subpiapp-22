@@ -12,9 +12,20 @@ interface UploadProgressDisplayProps {
 
 const UploadProgressDisplay: React.FC<UploadProgressDisplayProps> = ({ stats, type }) => {
   const getProgressValue = () => {
-    if (!stats.totalRows || stats.totalRows === 0) return 0;
-    const progress = (stats.processedRows / stats.totalRows) * 100;
-    return Math.min(Math.max(progress, 0), 100);
+    // Try to get progress from different properties based on what's available
+    if (typeof stats.progress === 'number') {
+      return stats.progress;
+    }
+    
+    if (stats.totalRows && stats.totalRows > 0 && stats.processedRows) {
+      return (stats.processedRows / stats.totalRows) * 100;
+    }
+    
+    if (stats.totalRecords && stats.totalRecords > 0 && stats.processed) {
+      return (stats.processed / stats.totalRecords) * 100;  
+    }
+    
+    return 0;
   };
 
   const progressValue = getProgressValue();
@@ -76,7 +87,7 @@ const UploadProgressDisplay: React.FC<UploadProgressDisplayProps> = ({ stats, ty
         <div className="text-xs grid grid-cols-2 gap-x-4 mt-1">
           <div className="flex justify-between">
             <span>Registros processados:</span>
-            <span className="font-medium">{stats.processedRows}</span>
+            <span className="font-medium">{stats.processedRows || stats.processed || 0}</span>
           </div>
           <div className="flex justify-between">
             <span>Novos registros:</span>

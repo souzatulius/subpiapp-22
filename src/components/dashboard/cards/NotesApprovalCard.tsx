@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
@@ -35,26 +34,20 @@ const NotesApprovalCard: React.FC<NotesApprovalCardProps> = ({ maxNotes = 5 }) =
             titulo, 
             status, 
             criado_em,
-            autor_id (nome_completo)
+            autor:autor_id (nome_completo)
           `)
           .order('criado_em', { ascending: false })
           .limit(maxNotes);
         
         if (error) throw error;
         
-        // Process the data to ensure we match the Note interface
         const processedNotes: Note[] = (data || []).map(note => {
-          // Ensure autor is an object with nome_completo
-          const autorObj = note.autor_id 
-            ? { nome_completo: note.autor_id.nome_completo || 'Usuário' }
-            : { nome_completo: 'Usuário' };
-          
           return {
             id: note.id,
             titulo: note.titulo,
             status: note.status,
             criado_em: note.criado_em,
-            autor: autorObj
+            autor: note.autor
           };
         });
         
@@ -67,7 +60,6 @@ const NotesApprovalCard: React.FC<NotesApprovalCardProps> = ({ maxNotes = 5 }) =
     };
 
     fetchNotes();
-    // Refresh every 2 minutes
     const interval = setInterval(fetchNotes, 2 * 60 * 1000);
     return () => clearInterval(interval);
   }, [maxNotes]);

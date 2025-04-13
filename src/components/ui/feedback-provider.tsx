@@ -22,7 +22,11 @@ export const FeedbackProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   // Monitor upload progress and show feedback
   useEffect(() => {
     if (sgzProgress?.stage === 'uploading' || sgzProgress?.stage === 'processing') {
-      const progress = sgzProgress.progress || 10; 
+      // Use either progress or calculate from totalRecords/processed
+      const progress = sgzProgress.progress || 
+        (sgzProgress.totalRecords && sgzProgress.processed 
+          ? Math.round((sgzProgress.processed / sgzProgress.totalRecords) * 100) 
+          : 10);
         
       const message = sgzProgress.stage === 'uploading' 
         ? 'Enviando arquivo SGZ...'
@@ -34,7 +38,11 @@ export const FeedbackProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         duration: 0
       });
     } else if (painelProgress?.stage === 'uploading' || painelProgress?.stage === 'processing') {
-      const progress = painelProgress.progress || 10;
+      // Use either progress or calculate from totalRecords/processed
+      const progress = painelProgress.progress || 
+        (painelProgress.totalRecords && painelProgress.processed 
+          ? Math.round((painelProgress.processed / painelProgress.totalRecords) * 100) 
+          : 10);
         
       const message = painelProgress.stage === 'uploading' 
         ? 'Enviando arquivo do Painel...'

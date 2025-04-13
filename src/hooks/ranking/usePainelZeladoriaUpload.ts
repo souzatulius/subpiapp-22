@@ -3,7 +3,7 @@ import { User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import * as XLSX from 'xlsx';
 import { useUploadState } from './useUploadState';
-import { UploadResult } from '@/hooks/ranking/types/uploadTypes';
+import { UploadProgressStats, UploadResult } from '@/hooks/ranking/types/uploadTypes';
 import { useAnimatedFeedback } from '@/hooks/use-animated-feedback';
 
 export const usePainelZeladoriaUpload = (user: User | null) => {
@@ -23,6 +23,10 @@ export const usePainelZeladoriaUpload = (user: User | null) => {
 
     try {
       setPainelProgress({
+        totalRows: 0,
+        processedRows: 0,
+        updatedRows: 0,
+        newRows: 0,
         totalRecords: 0,
         processed: 0,
         success: 0,
@@ -44,7 +48,11 @@ export const usePainelZeladoriaUpload = (user: User | null) => {
         setPainelProgress({
           ...painelProgress!,
           stage: 'error',
-          message: 'Formato de arquivo inválido'
+          message: 'Formato de arquivo inválido',
+          totalRows: 0,
+          processedRows: 0,
+          updatedRows: 0,
+          newRows: 0
         });
         return null;
       }
@@ -246,7 +254,11 @@ export const usePainelZeladoriaUpload = (user: User | null) => {
       setPainelProgress({
         ...painelProgress!,
         stage: 'error',
-        message: `Erro ao processar arquivo: ${error.message || 'Erro desconhecido'}`
+        message: `Erro ao processar arquivo: ${error.message || 'Erro desconhecido'}`,
+        totalRows: 0,
+        processedRows: 0,
+        updatedRows: 0,
+        newRows: 0
       });
       
       return {
@@ -267,6 +279,10 @@ export const usePainelZeladoriaUpload = (user: User | null) => {
     setPainelProgress({
       stage,
       message,
+      totalRows: totalRecords,
+      processedRows: processed,
+      updatedRows: 0,
+      newRows: 0,
       totalRecords,
       processed,
       success: processed,
@@ -363,7 +379,7 @@ export const usePainelZeladoriaUpload = (user: User | null) => {
     processamentoPainel: {
       status: painelProgress?.stage || 'uploading',
       message: painelProgress?.message || '',
-      recordCount: painelProgress?.processed || 0
+      recordCount: painelProgress?.processedRows || 0
     },
     handleUploadPainel
   };

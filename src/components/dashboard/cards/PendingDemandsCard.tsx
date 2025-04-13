@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
@@ -9,7 +8,7 @@ interface Demand {
   id: string;
   titulo: string;
   status: string;
-  criado_em: string;
+  horario_publicacao: string;
   autor?: {
     nome_completo: string;
   } | null;
@@ -34,27 +33,21 @@ const PendingDemandsCard: React.FC<PendingDemandsCardProps> = ({ maxDemands = 5 
             id, 
             titulo, 
             status, 
-            criado_em,
-            autor_id (nome_completo)
+            horario_publicacao,
+            autor:autor_id (nome_completo)
           `)
-          .order('criado_em', { ascending: false })
+          .order('horario_publicacao', { ascending: false })
           .limit(maxDemands);
         
         if (error) throw error;
         
-        // Process the data to ensure we match the Demand interface
         const processedDemands: Demand[] = (data || []).map(demand => {
-          // Ensure autor is an object with nome_completo
-          const autorObj = demand.autor_id 
-            ? { nome_completo: demand.autor_id.nome_completo || 'Usuário' }
-            : { nome_completo: 'Usuário' };
-          
           return {
             id: demand.id,
             titulo: demand.titulo,
             status: demand.status,
-            criado_em: demand.criado_em,
-            autor: autorObj
+            horario_publicacao: demand.horario_publicacao,
+            autor: demand.autor
           };
         });
         
@@ -67,7 +60,6 @@ const PendingDemandsCard: React.FC<PendingDemandsCardProps> = ({ maxDemands = 5 
     };
 
     fetchDemands();
-    // Refresh every 2 minutes
     const interval = setInterval(fetchDemands, 2 * 60 * 1000);
     return () => clearInterval(interval);
   }, [maxDemands]);
@@ -112,7 +104,7 @@ const PendingDemandsCard: React.FC<PendingDemandsCardProps> = ({ maxDemands = 5 
                   </div>
                   <div className="flex justify-between items-center mt-1 text-xs text-gray-600">
                     <span>{demand.autor?.nome_completo || 'Usuário'}</span>
-                    <span>{formatDate(demand.criado_em)}</span>
+                    <span>{formatDate(demand.horario_publicacao)}</span>
                   </div>
                 </li>
               ))}
