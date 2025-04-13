@@ -25,24 +25,38 @@ const getSpecialContent = ({
 
   // For cards with dataSourceKey
   if (card.dataSourceKey) {
-    const { latestNotes, latestDemands, statistics, isLoading } = useDynamicDashboardContent();
+    const dashboardContent = useDynamicDashboardContent();
+    const { notasItems, demandasItems, isLoading } = dashboardContent;
+    
+    // Items for DynamicContentCard with proper paths
+    const notesWithPaths = notasItems?.map(item => ({
+      ...item,
+      path: `/dashboard/comunicacao/notas/${item.id}`
+    })) || [];
+    
+    const demandsWithPaths = demandasItems?.map(item => ({
+      ...item,
+      path: `/dashboard/comunicacao/demandas/${item.id}`
+    })) || [];
     
     switch (card.dataSourceKey) {
       case 'ultimas_notas':
         return (
           <DynamicContentCard 
-            items={latestNotes} 
+            items={notesWithPaths} 
             type="notes" 
             isLoading={isLoading} 
+            showHeader={true}
           />
         );
         
       case 'ultimas_demandas':
         return (
           <DynamicContentCard 
-            items={latestDemands} 
+            items={demandsWithPaths} 
             type="demands" 
             isLoading={isLoading} 
+            showHeader={true}
           />
         );
         
@@ -55,21 +69,39 @@ const getSpecialContent = ({
           );
         }
         
+        // Create mock statistics data since we don't have actual statistics yet
+        const mockStatistics = {
+          demands: [
+            { name: 'Pendentes', value: 25, color: '#3B82F6' },
+            { name: 'Em andamento', value: 15, color: '#F59E0B' },
+            { name: 'Concluídas', value: 45, color: '#10B981' }
+          ],
+          notes: [
+            { name: 'Aprovadas', value: 30, color: '#10B981' },
+            { name: 'Pendentes', value: 12, color: '#F59E0B' },
+            { name: 'Rejeitadas', value: 8, color: '#EF4444' }
+          ],
+          news: [
+            { name: 'Publicadas', value: 22, color: '#3B82F6' },
+            { name: 'Rascunhos', value: 10, color: '#9CA3AF' }
+          ]
+        };
+        
         // Create a dynamic charts view based on available statistics
         return (
           <div className="grid grid-cols-3 gap-4 p-4 h-full">
             <StatisticsCard 
-              data={statistics.demands} 
+              data={mockStatistics.demands} 
               title="Demandas por Status" 
               chartType="pie" 
             />
             <StatisticsCard 
-              data={statistics.notes} 
+              data={mockStatistics.notes} 
               title="Notas por Status" 
               chartType="bar" 
             />
             <StatisticsCard 
-              data={statistics.news} 
+              data={mockStatistics.news} 
               title="Notícias" 
               chartType="pie" 
             />

@@ -1,3 +1,4 @@
+
 import { useNavigate } from 'react-router-dom';
 import { CardColor, CardWidth, CardHeight, CardType } from '@/types/dashboard';
 import { getIconComponentFromId } from '@/hooks/dashboard/defaultCards';
@@ -9,6 +10,7 @@ import ChartPreview from './charts/ChartPreview';
 import { memo } from 'react';
 import NotesApprovalCard from './cards/NotesApprovalCard';
 import PendingDemandsCard from './cards/PendingDemandsCard';
+
 export interface ActionCardProps {
   id: string;
   title: string;
@@ -34,6 +36,7 @@ export interface ActionCardProps {
   chartId?: string;
   specialContent?: React.ReactNode;
 }
+
 const getIconSize = (size?: 'sm' | 'md' | 'lg' | 'xl'): string => {
   switch (size) {
     case 'sm':
@@ -47,6 +50,7 @@ const getIconSize = (size?: 'sm' | 'md' | 'lg' | 'xl'): string => {
       return 'w-10 h-10';
   }
 };
+
 const ActionCard = memo(({
   id,
   title,
@@ -70,18 +74,40 @@ const ActionCard = memo(({
   const navigate = useNavigate();
   const colorClasses = getColorClasses(color);
   const textColorClass = getTextColorClass(color, id);
+  
+  // Helper function to determine icon color based on background
+  const getIconColorClass = (colorName: string) => {
+    // For deep blue, orange-dark, and blue-dark cards, use white icons
+    if (['deep-blue', 'orange-dark', 'blue-dark'].includes(colorName)) {
+      return 'text-white';
+    }
+    
+    // For gray-light card with specific ID, use dark text
+    if (colorName === 'gray-light' && id === 'esic-processos-card') {
+      return 'text-gray-700';
+    }
+    
+    // Default
+    return textColorClass;
+  };
+  
+  const iconColorClass = getIconColorClass(color);
+  
   const renderIcon = () => {
     if (!iconId) return null;
     const LucideIcon = (LucideIcons as any)[iconId];
     if (LucideIcon) {
-      return <LucideIcon className={getIconSize(iconSize)} />;
+      return <LucideIcon className={`${getIconSize(iconSize)} ${iconColorClass}`} />;
     }
     const FallbackIcon = getIconComponentFromId(iconId);
-    return FallbackIcon ? <FallbackIcon className={getIconSize(iconSize)} /> : null;
+    return FallbackIcon ? <FallbackIcon className={`${getIconSize(iconSize)} ${iconColorClass}`} /> : null;
   };
+  
   const isNotesApprovalCard = id === 'aprovar-notas';
   const isPendingDemandsCard = id === 'responder-demandas';
-  return <div className={`w-full h-full rounded-xl shadow-md overflow-hidden 
+
+  return (
+    <div className={`w-full h-full rounded-xl shadow-md overflow-hidden 
         ${!isDraggable ? 'cursor-pointer' : 'cursor-grab'} 
         hover:shadow-lg ${colorClasses} group relative`}>
       {isDraggable && <div className="absolute top-2 left-2 z-10 opacity-0 group-hover:opacity-80 transition-opacity duration-200">
@@ -98,20 +124,22 @@ const ActionCard = memo(({
         {specialContent ? <div className="w-full h-full">{specialContent}</div> : isNotesApprovalCard ? <NotesApprovalCard /> : isPendingDemandsCard ? <PendingDemandsCard /> : children ? children : chartId ? <div className="w-full h-full flex flex-col">
             <ChartPreview chartId={chartId} />
           </div> : <>
-            <div className="mb-2.5 text-gray-800">
+            <div className={`mb-2.5 ${id === 'esic-processos-card' ? 'text-gray-700' : ''}`}>
               {renderIcon()}
             </div>
             <div className="line-clamp-2 max-w-[90%] py-[6px] my-[5px]">
-              <h3 className="font-semibold text-lg leading-tight break-words text-balance text-slate-50">
+              <h3 className={`font-semibold text-lg leading-tight break-words text-balance ${id === 'esic-processos-card' ? 'text-gray-700' : color.includes('dark') || color === 'deep-blue' ? 'text-slate-50' : 'text-slate-800'}`}>
                 {title}
               </h3>
-              {subtitle && <p className="text-sm text-gray-700 opacity-80 mt-1 line-clamp-2">
+              {subtitle && <p className={`text-sm ${color.includes('dark') || color === 'deep-blue' ? 'text-gray-200 opacity-90' : 'text-gray-700 opacity-80'} mt-1 line-clamp-2`}>
                   {subtitle}
                 </p>}
             </div>
           </>}
       </div>
-    </div>;
+    </div>
+  );
 });
+
 ActionCard.displayName = 'ActionCard';
 export default ActionCard;
