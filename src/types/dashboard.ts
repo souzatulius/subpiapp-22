@@ -1,3 +1,4 @@
+
 export type CardWidth = '25' | '50' | '75' | '100';
 export type CardHeight = '0.5' | '1' | '2' | '3' | '4';
 export type CardColor = 
@@ -5,6 +6,8 @@ export type CardColor =
   | 'bg-blue-500' 
   | 'bg-orange-500' 
   | 'bg-gray-500' 
+  | 'bg-gray-100'  // Added bg-gray-100 as valid CardColor
+  | 'bg-blue-600'  // Added bg-blue-600 as valid CardColor
   | 'bg-yellow-500' 
   | 'bg-teal-500'
   | 'bg-green-500'

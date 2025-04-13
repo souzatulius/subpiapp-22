@@ -1,3 +1,4 @@
+
 import { v4 as uuidv4 } from 'uuid';
 import { ActionCardItem } from '@/types/dashboard';
 import React from 'react';
@@ -27,7 +28,7 @@ export const getIconComponentFromId = (iconId: string) => {
     'file-search': () => import('lucide-react').then(mod => mod.FileSearch),
     'list': () => import('lucide-react').then(mod => mod.List),
     'bar-chart': () => import('lucide-react').then(mod => mod.BarChart),
-    'search': () => import('lucide-react').then(mod => mod.Search),
+    // Remove the duplicate 'search' entry
   };
   
   const LoadedIcon = React.lazy(() => 
@@ -107,7 +108,7 @@ export const getDefaultCards = (): ActionCardItem[] => {
       title: 'Origem das Demandas',
       iconId: 'PieChart',
       path: '/dashboard/comunicacao/origem',
-      color: 'bg-gray-100',
+      color: 'bg-gray-500', // Fix: Changed from 'bg-gray-100' to 'bg-gray-500'
       width: '50',
       height: '2',
       type: 'origin_demand_chart',
@@ -119,7 +120,7 @@ export const getDefaultCards = (): ActionCardItem[] => {
       title: 'Ações Pendentes',
       iconId: 'Clock',
       path: '/dashboard/comunicacao/pendentes',
-      color: 'bg-gray-100',
+      color: 'bg-gray-500', // Fix: Changed from 'bg-gray-100' to 'bg-gray-500'
       width: '50',
       height: '2',
       type: 'pending_actions',
@@ -155,7 +156,7 @@ export const getDefaultCards = (): ActionCardItem[] => {
       title: 'Área da Comunicação',
       iconId: 'MessageSquare',
       path: '/dashboard/comunicacao',
-      color: 'bg-blue-600',
+      color: 'bg-blue-500', // Fix: Changed from 'bg-blue-600' to 'bg-blue-500'
       width: '25',
       height: '1',
       type: 'standard',

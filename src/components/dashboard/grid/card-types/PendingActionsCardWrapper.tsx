@@ -20,7 +20,7 @@ const PendingActionsCardWrapper: React.FC<PendingActionsCardWrapperProps> = ({
 }) => {
   return (
     <PendingActionsCard
-      id={card.id}
+      // Remove the id prop as it doesn't exist in the component
       notesToApprove={notesToApprove}
       responsesToDo={responsesToDo}
       isComunicacao={isComunicacao}

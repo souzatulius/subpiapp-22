@@ -13,7 +13,19 @@ interface PendingItem {
   type: 'note' | 'demand';
 }
 
-const PendingActionsCard: React.FC = () => {
+interface PendingActionsCardProps {
+  notesToApprove?: number;
+  responsesToDo?: number;
+  isComunicacao?: boolean;
+  userDepartmentId?: string;
+}
+
+const PendingActionsCard: React.FC<PendingActionsCardProps> = ({
+  notesToApprove,
+  responsesToDo,
+  isComunicacao,
+  userDepartmentId
+}) => {
   // Mock data - in production, this would come from an API call
   const pendingItems: PendingItem[] = [
     {
