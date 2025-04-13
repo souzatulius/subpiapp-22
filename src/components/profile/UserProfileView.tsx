@@ -1,10 +1,10 @@
 
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Edit, Phone, Calendar, Mail, MapPin, User } from 'lucide-react';
+import { Edit, Phone, Calendar, Mail, MapPin, User, Briefcase } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import AvatarDisplay from './photo/AvatarDisplay';
-import { format } from 'date-fns';
+import { format, parse } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ProfileData } from './types';
@@ -16,13 +16,13 @@ interface UserProfileViewProps {
 }
 
 const UserProfileView: React.FC<UserProfileViewProps> = ({ userProfile, loading, onEdit }) => {
-  // Helper function to format date
+  // Helper function to format date in Brazilian format
   const formatDate = (date: Date | string | undefined) => {
     if (!date) return 'Não informado';
     
     try {
       const dateObj = typeof date === 'string' ? new Date(date) : date;
-      return format(dateObj, "dd 'de' MMMM", { locale: ptBR });
+      return format(dateObj, "dd/MM/yyyy", { locale: ptBR });
     } catch (error) {
       console.error('Error formatting date:', error);
       return 'Data inválida';
@@ -49,6 +49,17 @@ const UserProfileView: React.FC<UserProfileViewProps> = ({ userProfile, loading,
     }
     
     return userProfile.coordenacao.descricao || 'Não informado';
+  };
+  
+  // Helper to get supervisao_tecnica text
+  const getSupervisaoText = () => {
+    if (!userProfile?.supervisao_tecnica) return 'Não informado';
+    
+    if (typeof userProfile.supervisao_tecnica === 'string') {
+      return userProfile.supervisao_tecnica;
+    }
+    
+    return userProfile.supervisao_tecnica.descricao || 'Não informado';
   };
 
   if (loading) {
@@ -138,7 +149,7 @@ const UserProfileView: React.FC<UserProfileViewProps> = ({ userProfile, loading,
           
           <div className="flex">
             <div className="w-8 h-8 mr-3 flex items-center justify-center text-gray-500">
-              <User className="h-5 w-5" />
+              <Briefcase className="h-5 w-5" />
             </div>
             <div>
               <div className="text-sm text-gray-500">Cargo</div>
@@ -155,6 +166,18 @@ const UserProfileView: React.FC<UserProfileViewProps> = ({ userProfile, loading,
               <div>{getCoordenacaoText()}</div>
             </div>
           </div>
+          
+          {userProfile?.supervisao_tecnica && (
+            <div className="flex">
+              <div className="w-8 h-8 mr-3 flex items-center justify-center text-gray-500">
+                <User className="h-5 w-5" />
+              </div>
+              <div>
+                <div className="text-sm text-gray-500">Supervisão Técnica</div>
+                <div>{getSupervisaoText()}</div>
+              </div>
+            </div>
+          )}
         </div>
       </CardContent>
     </Card>

@@ -6,19 +6,20 @@ import { UserProfileMenu } from './index';
 import { useUserProfile } from './useUserProfile';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Menu } from 'lucide-react';
+import NotificationsPopover from './NotificationsPopover';
 
 interface HeaderProps {
   showControls?: boolean;
   toggleSidebar?: () => void;
   hideUserMenu?: boolean;
-  className?: string; // Added className prop
+  className?: string;
 }
 
 const Header: React.FC<HeaderProps> = ({
   showControls = false,
   toggleSidebar,
   hideUserMenu = false,
-  className = '' // Added default value for className
+  className = ''
 }) => {
   const {
     userProfile
@@ -50,8 +51,9 @@ const Header: React.FC<HeaderProps> = ({
           </Link>
         </div>
         
-        {/* Right side - User profile */}
-        <div className="w-1/4 flex items-center justify-end mx-[30px]">
+        {/* Right side - Notifications & User profile */}
+        <div className="w-1/4 flex items-center justify-end gap-2 mx-[30px]">
+          {showControls && <NotificationsPopover />}
           {showControls && !hideUserMenu && <UserProfileMenu />}
         </div>
       </div>

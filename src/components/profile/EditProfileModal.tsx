@@ -213,8 +213,10 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
   const userCoordenacao = typeof userData?.coordenacao === 'string' ? userData?.coordenacao : 
                           userData?.coordenacao?.descricao || '';
                           
-  const userSupervisao = userData && 'supervisao_tecnica' in userData ? 
-                         userData.supervisao_tecnica as string : '';
+  const userSupervisao = userData?.supervisao_tecnica ? 
+                         (typeof userData.supervisao_tecnica === 'string' ? 
+                         userData.supervisao_tecnica : 
+                         userData.supervisao_tecnica.descricao || '') : '';
                          
   const userEmail = userData?.email || '';
 
@@ -302,19 +304,21 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
               />
             </div>
             
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <label htmlFor="supervisao_tecnica" className="text-sm font-medium">Supervisão Técnica</label>
-                <span className="text-xs text-gray-500">Não editável</span>
+            {userSupervisao && (
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <label htmlFor="supervisao_tecnica" className="text-sm font-medium">Supervisão Técnica</label>
+                  <span className="text-xs text-gray-500">Não editável</span>
+                </div>
+                <Input
+                  id="supervisao_tecnica"
+                  name="supervisao_tecnica"
+                  value={userSupervisao}
+                  disabled
+                  className="bg-gray-100"
+                />
               </div>
-              <Input
-                id="supervisao_tecnica"
-                name="supervisao_tecnica"
-                value={userSupervisao}
-                disabled
-                className="bg-gray-100"
-              />
-            </div>
+            )}
             
             <div className="space-y-2">
               <label htmlFor="whatsapp" className="text-sm font-medium">
