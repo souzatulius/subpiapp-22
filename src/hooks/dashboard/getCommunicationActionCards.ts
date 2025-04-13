@@ -1,3 +1,4 @@
+
 import { v4 as uuidv4 } from 'uuid';
 import { ActionCardItem } from '@/types/dashboard';
 
@@ -65,10 +66,10 @@ export const getCommunicationActionCards = (): ActionCardItem[] => {
       mobileOrder: 5
     },
     {
-      id: 'esic-card',
-      title: 'Processos e-SIC',
-      iconId: 'FileSearch',
-      path: '/dashboard/esic',
+      id: 'noticias-releases-card',
+      title: 'Notícias e Releases',
+      iconId: 'Newspaper',
+      path: '/dashboard/releases',
       color: 'deep-blue',
       width: '25',
       height: '2',
@@ -77,20 +78,8 @@ export const getCommunicationActionCards = (): ActionCardItem[] => {
       mobileOrder: 6
     },
     {
-      id: 'releases-card',
-      title: 'Releases e Notícias',
-      iconId: 'Newspaper',
-      path: '/dashboard/comunicacao/releases',
-      color: 'blue-light',
-      width: '25',
-      height: '2',
-      type: 'standard',
-      displayMobile: true,
-      mobileOrder: 7
-    },
-    {
-      id: 'ver-notas-card',
-      title: 'Ver Notas de Imprensa',
+      id: 'notas-imprensa-card',
+      title: 'Notas de Imprensa',
       iconId: 'FileText',
       path: '/dashboard/comunicacao/notas',
       color: 'orange-dark',
@@ -111,6 +100,18 @@ export const getCommunicationActionCards = (): ActionCardItem[] => {
       type: 'standard',
       displayMobile: true,
       mobileOrder: 9
+    },
+    {
+      id: 'esic-processos-card',
+      title: 'Processos e-SIC',
+      iconId: 'FileSearch',
+      path: '/dashboard/esic',
+      color: 'gray-light',
+      width: '25',
+      height: '2',
+      type: 'standard',
+      displayMobile: true,
+      mobileOrder: 7
     },
     {
       id: 'press-request-card',

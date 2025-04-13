@@ -28,22 +28,35 @@ const getSpecialContent = ({
     const dashboardContent = useDynamicDashboardContent();
     const { notasItems, demandasItems, isLoading } = dashboardContent;
     
+    // Items for DynamicContentCard with proper paths
+    const notesWithPaths = notasItems?.map(item => ({
+      ...item,
+      path: `/dashboard/comunicacao/notas/${item.id}`
+    })) || [];
+    
+    const demandsWithPaths = demandasItems?.map(item => ({
+      ...item,
+      path: `/dashboard/comunicacao/demandas/${item.id}`
+    })) || [];
+    
     switch (card.dataSourceKey) {
       case 'ultimas_notas':
         return (
           <DynamicContentCard 
-            items={notasItems} 
+            items={notesWithPaths} 
             type="notes" 
             isLoading={isLoading} 
+            showHeader={true}
           />
         );
         
       case 'ultimas_demandas':
         return (
           <DynamicContentCard 
-            items={demandasItems} 
+            items={demandsWithPaths} 
             type="demands" 
             isLoading={isLoading} 
+            showHeader={true}
           />
         );
         
