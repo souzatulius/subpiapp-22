@@ -1,9 +1,9 @@
+
 import { supabase } from '@/integrations/supabase/client';
-import { UploadResult, UploadProgressStats } from '../types/uploadTypes';
+import { UploadResult, UploadProgressStats, ValidationError } from '../types/uploadTypes';
 import { 
   processExcelFile, 
-  mapExcelRowToSGZOrdem,
-  ValidationError
+  mapExcelRowToSGZOrdem
 } from '../utils/excelUtils';
 
 // Type for progress update callbacks
@@ -25,7 +25,13 @@ export const handleFileUpload = async (
     
     // Process Excel file with validation
     const processingResult = await processExcelFile(file);
-    const { data, errors, stats } = processingResult;
+    const { data, errors: rawErrors, stats } = processingResult;
+    
+    // Convert errors to the correct ValidationError type
+    const errors: ValidationError[] = rawErrors.map(error => ({
+      ...error,
+      type: 'error' // Set default type to 'error'
+    }));
     
     // Update progress after processing file
     onProgress?.(40);
@@ -134,7 +140,8 @@ export const handleFileUpload = async (
             errors: [...errors, {
               row: -1,
               column: 'sgz_departamento_tecnico',
-              message: insertError.message
+              message: insertError.message,
+              type: 'error' // Add the required type property
             }]
           };
         }

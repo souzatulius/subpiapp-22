@@ -58,11 +58,12 @@ export const findColumnByNormalizedName = (headers: string[], targetNormalized: 
   return similarMatch || null;
 };
 
-// Error validation types
+// Error validation types - updated to match uploadTypes.ts
 export type ValidationError = {
   row: number;
   column: string;
   message: string;
+  type: 'error' | 'warning';  // Added type property to match uploadTypes.ts
   value?: any;
 };
 
@@ -207,7 +208,8 @@ export const processExcelFile = async (file: File): Promise<ProcessingResult> =>
               rowErrors.push({
                 row: rowNumber,
                 column: requiredCol,
-                message: `Campo obrigatório não preenchido: ${requiredCol}`
+                message: `Campo obrigatório não preenchido: ${requiredCol}`,
+                type: 'error' // Add required type
               });
             }
           }
@@ -224,7 +226,8 @@ export const processExcelFile = async (file: File): Promise<ProcessingResult> =>
               rowErrors.push({
                 row: rowNumber,
                 column: 'Ordem de Serviço',
-                message: 'Número de ordem de serviço não encontrado'
+                message: 'Número de ordem de serviço não encontrado',
+                type: 'error' // Add required type
               });
             } else {
               mappedRow.ordem_servico = String(row[osColumn]).trim();
@@ -254,7 +257,8 @@ export const processExcelFile = async (file: File): Promise<ProcessingResult> =>
                   row: rowNumber,
                   column: createdDateColumn,
                   message: 'Data de criação inválida',
-                  value: row[createdDateColumn]
+                  value: row[createdDateColumn],
+                  type: 'error' // Add required type
                 });
               } else {
                 mappedRow.sgz_criado_em = parsedDate;
@@ -275,7 +279,8 @@ export const processExcelFile = async (file: File): Promise<ProcessingResult> =>
                   row: rowNumber,
                   column: statusDateColumn,
                   message: 'Data de status inválida',
-                  value: row[statusDateColumn]
+                  value: row[statusDateColumn],
+                  type: 'error' // Add required type
                 });
               } else {
                 mappedRow.sgz_modificado_em = parsedDate;

@@ -2,12 +2,15 @@
 import { useState, useEffect, useMemo } from 'react';
 import Fuse from 'fuse.js';
 import { useNavigate } from 'react-router-dom';
+import { SearchSuggestion } from '@/components/dashboard/search/SearchInput';
 
 // Define types for our search actions
 export interface SearchAction {
   label: string;
   route: string;
   keywords: string[];
+  // Add title property to match SearchSuggestion interface
+  title?: string;
 }
 
 // Predefined search actions with their routes and keywords
@@ -63,7 +66,7 @@ const ignoreWords = [
 
 export const useSmartSearch = () => {
   const [query, setQuery] = useState('');
-  const [suggestions, setSuggestions] = useState<SearchAction[]>([]);
+  const [suggestions, setSuggestions] = useState<SearchSuggestion[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const navigate = useNavigate();
@@ -141,9 +144,12 @@ export const useSmartSearch = () => {
         results = combinedResults.sort((a, b) => (a.score || 1) - (b.score || 1));
       }
       
-      // Map the Fuse.js results to our SearchAction type
+      // Map the Fuse.js results to SearchSuggestion type
       const filteredSuggestions = results
-        .map(result => result.item)
+        .map(result => ({
+          title: result.item.label, // Use label as title
+          route: result.item.route
+        }))
         .slice(0, 5); // Limit to 5 suggestions
       
       console.log('Suggestions:', filteredSuggestions);
@@ -157,12 +163,12 @@ export const useSmartSearch = () => {
   }, [query, fuse]);
 
   // Navigate to the selected action's route
-  const handleSelectSuggestion = (action: SearchAction) => {
-    console.log('Selected suggestion:', action);
+  const handleSelectSuggestion = (suggestion: SearchSuggestion) => {
+    console.log('Selected suggestion:', suggestion);
     setQuery('');
     setSuggestions([]);
     setShowSuggestions(false);
-    navigate(action.route);
+    navigate(suggestion.route);
   };
 
   // Handle direct search submission
