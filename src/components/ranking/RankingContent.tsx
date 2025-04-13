@@ -40,7 +40,12 @@ const RankingContent: React.FC<RankingContentProps> = ({
     refreshChartData, isMockData, dataSource, setDataSource
   } = useRankingCharts();
   
-  const { lastRefreshTime, dataSource: uploadDataSource, setDataSource: setUploadDataSource } = useUploadState();
+  const { 
+    lastRefreshTime, 
+    dataSource: uploadDataSource, 
+    setDataSource: setUploadDataSource 
+  } = useUploadState();
+  
   const { showFeedback } = useAnimatedFeedback();
 
   // Synchronize data sources on mount and when they change
@@ -236,8 +241,10 @@ const RankingContent: React.FC<RankingContentProps> = ({
           dataStatus={{
             sgzCount: sgzData?.length || 0,
             painelCount: painelData?.length || 0,
-            lastSgzUpdate: lastRefreshTime ? lastRefreshTime.toISOString() : null,
-            lastPainelUpdate: lastRefreshTime ? lastRefreshTime.toISOString() : null,
+            lastSgzUpdate: lastRefreshTime ? 
+              (typeof lastRefreshTime === 'string' ? lastRefreshTime : lastRefreshTime.toISOString()) : null,
+            lastPainelUpdate: lastRefreshTime ? 
+              (typeof lastRefreshTime === 'string' ? lastRefreshTime : lastRefreshTime.toISOString()) : null,
             dataSource: dataSource
           }}
           isLoading={isLoading}

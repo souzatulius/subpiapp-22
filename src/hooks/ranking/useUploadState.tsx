@@ -9,6 +9,7 @@ interface UploadState {
   lastRefreshTime: Date | null;
   isUploading: boolean;
   validationErrors: ValidationError[];
+  dataSource?: 'mock' | 'upload' | 'supabase';
   
   setSgzProgress: (progress: UploadProgressStats) => void;
   setPainelProgress: (progress: UploadProgressStats) => void;
@@ -16,6 +17,7 @@ interface UploadState {
   setIsUploading: (isUploading: boolean) => void;
   resetProgress: () => void;
   setValidationErrors: (errors: ValidationError[]) => void;
+  setDataSource: (source: 'mock' | 'upload' | 'supabase') => void;
 }
 
 export const useUploadState = create<UploadState>()(
@@ -26,6 +28,7 @@ export const useUploadState = create<UploadState>()(
       lastRefreshTime: null,
       isUploading: false,
       validationErrors: [],
+      dataSource: 'mock',
       
       setSgzProgress: (progress) => set({ sgzProgress: progress }),
       setPainelProgress: (progress) => set({ painelProgress: progress }),
@@ -36,12 +39,14 @@ export const useUploadState = create<UploadState>()(
         painelProgress: null,
         validationErrors: []
       }),
-      setValidationErrors: (errors) => set({ validationErrors: errors })
+      setValidationErrors: (errors) => set({ validationErrors: errors }),
+      setDataSource: (source) => set({ dataSource: source })
     }),
     {
       name: 'upload-state',
       partialize: (state) => ({ 
-        lastRefreshTime: state.lastRefreshTime,
+        lastRefreshTime: state.lastRefreshTime ? state.lastRefreshTime.toISOString() : null,
+        dataSource: state.dataSource
         // Don't persist progress or errors
       }),
     }

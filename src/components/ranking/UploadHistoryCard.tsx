@@ -43,7 +43,9 @@ const UploadHistoryCard: React.FC<UploadHistoryCardProps> = ({
   
   // Format last update time from the uploadState
   const formattedLastRefresh = lastRefreshTime 
-    ? formatDate(lastRefreshTime.toISOString())
+    ? (typeof lastRefreshTime === 'string' 
+       ? formatDate(lastRefreshTime) 
+       : formatDate(lastRefreshTime.toISOString()))
     : formatDate(lastUpdate);
   
   // Update counts when data changes
