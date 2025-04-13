@@ -1,6 +1,6 @@
-
 import React, { useState, useEffect } from 'react';
 import RankingContent from '@/components/ranking/RankingContent';
+import RankingFilterDialog from '@/components/ranking/filters/RankingFilterDialog';
 import { useRankingCharts } from '@/hooks/ranking/useRankingCharts';
 import { useUpload } from '@/hooks/ranking/useUpload';
 import { useAnimatedFeedback } from '@/hooks/use-animated-feedback';
