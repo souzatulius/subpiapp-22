@@ -102,7 +102,7 @@ const SearchInput: React.FC<SearchInputProps> = ({
           onChange={handleInputChange}
           onFocus={() => setShowSuggestions(suggestions.length > 0)}
           onKeyDown={handleKeyDown}
-          className="pl-9 pr-4 w-full h-full"
+          className="pl-9 pr-4 w-full h-full bg-transparent border-gray-300"
         />
       </form>
 

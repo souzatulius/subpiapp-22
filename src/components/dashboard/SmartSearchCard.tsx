@@ -36,8 +36,8 @@ const SmartSearchCard: React.FC<SmartSearchCardProps> = ({
   
   return (
     <div className={`w-full h-full ${className}`}>
-      <Card className="w-full h-full border border-blue-100 rounded-xl">
-        <CardContent className="p-3 h-full">
+      <Card className="w-full h-full border border-blue-100 rounded-xl bg-transparent">
+        <CardContent className="p-3 h-full bg-transparent">
           <SearchInput
             placeholder={placeholder}
             onSearch={handleLocalSearch}

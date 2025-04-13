@@ -41,7 +41,7 @@ export const SmartSearchCard: React.FC<SmartSearchCardProps> = ({
   };
   
   return (
-    <Card className="w-full bg-gray-50 border border-gray-200 shadow-sm">
+    <Card className="w-full bg-transparent border border-gray-200 shadow-sm">
       <CardContent className="p-4">
         <form onSubmit={handleSubmit} className="relative">
           <div className="relative">
@@ -49,7 +49,7 @@ export const SmartSearchCard: React.FC<SmartSearchCardProps> = ({
             <Input
               ref={inputRef}
               type="text" 
-              className="pl-14 pr-4 py-5 rounded-xl border border-gray-300 w-full bg-white text-2xl font-bold text-gray-800 placeholder:text-gray-600 placeholder:font-bold"
+              className="pl-14 pr-4 py-5 rounded-xl border border-gray-300 w-full bg-transparent text-2xl font-bold text-gray-800 placeholder:text-gray-600 placeholder:font-bold"
               placeholder={placeholder}
               value={query}
               onChange={handleInputChange}

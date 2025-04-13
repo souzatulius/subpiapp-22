@@ -77,14 +77,14 @@ const SearchSuggestionsPortal: React.FC<SearchSuggestionsPortalProps> = ({
         {suggestions.map((suggestion, i) => (
           <li
             key={i}
-            className="px-3 py-2 hover:bg-gray-100 cursor-pointer flex items-center text-xl font-medium"
+            className="px-3 py-2 hover:bg-gray-100 cursor-pointer flex items-center text-base font-medium"
             onMouseDown={() => onSelect(suggestion)}
           >
             <div className="flex-grow">
               <div className="font-medium text-gray-700">{suggestion.title}</div>
             </div>
             <div className="text-gray-400">
-              <Search className="h-6 w-6" />
+              <Search className="h-5 w-5" />
             </div>
           </li>
         ))}

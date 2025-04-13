@@ -49,8 +49,8 @@ const SmartSearchPopover: React.FC = () => {
           <Search className="h-5 w-5" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent align="end" className="w-[300px] p-0 rounded-xl">
-        <div className="p-3">
+      <PopoverContent align="end" className="w-[300px] p-0 rounded-xl bg-transparent border-none shadow-none">
+        <div className="p-3 bg-transparent w-full h-full">
           <SearchInput
             placeholder="O que vamos fazer?"
             onSearch={handleSearch}
@@ -62,13 +62,13 @@ const SmartSearchPopover: React.FC = () => {
         </div>
         
         {isLoading && searchQuery.length >= 4 && (
-          <div className="p-3 text-sm text-gray-500 italic text-center border-t">
+          <div className="p-3 text-sm text-gray-500 italic text-center bg-white border-t border-gray-200 rounded-b-xl">
             Buscando...
           </div>
         )}
         
         {searchQuery.length > 0 && searchQuery.length < 4 && (
-          <div className="p-3 text-sm text-gray-500 italic text-center border-t">
+          <div className="p-3 text-sm text-gray-500 italic text-center bg-white border-t border-gray-200 rounded-b-xl">
             Digite pelo menos 4 caracteres para ver sugestões
           </div>
         )}
