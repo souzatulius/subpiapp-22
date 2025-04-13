@@ -13,30 +13,30 @@ interface WelcomeCardProps {
   buttonIcon?: React.ReactNode;
   buttonVariant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link" | "action";
   onButtonClick?: () => void;
-  label?: string; // Added label prop
+  label?: string;
 }
 
 const WelcomeCard: React.FC<WelcomeCardProps> = ({ 
   userCount, 
   unreadCount = 0,
-  color = "bg-gradient-to-r from-orange-500 to-orange-700",
+  color = "bg-transparent",
   showButton = false,
   buttonText = "Gerenciar Dashboards",
   buttonIcon = <LayoutDashboard className="h-4 w-4" />,
   buttonVariant = "secondary",
   onButtonClick,
-  label = "usuários" // Default value for label
+  label = "usuários"
 }) => {
   return (
-    <Card className={`${color} text-white shadow-lg overflow-hidden`}>
-      <CardContent className="p-6">
+    <Card className="border-0 shadow-none bg-transparent">
+      <CardContent className="p-6 bg-transparent">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
-            <h2 className="text-2xl font-bold mb-5 flex items-center">
-              <Settings className="h-6 w-6 mr-2" />
+            <h2 className="text-2xl font-bold mb-5 flex items-center text-gray-950">
+              <Settings className="h-6 w-6 mr-2 text-gray-800" />
               Central de Configurações
             </h2>
-            <p className="text-orange-100">
+            <p className="text-gray-600">
               Gerencie todas as configurações do sistema em um só lugar.
             </p>
           </div>

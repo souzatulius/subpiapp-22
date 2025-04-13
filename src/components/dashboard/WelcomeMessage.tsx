@@ -26,14 +26,14 @@ const WelcomeMessage: React.FC = () => {
 
   return (
     <div className="col-span-4 mb-8">
-      <Card className="bg-blue-50 text-blue-800 border border-blue-200 rounded-xl shadow-md overflow-hidden">
+      <Card className="bg-blue-50 text-blue-800 border-0 rounded-xl shadow-sm overflow-hidden">
         <CardContent className="p-4 flex items-start space-x-3">
           <div className="flex-shrink-0 mt-1">
-            <Info className="h-5 w-5" />
+            <Info className="h-5 w-5 text-gray-800" />
           </div>
           <div className="flex-grow">
             <div className="flex justify-between">
-              <h3 className="font-medium mb-1">Bem-vindo ao seu Dashboard Personalizado!</h3>
+              <h3 className="font-medium mb-1 text-gray-950">Bem-vindo ao seu Dashboard Personalizado!</h3>
               <button 
                 onClick={handleClose}
                 className="text-blue-600 hover:text-blue-800 p-1"
@@ -42,7 +42,7 @@ const WelcomeMessage: React.FC = () => {
                 <X className="h-4 w-4" />
               </button>
             </div>
-            <p className="text-sm mb-2">
+            <p className="text-sm mb-2 text-gray-600">
               Você pode organizar esta área como preferir, movendo os cards e personalizando seu painel de trabalho.
             </p>
             <div className="flex items-center text-xs text-blue-600">

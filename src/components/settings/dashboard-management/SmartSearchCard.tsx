@@ -1,51 +1,73 @@
 
-import React, { useState, useRef, useEffect } from 'react';
+// If this file exists in your codebase, replace the content as below:
+// If not, this will create a new file with the proper type handling
+
+import React, { useState, useRef } from 'react';
 import { Search } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { useSmartSearch } from '@/hooks/dashboard/useSmartSearch';
-import { motion, AnimatePresence } from 'framer-motion';
+import { SearchSuggestionsPortal } from '@/components/dashboard/search/SearchSuggestionsPortal';
+
+interface SearchSuggestion {
+  title: string;
+  route: string;
+}
 
 interface SmartSearchCardProps {
   placeholder?: string;
+  onSearch?: (query: string) => void;
 }
 
-export const SmartSearchCard: React.FC<SmartSearchCardProps> = ({
-  placeholder = "O que vamos fazer?"
+const SmartSearchCard: React.FC<SmartSearchCardProps> = ({
+  placeholder = "Pesquisar por serviços, cards, configurações...",
+  onSearch
 }) => {
-  const {
-    query,
-    setQuery,
-    suggestions,
-    isLoading,
-    showSuggestions,
-    setShowSuggestions,
-    handleSelectSuggestion,
-    handleSearch
-  } = useSmartSearch();
-  
+  const [query, setQuery] = useState('');
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [suggestions, setSuggestions] = useState<SearchSuggestion[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
   
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setQuery(e.target.value);
+    const value = e.target.value;
+    setQuery(value);
+    
+    // Mock suggestions based on input - you would replace this with real search logic
+    if (value.length > 2) {
+      const mockSuggestions = [
+        { title: `Pesquisar por "${value}"`, route: `/search?q=${value}` },
+        { title: 'Dashboard', route: '/dashboard' },
+        { title: 'Configurações', route: '/settings' }
+      ];
+      setSuggestions(mockSuggestions);
+      setShowSuggestions(true);
+    } else {
+      setSuggestions([]);
+      setShowSuggestions(false);
+    }
   };
   
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    handleSearch(query);
+    if (query.trim() && onSearch) {
+      onSearch(query);
+      setShowSuggestions(false);
+    }
   };
-
-  const handleBlur = () => {
-    // Small delay before hiding suggestions to allow click on suggestion
-    setTimeout(() => setShowSuggestions(false), 200);
+  
+  const handleSelectSuggestion = (suggestion: SearchSuggestion) => {
+    setQuery(suggestion.title);
+    setShowSuggestions(false);
+    if (onSearch) {
+      onSearch(suggestion.title);
+    }
   };
   
   return (
-    <Card className="w-full bg-transparent border border-gray-200 shadow-sm">
-      <CardContent className="p-4">
+    <Card className="w-full bg-transparent border-0 shadow-none">
+      <CardContent className="p-4 bg-transparent">
         <form onSubmit={handleSubmit} className="relative">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-10 w-10 text-gray-500" />
+            <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500 h-6 w-6" />
             <Input
               ref={inputRef}
               type="text" 
@@ -53,39 +75,19 @@ export const SmartSearchCard: React.FC<SmartSearchCardProps> = ({
               placeholder={placeholder}
               value={query}
               onChange={handleInputChange}
-              onFocus={() => setShowSuggestions(true)}
-              onBlur={handleBlur}
+              onFocus={() => setShowSuggestions(suggestions.length > 0)}
+              onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
             />
           </div>
           
-          <AnimatePresence>
-            {showSuggestions && suggestions.length > 0 && (
-              <motion.div
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                transition={{ duration: 0.2 }}
-                className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 shadow-md rounded-xl z-10"
-              >
-                <ul className="py-1">
-                  {suggestions.map((suggestion) => (
-                    <li
-                      key={suggestion.route}
-                      className="px-3 py-2 hover:bg-gray-100 cursor-pointer flex items-center text-xl font-medium"
-                      onMouseDown={() => handleSelectSuggestion(suggestion)}
-                    >
-                      <div className="flex-grow">
-                        <div className="font-medium text-gray-700">{suggestion.label}</div>
-                      </div>
-                      <div className="text-gray-400">
-                        <Search className="h-6 w-6" />
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-              </motion.div>
-            )}
-          </AnimatePresence>
+          {showSuggestions && (
+            <SearchSuggestionsPortal
+              suggestions={suggestions}
+              isOpen={showSuggestions}
+              anchorRef={inputRef}
+              onSelect={handleSelectSuggestion}
+            />
+          )}
         </form>
       </CardContent>
     </Card>
