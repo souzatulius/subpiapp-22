@@ -1,3 +1,4 @@
+
 import React, { useState, useCallback } from 'react';
 import { DateRange } from 'react-day-picker';
 import { Card, CardContent } from '@/components/ui/card';
@@ -5,7 +6,7 @@ import { DateRangePicker } from '@/components/ui/date-range-picker';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { cn } from '@/utils/cn';
+import { cn } from '@/lib/utils';
 
 interface RelatoriosFiltersProps {
   className?: string;
@@ -50,6 +51,7 @@ const RelatoriosFilters: React.FC<RelatoriosFiltersProps> = ({
               placeholder="Pesquisar..."
               value={searchTerm}
               onChange={(e) => onSearchTermChange(e.target.value)}
+              className="rounded-xl" 
             />
           </div>
         </div>

@@ -148,8 +148,8 @@ export const RelatoriosKPICards: React.FC = () => {
   }, []);
 
   return (
-    <div className="flex flex-nowrap overflow-x-auto gap-4 pb-2">
-      <div className="flex-shrink-0 w-full sm:w-1/4">
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+      <div>
         <StatsCard
           title="Demandas"
           value={kpiStats.totalDemandas}
@@ -159,7 +159,7 @@ export const RelatoriosKPICards: React.FC = () => {
         />
       </div>
       
-      <div className="flex-shrink-0 w-full sm:w-1/4">
+      <div>
         <StatsCard
           title="Notícias e Releases"
           value={kpiStats.noticiasPublicadas}
@@ -169,7 +169,7 @@ export const RelatoriosKPICards: React.FC = () => {
         />
       </div>
       
-      <div className="flex-shrink-0 w-full sm:w-1/4">
+      <div>
         <StatsCard
           title="Notas emitidas"
           value={kpiStats.totalNotas}
@@ -179,7 +179,7 @@ export const RelatoriosKPICards: React.FC = () => {
         />
       </div>
 
-      <div className="flex-shrink-0 w-full sm:w-1/4">
+      <div>
         <ESICProcessesCard 
           loading={loadingESIC} 
           total={esicStats.total}

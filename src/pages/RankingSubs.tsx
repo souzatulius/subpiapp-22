@@ -1,5 +1,4 @@
-
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import Header from '@/components/layouts/Header';
 import DashboardSidebar from '@/components/dashboard/DashboardSidebar';
 import BreadcrumbBar from '@/components/layouts/BreadcrumbBar';
@@ -20,6 +19,8 @@ import {
   Legend
 } from 'chart.js';
 import { Bar, Pie, Line } from 'react-chartjs-2';
+import { Button } from '@/components/ui/button';
+import { Printer, FileText, SlidersHorizontal } from 'lucide-react';
 
 // Register Chart.js components
 ChartJS.register(
@@ -91,6 +92,7 @@ const generateLineData = () => {
 
 const RankingSubs = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [filterDialogOpen, setFilterDialogOpen] = useState(false);
   const isMobile = useIsMobile();
   const scrollFadeStyles = useScrollFade({ threshold: 10, fadeDistance: 80 });
   const [barData, setBarData] = useState(generateBarData());
@@ -99,6 +101,18 @@ const RankingSubs = () => {
 
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
+  };
+
+  const handlePrint = () => {
+    window.print();
+  };
+
+  const handleExportPDF = () => {
+    console.log('Exporting to PDF');
+  };
+
+  const handleOpenFilters = () => {
+    setFilterDialogOpen(true);
   };
 
   return (
@@ -122,14 +136,43 @@ const RankingSubs = () => {
           </div>
         )}
         
-        <main className="flex-1 flex flex-col overflow-auto">
+        <main className="flex-1 flex flex-col overflow-hidden">
           {/* Desktop breadcrumb */}
           {!isMobile && <BreadcrumbBar className="flex-shrink-0" />}
           
           <div className="flex-1 max-w-full mx-auto w-full overflow-y-auto">
             <div className={`p-4 ${isMobile ? 'pb-32' : ''}`}>
-              <div className="transition-all duration-300">
-                <h1 className="text-2xl font-bold text-gray-800 mb-6">Ranking das Subs</h1>
+              <div className="flex justify-between items-center mb-6">
+                <h1 className="text-2xl font-bold text-gray-800">Ranking das Subs</h1>
+                
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="bg-white hover:bg-gray-100 border-gray-200 rounded-lg"
+                    onClick={handlePrint}
+                  >
+                    <Printer className="h-5 w-5 text-gray-600" />
+                  </Button>
+                  
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="bg-white hover:bg-gray-100 border-gray-200 rounded-lg"
+                    onClick={handleExportPDF}
+                  >
+                    <FileText className="h-5 w-5 text-gray-600" />
+                  </Button>
+                  
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="bg-white hover:bg-gray-100 border-gray-200 rounded-lg"
+                    onClick={handleOpenFilters}
+                  >
+                    <SlidersHorizontal className="h-5 w-5 text-gray-600" />
+                  </Button>
+                </div>
               </div>
               
               {/* Chart containers */}

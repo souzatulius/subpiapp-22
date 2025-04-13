@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import Header from '@/components/layouts/Header';
 import DashboardSidebar from '@/components/dashboard/DashboardSidebar';
@@ -29,10 +30,12 @@ const RankingSubs = () => {
 
   const handleUpload = async (file: File) => {
     console.log("Arquivo recebido para upload:", file.name);
+    // Implement upload functionality here
   };
 
   const handleRefreshData = async () => {
     console.log("Dados sendo atualizados...");
+    // Add data refresh functionality here
   };
 
   return (

@@ -42,29 +42,6 @@ const Relatorios = () => {
   const handleFiltersChange = (newFilters: ReportFilters) => {
     setFilters(newFilters);
   };
-  
-  const handleResetDashboard = () => {
-    setChartVisibility({
-      origemDemandas: true,
-      distribuicaoPorTemas: true,
-      tempoMedioResposta: true,
-      performanceArea: true,
-      notasEmitidas: true,
-      noticiasVsReleases: true,
-      problemasComuns: true,
-      demandasEsic: true,
-      resolucaoEsic: true,
-      processosCadastrados: true
-    });
-    
-    window.location.href = window.location.pathname + '?reset=true';
-
-    toast({
-      title: "Dashboard resetado",
-      description: "Todos os cards foram restaurados para a visualização padrão.",
-      duration: 3000,
-    });
-  };
 
   return (
     <div className="flex flex-col min-h-screen bg-[#FFFAFA]">
@@ -110,8 +87,7 @@ const Relatorios = () => {
                     buttonIcon={<SlidersHorizontal className="h-4 w-4" />}
                     buttonVariant="default"
                     onButtonClick={() => setFilterDialogOpen(true)}
-                    showResetButton={true}
-                    onResetClick={handleResetDashboard}
+                    showResetButton={false}
                   />
                 </div>
                

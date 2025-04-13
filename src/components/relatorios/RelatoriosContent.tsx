@@ -32,34 +32,6 @@ export const RelatoriosContent: React.FC<RelatoriosContentProps> = ({
     processosCadastrados: true
   });
 
-  const resetDashboardChartVisibility = () => {
-    setChartVisibility({
-      origemDemandas: true,
-      distribuicaoPorTemas: true,
-      tempoMedioResposta: true,
-      performanceArea: true,
-      notasEmitidas: true,
-      noticiasVsReleases: true,
-      problemasComuns: true,
-      demandasEsic: true,
-      resolucaoEsic: true,
-      processosCadastrados: true
-    });
-    
-    toast({
-      title: "Dashboard resetado",
-      description: "Todos os cards foram restaurados para a visualização padrão.",
-      duration: 3000,
-    });
-  };
-
-  // Reset visibility when page loads if reset param exists in URL
-  useEffect(() => {
-    if (window.location.search.includes('reset=true')) {
-      resetDashboardChartVisibility();
-    }
-  }, []);
-
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-center gap-3 mb-6">
