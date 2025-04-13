@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
@@ -35,9 +34,7 @@ const NotesApprovalCard: React.FC<NotesApprovalCardProps> = ({ maxNotes = 5 }) =
             titulo, 
             status, 
             criado_em,
-            autor:usuarios!autor_id (
-              nome_completo
-            )
+            autor:usuarios(nome_completo)
           `)
           .order('criado_em', { ascending: false })
           .limit(maxNotes);
