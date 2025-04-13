@@ -11,7 +11,7 @@ export interface UploadProgressStats {
   errorCount?: number;
   estimatedTimeRemaining?: number; // Added for time estimation
 
-  // Fields from SGZProgressStats for compatibility
+  // Additional fields for backward compatibility
   totalRecords?: number;
   processed?: number;
   success?: number;
@@ -21,9 +21,7 @@ export interface UploadProgressStats {
 }
 
 // This interface is now an alias to UploadProgressStats for backward compatibility
-export interface SGZProgressStats extends UploadProgressStats {
-  // No additional properties needed as we've unified the interfaces
-}
+export type SGZProgressStats = UploadProgressStats;
 
 export interface ValidationError {
   row?: number;

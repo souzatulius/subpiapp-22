@@ -41,15 +41,13 @@ const NotesApprovalCard: React.FC<NotesApprovalCardProps> = ({ maxNotes = 5 }) =
         
         if (error) throw error;
         
-        const processedNotes: Note[] = (data || []).map(note => {
-          return {
-            id: note.id,
-            titulo: note.titulo,
-            status: note.status,
-            criado_em: note.criado_em,
-            autor: note.autor
-          };
-        });
+        const processedNotes: Note[] = (data || []).map(note => ({
+          id: note.id,
+          titulo: note.titulo,
+          status: note.status,
+          criado_em: note.criado_em,
+          autor: note.autor
+        }));
         
         setNotes(processedNotes);
       } catch (err) {
@@ -66,6 +64,39 @@ const NotesApprovalCard: React.FC<NotesApprovalCardProps> = ({ maxNotes = 5 }) =
 
   const handleNoteClick = (noteId: string) => {
     navigate(`/dashboard/comunicacao/notas/detalhe?id=${noteId}`);
+  };
+
+  const getStatusColor = (status: string): string => {
+    switch (status.toLowerCase()) {
+      case 'pendente': return 'bg-yellow-500 hover:bg-yellow-600';
+      case 'aprovada': return 'bg-green-500 hover:bg-green-600';
+      case 'rejeitada': return 'bg-red-500 hover:bg-red-600';
+      default: return 'bg-gray-500 hover:bg-gray-600';
+    }
+  };
+
+  const getStatusLabel = (status: string): string => {
+    switch (status.toLowerCase()) {
+      case 'pendente': return 'Pendente';
+      case 'aprovada': return 'Aprovada';
+      case 'rejeitada': return 'Rejeitada';
+      default: return status;
+    }
+  };
+
+  const formatDate = (dateString: string): string => {
+    if (!dateString) return '';
+    
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleDateString('pt-BR', {
+        day: '2-digit',
+        month: '2-digit',
+        year: '2-digit',
+      });
+    } catch (e) {
+      return '';
+    }
   };
 
   if (isLoading) {
@@ -114,39 +145,6 @@ const NotesApprovalCard: React.FC<NotesApprovalCardProps> = ({ maxNotes = 5 }) =
       </div>
     </div>
   );
-};
-
-const getStatusColor = (status: string): string => {
-  switch (status.toLowerCase()) {
-    case 'pendente': return 'bg-yellow-500 hover:bg-yellow-600';
-    case 'aprovada': return 'bg-green-500 hover:bg-green-600';
-    case 'rejeitada': return 'bg-red-500 hover:bg-red-600';
-    default: return 'bg-gray-500 hover:bg-gray-600';
-  }
-};
-
-const getStatusLabel = (status: string): string => {
-  switch (status.toLowerCase()) {
-    case 'pendente': return 'Pendente';
-    case 'aprovada': return 'Aprovada';
-    case 'rejeitada': return 'Rejeitada';
-    default: return status;
-  }
-};
-
-const formatDate = (dateString: string): string => {
-  if (!dateString) return '';
-  
-  try {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('pt-BR', {
-      day: '2-digit',
-      month: '2-digit',
-      year: '2-digit',
-    });
-  } catch (e) {
-    return '';
-  }
 };
 
 export default NotesApprovalCard;

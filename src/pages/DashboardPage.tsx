@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Home, RotateCcw } from 'lucide-react';
 import { useDashboardCards } from '@/hooks/dashboard/useDashboardCards';
@@ -19,6 +20,7 @@ import { motion } from 'framer-motion';
 import { useCardStorage } from '@/hooks/dashboard/useCardStorage';
 import PendingTasksCard from '@/components/dashboard/cards/PendingTasksCard';
 import ComunicadosCard from '@/components/dashboard/cards/ComunicadosCard';
+
 const DashboardPage: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
@@ -45,16 +47,20 @@ const DashboardPage: React.FC = () => {
     saveCardConfig,
     isSaving
   } = useCardStorage(user, userCoordenaticaoId);
+
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
   };
+
   const toggleEditMode = () => {
     setIsEditMode(!isEditMode);
   };
+
   const handleCardEdit = (card: ActionCardItem) => {
     setSelectedCard(card);
     setIsEditCardModalOpen(true);
   };
+
   const handleSaveCard = async (updatedCard: Partial<ActionCardItem>) => {
     saveCardEdit(updatedCard as ActionCardItem);
     setIsEditCardModalOpen(false);
@@ -66,12 +72,14 @@ const DashboardPage: React.FC = () => {
       await saveCardConfig(updatedCards);
     }
   };
+
   const handleCardsChange = async (updatedCards: ActionCardItem[]) => {
     handleCardsReorder(updatedCards);
     if (user) {
       await saveCardConfig(updatedCards);
     }
   };
+
   const handleHideCard = async (cardId: string) => {
     handleCardHide(cardId);
     if (user && cards) {
@@ -82,6 +90,7 @@ const DashboardPage: React.FC = () => {
       await saveCardConfig(updatedCards);
     }
   };
+
   const handleResetDashboard = async () => {
     resetDashboard();
     if (user) {
@@ -94,50 +103,9 @@ const DashboardPage: React.FC = () => {
       variant: "default"
     });
   };
-  useEffect(() => {
-    if (!cards || cards.length === 0) return;
-    const searchCardExists = cards.some(card => card.id === 'dashboard-search-card');
-    const originDemandCardExists = cards.some(card => card.id === 'origem-demandas-card' || card.type === 'origin_demand_chart');
-    let updatedCards = [...cards];
-    let needsUpdate = false;
-    if (!searchCardExists) {
-      const searchCard: ActionCardItem = {
-        id: 'dashboard-search-card',
-        title: 'Busca Rápida',
-        iconId: 'Search',
-        path: '',
-        color: 'bg-white',
-        width: '100',
-        height: '0.5',
-        type: 'smart_search',
-        isSearch: true,
-        displayMobile: true,
-        mobileOrder: 1
-      };
-      updatedCards = [searchCard, ...updatedCards];
-      needsUpdate = true;
-    }
-    if (!originDemandCardExists) {
-      const originDemandCard: ActionCardItem = {
-        id: 'origem-demandas-card',
-        title: 'Atividades em Andamento',
-        subtitle: 'Demandas da semana por área técnica',
-        iconId: 'BarChart2',
-        path: '',
-        color: 'gray-light',
-        width: isMobile ? '100' : '50',
-        height: '2',
-        type: 'origin_demand_chart',
-        displayMobile: true,
-        mobileOrder: 5
-      };
-      updatedCards = [...updatedCards, originDemandCard];
-      needsUpdate = true;
-    }
-    if (needsUpdate) {
-      handleCardsChange(updatedCards);
-    }
-  }, [cards, isMobile, handleCardsChange]);
+
+  // Removed the useEffect that was adding the duplicate search card
+  
   const renderSpecialCardContent = useCallback((cardId: string) => {
     const card = cards.find(c => c.id === cardId);
     if (!card) return null;
@@ -149,12 +117,15 @@ const DashboardPage: React.FC = () => {
     }
     return null;
   }, [cards, userCoordenaticaoId]);
+
   const filteredCards = useMemo(() => {
     return cards ? cards.filter(card => !card.isHidden) : [];
   }, [cards]);
+
   if (!user) {
     return <LoadingIndicator message="Carregando..." />;
   }
+
   return <div className="flex flex-col h-screen bg-[#FFFAFA]">
       <Header showControls={true} toggleSidebar={toggleSidebar} className="flex-shrink-0" />
       
@@ -205,4 +176,5 @@ const DashboardPage: React.FC = () => {
       {isMobile && <MobileBottomNav />}
     </div>;
 };
+
 export default DashboardPage;
