@@ -41,6 +41,11 @@ export const useRankingCharts = () => {
   const [dataSource, setDataSource] = useState<'mock' | 'upload' | 'supabase'>('mock');
   const [isInsightsLoading, setIsInsightsLoading] = useState<boolean>(false);
   
+  // Add progress tracking states
+  const [insightsProgress, setInsightsProgress] = useState<number>(0); 
+  const [chartsProgress, setChartsProgress] = useState<number>(0);
+  const [isChartsLoading, setIsChartsLoading] = useState<boolean>(false);
+  
   // Toggle chart visibility function
   const toggleChartVisibility = useCallback((chartId: keyof ChartVisibility) => {
     setChartVisibility(prevState => {
@@ -62,6 +67,7 @@ export const useRankingCharts = () => {
   const refreshChartData = useCallback(async () => {
     setIsRefreshing(true);
     setIsLoading(true);
+    setChartsProgress(0); // Reset progress
     
     try {
       // Check localStorage for saved data
@@ -78,6 +84,7 @@ export const useRankingCharts = () => {
             setSgzData(parsedSgzData);
             setPlanilhaData(parsedSgzData);
             console.log(`Loaded ${parsedSgzData.length} SGZ records from localStorage`);
+            setChartsProgress(50); // Update progress
           }
           
           // Try to load Painel data
@@ -86,6 +93,7 @@ export const useRankingCharts = () => {
             const parsedPainelData = JSON.parse(painelDataString);
             setPainelData(parsedPainelData);
             console.log(`Loaded ${parsedPainelData.length} Painel records from localStorage`);
+            setChartsProgress(100); // Complete progress
           }
           
           setDataSource('upload');
@@ -100,6 +108,7 @@ export const useRankingCharts = () => {
         console.log('Using mock data...');
         setDataSource('mock');
         setIsMockData(true);
+        setChartsProgress(100); // Complete progress for mock data
       }
     } catch (e) {
       console.error('Error refreshing chart data:', e);
@@ -148,6 +157,12 @@ export const useRankingCharts = () => {
     setDataSource,
     isInsightsLoading,
     setIsInsightsLoading,
+    insightsProgress,
+    setInsightsProgress,
+    chartsProgress,
+    setChartsProgress,
+    isChartsLoading,
+    setIsChartsLoading,
     refreshChartData
   };
 };

@@ -121,23 +121,23 @@ export const handleFileUpload = async (
     let updateCount = 0;
     let insertErrors = 0;
     
-    // First, query for existing records by protocol
-    const protocolsList = formattedData.map(item => item.protocolo).filter(Boolean);
+    // First, query for existing records by ordem_servico
+    const ordersList = formattedData.map(item => item.ordem_servico).filter(Boolean);
     
-    if (protocolsList.length > 0) {
+    if (ordersList.length > 0) {
       // Split into batches to avoid query parameter limits
       const batchSize = 100;
-      for (let i = 0; i < protocolsList.length; i += batchSize) {
-        const batchProtocols = protocolsList.slice(i, i + batchSize);
+      for (let i = 0; i < ordersList.length; i += batchSize) {
+        const batchOrders = ordersList.slice(i, i + batchSize);
         
         const { data: existingItems } = await supabase
           .from('sgz_ordens_servico')
-          .select('protocolo, id')
-          .in('protocolo', batchProtocols);
+          .select('ordem_servico, id')
+          .in('ordem_servico', batchOrders);
         
         if (existingItems) {
           existingItems.forEach(item => {
-            existingRecords.set(item.protocolo, item.id);
+            existingRecords.set(item.ordem_servico, item.id);
           });
         }
       }
@@ -150,10 +150,10 @@ export const handleFileUpload = async (
     const recordsToUpdate = [];
     
     formattedData.forEach(item => {
-      if (existingRecords.has(item.protocolo)) {
+      if (existingRecords.has(item.ordem_servico)) {
         // For update
         recordsToUpdate.push({
-          id: existingRecords.get(item.protocolo),
+          id: existingRecords.get(item.ordem_servico),
           ...item,
           updated_at: new Date().toISOString()
         });
@@ -175,7 +175,7 @@ export const handleFileUpload = async (
           .eq('id', record.id);
         
         if (updateError) {
-          console.error(`Error updating record ${record.protocolo}:`, updateError);
+          console.error(`Error updating record ${record.ordem_servico}:`, updateError);
           insertErrors++;
         } else {
           updateCount++;
@@ -261,9 +261,9 @@ export const handleFileUpload = async (
         if (storedData) {
           existingData = JSON.parse(storedData);
           
-          // Remove duplicates by protocol
-          const uniqueProtocols = new Set(formattedData.map(item => item.protocolo));
-          existingData = existingData.filter(item => !uniqueProtocols.has(item.protocolo));
+          // Remove duplicates by ordem_servico
+          const uniqueOrders = new Set(formattedData.map(item => item.ordem_servico));
+          existingData = existingData.filter(item => !uniqueOrders.has(item.ordem_servico));
         }
       } catch (parseError) {
         console.warn('Error parsing stored data:', parseError);
@@ -315,4 +315,4 @@ function summarizeErrors(errors: ValidationError[]): Record<string, number> {
 }
 
 // Export the hook instead of a non-existent function
-export { usePainelZeladoriaUpload } from '@/hooks/ranking/usePainelZeladoriaUpload';
+export { usePainelZeladoriaUpload } from '@/components/ranking/hooks/usePainelZeladoriaUpload';

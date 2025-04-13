@@ -1,222 +1,169 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { Home, RotateCcw } from 'lucide-react';
-import { useDashboardCards } from '@/hooks/dashboard/useDashboardCards';
-import { useIsMobile } from '@/hooks/use-mobile';
-import { useUserData } from '@/hooks/dashboard/useUserData';
-import { useAuth } from '@/hooks/useSupabaseAuth';
-import Header from '@/components/layouts/header';
-import DashboardSidebar from '@/components/dashboard/DashboardSidebar';
-import BreadcrumbBar from '@/components/layouts/BreadcrumbBar';
-import MobileBottomNav from '@/components/layouts/MobileBottomNav';
+
+import React, { useState, useEffect, useCallback } from 'react';
 import WelcomeCard from '@/components/shared/WelcomeCard';
-import LoadingIndicator from '@/components/shared/LoadingIndicator';
 import CardGridContainer from '@/components/dashboard/CardGridContainer';
-import EditCardModal from '@/components/dashboard/card-customization/EditCardModal';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { useDashboardState } from '@/hooks/useDashboardState';
+import { RotateCcw } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { ActionCardItem } from '@/types/dashboard';
-import { toast } from '@/hooks/use-toast';
-import { Skeleton } from '@/components/ui/skeleton';
-import { motion } from 'framer-motion';
-import { useCardStorage } from '@/hooks/dashboard/useCardStorage';
-import PendingTasksCard from '@/components/dashboard/cards/PendingTasksCard';
-import ComunicadosCard from '@/components/dashboard/cards/ComunicadosCard';
-import NotesApprovalCard from '@/components/dashboard/cards/NotesApprovalCard';
-import PendingDemandsCard from '@/components/dashboard/cards/PendingDemandsCard';
-import SmartSearchCard from '@/components/dashboard/SmartSearchCard';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+import EditCardModal from '@/components/dashboard/EditCardModal';
 
 const DashboardPage: React.FC = () => {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [isEditMode, setIsEditMode] = useState(false);
-  const [isEditCardModalOpen, setIsEditCardModalOpen] = useState(false);
-  const [selectedCard, setSelectedCard] = useState<ActionCardItem | null>(null);
-  const isMobile = useIsMobile();
-  const {
-    user
-  } = useAuth();
-  const {
+  const { 
+    viewType, 
+    actionCards, 
+    setActionCards, 
+    toggleView, 
     firstName,
-    userCoordenaticaoId,
-    isLoadingUser
-  } = useUserData(user?.id);
-  const {
-    cards,
-    isLoading,
-    handleCardEdit: saveCardEdit,
-    handleCardHide,
-    handleCardsReorder,
-    resetDashboard
-  } = useDashboardCards();
-  const {
-    saveCardConfig,
-    isSaving
-  } = useCardStorage(user, userCoordenaticaoId);
-
-  const toggleSidebar = () => {
-    setSidebarOpen(!sidebarOpen);
-  };
+    user
+  } = useDashboardState();
+  
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [isCardEditModalOpen, setIsCardEditModalOpen] = useState(false);
+  const [selectedCard, setSelectedCard] = useState<ActionCardItem | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
+  const [lastSaved, setLastSaved] = useState<Date | null>(null);
+  
+  const isMobileView = useIsMobile();
 
   const toggleEditMode = () => {
-    setIsEditMode(!isEditMode);
+    setIsEditMode(prev => !prev);
   };
 
   const handleCardEdit = (card: ActionCardItem) => {
     setSelectedCard(card);
-    setIsEditCardModalOpen(true);
+    setIsCardEditModalOpen(true);
   };
 
-  const handleSaveCard = async (updatedCard: Partial<ActionCardItem>) => {
-    saveCardEdit(updatedCard as ActionCardItem);
-    setIsEditCardModalOpen(false);
-    if (user && cards) {
-      const updatedCards = cards.map(card => card.id === updatedCard.id ? {
-        ...card,
-        ...updatedCard
-      } : card);
-      await saveCardConfig(updatedCards);
+  const handleCardHide = (cardId: string) => {
+    const updatedCards = actionCards.map(card => 
+      card.id === cardId ? { ...card, isHidden: true } : card
+    );
+    setActionCards(updatedCards);
+    saveCardsToSupabase(updatedCards);
+  };
+
+  const handleCardsReorder = (reorderedCards: ActionCardItem[]) => {
+    setActionCards(reorderedCards);
+    saveCardsToSupabase(reorderedCards);
+  };
+  
+  const handleSaveCardEdit = (editedCard: ActionCardItem) => {
+    const updatedCards = actionCards.map(card => 
+      card.id === editedCard.id ? editedCard : card
+    );
+    setActionCards(updatedCards);
+    setIsCardEditModalOpen(false);
+    setSelectedCard(null);
+    saveCardsToSupabase(updatedCards);
+  };
+
+  const saveCardsToSupabase = async (cards: ActionCardItem[]) => {
+    if (!user || !user.id) return;
+    
+    setIsSaving(true);
+    
+    try {
+      const { error } = await supabase
+        .from('user_dashboard')
+        .upsert({
+          user_id: user.id,
+          cards_config: JSON.stringify(cards),
+          updated_at: new Date().toISOString()
+        }, {
+          onConflict: 'user_id'
+        });
+        
+      if (error) throw error;
+      setLastSaved(new Date());
+      toast.success("Dashboard salvo com sucesso");
+    } catch (error) {
+      console.error('Error saving dashboard configuration:', error);
+      toast.error('Erro ao salvar as configurações do dashboard');
+    } finally {
+      setIsSaving(false);
     }
   };
 
-  const handleCardsChange = async (updatedCards: ActionCardItem[]) => {
-    handleCardsReorder(updatedCards);
-    if (user) {
-      await saveCardConfig(updatedCards);
+  const resetDashboard = async () => {
+    if (!user || !user.id) return;
+    
+    try {
+      // Fetch the default department dashboard config
+      const { data, error } = await supabase
+        .from('department_dashboard')
+        .select('cards_config')
+        .eq('department', 'main')
+        .single();
+        
+      if (error) throw error;
+      
+      if (data && data.cards_config) {
+        const defaultCards = JSON.parse(data.cards_config);
+        setActionCards(defaultCards);
+        saveCardsToSupabase(defaultCards);
+        toast.success("Dashboard resetado com sucesso");
+      }
+    } catch (error) {
+      console.error('Error resetting dashboard:', error);
+      toast.error('Erro ao resetar o dashboard');
+      window.location.reload();
     }
   };
 
-  const handleHideCard = async (cardId: string) => {
-    handleCardHide(cardId);
-    if (user && cards) {
-      const updatedCards = cards.map(card => card.id === cardId ? {
-        ...card,
-        isHidden: true
-      } : card);
-      await saveCardConfig(updatedCards);
-    }
-  };
-
-  const handleResetDashboard = async () => {
-    resetDashboard();
-    if (user) {
-      const defaultCards = resetDashboard();
-      await saveCardConfig(defaultCards);
-    }
-    toast({
-      title: "Dashboard resetado",
-      description: "O dashboard foi restaurado para a configuração padrão.",
-      variant: "default"
-    });
-  };
-
+  // Render specialized content for specific cards
   const renderSpecialCardContent = useCallback((cardId: string) => {
-    const card = cards.find(c => c.id === cardId);
-    if (!card) return null;
-    if (cardId === 'busca-rapida' || card.isSearch || card.type === 'smart_search') {
-      return <SmartSearchCard className="w-full h-full" />;
-    }
-    if (cardId === 'acoes-pendentes-card' || cardId.includes('acoes-pendentes') || card.isPendingTasks || card.type === 'pending_tasks') {
-      return <PendingTasksCard id={card.id} title={card.title} userDepartmentId={userCoordenaticaoId} isComunicacao={userCoordenaticaoId === 'comunicacao'} />;
-    }
-    if (cardId === 'comunicados-card' || cardId.includes('comunicados') || card.isComunicados || card.type === 'communications') {
-      return <ComunicadosCard id={card.id} title={card.title} className="w-full h-full" />;
-    }
-    if (cardId === 'aprovar-notas' || card.type === 'recent_notes') {
-      return <NotesApprovalCard maxNotes={5} />;
-    }
-    if (cardId === 'responder-demandas' || card.type === 'in_progress_demands') {
-      return <PendingDemandsCard maxDemands={5} />;
-    }
+    // You can add special card content rendering logic here if needed
     return null;
-  }, [cards, userCoordenaticaoId]);
-
-  const filteredCards = useMemo(() => {
-    return cards ? cards.filter(card => !card.isHidden) : [];
-  }, [cards]);
-
-  if (!user) {
-    return <LoadingIndicator message="Carregando..." />;
-  }
+  }, []);
 
   return (
-    <div className="flex flex-col h-screen bg-[#FFFAFA]">
-      <Header showControls={true} toggleSidebar={toggleSidebar} className="flex-shrink-0" />
-      
-      <div className="flex flex-1 overflow-hidden">
-        {!isMobile && (
-          <div className="h-full flex-shrink-0">
-            <DashboardSidebar isOpen={sidebarOpen} />
-          </div>
-        )}
-        
-        <main className="flex-1 flex flex-col overflow-auto">
-          {!isMobile ? (
-            <BreadcrumbBar className="flex-shrink-0" />
-          ) : (
-            <div className="sticky top-0 z-10 bg-white">
-              <BreadcrumbBar className="flex-shrink-0" />
-            </div>
-          )}
-          
-          <div className="flex-1 overflow-auto">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-              className="max-w-7xl mx-auto p-4 px-[30px]"
-            >
-              <div>
-                <WelcomeCard
-                  title="Dashboard"
-                  description="Arraste e edite os cards para personalizar a sua tela"
-                  icon={<Home className="h-8 w-8 mr-2 text-gray-500" />}
-                  userName={firstName || ''}
-                  greeting={true}
-                  showResetButton={true}
-                  resetButtonIcon={<RotateCcw className="h-4 w-4" />}
-                  onResetClick={handleResetDashboard}
-                />
-                
-                <div className={`relative ${isMobile ? 'pb-32' : ''}`}>
-                  {isLoading ? (
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                      {Array.from({ length: 8 }).map((_, index) => (
-                        <Skeleton key={index} className="h-32 w-full rounded-lg" />
-                      ))}
-                    </div>
-                  ) : filteredCards.length > 0 ? (
-                    <div className="py-0 px-0">
-                      <CardGridContainer
-                        cards={filteredCards}
-                        onCardsChange={handleCardsChange}
-                        onEditCard={handleCardEdit}
-                        onHideCard={handleHideCard}
-                        isMobileView={isMobile}
-                        isEditMode={isEditMode}
-                        renderSpecialCardContent={renderSpecialCardContent}
-                        disableWiggleEffect={true}
-                        showSpecialFeatures={true}
-                      />
-                    </div>
-                  ) : (
-                    <div className="p-4 text-center text-gray-500">
-                      Nenhum card disponível.
-                    </div>
-                  )}
-                </div>
-              </div>
-            </motion.div>
-          </div>
-        </main>
+    <div className="space-y-6">
+      <div className="mb-8">
+        <WelcomeCard
+          title="Dashboard"
+          description="Acompanhe indicadores e acesse as principais funcionalidades do sistema"
+          greeting={true}
+          userName={firstName}
+          showResetButton={isEditMode}
+          onResetClick={resetDashboard}
+          showButton={true}
+          buttonText={isEditMode ? "Concluir Edição" : "Personalizar Dashboard"}
+          buttonVariant="outline"
+          onButtonClick={toggleEditMode}
+          icon={<div className="h-8 w-8 mr-4 text-gray-800" />}
+        />
       </div>
+
+      {isSaving && (
+        <div className="bg-blue-50 text-blue-700 p-2 rounded-lg mb-4 flex items-center">
+          <div className="animate-spin h-4 w-4 border-2 border-blue-700 border-t-transparent rounded-full mr-2"></div>
+          Salvando alterações...
+        </div>
+      )}
+
+      <CardGridContainer
+        cards={actionCards}
+        onCardsChange={handleCardsReorder}
+        onEditCard={handleCardEdit}
+        onHideCard={handleCardHide}
+        isMobileView={isMobileView}
+        isEditMode={isEditMode}
+        disableWiggleEffect={!isEditMode}
+        renderSpecialCardContent={renderSpecialCardContent}
+      />
       
       {selectedCard && (
         <EditCardModal
-          isOpen={isEditCardModalOpen}
-          onClose={() => setIsEditCardModalOpen(false)}
-          onSave={handleSaveCard}
+          isOpen={isCardEditModalOpen}
+          onClose={() => setIsCardEditModalOpen(false)}
+          onSave={handleSaveCardEdit}
           card={selectedCard}
         />
       )}
-      
-      {isMobile && <MobileBottomNav />}
     </div>
   );
 };
