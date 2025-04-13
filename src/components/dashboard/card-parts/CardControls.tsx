@@ -10,7 +10,7 @@ const CardControls: React.FC<CardControlsProps> = ({
   onEdit,
   onHide
 }) => {
-  return <div className="flex space-x-1 px-[10px] my-0 py-0">
+  return <div className="flex space-x-1 my-0 py-0 px-0">
       {onEdit && <button className="p-1 rounded-full bg-white/80 hover:bg-white text-gray-500 hover:text-blue-500 transition-colors" onClick={e => {
       e.stopPropagation();
       onEdit();

@@ -112,7 +112,7 @@ const NotesApprovalCard: React.FC<NotesApprovalCardProps> = ({
         <Loader2 className="h-8 w-8 animate-spin text-orange-500" />
       </div>;
   }
-  return <div className="h-full w-full border border-slate-300 bg-gray-2100 rounded-2xl">
+  return <div className="h-full w-full border border-slate-300 bg-gray-2100 rounded-2xl py-0">
       <div className="">
         <h3 className="font-semibold mb-2 text-center my-[12px] py-0 text-gray-900 text-lg">Últimas Notas</h3>
         <div className="overflow-auto flex-1">
