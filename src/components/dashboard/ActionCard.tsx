@@ -1,4 +1,3 @@
-
 import { useNavigate } from 'react-router-dom';
 import { CardColor, CardWidth, CardHeight, CardType } from '@/types/dashboard';
 import { getIconComponentFromId } from '@/hooks/dashboard/defaultCards';
@@ -8,6 +7,7 @@ import * as LucideIcons from 'lucide-react';
 import { getColorClasses, getTextColorClass } from './utils/cardColorUtils';
 import ChartPreview from './charts/ChartPreview';
 import { memo } from 'react';
+import NotesApprovalCard from './cards/NotesApprovalCard';
 
 export interface ActionCardProps {
   id: string;
@@ -45,7 +45,6 @@ const getIconSize = (size?: 'sm' | 'md' | 'lg' | 'xl'): string => {
   }
 };
 
-// Memoize the component to prevent unnecessary re-renders
 const ActionCard = memo(({
   id,
   title,
@@ -63,6 +62,7 @@ const ActionCard = memo(({
   children,
   showControls = true,
   chartId,
+  type,
   specialContent
 }: ActionCardProps) => {
   const navigate = useNavigate();
@@ -72,19 +72,17 @@ const ActionCard = memo(({
   const renderIcon = () => {
     if (!iconId) return null;
     
-    // Direct check for Lucide icon by name
     const LucideIcon = (LucideIcons as any)[iconId];
     if (LucideIcon) {
       return <LucideIcon className={getIconSize(iconSize)} />;
     }
     
-    // Fallback to our custom icon loader
     const FallbackIcon = getIconComponentFromId(iconId);
     return FallbackIcon ? <FallbackIcon className={getIconSize(iconSize)} /> : null;
   };
 
-  // Removed the animation classes causing flashing: hover:-translate-y-1, active:scale-95
-  // Kept shadow and cursor effects which are less likely to cause flashing
+  const isNotesApprovalCard = id === 'aprovar-notas' || type === 'tasks_notes';
+
   return (
     <div 
       className={`w-full h-full rounded-xl shadow-md overflow-hidden 
@@ -112,6 +110,8 @@ const ActionCard = memo(({
       <div className="relative h-full flex flex-col items-center justify-center text-center py-2.5 px-2">
         {specialContent ? (
           <div className="w-full h-full">{specialContent}</div>
+        ) : isNotesApprovalCard ? (
+          <NotesApprovalCard />
         ) : children ? (
           children
         ) : chartId ? (
