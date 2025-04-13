@@ -1,4 +1,3 @@
-
 import { v4 as uuidv4 } from 'uuid';
 import { ActionCardItem } from '@/types/dashboard';
 import React from 'react';
@@ -75,19 +74,6 @@ export const getDefaultCards = (): ActionCardItem[] => {
       type: 'standard',
       displayMobile: true,
       mobileOrder: 2
-    },
-    {
-      id: 'origem-demandas-card',
-      title: 'Atividades em Andamento',
-      subtitle: 'Demandas da semana por área técnica',
-      iconId: 'BarChart2',
-      path: '',
-      color: 'gray-light',
-      width: '50',
-      height: '2',
-      type: 'origin_demand_chart',
-      displayMobile: true,
-      mobileOrder: 3
     },
     {
       id: 'acoes-pendentes-card',
@@ -220,19 +206,6 @@ export const getCommunicationActionCards = (): ActionCardItem[] => {
       type: 'standard',
       displayMobile: true,
       mobileOrder: 5
-    },
-    {
-      id: 'origem-demandas-card',
-      title: 'Atividades em Andamento',
-      subtitle: 'Demandas da semana por área técnica',
-      iconId: 'BarChart2',
-      path: '',
-      color: 'gray-light',
-      width: '50',
-      height: '2',
-      type: 'origin_demand_chart',
-      displayMobile: true,
-      mobileOrder: 6
     },
     {
       id: 'esic-card',

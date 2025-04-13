@@ -1,22 +1,8 @@
-
 import { v4 as uuidv4 } from 'uuid';
 import { ActionCardItem } from '@/types/dashboard';
 
 export const getCommunicationActionCards = (): ActionCardItem[] => {
   return [
-    {
-      id: 'comunicacao-search-card',
-      title: 'Busca Comunicação',
-      iconId: 'Search',
-      path: '',
-      color: 'bg-white',
-      width: '100',
-      height: '0.5',
-      type: 'smart_search',
-      isSearch: true,
-      displayMobile: true,
-      mobileOrder: 1
-    },
     {
       id: 'cadastrar-demanda-card',
       title: 'Cadastrar Demanda',

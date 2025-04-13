@@ -1,12 +1,8 @@
-
-// If this file exists in your codebase, replace the content as below:
-// If not, this will create a new file with the proper type handling
-
 import React, { useState, useRef } from 'react';
 import { Search } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { SearchSuggestionsPortal } from '@/components/dashboard/search/SearchSuggestionsPortal';
+import SearchSuggestionsPortal from '@/components/dashboard/search/SearchSuggestionsPortal';
 
 interface SearchSuggestion {
   title: string;
