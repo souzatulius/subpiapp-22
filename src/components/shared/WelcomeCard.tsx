@@ -58,7 +58,7 @@ const WelcomeCard: React.FC<WelcomeCardProps> = ({
             </p>
           </div>
           
-          <div className="col-span-6 rounded-xl h-32 flex items-center justify-center hover:shadow-none hover:border-none hover:outline-none bg-transparent">
+          <div className="col-span-6 h-32 flex items-center justify-center hover:shadow-none hover:border-none hover:outline-none rounded-none bg-transparent">
             {showResetButton && <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
