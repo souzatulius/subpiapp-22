@@ -114,11 +114,16 @@ export const useFetchDemandas = () => {
           
           if (Array.isArray(item.perguntas)) {
             // Convert string array to Record<string, string>
-            item.perguntas.forEach((question, index) => {
+            item.perguntas.forEach((question: string, index: number) => {
               perguntasObject[index.toString()] = question;
             });
           } else if (typeof item.perguntas === 'object' && item.perguntas !== null) {
-            perguntasObject = item.perguntas as Record<string, string>;
+            // Convert any object to Record<string, string>, ensuring all values are strings
+            const entries = Object.entries(item.perguntas);
+            entries.forEach(([key, value]) => {
+              // Ensure the value is a string
+              perguntasObject[key] = String(value);
+            });
           }
           
           // Process anexos to ensure it's always a valid array of URLs

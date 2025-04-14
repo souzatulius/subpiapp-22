@@ -94,7 +94,7 @@ export interface Demanda {
 }
 
 // Changed ViewMode type to match UnifiedFilterBar's expected values
-export type ViewMode = "list" | "grid" | "cards";
+export type ViewMode = "list" | "cards";
 
 export interface ResponseData {
   id: string;

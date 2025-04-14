@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { useDraggable } from '@dnd-kit/core';
 import { ChevronDown, ChevronUp, Eye, EyeOff, BarChart2, FileText } from 'lucide-react';

@@ -8,7 +8,8 @@ import DemandaCard from './components/DemandaCard';
 import UnifiedViewContainer from '@/components/shared/unified-view/UnifiedViewContainer';
 
 const ResponderDemandaContent: React.FC = () => {
-  const [viewMode, setViewMode] = useState<ViewMode>('list');
+  // Change viewMode to match the UnifiedFilterBar's expected values
+  const [viewMode, setViewMode] = useState<"list" | "cards">('list');
   
   const {
     demandas,
