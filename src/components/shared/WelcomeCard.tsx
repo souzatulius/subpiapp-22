@@ -56,7 +56,7 @@ const WelcomeCard: React.FC<WelcomeCardProps> = ({
               </div> : <div className="flex items-center">
                 {icon}
                 <div className="flex items-center">
-                  <h2 className="text-2xl font-bold mb-2 text-blue-500 py-0 my-[4px">{title}</h2>
+                  <h2 className="font-semibold text-3xl text-gray-600">{title}</h2>
                   <p className=" opacity-90 text-gray-500 my-0 py-0 font-normal text-lg">{description}</p>
                 </div>
               </div>}
