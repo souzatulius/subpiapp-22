@@ -119,7 +119,11 @@ const NotificationsPopover: React.FC = () => {
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Button variant="ghost" size="icon" className="relative">
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          className="relative h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center"
+        >
           <Bell className="h-5 w-5" />
           {unreadCount > 0 && (
             <span className="absolute -top-1 -right-1 h-5 w-5 bg-orange-500 rounded-full flex items-center justify-center text-white text-xs">
@@ -128,8 +132,8 @@ const NotificationsPopover: React.FC = () => {
           )}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-96 max-h-[80vh] p-0" align="end">
-        <div className="flex items-center justify-between px-4 py-2 bg-gray-50">
+      <PopoverContent className="w-96 max-h-[80vh] p-0 bg-gray-100" align="end">
+        <div className="flex items-center justify-between px-4 py-2 bg-gray-200">
           <h4 className="text-sm font-medium">Notificações</h4>
           {unreadCount > 0 && (
             <Button 
@@ -156,7 +160,7 @@ const NotificationsPopover: React.FC = () => {
               <p className="text-sm text-gray-500">Nenhuma notificação</p>
             </div>
           ) : (
-            <div className="divide-y">
+            <div className="divide-y bg-white">
               {notifications.map((notification) => (
                 <div 
                   key={notification.id} 
