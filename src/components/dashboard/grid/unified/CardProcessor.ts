@@ -43,28 +43,30 @@ export const useCardProcessor = (isMobileView: boolean = false) => {
     } else if (card.title === "Atividades Pendentes") {
       processedCard.width = '25' as CardWidth;
       processedCard.height = '3' as CardHeight;
+    } else if (card.title === "Ranking da Zeladoria") {
+      processedCard.color = "bg-orange-500" as CardColor;
+      (processedCard as ExtendedCardItem).iconColor = "text-white";
     } else if (card.title === "Relatórios da Comunicação") {
-      // Apply requested styles
-      processedCard.color = "bg-gray-500" as CardColor; // Using valid CardColor value
+      processedCard.color = "bg-gray-500" as CardColor;
       (processedCard as ExtendedCardItem).iconColor = "text-orange-500";
     } else if (card.title === "Processos e-SIC") {
-      // Apply requested styles
       (processedCard as ExtendedCardItem).iconColor = "text-white";
     } else if (card.title === "Notícias do Site") {
-      // Apply requested styles
       (processedCard as ExtendedCardItem).iconColor = "text-blue-900";
+      // Ensure it has the same height as "Perfil do Usuário" and "Ajustes de Notificação"
+      processedCard.height = '1' as CardHeight;
     } else if (card.title === "Perfil do Usuário") {
-      // Apply requested styles
-      processedCard.color = "bg-gray-500" as CardColor; // Using valid CardColor value
+      processedCard.color = "bg-gray-500" as CardColor;
       (processedCard as ExtendedCardItem).iconColor = "text-blue-500";
     } else if (card.title === "Últimas Notas") {
-      // Apply requested styles
       (processedCard as ExtendedCardItem).iconColor = "text-blue-900";
-      processedCard.color = "bg-blue-500" as CardColor; // Using valid CardColor value
+      processedCard.color = "bg-blue-500" as CardColor;
       (processedCard as ExtendedCardItem).padding = "pb-4";
     } else if (card.title === "Últimas Demandas") {
-      // Apply requested styles
       (processedCard as ExtendedCardItem).iconColor = "text-gray-800";
+    } else if (card.title === "Ajustes de Notificação") {
+      processedCard.color = "bg-gray-500" as CardColor;
+      (processedCard as ExtendedCardItem).iconColor = "text-orange-500";
     } else {
       // Ensure default values are always set
       processedCard.width = processedCard.width || '25' as CardWidth;

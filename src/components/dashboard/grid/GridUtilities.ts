@@ -1,3 +1,4 @@
+
 import { CardWidth, CardHeight } from '@/types/dashboard';
 
 // Get width class based on width
@@ -7,8 +8,8 @@ export const getWidthClass = (width?: string, isMobile: boolean = false): string
     switch (width) {
       case '100':
       case '75':
-        return 'col-span-2'; // Full width on mobile (spans all 2 columns)
       case '50':
+        return 'col-span-2'; // Full width on mobile (spans all 2 columns)
       case '25':
         return 'col-span-1'; // Half width on mobile (1 of 2 columns)
       default:
@@ -69,6 +70,7 @@ export const getMobileSpecificDimensions = (title: string): { width: CardWidth, 
     case "Notas de imprensa":
       return { width: '100', height: '3' };
     case "Atividades Pendentes":
+    case "Ranking da Zeladoria":
       return { width: '100', height: '3' };
     default:
       return { width: '50', height: '1' };
