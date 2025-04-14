@@ -1,7 +1,9 @@
+
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { RotateCcw, Home } from 'lucide-react';
 import { cn } from '@/utils/cn';
+
 interface WelcomeCardProps {
   title: string;
   description: string;
@@ -23,6 +25,7 @@ interface WelcomeCardProps {
   rightContent?: React.ReactNode;
   hideFunctions?: boolean;
 }
+
 const WelcomeCard: React.FC<WelcomeCardProps> = ({
   title,
   description,
@@ -67,11 +70,7 @@ const WelcomeCard: React.FC<WelcomeCardProps> = ({
             </div>}
         </div>
 
-        <div className="absolute right-0 top-0 w-1/3 h-full opacity-10">
-          <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="none">
-            <path d="M0,0 L100,0 L80,100 L0,100 Z" fill="currentColor" />
-          </svg>
-        </div>
+        {/* SVG element removed */}
       </div>
 
       {!hideFunctions && (showButton || showResetButton) && <div className={cn("flex flex-col sm:flex-row gap-2 px-6 py-3 bg-white", spacingClassName)}>
@@ -88,3 +87,4 @@ const WelcomeCard: React.FC<WelcomeCardProps> = ({
     </div>;
 };
 export default WelcomeCard;
+
