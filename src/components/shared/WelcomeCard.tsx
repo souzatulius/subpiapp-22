@@ -46,7 +46,7 @@ const WelcomeCard: React.FC<WelcomeCardProps> = ({
 }) => {
   return <div className="bg-transparent">
       <div className="bg-transparent">
-        <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-transparent my-[47px]">
+        <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-transparent my-[47px] ">
           <div className="text-white bg-transparent">
             {greeting && userName ? <div className="flex items-center">
                 <Home className="h-8 w-8 mr-3 text-white/90" strokeWidth={1.5} />
