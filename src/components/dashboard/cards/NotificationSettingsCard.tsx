@@ -23,10 +23,10 @@ const NotificationSettingsCard: React.FC<NotificationSettingsCardProps> = ({
         className="h-full cursor-pointer" 
         onClick={() => setIsOpen(true)}
       >
-        <Card className="h-full flex flex-col items-center justify-center p-4 shadow-md border border-gray-100 hover:shadow-lg transition-all bg-orange-200 py-[20px] px-[10px]">
-          <Bell className="h-12 w-12 text-gray-600 mb-3" />
-          <h3 className="font-semibold text-lg text-center py-0">{title}</h3>
-          <p className="text-gray-500 mt-2 text-center text-xs">Configure suas notificações</p>
+        <Card className="h-full flex flex-col items-center justify-center p-4 shadow-md border border-gray-100 hover:shadow-lg transition-all bg-gray-50 py-[20px] px-[10px]">
+          <Bell className="h-12 w-12 text-blue-700 mb-3" />
+          <h3 className="font-semibold text-lg text-center text-gray-800">{title}</h3>
+          <p className="text-gray-600 mt-2 text-center text-sm">Configure suas notificações</p>
         </Card>
       </div>
       

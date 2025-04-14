@@ -1,7 +1,9 @@
+
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { RotateCcw, Home } from 'lucide-react';
 import { cn } from '@/utils/cn';
+
 interface WelcomeCardProps {
   title: string;
   description: string;
@@ -23,6 +25,7 @@ interface WelcomeCardProps {
   rightContent?: React.ReactNode;
   hideFunctions?: boolean;
 }
+
 const WelcomeCard: React.FC<WelcomeCardProps> = ({
   title,
   description,
@@ -44,28 +47,34 @@ const WelcomeCard: React.FC<WelcomeCardProps> = ({
   rightContent,
   hideFunctions = false
 }) => {
-  return <div className="bg-transparent">
-      <div className="bg-transparent">
-        <div className="px-0 my-0 py-0">
-          <div className="px-0 my-0 py-0">
-            <div className="">
-              {icon}
-              <div className="">
-                {greeting && userName ? <div className="flex items-center">
-                    <Home className="h-12 w-12 mr-2 text-blue-200" strokeWidth={2} />
-                    <h2 className="text-3xl font-bold text-blue-950 py-[23px] px-[17px]">
-                      Olá, {userName}!
-                    </h2>
-                  </div> : <h2 className="text-3xl font-bold text-blue-950 px-0 py-[14px]">{title}</h2>}
-                
-                <p className="text-gray-500 font-normal py-0 text-base">{description}</p>
+  return (
+    <div className={cn("bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden mb-6", className)}>
+      <div className={cn("p-6 relative overflow-hidden", color)}>
+        <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <div className="text-white">
+            {greeting && userName ? (
+              <div className="flex items-center">
+                <Home className="h-8 w-8 mr-3 text-white/90" strokeWidth={1.5} />
+                <h2 className={cn("text-2xl font-bold", userNameClassName || "text-white")}>
+                  Olá, {userName}!
+                </h2>
               </div>
-            </div>
-
-            {rightContent && <div className="flex-shrink-0">
-                {rightContent}
-              </div>}
+            ) : (
+              <div className="flex items-start gap-3">
+                {icon}
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">{title}</h2>
+                  <p className="opacity-90">{description}</p>
+                </div>
+              </div>
+            )}
           </div>
+
+          {rightContent && (
+            <div className="flex-shrink-0">
+              {rightContent}
+            </div>
+          )}
         </div>
 
         <div className="absolute right-0 top-0 w-1/3 h-full opacity-10">
@@ -75,14 +84,25 @@ const WelcomeCard: React.FC<WelcomeCardProps> = ({
         </div>
       </div>
 
-      {!hideFunctions && (showButton || showResetButton) && <div className="flex flex-col sm:flex-row gap-2 mt-4">
-          {showButton && <Button variant={buttonVariant} onClick={onButtonClick} className="flex items-center gap-2">
+      {!hideFunctions && (showButton || showResetButton) && (
+        <div className={cn("flex flex-col sm:flex-row gap-2 px-6 py-3 bg-white", spacingClassName)}>
+          {showButton && (
+            <Button variant={buttonVariant} onClick={onButtonClick} className="flex items-center gap-2">
               {buttonIcon}
               {buttonText}
-            </Button>}
+            </Button>
+          )}
           
-          {showResetButton}
-        </div>}
-    </div>;
+          {showResetButton && (
+            <Button variant="outline" onClick={onResetClick} className="flex items-center gap-2">
+              {resetButtonIcon || <RotateCcw className="h-4 w-4" />}
+              Redefinir Padrão
+            </Button>
+          )}
+        </div>
+      )}
+    </div>
+  );
 };
+
 export default WelcomeCard;

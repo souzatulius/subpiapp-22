@@ -13,7 +13,7 @@ const ResponderDemandas = () => {
       <WelcomeCard
         title="Responder Demandas"
         description={`Olá ${firstName}, atenda às solicitações pendentes de comunicação`}
-        icon={<MessageCircle className="h-6 w-6 mr-2" />}
+        icon={<MessageCircle className="h-6 w-6 mr-2 text-white" />}
         color="bg-gradient-to-r from-blue-700 to-blue-800"
       />
       

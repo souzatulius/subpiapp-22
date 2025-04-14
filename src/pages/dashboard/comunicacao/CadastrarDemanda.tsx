@@ -16,11 +16,11 @@ const CadastrarDemanda = () => {
       <WelcomeCard
         title="Nova Demanda"
         description="Cadastre uma nova solicitação de comunicação"
-        icon={<PlusCircle className="h-6 w-6 mr-2" />}
+        icon={<PlusCircle className="h-6 w-6 mr-2 text-white" />}
         color="bg-gradient-to-r from-blue-600 to-blue-800"
       />
       
-      <div className="mt-4">
+      <div className="mt-6">
         <CadastrarDemandaForm onClose={onClose} />
       </div>
     </div>

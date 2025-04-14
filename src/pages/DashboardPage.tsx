@@ -4,7 +4,7 @@ import WelcomeCard from '@/components/shared/WelcomeCard';
 import CardGridContainer from '@/components/dashboard/CardGridContainer';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useDashboardState } from '@/hooks/useDashboardState';
-import { RotateCcw, Search } from 'lucide-react';
+import { RotateCcw, Home } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ActionCardItem } from '@/types/dashboard';
 import { supabase } from '@/integrations/supabase/client';
@@ -67,9 +67,7 @@ const DashboardPage: React.FC = () => {
     if (!user || !user.id) return;
     setIsSaving(true);
     try {
-      const {
-        error
-      } = await supabase.from('user_dashboard').upsert({
+      const { error } = await supabase.from('user_dashboard').upsert({
         user_id: user.id,
         cards_config: JSON.stringify(cards),
         updated_at: new Date().toISOString()
@@ -91,10 +89,7 @@ const DashboardPage: React.FC = () => {
     if (!user || !user.id) return;
     try {
       // Fetch the default department dashboard config
-      const {
-        data,
-        error
-      } = await supabase.from('department_dashboard').select('cards_config').eq('department', 'main').single();
+      const { data, error } = await supabase.from('department_dashboard').select('cards_config').eq('department', 'main').single();
       if (error) throw error;
       if (data && data.cards_config) {
         const defaultCards = JSON.parse(data.cards_config);
@@ -132,25 +127,27 @@ const DashboardPage: React.FC = () => {
     return null;
   }, [specialCardsData]);
 
-  return <div className="space-y-6">
-      <div className="mb-8">
-        <WelcomeCard 
-          title="Dashboard" 
-          description="Acompanhe indicadores e acesse as principais funcionalidades do sistema" 
-          greeting={true} 
-          userName={firstName} 
-          userNameClassName="text-gray-950" 
-          showResetButton={isEditMode} 
-          onResetClick={resetDashboard} 
-          showButton={false} 
-          spacingClassName="space-y-3" 
-        />
-      </div>
+  return (
+    <div className="space-y-6">
+      <WelcomeCard 
+        title="Dashboard" 
+        description="Acompanhe indicadores e acesse as principais funcionalidades do sistema" 
+        greeting={true} 
+        userName={firstName} 
+        userNameClassName="text-white" 
+        showResetButton={isEditMode} 
+        onResetClick={resetDashboard}
+        resetButtonIcon={<RotateCcw className="h-4 w-4" />}
+        color="bg-gradient-to-r from-blue-600 to-blue-800"
+        showButton={false} 
+      />
 
-      {isSaving && <div className="bg-blue-50 text-blue-700 p-2 rounded-lg mb-4 flex items-center">
+      {isSaving && (
+        <div className="bg-blue-50 text-blue-700 p-2 rounded-lg mb-4 flex items-center">
           <div className="animate-spin h-4 w-4 border-2 border-blue-700 border-t-transparent rounded-full mr-2"></div>
           Salvando alterações...
-        </div>}
+        </div>
+      )}
 
       <CardGridContainer 
         cards={actionCards} 
@@ -165,7 +162,8 @@ const DashboardPage: React.FC = () => {
       />
       
       {selectedCard && <EditCardModal isOpen={isCardEditModalOpen} onClose={() => setIsCardEditModalOpen(false)} onSave={handleSaveCardEdit} card={selectedCard} />}
-    </div>;
+    </div>
+  );
 };
 
 export default DashboardPage;

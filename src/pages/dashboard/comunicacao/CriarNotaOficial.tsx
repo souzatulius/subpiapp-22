@@ -16,7 +16,7 @@ const CriarNotaOficial = () => {
       <WelcomeCard
         title="Nova Nota"
         description="Elabore uma nova nota oficial de comunicação"
-        icon={<FileEdit className="h-6 w-6 mr-2" />}
+        icon={<FileEdit className="h-6 w-6 mr-2 text-white" />}
         color="bg-gradient-to-r from-blue-700 to-blue-900"
       />
       

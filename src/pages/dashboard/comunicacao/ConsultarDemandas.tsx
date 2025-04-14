@@ -13,7 +13,7 @@ const ConsultarDemandas = () => {
       <WelcomeCard
         title="Consultar Demandas"
         description="Visualize o histórico completo de demandas de comunicação"
-        icon={<FileText className="h-6 w-6 mr-2" />}
+        icon={<FileText className="h-6 w-6 mr-2 text-white" />}
         color="bg-gradient-to-r from-blue-600 to-blue-800"
       />
       

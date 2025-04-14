@@ -13,7 +13,7 @@ const ConsultarNotas = () => {
       <WelcomeCard
         title="Consultar Notas Oficiais"
         description="Visualize o histórico de notas oficiais emitidas pela secretaria"
-        icon={<FileText className="h-6 w-6 mr-2" />}
+        icon={<FileText className="h-6 w-6 mr-2 text-white" />}
         color="bg-gradient-to-r from-blue-600 via-blue-700 to-blue-800"
       />
       

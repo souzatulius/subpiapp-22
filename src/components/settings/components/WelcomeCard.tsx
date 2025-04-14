@@ -28,8 +28,8 @@ const WelcomeCard: React.FC<WelcomeCardProps> = ({
   label = "usuários"
 }) => {
   return (
-    <Card className="border-0 shadow-none bg-transparent">
-      <CardContent className="p-6 bg-transparent">
+    <Card className="border-0 shadow-sm rounded-xl bg-white mb-4">
+      <CardContent className="p-6">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
             <h2 className="text-2xl font-bold mb-5 flex items-center text-gray-950">
