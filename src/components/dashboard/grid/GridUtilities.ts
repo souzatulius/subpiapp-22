@@ -1,23 +1,21 @@
-
 import { CardWidth, CardHeight } from '@/types/dashboard';
 
 // Get width class based on width
 export const getWidthClass = (width?: string, isMobile: boolean = false): string => {
   if (isMobile) {
-    // For mobile view, we use a modified grid
+    // For mobile view, we want to ensure cards take full width or half width
     switch (width) {
       case '100':
       case '75':
-        return 'col-span-2'; // Full width on mobile (spans both columns)
+        return 'col-span-2'; // Full width on mobile (spans all 2 columns)
       case '50':
-        return 'col-span-1'; // Half width (1 of 2 columns)
       case '25':
-        return 'col-span-1'; // Quarter width (also 1 of 2 columns on mobile)
+        return 'col-span-1'; // Half width on mobile (1 of 2 columns)
       default:
-        return 'col-span-1'; // Default half width on mobile
+        return 'col-span-1'; // Default to half width on mobile
     }
   } else {
-    // For desktop view
+    // For desktop view, keep the existing column spans
     switch (width) {
       case '100':
         return 'col-span-4'; // Full width
