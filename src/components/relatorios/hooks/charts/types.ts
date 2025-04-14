@@ -13,3 +13,9 @@ export interface ChartData {
   Quantidade?: number;
   [key: string]: any;
 }
+
+// Add explicit type for ChartConfigs
+export interface ChartConfigs {
+  chartColors: string[];
+  pieChartColors: string[];
+}
