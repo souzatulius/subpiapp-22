@@ -79,13 +79,13 @@ const NotasCards: React.FC<NotasCardsProps> = ({ notas, loading, formatDate, onV
               {nota.area_coordenacao?.descricao || 'Sem área definida'}
             </div>
             <div className="flex space-x-2">
-              <Button size="sm" variant="ghost" onClick={() => onView(nota)}>
+              <Button size="sm" variant="ghost" className="p-0 h-8 w-8" onClick={() => onView(nota)}>
                 <Eye className="h-4 w-4" />
               </Button>
-              <Button size="sm" variant="ghost" onClick={() => onEdit(nota)}>
+              <Button size="sm" variant="ghost" className="p-0 h-8 w-8" onClick={() => onEdit(nota)}>
                 <Edit className="h-4 w-4" />
               </Button>
-              <Button size="sm" variant="ghost" onClick={() => onDelete(nota)}>
+              <Button size="sm" variant="ghost" className="p-0 h-8 w-8" onClick={() => onDelete(nota)}>
                 <Trash className="h-4 w-4" />
               </Button>
             </div>

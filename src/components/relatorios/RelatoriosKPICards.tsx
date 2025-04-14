@@ -205,7 +205,7 @@ export const RelatoriosKPICards: React.FC = () => {
   const weekRangeText = formatDateRange(dateRanges.weekStart, dateRanges.today);
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
       <div>
         <StatsCard
           title="Demandas"

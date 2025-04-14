@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { RelatorioItem } from '../hooks/useRelatorioItemsState';
@@ -5,6 +6,7 @@ import { SortableChartCard } from '../components/SortableChartCard';
 import { Skeleton } from '@/components/ui/skeleton';
 import { supabase } from '@/integrations/supabase/client';
 import ESICProcessesChart from '../charts/ESICProcessesChart';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface ESICProps {
   items: RelatorioItem[];
@@ -27,6 +29,7 @@ const ESIC: React.FC<ESICProps> = ({
     justified: 0
   });
   const [loadingESIC, setLoadingESIC] = useState(true);
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     const fetchESICStats = async () => {
@@ -68,7 +71,7 @@ const ESIC: React.FC<ESICProps> = ({
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 gap-4">
           <div className="relative group">
             <ESICProcessesChart 
               total={esicStats.total} 

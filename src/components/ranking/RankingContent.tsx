@@ -11,6 +11,7 @@ import { toast } from 'sonner';
 import { RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import InsightsSection from './insights/InsightsSection';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface RankingContentProps {
   filterDialogOpen: boolean;
@@ -31,6 +32,7 @@ const RankingContent: React.FC<RankingContentProps> = ({
   lastUpdateText = "Última Atualização",
   onRefreshData
 }) => {
+  const isMobile = useIsMobile();
   const [isSimulationActive, setIsSimulationActive] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
@@ -190,8 +192,31 @@ const RankingContent: React.FC<RankingContentProps> = ({
         </div>
       </div>
 
+      {isMobile && (
+        <div className="grid grid-cols-3 gap-2 mb-4">
+          <Button variant="outline" size="sm" className="text-xs">Eficiência</Button>
+          <Button variant="outline" size="sm" className="text-xs">Localização</Button>
+          <Button variant="outline" size="sm" className="text-xs">Serviços</Button>
+          <Button variant="outline" size="sm" className="text-xs">Problemas +</Button>
+          <Button variant="outline" size="sm" className="text-xs">Apenas Sub</Button>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="text-xs"
+            onClick={handleSimulateIdealRanking}
+          >
+            {isSimulationActive ? "Desativar Simulação" : "Simular Ranking Ideal"}
+          </Button>
+        </div>
+      )}
+
       {/* Insights Section - New component */}
-      <InsightsSection sgzData={sgzData || planilhaData} painelData={painelData} isSimulationActive={isSimulationActive} />
+      <InsightsSection 
+        sgzData={sgzData || planilhaData} 
+        painelData={painelData} 
+        isSimulationActive={isSimulationActive} 
+        isMobile={isMobile}
+      />
 
       {/* Dashboard Cards */}
       <div className="overflow-x-hidden">
@@ -212,7 +237,7 @@ const RankingContent: React.FC<RankingContentProps> = ({
           chartVisibility={chartVisibility}
           isSimulationActive={isSimulationActive}
           onSimulateIdealRanking={handleSimulateIdealRanking}
-          disableCardContainers={disableCardContainers}
+          disableCardContainers={disableCardContainers || isMobile}
           onToggleChartVisibility={toggleChartVisibility}
         />
       </div>
