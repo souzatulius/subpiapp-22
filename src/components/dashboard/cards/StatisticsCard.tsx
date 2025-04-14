@@ -2,11 +2,13 @@
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
 
 interface StatItem {
   name: string;
   value: number;
   color?: string;
+  change?: string;
 }
 
 interface StatisticsCardProps {
@@ -14,11 +16,18 @@ interface StatisticsCardProps {
   title: string;
   chartType: 'bar' | 'pie' | 'line';
   isLoading?: boolean;
+  showChange?: boolean;
 }
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8'];
 
-const StatisticsCard: React.FC<StatisticsCardProps> = ({ data, title, chartType, isLoading = false }) => {
+const StatisticsCard: React.FC<StatisticsCardProps> = ({ 
+  data, 
+  title, 
+  chartType, 
+  isLoading = false,
+  showChange = false 
+}) => {
   if (isLoading) {
     return (
       <div className="animate-pulse flex flex-col space-y-4 p-4">
@@ -27,6 +36,22 @@ const StatisticsCard: React.FC<StatisticsCardProps> = ({ data, title, chartType,
       </div>
     );
   }
+
+  // Function to get trend icon based on change value
+  const getTrendIcon = (change: string) => {
+    if (!change) return null;
+    
+    const isPositive = change.startsWith('+');
+    const isNegative = change.startsWith('-');
+    
+    if (isPositive) {
+      return <TrendingUp size={14} className="text-green-500 ml-1" />;
+    } else if (isNegative) {
+      return <TrendingDown size={14} className="text-red-500 ml-1" />;
+    } else {
+      return <Minus size={14} className="text-gray-400 ml-1" />;
+    }
+  };
 
   return (
     <Card className="h-full w-full">
@@ -70,6 +95,25 @@ const StatisticsCard: React.FC<StatisticsCardProps> = ({ data, title, chartType,
             </ResponsiveContainer>
           )}
         </div>
+        
+        {showChange && (
+          <div className="mt-4 grid grid-cols-2 gap-2">
+            {data.map((item, index) => (
+              <div key={index} className="flex items-center justify-between bg-gray-50 p-2 rounded-lg">
+                <span className="text-sm font-medium">{item.name}</span>
+                <div className="flex items-center">
+                  <span className={`text-sm ${
+                    item.change?.startsWith('+') ? 'text-green-600' : 
+                    item.change?.startsWith('-') ? 'text-red-600' : 'text-gray-600'
+                  }`}>
+                    {item.change}
+                  </span>
+                  {item.change && getTrendIcon(item.change)}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </CardContent>
     </Card>
   );

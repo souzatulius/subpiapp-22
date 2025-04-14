@@ -1,94 +1,94 @@
 
 import React from 'react';
-import { ArrowUpIcon, ArrowDownIcon, TrendingUp, FileText, Inbox, Newspaper, FileCog } from 'lucide-react';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Cell } from 'recharts';
+import { TrendingUp, TrendingDown } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 
-interface KpiItem {
-  title: string;
-  value: number;
-  previousValue: number;
-  change: number;
-  isPositive: boolean;
-  icon: React.ReactNode;
+interface OriginDemandStatisticsProps {
+  showComparison?: boolean;
 }
 
-const OriginDemandStatistics: React.FC = () => {
-  // Enhanced mock data - would be replaced with real API data
-  const kpis: KpiItem[] = [
-    {
-      title: 'Notícias',
-      value: 25,
-      previousValue: 20,
-      change: 25,
-      isPositive: true,
-      icon: <Newspaper className="h-5 w-5 text-blue-500" />
-    },
-    {
-      title: 'Releases',
-      value: 12,
-      previousValue: 15,
-      change: 20,
-      isPositive: false,
-      icon: <TrendingUp className="h-5 w-5 text-green-500" />
-    },
-    {
-      title: 'Demandas',
-      value: 34,
-      previousValue: 28,
-      change: 21,
-      isPositive: true,
-      icon: <Inbox className="h-5 w-5 text-orange-500" />
-    },
-    {
-      title: 'Notas',
-      value: 8,
-      previousValue: 10,
-      change: 20,
-      isPositive: false,
-      icon: <FileText className="h-5 w-5 text-purple-500" />
-    },
-    {
-      title: 'e-SIC',
-      value: 15,
-      previousValue: 12,
-      change: 25,
-      isPositive: true,
-      icon: <FileCog className="h-5 w-5 text-indigo-500" />
-    }
-  ];
-  
+// Sample data for the origin demand statistics
+const data = [
+  { name: 'Atendimento', count: 42, prevCount: 38, change: '+10%' },
+  { name: 'Portal', count: 30, prevCount: 33, change: '-9%' },
+  { name: 'e-SIC', count: 28, prevCount: 24, change: '+16%' },
+  { name: 'Imprensa', count: 17, prevCount: 15, change: '+13%' },
+  { name: 'Telefone', count: 14, prevCount: 18, change: '-22%' },
+];
+
+const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d'];
+
+const OriginDemandStatistics: React.FC<OriginDemandStatisticsProps> = ({ showComparison = false }) => {
   return (
-    <div className="w-full h-full p-4 bg-gray-50">
-      <h3 className="text-base font-medium mb-4 text-gray-800">Estatísticas de Conteúdo</h3>
-      
-      <div className="grid grid-cols-2 gap-3">
-        {kpis.map((kpi, index) => (
-          <div key={index} className="bg-white p-3 rounded-lg shadow-sm">
-            <div className="flex justify-between items-start">
-              <div className="bg-gray-100 p-2 rounded-full">
-                {kpi.icon}
-              </div>
-              
-              <div className="flex items-center text-xs">
-                <span className={kpi.isPositive ? 'text-green-500' : 'text-red-500'}>
-                  {kpi.isPositive ? (
-                    <ArrowUpIcon className="h-3 w-3 inline mr-1" />
-                  ) : (
-                    <ArrowDownIcon className="h-3 w-3 inline mr-1" />
-                  )}
-                  {kpi.change}%
-                </span>
-              </div>
+    <Card className="h-full">
+      <CardHeader className="pb-2">
+        <CardTitle className="text-lg">Origem das Demandas</CardTitle>
+      </CardHeader>
+      <CardContent className="p-4 pt-0">
+        {showComparison ? (
+          <div className="space-y-4">
+            <div className="h-[180px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 20 }}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                  <XAxis dataKey="name" scale="point" tick={{ fontSize: 12 }} />
+                  <YAxis tick={{ fontSize: 12 }} />
+                  <Bar dataKey="count" fill="#8884d8">
+                    {data.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
             </div>
-            
-            <div className="mt-2">
-              <p className="text-xs text-gray-500">{kpi.title}</p>
-              <p className="text-xl font-semibold">{kpi.value}</p>
-              <p className="text-xs text-gray-400">Ontem: {kpi.previousValue}</p>
+            <div className="grid grid-cols-3 gap-2">
+              {data.map((item, index) => (
+                <div 
+                  key={index}
+                  className="bg-gray-50 p-2 rounded-lg flex flex-col" 
+                >
+                  <div className="flex justify-between items-center">
+                    <span className="font-medium text-xs">{item.name}</span>
+                    <Badge 
+                      variant="outline" 
+                      className={`text-xs ${
+                        item.change.startsWith('+') ? 'bg-green-50 text-green-700' : 
+                        item.change.startsWith('-') ? 'bg-red-50 text-red-700' : 'bg-gray-100'
+                      }`}
+                    >
+                      {item.change.startsWith('+') ? (
+                        <TrendingUp className="mr-1 h-3 w-3" />
+                      ) : (
+                        <TrendingDown className="mr-1 h-3 w-3" />
+                      )}
+                      {item.change}
+                    </Badge>
+                  </div>
+                  <span className="text-lg font-bold">{item.count}</span>
+                </div>
+              ))}
             </div>
           </div>
-        ))}
-      </div>
-    </div>
+        ) : (
+          <div className="h-[220px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 20 }}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                <XAxis dataKey="name" scale="point" tick={{ fontSize: 12 }} />
+                <YAxis tick={{ fontSize: 12 }} />
+                <Bar dataKey="count" fill="#8884d8">
+                  {data.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        )}
+      </CardContent>
+    </Card>
   );
 };
 

@@ -1,116 +1,153 @@
 
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Badge } from '@/components/ui/badge';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Calendar, FileText, MessageSquare, AlertCircle } from 'lucide-react';
+import { BellRing, ChevronRight, Clock } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { useNavigate } from 'react-router-dom';
 
-interface PendingActionsCardProps {
+interface PendingActionsProps {
   id?: string;
   title?: string;
   notesToApprove?: number;
   responsesToDo?: number;
   isComunicacao?: boolean;
   userDepartmentId?: string;
+  showDetailedList?: boolean;
 }
 
-const PendingActionsCard: React.FC<PendingActionsCardProps> = ({
-  id = 'acoes-pendentes',
+const PendingActionsCard: React.FC<PendingActionsProps> = ({
+  id = 'pending-actions',
   title = 'Ações Pendentes',
-  notesToApprove = 3,
-  responsesToDo = 5,
-  isComunicacao = true,
-  userDepartmentId = ''
+  notesToApprove = 0,
+  responsesToDo = 0,
+  isComunicacao = false,
+  userDepartmentId = '',
+  showDetailedList = false
 }) => {
   const navigate = useNavigate();
-
-  const pendingActions = [
-    {
-      name: 'Notas para aprovar',
-      count: notesToApprove,
-      icon: <FileText className="h-4 w-4" />,
-      path: '/dashboard/comunicacao/aprovar-nota'
-    },
-    {
-      name: 'Demandas para responder',
-      count: responsesToDo,
-      icon: <MessageSquare className="h-4 w-4" />,
-      path: '/dashboard/comunicacao/responder'
-    },
-    {
-      name: 'Comunicados próximos',
-      count: 2,
-      icon: <Calendar className="h-4 w-4" />,
-      path: '/dashboard/comunicacao/comunicados'
-    }
+  
+  const totalActions = notesToApprove + responsesToDo;
+  
+  // Sample data for detailed list view
+  const detailedActions = [
+    { id: '1', title: 'Responder demanda de imprensa', type: 'demanda', priority: 'alta', dueDate: '2025-04-17', department: 'Comunicação' },
+    { id: '2', title: 'Aprovar nota sobre obras', type: 'nota', priority: 'média', dueDate: '2025-04-18', department: 'Infraestrutura' },
+    { id: '3', title: 'Responder solicitação de dados', type: 'demanda', priority: 'baixa', dueDate: '2025-04-20', department: 'Planejamento' },
   ];
-
-  const handleActionClick = (path: string) => {
-    navigate(path);
+  
+  const handleCardClick = () => {
+    if (notesToApprove > 0) {
+      navigate('/dashboard/comunicacao/aprovar-nota');
+    } else {
+      navigate('/dashboard/comunicacao/responder-demanda');
+    }
+  };
+  
+  // Define priority badge colors
+  const getPriorityBadge = (priority: string) => {
+    switch(priority.toLowerCase()) {
+      case 'alta':
+        return <Badge variant="outline" className="text-red-600 bg-red-50 border-red-200">Alta</Badge>;
+      case 'média':
+        return <Badge variant="outline" className="text-orange-600 bg-orange-50 border-orange-200">Média</Badge>;
+      case 'baixa':
+        return <Badge variant="outline" className="text-green-600 bg-green-50 border-green-200">Baixa</Badge>;
+      default:
+        return <Badge variant="outline" className="text-gray-600 bg-gray-50 border-gray-200">{priority}</Badge>;
+    }
   };
 
   return (
-    <div className="w-full h-full bg-white p-4 rounded-lg">
-      <div className="flex justify-between items-center mb-4">
-        <h3 className="font-medium text-gray-800">{title}</h3>
-        
-        {(notesToApprove > 0 || responsesToDo > 0) && (
-          <Badge variant="destructive" className="rounded-full">
-            {notesToApprove + responsesToDo} pendentes
-          </Badge>
-        )}
-      </div>
-
-      {pendingActions.some(action => action.count > 0) ? (
-        <div className="space-y-3">
-          {pendingActions.map((action, index) => (
-            action.count > 0 && (
+    <Card className="h-full overflow-hidden">
+      <CardHeader className="pb-2">
+        <CardTitle className="text-lg flex items-center">
+          <BellRing className="mr-2 h-5 w-5 text-orange-500" />
+          {title}
+          {totalActions > 0 && (
+            <Badge className="ml-2 bg-orange-100 text-orange-800 hover:bg-orange-200">
+              {totalActions}
+            </Badge>
+          )}
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="px-4 pb-4 pt-0">
+        {totalActions === 0 ? (
+          <div className="flex flex-col items-center justify-center text-center h-[180px] text-gray-500">
+            <div className="bg-gray-100 p-3 rounded-full mb-3">
+              <BellRing className="h-6 w-6 text-gray-400" />
+            </div>
+            <p className="font-medium">Sem ações pendentes</p>
+            <p className="text-sm">Você está com tudo em dia!</p>
+          </div>
+        ) : showDetailedList ? (
+          <div className="space-y-3">
+            {detailedActions.map(action => (
               <div 
-                key={index} 
-                className="p-3 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer transition-colors"
-                onClick={() => handleActionClick(action.path)}
+                key={action.id}
+                className="p-3 bg-white border border-gray-100 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
               >
-                <div className="flex justify-between items-center">
-                  <div className="flex items-center gap-2">
-                    <span className="p-1 rounded-full bg-blue-100 text-blue-700">
-                      {action.icon}
-                    </span>
-                    <span className="text-sm font-medium">{action.name}</span>
+                <div className="flex justify-between items-start mb-2">
+                  <div className="font-medium text-sm">{action.title}</div>
+                  {getPriorityBadge(action.priority)}
+                </div>
+                <div className="flex items-center justify-between text-xs text-gray-500">
+                  <div className="flex items-center">
+                    <Clock className="h-3 w-3 mr-1" />
+                    <span>{new Date(action.dueDate).toLocaleDateString()}</span>
                   </div>
-                  <Badge variant="outline" className="rounded-full bg-white">
-                    {action.count}
-                  </Badge>
+                  <span className="bg-gray-100 px-2 py-0.5 rounded-full">{action.department}</span>
                 </div>
               </div>
-            )
-          ))}
-          
-          <div className="mt-4">
+            ))}
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {notesToApprove > 0 && (
+              <div className="flex items-center justify-between hover:bg-gray-50 p-2 rounded-lg transition-colors cursor-pointer" onClick={() => navigate('/dashboard/comunicacao/aprovar-nota')}>
+                <div>
+                  <p className="font-medium">Notas para aprovar</p>
+                  <p className="text-sm text-gray-500">
+                    {isComunicacao
+                      ? 'Revisão de notas oficiais'
+                      : `De ${userDepartmentId || 'sua coordenação'}`}
+                  </p>
+                </div>
+                <div className="flex items-center">
+                  <Badge className="mr-2 bg-blue-100 text-blue-800">{notesToApprove}</Badge>
+                  <ChevronRight className="h-4 w-4 text-gray-400" />
+                </div>
+              </div>
+            )}
+            
+            {responsesToDo > 0 && (
+              <div className="flex items-center justify-between hover:bg-gray-50 p-2 rounded-lg transition-colors cursor-pointer" onClick={() => navigate('/dashboard/comunicacao/responder-demanda')}>
+                <div>
+                  <p className="font-medium">Demandas para responder</p>
+                  <p className="text-sm text-gray-500">
+                    {isComunicacao
+                      ? 'Demandas aguardando resposta'
+                      : `Solicitadas à ${userDepartmentId || 'sua coordenação'}`}
+                  </p>
+                </div>
+                <div className="flex items-center">
+                  <Badge className="mr-2 bg-orange-100 text-orange-800">{responsesToDo}</Badge>
+                  <ChevronRight className="h-4 w-4 text-gray-400" />
+                </div>
+              </div>
+            )}
+            
             <Button 
-              variant="outline" 
-              size="sm" 
-              className="w-full"
-              onClick={() => navigate('/dashboard/comunicacao/tarefas')}
+              variant="ghost" 
+              className="w-full justify-center text-sm mt-2"
+              onClick={handleCardClick}
             >
               Ver todas as pendências
             </Button>
           </div>
-        </div>
-      ) : (
-        <div className="flex flex-col items-center justify-center h-[calc(100%-36px)] space-y-3 text-center">
-          <div className="p-2 rounded-full bg-green-100 text-green-600">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-              <polyline points="22 4 12 14.01 9 11.01"></polyline>
-            </svg>
-          </div>
-          <div>
-            <p className="text-gray-700 font-medium">Sem pendências</p>
-            <p className="text-gray-500 text-sm">Você está em dia com suas tarefas</p>
-          </div>
-        </div>
-      )}
-    </div>
+        )}
+      </CardContent>
+    </Card>
   );
 };
 
