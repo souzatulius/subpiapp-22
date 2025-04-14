@@ -45,17 +45,17 @@ export const useChartData = () => {
         if (coordenacoesError) throw coordenacoesError;
 
         // Transform data for charts (using random data for demonstration)
-        const problemasTransformed = problemasData.map(problem => ({
+        const problemasTransformed = (problemasData || []).map(problem => ({
           name: problem.descricao,
           value: Math.floor(Math.random() * 50) + 10
         }));
 
-        const origensTransformed = origensData.map(origem => ({
+        const origensTransformed = (origensData || []).map(origem => ({
           name: origem.descricao,
           value: Math.floor(Math.random() * 50) + 10
         }));
 
-        const coordenacoesTransformed = coordenacoesData.map(coord => ({
+        const coordenacoesTransformed = (coordenacoesData || []).map(coord => ({
           name: coord.descricao,
           Demandas: Math.floor(Math.random() * 100) + 50
         }));

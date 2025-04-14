@@ -20,11 +20,14 @@ export const useRankingChartComponents = () => {
   
   const { chartColors } = useChartConfigs();
   
+  // Ensure data is always an array with a proper fallback
+  const ensureArray = (data: any[] | null | undefined) => Array.isArray(data) ? data : [];
+  
   // Ranking chart components
   const rankingChartComponents = useMemo<ChartComponentsCollection>(() => ({
     'serviceDiversity': (
       <BarChart 
-        data={problemas || []}
+        data={ensureArray(problemas)}
         xAxisDataKey="name"
         bars={[
           { dataKey: 'value', name: 'Quantidade', color: chartColors[0] }
@@ -33,13 +36,7 @@ export const useRankingChartComponents = () => {
     ),
     'servicesByDistrict': (
       <BarChart 
-        data={coordinations || [
-          { name: 'CPO', Demandas: 92 },
-          { name: 'CPDU', Demandas: 87 },
-          { name: 'Governo Local', Demandas: 82 },
-          { name: 'Jurídico', Demandas: 75 },
-          { name: 'Finanças', Demandas: 68 },
-        ]}
+        data={ensureArray(coordinations)}
         xAxisDataKey="name"
         bars={[
           { dataKey: 'Demandas', name: 'Quantidade', color: chartColors[1] }
@@ -48,7 +45,7 @@ export const useRankingChartComponents = () => {
     ),
     'serviceTypes': (
       <BarChart 
-        data={problemas || []}
+        data={ensureArray(problemas)}
         xAxisDataKey="name"
         bars={[
           { dataKey: 'value', name: 'Quantidade', color: chartColors[2] }
@@ -57,7 +54,7 @@ export const useRankingChartComponents = () => {
     ),
     'statusDistribution': (
       <BarChart 
-        data={origens || []}
+        data={ensureArray(origens)}
         xAxisDataKey="name"
         bars={[
           { dataKey: 'value', name: 'Quantidade', color: chartColors[3] }
@@ -66,7 +63,7 @@ export const useRankingChartComponents = () => {
     ),
     'timeComparison': (
       <BarChart 
-        data={responseTimes || []}
+        data={ensureArray(responseTimes)}
         xAxisDataKey="name"
         bars={[
           { dataKey: 'Demandas', name: 'Dias', color: chartColors[0] }
@@ -75,7 +72,7 @@ export const useRankingChartComponents = () => {
     ),
     'topCompanies': (
       <BarChart 
-        data={coordinations || []}
+        data={ensureArray(coordinations)}
         xAxisDataKey="name"
         bars={[
           { dataKey: 'Demandas', name: 'Concluídas', color: chartColors[1] }
@@ -84,7 +81,7 @@ export const useRankingChartComponents = () => {
     ),
     'statusTransition': (
       <LineChart 
-        data={mediaTypes || []}
+        data={ensureArray(mediaTypes)}
         xAxisDataKey="name"
         lines={[
           { dataKey: 'Quantidade', name: 'Aberto', color: chartColors[2] },
