@@ -1,10 +1,8 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import UnifiedFilterBar, { FilterOption, ViewMode } from './UnifiedFilterBar';
 import UnifiedListView from './UnifiedListView';
 import UnifiedGridView from './UnifiedGridView';
-
 interface UnifiedViewContainerProps<T> {
   items: T[];
   isLoading: boolean;
@@ -44,7 +42,6 @@ interface UnifiedViewContainerProps<T> {
   };
   actionMenu?: React.ReactNode;
 }
-
 function UnifiedViewContainer<T>({
   items,
   isLoading,
@@ -68,57 +65,20 @@ function UnifiedViewContainer<T>({
   actionMenu
 }: UnifiedViewContainerProps<T>) {
   const [viewMode, setViewMode] = useState<ViewMode>(defaultViewMode);
-
-  return (
-    <Card className={`border border-gray-200 shadow-sm rounded-xl overflow-hidden ${className}`}>
-      <CardContent className={`${cardContentClassName} rounded-xl`}>
+  return <Card className={`border border-gray-200 shadow-sm rounded-xl overflow-hidden ${className}`}>
+      <CardContent className="">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
           <div className="flex-1">
-            <UnifiedFilterBar
-              searchTerm={searchTerm}
-              setSearchTerm={setSearchTerm}
-              viewMode={viewMode}
-              setViewMode={setViewMode}
-              filterOptions={filterOptions}
-              searchPlaceholder={searchPlaceholder}
-              showBackButton={showBackButton}
-              onBack={onBack}
-              hideViewToggle={hideViewToggle}
-            />
+            <UnifiedFilterBar searchTerm={searchTerm} setSearchTerm={setSearchTerm} viewMode={viewMode} setViewMode={setViewMode} filterOptions={filterOptions} searchPlaceholder={searchPlaceholder} showBackButton={showBackButton} onBack={onBack} hideViewToggle={hideViewToggle} />
           </div>
           
-          {actionMenu && (
-            <div className="flex-shrink-0">
+          {actionMenu && <div className="flex-shrink-0">
               {actionMenu}
-            </div>
-          )}
+            </div>}
         </div>
         
-        {viewMode === 'cards' ? (
-          <UnifiedGridView
-            items={items}
-            isLoading={isLoading}
-            renderItem={renderGridItem}
-            idExtractor={idExtractor}
-            onItemClick={onItemClick}
-            selectedItemId={selectedItemId}
-            emptyStateMessage={emptyStateMessage}
-            columns={gridColumns}
-          />
-        ) : (
-          <UnifiedListView
-            items={items}
-            isLoading={isLoading}
-            renderItem={renderListItem}
-            idExtractor={idExtractor}
-            onItemClick={onItemClick}
-            selectedItemId={selectedItemId}
-            emptyStateMessage={emptyStateMessage}
-          />
-        )}
+        {viewMode === 'cards' ? <UnifiedGridView items={items} isLoading={isLoading} renderItem={renderGridItem} idExtractor={idExtractor} onItemClick={onItemClick} selectedItemId={selectedItemId} emptyStateMessage={emptyStateMessage} columns={gridColumns} /> : <UnifiedListView items={items} isLoading={isLoading} renderItem={renderListItem} idExtractor={idExtractor} onItemClick={onItemClick} selectedItemId={selectedItemId} emptyStateMessage={emptyStateMessage} />}
       </CardContent>
-    </Card>
-  );
+    </Card>;
 }
-
 export default UnifiedViewContainer;
