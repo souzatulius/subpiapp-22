@@ -123,7 +123,7 @@ const ResponderDemandaContent: React.FC = () => {
       }}
       emptyStateMessage="Nenhuma demanda encontrada com os filtros selecionados"
       searchPlaceholder="Buscar demanda..."
-      defaultViewMode={viewMode as ViewMode}
+      defaultViewMode={viewMode}
       className="animate-fade-in" // Mantendo a animação diretamente na classe do UnifiedViewContainer
     />
   );

@@ -103,8 +103,8 @@ const DemandasFilter: React.FC<DemandasFilterProps> = ({
           <Button
             variant="outline"
             size="icon"
-            onClick={() => setViewMode('cards')}
-            className={`rounded-xl ${viewMode === 'cards' ? 'bg-blue-50' : ''}`}
+            onClick={() => setViewMode('grid')}
+            className={`rounded-xl ${viewMode === 'grid' ? 'bg-blue-50' : ''}`}
           >
             <Grid className="h-4 w-4" />
           </Button>

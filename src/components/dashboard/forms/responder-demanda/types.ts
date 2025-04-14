@@ -75,9 +75,26 @@ export interface Demanda {
   };
   resumo_situacao?: string;
   created_at?: string;
+  
+  // Add missing properties referenced in DemandaInfoSection
+  origens_demandas?: {
+    id?: string;
+    descricao?: string;
+  };
+  protocolo?: string;
+  distrito?: {
+    id?: string;
+    nome?: string;
+  };
+  bairros?: {
+    id?: string;
+    nome?: string;
+    distrito_id?: string;
+  };
 }
 
-export type ViewMode = "list" | "grid";
+// Changed ViewMode type to match UnifiedFilterBar's expected values
+export type ViewMode = "list" | "grid" | "cards";
 
 export interface ResponseData {
   id: string;
@@ -93,4 +110,10 @@ export interface ResponseData {
 export interface Question {
   key: string;
   question: string;
+}
+
+// Add Area interface for useFetchAreas.ts
+export interface Area {
+  id: string;
+  descricao: string;
 }

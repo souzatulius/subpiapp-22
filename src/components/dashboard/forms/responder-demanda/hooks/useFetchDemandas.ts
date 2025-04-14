@@ -109,8 +109,17 @@ export const useFetchDemandas = () => {
         
         // Transform the data to match the Demanda type
         const transformedData: Demanda[] = (filteredData || []).map(item => {
-          // Process perguntas from different formats
-          let perguntasArray = normalizeQuestions(item.perguntas);
+          // Process perguntas from different formats - ensure it returns a Record<string, string>
+          let perguntasObject: Record<string, string> = {};
+          
+          if (Array.isArray(item.perguntas)) {
+            // Convert string array to Record<string, string>
+            item.perguntas.forEach((question, index) => {
+              perguntasObject[index.toString()] = question;
+            });
+          } else if (typeof item.perguntas === 'object' && item.perguntas !== null) {
+            perguntasObject = item.perguntas as Record<string, string>;
+          }
           
           // Process anexos to ensure it's always a valid array of URLs
           const processedAnexos = processFileUrls(item.anexos);
@@ -136,7 +145,7 @@ export const useFetchDemandas = () => {
             detalhes_solicitacao: item.detalhes_solicitacao,
             prazo_resposta: item.prazo_resposta,
             prioridade: item.prioridade,
-            perguntas: perguntasArray,
+            perguntas: perguntasObject,
             status: item.status,
             horario_publicacao: item.horario_publicacao,
             endereco: item.endereco,

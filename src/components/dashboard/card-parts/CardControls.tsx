@@ -3,12 +3,14 @@ import React from 'react';
 import { Pencil, EyeOff } from 'lucide-react';
 
 interface CardControlsProps {
+  id?: string; // Added id prop as optional
   onDelete?: () => void;
   onEdit?: () => void;
   onHide?: () => void;
 }
 
 const CardControls: React.FC<CardControlsProps> = ({
+  id,
   onDelete,
   onEdit,
   onHide

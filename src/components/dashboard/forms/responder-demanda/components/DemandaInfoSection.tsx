@@ -34,7 +34,7 @@ const DemandaInfoSection: React.FC<DemandaInfoSectionProps> = ({ demanda }) => {
             <span className="text-xs">Origem</span>
           </div>
           <span className="text-sm font-medium">
-            {demanda.origens_demandas?.descricao || 'Não informado'}
+            {demanda.origens_demandas?.descricao || demanda.origem?.descricao || 'Não informado'}
           </span>
         </div>
         
@@ -110,14 +110,14 @@ const DemandaInfoSection: React.FC<DemandaInfoSectionProps> = ({ demanda }) => {
                 </div>
               )}
               
-              {demanda.bairros?.nome && (
+              {(demanda.bairros?.nome || demanda.bairro?.nome) && (
                 <div className="flex flex-col space-y-1">
                   <div className="flex items-center text-gray-600">
                     <MapPin className="w-4 h-4 mr-1" />
                     <span className="text-xs">Bairro</span>
                   </div>
                   <span className="text-sm font-medium">
-                    {demanda.bairros?.nome}
+                    {demanda.bairros?.nome || demanda.bairro?.nome}
                   </span>
                 </div>
               )}
