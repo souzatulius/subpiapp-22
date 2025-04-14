@@ -1,17 +1,15 @@
 
 import React, { useState } from 'react';
-import { BarChart3, SlidersHorizontal, Printer, FileText, RefreshCw } from 'lucide-react';
+import { BarChart3, SlidersHorizontal, Printer, FileText } from 'lucide-react';
 import WelcomeCard from '@/components/shared/WelcomeCard';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
 import '@/components/ranking/charts/ChartRegistration';
 import { exportToPDF, printWithStyles } from '@/utils/pdfExport';
-import { useIsMobile } from '@/hooks/use-mobile';
 import RankingContent from '@/components/ranking/RankingContent';
 
 const RankingSubs = () => {
   const [filterDialogOpen, setFilterDialogOpen] = useState(false);
-  const isMobile = useIsMobile();
 
   const handlePrint = () => {
     printWithStyles();
@@ -70,7 +68,7 @@ const RankingSubs = () => {
           </Button>
         </div>
         
-        <div className="mt-6">
+        <div className="mt-6 max-w-full overflow-x-hidden">
           <RankingContent 
             filterDialogOpen={filterDialogOpen} 
             setFilterDialogOpen={setFilterDialogOpen}
@@ -80,16 +78,6 @@ const RankingSubs = () => {
           />
         </div>
       </motion.div>
-
-      <style dangerouslySetInnerHTML={{ __html: `
-        @media (max-width: 767px) {
-          .mobile-kpi-grid .kpi-container {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 8px;
-          }
-        }
-      `}} />
     </div>
   );
 };

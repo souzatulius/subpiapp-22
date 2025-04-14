@@ -18,46 +18,56 @@ const DEFAULT_MOCK_STATISTICS = {
   demands: [{
     name: 'Pendentes',
     value: 25,
-    color: '#3B82F6'
+    color: '#3B82F6',
+    change: '+5%' // Added change data for KPI comparison
   }, {
     name: 'Em andamento',
     value: 15,
-    color: '#F59E0B'
+    color: '#F59E0B',
+    change: '-2%'
   }, {
     name: 'Concluídas',
     value: 45,
-    color: '#10B981'
+    color: '#10B981',
+    change: '+12%'
   }],
   notes: [{
     name: 'Aprovadas',
     value: 30,
-    color: '#10B981'
+    color: '#10B981',
+    change: '+8%'
   }, {
     name: 'Pendentes',
     value: 12,
-    color: '#F59E0B'
+    color: '#F59E0B',
+    change: '-3%'
   }, {
     name: 'Rejeitadas',
     value: 8,
-    color: '#EF4444'
+    color: '#EF4444',
+    change: '+1%'
   }],
   news: [{
     name: 'Publicadas',
     value: 22,
-    color: '#3B82F6'
+    color: '#3B82F6',
+    change: '+5%'
   }, {
     name: 'Rascunhos',
     value: 10,
-    color: '#9CA3AF'
+    color: '#9CA3AF',
+    change: '0%'
   }],
   esic: [{
     name: 'Abertos',
     value: 18,
-    color: '#F59E0B'
+    color: '#F59E0B',
+    change: '+2%'
   }, {
     name: 'Finalizados',
     value: 42,
-    color: '#10B981'
+    color: '#10B981',
+    change: '+15%'
   }]
 };
 
@@ -74,11 +84,11 @@ const getSpecialContent = ({
 
   // Check for specific card IDs
   if (card.id === 'origem-demandas') {
-    return <OriginDemandStatistics />;
+    return <OriginDemandStatistics showComparison={true} />;
   }
 
   if (card.id === 'acoes-pendentes') {
-    return <PendingActionsCard />;
+    return <PendingActionsCard showDetailedList={true} />;
   }
 
   if (card.id === 'atividades-andamento') {
@@ -86,9 +96,19 @@ const getSpecialContent = ({
       <div className="p-4 h-full">
         <h3 className="font-medium mb-2">Atividades em Andamento</h3>
         <ul className="space-y-2">
-          <li className="p-2 bg-blue-50 rounded-lg text-sm">Análise de demanda de imprensa</li>
-          <li className="p-2 bg-orange-50 rounded-lg text-sm">Preparação de nota oficial</li>
-          <li className="p-2 bg-green-50 rounded-lg text-sm">Notificação de equipe</li>
+          {specialCardsData?.activities ? (
+            specialCardsData.activities.map((activity, index) => (
+              <li key={index} className={`p-2 ${index % 3 === 0 ? 'bg-blue-50' : index % 3 === 1 ? 'bg-orange-50' : 'bg-green-50'} rounded-lg text-sm`}>
+                {activity.title || activity}
+              </li>
+            ))
+          ) : (
+            <>
+              <li className="p-2 bg-blue-50 rounded-lg text-sm">Análise de demanda de imprensa</li>
+              <li className="p-2 bg-orange-50 rounded-lg text-sm">Preparação de nota oficial</li>
+              <li className="p-2 bg-green-50 rounded-lg text-sm">Notificação de equipe</li>
+            </>
+          )}
         </ul>
       </div>
     );
@@ -130,10 +150,10 @@ const getSpecialContent = ({
 
         // Create a dynamic charts view based on available statistics
         return <div className="grid grid-cols-3 gap-4 p-4 h-full">
-            <StatisticsCard data={mockStatistics.demands} title="Demandas por Status" chartType="pie" />
-            <StatisticsCard data={mockStatistics.notes} title="Notas por Status" chartType="bar" />
-            <StatisticsCard data={mockStatistics.news} title="Notícias" chartType="pie" />
-            {mockStatistics.esic && <StatisticsCard data={mockStatistics.esic} title="Processos e-SIC" chartType="pie" />}
+            <StatisticsCard data={mockStatistics.demands} title="Demandas por Status" chartType="pie" showChange={true} />
+            <StatisticsCard data={mockStatistics.notes} title="Notas por Status" chartType="bar" showChange={true} />
+            <StatisticsCard data={mockStatistics.news} title="Notícias" chartType="pie" showChange={true} />
+            {mockStatistics.esic && <StatisticsCard data={mockStatistics.esic} title="Processos e-SIC" chartType="pie" showChange={true} />}
           </div>;
       default:
         return null;

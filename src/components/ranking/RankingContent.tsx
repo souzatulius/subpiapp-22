@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import RankingFilterDialog from './filters/RankingFilterDialog';
 import RankingCharts from './RankingCharts';
@@ -7,6 +8,8 @@ import DashboardCards from './insights/DashboardCards';
 import { useAnimatedFeedback } from '@/hooks/use-animated-feedback';
 import { useUploadState } from '@/hooks/ranking/useUploadState';
 import { toast } from 'sonner';
+import { RefreshCw } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 interface RankingContentProps {
   filterDialogOpen: boolean;
@@ -44,6 +47,7 @@ const RankingContent: React.FC<RankingContentProps> = ({
   
   const { showFeedback } = useAnimatedFeedback();
 
+  // Sync data source between localStorage and state
   useEffect(() => {
     const localDataSource = localStorage.getItem('demo-data-source');
     if (localDataSource && (localDataSource === 'mock' || localDataSource === 'upload' || localDataSource === 'supabase')) {
@@ -58,6 +62,7 @@ const RankingContent: React.FC<RankingContentProps> = ({
     }
   }, [dataSource, uploadDataSource, setDataSource, setUploadDataSource]);
 
+  // Log data availability for debugging
   useEffect(() => {
     console.log("RankingContent: Data availability check:", {
       planilhaData: planilhaData?.length || 0,
@@ -83,6 +88,7 @@ const RankingContent: React.FC<RankingContentProps> = ({
     }
   };
 
+  // Show loading feedback when data is being loaded
   useEffect(() => {
     if (isLoading) {
       showFeedback('loading', 'Gerando insights e gráficos...', { 
@@ -93,6 +99,7 @@ const RankingContent: React.FC<RankingContentProps> = ({
     }
   }, [isLoading, showFeedback]);
 
+  // Refresh data on mount if refresh function is provided
   useEffect(() => {
     if (onRefreshData) {
       console.log("RankingContent: Calling onRefreshData on mount");
@@ -107,30 +114,73 @@ const RankingContent: React.FC<RankingContentProps> = ({
     }
   }, [onRefreshData]);
 
+  // Handle manual data refresh
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    try {
+      if (onRefreshData) {
+        await onRefreshData();
+        toast.success('Dados atualizados com sucesso');
+      } else {
+        await refreshChartData();
+        toast.success('Dados atualizados com sucesso');
+      }
+    } catch (error) {
+      console.error('Failed to refresh data:', error);
+      toast.error('Erro ao atualizar dados');
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
+
   return (
-    <div className="space-y-6">
-      <div className="flex flex-nowrap overflow-x-auto gap-4 pb-2 max-w-full">
-        <div className="w-full">
-          <DashboardCards 
-            dadosPlanilha={planilhaData} 
-            dadosPainel={painelData} 
-            isSimulationActive={isSimulationActive}
-          />
+    <div className={`space-y-6 max-w-full overflow-x-hidden ${className}`}>
+      {/* Header with refresh button */}
+      <div className="flex justify-between items-center mb-2">
+        <div className="flex items-center gap-2">
+          {lastRefreshTime && (
+            <span className="text-xs text-gray-500">
+              {lastUpdateText}: {new Date(lastRefreshTime).toLocaleString()}
+            </span>
+          )}
         </div>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleRefresh}
+          disabled={isRefreshing}
+          className="flex items-center gap-1.5"
+        >
+          <RefreshCw className={`h-3.5 w-3.5 ${isRefreshing ? 'animate-spin' : ''}`} />
+          {buttonText}
+        </Button>
       </div>
 
-      <RankingCharts
-        chartData={{}}
-        sgzData={sgzData || planilhaData}
-        painelData={painelData}
-        isLoading={isLoading}
-        chartVisibility={chartVisibility}
-        isSimulationActive={isSimulationActive}
-        onSimulateIdealRanking={handleSimulateIdealRanking}
-        disableCardContainers={disableCardContainers}
-        onToggleChartVisibility={toggleChartVisibility}
-      />
+      {/* Dashboard Cards */}
+      <div className="overflow-x-hidden">
+        <DashboardCards 
+          dadosPlanilha={planilhaData} 
+          dadosPainel={painelData} 
+          isSimulationActive={isSimulationActive}
+        />
+      </div>
 
+      {/* Ranking Charts */}
+      <div className="overflow-x-hidden">
+        <RankingCharts
+          chartData={{}}
+          sgzData={sgzData || planilhaData}
+          painelData={painelData}
+          isLoading={isLoading}
+          chartVisibility={chartVisibility}
+          isSimulationActive={isSimulationActive}
+          onSimulateIdealRanking={handleSimulateIdealRanking}
+          disableCardContainers={disableCardContainers}
+          onToggleChartVisibility={toggleChartVisibility}
+        />
+      </div>
+
+      {/* Filter Dialog */}
       <RankingFilterDialog 
         open={filterDialogOpen} 
         onOpenChange={setFilterDialogOpen}

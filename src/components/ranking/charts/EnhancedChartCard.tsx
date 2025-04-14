@@ -1,8 +1,10 @@
+
 import React, { ReactNode, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { EyeOff, Search } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+
 interface EnhancedChartCardProps {
   title: string;
   subtitle?: string;
@@ -17,6 +19,7 @@ interface EnhancedChartCardProps {
   dataSource?: 'SGZ' | 'Painel da Zeladoria' | string;
   analysis?: string;
 }
+
 const EnhancedChartCard: React.FC<EnhancedChartCardProps> = ({
   title,
   subtitle,
@@ -45,7 +48,13 @@ const EnhancedChartCard: React.FC<EnhancedChartCardProps> = ({
         return 'bg-gray-100 text-gray-700 border-gray-300';
     }
   };
-  return <Card className={`border border-orange-200 shadow-sm hover:shadow-md transition-all relative ${className}`} onMouseEnter={() => setIsHovering(true)} onMouseLeave={() => setIsHovering(false)}>
+
+  return (
+    <Card 
+      className={`border border-orange-200 shadow-sm hover:shadow-md transition-all relative ${className}`}
+      onMouseEnter={() => setIsHovering(true)} 
+      onMouseLeave={() => setIsHovering(false)}
+    >
       <CardHeader>
         <div className="flex items-center justify-between">
           <div className="flex-1">
@@ -53,9 +62,14 @@ const EnhancedChartCard: React.FC<EnhancedChartCardProps> = ({
               <CardTitle className="text-sm font-medium text-gray-800">{title}</CardTitle>
               
               {/* Data source badge moved to right side */}
-              {dataSource && <Badge variant="outline" className={`text-xs py-0 px-1.5 ml-2 ${getBadgeColor(dataSource)}`}>
+              {dataSource && (
+                <Badge 
+                  variant="outline" 
+                  className={`text-xs py-0 px-1.5 ml-2 ${getBadgeColor(dataSource)}`}
+                >
                   {dataSource}
-                </Badge>}
+                </Badge>
+              )}
             </div>
             
             {subtitle && <p className="text-xs text-gray-500">{subtitle}</p>}
@@ -64,19 +78,31 @@ const EnhancedChartCard: React.FC<EnhancedChartCardProps> = ({
           
           {/* Action buttons on header with updated styling */}
           <div className="flex space-x-1 ml-2">
-            {onToggleAnalysis && <button onClick={e => {
-            e.stopPropagation();
-            onToggleAnalysis();
-          }} className="p-1.5 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600 transition-colors" title="Mostrar análise">
+            {onToggleAnalysis && (
+              <button 
+                onClick={e => {
+                  e.stopPropagation();
+                  onToggleAnalysis();
+                }} 
+                className="p-1.5 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600 transition-colors" 
+                title="Mostrar análise"
+              >
                 <Search size={16} />
-              </button>}
+              </button>
+            )}
             
-            {onToggleVisibility && <button onClick={e => {
-            e.stopPropagation();
-            onToggleVisibility();
-          }} title="Ocultar card" className="p-1.5 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600 transition-colors py-[5px]">
+            {onToggleVisibility && (
+              <button 
+                onClick={e => {
+                  e.stopPropagation();
+                  onToggleVisibility();
+                }} 
+                title="Ocultar card" 
+                className="p-1.5 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600 transition-colors py-[5px]"
+              >
                 <EyeOff size={16} />
-              </button>}
+              </button>
+            )}
           </div>
           
           {headerContent}
@@ -84,16 +110,24 @@ const EnhancedChartCard: React.FC<EnhancedChartCardProps> = ({
       </CardHeader>
       
       <CardContent className="relative">
-        {isLoading ? <div className="flex items-center justify-center h-[220px]">
+        {isLoading ? (
+          <div className="flex items-center justify-center h-[220px]">
             <Skeleton className="h-[200px] w-[200px]" />
-          </div> : <div className="h-[220px]">
+          </div>
+        ) : (
+          <div className="h-[220px] w-full">
             {children}
-          </div>}
+          </div>
+        )}
         
-        {footerContent && <div className="mt-3">
+        {footerContent && (
+          <div className="mt-3">
             {footerContent}
-          </div>}
+          </div>
+        )}
       </CardContent>
-    </Card>;
+    </Card>
+  );
 };
+
 export default EnhancedChartCard;
