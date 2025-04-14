@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useSupabaseAuth';
@@ -10,14 +11,11 @@ import { useToast } from '@/components/ui/use-toast';
 import { useIsMobile } from '@/hooks/use-mobile';
 import ProfileEditModal from '@/components/profile/ProfileEditModal';
 import { ProfileData } from '@/components/profile/types';
+import AccountSettingsModal from '@/components/profile/AccountSettingsModal';
+
 const UserProfileMenu = () => {
-  const {
-    user,
-    signOut
-  } = useAuth();
-  const {
-    toast
-  } = useToast();
+  const { user, signOut } = useAuth();
+  const { toast } = useToast();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const [userProfile, setUserProfile] = useState<{
@@ -32,22 +30,26 @@ const UserProfileMenu = () => {
   } | null>(null);
   const [loading, setLoading] = useState(true);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+  const [isNotificationSettingsOpen, setIsNotificationSettingsOpen] = useState(false);
+  
   useEffect(() => {
     const fetchUserProfile = async () => {
       if (!user) return;
       try {
         setLoading(true);
-        const {
-          data,
-          error
-        } = await supabase.from('usuarios').select(`
+        const { data, error } = await supabase
+          .from('usuarios')
+          .select(`
             nome_completo,
             email,
             foto_perfil_url,
             coordenacao:coordenacoes(descricao),
             whatsapp,
             aniversario
-          `).eq('id', user.id).single();
+          `)
+          .eq('id', user.id)
+          .single();
+
         if (error) throw error;
         setUserProfile(data);
       } catch (error) {
@@ -56,20 +58,24 @@ const UserProfileMenu = () => {
         setLoading(false);
       }
     };
+
     fetchUserProfile();
   }, [user]);
+
   const getInitials = () => {
     if (!userProfile?.nome_completo) return 'U';
     const nameParts = userProfile.nome_completo.split(' ');
     if (nameParts.length === 1) return nameParts[0].charAt(0);
     return `${nameParts[0].charAt(0)}${nameParts[nameParts.length - 1].charAt(0)}`;
   };
+
   const getFirstAndLastName = () => {
     if (!userProfile?.nome_completo) return 'Usuário';
     const nameParts = userProfile.nome_completo.split(' ');
     if (nameParts.length === 1) return nameParts[0];
     return `${nameParts[0]} ${nameParts[nameParts.length - 1]}`;
   };
+
   const handleLogout = async () => {
     try {
       await signOut();
@@ -83,9 +89,15 @@ const UserProfileMenu = () => {
       });
     }
   };
+
   const handleEditProfile = () => {
     setIsProfileModalOpen(true);
   };
+  
+  const handleNotificationSettings = () => {
+    setIsNotificationSettingsOpen(true);
+  };
+
   const handleProfileUpdate = (updatedData: Partial<ProfileData>) => {
     if (userProfile) {
       setUserProfile({
@@ -96,44 +108,61 @@ const UserProfileMenu = () => {
       });
     }
   };
+
   const profileData: ProfileData = {
     nome_completo: userProfile?.nome_completo || '',
     whatsapp: userProfile?.whatsapp || '',
     aniversario: userProfile?.aniversario || ''
   };
-  return <div className="flex items-center">
+
+  return (
+    <div className="flex items-center">
       {/* Desktop view - Show name and department with reduced font size */}
-      {!isMobile && <div className="mr-3 text-right hidden md:block">
+      {!isMobile && (
+        <div className="mr-3 text-right hidden md:block">
           <h3 className="font-bold text-[#003570] text-sm">{getFirstAndLastName()}</h3>
           <p className="text-gray-500 text-xs">
             {userProfile?.coordenacao?.descricao || 'Sem coordenação'}
           </p>
-        </div>}
+        </div>
+      )}
 
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" className="relative h-10 w-10 rounded-full">
             <Avatar className="h-10 w-10">
-              {userProfile?.foto_perfil_url ? <AvatarImage src={userProfile.foto_perfil_url} alt={userProfile.nome_completo || 'User avatar'} /> : <AvatarFallback className="bg-orange-500 text-white">{getInitials()}</AvatarFallback>}
+              {userProfile?.foto_perfil_url ? (
+                <AvatarImage src={userProfile.foto_perfil_url} alt={userProfile.nome_completo || 'User avatar'} />
+              ) : (
+                <AvatarFallback className="bg-orange-500 text-white">{getInitials()}</AvatarFallback>
+              )}
             </Avatar>
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          {isMobile && <>
+          {isMobile && (
+            <>
               <DropdownMenuLabel className="font-normal">
                 <div className="flex flex-col space-y-1">
                   <p className="font-bold text-sm">{getFirstAndLastName()}</p>
                   <p className="text-xs text-muted-foreground truncate">{userProfile?.email}</p>
-                  {userProfile?.coordenacao && <p className="text-xs text-muted-foreground">
+                  {userProfile?.coordenacao && (
+                    <p className="text-xs text-muted-foreground">
                       {userProfile.coordenacao.descricao}
-                    </p>}
+                    </p>
+                  )}
                 </div>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
-            </>}
+            </>
+          )}
           <DropdownMenuItem onClick={handleEditProfile}>
             <User className="mr-2 h-4 w-4" />
             <span>Editar Perfil</span>
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={handleNotificationSettings}>
+            <Bell className="mr-2 h-4 w-4" />
+            <span>Ajustes de Notificação</span>
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => navigate('/settings')}>
             <Settings className="mr-2 h-4 w-4" />
@@ -148,7 +177,23 @@ const UserProfileMenu = () => {
       </DropdownMenu>
 
       {/* Edit Profile Modal */}
-      {user && userProfile && <ProfileEditModal isOpen={isProfileModalOpen} onClose={() => setIsProfileModalOpen(false)} profileData={profileData} userId={user.id} onProfileUpdate={handleProfileUpdate} />}
-    </div>;
+      {user && userProfile && (
+        <ProfileEditModal
+          isOpen={isProfileModalOpen}
+          onClose={() => setIsProfileModalOpen(false)}
+          profileData={profileData}
+          userId={user.id}
+          onProfileUpdate={handleProfileUpdate}
+        />
+      )}
+      
+      {/* Notification Settings Modal */}
+      <AccountSettingsModal
+        isOpen={isNotificationSettingsOpen}
+        onClose={() => setIsNotificationSettingsOpen(false)}
+      />
+    </div>
+  );
 };
+
 export default UserProfileMenu;

@@ -6,6 +6,8 @@ import ESICProcessesCard from './ESICProcessesCard';
 import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/components/ui/use-toast';
+import { subDays, format } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
 
 export const RelatoriosKPICards: React.FC = () => {
   const [esicStats, setEsicStats] = React.useState({
@@ -16,12 +18,17 @@ export const RelatoriosKPICards: React.FC = () => {
   const [loadingESIC, setLoadingESIC] = React.useState(true);
   const [kpiStats, setKpiStats] = React.useState({
     totalDemandas: 0,
+    demandasSemana: 0,
+    demandasMes: 0,
     totalNotas: 0,
+    notasSemana: 0,
+    notasVariacao: 0,
     totalReleases: 0,
     noticiasPublicadas: 0,
-    demandasVariacao: 0,
-    notasVariacao: 0,
-    releasesVariacao: 0,
+    noticiasVariacao: 0,
+    esicTotal: 0,
+    esicRespondidos: 0,
+    esicPrazo: 0
   });
   const [loadingKPIs, setLoadingKPIs] = React.useState(true);
   const { toast } = useToast();
@@ -53,6 +60,26 @@ export const RelatoriosKPICards: React.FC = () => {
     ...(stats || {})
   };
 
+  // Get date ranges for this week and month
+  const getDateRanges = () => {
+    const today = new Date();
+    const startOfWeek = subDays(today, 7);
+    const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+    
+    return {
+      weekStart: startOfWeek,
+      monthStart: startOfMonth,
+      today: today
+    };
+  };
+
+  const dateRanges = getDateRanges();
+
+  // Format date for display
+  const formatDateRange = (start: Date, end: Date) => {
+    return `${format(start, 'dd/MM', { locale: ptBR })} - ${format(end, 'dd/MM', { locale: ptBR })}`;
+  };
+
   // Fetch KPI stats directly from Supabase
   React.useEffect(() => {
     const fetchKPIStats = async () => {
@@ -65,12 +92,30 @@ export const RelatoriosKPICards: React.FC = () => {
         
         if (demandasError) throw demandasError;
 
+        // Get demandas from this week
+        const { count: demandasSemanaCount } = await supabase
+          .from('demandas')
+          .select('*', { count: 'exact', head: true })
+          .gte('data_criacao', dateRanges.weekStart.toISOString());
+
+        // Get demandas from this month
+        const { count: demandasMesCount } = await supabase
+          .from('demandas')
+          .select('*', { count: 'exact', head: true })
+          .gte('data_criacao', dateRanges.monthStart.toISOString());
+
         // Get notas count
         const { count: notasCount, error: notasError } = await supabase
           .from('notas_oficiais')
           .select('*', { count: 'exact', head: true });
         
         if (notasError) throw notasError;
+
+        // Get notas from this week
+        const { count: notasSemanaCount } = await supabase
+          .from('notas_oficiais')
+          .select('*', { count: 'exact', head: true })
+          .gte('data_criacao', dateRanges.weekStart.toISOString());
 
         // Get releases count
         const { count: releasesCount, error: releasesError } = await supabase
@@ -87,14 +132,24 @@ export const RelatoriosKPICards: React.FC = () => {
         
         if (noticiasError) throw noticiasError;
 
+        // Calculate percentage of notes variation
+        const notasVariacao = notasSemanaCount && notasCount 
+          ? ((notasSemanaCount / notasCount) * 100) - 100 
+          : 0;
+
         setKpiStats({
           totalDemandas: demandasCount || 0,
+          demandasSemana: demandasSemanaCount || 0,
+          demandasMes: demandasMesCount || 0,
           totalNotas: notasCount || 0,
+          notasSemana: notasSemanaCount || 0,
+          notasVariacao: notasVariacao,
           totalReleases: releasesCount || 0,
           noticiasPublicadas: noticiasPublicadasCount || 0,
-          demandasVariacao: displayStats.demandasVariacao,
-          notasVariacao: displayStats.notasVariacao,
-          releasesVariacao: 0, // We don't have this data yet, using 0 as default
+          noticiasVariacao: displayStats.notasVariacao,
+          esicTotal: esicStats.total,
+          esicRespondidos: esicStats.responded,
+          esicPrazo: esicStats.responded > 0 ? Math.round((esicStats.responded / esicStats.total) * 100) : 0
         });
       } catch (error) {
         console.error('Error fetching KPI stats:', error);
@@ -109,7 +164,7 @@ export const RelatoriosKPICards: React.FC = () => {
     };
     
     fetchKPIStats();
-  }, [displayStats.demandasVariacao, displayStats.notasVariacao, toast]);
+  }, [displayStats.notasVariacao, toast, esicStats]);
 
   // Fetch ESIC stats
   React.useEffect(() => {
@@ -147,35 +202,38 @@ export const RelatoriosKPICards: React.FC = () => {
     fetchESICStats();
   }, []);
 
+  const weekRangeText = formatDateRange(dateRanges.weekStart, dateRanges.today);
+
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
       <div>
         <StatsCard
           title="Demandas"
-          value={kpiStats.totalDemandas}
-          comparison={`Últimos 30 dias: ${Math.abs(displayStats.demandasVariacao || 0)}% ${displayStats.demandasVariacao >= 0 ? '↑' : '↓'}`}
+          value={kpiStats.demandasSemana}
+          comparison={`No mês foram ${kpiStats.demandasMes}`}
           isLoading={loadingKPIs}
-          description="Total de solicitações recebidas"
+          description={`Solicitações recebidas na semana`}
         />
       </div>
       
       <div>
         <StatsCard
-          title="Notícias e Releases"
+          title="Notícias"
           value={kpiStats.noticiasPublicadas}
-          comparison={`${kpiStats.totalReleases} no total`}
+          comparison={`${kpiStats.totalReleases} releases cadastrados`}
           isLoading={loadingKPIs}
-          description="Notícias publicadas oficialmente"
+          description="Publicadas no site"
         />
       </div>
       
       <div>
         <StatsCard
-          title="Notas emitidas"
-          value={kpiStats.totalNotas}
-          comparison={`${Math.abs(displayStats.notasVariacao || 0)}% ${displayStats.notasVariacao >= 0 ? 'mais' : 'menos'} que período anterior`}
+          title="Notas de Imprensa"
+          value={kpiStats.notasSemana}
+          comparison={`${Math.abs(kpiStats.notasVariacao).toFixed(0)}% que semana passada`}
           isLoading={loadingKPIs}
-          description="Comunicados oficiais publicados"
+          direction={kpiStats.notasVariacao >= 0 ? 'increase' : 'decrease'}
+          description={`Comunicados enviados na semana`}
         />
       </div>
 
@@ -185,6 +243,8 @@ export const RelatoriosKPICards: React.FC = () => {
           total={esicStats.total}
           responded={esicStats.responded}
           justified={esicStats.justified}
+          description={`No mês`}
+          percentText={`${esicStats.responded > 0 ? Math.round((esicStats.responded / esicStats.total) * 100) : 0}% concluídos no prazo`}
         />
       </div>
     </div>
