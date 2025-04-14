@@ -71,7 +71,7 @@ const RelatoriosPage = () => {
       duration: 3000
     });
   }, [setChartVisibility]);
-  return <motion.div className="max-w-7xl mx-auto pdf-content" initial={{
+  return <motion.div initial={{
     opacity: 0,
     y: 20
   }} animate={{
@@ -79,7 +79,7 @@ const RelatoriosPage = () => {
     y: 0
   }} transition={{
     duration: 0.5
-  }}>
+  }} className="max-w-7xl mx-auto pdf-content my-0 py-0">
       {/* WelcomeCard with reset button */}
       <WelcomeCard title="Relatórios da Comunicação" description="Ações e estatísticas da área" icon={<PieChart className="h-10 w-10 mr-2 text-blue-500 py-0 my-0" />} color="bg-gradient-to-r from-blue-600 to-blue-800" showResetButton={true} onResetClick={resetDashboard} resetButtonIcon={<RotateCcw className="h-4 w-4" />} className="h-15 w-15 mr-3 text-gray-300" />
 
