@@ -7,13 +7,12 @@ export const getWidthClass = (width?: string, isMobile: boolean = false): string
     // For mobile view, we use a modified grid
     switch (width) {
       case '100':
-        return 'col-span-2'; // Full width
       case '75':
-        return 'col-span-2'; // 3/4 width (full on mobile)
+        return 'col-span-2'; // Full width on mobile (spans both columns)
       case '50':
-        return 'col-span-1'; // Half width
+        return 'col-span-1'; // Half width (1 of 2 columns)
       case '25':
-        return 'col-span-1'; // Quarter width
+        return 'col-span-1'; // Quarter width (also 1 of 2 columns on mobile)
       default:
         return 'col-span-1'; // Default half width on mobile
     }
