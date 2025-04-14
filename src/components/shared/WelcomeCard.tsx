@@ -47,18 +47,18 @@ const WelcomeCard: React.FC<WelcomeCardProps> = ({
   return <div className="bg-transparent">
       <div className="bg-transparent">
         <div className="bg-transparent py-0 text-3xl font-bold text-blue-950">
-          <div className="flex items-center justify-between bg-transparent my-[24px] text-lg">
-            <div className="flex items-center bg-transparent my-0">
+          <div className="\"pt-1 text-gray-600 py-0 my-0">
+            <div className="pt-0 text-gray-600 py-0 px-0 my-[19px]">
               {icon}
-              <div>
+              <div className="">
                 {greeting && userName ? <div className="flex items-center">
                     <Home className="h-12 w-12 mr-2 text-blue-200" strokeWidth={2} />
                     <h2 className="text-3xl font-bold text-blue-950 py-[23px] px-[17px]">
                       Olá, {userName}!
                     </h2>
-                  </div> : <h2 className="text-3xl font-bold text-blue-950">{title}</h2>}
+                  </div> : <h2 className="\"pt-1 text-gray-600 py-0">{title}</h2>}
                 
-                <p className="mt-2 text-gray-500 font-normal text-lg">{description}</p>
+                <p className="text-gray-500 text-lg py-[11px] my-0">{description}</p>
               </div>
             </div>
 
