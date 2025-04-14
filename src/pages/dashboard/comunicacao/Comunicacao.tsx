@@ -133,7 +133,7 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
   }
   return <div className="space-y-6 bg-[#FFFAFA]">
       <div className="w-full mb-4">
-        <WelcomeCard title="Comunicação" description="Gerencie demandas e notas oficiais" icon={<MessageSquareReply className="flex items-start gap-3 h-20 w-20" />} color="bg-gradient-to-r from-[#0066FF] to-blue-700" showResetButton={false} className="text-blue-400 h-12 w-12" />
+        <WelcomeCard title="Comunicação" description="Gerencie demandas e notas oficiais" icon={<MessageSquareReply className="flex items-start gap-3 h-20 w-20" />} color="bg-gradient-to-r from-[#0066FF] to-blue-700" showResetButton={false} className="text-blue-300 h-15 w-15" />
       </div>
       
       {/* Save status indicator - only render if there's save information to show */}
