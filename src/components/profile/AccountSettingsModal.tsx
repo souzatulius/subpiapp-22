@@ -37,7 +37,7 @@ const AccountSettingsModal: React.FC<AccountSettingsModalProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[550px] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-[550px] max-h-[90vh] overflow-y-auto bg-gray-100 rounded-xl border border-gray-200">
         <DialogHeader>
           <DialogTitle>Configurações da Conta</DialogTitle>
           <DialogDescription>

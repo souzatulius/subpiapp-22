@@ -51,8 +51,11 @@ const InsightsSection: React.FC<InsightsSectionProps> = ({
     }
   ];
 
+  // Use real isMobile from hook instead of prop
+  const isMobileView = useIsMobile();
+  
   // Adjusted grid columns based on mobile state
-  const gridClass = isMobile 
+  const gridClass = isMobileView 
     ? "grid grid-cols-2 gap-4" 
     : "grid grid-cols-4 gap-4";
 
