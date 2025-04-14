@@ -84,13 +84,11 @@ const getSpecialContent = ({
 
   // Check for specific card IDs
   if (card.id === 'origem-demandas') {
-    // Since we don't have access to OriginDemandStatistics's implementation, we'll remove the prop
-    return <OriginDemandStatistics />;
+    return <OriginDemandStatistics showComparison={true} />;
   }
 
   if (card.id === 'acoes-pendentes') {
-    // Since we don't have access to PendingActionsCard's implementation, we'll remove the prop
-    return <PendingActionsCard />;
+    return <PendingActionsCard showDetailedList={true} />;
   }
 
   if (card.id === 'atividades-andamento') {
@@ -152,10 +150,10 @@ const getSpecialContent = ({
 
         // Create a dynamic charts view based on available statistics
         return <div className="grid grid-cols-3 gap-4 p-4 h-full">
-            <StatisticsCard data={mockStatistics.demands} title="Demandas por Status" chartType="pie" />
-            <StatisticsCard data={mockStatistics.notes} title="Notas por Status" chartType="bar" />
-            <StatisticsCard data={mockStatistics.news} title="Notícias" chartType="pie" />
-            {mockStatistics.esic && <StatisticsCard data={mockStatistics.esic} title="Processos e-SIC" chartType="pie" />}
+            <StatisticsCard data={mockStatistics.demands} title="Demandas por Status" chartType="pie" showChange={true} />
+            <StatisticsCard data={mockStatistics.notes} title="Notas por Status" chartType="bar" showChange={true} />
+            <StatisticsCard data={mockStatistics.news} title="Notícias" chartType="pie" showChange={true} />
+            {mockStatistics.esic && <StatisticsCard data={mockStatistics.esic} title="Processos e-SIC" chartType="pie" showChange={true} />}
           </div>;
       default:
         return null;

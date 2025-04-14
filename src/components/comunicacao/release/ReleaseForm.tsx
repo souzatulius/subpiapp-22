@@ -39,17 +39,20 @@ const ReleaseForm: React.FC<ReleaseFormProps> = ({
           variant="default" 
           onClick={onSave}
           disabled={isSubmitting}
-          className="flex items-center gap-2 rounded-xl"
+          className="flex items-center gap-2 rounded-xl bg-[#003570] hover:bg-[#002855]"
         >
           <Save className="h-4 w-4" />
           Salvar
+          {isSubmitting && (
+            <div className="w-4 h-4 border-2 border-t-transparent border-white rounded-full animate-spin ml-2"></div>
+          )}
         </Button>
         
         <Button 
           variant="action" 
           onClick={onGenerate}
           disabled={isGenerating}
-          className="flex items-center gap-2 rounded-xl bg-orange-500 hover:bg-orange-600"
+          className="flex items-center gap-2 rounded-xl bg-[#f57737] hover:bg-[#e56726]"
         >
           <Wand2 className="h-4 w-4" />
           Gerar Notícia

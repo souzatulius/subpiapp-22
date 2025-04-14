@@ -86,7 +86,7 @@ export const KPICard: React.FC<KPICardProps> = ({
 
   return (
     <div className={cn(
-      "rounded-xl border p-4 shadow-sm h-40 flex flex-col justify-between transition-all",
+      "rounded-xl border p-4 shadow-sm h-40 flex flex-col justify-between transition-all w-full",
       getVariantClasses()
     )}>
       <div className="flex justify-between items-start">
@@ -115,7 +115,7 @@ export const KPICard: React.FC<KPICardProps> = ({
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
             >
-              <Skeleton className="h-10 w-24 bg-gray-200/70" />
+              <Skeleton className="h-10 w-24 bg-gray-200/70 rounded-lg" />
             </motion.div>
           ) : (
             <motion.div

@@ -42,7 +42,14 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant, size, asChild = false, ...props }, ref) => {
     // If the button has a class bg-orange-500, modify the variant to 'action' to improve transitions
     const hasOrangeClass = className?.includes('bg-orange-500');
-    const effectiveVariant = hasOrangeClass ? 'action' : variant;
+    const hasBlueClass = className?.includes('bg-blue-');
+    let effectiveVariant = variant;
+    
+    if (hasOrangeClass) {
+      effectiveVariant = 'action';
+    } else if (hasBlueClass) {
+      effectiveVariant = 'default';
+    }
     
     const Comp = asChild ? Slot : 'button';
     return (

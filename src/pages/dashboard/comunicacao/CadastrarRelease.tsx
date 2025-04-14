@@ -52,9 +52,6 @@ const CadastrarRelease = () => {
         if (data) {
           // Set the release content from the fetched data
           setReleaseContent(data.conteudo || '');
-          
-          // If the release is already loaded, we can proceed to generate news automatically
-          handleGenerateNews();
         }
       } catch (error: any) {
         console.error('Error fetching release:', error);

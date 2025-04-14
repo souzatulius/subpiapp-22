@@ -63,14 +63,14 @@ const ReleasesList: React.FC<ReleasesListProps> = ({ releases, isLoading, onSele
               <div className="flex items-center gap-1">
                 <Calendar size={12} />
                 <span>
-                  {new Date(release.created_at).toLocaleDateString('pt-BR')}
+                  {new Date(release.created_at || release.publishDate).toLocaleDateString('pt-BR')}
                 </span>
               </div>
               <div className="flex items-center gap-1">
                 <User size={12} />
                 <span>{release.author}</span>
               </div>
-              {release.status === 'publicado' ? (
+              {(release.status === 'publicado' || release.status === 'published') ? (
                 <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 rounded-full">
                   Publicado
                 </Badge>

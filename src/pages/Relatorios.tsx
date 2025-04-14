@@ -75,6 +75,7 @@ const Relatorios = () => {
                 initial={{ opacity: 0, y: 20 }} 
                 animate={{ opacity: 1, y: 0 }} 
                 transition={{ duration: 0.5 }}
+                className="w-full max-w-full overflow-hidden"
               >
                 <div className="transition-all duration-300">
                   <WelcomeCard 
@@ -97,7 +98,7 @@ const Relatorios = () => {
                   </div>
                 )}
                
-                <div className="mt-6">
+                <div className="mt-6 w-full overflow-x-hidden">
                   <RelatoriosContent 
                     filterDialogOpen={filterDialogOpen} 
                     setFilterDialogOpen={setFilterDialogOpen} 
