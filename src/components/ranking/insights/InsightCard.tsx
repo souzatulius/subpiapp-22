@@ -37,7 +37,7 @@ const InsightCard: React.FC<InsightCardProps> = ({
   }} transition={{
     duration: 0.3
   }} onMouseEnter={() => setIsHovered(true)} onMouseLeave={() => setIsHovered(false)} className="w-full">
-      <Card className="rounded-2xl bg-zinc-200">
+      <Card className="rounded-2xl bg-zinc-200 px-[23px] mx-[3px]">
         {/* Action buttons on hover */}
         <AnimatePresence>
           {isHovered && !isLoading && <motion.div initial={{
@@ -62,7 +62,7 @@ const InsightCard: React.FC<InsightCardProps> = ({
             </motion.div>}
         </AnimatePresence>
         
-        <div className="p-2 rounded-2xl">
+        <div className="p-2 rounded-2xl px-0 mx-0">
           <div className="flex items-center justify-between">
             <h3 className="text-xs font-medium truncate">
               {title}

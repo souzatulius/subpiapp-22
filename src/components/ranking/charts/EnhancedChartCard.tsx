@@ -59,7 +59,7 @@ const EnhancedChartCard: React.FC<EnhancedChartCardProps> = ({
             </div>
             
             {subtitle && <p className="text-xs text-gray-500">{subtitle}</p>}
-            {value !== undefined && <p className="font-semibold mt-1 text-orange-600 text-xl">{value}</p>}
+            {value !== undefined && <p className="font-semibold mt-1 text-orange-600 text-2xl">{value}</p>}
           </div>
           
           {/* Action buttons on header with updated styling */}
@@ -74,7 +74,7 @@ const EnhancedChartCard: React.FC<EnhancedChartCardProps> = ({
             {onToggleVisibility && <button onClick={e => {
             e.stopPropagation();
             onToggleVisibility();
-          }} className="p-1.5 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600 transition-colors" title="Ocultar card">
+          }} title="Ocultar card" className="p-1.5 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600 transition-colors py-[5px]">
                 <EyeOff size={16} />
               </button>}
           </div>
