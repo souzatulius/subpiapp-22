@@ -15,6 +15,11 @@ export function PrioridadeBadge({
   className,
   size = 'sm',
 }: PrioridadeBadgeProps) {
+  // Format priority to capitalize first letter
+  const formattedPrioridade = prioridade ? 
+    prioridade.charAt(0).toUpperCase() + prioridade.slice(1).toLowerCase() : 
+    'Média'; // Default to "Média" if no priority provided
+
   // Determine styling based on priority level
   const config = {
     alta: {
@@ -24,6 +29,12 @@ export function PrioridadeBadge({
       border: 'border-red-200'
     },
     media: {
+      icon: AlertCircle,
+      bg: 'bg-amber-50',
+      text: 'text-amber-700',
+      border: 'border-amber-200'
+    },
+    média: {
       icon: AlertCircle,
       bg: 'bg-amber-50',
       text: 'text-amber-700',
@@ -56,7 +67,7 @@ export function PrioridadeBadge({
       )}
     >
       <IconComponent size={getIconSize(size)} className="shrink-0" />
-      <span>{prioridade}</span>
+      <span>{formattedPrioridade}</span>
     </span>
   );
 }

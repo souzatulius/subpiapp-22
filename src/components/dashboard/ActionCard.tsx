@@ -75,6 +75,12 @@ const ActionCard = memo(({
   const colorClasses = getColorClasses(color);
   const textColorClass = getTextColorClass(color, id);
   
+  // Function to check if title has more than 2 words for line break
+  const hasMultipleWords = (text: string) => {
+    const words = text?.trim().split(/\s+/) || [];
+    return words.length > 2;
+  };
+  
   const renderIcon = () => {
     if (!iconId) return null;
     
@@ -109,38 +115,70 @@ const ActionCard = memo(({
     titleTextClass = textColorClass; // Match text color to icon color
   }
 
-  return <div className={`w-full h-full rounded-xl shadow-md overflow-hidden 
+  return (
+    <div 
+      className={`w-full h-full rounded-xl shadow-md overflow-hidden 
         ${!isDraggable ? 'cursor-pointer' : 'cursor-grab'} 
-        hover:shadow-lg ${colorClasses} group relative`}>
-      {isDraggable && <div className="absolute top-2 left-2 z-10 opacity-0 group-hover:opacity-80 transition-opacity duration-200">
+        hover:shadow-lg ${colorClasses} group relative`}
+    >
+      {isDraggable && (
+        <div className="absolute top-2 left-2 z-10 opacity-0 group-hover:opacity-80 transition-opacity duration-200">
           <div className="p-1.5 rounded-full bg-white bg-opacity-60 text-gray-600">
             <MoveIcon className="h-3.5 w-3.5" />
           </div>
-        </div>}
+        </div>
+      )}
 
-      {showControls && (onEdit || onDelete || onHide) && <div className="absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-          <CardControls onEdit={onEdit ? () => onEdit(id) : undefined} onDelete={onDelete ? () => onDelete(id) : undefined} onHide={onHide ? () => onHide(id) : undefined} />
-        </div>}
+      {showControls && (onEdit || onDelete || onHide) && (
+        <div className="absolute top-2 right-2 z-10">
+          <CardControls
+            id={id}
+            onEdit={onEdit}
+            onDelete={onDelete}
+            onHide={onHide}
+          />
+        </div>
+      )}
 
-      <div className="relative h-full flex flex-col items-center justify-center text-center px-[10px] py-[20px] bg-transparent my-0">
-        {specialContent ? <div className="w-full h-full">{specialContent}</div> : isNotesApprovalCard ? <NotesApprovalCard /> : isPendingDemandsCard ? <PendingDemandsCard /> : children ? children : chartId ? <div className="w-full h-full flex flex-col">
-            <ChartPreview chartId={chartId} />
-          </div> : <>
-            <div className="mb-2.5 text-gray-800">
-              {renderIcon()}
-            </div>
-            <div className="line-clamp-2 max-w-[90%] py-[6px] my-[5px]">
-              <h3 className={`font-semibold text-lg leading-tight break-words text-balance ${titleTextClass}`}>
-                {title}
-              </h3>
-              {subtitle && <p className="text-sm text-gray-700 opacity-80 mt-1 line-clamp-2">
-                  {subtitle}
-                </p>}
-            </div>
-          </>}
-      </div>
-    </div>;
+      {/* If this is a special card, render it differently */}
+      {isNotesApprovalCard && type === 'special' ? (
+        <NotesApprovalCard />
+      ) : isPendingDemandsCard && type === 'special' ? (
+        <PendingDemandsCard />
+      ) : chartId ? (
+        <ChartPreview chartId={chartId} />
+      ) : specialContent ? (
+        <div className="h-full w-full">
+          {specialContent}
+        </div>
+      ) : (
+        <div 
+          className="flex flex-col items-center justify-center p-6 text-center h-full"
+          onClick={() => {
+            if (path && !isDraggable) {
+              navigate(path);
+            }
+          }}
+        >
+          {renderIcon()}
+          
+          <div className="mt-4 flex-1 flex flex-col justify-center">
+            <h3 className={`font-semibold text-lg ${hasMultipleWords(title) ? 'line-clamp-2' : ''} ${titleTextClass}`}>
+              {title}
+            </h3>
+            
+            {subtitle && (
+              <p className={`mt-1 text-sm ${textColorClass} opacity-80`}>
+                {subtitle}
+              </p>
+            )}
+          </div>
+          
+          {children}
+        </div>
+      )}
+    </div>
+  );
 });
 
-ActionCard.displayName = 'ActionCard';
 export default ActionCard;

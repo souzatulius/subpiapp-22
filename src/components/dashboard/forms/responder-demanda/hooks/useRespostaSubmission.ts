@@ -83,7 +83,7 @@ export const useRespostaSubmission = (options?: SubmissionOptions) => {
         // We continue anyway since the response is saved
       }
       
-      // Show animated feedback instead of toast
+      // Show animated feedback 
       showFeedback('success', 'Resposta enviada com sucesso!');
 
       if (options?.onSuccess) {

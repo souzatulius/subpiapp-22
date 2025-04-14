@@ -37,6 +37,7 @@ const SmartSearchCard: React.FC<SmartSearchCardProps> = ({
   } = useSmartSearch();
   const [showSuggestions, setShowSuggestions] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -86,7 +87,7 @@ const SmartSearchCard: React.FC<SmartSearchCardProps> = ({
   // Close suggestions when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (inputRef.current && !inputRef.current.contains(event.target as Node)) {
+      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
         setShowSuggestions(false);
       }
     };
@@ -100,7 +101,7 @@ const SmartSearchCard: React.FC<SmartSearchCardProps> = ({
     <Card className={`w-full bg-transparent border-0 shadow-none ${className}`}>
       <CardContent className="p-4 bg-transparent px-0 my-[22px] py-0">
         <form onSubmit={handleSubmit} className="relative">
-          <div className="relative">
+          <div className="relative" ref={containerRef}>
             <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500 h-5 w-5" />
             <Input 
               ref={inputRef} 
@@ -113,33 +114,32 @@ const SmartSearchCard: React.FC<SmartSearchCardProps> = ({
               className="pl-12 pr-4 rounded-2xl border border-gray-300 w-full bg-white text-lg font-medium text-gray-800 placeholder:text-gray-400 placeholder:font-normal py-[20px]" 
               disabled={isEditMode}
             />
+            
+            {/* Render suggestions directly attached to the input */}
+            {showSuggestions && (
+              <div className="absolute z-10 w-full bg-white mt-1 rounded-lg border border-gray-200 shadow-lg">
+                <ul className="py-2 max-h-72 overflow-y-auto">
+                  {suggestions.map((suggestion, index) => (
+                    <li
+                      key={index}
+                      onClick={() => handleSelectItem(suggestion)}
+                      className="px-4 py-3 hover:bg-gray-100 cursor-pointer text-lg"
+                    >
+                      {suggestion.title}
+                    </li>
+                  ))}
+                </ul>
+                {isLoading && (
+                  <div className="p-3 text-center text-gray-500 border-t border-gray-200">
+                    <div className="inline-block animate-spin h-4 w-4 border-2 border-gray-500 border-t-transparent rounded-full mr-2"></div>
+                    Buscando sugestões...
+                  </div>
+                )}
+              </div>
+            )}
           </div>
-          
-          {showSuggestions && (
-            <div className="absolute z-10 w-full bg-white mt-1 rounded-lg border border-gray-200 shadow-lg">
-              <ul className="py-2 max-h-72 overflow-y-auto">
-                {suggestions.map((suggestion, index) => (
-                  <li
-                    key={index}
-                    onClick={() => handleSelectItem(suggestion)}
-                    className="px-4 py-3 hover:bg-gray-100 cursor-pointer text-lg"
-                  >
-                    {suggestion.title}
-                  </li>
-                ))}
-              </ul>
-              {isLoading && (
-                <div className="p-3 text-center text-gray-500 border-t border-gray-200">
-                  <div className="inline-block animate-spin h-4 w-4 border-2 border-gray-500 border-t-transparent rounded-full mr-2"></div>
-                  Buscando sugestões...
-                </div>
-              )}
-            </div>
-          )}
         </form>
       </CardContent>
     </Card>
   );
-};
-
-export default SmartSearchCard;
+}

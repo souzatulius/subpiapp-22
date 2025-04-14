@@ -153,6 +153,9 @@ const RespostaForm: React.FC<RespostaFormProps> = ({
                     className="flex flex-col items-center transition-transform hover:scale-105"
                   >
                     {renderAttachmentIcon(filename)}
+                    <span className="text-sm text-gray-600 mt-1 text-center max-w-[120px] truncate">
+                      {filename}
+                    </span>
                   </a>
                 );
               })}
@@ -160,10 +163,19 @@ const RespostaForm: React.FC<RespostaFormProps> = ({
           </div>
         )}
         
-        {/* Seção de resumo (substitui detalhes) */}
-        {selectedDemanda.detalhes_solicitacao && (
+        {/* Seção de resumo (antes estava exibindo detalhes_solicitacao) */}
+        {selectedDemanda.resumo_situacao ? (
           <div className="space-y-4">
             <h3 className="text-lg font-medium text-subpi-blue">Resumo</h3>
+            <div className="bg-gray-50 p-4 rounded-xl border border-gray-200">
+              <p className="text-sm text-gray-700 whitespace-pre-line">
+                {selectedDemanda.resumo_situacao}
+              </p>
+            </div>
+          </div>
+        ) : selectedDemanda.detalhes_solicitacao && (
+          <div className="space-y-4">
+            <h3 className="text-lg font-medium text-subpi-blue">Detalhes da Solicitação</h3>
             <div className="bg-gray-50 p-4 rounded-xl border border-gray-200">
               <p className="text-sm text-gray-700 whitespace-pre-line">
                 {selectedDemanda.detalhes_solicitacao}
