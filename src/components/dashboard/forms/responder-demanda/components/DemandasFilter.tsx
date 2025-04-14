@@ -41,82 +41,65 @@ const DemandasFilter: React.FC<DemandasFilterProps> = ({
     setIsFilterOpen(!isFilterOpen);
   };
 
-  const prioridades = [
-    { id: 'todos', nome: 'Todas as prioridades' },
-    { id: 'alta', nome: 'Alta' },
-    { id: 'media', nome: 'Média' },
-    { id: 'baixa', nome: 'Baixa' }
-  ];
-
-  // Set default values on mount if they're not already set
-  React.useEffect(() => {
-    if (!areaFilter) {
-      setAreaFilter('todos');
-    }
-    if (!prioridadeFilter) {
-      setPrioridadeFilter('todos');
-    }
-  }, [areaFilter, prioridadeFilter, setAreaFilter, setPrioridadeFilter]);
-
   return (
-    <div className="space-y-4">
-      <div className="flex items-center gap-2">
-        {/* Only show back button if explicitly requested */}
-        {showBackButton && onBack && (
-          <Button 
-            variant="outline" 
-            size="sm" 
+    <div className="bg-white p-4 mb-6 rounded-lg shadow-sm">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        {showBackButton && (
+          <Button
+            variant="outline"
+            size="sm"
+            className="mr-auto"
             onClick={onBack}
-            className="flex items-center gap-2"
           >
-            <ArrowLeft className="h-4 w-4" />
-            {!isMobile && "Voltar"}
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Voltar
           </Button>
         )}
 
-        <DemandasSearchBar
+        <DemandasSearchBar 
           searchTerm={searchTerm}
           setSearchTerm={setSearchTerm}
-          placeholder="Buscar demanda..."
-          className="flex-1"
+          className="flex-1 min-w-[200px]"
         />
 
-        <Button
-          variant="outline"
-          size="icon"
-          onClick={toggleFilter}
-          className={`rounded-xl ${isFilterOpen ? 'bg-blue-50' : ''}`}
-        >
-          <Filter className="h-4 w-4" />
-        </Button>
-
-        <div className="flex gap-2">
+        <div className="flex items-center gap-2 ml-auto">
           <Button
             variant="outline"
-            size="icon"
-            onClick={() => setViewMode('list')}
-            className={`rounded-xl ${viewMode === 'list' ? 'bg-blue-50' : ''}`}
+            size="sm"
+            className="hidden md:flex"
+            onClick={toggleFilter}
           >
-            <List className="h-4 w-4" />
+            <Filter className="h-4 w-4 mr-2" />
+            Filtrar
           </Button>
           
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={() => setViewMode('grid')}
-            className={`rounded-xl ${viewMode === 'grid' ? 'bg-blue-50' : ''}`}
-          >
-            <Grid className="h-4 w-4" />
-          </Button>
+          <div className="flex border rounded-md overflow-hidden">
+            <Button
+              variant="ghost"
+              size="sm"
+              className={`${viewMode === 'list' ? 'bg-gray-100' : ''}`}
+              onClick={() => setViewMode('list')}
+            >
+              <List className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              className={`${viewMode === 'cards' ? 'bg-gray-100' : ''}`}
+              onClick={() => setViewMode('cards')}
+            >
+              <Grid className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
       </div>
 
       {isFilterOpen && (
-        <div className="flex flex-wrap gap-4 animate-fadeInUp">
-          <div className="w-full sm:w-auto flex-1">
-            <Select value={areaFilter} onValueChange={setAreaFilter} defaultValue="todos">
-              <SelectTrigger className="rounded-xl">
-                <SelectValue placeholder="Coordenação" />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+          <div>
+            <Select value={areaFilter} onValueChange={setAreaFilter}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Filtrar por coordenação" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="todos">Todas as coordenações</SelectItem>
@@ -128,18 +111,16 @@ const DemandasFilter: React.FC<DemandasFilterProps> = ({
               </SelectContent>
             </Select>
           </div>
-
-          <div className="w-full sm:w-auto flex-1">
-            <Select value={prioridadeFilter} onValueChange={setPrioridadeFilter} defaultValue="todos">
-              <SelectTrigger className="rounded-xl">
-                <SelectValue placeholder="Prioridade" />
+          <div>
+            <Select value={prioridadeFilter} onValueChange={setPrioridadeFilter}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Filtrar por prioridade" />
               </SelectTrigger>
               <SelectContent>
-                {prioridades.map((prioridade) => (
-                  <SelectItem key={prioridade.id} value={prioridade.id}>
-                    {prioridade.nome}
-                  </SelectItem>
-                ))}
+                <SelectItem value="todos">Todas as prioridades</SelectItem>
+                <SelectItem value="alta">Alta</SelectItem>
+                <SelectItem value="media">Média</SelectItem>
+                <SelectItem value="baixa">Baixa</SelectItem>
               </SelectContent>
             </Select>
           </div>

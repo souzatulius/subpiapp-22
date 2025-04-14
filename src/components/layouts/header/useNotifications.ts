@@ -2,15 +2,19 @@
 import { useState, useCallback, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useSupabaseAuth';
+import { toast } from '@/components/ui/use-toast';
 
 export type Notification = {
   id: string;
   mensagem: string;
   data_envio: string;
+  created_at?: string;
   lida: boolean;
   tipo: string;
+  referencia_id?: string;
   referencia_tipo?: string;
   metadados?: any;
+  excluida?: boolean;
 };
 
 export const useNotifications = () => {
@@ -30,7 +34,7 @@ export const useNotifications = () => {
         .eq('usuario_id', user.id)
         .eq('excluida', false)
         .order('data_envio', { ascending: false })
-        .limit(10);
+        .limit(20);
       
       if (error) throw error;
       
@@ -63,8 +67,16 @@ export const useNotifications = () => {
       
       // Update unread count
       setUnreadCount(prev => Math.max(0, prev - 1));
+      
+      return true;
     } catch (error) {
       console.error('Error marking notification as read:', error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível marcar a notificação como lida",
+        variant: "destructive"
+      });
+      return false;
     }
   }, [user?.id]);
 
@@ -88,8 +100,16 @@ export const useNotifications = () => {
       if (wasUnread) {
         setUnreadCount(prev => Math.max(0, prev - 1));
       }
+      
+      return true;
     } catch (error) {
       console.error('Error deleting notification:', error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível excluir a notificação",
+        variant: "destructive"
+      });
+      return false;
     }
   }, [user?.id, notifications]);
 
@@ -101,15 +121,31 @@ export const useNotifications = () => {
         .from('notificacoes')
         .update({ lida: true })
         .eq('usuario_id', user.id)
-        .eq('lida', false);
+        .eq('lida', false)
+        .eq('excluida', false);
       
       if (error) throw error;
       
       // Update local state
       setNotifications(prev => prev.map(n => ({ ...n, lida: true })));
       setUnreadCount(0);
+      
+      toast({
+        title: "Sucesso",
+        description: "Todas as notificações foram marcadas como lidas",
+        variant: "success",
+        duration: 2000,
+      });
+      
+      return true;
     } catch (error) {
       console.error('Error marking all notifications as read:', error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível marcar todas as notificações como lidas",
+        variant: "destructive"
+      });
+      return false;
     }
   }, [user?.id, unreadCount]);
 
@@ -129,6 +165,14 @@ export const useNotifications = () => {
         const newNotification = payload.new as Notification;
         setNotifications(prev => [newNotification, ...prev]);
         setUnreadCount(prev => prev + 1);
+        
+        // Show a toast notification if the app is open
+        toast({
+          title: newNotification.tipo ? newNotification.tipo.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) : 'Nova notificação',
+          description: newNotification.mensagem,
+          variant: "default",
+          duration: 5000,
+        });
       })
       .subscribe();
 

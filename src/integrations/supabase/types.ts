@@ -985,6 +985,7 @@ export type Database = {
           lida: boolean
           mensagem: string
           metadados: Json | null
+          referencia_id: string | null
           referencia_tipo: string | null
           tipo: string | null
           usuario_id: string
@@ -996,6 +997,7 @@ export type Database = {
           lida?: boolean
           mensagem: string
           metadados?: Json | null
+          referencia_id?: string | null
           referencia_tipo?: string | null
           tipo?: string | null
           usuario_id: string
@@ -1007,6 +1009,7 @@ export type Database = {
           lida?: boolean
           mensagem?: string
           metadados?: Json | null
+          referencia_id?: string | null
           referencia_tipo?: string | null
           tipo?: string | null
           usuario_id?: string
@@ -2578,6 +2581,17 @@ export type Database = {
       }
       ensure_sgz_department_exists: {
         Args: { department_name: string }
+        Returns: string
+      }
+      enviar_notificacao: {
+        Args: {
+          p_usuario_id: string
+          p_mensagem: string
+          p_tipo?: string
+          p_referencia_id?: string
+          p_referencia_tipo?: string
+          p_metadados?: Json
+        }
         Returns: string
       }
       get_demandas_por_origem: {
