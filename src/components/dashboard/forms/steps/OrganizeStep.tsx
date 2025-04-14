@@ -6,6 +6,8 @@ import QuestionsSection from './questions/QuestionsSection';
 import FileUploadSection from './questions/FileUploadSection';
 import { Textarea } from '@/components/ui/textarea';
 import { Loader2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Sparkles } from 'lucide-react';
 
 interface OrganizeStepProps {
   formData: {
@@ -27,7 +29,7 @@ interface OrganizeStepProps {
   filteredBairros: any[];
   errors: ValidationError[];
   onGenerateAIContent?: () => Promise<void>;
-  isGenerating?: boolean; // Added this prop to match what's passed in FormContent.tsx
+  isGenerating?: boolean;
 }
 
 const OrganizeStep: React.FC<OrganizeStepProps> = ({
@@ -40,7 +42,7 @@ const OrganizeStep: React.FC<OrganizeStepProps> = ({
   filteredBairros,
   errors,
   onGenerateAIContent,
-  isGenerating = false // Added default value
+  isGenerating = false
 }) => {
   // Find the problem and service descriptions
   const selectedProblem = problemas.find(p => p.id === formData.problema_id);
@@ -77,6 +79,20 @@ const OrganizeStep: React.FC<OrganizeStepProps> = ({
           <p className="text-blue-700">Gerando sugestões com IA...</p>
         </div>
       )}
+
+      {/* AI Content generation button */}
+      <div className="flex justify-end">
+        <Button
+          type="button"
+          variant="outline"
+          className="flex items-center gap-2 text-blue-600 border-blue-300 hover:bg-blue-50"
+          onClick={onGenerateAIContent}
+          disabled={isGenerating || !formData.problema_id || !formData.detalhes_solicitacao}
+        >
+          <Sparkles className="h-4 w-4" />
+          {isGenerating ? "Gerando..." : "Gerar sugestões com IA"}
+        </Button>
+      </div>
 
       {/* Título da Demanda */}
       <TitleSection 

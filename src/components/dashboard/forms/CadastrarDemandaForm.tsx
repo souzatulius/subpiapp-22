@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { Card } from '@/components/ui/card';
 import { useAuth } from '@/hooks/useSupabaseAuth';
@@ -23,7 +22,7 @@ const CadastrarDemandaForm: React.FC<CadastrarDemandaFormProps> = ({
   const { user } = useAuth();
   const [validationErrors, setValidationErrors] = useState<ValidationError[]>([]);
   const [showValidationAlert, setShowValidationAlert] = useState(false);
-  const [isGeneratingAI, setIsGeneratingAI] = useState(false); // Added state for AI generation
+  const [isGeneratingAI, setIsGeneratingAI] = useState(false); 
   const location = useLocation();
   const formRef = useRef<HTMLDivElement>(null);
   

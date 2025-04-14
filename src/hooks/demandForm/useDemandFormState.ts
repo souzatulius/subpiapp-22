@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { DemandFormData } from './types';
 import { supabase } from '@/integrations/supabase/client';
 import { generateTitleSuggestion } from '../../components/dashboard/forms/steps/organize/utils';
+import { toast } from '@/components/ui/use-toast';
 
 const FORM_STORAGE_KEY = 'demandForm_state';
 
@@ -279,60 +280,94 @@ export const useDemandFormState = (
         }
       }
 
-      const prompt = `
-      Com base nas informações abaixo, gere um título conciso, um resumo da situação, e 3 perguntas pertinentes para uma área técnica:
-      
-      Problema: ${selectedProblem?.descricao || ''}
-      ${serviceName ? `Serviço: ${serviceName}` : ''}
-      ${bairroName ? `Bairro: ${bairroName}` : ''}
-      ${formData.endereco ? `Endereço: ${formData.endereco}` : ''}
-      
-      Detalhes da solicitação: ${formData.detalhes_solicitacao}
-      
-      Por favor, formate a resposta da seguinte maneira:
-      Título: [título curto e objetivo]
-      
-      Resumo: [resumo conciso da situação em até 4 linhas]
-      
-      Perguntas:
-      1. [primeira pergunta]
-      2. [segunda pergunta]
-      3. [terceira pergunta]
-      `;
+      const { data, error } = await supabase.functions.invoke('generate-demand-content', {
+        body: {
+          problem: selectedProblem?.descricao || '',
+          service: serviceName,
+          neighborhood: bairroName,
+          address: formData.endereco || '',
+          details: formData.detalhes_solicitacao
+        }
+      });
 
-      console.log("AI Prompt:", prompt);
-      
-      setTimeout(() => {
-        const aiTitle = `Solicitação: ${selectedProblem?.descricao || ''} ${serviceName ? `- ${serviceName}` : ''} ${bairroName ? `em ${bairroName}` : ''}`;
-        
-        const aiResumo = `Análise técnica solicitada para ${selectedProblem?.descricao || ''} ${
-          serviceName ? `relacionado a ${serviceName}` : ''
-        } ${bairroName ? `na região de ${bairroName}` : ''}. ${
-          formData.detalhes_solicitacao.substring(0, 100)
-        }${formData.detalhes_solicitacao.length > 100 ? '...' : ''}`;
-        
-        const aiPerguntas = [
-          `Qual é o prazo estimado para resolução deste problema de ${selectedProblem?.descricao || ''}?`,
-          `Quais são os procedimentos técnicos necessários para esta situação?`,
-          `Existe algum histórico similar para este tipo de ocorrência ${bairroName ? `em ${bairroName}` : ''}?`
-        ];
-        
-        setFormData(prev => ({
-          ...prev,
-          titulo: aiTitle,
-          resumo_situacao: aiResumo,
-          perguntas: [
-            aiPerguntas[0],
-            aiPerguntas[1],
-            aiPerguntas[2],
-            '',
-            ''
-          ]
-        }));
-      }, 1500);
-      
+      if (error) {
+        console.error('Error calling Edge Function:', error);
+        throw error;
+      }
+
+      if (data.error) {
+        throw new Error(data.error);
+      }
+
+      setFormData(prev => ({
+        ...prev,
+        titulo: data.title || prev.titulo,
+        resumo_situacao: data.resumo || prev.resumo_situacao,
+        perguntas: [
+          data.perguntas?.[0] || '',
+          data.perguntas?.[1] || '',
+          data.perguntas?.[2] || '',
+          prev.perguntas[3] || '',
+          prev.perguntas[4] || ''
+        ]
+      }));
+
+      toast({
+        title: "Conteúdo gerado com sucesso",
+        description: "Título, resumo e perguntas foram gerados automaticamente.",
+      });
     } catch (error) {
       console.error('Error generating AI content:', error);
+      
+      const selectedProblem = problemas.find(p => p.id === formData.problema_id);
+      let serviceName = '';
+      if (formData.servico_id) {
+        const service = servicos.find(s => s.id === formData.servico_id);
+        if (service) {
+          serviceName = service.descricao;
+        }
+      }
+
+      let bairroName = '';
+      if (formData.bairro_id) {
+        const bairro = filteredBairros.find(b => b.id === formData.bairro_id);
+        if (bairro) {
+          bairroName = bairro.nome;
+        }
+      }
+
+      const aiTitle = `Solicitação: ${selectedProblem?.descricao || ''} ${serviceName ? `- ${serviceName}` : ''} ${bairroName ? `em ${bairroName}` : ''}`;
+      
+      const aiResumo = `Análise técnica solicitada para ${selectedProblem?.descricao || ''} ${
+        serviceName ? `relacionado a ${serviceName}` : ''
+      } ${bairroName ? `na região de ${bairroName}` : ''}. ${
+        formData.detalhes_solicitacao.substring(0, 100)
+      }${formData.detalhes_solicitacao.length > 100 ? '...' : ''}`;
+      
+      const aiPerguntas = [
+        `Qual é o prazo estimado para resolução deste problema de ${selectedProblem?.descricao || ''}?`,
+        `Quais são os procedimentos técnicos necessários para esta situação?`,
+        `Existe algum histórico similar para este tipo de ocorrência ${bairroName ? `em ${bairroName}` : ''}?`
+      ];
+      
+      setFormData(prev => ({
+        ...prev,
+        titulo: aiTitle,
+        resumo_situacao: aiResumo,
+        perguntas: [
+          aiPerguntas[0],
+          aiPerguntas[1],
+          aiPerguntas[2],
+          '',
+          ''
+        ]
+      }));
+      
+      toast({
+        title: "Geração com IA falhou",
+        description: "Foram utilizados templates padrão. Verifique e ajuste o conteúdo se necessário.",
+        variant: "destructive"
+      });
     }
   };
 
