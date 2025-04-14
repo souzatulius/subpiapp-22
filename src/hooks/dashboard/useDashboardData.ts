@@ -105,6 +105,23 @@ export const useDashboardData = (
           }));
           useMock = true;
           break;
+          
+        case 'get_demandas_por_origem':
+          query = supabase
+            .from('origens_demandas')
+            .select(`
+              id,
+              descricao as origem_descricao,
+              demandas:demandas!origem_id(count)
+            `)
+            .order('descricao', { ascending: true });
+          mockData = Array.from({length: 5}, (_, i) => ({
+            id: `origem-${i}`,
+            origem_descricao: `Origem ${i+1}`,
+            count: Math.floor(Math.random() * 40) + 10
+          }));
+          useMock = false; // Try to use real data for this one
+          break;
 
         default:
           console.warn(`Unknown dataSourceKey: ${dataSourceKey}`);
@@ -132,7 +149,19 @@ export const useDashboardData = (
           setData(mockData);
         } else {
           console.log(`Data loaded for ${dataSourceKey}:`, realData);
-          setData(realData || []);
+          
+          // Transform data if needed
+          if (dataSourceKey === 'get_demandas_por_origem') {
+            // Flatten the nested count structure
+            const transformedData = realData.map((item: any) => ({
+              id: item.id,
+              origem_descricao: item.origem_descricao,
+              count: item.demandas?.length || 0
+            }));
+            setData(transformedData);
+          } else {
+            setData(realData || []);
+          }
         }
       } catch (err) {
         console.error('Exception fetching dashboard data:', err);

@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { ActionCardItem } from '@/types/dashboard';
 import DynamicContentCard from '../../cards/DynamicContentCard';
@@ -5,6 +6,9 @@ import StatisticsCard from '../../cards/StatisticsCard';
 import OriginDemandStatistics from '../../cards/OriginDemandStatistics';
 import PendingActionsCard from '../../cards/PendingActionsCard';
 import { Search } from 'lucide-react';
+import { format } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
+
 interface GetSpecialContentProps {
   card: ActionCardItem;
   renderSpecialCardContent?: (cardId: string) => React.ReactNode | null;
@@ -68,6 +72,15 @@ const DEFAULT_MOCK_STATISTICS = {
     change: '+15%'
   }]
 };
+
+// Default activities for "Atividades em Andamento" card
+const DEFAULT_ACTIVITIES = [
+  { id: 'act1', title: 'Análise de demanda de imprensa', date: new Date(), type: 'Imprensa' },
+  { id: 'act2', title: 'Preparação de nota oficial', date: new Date(), type: 'Nota' },
+  { id: 'act3', title: 'Notificação de equipe', date: new Date(), type: 'Interno' },
+  { id: 'act4', title: 'Revisão de release', date: new Date(), type: 'Release' },
+];
+
 const getSpecialContent = ({
   card,
   renderSpecialCardContent,
@@ -83,23 +96,39 @@ const getSpecialContent = ({
   if (card.id === 'origem-demandas') {
     return <OriginDemandStatistics showComparison={true} />;
   }
+  
   if (card.id === 'acoes-pendentes') {
-    return <PendingActionsCard showDetailedList={true} />;
+    return <PendingActionsCard 
+      showDetailedList={true}
+      notesToApprove={specialCardsData?.notesToApprove || 0}
+      responsesToDo={specialCardsData?.responsesToDo || 0}
+      isComunicacao={specialCardsData?.isComunicacao || false}
+      userDepartmentId={specialCardsData?.userCoordenaticaoId || ''}
+    />;
   }
+  
   if (card.id === 'atividades-andamento') {
-    return <div className="p-4 h-full">
-        <h3 className="font-medium mb-2">Atividades em Andamento</h3>
-        <ul className="space-y-2">
-          {specialCardsData?.activities ? specialCardsData.activities.map((activity, index) => <li key={index} className={`p-2 ${index % 3 === 0 ? 'bg-blue-50' : index % 3 === 1 ? 'bg-orange-50' : 'bg-green-50'} rounded-lg text-sm`}>
-                {activity.title || activity}
-              </li>) : <>
-              <li className="p-2 bg-blue-50 rounded-lg text-sm">Análise de demanda de imprensa</li>
-              <li className="p-2 bg-orange-50 rounded-lg text-sm">Preparação de nota oficial</li>
-              <li className="p-2 bg-green-50 rounded-lg text-sm">Notificação de equipe</li>
-            </>}
-        </ul>
-      </div>;
+    // Format activities data for DynamicContentCard
+    const activities = specialCardsData?.activities || DEFAULT_ACTIVITIES;
+    
+    // Convert activities to timeline items format expected by DynamicContentCard
+    const formattedActivities = activities.map((activity: any, index: number) => ({
+      id: activity.id || `activity-${index}`,
+      title: activity.title,
+      date: activity.date ? 
+        format(new Date(activity.date), 'PPp', {locale: ptBR}) : 
+        format(new Date(), 'PPp', {locale: ptBR}),
+      tag: activity.type,
+      status: activity.status || 'in-progress'
+    }));
+    
+    return <DynamicContentCard 
+      items={formattedActivities} 
+      type="demands" 
+      isLoading={specialCardsData?.isLoading || false} 
+    />;
   }
+  
   if (card.id === 'busca-rapida') {
     return <div className="p-4 flex items-center justify-center w-full h-full">
         <div className="bg-white rounded-lg w-full flex items-center shadow-sm border border-gray-200">

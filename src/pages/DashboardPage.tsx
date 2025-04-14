@@ -13,6 +13,7 @@ import EditCardModal from '@/components/dashboard/EditCardModal';
 import PendingActionsCard from '@/components/dashboard/cards/PendingActionsCard';
 import OriginDemandStatistics from '@/components/dashboard/cards/OriginDemandStatistics';
 import SmartSearchCard from '@/components/dashboard/SmartSearchCard';
+import { useSpecialCardsData } from '@/hooks/dashboard/useSpecialCardsData';
 
 const DashboardPage: React.FC = () => {
   const {
@@ -29,6 +30,7 @@ const DashboardPage: React.FC = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const isMobileView = useIsMobile();
+  const specialCardsData = useSpecialCardsData();
 
   const toggleEditMode = () => {
     setIsEditMode(prev => !prev);
@@ -110,10 +112,17 @@ const DashboardPage: React.FC = () => {
   // Render specialized content for specific cards
   const renderSpecialCardContent = useCallback((cardId: string) => {
     if (cardId === 'origem-demandas') {
-      return <OriginDemandStatistics />;
+      return <OriginDemandStatistics showComparison={true} />;
     }
     if (cardId === 'acoes-pendentes') {
-      return <PendingActionsCard />;
+      return <PendingActionsCard 
+        id={cardId}
+        showDetailedList={true} 
+        notesToApprove={specialCardsData.notesToApprove}
+        responsesToDo={specialCardsData.responsesToDo}
+        isComunicacao={specialCardsData.isComunicacao}
+        userDepartmentId={specialCardsData.userCoordenaticaoId || ''}
+      />;
     }
     if (cardId === 'busca-rapida') {
       return <div className="p-4 flex items-center justify-center w-full h-full">
@@ -121,7 +130,7 @@ const DashboardPage: React.FC = () => {
         </div>;
     }
     return null;
-  }, []);
+  }, [specialCardsData]);
 
   return <div className="space-y-6">
       <div className="mb-8">
@@ -152,6 +161,7 @@ const DashboardPage: React.FC = () => {
         isEditMode={isEditMode} 
         disableWiggleEffect={true} 
         renderSpecialCardContent={renderSpecialCardContent} 
+        specialCardsData={specialCardsData}
       />
       
       {selectedCard && <EditCardModal isOpen={isCardEditModalOpen} onClose={() => setIsCardEditModalOpen(false)} onSave={handleSaveCardEdit} card={selectedCard} />}

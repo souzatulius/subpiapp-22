@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Clock, FileText, ArrowRight } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 interface PendingActionsCardProps {
   showDetailedList?: boolean;
@@ -32,8 +33,30 @@ const PendingActionsCard: React.FC<PendingActionsCardProps> = ({
   isComunicacao = false,
   userDepartmentId = ""
 }) => {
+  const navigate = useNavigate();
   // Calculate total actions from notes and responses
   const totalActions = notesToApprove + responsesToDo || pendingActions.length;
+  
+  const handleViewAll = () => {
+    // Navigate to appropriate page based on whether it's for communication department or other
+    if (isComunicacao) {
+      navigate('/dashboard/comunicacao');
+    } else {
+      navigate('/dashboard/responder');
+    }
+  };
+
+  const handleItemClick = (type: string) => {
+    if (type === 'Nota') {
+      navigate('/dashboard/comunicacao/notas');
+    } else if (type === 'Release') {
+      navigate('/dashboard/comunicacao/releases');
+    } else if (type === 'Imprensa') {
+      navigate('/dashboard/comunicacao/responder');
+    } else {
+      navigate('/dashboard');
+    }
+  };
   
   return (
     <Card className="h-full">
@@ -51,12 +74,13 @@ const PendingActionsCard: React.FC<PendingActionsCardProps> = ({
             {pendingActions.map((action) => (
               <div 
                 key={action.id} 
-                className="bg-gray-50 p-3 rounded-xl border-l-4 border-l-solid hover:shadow-sm transition-all"
+                className="bg-gray-50 p-3 rounded-xl border-l-4 border-l-solid hover:shadow-sm transition-all cursor-pointer"
                 style={{ 
                   borderLeftColor: 
                     action.priority === 'high' ? '#ef4444' : 
                     action.priority === 'medium' ? '#f59e0b' : '#22c55e'
                 }}
+                onClick={() => handleItemClick(action.type)}
               >
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
@@ -81,6 +105,7 @@ const PendingActionsCard: React.FC<PendingActionsCardProps> = ({
               variant="ghost" 
               size="sm"
               className="w-full text-sm text-gray-600 mt-2 hover:bg-gray-100"
+              onClick={handleViewAll}
             >
               Ver todas as ações
               <ArrowRight className="h-4 w-4 ml-1" />
@@ -92,6 +117,7 @@ const PendingActionsCard: React.FC<PendingActionsCardProps> = ({
               <div 
                 key={action.id} 
                 className="flex items-center justify-between p-2 hover:bg-gray-50 rounded-lg cursor-pointer"
+                onClick={() => handleItemClick(action.type)}
               >
                 <div className="flex items-center">
                   <div 
@@ -117,6 +143,7 @@ const PendingActionsCard: React.FC<PendingActionsCardProps> = ({
               variant="ghost" 
               size="sm"
               className="w-full text-xs text-gray-600 mt-1"
+              onClick={handleViewAll}
             >
               <FileText className="h-3 w-3 mr-1" />
               Ver todas

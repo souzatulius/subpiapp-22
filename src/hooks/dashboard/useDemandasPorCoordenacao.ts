@@ -1,259 +1,99 @@
-import { useState, useEffect } from 'react';
+
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { startOfWeek, addDays, format, isSameDay } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
-import { ChartData } from '@/types/charts';
+import { useAuth } from '@/hooks/useSupabaseAuth';
 
-type DemandaCountByCoordination = {
-  dia: string;
-  dia_formatado: string;
-  data: Date;
-  coordenacao_id: string;
-  coordenacao_nome: string;
-  quantidade: number;
-};
+export interface ChartDataItem {
+  name: string;
+  valor: number;
+  color: string;
+}
 
-type NotasCount = {
-  dia: string;
-  dia_formatado: string;
-  data: Date;
-  quantidade: number;
-};
-
-type CoordenacaoInfo = {
-  id: string;
-  nome: string;
-  cor: string;
-};
+const COLORS = [
+  '#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899', 
+  '#14B8A6', '#6366F1', '#D946EF', '#F97316'
+];
 
 export const useDemandasPorCoordenacao = () => {
-  const [demandas, setDemandas] = useState<DemandaCountByCoordination[]>([]);
-  const [notas, setNotas] = useState<NotasCount[]>([]);
-  const [coordenacoes, setCoordenacoes] = useState<CoordenacaoInfo[]>([]);
+  const [chartData, setChartData] = useState<ChartDataItem[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [lastFetched, setLastFetched] = useState<Date | null>(null);
-
-  const coresCoordenacao: Record<string, string> = {
-    'Comunicação': '#0D6EFD',  // azul escuro
-    'Zeladoria': '#FD7E14',    // laranja
-    'Cultura': '#20C997',      // verde limão
-    'Outros': '#212529',       // cinza escuro
-  };
-
-  useEffect(() => {
-    const fetchData = async () => {
-      if (!lastFetched || new Date().getTime() - lastFetched.getTime() > 60 * 60 * 1000) {
-        setIsLoading(true);
-        setError(null);
-        
-        try {
-          const today = new Date();
-          const startDay = startOfWeek(today, { weekStartsOn: 1 }); // Monday
-
-          const { data: coordenacoesData, error: coordenacoesError } = await supabase
-            .from('coordenacoes')
-            .select('id, descricao')
-            .order('descricao');
-          
-          if (coordenacoesError) throw coordenacoesError;
-          
-          const coordenacoesWithColors = coordenacoesData.map((coord) => {
-            let cor = '#212529';
-            
-            if (coord.descricao.includes('Comunicação')) {
-              cor = coresCoordenacao['Comunicação'];
-            } else if (coord.descricao.includes('Zeladoria')) {
-              cor = coresCoordenacao['Zeladoria'];
-            } else if (coord.descricao.includes('Cultura')) {
-              cor = coresCoordenacao['Cultura'];
-            }
-            
-            return {
-              id: coord.id,
-              nome: coord.descricao,
-              cor
-            };
-          });
-          
-          setCoordenacoes(coordenacoesWithColors);
-          
-          const weekdays = Array.from({ length: 5 }, (_, i) => {
-            const date = addDays(startDay, i);
-            return {
-              data: date,
-              dia: format(date, 'yyyy-MM-dd'),
-              dia_formatado: format(date, 'EEEE', { locale: ptBR })
-            };
-          });
-          
-          const startDateStr = format(startDay, 'yyyy-MM-dd');
-          const endDateStr = format(addDays(startDay, 4), 'yyyy-MM-dd');
-          
-          const { data: demandasData, error: demandasError } = await supabase
-            .from('demandas')
-            .select(`
-              id, 
-              atualizado_em, 
-              coordenacao_id, 
-              coordenacao:coordenacoes(id, descricao)
-            `)
-            .gte('atualizado_em', startDateStr)
-            .lte('atualizado_em', endDateStr);
-          
-          if (demandasError) throw demandasError;
-          
-          const groupedDemandas: Record<string, DemandaCountByCoordination> = {};
-          
-          if (demandasData) {
-            demandasData.forEach(item => {
-              const date = new Date(item.atualizado_em);
-              const day = format(date, 'yyyy-MM-dd');
-              const coordId = item.coordenacao_id || 'sem_coordenacao';
-              const coordNome = item.coordenacao?.descricao || 'Sem coordenação';
-              
-              const key = `${day}-${coordId}`;
-              
-              if (!groupedDemandas[key]) {
-                groupedDemandas[key] = {
-                  dia: day,
-                  dia_formatado: format(date, 'EEEE', { locale: ptBR }),
-                  data: date,
-                  coordenacao_id: coordId,
-                  coordenacao_nome: coordNome,
-                  quantidade: 0
-                };
-              }
-              
-              groupedDemandas[key].quantidade += 1;
-            });
-          }
-          
-          const processedDemandas = Object.values(groupedDemandas);
-          
-          const fullDemandasData: DemandaCountByCoordination[] = [];
-          
-          weekdays.forEach(day => {
-            coordenacoesWithColors.forEach(coord => {
-              const existing = processedDemandas.find(d => 
-                d.dia === day.dia && 
-                d.coordenacao_id === coord.id
-              );
-              
-              if (existing) {
-                fullDemandasData.push({
-                  ...existing,
-                  dia_formatado: day.dia_formatado
-                });
-              } else {
-                fullDemandasData.push({
-                  dia: day.dia,
-                  dia_formatado: day.dia_formatado,
-                  data: day.data,
-                  coordenacao_id: coord.id,
-                  coordenacao_nome: coord.nome,
-                  quantidade: 0
-                });
-              }
-            });
-          });
-          
-          setDemandas(fullDemandasData);
-          
-          const { data: notasData, error: notasError } = await supabase
-            .from('notas_oficiais')
-            .select('id, criado_em')
-            .gte('criado_em', startDateStr)
-            .lte('criado_em', endDateStr);
-          
-          if (notasError) throw notasError;
-          
-          const groupedNotas: Record<string, NotasCount> = {};
-          
-          if (notasData) {
-            notasData.forEach(item => {
-              const date = new Date(item.criado_em);
-              const day = format(date, 'yyyy-MM-dd');
-              
-              if (!groupedNotas[day]) {
-                groupedNotas[day] = {
-                  dia: day,
-                  dia_formatado: format(date, 'EEEE', { locale: ptBR }),
-                  data: date,
-                  quantidade: 0
-                };
-              }
-              
-              groupedNotas[day].quantidade += 1;
-            });
-          }
-          
-          const processedNotas = Object.values(groupedNotas);
-          
-          const fullNotasData = weekdays.map(day => {
-            const existing = processedNotas.find(n => n.dia === day.dia);
-            
-            if (existing) {
-              return {
-                ...existing,
-                dia_formatado: day.dia_formatado
-              };
-            }
-            
-            return {
-              dia: day.dia,
-              dia_formatado: day.dia_formatado,
-              data: day.data,
-              quantidade: 0
-            };
-          });
-          
-          setNotas(fullNotasData);
-          setLastFetched(new Date());
-        } catch (err: any) {
-          console.error('Error fetching dashboard data:', err);
-          setError(err.message || 'Erro ao carregar dados');
-        } finally {
-          setIsLoading(false);
-        }
+  const { user } = useAuth();
+  
+  const fetchData = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      // Fetch the origins data with demand counts
+      const { data, error: fetchError } = await supabase
+        .from('origens_demandas')
+        .select(`
+          id,
+          descricao,
+          demandas:demandas!origem_id(count)
+        `)
+        .order('descricao', { ascending: true });
+      
+      if (fetchError) {
+        throw fetchError;
       }
-    };
-    
+      
+      if (data && data.length > 0) {
+        // Transform the data for chart display
+        const transformedData = data.map((item, index) => ({
+          name: item.descricao,
+          valor: item.demandas?.length || 0,
+          color: COLORS[index % COLORS.length]
+        }));
+        
+        setChartData(transformedData);
+      } else {
+        // No data, use fallback
+        setChartData([
+          { name: 'Imprensa', valor: 45, color: '#3B82F6' },
+          { name: 'Atendimento', valor: 32, color: '#10B981' },
+          { name: 'Portal', valor: 27, color: '#F59E0B' },
+          { name: 'e-SIC', valor: 18, color: '#EF4444' },
+          { name: 'Telefone', valor: 12, color: '#8B5CF6' }
+        ]);
+      }
+    } catch (err: any) {
+      console.error('Error fetching demandas por coordenacao:', err);
+      setError(err.message || 'Erro ao carregar dados');
+      
+      // Set fallback data
+      setChartData([
+        { name: 'Imprensa', valor: 45, color: '#3B82F6' },
+        { name: 'Atendimento', valor: 32, color: '#10B981' },
+        { name: 'Portal', valor: 27, color: '#F59E0B' },
+        { name: 'e-SIC', valor: 18, color: '#EF4444' },
+        { name: 'Telefone', valor: 12, color: '#8B5CF6' }
+      ]);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+  
+  // Initial fetch
+  useEffect(() => {
     fetchData();
-  }, [lastFetched]);
-
-  const getChartData = () => {
-    if (!demandas.length || !notas.length) return null;
     
-    const weekDays = Array.from(
-      new Set(demandas.map(d => d.dia))
-    ).sort();
+    // Refresh data every 5 minutes
+    const intervalId = setInterval(fetchData, 5 * 60 * 1000);
     
-    const chartData: ChartData[] = weekDays.map(day => {
-      const dayDemandas = demandas.filter(d => d.dia === day);
-      const dayNota = notas.find(n => n.dia === day);
-      
-      const dayLabel = dayDemandas.length > 0 
-        ? dayDemandas[0].dia_formatado.charAt(0).toUpperCase() + dayDemandas[0].dia_formatado.slice(1, 3)
-        : '';
-      
-      const demandasSum = dayDemandas.reduce((sum, d) => sum + d.quantidade, 0);
-      
-      return {
-        name: dayLabel,
-        demandas: demandasSum,
-        notas: dayNota?.quantidade || 0
-      };
-    });
-    
-    return chartData;
+    return () => clearInterval(intervalId);
+  }, [fetchData]);
+  
+  // Function to manually refresh the data
+  const refresh = () => {
+    fetchData();
   };
   
   return {
-    chartData: getChartData(),
+    chartData,
     isLoading,
     error,
-    coordenacoes,
-    refresh: () => setLastFetched(null)
+    refresh
   };
 };

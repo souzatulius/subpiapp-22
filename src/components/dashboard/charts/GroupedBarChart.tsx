@@ -1,95 +1,55 @@
 
 import React from 'react';
-import {
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Cell, TooltipProps
-} from 'recharts';
-import { ChartData } from '@/types/charts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, Cell } from 'recharts';
+import { ChartDataItem } from '@/hooks/dashboard/useDemandasPorCoordenacao';
 
 interface GroupedBarChartProps {
-  data: ChartData[];
+  data: ChartDataItem[];
   height?: number;
   className?: string;
-  compact?: boolean;
 }
 
-const GroupedBarChart: React.FC<GroupedBarChartProps> = ({
-  data,
+const CustomTooltip = ({ active, payload, label }: any) => {
+  if (active && payload && payload.length) {
+    return (
+      <div className="bg-white p-2 border border-gray-200 shadow-md rounded-md">
+        <p className="font-medium">{label}</p>
+        <p className="text-sm text-gray-700">
+          Total: <span className="font-semibold">{payload[0].value}</span>
+        </p>
+      </div>
+    );
+  }
+  return null;
+};
+
+const GroupedBarChart: React.FC<GroupedBarChartProps> = ({ 
+  data, 
   height = 300,
-  className = '',
-  compact = false
+  className = ''
 }) => {
-  const barColors = ['#3b82f6', '#f97316'];
-
-  const getBarColor = (name: string, seriesIndex: number): string => {
-    const colorIndex = seriesIndex % barColors.length;
-    return barColors[colorIndex];
-  };
-
-  const CustomTooltip = ({ active, payload, label, compact }: TooltipProps<any, any> & { compact?: boolean }) => {
-    if (active && payload && payload.length) {
-      return (
-        <div className={`bg-white p-${compact ? '1' : '2'} border border-gray-200 rounded shadow-sm`}>
-          <p className={`text-gray-700 font-medium text-${compact ? 'xs' : 'sm'} mb-1`}>{label}</p>
-          {payload.map((p, i) => (
-            <div key={i} className="flex items-center">
-              <div
-                className="w-2 h-2 rounded-full mr-1"
-                style={{ backgroundColor: p.color }}
-              />
-              <p className={`text-${compact ? 'xs' : 'sm'} text-gray-600`}>
-                {p.name}: <span className="font-medium">{p.value}</span>
-              </p>
-            </div>
-          ))}
-        </div>
-      );
-    }
-    return null;
-  };
-
   return (
-    <div className={`w-full ${className}`} style={{ height: `${height}px` }}>
+    <div className={`w-full ${className}`} style={{ height }}>
       <ResponsiveContainer width="100%" height="100%">
         <BarChart
           data={data}
-          margin={{
-            top: compact ? 5 : 20,
-            right: compact ? 10 : 30,
-            left: compact ? 10 : 20,
-            bottom: compact ? 5 : 20,
-          }}
-          barSize={compact ? 10 : 20}
+          margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
         >
-          <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
+          <CartesianGrid strokeDasharray="3 3" vertical={false} />
           <XAxis 
             dataKey="name" 
-            fontSize={compact ? 8 : 12}
-            tick={{ fill: '#666' }}
-            tickLine={{ stroke: '#ccc' }}
-            axisLine={{ stroke: '#ccc' }}
+            tick={{ fontSize: 12 }}
+            tickLine={false}
           />
           <YAxis 
-            fontSize={compact ? 8 : 12}
-            tick={{ fill: '#666' }}
-            tickLine={{ stroke: '#ccc' }}
-            axisLine={{ stroke: '#ccc' }}
+            tick={{ fontSize: 12 }}
+            tickLine={false}
+            axisLine={false}
           />
-          <Tooltip 
-            content={<CustomTooltip compact={compact} />}
-            cursor={{ fill: 'rgba(0, 0, 0, 0.05)' }}
-          />
-          <Legend 
-            wrapperStyle={{ fontSize: compact ? 8 : 12 }}
-            iconSize={compact ? 8 : 14}
-          />
-          <Bar dataKey="demandas" name="Demandas" fill="#3b82f6" radius={[2, 2, 0, 0]}>
+          <Tooltip content={<CustomTooltip />} />
+          <Bar dataKey="valor" fill="#8884d8" radius={[4, 4, 0, 0]}>
             {data.map((entry, index) => (
-              <Cell key={`cell-${index}`} fill={getBarColor(entry.name, 0)} />
-            ))}
-          </Bar>
-          <Bar dataKey="notas" name="Notas" fill="#f97316" radius={[2, 2, 0, 0]}>
-            {data.map((entry, index) => (
-              <Cell key={`cell-${index}`} fill={getBarColor(entry.name, 1)} />
+              <Cell key={`cell-${index}`} fill={entry.color} />
             ))}
           </Bar>
         </BarChart>
