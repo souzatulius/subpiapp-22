@@ -49,8 +49,8 @@ const WelcomeCard: React.FC<WelcomeCardProps> = ({
         <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-transparent my-[47px]">
           <div className=" text-blue-300 h-15 w-15">
             {greeting && userName ? <div className="flex items-center">
-                <Home className="h-8 w-8 mr-3 text-white/90" strokeWidth={1.5} />
-                <h2 className={cn("text-2xl font-bold", userNameClassName || "text-white")}>
+                <Home strokeWidth={1.5} className="h-12 w-12 mr-3 text-gray-300" />
+                <h2 className="font-semibold text-3xl text-gray-600">
                   Olá, {userName}!
                 </h2>
               </div> : <div className=" relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-transparent my-[47px]">
