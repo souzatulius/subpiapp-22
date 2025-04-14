@@ -57,6 +57,8 @@ export interface Demand {
   notas?: Note[] | null;
   origem_id?: string;
   tipo_midia_id?: string;
+  created_at?: string;
+  resumo_situacao?: string | null;
 }
 
 export interface Note {

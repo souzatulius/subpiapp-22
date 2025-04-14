@@ -133,17 +133,17 @@ const ActionCard = memo(({
         <div className="absolute top-2 right-2 z-10">
           <CardControls
             id={id}
-            onEdit={onEdit}
-            onDelete={onDelete}
-            onHide={onHide}
+            onEdit={onEdit ? () => onEdit(id) : undefined}
+            onDelete={onDelete ? () => onDelete(id) : undefined}
+            onHide={onHide ? () => onHide(id) : undefined}
           />
         </div>
       )}
 
       {/* If this is a special card, render it differently */}
-      {isNotesApprovalCard && type === 'special' ? (
+      {isNotesApprovalCard && type === 'recent_notes' ? (
         <NotesApprovalCard />
-      ) : isPendingDemandsCard && type === 'special' ? (
+      ) : isPendingDemandsCard && type === 'pending_actions' ? (
         <PendingDemandsCard />
       ) : chartId ? (
         <ChartPreview chartId={chartId} />

@@ -142,4 +142,6 @@ const SmartSearchCard: React.FC<SmartSearchCardProps> = ({
       </CardContent>
     </Card>
   );
-}
+};
+
+export default SmartSearchCard;
