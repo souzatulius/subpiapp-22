@@ -46,7 +46,7 @@ const WelcomeCard: React.FC<WelcomeCardProps> = ({
 }) => {
   return <div className="bg-transparent">
       <div className="bg-transparent">
-        <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-transparent my-[48px]">
+        <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-transparent my-[47px]">
           <div className=" text-blue-300 h-15 w-15">
             {greeting && userName ? <div className="flex items-center">
                 <Home strokeWidth={1.5} className="h-12 w-12 mr-3 text-gray-300" />
@@ -68,17 +68,7 @@ const WelcomeCard: React.FC<WelcomeCardProps> = ({
         </div>
       </div>
 
-      {!hideFunctions && (showButton || showResetButton) && <div className={cn("flex flex-col sm:flex-row gap-2 px-6 py-3 bg-white", spacingClassName)}>
-          {showButton && <Button variant={buttonVariant} onClick={onButtonClick} className="flex items-center gap-2">
-              {buttonIcon}
-              {buttonText}
-            </Button>}
-          
-          {showResetButton && <Button variant="outline" onClick={onResetClick} className="flex items-center gap-2">
-              {resetButtonIcon || <RotateCcw className="h-4 w-4" />}
-              Redefinir Padrão
-            </Button>}
-        </div>}
+      {!hideFunctions && (showButton || showResetButton)}
     </div>;
 };
 export default WelcomeCard;

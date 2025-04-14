@@ -84,7 +84,7 @@ const RelatoriosPage = () => {
       <WelcomeCard title="Relatórios da Comunicação" description="Ações e estatísticas da área" icon={<PieChart className="h-10 w-10 mr-2 text-blue-500 py-0 my-0" />} color="bg-gradient-to-r from-blue-600 to-blue-800" showResetButton={true} onResetClick={resetDashboard} resetButtonIcon={<RotateCcw className="h-4 w-4" />} className="h-15 w-15 mr-3 text-gray-300" />
 
       {/* Buttons only with icons below WelcomeCard */}
-      <div className="flex justify-end mt-4 gap-2">
+      <div className="flex justify-end mt-4 gap-2 py-0 my-0">
         <Button variant="outline" size="icon" onClick={handlePrint} className="h-9 w-9 bg-white hover:bg-gray-100 border-gray-200 shadow-sm hover:shadow transition-all rounded-xl" title="Imprimir">
           <Printer className="h-4 w-4 text-gray-600" />
         </Button>
