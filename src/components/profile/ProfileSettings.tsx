@@ -15,7 +15,7 @@ const ProfileSettings: React.FC = () => {
   const [formData, setFormData] = useState({
     nome: '',
     email: user?.email || '',
-    telefone: '',
+    whatsapp: '', // Changed from 'telefone' to 'whatsapp' to match the database schema
   });
 
   React.useEffect(() => {
@@ -29,7 +29,7 @@ const ProfileSettings: React.FC = () => {
     try {
       const { data, error } = await supabase
         .from('usuarios')
-        .select('nome_completo, email, telefone')
+        .select('nome_completo, email, whatsapp') // Changed 'telefone' to 'whatsapp'
         .eq('id', user?.id)
         .single();
 
@@ -38,7 +38,7 @@ const ProfileSettings: React.FC = () => {
       setFormData({
         nome: data?.nome_completo || '',
         email: data?.email || user?.email || '',
-        telefone: data?.telefone || '',
+        whatsapp: data?.whatsapp || '', // Changed from 'telefone' to 'whatsapp'
       });
     } catch (error) {
       console.error('Error fetching user profile:', error);
@@ -66,7 +66,7 @@ const ProfileSettings: React.FC = () => {
         .from('usuarios')
         .update({ 
           nome_completo: formData.nome,
-          telefone: formData.telefone
+          whatsapp: formData.whatsapp // Changed from 'telefone' to 'whatsapp'
         })
         .eq('id', user?.id);
 
@@ -125,11 +125,11 @@ const ProfileSettings: React.FC = () => {
       </div>
       
       <div className="grid gap-2">
-        <Label htmlFor="telefone">Telefone</Label>
+        <Label htmlFor="whatsapp">WhatsApp</Label> {/* Changed from 'telefone' to 'whatsapp' */}
         <Input
-          id="telefone"
-          name="telefone"
-          value={formData.telefone}
+          id="whatsapp"
+          name="whatsapp"
+          value={formData.whatsapp}
           onChange={handleInputChange}
           placeholder="(11) 98765-4321"
         />
