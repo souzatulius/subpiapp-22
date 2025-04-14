@@ -7,6 +7,12 @@ import { Clock, FileText, ArrowRight } from 'lucide-react';
 
 interface PendingActionsCardProps {
   showDetailedList?: boolean;
+  id?: string;
+  title?: string;
+  notesToApprove?: number;
+  responsesToDo?: number;
+  isComunicacao?: boolean;
+  userDepartmentId?: string;
 }
 
 // Sample data for pending actions
@@ -17,14 +23,25 @@ const pendingActions = [
   { id: 4, title: 'Atualizar site institucional', deadline: '3 dias restantes', type: 'Site', priority: 'medium' },
 ];
 
-const PendingActionsCard: React.FC<PendingActionsCardProps> = ({ showDetailedList = false }) => {
+const PendingActionsCard: React.FC<PendingActionsCardProps> = ({ 
+  showDetailedList = false,
+  id,
+  title = "Ações Pendentes",
+  notesToApprove = 0,
+  responsesToDo = 0,
+  isComunicacao = false,
+  userDepartmentId = ""
+}) => {
+  // Calculate total actions from notes and responses
+  const totalActions = notesToApprove + responsesToDo || pendingActions.length;
+  
   return (
     <Card className="h-full">
       <CardHeader className="pb-2">
         <CardTitle className="text-lg flex justify-between items-center">
-          <span>Ações Pendentes</span>
+          <span>{title}</span>
           <Badge variant="outline" className="bg-orange-50 text-orange-700 border-orange-200">
-            {pendingActions.length}
+            {totalActions}
           </Badge>
         </CardTitle>
       </CardHeader>
