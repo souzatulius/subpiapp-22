@@ -2,6 +2,7 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { RotateCcw, Home } from 'lucide-react';
 import { cn } from '@/utils/cn';
+
 interface WelcomeCardProps {
   title: string;
   description: string;
@@ -23,6 +24,7 @@ interface WelcomeCardProps {
   rightContent?: React.ReactNode;
   hideFunctions?: boolean;
 }
+
 const WelcomeCard: React.FC<WelcomeCardProps> = ({
   title,
   description,
@@ -53,11 +55,11 @@ const WelcomeCard: React.FC<WelcomeCardProps> = ({
                 <h2 className="font-semibold text-3xl text-gray-600">
                   Olá, {userName}!
                 </h2>
-              </div> : <div className="flex items-center">
+              </div> : <div className="flex flex-col items-start">
                 {icon}
-                <div className="flex items-center">
-                  <h2 className="font-semibold text-3xl text-gray-600">{title}</h2>
-                  <p className=" opacity-90 text-gray-500 my-0 py-0 font-normal text-lg">{description}</p>
+                <div>
+                  <h2 className="font-semibold text-3xl text-gray-600 mb-2">{title}</h2>
+                  <p className="opacity-90 text-gray-500 font-normal text-lg">{description}</p>
                 </div>
               </div>}
           </div>
@@ -66,8 +68,6 @@ const WelcomeCard: React.FC<WelcomeCardProps> = ({
               {rightContent}
             </div>}
         </div>
-
-        {/* SVG element removed */}
       </div>
 
       {!hideFunctions && (showButton || showResetButton) && <div className={cn("flex flex-col sm:flex-row gap-2 px-6 py-3 bg-white", spacingClassName)}>
@@ -83,4 +83,5 @@ const WelcomeCard: React.FC<WelcomeCardProps> = ({
         </div>}
     </div>;
 };
+
 export default WelcomeCard;
