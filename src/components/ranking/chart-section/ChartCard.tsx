@@ -52,6 +52,9 @@ const ChartCard: React.FC<ChartCardProps> = ({
     }
   };
   
+  // State for hover detection
+  const [isHovered, setIsHovered] = useState(false);
+  
   return (
     <div
       ref={setNodeRef}
@@ -59,6 +62,8 @@ const ChartCard: React.FC<ChartCardProps> = ({
         transform: transform ? `translate3d(${transform.x}px, ${transform.y}px, 0)` : undefined,
       }}
       className="h-full"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
     >
       <CardComponent {...cardProps}>
         <CardHeader 
@@ -67,60 +72,54 @@ const ChartCard: React.FC<ChartCardProps> = ({
           className={`${disableContainer ? 'px-0 pt-0' : ''} cursor-grab`}
         >
           <div className="flex justify-between items-center">
-            <div className="flex items-center justify-between flex-1">
+            <div className="flex-1">
               <CardTitle className="text-lg">{chart.title}</CardTitle>
-              
-              {dataSource && (
-                <Badge 
-                  variant="outline" 
-                  className={`text-xs py-0 px-1.5 ml-2 ${getBadgeColor(dataSource)}`}
-                >
-                  {dataSource}
-                </Badge>
-              )}
             </div>
             
-            <div className="flex space-x-1 ml-2">
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8 bg-gray-100 hover:bg-gray-200 text-gray-600"
-                onClick={onToggleView}
-                title={showAnalysisOnly ? "Mostrar gráfico" : "Mostrar análise"}
-              >
-                {showAnalysisOnly ? (
-                  <BarChart2 className="h-4 w-4" />
-                ) : (
-                  <FileText className="h-4 w-4" />
-                )}
-              </Button>
-              
-              {chart.analysis && (
+            {/* Control buttons - only visible on hover */}
+            {isHovered && (
+              <div className="flex space-x-1 ml-2">
                 <Button
                   variant="ghost"
                   size="icon"
                   className="h-8 w-8 bg-gray-100 hover:bg-gray-200 text-gray-600"
-                  onClick={onToggleAnalysis}
-                  title={isAnalysisExpanded ? "Esconder análise" : "Mostrar análise"}
+                  onClick={onToggleView}
+                  title={showAnalysisOnly ? "Mostrar gráfico" : "Mostrar análise"}
                 >
-                  {isAnalysisExpanded ? (
-                    <ChevronUp className="h-4 w-4" />
+                  {showAnalysisOnly ? (
+                    <BarChart2 className="h-4 w-4" />
                   ) : (
-                    <ChevronDown className="h-4 w-4" />
+                    <FileText className="h-4 w-4" />
                   )}
                 </Button>
-              )}
-              
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8 bg-gray-100 hover:bg-gray-200 text-gray-600"
-                onClick={onToggleVisibility}
-                title="Esconder gráfico"
-              >
-                <EyeOff className="h-4 w-4" />
-              </Button>
-            </div>
+                
+                {chart.analysis && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 bg-gray-100 hover:bg-gray-200 text-gray-600"
+                    onClick={onToggleAnalysis}
+                    title={isAnalysisExpanded ? "Esconder análise" : "Mostrar análise"}
+                  >
+                    {isAnalysisExpanded ? (
+                      <ChevronUp className="h-4 w-4" />
+                    ) : (
+                      <ChevronDown className="h-4 w-4" />
+                    )}
+                  </Button>
+                )}
+                
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 bg-gray-100 hover:bg-gray-200 text-gray-600"
+                  onClick={onToggleVisibility}
+                  title="Esconder gráfico"
+                >
+                  <EyeOff className="h-4 w-4" />
+                </Button>
+              </div>
+            )}
           </div>
         </CardHeader>
         
@@ -138,6 +137,18 @@ const ChartCard: React.FC<ChartCardProps> = ({
             </div>
           )}
         </CardContent>
+        
+        {/* Data source badge at the bottom */}
+        {dataSource && (
+          <CardFooter className={`${disableContainer ? 'px-0 pt-2 pb-0' : ''} flex justify-end`}>
+            <Badge 
+              variant="outline" 
+              className={`text-xs py-0.5 px-2 ${getBadgeColor(dataSource)} opacity-70`}
+            >
+              {dataSource}
+            </Badge>
+          </CardFooter>
+        )}
       </CardComponent>
     </div>
   );

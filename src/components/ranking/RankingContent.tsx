@@ -10,6 +10,7 @@ import { useUploadState } from '@/hooks/ranking/useUploadState';
 import { toast } from 'sonner';
 import { RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import InsightsSection from './insights/InsightsSection';
 
 interface RankingContentProps {
   filterDialogOpen: boolean;
@@ -32,11 +33,20 @@ const RankingContent: React.FC<RankingContentProps> = ({
 }) => {
   const [isSimulationActive, setIsSimulationActive] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
   
   const { 
-    chartVisibility, toggleChartVisibility, setChartVisibility,
-    planilhaData, sgzData, painelData, isLoading, 
-    refreshChartData, isMockData, dataSource, setDataSource
+    chartVisibility, 
+    toggleChartVisibility, 
+    setChartVisibility,
+    planilhaData, 
+    sgzData, 
+    painelData, 
+    isLoading, 
+    refreshChartData, 
+    isMockData, 
+    dataSource, 
+    setDataSource
   } = useRankingCharts();
   
   const { 
@@ -61,6 +71,52 @@ const RankingContent: React.FC<RankingContentProps> = ({
       }
     }
   }, [dataSource, uploadDataSource, setDataSource, setUploadDataSource]);
+
+  // On initial mount, attempt to load data from localStorage to persist between page visits
+  useEffect(() => {
+    const loadCachedData = () => {
+      try {
+        // Check if we have cached SGZ data
+        const cachedSgzData = localStorage.getItem('demo-sgz-data');
+        const cachedPainelData = localStorage.getItem('demo-painel-data');
+
+        if (cachedSgzData) {
+          const parsedData = JSON.parse(cachedSgzData);
+          if (Array.isArray(parsedData) && parsedData.length > 0) {
+            console.log('Loading cached SGZ data from localStorage:', parsedData.length, 'records');
+            return true; // Found cached data
+          }
+        }
+
+        if (cachedPainelData) {
+          const parsedData = JSON.parse(cachedPainelData);
+          if (Array.isArray(parsedData) && parsedData.length > 0) {
+            console.log('Loading cached Painel data from localStorage:', parsedData.length, 'records');
+            return true; // Found cached data
+          }
+        }
+
+        return false; // No cached data found
+      } catch (error) {
+        console.error('Error loading cached data:', error);
+        return false;
+      }
+    };
+
+    // Only show the loading feedback if this is the first load and we don't have cached data
+    const hasCachedData = loadCachedData();
+    
+    if (isInitialLoad && !hasCachedData) {
+      showFeedback('loading', 'Carregando dados do ranking...', { 
+        duration: 0,
+        progress: 30,
+        stage: 'Inicializando'
+      });
+    }
+
+    // Set initial load to false after first render
+    setIsInitialLoad(false);
+  }, [showFeedback, isInitialLoad]);
 
   // Log data availability for debugging
   useEffect(() => {
@@ -88,31 +144,19 @@ const RankingContent: React.FC<RankingContentProps> = ({
     }
   };
 
-  // Show loading feedback when data is being loaded
+  // Only show loading feedback when data is being loaded on first render
   useEffect(() => {
-    if (isLoading) {
+    if (isLoading && isInitialLoad) {
       showFeedback('loading', 'Gerando insights e gráficos...', { 
         duration: 0, 
         progress: 50,
         stage: 'Processando dados'
       });
+    } else if (!isLoading && isInitialLoad) {
+      // Clear loading feedback when data is loaded
+      showFeedback('success', 'Dados carregados com sucesso', { duration: 1500 });
     }
-  }, [isLoading, showFeedback]);
-
-  // Refresh data on mount if refresh function is provided
-  useEffect(() => {
-    if (onRefreshData) {
-      console.log("RankingContent: Calling onRefreshData on mount");
-      setIsRefreshing(true);
-      
-      onRefreshData().catch(err => {
-        console.error("Error refreshing data on mount:", err);
-        toast.error("Erro ao carregar dados iniciais");
-      }).finally(() => {
-        setIsRefreshing(false);
-      });
-    }
-  }, [onRefreshData]);
+  }, [isLoading, showFeedback, isInitialLoad]);
 
   // Handle manual data refresh
   const handleRefresh = async () => {
@@ -144,17 +188,10 @@ const RankingContent: React.FC<RankingContentProps> = ({
             </span>
           )}
         </div>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={handleRefresh}
-          disabled={isRefreshing}
-          className="flex items-center gap-1.5"
-        >
-          <RefreshCw className={`h-3.5 w-3.5 ${isRefreshing ? 'animate-spin' : ''}`} />
-          {buttonText}
-        </Button>
       </div>
+
+      {/* Insights Section - New component */}
+      <InsightsSection sgzData={sgzData || planilhaData} painelData={painelData} isSimulationActive={isSimulationActive} />
 
       {/* Dashboard Cards */}
       <div className="overflow-x-hidden">

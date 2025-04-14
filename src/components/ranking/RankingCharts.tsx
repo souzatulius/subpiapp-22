@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -13,6 +14,7 @@ import StatusDistributionChart from './charts/StatusDistributionChart';
 import StatusTransitionChart from './charts/StatusTransitionChart';
 import DistrictEfficiencyRadarChart from './charts/DistrictEfficiencyRadarChart';
 import ComparativoSGZPainelChart from './charts/ComparativoSGZPainelChart';
+
 interface RankingChartsProps {
   chartData: any;
   sgzData: any[] | null;
@@ -24,6 +26,7 @@ interface RankingChartsProps {
   disableCardContainers?: boolean;
   onToggleChartVisibility?: (chartId: string) => void;
 }
+
 const RankingCharts: React.FC<RankingChartsProps> = ({
   chartData,
   sgzData,
@@ -73,19 +76,31 @@ const RankingCharts: React.FC<RankingChartsProps> = ({
 
   // Sample empty data object for charts
   const emptyData = {};
-  return <Card className="p-4 bg-white border-orange-200 shadow-sm overflow-hidden hover:shadow-md transition-all rounded-3xl">
+  
+  return (
+    <Card className="p-4 bg-white border-orange-200 shadow-sm overflow-hidden hover:shadow-md transition-all rounded-3xl">
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-xl text-orange-800">
+        <h2 className="text-xl font-semibold text-orange-800 flex items-center">
           <BarChart3 className="h-6 w-6 mr-2 text-orange-500" />
           Análise de Desempenho
         </h2>
         <div className="flex items-center gap-2">
-          <Button variant={showOnlySubprefeitura ? "default" : "outline"} className={`flex items-center gap-2 rounded-xl ${showOnlySubprefeitura ? 'bg-blue-900 hover:bg-blue-800 text-white' : 'border-blue-900 text-blue-900 hover:bg-blue-50'}`} onClick={() => setShowOnlySubprefeitura(!showOnlySubprefeitura)} title="Considerar apenas dados da subprefeitura">
+          <Button 
+            variant={showOnlySubprefeitura ? "default" : "outline"} 
+            className={`flex items-center gap-2 rounded-xl ${showOnlySubprefeitura ? 'bg-blue-900 hover:bg-blue-800 text-white' : 'border-blue-900 text-blue-900 hover:bg-blue-50'}`} 
+            onClick={() => setShowOnlySubprefeitura(!showOnlySubprefeitura)} 
+            title="Considerar apenas dados da subprefeitura"
+          >
             <Building2 className="h-4 w-4" />
-            Apenas Sub
+            <span className="text-white">Apenas Sub</span>
           </Button>
           
-          <Button variant="outline" className={`flex items-center gap-2 border rounded-xl ${isSimulationActive ? 'bg-orange-100 text-orange-700 border-orange-300' : 'text-gray-600'}`} onClick={onSimulateIdealRanking} title="Como seria o ranking com dados corretos">
+          <Button 
+            variant="outline" 
+            className={`flex items-center gap-2 border rounded-xl ${isSimulationActive ? 'bg-orange-100 text-orange-700 border-orange-300' : 'text-gray-600'}`} 
+            onClick={onSimulateIdealRanking} 
+            title="Como seria o ranking com dados corretos"
+          >
             <RefreshCw className="h-4 w-4" />
             {isSimulationActive ? 'Desativar Simulação' : 'Simular Ranking Ideal'}
           </Button>
@@ -146,7 +161,8 @@ const RankingCharts: React.FC<RankingChartsProps> = ({
         </TabsContent>
       </Tabs>
 
-      {isSimulationActive && <div className="mt-4 p-3 bg-orange-50 border border-orange-200 rounded-2xl">
+      {isSimulationActive && (
+        <div className="mt-4 p-3 bg-orange-50 border border-orange-200 rounded-2xl">
           <p className="text-sm text-orange-700 flex items-center">
             <RefreshCw className="h-4 w-4 mr-2 text-orange-500" />
             <span>
@@ -154,19 +170,26 @@ const RankingCharts: React.FC<RankingChartsProps> = ({
               após implementação das recomendações de melhoria.
             </span>
           </p>
-        </div>}
+        </div>
+      )}
       
-      {showOnlySubprefeitura && <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-2xl">
+      {showOnlySubprefeitura && (
+        <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-2xl">
           <p className="text-sm text-green-700 flex items-center">
             <Building2 className="h-4 w-4 mr-2 text-green-500" />
             <span>
               <strong>Filtro Ativo:</strong> Mostrando apenas ordens de serviço de responsabilidade direta da Subprefeitura.
-              {filteredSgzData && <span className="ml-1">
+              {filteredSgzData && (
+                <span className="ml-1">
                   ({filteredSgzData.length} ordens de {sgzData?.length || 0} total)
-                </span>}
+                </span>
+              )}
             </span>
           </p>
-        </div>}
-    </Card>;
+        </div>
+      )}
+    </Card>
+  );
 };
+
 export default RankingCharts;

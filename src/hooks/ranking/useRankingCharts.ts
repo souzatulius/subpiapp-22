@@ -56,19 +56,67 @@ export const useRankingCharts = () => {
   
   // Function to toggle chart visibility
   const toggleChartVisibility = useCallback((chartId: keyof ChartVisibility) => {
-    setChartVisibilityState(prev => ({
-      ...prev,
-      [chartId]: !prev[chartId]
-    }));
+    setChartVisibilityState(prev => {
+      const newState = {
+        ...prev,
+        [chartId]: !prev[chartId]
+      };
+      // Store visibility state in localStorage for persistence
+      localStorage.setItem('chart-visibility', JSON.stringify(newState));
+      return newState;
+    });
   }, []);
   
   // Function to set chart visibility
   const setChartVisibility = useCallback((visibility: ChartVisibility) => {
     setChartVisibilityState(visibility);
+    localStorage.setItem('chart-visibility', JSON.stringify(visibility));
   }, []);
   
-  // Load chart data on mount
+  // Load chart data and visibility settings on mount
   useEffect(() => {
+    // Try to load chart visibility settings from localStorage
+    try {
+      const savedVisibility = localStorage.getItem('chart-visibility');
+      if (savedVisibility) {
+        const parsedVisibility = JSON.parse(savedVisibility);
+        setChartVisibilityState(prev => ({
+          ...prev,
+          ...parsedVisibility
+        }));
+      }
+    } catch (err) {
+      console.error('Error loading chart visibility settings:', err);
+    }
+    
+    // Try to load cached data before making a new request
+    try {
+      const cachedSgzData = localStorage.getItem('demo-sgz-data');
+      const cachedPainelData = localStorage.getItem('demo-painel-data');
+      
+      if (cachedSgzData) {
+        const parsedData = JSON.parse(cachedSgzData);
+        if (Array.isArray(parsedData) && parsedData.length > 0) {
+          setSgzData(parsedData);
+          setPlanilhaData(parsedData);
+          setIsLoading(false);
+          console.log('Loaded cached SGZ data from localStorage:', parsedData.length, 'records');
+        }
+      }
+      
+      if (cachedPainelData) {
+        const parsedData = JSON.parse(cachedPainelData);
+        if (Array.isArray(parsedData) && parsedData.length > 0) {
+          setPainelData(parsedData);
+          setIsLoading(false);
+          console.log('Loaded cached Painel data from localStorage:', parsedData.length, 'records');
+        }
+      }
+    } catch (err) {
+      console.error('Error loading cached data:', err);
+    }
+    
+    // Still refresh the data to ensure it's up to date
     refreshChartData();
   }, []);
   
@@ -83,18 +131,69 @@ export const useRankingCharts = () => {
     setError(null);
     
     try {
-      // For demonstration, we're loading mock data
-      const response = await fetch('/mock/zeladoria_mock_data.json');
+      // Check if we have cached data first
+      const cachedSgzData = localStorage.getItem('demo-sgz-data');
+      const cachedPainelData = localStorage.getItem('demo-painel-data');
       
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
+      let shouldFetchMock = true;
+      
+      if (cachedSgzData) {
+        try {
+          const parsedData = JSON.parse(cachedSgzData);
+          if (Array.isArray(parsedData) && parsedData.length > 0) {
+            setSgzData(parsedData);
+            setPlanilhaData(parsedData);
+            shouldFetchMock = false;
+          }
+        } catch (err) {
+          console.error('Error parsing cached SGZ data:', err);
+        }
       }
       
-      const jsonData = await response.json();
+      if (cachedPainelData) {
+        try {
+          const parsedData = JSON.parse(cachedPainelData);
+          if (Array.isArray(parsedData) && parsedData.length > 0) {
+            setPainelData(parsedData);
+            shouldFetchMock = false;
+          }
+        } catch (err) {
+          console.error('Error parsing cached Painel data:', err);
+        }
+      }
       
-      setData(jsonData);
-      setFilteredData(jsonData);
-      console.info('Using mock data...');
+      // If no cached data, load mock data
+      if (shouldFetchMock) {
+        // For demonstration, we're loading mock data
+        const response = await fetch('/mock/zeladoria_mock_data.json');
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        
+        const jsonData = await response.json();
+        
+        setData(jsonData);
+        setFilteredData(jsonData);
+        setSgzData(jsonData);
+        setPlanilhaData(jsonData);
+        
+        // Store the mock data in localStorage for future use
+        localStorage.setItem('demo-sgz-data', JSON.stringify(jsonData));
+        localStorage.setItem('demo-data-source', 'mock');
+        localStorage.setItem('demo-last-update', new Date().toISOString());
+        
+        setIsMockData(true);
+        setDataSource('mock');
+        
+        console.info('Using mock data...');
+      } else {
+        const dataSource = localStorage.getItem('demo-data-source');
+        if (dataSource === 'upload' || dataSource === 'supabase') {
+          setIsMockData(false);
+          setDataSource(dataSource as 'upload' | 'supabase');
+        }
+      }
     } catch (err) {
       setError(err instanceof Error ? err : new Error('Unknown error loading chart data'));
       console.error('Error loading chart data:', err);

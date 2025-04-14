@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { ActionCardItem } from '@/types/dashboard';
-import SmartSearchCard from '@/components/dashboard/SmartSearchCard';
+import { SmartSearchCard } from '@/components/dashboard/SmartSearchCard';
 
 interface SearchCardProps {
   card: ActionCardItem;

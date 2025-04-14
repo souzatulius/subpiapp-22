@@ -1,16 +1,12 @@
 
 import React, { useState, useEffect } from 'react';
-import Header from '@/components/layouts/Header';
-import DashboardSidebar from '@/components/dashboard/DashboardSidebar';
-import RankingContent from '@/components/ranking/RankingContent';
 import { BarChart3, SlidersHorizontal, Printer, FileText, RefreshCw, Bug } from 'lucide-react';
 import WelcomeCard from '@/components/shared/WelcomeCard';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
 import '@/components/ranking/charts/ChartRegistration';
 import { exportToPDF, printWithStyles } from '@/utils/pdfExport';
-import { useIsMobile } from '@/hooks/use-mobile';
-import UploadSection from '@/components/ranking/UploadSection';
+import RankingContent from '@/components/ranking/RankingContent';
 import { useRankingCharts } from '@/hooks/ranking/useRankingCharts';
 import { useAnimatedFeedback } from '@/hooks/use-animated-feedback';
 import FeedbackProvider from '@/components/ui/feedback-provider';
@@ -20,13 +16,12 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { useOpenAIChartData } from '@/hooks/ranking/useOpenAIChartData';
 import ChartDebugPanel from '@/components/ranking/charts/ChartDebugPanel';
 import { toast } from 'sonner';
+import UploadSection from '@/components/ranking/UploadSection';
 
 const RankingSubs = () => {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [filterDialogOpen, setFilterDialogOpen] = useState(false);
   const [isUploadSectionOpen, setIsUploadSectionOpen] = useState(false);
   const [showDebugPanel, setShowDebugPanel] = useState(false);
-  const isMobile = useIsMobile();
   
   const { 
     uploadId, 
@@ -227,10 +222,40 @@ const RankingSubs = () => {
   const [isUploading, setIsUploading] = useState(false);
 
   useEffect(() => {
+    // Attempt to load data from localStorage first for instant rendering
+    const tryLoadCachedData = () => {
+      try {
+        const cachedSgzData = localStorage.getItem('demo-sgz-data');
+        const cachedPainelData = localStorage.getItem('demo-painel-data');
+        
+        if (cachedSgzData) {
+          const parsedData = JSON.parse(cachedSgzData);
+          if (Array.isArray(parsedData) && parsedData.length > 0) {
+            setPlanilhaData(parsedData);
+            console.log('Loaded cached SGZ data from localStorage:', parsedData.length, 'records');
+          }
+        }
+        
+        if (cachedPainelData) {
+          const parsedData = JSON.parse(cachedPainelData);
+          if (Array.isArray(parsedData) && parsedData.length > 0) {
+            setPainelData(parsedData);
+            console.log('Loaded cached Painel data from localStorage:', parsedData.length, 'records');
+          }
+        }
+      } catch (err) {
+        console.error('Error loading cached data:', err);
+      }
+    };
+
+    // Try to load cached data first
+    tryLoadCachedData();
+    
+    // Then refresh data in the background
     refreshAllChartData().catch(err => {
       console.error("Error refreshing chart data on mount:", err);
     });
-  }, [refreshAllChartData]);
+  }, [refreshAllChartData, setPlanilhaData, setPainelData]);
 
   const handleRefreshData = async () => {
     try {
@@ -394,6 +419,7 @@ const RankingSubs = () => {
             size="icon"
             className="bg-white hover:bg-gray-100 border-gray-200 rounded-lg"
             onClick={handlePrint}
+            title="Imprimir relatório"
           >
             <Printer className="h-5 w-5 text-gray-600" />
           </Button>
@@ -403,6 +429,7 @@ const RankingSubs = () => {
             size="icon"
             className="bg-white hover:bg-gray-100 border-gray-200 rounded-lg"
             onClick={handleExportPDF}
+            title="Exportar para PDF"
           >
             <FileText className="h-5 w-5 text-gray-600" />
           </Button>
@@ -411,7 +438,19 @@ const RankingSubs = () => {
             variant="outline"
             size="icon"
             className="bg-white hover:bg-gray-100 border-gray-200 rounded-lg"
+            onClick={handleRefreshData}
+            disabled={isRefreshing}
+            title="Atualizar dados"
+          >
+            <RefreshCw className={`h-5 w-5 ${isRefreshing ? 'animate-spin' : ''}`} />
+          </Button>
+          
+          <Button
+            variant="outline"
+            size="icon"
+            className="bg-white hover:bg-gray-100 border-gray-200 rounded-lg"
             onClick={() => setFilterDialogOpen(true)}
+            title="Filtrar dados"
           >
             <SlidersHorizontal className="h-5 w-5 text-gray-600" />
           </Button>
@@ -422,7 +461,7 @@ const RankingSubs = () => {
             filterDialogOpen={filterDialogOpen} 
             setFilterDialogOpen={setFilterDialogOpen} 
             disableCardContainers={true}
-            className={isMobile ? "mobile-kpi-grid" : ""} 
+            className="mobile-kpi-grid" 
             buttonText="Atualizar"
             lastUpdateText="Atualização"
             onRefreshData={handleRefreshData}
