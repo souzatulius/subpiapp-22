@@ -2,7 +2,6 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { RotateCcw, Home } from 'lucide-react';
 import { cn } from '@/utils/cn';
-
 interface WelcomeCardProps {
   title: string;
   description: string;
@@ -24,7 +23,6 @@ interface WelcomeCardProps {
   rightContent?: React.ReactNode;
   hideFunctions?: boolean;
 }
-
 const WelcomeCard: React.FC<WelcomeCardProps> = ({
   title,
   description,
@@ -48,7 +46,7 @@ const WelcomeCard: React.FC<WelcomeCardProps> = ({
 }) => {
   return <div className="bg-transparent">
       <div className="bg-transparent">
-        <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-transparent my-[47px]">
+        <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-transparent my-[48px]">
           <div className=" text-blue-300 h-15 w-15">
             {greeting && userName ? <div className="flex items-center">
                 <Home strokeWidth={1.5} className="h-12 w-12 mr-3 text-gray-300" />
@@ -83,5 +81,4 @@ const WelcomeCard: React.FC<WelcomeCardProps> = ({
         </div>}
     </div>;
 };
-
 export default WelcomeCard;
