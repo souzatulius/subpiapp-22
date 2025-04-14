@@ -12,6 +12,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import ProfileEditModal from '@/components/profile/ProfileEditModal';
 import { ProfileData } from '@/components/profile/types';
 import AccountSettingsModal from '@/components/profile/AccountSettingsModal';
+import NotificationsPopover from './NotificationsPopover';
 
 const UserProfileMenu = () => {
   const { user, signOut } = useAuth();
@@ -116,7 +117,10 @@ const UserProfileMenu = () => {
   };
 
   return (
-    <div className="flex items-center">
+    <div className="flex items-center gap-2">
+      {/* Notifications Popover */}
+      <NotificationsPopover />
+
       {/* Desktop view - Show name and department with reduced font size */}
       {!isMobile && (
         <div className="mr-3 text-right hidden md:block">
