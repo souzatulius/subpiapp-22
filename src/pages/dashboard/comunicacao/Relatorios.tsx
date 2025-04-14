@@ -81,7 +81,7 @@ const RelatoriosPage = () => {
     duration: 0.5
   }}>
       {/* WelcomeCard with reset button */}
-      <WelcomeCard title="Relatórios da Comunicação" description="Ações e estatísticas da área" icon={<PieChart className="h-10 w-10 mr-2 text-blue-500 py-0 my-0" />} color="bg-gradient-to-r from-blue-600 to-blue-800" showResetButton={true} onResetClick={resetDashboard} resetButtonIcon={<RotateCcw className="h-4 w-4" />} className="text-blue-300 h-15 w-15 // text-2xl font-bold mb-2 text-blue-500 py-0 my-[4px]" />
+      <WelcomeCard title="Relatórios da Comunicação" description="Ações e estatísticas da área" icon={<PieChart className="h-10 w-10 mr-2 text-blue-500 py-0 my-0" />} color="bg-gradient-to-r from-blue-600 to-blue-800" showResetButton={true} onResetClick={resetDashboard} resetButtonIcon={<RotateCcw className="h-4 w-4" />} className="h-12 w-12 mr-3 text-gray-300" />
 
       {/* Buttons only with icons below WelcomeCard */}
       <div className="flex justify-end mt-4 gap-2">
