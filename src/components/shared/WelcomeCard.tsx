@@ -81,10 +81,7 @@ const WelcomeCard: React.FC<WelcomeCardProps> = ({
               {buttonText}
             </Button>}
           
-          {showResetButton && <Button variant="outline" onClick={onResetClick} className="flex items-center gap-2">
-              {resetButtonIcon || <RotateCcw className="h-4 w-4" />}
-              Resetar
-            </Button>}
+          {showResetButton}
         </div>}
     </div>;
 };

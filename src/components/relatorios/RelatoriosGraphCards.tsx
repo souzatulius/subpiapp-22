@@ -197,7 +197,7 @@ const RelatoriosGraphCards: React.FC<RelatoriosGraphCardsProps> = ({
     return <Card onMouseEnter={() => setIsHovering(true)} onMouseLeave={() => setIsHovering(false)} className="shadow-sm hover:shadow-md transition-all rounded-xl bg-zinc-100">
         <CardHeader className="pb-1 pt-4 relative">
           <CardTitle className="text-sm font-medium text-gray-800">{title}</CardTitle>
-          {value !== undefined && <p className="font-semibold mt-1 text-xl text-blue-900">{value}</p>}
+          {value !== undefined && <p className="font-semibold mt-1 text-blue-900 text-3xl">{value}</p>}
           <div>
             <p className=" text-xs text-gray-500">{description}</p>
           </div>
