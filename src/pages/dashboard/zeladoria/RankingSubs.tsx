@@ -30,7 +30,7 @@ const RankingSubs = () => {
     }} transition={{
       duration: 0.5
     }}>
-        <WelcomeCard title="Ranking da Zeladoria" description="Acompanhamento de desempenho e análises de ações, projetos e obras." icon={<BarChart3 className="text-blue-300 h-15 w-15" />} color="bg-gradient-to-r from-blue-700 to-blue-900" className="h-10 w-10" />
+        <WelcomeCard title="Ranking da Zeladoria" description="Acompanhamento de desempenho e análises de ações, projetos e obras." icon={<BarChart3 className="text-blue-300 h-15 w-15" />} color="bg-gradient-to-r from-blue-700 to-blue-900" className="h-12 w-12 mr-3 text-gray-300" />
         
         {!isMobile && <div className="flex justify-end mt-4 space-x-2">
             <Button variant="outline" size="icon" className="bg-white hover:bg-gray-100 border-gray-200 rounded-lg" onClick={handlePrint}>
