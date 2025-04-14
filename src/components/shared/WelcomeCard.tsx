@@ -1,7 +1,9 @@
+
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { RotateCcw, Home } from 'lucide-react';
 import { cn } from '@/utils/cn';
+
 interface WelcomeCardProps {
   title: string;
   description: string;
@@ -23,6 +25,7 @@ interface WelcomeCardProps {
   rightContent?: React.ReactNode;
   hideFunctions?: boolean;
 }
+
 const WelcomeCard: React.FC<WelcomeCardProps> = ({
   title,
   description,
@@ -44,27 +47,34 @@ const WelcomeCard: React.FC<WelcomeCardProps> = ({
   rightContent,
   hideFunctions = false
 }) => {
-  return <div className="bg-transparent">
+  return (
+    <div className="bg-transparent">
       <div className="bg-transparent">
         <div className="bg-transparent py-0 text-3xl font-bold text-blue-950">
-          <div className="\"pt-1 text-gray-600 py-0 my-0">
+          <div className="pt-1 text-gray-600 py-0 my-0">
             <div className="pt-0 text-gray-600 py-0 px-0 my-[19px]">
               {icon}
               <div className="">
-                {greeting && userName ? <div className="flex items-center">
+                {greeting && userName ? (
+                  <div className="flex items-center">
                     <Home className="h-12 w-12 mr-2 text-blue-200" strokeWidth={2} />
                     <h2 className="text-3xl font-bold text-blue-950 py-[23px] px-[17px]">
                       Olá, {userName}!
                     </h2>
-                  </div> : <h2 className="\"pt-1 text-gray-600 py-0">{title}</h2>}
+                  </div>
+                ) : (
+                  <h2 className="pt-1 text-gray-600 py-0">{title}</h2>
+                )}
                 
                 <p className="text-gray-500 text-lg py-[11px] my-0">{description}</p>
               </div>
             </div>
 
-            {rightContent && <div className="flex-shrink-0">
+            {rightContent && (
+              <div className="flex-shrink-0">
                 {rightContent}
-              </div>}
+              </div>
+            )}
           </div>
         </div>
 
@@ -75,14 +85,25 @@ const WelcomeCard: React.FC<WelcomeCardProps> = ({
         </div>
       </div>
 
-      {!hideFunctions && (showButton || showResetButton) && <div className="flex flex-col sm:flex-row gap-2 mt-4">
-          {showButton && <Button variant={buttonVariant} onClick={onButtonClick} className="flex items-center gap-2">
+      {!hideFunctions && (showButton || showResetButton) && (
+        <div className="flex flex-col sm:flex-row gap-2 mt-4">
+          {showButton && (
+            <Button variant={buttonVariant} onClick={onButtonClick} className="flex items-center gap-2">
               {buttonIcon}
               {buttonText}
-            </Button>}
+            </Button>
+          )}
           
-          {showResetButton}
-        </div>}
-    </div>;
+          {showResetButton && (
+            <Button variant="outline" onClick={onResetClick} className="flex items-center gap-2">
+              {resetButtonIcon || <RotateCcw className="h-4 w-4" />}
+              Resetar
+            </Button>
+          )}
+        </div>
+      )}
+    </div>
+  );
 };
+
 export default WelcomeCard;
