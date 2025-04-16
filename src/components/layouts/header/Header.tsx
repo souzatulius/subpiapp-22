@@ -6,7 +6,7 @@ import { UserProfileMenu } from './index';
 import { useUserProfile } from './useUserProfile';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Menu } from 'lucide-react';
-import NotificationsPopover from './NotificationsPopover';
+// Remove the NotificationsPopover import as it's already included in UserProfileMenu
 
 interface HeaderProps {
   showControls?: boolean;
@@ -51,9 +51,8 @@ const Header: React.FC<HeaderProps> = ({
           </Link>
         </div>
         
-        {/* Right side - Notifications & User profile */}
+        {/* Right side - User profile (notifications are included in UserProfileMenu) */}
         <div className="w-1/4 flex items-center justify-end gap-2 mx-[30px]">
-          {showControls && <NotificationsPopover />}
           {showControls && !hideUserMenu && <UserProfileMenu />}
         </div>
       </div>

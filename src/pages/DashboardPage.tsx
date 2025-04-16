@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback } from 'react';
 import WelcomeCard from '@/components/shared/WelcomeCard';
 import CardGridContainer from '@/components/dashboard/CardGridContainer';
@@ -14,16 +13,20 @@ import PendingActionsCard from '@/components/dashboard/cards/PendingActionsCard'
 import OriginDemandStatistics from '@/components/dashboard/cards/OriginDemandStatistics';
 import SmartSearchCard from '@/components/dashboard/SmartSearchCard';
 import { useSpecialCardsData } from '@/hooks/dashboard/useSpecialCardsData';
+import { useAuth } from '@/hooks/useSupabaseAuth';
+import { useUserData } from '@/hooks/dashboard/useUserData';
 
 const DashboardPage: React.FC = () => {
   const {
     viewType,
     actionCards,
     setActionCards,
-    toggleView,
-    firstName,
-    user
+    toggleView
   } = useDashboardState();
+  
+  const { user } = useAuth();
+  const { firstName } = useUserData(user?.id);
+  
   const [isEditMode, setIsEditMode] = useState(false);
   const [isCardEditModalOpen, setIsCardEditModalOpen] = useState(false);
   const [selectedCard, setSelectedCard] = useState<ActionCardItem | null>(null);
@@ -104,7 +107,6 @@ const DashboardPage: React.FC = () => {
     }
   };
 
-  // Render specialized content for specific cards
   const renderSpecialCardContent = useCallback((cardId: string) => {
     if (cardId === 'origem-demandas') {
       return <OriginDemandStatistics showComparison={true} />;

@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { Progress } from '@/components/ui/progress';
 import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
+import { useLocation } from 'react-router-dom';
 
 interface GlobalProgressBarProps {
   /** Whether the progress bar is currently active */
@@ -29,8 +30,17 @@ const GlobalProgressBar = ({
   className
 }: GlobalProgressBarProps) => {
   const [value, setValue] = useState(propValue || 0);
-
+  const location = useLocation();
+  
+  // Only show the progress bar on the ranking-subs page
+  const shouldShowProgressBar = location.pathname.includes('ranking-subs');
+  
   useEffect(() => {
+    if (!shouldShowProgressBar) {
+      setValue(0);
+      return;
+    }
+    
     if (propValue !== undefined) {
       setValue(propValue);
     } else if (isLoading && autoIncrement && value < 90) {
@@ -53,9 +63,10 @@ const GlobalProgressBar = ({
         return () => clearTimeout(timer);
       }
     }
-  }, [isLoading, autoIncrement, value, propValue]);
+  }, [isLoading, autoIncrement, value, propValue, shouldShowProgressBar]);
 
-  if (!isLoading && value === 0) {
+  // Don't render anything if not on the ranking-subs page or if progress is 0
+  if ((!shouldShowProgressBar) || (!isLoading && value === 0)) {
     return null;
   }
 
