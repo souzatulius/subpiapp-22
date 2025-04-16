@@ -5,23 +5,16 @@ import { ptBR } from "date-fns/locale";
 import { CalendarIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import {
-  Popover,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { DateTimePickerContent } from "./date-picker/date-time-picker-content";
-
-export interface DatePickerProps {
-  date?: Date;
-  onSelect: (date?: Date) => void;
-  placeholder?: string;
-  className?: string;
-  showTimeSelect?: boolean;
-  useDropdownTimeSelect?: boolean;
-}
+import { Popover, PopoverTrigger } from "@/components/ui/popover";
+import { DateTimePickerContent } from "./date-time-picker-content";
+import { DatePickerProps } from "./date-picker-types";
+import { formatTimeValue, createDateWithTime } from "./time-input-handler";
 
 /**
  * DatePicker component with time selection capability
+ * 
+ * Allows selection of dates with optional time selection using either
+ * text inputs or dropdown selectors
  */
 export function DatePicker({
   date,
@@ -64,12 +57,9 @@ export function DatePicker({
     const hours = parseInt(selectedHours || '12', 10);
     const minutes = parseInt(selectedMinutes || '00', 10);
     
-    // Create new date instance to avoid modifying the original date
-    const dateWithTime = new Date(newDate);
-    
-    // Set hours and minutes, preserving the date part
-    dateWithTime.setHours(hours);
-    dateWithTime.setMinutes(minutes);
+    // Create new date instance with time preserved
+    const dateWithTime = createDateWithTime(newDate, hours, minutes);
+    console.log("Selected date with time:", dateWithTime.toISOString());
     
     // Call the parent's onSelect with the new date that has the preserved time
     onSelect(dateWithTime);
@@ -81,15 +71,9 @@ export function DatePicker({
   const handleTimeChange = (type: 'hours' | 'minutes', value: string) => {
     // Handle the input changes
     if (type === 'hours') {
-      // For valid numeric values or empty string
-      if (value === '' || (value.match(/^\d+$/) && parseInt(value, 10) >= 0 && parseInt(value, 10) <= 23)) {
-        setSelectedHours(value);
-      }
+      setSelectedHours(value);
     } else {
-      // For valid numeric values or empty string
-      if (value === '' || (value.match(/^\d+$/) && parseInt(value, 10) >= 0 && parseInt(value, 10) <= 59)) {
-        setSelectedMinutes(value);
-      }
+      setSelectedMinutes(value);
     }
 
     // Only update the date if we have a valid date selected and valid input
@@ -100,8 +84,8 @@ export function DatePicker({
       
       // Validate to ensure we have valid numbers
       if (!isNaN(hours) && !isNaN(minutes)) {
-        const newDate = new Date(date);
-        newDate.setHours(hours, minutes);
+        const newDate = createDateWithTime(date, hours, minutes);
+        console.log("Time changed:", newDate.toISOString());
         onSelect(newDate);
       }
     }
@@ -123,27 +107,9 @@ export function DatePicker({
    */
   const handleTimeBlur = (type: 'hours' | 'minutes') => {
     if (type === 'hours') {
-      if (selectedHours === '') {
-        setSelectedHours('00');
-      } else {
-        const numValue = parseInt(selectedHours, 10);
-        if (!isNaN(numValue) && numValue >= 0 && numValue <= 23) {
-          setSelectedHours(numValue.toString().padStart(2, '0'));
-        } else {
-          setSelectedHours('00');
-        }
-      }
+      setSelectedHours(formatTimeValue(selectedHours, 'hours'));
     } else {
-      if (selectedMinutes === '') {
-        setSelectedMinutes('00');
-      } else {
-        const numValue = parseInt(selectedMinutes, 10);
-        if (!isNaN(numValue) && numValue >= 0 && numValue <= 59) {
-          setSelectedMinutes(numValue.toString().padStart(2, '0'));
-        } else {
-          setSelectedMinutes('00');
-        }
-      }
+      setSelectedMinutes(formatTimeValue(selectedMinutes, 'minutes'));
     }
 
     // Update date with formatted time
@@ -153,8 +119,8 @@ export function DatePicker({
       
       // Validate to ensure we have valid numbers
       if (!isNaN(hours) && !isNaN(minutes)) {
-        const newDate = new Date(date);
-        newDate.setHours(hours, minutes);
+        const newDate = createDateWithTime(date, hours, minutes);
+        console.log("Time blur, updated date:", newDate.toISOString());
         onSelect(newDate);
       }
     }

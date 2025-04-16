@@ -7,6 +7,7 @@ import { TimeInput } from "../time-picker/time-input";
 import { TimeDropdown } from "../time-picker/time-dropdown";
 import { Clock } from "lucide-react";
 import { ptBR } from "date-fns/locale";
+import { TimeInputProps, TimeDropdownProps } from "./date-picker-types";
 
 interface DateTimePickerContentProps {
   date?: Date;
@@ -29,8 +30,6 @@ interface DateTimePickerContentProps {
  * 
  * Renders the content of the date picker popover, including a calendar for date selection
  * and time input fields when time selection is enabled.
- * 
- * @param props - Component props
  */
 export function DateTimePickerContent({
   date,
@@ -48,13 +47,15 @@ export function DateTimePickerContent({
   useDropdownTimeSelect = false
 }: DateTimePickerContentProps) {
   // Generate hours options (6:00 - 22:00)
-  const hoursOptions = Array.from({ length: 17 }, (_, i) => {
-    const hour = i + 6; // Start from 6
-    return hour.toString().padStart(2, '0');
-  });
+  const hoursOptions = React.useMemo(() => 
+    Array.from({ length: 17 }, (_, i) => {
+      const hour = i + 6; // Start from 6
+      return hour.toString().padStart(2, '0');
+    }),
+  []);
 
   // Generate minutes options (00 and 30)
-  const minutesOptions = ['00', '30'];
+  const minutesOptions = React.useMemo(() => ['00', '30'], []);
 
   return (
     <PopoverContent className="w-auto p-0">

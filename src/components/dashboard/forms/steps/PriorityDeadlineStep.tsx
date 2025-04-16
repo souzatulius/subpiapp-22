@@ -1,10 +1,9 @@
 
 import React from 'react';
-import { DatePicker } from '@/components/ui/date-picker';
+import { DatePicker } from '@/components/ui/date-picker/date-picker';
 import { ValidationError } from '@/lib/formValidationUtils';
 import { BellRing, Flame } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { getPriorityStyles } from '@/utils/priorityUtils';
 
 interface PriorityDeadlineStepProps {
   formData: {
@@ -52,7 +51,7 @@ const PriorityDeadlineStep: React.FC<PriorityDeadlineStepProps> = ({
     if (date) {
       // Create a consistent ISO string representation
       const isoString = date.toISOString();
-      console.log("Selected date ISO string:", isoString);
+      console.log("PriorityDeadlineStep - Selected date ISO string:", isoString);
       handleSelectChange('prazo_resposta', isoString);
     } else {
       handleSelectChange('prazo_resposta', '');
