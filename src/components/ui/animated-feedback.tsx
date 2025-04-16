@@ -13,6 +13,7 @@ interface AnimatedFeedbackProps {
   visible: boolean;
   onClose?: () => void;
   duration?: number; // in milliseconds
+  progress?: number; // for progress indicator
   options?: {
     progress?: number;
     stage?: string;
@@ -27,7 +28,7 @@ export const AnimatedFeedback: React.FC<AnimatedFeedbackProps> = ({
   message,
   visible,
   onClose,
-  duration = 2000, // Default to 2 seconds as requested
+  duration = 3000, // Increased default duration for better visibility
   options = {}
 }) => {
   const [isVisible, setIsVisible] = useState(visible);
@@ -62,8 +63,6 @@ export const AnimatedFeedback: React.FC<AnimatedFeedbackProps> = ({
           exit={{ opacity: 0, y: 10, scale: 0.95 }}
           transition={{ duration: 0.3 }}
           className="fixed top-1/4 left-1/2 -translate-x-1/2 z-50 pointer-events-auto max-w-md w-full px-4"
-          role={type === 'error' ? 'alert' : 'status'}
-          aria-live={type === 'error' ? 'assertive' : 'polite'}
         >
           <div className={cn(
             "rounded-xl shadow-lg px-6 py-4 flex flex-col gap-3 mx-auto",

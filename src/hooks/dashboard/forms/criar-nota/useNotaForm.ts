@@ -6,10 +6,9 @@ import { ResponseQA } from '@/components/dashboard/forms/criar-nota/types';
 import { useNavigate } from 'react-router-dom';
 import { fetchDemandResponse } from './api/fetchDemandResponse';
 import { formatResponses } from './utils/formatResponses';
-import { submitNotaForm, setFeedbackFunction } from './api/submitNotaForm';
+import { submitNotaForm } from './api/submitNotaForm';
 import { validateNotaForm } from './validators/validateNotaForm';
 import { adaptDemandType } from './utils/typeAdapters';
-import { useFeedback } from '@/components/ui/feedback-provider';
 
 export const useNotaForm = (onClose: () => void) => {
   const { user } = useAuth();
@@ -22,10 +21,6 @@ export const useNotaForm = (onClose: () => void) => {
   const [texto, setTexto] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [step, setStep] = useState<'select-demand' | 'create-note'>('select-demand');
-  const { showFeedback } = useFeedback();
-
-  // Set the feedback function for the submitNotaForm to use
-  setFeedbackFunction(showFeedback);
 
   const handleDemandaSelect = async (demandaId: string, demandas: Demand[]) => {
     setSelectedDemandaId(demandaId);
@@ -33,31 +28,23 @@ export const useNotaForm = (onClose: () => void) => {
     // Find the selected demand
     const selected = demandas.find(d => d.id === demandaId);
     if (selected) {
+      console.log("Selected demand:", selected);
       setSelectedDemanda(selected);
       
       // Set a default title based on the demand title
       setTitulo(selected.titulo || '');
       
-      showFeedback('loading', 'Carregando respostas da demanda...', { progress: 50 });
-      
       // Fetch responses for this demand
-      try {
-        const { responseText, comments } = await fetchDemandResponse(demandaId);
-        setDemandaResponse(responseText);
-        setDemandaComments(comments);
-        
-        // Update the selected demand with comments
-        if (comments) {
-          setSelectedDemanda({
-            ...selected,
-            comentarios: comments
-          });
-        }
-        
-        showFeedback('success', 'Demanda carregada com sucesso!');
-      } catch (error) {
-        showFeedback('error', 'Erro ao carregar respostas da demanda');
-        console.error(error);
+      const { responseText, comments } = await fetchDemandResponse(demandaId);
+      setDemandaResponse(responseText);
+      setDemandaComments(comments);
+      
+      // Update the selected demand with comments
+      if (comments) {
+        setSelectedDemanda({
+          ...selected,
+          comentarios: comments
+        });
       }
     }
     
@@ -74,6 +61,12 @@ export const useNotaForm = (onClose: () => void) => {
   };
 
   const handleSubmit = async () => {
+    console.log("Submit button clicked with data:", {
+      titulo,
+      texto,
+      selectedDemanda: selectedDemanda ? { id: selectedDemanda.id, titulo: selectedDemanda.titulo } : null
+    });
+    
     // Validation
     const isValid = validateNotaForm({
       titulo,
@@ -82,15 +75,18 @@ export const useNotaForm = (onClose: () => void) => {
     });
     
     if (!isValid) {
-      showFeedback('error', 'Por favor, preencha todos os campos obrigatórios.');
+      console.error('Por favor, preencha todos os campos obrigatórios.');
       return;
     }
 
     try {
       setIsSubmitting(true);
+      console.log("Validation passed, proceeding with submission");
       
       // Use the adapter to convert the demand type if selectedDemanda exists
       const adaptedDemanda = selectedDemanda ? adaptDemandType(selectedDemanda) : null;
+      
+      console.log("Adapted demand:", adaptedDemanda);
       
       const success = await submitNotaForm({
         titulo,
@@ -101,11 +97,14 @@ export const useNotaForm = (onClose: () => void) => {
       });
       
       if (success) {
+        console.log("Note created successfully, navigating to dashboard");
         // Redirect to dashboard
         navigate('/dashboard/comunicacao');
+      } else {
+        console.error('Erro ao criar nota. Verifique os dados e tente novamente.');
       }
     } catch (error: any) {
-      showFeedback('error', `Erro durante a submissão: ${error.message || 'Erro desconhecido'}`);
+      console.error("Error in handleSubmit:", error);
     } finally {
       setIsSubmitting(false);
     }

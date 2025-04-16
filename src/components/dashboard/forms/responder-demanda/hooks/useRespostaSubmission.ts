@@ -5,7 +5,6 @@ import { useAuth } from '@/hooks/useSupabaseAuth';
 import { Demanda } from '../types';
 import { useRespostaFormatter } from './useRespostaFormatter';
 import { useRespostaValidation } from './useRespostaValidation';
-import { useFeedback } from '@/components/ui/feedback-provider';
 
 interface SubmissionOptions {
   onSuccess?: () => void;
@@ -18,7 +17,6 @@ export const useRespostaSubmission = (options?: SubmissionOptions) => {
   const { user } = useAuth();
   const { formatRespostaText } = useRespostaFormatter();
   const { validateResposta } = useRespostaValidation();
-  const { showFeedback } = useFeedback();
 
   /**
    * Submits the response to the database
@@ -28,27 +26,30 @@ export const useRespostaSubmission = (options?: SubmissionOptions) => {
     resposta: Record<string, string>,
     comentarios: string | null = null
   ): Promise<boolean> => {
+    console.log("Submit resposta called", { selectedDemanda, resposta, comentarios });
+    
     // Validate the response
     const validation = validateResposta(selectedDemanda, resposta);
     if (!validation.isValid) {
-      showFeedback('error', validation.message || 'Erro na validação de respostas');
+      console.error(validation.message);
       return false;
     }
 
     if (!selectedDemanda || !user) {
-      showFeedback('error', 'Demanda ou usuário inválido');
+      console.error("Missing selectedDemanda or user", { selectedDemanda, user });
       return false;
     }
 
     try {
       setIsSubmitting(true);
-      showFeedback('loading', 'Preparando resposta...', { progress: 20 });
       
+      console.log("Setting status to em_andamento");
+
+      // First, save the response without changing the status
       // Generate text summary of responses
       const respostasText = formatRespostaText(selectedDemanda, resposta);
+      console.log("Generated respostasText", respostasText);
 
-      showFeedback('loading', 'Enviando resposta...', { progress: 50 });
-      
       // Insert the response
       const { error: respostaError } = await supabase
         .from('respostas_demandas')
@@ -61,10 +62,11 @@ export const useRespostaSubmission = (options?: SubmissionOptions) => {
         });
         
       if (respostaError) {
+        console.error("Error inserting response:", respostaError);
         throw respostaError;
       }
 
-      showFeedback('loading', 'Atualizando status...', { progress: 80 });
+      console.log("Response inserted successfully");
       
       // Now try to update the status to "em_andamento"
       // This is safer since the response is already saved
@@ -73,20 +75,21 @@ export const useRespostaSubmission = (options?: SubmissionOptions) => {
           .from('demandas')
           .update({ status: 'em_andamento' })
           .eq('id', selectedDemanda.id);
+          
+        console.log("Status updated to em_andamento");
       } catch (statusError) {
         console.warn("Could not update status to em_andamento, continuing anyway", statusError);
         // We continue anyway since the response is saved
       }
 
-      showFeedback('success', 'Resposta enviada com sucesso!');
-
       if (options?.onSuccess) {
+        console.log("Calling onSuccess callback");
         options.onSuccess();
       }
 
       return true;
     } catch (error: any) {
-      showFeedback('error', `Erro ao enviar resposta: ${error.message || 'Erro desconhecido'}`);
+      console.error('Erro ao enviar resposta:', error);
       
       if (options?.onError) {
         options.onError(error);

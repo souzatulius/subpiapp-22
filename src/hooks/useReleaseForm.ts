@@ -2,7 +2,6 @@
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useSupabaseAuth';
-import { useFeedback } from '@/components/ui/feedback-provider';
 
 export interface ReleaseFormValues {
   titulo: string;
@@ -15,17 +14,15 @@ export interface ReleaseFormValues {
 export const useReleaseForm = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { user } = useAuth();
-  const { showFeedback } = useFeedback();
   
   const submitRelease = async (data: ReleaseFormValues, file: File | null) => {
     if (!user) {
-      showFeedback('error', 'Você precisa estar autenticado para criar uma nota oficial');
+      console.error('Você precisa estar autenticado para criar uma nota oficial');
       return false;
     }
     
     try {
       setIsSubmitting(true);
-      showFeedback('loading', 'Criando nota oficial...', { progress: 20 });
       
       // Create the nota in notas_oficiais table
       const { data: notaData, error: notaError } = await supabase
@@ -42,14 +39,10 @@ export const useReleaseForm = () => {
       
       if (notaError) throw notaError;
       
-      showFeedback('loading', 'Verificando anexos...', { progress: 60 });
-      
       // Upload attachment if file is provided
       if (file && notaData) {
         const fileExt = file.name.split('.').pop();
         const fileName = `nota-${notaData.id}-${Date.now()}.${fileExt}`;
-        
-        showFeedback('loading', 'Enviando anexo...', { progress: 70 });
         
         // Check if storage bucket exists before trying to upload
         try {
@@ -62,8 +55,6 @@ export const useReleaseForm = () => {
           } else if (fileData) {
             // If we successfully uploaded the file, now try to add reference in the database
             try {
-              showFeedback('loading', 'Finalizando...', { progress: 90 });
-              
               // Update archivo_url field (ensure this field exists in your table)
               const updateData: Record<string, any> = {};
               updateData.arquivo_url = fileData.path;
@@ -85,11 +76,11 @@ export const useReleaseForm = () => {
         }
       }
       
-      showFeedback('success', 'Nota criada com sucesso!');
+      console.log('Nota criada com sucesso');
       
       return true;
     } catch (error: any) {
-      showFeedback('error', `Erro ao criar nota: ${error.message || 'Erro desconhecido'}`);
+      console.error('Error creating nota oficial:', error);
       return false;
     } finally {
       setIsSubmitting(false);

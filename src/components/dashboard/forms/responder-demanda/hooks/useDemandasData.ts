@@ -5,7 +5,7 @@ import { useDemandasFilters } from './useDemandasFilters';
 import { useSelectedDemanda } from './useSelectedDemanda';
 
 export const useDemandasData = () => {
-  const { demandas, setDemandas, isLoading: isLoadingDemandas } = useFetchDemandas();
+  const { demandas, setDemandas, isLoadingDemandas } = useFetchDemandas();
   const { areas } = useFetchAreas();
   const { 
     filteredDemandas, 
