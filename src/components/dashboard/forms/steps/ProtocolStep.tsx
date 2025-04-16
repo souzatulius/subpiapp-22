@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
@@ -6,7 +7,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Calendar } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Button } from "@/components/ui/button"
-import { Calendar as CalendarIcon } from "lucide-react"
 import { format } from "date-fns"
 import { ptBR } from 'date-fns/locale';
 import { DatePicker } from "@/components/ui/date-picker"
@@ -105,38 +105,17 @@ const ProtocolStep: React.FC<ProtocolStepProps> = ({
         >
           Qual o prazo para resposta? {hasError('prazo_resposta') && <span className="text-orange-500">*</span>}
         </Label>
-        <Popover>
-          <PopoverTrigger asChild>
-            <Button
-              variant={"outline"}
-              className={
-                `w-full justify-start text-left font-normal rounded-xl
-                ${hasError('prazo_resposta') ? 'border-orange-500 text-orange-500' : ''}
-                ${!formData.prazo_resposta ? 'text-muted-foreground' : ''}`
-              }
-            >
-              <Calendar className="mr-2 h-4 w-4" />
-              {formData.prazo_resposta ? (
-                format(new Date(formData.prazo_resposta), "dd/MM/yyyy", { locale: ptBR })
-              ) : (
-                <span>Selecione a data</span>
-              )}
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-auto p-0" align="start" side="bottom">
-            <DatePicker
-              mode="single"
-              locale={ptBR}
-              selected={formData.prazo_resposta ? new Date(formData.prazo_resposta) : undefined}
-              onSelect={(date) => {
-                const formattedDate = formatDate(date);
-                handleSelectChange('prazo_resposta', formattedDate);
-              }}
-              disabled={false}
-              initialFocus
-            />
-          </PopoverContent>
-        </Popover>
+        <DatePicker
+          date={formData.prazo_resposta ? new Date(formData.prazo_resposta) : undefined}
+          onSelect={(date) => {
+            if (date) {
+              const formattedDate = formatDate(date);
+              handleSelectChange('prazo_resposta', formattedDate);
+            }
+          }}
+          placeholder="Selecione a data"
+          className={hasError('prazo_resposta') ? 'border-orange-500' : ''}
+        />
         {hasError('prazo_resposta') && (
           <p className="text-orange-500 text-sm mt-1">{getErrorMessage('prazo_resposta')}</p>
         )}
