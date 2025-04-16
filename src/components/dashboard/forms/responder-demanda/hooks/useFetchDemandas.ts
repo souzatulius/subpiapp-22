@@ -125,7 +125,7 @@ export const useFetchDemandas = () => {
         );
         
         // Transform the data to match the Demanda type
-        const transformedData: Demanda[] = filteredData.map((item): Demanda => {
+        const transformedData: Demanda[] = filteredData.map((item: any): Demanda => {
           if (!item) {
             // Return default empty Demanda if item is null or undefined
             return {

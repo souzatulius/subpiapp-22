@@ -1,10 +1,9 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
 import { Demand } from './types';
 import { Loader2 } from 'lucide-react';
+import UnifiedFilterBar, { ViewMode } from '@/components/shared/unified-view/UnifiedFilterBar';
 
 interface DemandaSelectionProps {
   filteredDemandas: Demand[];
@@ -21,17 +20,20 @@ const DemandaSelection: React.FC<DemandaSelectionProps> = ({
   onDemandaSelect,
   isLoading
 }) => {
+  const [viewMode, setViewMode] = useState<ViewMode>('list');
+  
   return (
     <Card className="border border-gray-200 rounded-lg shadow-sm">
       <CardContent className="p-6">
         <h3 className="font-semibold text-lg mb-4">Selecione uma Demanda</h3>
         
         <div className="mb-6">
-          <Input
-            placeholder="Buscar demanda por título..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="mb-4"
+          <UnifiedFilterBar
+            searchTerm={searchTerm}
+            setSearchTerm={setSearchTerm}
+            viewMode={viewMode}
+            setViewMode={setViewMode}
+            searchPlaceholder="Buscar demanda por título..."
           />
           
           {isLoading ? (
@@ -39,12 +41,12 @@ const DemandaSelection: React.FC<DemandaSelectionProps> = ({
               <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
             </div>
           ) : (
-            <div className="space-y-3 max-h-96 overflow-y-auto">
+            <div className={`mt-4 ${viewMode === 'list' ? 'space-y-3' : 'grid grid-cols-1 md:grid-cols-2 gap-3'} max-h-96 overflow-y-auto`}>
               {filteredDemandas.length > 0 ? (
                 filteredDemandas.map((demanda) => (
                   <div 
                     key={demanda.id}
-                    className="p-3 border rounded-md hover:bg-gray-50 cursor-pointer"
+                    className={`p-3 border rounded-md hover:bg-gray-50 cursor-pointer ${viewMode === 'cards' ? 'h-full' : ''}`}
                     onClick={() => onDemandaSelect(demanda.id)}
                   >
                     <div className="font-medium">{demanda.titulo}</div>

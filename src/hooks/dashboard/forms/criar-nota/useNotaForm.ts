@@ -17,6 +17,7 @@ export const useNotaForm = (onClose: () => void) => {
   const [selectedDemandaId, setSelectedDemandaId] = useState('');
   const [selectedDemanda, setSelectedDemanda] = useState<Demand | null>(null);
   const [demandaResponse, setDemandaResponse] = useState<string | null>(null);
+  const [demandaComments, setDemandaComments] = useState<string | null>(null);
   const [titulo, setTitulo] = useState('');
   const [texto, setTexto] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -36,8 +37,17 @@ export const useNotaForm = (onClose: () => void) => {
       setTitulo(selected.titulo || '');
       
       // Fetch responses for this demand
-      const responseText = await fetchDemandResponse(demandaId);
+      const { responseText, comments } = await fetchDemandResponse(demandaId);
       setDemandaResponse(responseText);
+      setDemandaComments(comments);
+      
+      // Update the selected demand with comments
+      if (comments) {
+        setSelectedDemanda({
+          ...selected,
+          comentarios: comments
+        });
+      }
     }
     
     setStep('create-note');
@@ -47,6 +57,7 @@ export const useNotaForm = (onClose: () => void) => {
     setStep('select-demand');
     setSelectedDemanda(null);
     setDemandaResponse(null);
+    setDemandaComments(null);
     setTitulo('');
     setTexto('');
   };
@@ -100,7 +111,7 @@ export const useNotaForm = (onClose: () => void) => {
         // Show error feedback if success is false
         showFeedback('error', 'Erro ao criar nota. Verifique os dados e tente novamente.');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error in handleSubmit:", error);
       showFeedback('error', error.message || 'Ocorreu um erro inesperado. Tente novamente.');
     } finally {
@@ -121,6 +132,7 @@ export const useNotaForm = (onClose: () => void) => {
     isSubmitting,
     step,
     formattedResponses,
+    demandaComments,
     handleDemandaSelect,
     handleBackToSelection,
     handleSubmit
