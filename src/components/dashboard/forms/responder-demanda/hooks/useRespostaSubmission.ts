@@ -2,7 +2,6 @@
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useSupabaseAuth';
-import { useAnimatedFeedback } from '@/hooks/use-animated-feedback';
 import { Demanda } from '../types';
 import { useRespostaFormatter } from './useRespostaFormatter';
 import { useRespostaValidation } from './useRespostaValidation';
@@ -18,7 +17,6 @@ export const useRespostaSubmission = (options?: SubmissionOptions) => {
   const { user } = useAuth();
   const { formatRespostaText } = useRespostaFormatter();
   const { validateResposta } = useRespostaValidation();
-  const { showFeedback } = useAnimatedFeedback();
 
   /**
    * Submits the response to the database
@@ -33,7 +31,7 @@ export const useRespostaSubmission = (options?: SubmissionOptions) => {
     // Validate the response
     const validation = validateResposta(selectedDemanda, resposta);
     if (!validation.isValid) {
-      showFeedback('error', validation.message);
+      console.error(validation.message);
       return false;
     }
 
@@ -44,9 +42,6 @@ export const useRespostaSubmission = (options?: SubmissionOptions) => {
 
     try {
       setIsSubmitting(true);
-      
-      // Show loading feedback
-      showFeedback('loading', 'Enviando resposta...', { progress: 30, stage: 'Processando' });
       
       console.log("Setting status to em_andamento");
 
@@ -73,9 +68,6 @@ export const useRespostaSubmission = (options?: SubmissionOptions) => {
 
       console.log("Response inserted successfully");
       
-      // Update feedback progress
-      showFeedback('loading', 'Atualizando status da demanda...', { progress: 70, stage: 'Finalizando' });
-      
       // Now try to update the status to "em_andamento"
       // This is safer since the response is already saved
       try {
@@ -89,11 +81,6 @@ export const useRespostaSubmission = (options?: SubmissionOptions) => {
         console.warn("Could not update status to em_andamento, continuing anyway", statusError);
         // We continue anyway since the response is saved
       }
-      
-      // Always show animated feedback for success
-      showFeedback('success', 'Resposta enviada com sucesso!', {
-        duration: 3000 // Show for 3 seconds
-      });
 
       if (options?.onSuccess) {
         console.log("Calling onSuccess callback");
@@ -103,8 +90,6 @@ export const useRespostaSubmission = (options?: SubmissionOptions) => {
       return true;
     } catch (error: any) {
       console.error('Erro ao enviar resposta:', error);
-      
-      showFeedback('error', error.message || "Ocorreu um erro ao processar sua solicitação");
       
       if (options?.onError) {
         options.onError(error);

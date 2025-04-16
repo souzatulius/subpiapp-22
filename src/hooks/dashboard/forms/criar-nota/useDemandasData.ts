@@ -1,7 +1,6 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from '@/components/ui/use-toast';
 import { Demand } from './types';
 
 export const useDemandasData = () => {
@@ -47,14 +46,20 @@ export const useDemandasData = () => {
           .in('status', ['pendente', 'em_andamento', 'respondida'])
           .order('horario_publicacao', { ascending: false });
         
-        if (demandasError) throw demandasError;
+        if (demandasError) {
+          console.error('Erro ao buscar demandas:', demandasError);
+          return;
+        }
         
         // Buscar todas as notas oficiais para verificar quais demandas já possuem notas
         const { data: notasData, error: notasError } = await supabase
           .from('notas_oficiais')
           .select('demanda_id');
         
-        if (notasError) throw notasError;
+        if (notasError) {
+          console.error('Erro ao buscar notas:', notasError);
+          return;
+        }
         
         // Criar um conjunto de IDs de demandas que já possuem notas
         const demandasComNotas = new Set(notasData?.map(nota => nota.demanda_id).filter(Boolean) || []);
@@ -70,16 +75,23 @@ export const useDemandasData = () => {
         const demandasProcessadas = await Promise.all(
           demandasSemNotas.map(async (demanda) => {
             try {
-              if (demanda.problema_id) {
+              // Usando cast explícito para evitar tipos complexos
+              const demandaItem = demanda as any;
+              
+              if (demandaItem.problema_id) {
                 const { data: problemaData } = await supabase
                   .from('problemas')
                   .select('id, descricao, coordenacao_id')
-                  .eq('id', demanda.problema_id)
+                  .eq('id', demandaItem.problema_id)
                   .single();
                 
                 // Criar objeto completo da demanda com todas as propriedades necessárias
-                return {
-                  ...demanda,
+                const demandaCompleta: Demand = {
+                  id: demandaItem.id || '',
+                  titulo: demandaItem.titulo || '',
+                  status: demandaItem.status || '',
+                  detalhes_solicitacao: demandaItem.detalhes_solicitacao || null,
+                  perguntas: demandaItem.perguntas || null,
                   supervisao_tecnica: null, // Mantemos esse campo para compatibilidade, mas como null
                   area_coordenacao: problemaData ? { descricao: problemaData.descricao } : null,
                   prioridade: "",
@@ -96,16 +108,21 @@ export const useDemandasData = () => {
                   autor: null,
                   servico: null,
                   problema: { descricao: problemaData?.descricao || null },
-                  resumo_situacao: hasResumoSituacao ? demanda.resumo_situacao : null,
-                  // Make sure these properties exist and are set properly
-                  arquivo_url: demanda.arquivo_url || null,
-                  anexos: demanda.anexos || null
-                } as Demand;
+                  resumo_situacao: hasResumoSituacao ? demandaItem.resumo_situacao : null,
+                  arquivo_url: demandaItem.arquivo_url || null,
+                  anexos: demandaItem.anexos || null
+                };
+                
+                return demandaCompleta;
               }
               
               // Se não tiver problema, criar objeto com valores padrão
-              return {
-                ...demanda,
+              const demandaSimples: Demand = {
+                id: demandaItem.id || '',
+                titulo: demandaItem.titulo || '',
+                status: demandaItem.status || '',
+                detalhes_solicitacao: demandaItem.detalhes_solicitacao || null,
+                perguntas: demandaItem.perguntas || null,
                 supervisao_tecnica: null,
                 area_coordenacao: null,
                 prioridade: "",
@@ -122,22 +139,23 @@ export const useDemandasData = () => {
                 autor: null,
                 servico: null,
                 problema: { descricao: null },
-                resumo_situacao: hasResumoSituacao ? demanda.resumo_situacao : null,
-                // Make sure these properties exist and are set properly
-                arquivo_url: demanda.arquivo_url || null,
-                anexos: demanda.anexos || null
-              } as Demand;
+                resumo_situacao: hasResumoSituacao ? demandaItem.resumo_situacao : null,
+                arquivo_url: demandaItem.arquivo_url || null,
+                anexos: demandaItem.anexos || null
+              };
+              
+              return demandaSimples;
             } catch (error) {
               console.error('Error processing demand:', error);
               // Return a minimal valid demand object
+              const demandaItem = demanda as any;
               return {
-                ...demanda,
-                id: demanda.id,
-                titulo: demanda.titulo,
-                status: demanda.status,
+                id: demandaItem.id || '',
+                titulo: demandaItem.titulo || '',
+                status: demandaItem.status || '',
                 area_coordenacao: null,
                 problema: { descricao: null },
-                detalhes_solicitacao: demanda.detalhes_solicitacao
+                detalhes_solicitacao: demandaItem.detalhes_solicitacao || null
               } as Demand;
             }
           })
@@ -147,11 +165,6 @@ export const useDemandasData = () => {
         setFilteredDemandas(demandasProcessadas);
       } catch (error) {
         console.error('Erro ao carregar demandas:', error);
-        toast({
-          title: "Erro ao carregar demandas",
-          description: "Não foi possível carregar as demandas disponíveis.",
-          variant: "destructive"
-        });
       } finally {
         setIsLoading(false);
       }

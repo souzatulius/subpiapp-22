@@ -2,7 +2,6 @@
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useSupabaseAuth';
-import { useAnimatedFeedback } from '@/hooks/use-animated-feedback';
 
 export interface ReleaseFormValues {
   titulo: string;
@@ -15,11 +14,10 @@ export interface ReleaseFormValues {
 export const useReleaseForm = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { user } = useAuth();
-  const { showFeedback } = useAnimatedFeedback();
   
   const submitRelease = async (data: ReleaseFormValues, file: File | null) => {
     if (!user) {
-      showFeedback('error', 'Você precisa estar autenticado para criar uma nota oficial');
+      console.error('Você precisa estar autenticado para criar uma nota oficial');
       return false;
     }
     
@@ -78,12 +76,11 @@ export const useReleaseForm = () => {
         }
       }
       
-      showFeedback('success', 'Nota criada com sucesso');
+      console.log('Nota criada com sucesso');
       
       return true;
     } catch (error: any) {
       console.error('Error creating nota oficial:', error);
-      showFeedback('error', error.message || "Ocorreu um erro ao criar a nota oficial");
       return false;
     } finally {
       setIsSubmitting(false);

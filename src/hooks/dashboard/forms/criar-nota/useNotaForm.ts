@@ -9,7 +9,6 @@ import { formatResponses } from './utils/formatResponses';
 import { submitNotaForm } from './api/submitNotaForm';
 import { validateNotaForm } from './validators/validateNotaForm';
 import { adaptDemandType } from './utils/typeAdapters';
-import { useAnimatedFeedback } from '@/hooks/use-animated-feedback';
 
 export const useNotaForm = (onClose: () => void) => {
   const { user } = useAuth();
@@ -22,7 +21,6 @@ export const useNotaForm = (onClose: () => void) => {
   const [texto, setTexto] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [step, setStep] = useState<'select-demand' | 'create-note'>('select-demand');
-  const { showFeedback } = useAnimatedFeedback();
 
   const handleDemandaSelect = async (demandaId: string, demandas: Demand[]) => {
     setSelectedDemandaId(demandaId);
@@ -77,16 +75,13 @@ export const useNotaForm = (onClose: () => void) => {
     });
     
     if (!isValid) {
-      showFeedback('error', 'Por favor, preencha todos os campos obrigatórios.');
+      console.error('Por favor, preencha todos os campos obrigatórios.');
       return;
     }
 
     try {
       setIsSubmitting(true);
       console.log("Validation passed, proceeding with submission");
-      
-      // Show "processing" feedback
-      showFeedback('loading', 'Processando sua solicitação...', { progress: 50 });
       
       // Use the adapter to convert the demand type if selectedDemanda exists
       const adaptedDemanda = selectedDemanda ? adaptDemandType(selectedDemanda) : null;
@@ -103,17 +98,13 @@ export const useNotaForm = (onClose: () => void) => {
       
       if (success) {
         console.log("Note created successfully, navigating to dashboard");
-        // Show success feedback
-        showFeedback('success', 'Nota criada com sucesso!');
         // Redirect to dashboard
         navigate('/dashboard/comunicacao');
       } else {
-        // Show error feedback if success is false
-        showFeedback('error', 'Erro ao criar nota. Verifique os dados e tente novamente.');
+        console.error('Erro ao criar nota. Verifique os dados e tente novamente.');
       }
     } catch (error: any) {
       console.error("Error in handleSubmit:", error);
-      showFeedback('error', error.message || 'Ocorreu um erro inesperado. Tente novamente.');
     } finally {
       setIsSubmitting(false);
     }

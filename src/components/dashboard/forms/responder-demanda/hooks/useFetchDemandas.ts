@@ -2,7 +2,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Demanda } from '../types';
-import { toast } from '@/components/ui/use-toast';
 import { normalizeQuestions, processFileUrls } from '@/utils/questionFormatUtils';
 
 export const useFetchDemandas = () => {
@@ -91,11 +90,6 @@ export const useFetchDemandas = () => {
         
         if (error) {
           console.error('Error fetching demandas:', error);
-          toast({
-            title: "Erro ao carregar demandas",
-            description: error.message,
-            variant: "destructive"
-          });
           return;
         }
 
@@ -106,12 +100,8 @@ export const useFetchDemandas = () => {
 
         if (respostasError) {
           console.error('Error fetching respostas:', respostasError);
-          // Fix: Access message property instead of id on the error object
-          toast({
-            title: "Erro ao verificar respostas",
-            description: respostasError.message,
-            variant: "destructive"
-          });
+          // Corrigido: usar message em vez de id no erro
+          console.error('Error message:', respostasError.message);
           return;
         }
         
@@ -225,11 +215,6 @@ export const useFetchDemandas = () => {
         setDemandas(transformedData);
       } catch (error: any) {
         console.error('Error in fetchDemandas:', error);
-        toast({
-          title: "Erro ao carregar demandas",
-          description: "Ocorreu um erro ao carregar as demandas.",
-          variant: "destructive"
-        });
       } finally {
         setIsLoadingDemandas(false);
       }

@@ -2,7 +2,6 @@
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useSupabaseAuth';
-import { useAnimatedFeedback } from '@/hooks/use-animated-feedback';
 import { Demanda } from '@/components/dashboard/forms/responder-demanda/types';
 import { useRespostaSubmission } from '@/components/dashboard/forms/responder-demanda/hooks/useRespostaSubmission';
 
@@ -17,10 +16,8 @@ export const useRespostaForm = (
   const { user } = useAuth();
   const [resposta, setResposta] = useState<Record<string, string>>({});
   const [comentarios, setComentarios] = useState<string>('');
-  const { showFeedback } = useAnimatedFeedback();
   
   // Initialize useRespostaSubmission hook with showSuccessToast=false
-  // to prevent duplicate toasts as we'll show our own feedback here
   const { isSubmitting, submitResposta } = useRespostaSubmission({
     showSuccessToast: false
   });
@@ -34,7 +31,7 @@ export const useRespostaForm = (
 
   const handleSubmitResposta = async () => {
     if (!selectedDemanda || Object.keys(resposta).length === 0) {
-      showFeedback('error', 'Por favor, responda todas as perguntas da demanda');
+      console.error('Por favor, responda todas as perguntas da demanda');
       return;
     }
     
@@ -43,8 +40,7 @@ export const useRespostaForm = (
       const success = await submitResposta(selectedDemanda, resposta, comentarios);
       
       if (success) {
-        // Only show feedback here since we disabled it in the submission hook
-        showFeedback('success', 'Demanda respondida com sucesso');
+        console.log('Demanda respondida com sucesso');
         
         // Update local state
         setDemandas(demandas.filter(d => d.id !== selectedDemanda.id));
@@ -55,7 +51,6 @@ export const useRespostaForm = (
       }
     } catch (error: any) {
       console.error('Erro ao enviar resposta:', error);
-      showFeedback('error', error.message || "Ocorreu um erro ao processar sua solicitação");
     }
   };
 
