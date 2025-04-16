@@ -27,14 +27,14 @@ const RequestInfoStep: React.FC<RequestInfoStepProps> = ({
     <div className="space-y-4">
       <div className={hasError('detalhes_solicitacao') ? 'error' : ''}>
         <Label htmlFor="detalhes_solicitacao" className={hasError('detalhes_solicitacao') ? 'text-destructive' : ''}>
-          O que está acontecendo? *
+          Descreva a demanda com detalhes...
         </Label>
         <Textarea
           id="detalhes_solicitacao"
           name="detalhes_solicitacao"
           value={formData.detalhes_solicitacao || ''}
           onChange={handleChange}
-          placeholder="Digite aqui..."
+          placeholder="Digite aqui os detalhes ou cole o email recebido"
           className={`min-h-[150px] ${hasError('detalhes_solicitacao') ? 'border-red-500' : ''}`}
         />
         {hasError('detalhes_solicitacao') && (

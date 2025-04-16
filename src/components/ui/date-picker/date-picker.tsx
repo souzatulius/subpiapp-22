@@ -35,16 +35,17 @@ export function DatePicker({
   const [selectedHours, setSelectedHours] = React.useState<string>(date ? format(date, 'HH') : '12');
   const [selectedMinutes, setSelectedMinutes] = React.useState<string>(date ? format(date, 'mm') : '00');
 
-  // Update time states when date prop changes - BUT ONLY when component mounts or date reference changes
-  // This avoids re-setting hours/minutes when user selects new values from dropdowns
+  // Update time states when date prop changes - only update when date reference changes
   React.useEffect(() => {
     if (date) {
       console.log("DatePicker: Initial date received:", date.toISOString());
       console.log("DatePicker: Setting initial hours/minutes from date:", format(date, 'HH'), format(date, 'mm'));
+      
+      // Only update the time fields when a date is initially set, not on every render
       setSelectedHours(format(date, 'HH'));
       setSelectedMinutes(format(date, 'mm'));
     }
-  }, []);  // Only run on mount, not when date changes
+  }, [date]); // Only run when date changes
 
   /**
    * Handles date selection from the calendar
@@ -61,7 +62,7 @@ export function DatePicker({
     const selectedDate = new Date(newDate);
     console.log("DatePicker: New date selected from calendar:", selectedDate.toISOString());
     
-    // When a new date is selected, preserve the current hours/minutes values
+    // Preserve currently selected hours and minutes
     const hours = parseInt(selectedHours, 10);
     const minutes = parseInt(selectedMinutes, 10);
     

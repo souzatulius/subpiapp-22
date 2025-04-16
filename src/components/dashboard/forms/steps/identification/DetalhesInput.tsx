@@ -14,7 +14,7 @@ const DetalhesInput: React.FC<DetalhesInputProps> = ({
   value,
   onChange,
   errors,
-  label = "Detalhes da solicitação"
+  label = "Descreva a demanda com detalhes..."
 }) => {
   return (
     <div>
@@ -29,7 +29,7 @@ const DetalhesInput: React.FC<DetalhesInputProps> = ({
         name="detalhes_solicitacao" 
         value={value || ''}
         onChange={onChange}
-        placeholder="Forneça mais detalhes sobre a solicitação..."
+        placeholder="Digite aqui os detalhes ou cole o email recebido"
         className={`min-h-[150px] ${hasFieldError('detalhes_solicitacao', errors) ? 'border-orange-500' : ''}`}
       />
       {hasFieldError('detalhes_solicitacao', errors) && (

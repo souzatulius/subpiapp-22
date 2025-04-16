@@ -29,18 +29,30 @@ export function TimeDropdown({
   placeholder = "00",
   label
 }: TimeDropdownProps) {
-  // Log whenever the value changes or is set
+  // Local state to ensure we properly track the user's selection
+  const [currentValue, setCurrentValue] = React.useState(value);
+  
+  // Update local state if parent value changes
   React.useEffect(() => {
-    console.log(`TimeDropdown (${label}): Current value:`, value);
-  }, [value, label]);
+    if (value !== currentValue) {
+      console.log(`TimeDropdown (${label}): Update from parent:`, value);
+      setCurrentValue(value);
+    }
+  }, [value, currentValue, label]);
+  
+  // Log when the dropdown is rendered with its current value
+  React.useEffect(() => {
+    console.log(`TimeDropdown (${label}): Rendered with value:`, currentValue);
+  }, [currentValue, label]);
 
   const handleChange = (newValue: string) => {
     console.log(`TimeDropdown (${label}): Value selected:`, newValue);
+    setCurrentValue(newValue);
     onChange(newValue);
   };
 
   return (
-    <Select value={value} onValueChange={handleChange}>
+    <Select value={currentValue} onValueChange={handleChange}>
       <SelectTrigger 
         className="w-16 text-center" 
         aria-label={label}

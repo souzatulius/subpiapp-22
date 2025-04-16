@@ -36,7 +36,7 @@ const PriorityDeadlineStep: React.FC<PriorityDeadlineStepProps> = ({
   const parseISODate = (dateString: string): Date | undefined => {
     if (!dateString) return undefined;
     try {
-      // Create a new date directly from the ISO string - this preserves the exact time
+      // Create a new date directly from the ISO string
       const date = new Date(dateString);
       
       // Check if it's a valid date
@@ -59,6 +59,7 @@ const PriorityDeadlineStep: React.FC<PriorityDeadlineStepProps> = ({
       // Create a consistent ISO string representation
       const isoString = date.toISOString();
       console.log("PriorityDeadlineStep - Selected date ISO string:", isoString);
+      console.log("PriorityDeadlineStep - Selected date local string:", date.toString());
       
       // Log the date's components to verify correctness
       console.log("PriorityDeadlineStep - Date components:", {
