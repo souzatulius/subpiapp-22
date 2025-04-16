@@ -17,7 +17,7 @@ const CommentsSection: React.FC<CommentsSectionProps> = ({
   return (
     <div className="space-y-2">
       <Textarea 
-        className="min-h-[120px] w-full"
+        className="min-h-[120px] w-full rounded-xl"
         value={comentarios}
         onChange={(e) => onChange(e.target.value)}
       />

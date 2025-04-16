@@ -3,7 +3,7 @@ export interface Demanda {
   id: string;
   titulo: string;
   detalhes_solicitacao?: string;
-  resumo_situacao?: string; // Added field for resumo
+  resumo_situacao?: string;
   prazo_resposta?: string;
   prioridade: string;
   perguntas?: Record<string, string>;

@@ -14,13 +14,14 @@ export const useFetchDemandas = () => {
       try {
         setIsLoadingDemandas(true);
         
-        // First get demands - check if the resumo_situacao column exists
+        // First get demands - include resumo_situacao field if it exists
         const { data, error } = await supabase
           .from('demandas')
           .select(`
             id,
             titulo,
             detalhes_solicitacao,
+            resumo_situacao,
             prazo_resposta,
             prioridade,
             perguntas,
@@ -148,8 +149,7 @@ export const useFetchDemandas = () => {
             id: item.id,
             titulo: item.titulo,
             detalhes_solicitacao: item.detalhes_solicitacao,
-            // Add an empty resumo_situacao since the column doesn't exist yet
-            resumo_situacao: item.detalhes_solicitacao, // Temporarily use detalhes_solicitacao as resumo
+            resumo_situacao: item.resumo_situacao, // Use resumo_situacao field if available
             prazo_resposta: item.prazo_resposta,
             prioridade: item.prioridade,
             perguntas: perguntasObject,
@@ -171,7 +171,7 @@ export const useFetchDemandas = () => {
             origem_id: item.origem_id,
             problema_id: item.problema_id,
             servico_id: item.servico_id,
-            protocolo: item.protocolo, // Include protocolo field
+            protocolo: item.protocolo,
             tema: item.problemas ? {
               id: item.problemas.id,
               descricao: item.problemas.descricao,
