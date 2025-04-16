@@ -1,5 +1,5 @@
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useFeedback } from '@/components/ui/feedback-provider';
 import { Demand } from './types';
@@ -66,7 +66,7 @@ export const useDemandasData = () => {
             prazo_resposta: demanda.prazo_resposta || '',
             coordenacao_id: demanda.coordenacao_id || undefined,
             problema_id: demanda.problema_id || undefined,
-            supervisao_tecnica_id: demanda.supervisao_tecnica_id || undefined,
+            supervisao_tecnica_id: undefined, // This field may not exist in the data
             resumo_situacao: '',
             comentarios: '',
             supervisao_tecnica: null,
@@ -91,12 +91,17 @@ export const useDemandasData = () => {
               descricao: demanda.problema.descricao || null,
               id: demanda.problema.id
             } : null,
-            tema: demanda.tema && typeof demanda.tema === 'object' ? {
-              id: demanda.tema.id || '',
-              descricao: demanda.tema.descricao || '',
-              coordenacao: demanda.tema.coordenacao || null
-            } : null
+            tema: null // Default to null first
           };
+          
+          // Safely assign tema if it exists and is an object
+          if (demanda.tema && typeof demanda.tema === 'object' && !Array.isArray(demanda.tema)) {
+            processedDemanda.tema = {
+              id: demanda.tema?.id || '',
+              descricao: demanda.tema?.descricao || '',
+              coordenacao: demanda.tema?.coordenacao || null
+            };
+          }
           
           return processedDemanda;
         });

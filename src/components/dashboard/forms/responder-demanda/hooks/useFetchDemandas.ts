@@ -42,27 +42,29 @@ export const useFetchDemandas = () => {
           const processedDemandas = data.map(demanda => {
             // Handle potential fields that may be null or not properly structured
             // Ensure perguntas is a Record<string, string> or empty object
-            const perguntas = demanda.perguntas ? 
-              (typeof demanda.perguntas === 'object' ? demanda.perguntas : {}) : 
-              {};
+            let formattedPerguntas: Record<string, string> = {};
+            
+            if (demanda.perguntas) {
+              if (typeof demanda.perguntas === 'object' && !Array.isArray(demanda.perguntas)) {
+                formattedPerguntas = demanda.perguntas as Record<string, string>;
+              }
+            }
             
             // Create a new object with correct types
             const processedDemanda: Demanda = {
               ...demanda,
-              perguntas: perguntas as Record<string, string>,
-              anexos: demanda.anexos || []
+              perguntas: formattedPerguntas,
+              anexos: demanda.anexos || [],
+              tema: null // Default to null, we'll set it properly below
             };
             
             // Make sure tema has the correct structure
-            if (demanda.tema && typeof demanda.tema === 'object') {
+            if (demanda.tema && typeof demanda.tema === 'object' && !Array.isArray(demanda.tema)) {
               processedDemanda.tema = {
-                id: demanda.tema.id || '',
-                descricao: demanda.tema.descricao || '',
-                coordenacao: demanda.tema.coordenacao || null
+                id: demanda.tema?.id || '',
+                descricao: demanda.tema?.descricao || '',
+                coordenacao: demanda.tema?.coordenacao || null
               };
-            } else {
-              // If tema is null or not an object, set it to null
-              processedDemanda.tema = null;
             }
             
             return processedDemanda;
