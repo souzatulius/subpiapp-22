@@ -96,10 +96,11 @@ export const useDemandasData = () => {
           
           // Safely assign tema if it exists and is an object
           if (demanda.tema && typeof demanda.tema === 'object' && !Array.isArray(demanda.tema)) {
+            const temaObj = demanda.tema as any; // Cast to any to safely access properties
             processedDemanda.tema = {
-              id: demanda.tema?.id || '',
-              descricao: demanda.tema?.descricao || '',
-              coordenacao: demanda.tema?.coordenacao || null
+              id: temaObj.id || '',
+              descricao: temaObj.descricao || '',
+              coordenacao: temaObj.coordenacao || null
             };
           }
           
