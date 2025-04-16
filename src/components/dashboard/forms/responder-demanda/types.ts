@@ -2,73 +2,73 @@
 export interface Demanda {
   id: string;
   titulo: string;
-  detalhes_solicitacao?: string;
-  resumo_situacao?: string;
-  prazo_resposta?: string;
+  detalhes_solicitacao?: string | null;
+  resumo_situacao?: string | null;
+  prazo_resposta?: string | null;
   prioridade: string;
   perguntas?: Record<string, string>;
   status: string;
   horario_publicacao: string;
-  endereco?: string;
-  nome_solicitante?: string;
-  email_solicitante?: string;
-  telefone_solicitante?: string;
-  veiculo_imprensa?: string;
-  arquivo_url?: string;
+  endereco?: string | null;
+  nome_solicitante?: string | null;
+  email_solicitante?: string | null;
+  telefone_solicitante?: string | null;
+  veiculo_imprensa?: string | null;
+  arquivo_url?: string | null;
   anexos?: string[];
-  coordenacao_id?: string;
+  coordenacao_id?: string | null;
   coordenacao?: {
     id?: string;
     descricao: string;
     sigla?: string;
-  };
-  supervisao_tecnica_id?: string;
-  bairro_id?: string;
-  autor_id?: string;
-  tipo_midia_id?: string;
-  origem_id?: string;
-  problema_id?: string;
-  servico_id?: string;
-  protocolo?: string;
+  } | null;
+  supervisao_tecnica_id?: string | null;
+  bairro_id?: string | null;
+  autor_id?: string | null;
+  tipo_midia_id?: string | null;
+  origem_id?: string | null;
+  problema_id?: string | null;
+  servico_id?: string | null;
+  protocolo?: string | null;
   tema?: {
     id: string;
     descricao: string;
-    icone?: string;
+    icone?: string | null;
     coordenacao?: {
       id?: string;
       descricao: string;
       sigla?: string;
-    }
-  };
+    } | null;
+  } | null;
   areas_coordenacao?: any;
   origens_demandas?: {
     id: string;
     descricao: string;
-  };
+  } | null;
   tipos_midia?: {
     id: string; 
     descricao: string;
-  };
+  } | null;
   bairros?: {
     id: string;
     nome: string;
     distritos?: {
       id: string;
       nome: string;
-    }
-  };
+    } | null;
+  } | null;
   distrito?: {
     id: string;
     nome: string;
-  };
+  } | null;
   autor?: {
     id: string;
     nome_completo: string;
-  };
+  } | null;
   servico?: {
     id?: string;
     descricao: string;
-  };
+  } | null;
   problema?: {
     id?: string;
     descricao?: string;
@@ -76,8 +76,8 @@ export interface Demanda {
       id?: string;
       descricao?: string;
       sigla?: string;
-    }
-  };
+    } | null;
+  } | null;
 }
 
 // Adding missing types

@@ -222,7 +222,7 @@ export const useFetchDemandas = () => {
         
         console.log('Transformed demandas for responding:', transformedData);
         setDemandas(transformedData);
-      } catch (error) {
+      } catch (error: any) {
         console.error('Error in fetchDemandas:', error);
         toast({
           title: "Erro ao carregar demandas",
