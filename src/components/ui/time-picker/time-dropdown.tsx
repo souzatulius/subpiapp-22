@@ -29,8 +29,18 @@ export function TimeDropdown({
   placeholder = "00",
   label
 }: TimeDropdownProps) {
+  // Log whenever the value changes or is set
+  React.useEffect(() => {
+    console.log(`TimeDropdown (${label}): Current value:`, value);
+  }, [value, label]);
+
+  const handleChange = (newValue: string) => {
+    console.log(`TimeDropdown (${label}): Value selected:`, newValue);
+    onChange(newValue);
+  };
+
   return (
-    <Select value={value} onValueChange={onChange}>
+    <Select value={value} onValueChange={handleChange}>
       <SelectTrigger 
         className="w-16 text-center" 
         aria-label={label}

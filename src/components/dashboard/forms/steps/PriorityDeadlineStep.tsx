@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { DatePicker } from '@/components/ui/date-picker/date-picker';
+import { DatePicker } from '@/components/ui/date-picker';
 import { ValidationError } from '@/lib/formValidationUtils';
 import { BellRing, Flame } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -36,12 +36,19 @@ const PriorityDeadlineStep: React.FC<PriorityDeadlineStepProps> = ({
   const parseISODate = (dateString: string): Date | undefined => {
     if (!dateString) return undefined;
     try {
+      // Create a new date directly from the ISO string - this preserves the exact time
       const date = new Date(dateString);
+      
       // Check if it's a valid date
-      if (isNaN(date.getTime())) return undefined;
+      if (isNaN(date.getTime())) {
+        console.error("PriorityDeadlineStep - Invalid date:", dateString);
+        return undefined;
+      }
+      
+      console.log("PriorityDeadlineStep - Parsed date:", date.toISOString());
       return date;
     } catch (e) {
-      console.error("Error parsing date:", e);
+      console.error("PriorityDeadlineStep - Error parsing date:", e);
       return undefined;
     }
   };
@@ -52,6 +59,16 @@ const PriorityDeadlineStep: React.FC<PriorityDeadlineStepProps> = ({
       // Create a consistent ISO string representation
       const isoString = date.toISOString();
       console.log("PriorityDeadlineStep - Selected date ISO string:", isoString);
+      
+      // Log the date's components to verify correctness
+      console.log("PriorityDeadlineStep - Date components:", {
+        year: date.getFullYear(),
+        month: date.getMonth() + 1,
+        day: date.getDate(),
+        hours: date.getHours(),
+        minutes: date.getMinutes()
+      });
+      
       handleSelectChange('prazo_resposta', isoString);
     } else {
       handleSelectChange('prazo_resposta', '');

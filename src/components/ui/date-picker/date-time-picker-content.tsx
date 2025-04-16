@@ -56,6 +56,14 @@ export function DateTimePickerContent({
 
   // Generate minutes options (00 and 30)
   const minutesOptions = React.useMemo(() => ['00', '30'], []);
+  
+  // Log the current state for debugging
+  React.useEffect(() => {
+    if (date) {
+      console.log("DateTimePickerContent: Current date:", date.toISOString());
+      console.log("DateTimePickerContent: Selected hours/minutes:", selectedHours, selectedMinutes);
+    }
+  }, [date, selectedHours, selectedMinutes]);
 
   return (
     <PopoverContent className="w-auto p-0">

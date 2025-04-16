@@ -17,11 +17,13 @@ export const formatTimeValue = (value: string, type: 'hours' | 'minutes'): strin
   }
   
   const maxValue = type === 'hours' ? 23 : 59;
-  if (numValue < 0 || numValue > maxValue) {
-    return '00';
-  }
+  const minValue = 0;
   
-  return numValue.toString().padStart(2, '0');
+  // Clamp to valid range
+  const clampedValue = Math.max(minValue, Math.min(numValue, maxValue));
+  
+  // Add leading zero
+  return clampedValue.toString().padStart(2, '0');
 };
 
 /**
@@ -53,13 +55,17 @@ export const createDateWithTime = (
   const hoursNum = typeof hours === 'string' ? parseInt(hours, 10) : hours;
   const minutesNum = typeof minutes === 'string' ? parseInt(minutes, 10) : minutes;
   
-  // Ensure we're working with a new date object
-  const newDate = new Date(baseDate);
+  // Create a new date object to avoid mutating the original
+  const newDate = new Date(baseDate.getTime());
   
+  // Only set hours/minutes if they're valid numbers
   if (!isNaN(hoursNum) && !isNaN(minutesNum)) {
+    console.log(`createDateWithTime: Setting time to ${hoursNum}:${minutesNum} on date:`, newDate.toISOString());
     newDate.setHours(hoursNum, minutesNum);
+    console.log("createDateWithTime: Resulting date:", newDate.toISOString());
+  } else {
+    console.warn("createDateWithTime: Invalid hours or minutes", { hours, minutes });
   }
   
   return newDate;
 };
-

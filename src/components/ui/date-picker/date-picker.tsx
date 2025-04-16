@@ -35,13 +35,16 @@ export function DatePicker({
   const [selectedHours, setSelectedHours] = React.useState<string>(date ? format(date, 'HH') : '12');
   const [selectedMinutes, setSelectedMinutes] = React.useState<string>(date ? format(date, 'mm') : '00');
 
-  // Update time states when date prop changes
+  // Update time states when date prop changes - BUT ONLY when component mounts or date reference changes
+  // This avoids re-setting hours/minutes when user selects new values from dropdowns
   React.useEffect(() => {
     if (date) {
+      console.log("DatePicker: Initial date received:", date.toISOString());
+      console.log("DatePicker: Setting initial hours/minutes from date:", format(date, 'HH'), format(date, 'mm'));
       setSelectedHours(format(date, 'HH'));
       setSelectedMinutes(format(date, 'mm'));
     }
-  }, [date]);
+  }, []);  // Only run on mount, not when date changes
 
   /**
    * Handles date selection from the calendar
@@ -49,17 +52,24 @@ export function DatePicker({
    */
   const handleDateSelect = (newDate?: Date) => {
     if (!newDate) {
+      console.log("DatePicker: Date cleared");
       onSelect(undefined);
       return;
     }
 
-    // When a new date is selected, preserve the current time
-    const hours = parseInt(selectedHours || '12', 10);
-    const minutes = parseInt(selectedMinutes || '00', 10);
+    // Important: Create a new date to avoid reference issues
+    const selectedDate = new Date(newDate);
+    console.log("DatePicker: New date selected from calendar:", selectedDate.toISOString());
+    
+    // When a new date is selected, preserve the current hours/minutes values
+    const hours = parseInt(selectedHours, 10);
+    const minutes = parseInt(selectedMinutes, 10);
+    
+    console.log("DatePicker: Preserving time values:", hours, minutes);
     
     // Create new date instance with time preserved
-    const dateWithTime = createDateWithTime(newDate, hours, minutes);
-    console.log("Selected date with time:", dateWithTime.toISOString());
+    const dateWithTime = createDateWithTime(selectedDate, hours, minutes);
+    console.log("DatePicker: Final date with preserved time:", dateWithTime.toISOString());
     
     // Call the parent's onSelect with the new date that has the preserved time
     onSelect(dateWithTime);
@@ -69,6 +79,8 @@ export function DatePicker({
    * Handles changes to the time inputs (hours or minutes)
    */
   const handleTimeChange = (type: 'hours' | 'minutes', value: string) => {
+    console.log(`DatePicker: Time ${type} changed to:`, value);
+    
     // Handle the input changes
     if (type === 'hours') {
       setSelectedHours(value);
@@ -84,8 +96,9 @@ export function DatePicker({
       
       // Validate to ensure we have valid numbers
       if (!isNaN(hours) && !isNaN(minutes)) {
-        const newDate = createDateWithTime(date, hours, minutes);
-        console.log("Time changed:", newDate.toISOString());
+        // Create a new date object to avoid mutations
+        const newDate = createDateWithTime(new Date(date), hours, minutes);
+        console.log(`DatePicker: Time changed, updating date to:`, newDate.toISOString());
         onSelect(newDate);
       }
     }
@@ -119,8 +132,9 @@ export function DatePicker({
       
       // Validate to ensure we have valid numbers
       if (!isNaN(hours) && !isNaN(minutes)) {
-        const newDate = createDateWithTime(date, hours, minutes);
-        console.log("Time blur, updated date:", newDate.toISOString());
+        // Create a new date object to avoid mutations
+        const newDate = createDateWithTime(new Date(date), hours, minutes);
+        console.log("DatePicker: Time blur, updated date:", newDate.toISOString());
         onSelect(newDate);
       }
     }
