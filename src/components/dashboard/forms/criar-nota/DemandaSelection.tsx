@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
-import { Demand } from './types';
+import { Demand } from '@/hooks/dashboard/forms/criar-nota/types';
 import { Loader2, Clock } from 'lucide-react';
 import UnifiedFilterBar, { ViewMode } from '@/components/shared/unified-view/UnifiedFilterBar';
 import { formatDistanceToNow, format, isToday } from 'date-fns';
@@ -48,11 +48,19 @@ const DemandaSelection: React.FC<DemandaSelectionProps> = ({
   
   // Get coordenação sigla
   const getCoordSigla = (demanda: Demand) => {
-    const coordenacao = demanda.tema?.coordenacao?.sigla || 
-                        demanda.problema?.coordenacao?.sigla || 
-                        demanda.area_coordenacao?.descricao || '';
+    if (typeof demanda.tema === 'object' && demanda.tema?.coordenacao?.sigla) {
+      return demanda.tema.coordenacao.sigla;
+    } 
     
-    return coordenacao;
+    if (demanda.problema?.coordenacao?.sigla) {
+      return demanda.problema.coordenacao.sigla;
+    }
+    
+    if (demanda.area_coordenacao?.descricao) {
+      return demanda.area_coordenacao.descricao;
+    }
+    
+    return '';
   };
   
   return (

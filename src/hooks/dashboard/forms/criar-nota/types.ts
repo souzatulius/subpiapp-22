@@ -10,9 +10,6 @@ export interface Demand {
   dataCriacao?: string;
   dataResposta?: string;
   origem?: string;
-  tema?: string;
-  servico?: string;
-  area?: string;
   protocolo?: string;
   requesterName?: string;
   requesterOrg?: string;
@@ -86,7 +83,7 @@ export interface Demand {
     } | null;
   } | null;
   
-  // Related entities
+  // Related entities as complex objects
   tema?: {
     descricao?: string;
     id?: string;
@@ -95,11 +92,14 @@ export interface Demand {
       id?: string;
       sigla?: string;
     }
-  };
+  } | string; // Allow both string and object
+  
   servico?: {
     descricao?: string;
     id?: string;
-  };
+  } | string; // Allow both string and object
+  
+  numero_protocolo_156?: string; // Added for protocol 156 access
 }
 
 export interface ResponseQA {

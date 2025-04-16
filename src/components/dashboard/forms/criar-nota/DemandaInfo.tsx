@@ -1,6 +1,6 @@
 
 import React, { useEffect, useState } from 'react';
-import { Demand, ResponseQA } from './types';
+import { Demand, ResponseQA } from '@/hooks/dashboard/forms/criar-nota/types';
 import { Separator } from '@/components/ui/separator';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -39,19 +39,45 @@ const DemandaInfo: React.FC<DemandaInfoProps> = ({
   
   // Get coordenação sigla
   const getCoordSigla = () => {
-    return selectedDemanda.tema?.coordenacao?.sigla || 
-           selectedDemanda.problema?.coordenacao?.sigla || 
-           selectedDemanda.area_coordenacao?.descricao || 'Não informada';
+    if (typeof selectedDemanda.tema === 'object' && selectedDemanda.tema?.coordenacao?.sigla) {
+      return selectedDemanda.tema.coordenacao.sigla;
+    }
+    
+    if (selectedDemanda.problema?.coordenacao?.sigla) {
+      return selectedDemanda.problema.coordenacao.sigla;
+    }
+    
+    if (selectedDemanda.area_coordenacao?.descricao) {
+      return selectedDemanda.area_coordenacao.descricao;
+    }
+    
+    return 'Não informada';
   };
   
   // Get tema description
   const getTema = () => {
-    return selectedDemanda.tema?.descricao || 'Não informado';
+    if (typeof selectedDemanda.tema === 'object' && selectedDemanda.tema?.descricao) {
+      return selectedDemanda.tema.descricao;
+    }
+    
+    if (typeof selectedDemanda.tema === 'string') {
+      return selectedDemanda.tema;
+    }
+    
+    return 'Não informado';
   };
   
   // Get serviço description
   const getServico = () => {
-    return selectedDemanda.servico?.descricao || 'Não informado';
+    if (typeof selectedDemanda.servico === 'object' && selectedDemanda.servico?.descricao) {
+      return selectedDemanda.servico.descricao;
+    }
+    
+    if (typeof selectedDemanda.servico === 'string') {
+      return selectedDemanda.servico;
+    }
+    
+    return 'Não informado';
   };
 
   return (
@@ -92,13 +118,13 @@ const DemandaInfo: React.FC<DemandaInfoProps> = ({
             </div>
           )}
           
-          {selectedDemanda.protocolo && (
+          {(selectedDemanda.protocolo || selectedDemanda.numero_protocolo_156) && (
             <div className="flex flex-col space-y-1">
               <div className="flex items-center text-gray-600">
                 <FileText className="w-4 h-4 mr-1" />
                 <span className="text-xs">Protocolo 156</span>
               </div>
-              <span className="text-sm font-medium">{selectedDemanda.protocolo}</span>
+              <span className="text-sm font-medium">{selectedDemanda.numero_protocolo_156 || selectedDemanda.protocolo}</span>
             </div>
           )}
           
