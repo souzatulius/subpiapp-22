@@ -115,61 +115,75 @@ export const useSmartSearch = () => {
       return;
     }
 
+    // Only start search if we have at least 2 characters (easier for testing)
+    // Original logic expected 4+ chars
+    if (query.trim().length < 2) {
+      setSuggestions([]);
+      setShowSuggestions(false);
+      return;
+    }
+    
     setIsLoading(true);
     
-    // Simulate a small delay for better UX
+    // Use a small delay for better UX
     const timer = setTimeout(() => {
-      // Process the natural language query
-      const searchQuery = query.trim();
-      const processedWords = processNaturalLanguageQuery(searchQuery);
-      
-      // Log the search query for debugging
-      console.log('Original query:', searchQuery);
-      console.log('Processed words:', processedWords);
-      
-      // No meaningful words found
-      if (processedWords.length === 0) {
-        setIsLoading(false);
+      try {
+        // Process the natural language query
+        const searchQuery = query.trim();
+        const processedWords = processNaturalLanguageQuery(searchQuery);
+        
+        // Log the search query for debugging
+        console.log('Search query:', searchQuery, 'Length:', searchQuery.length);
+        console.log('Processed words:', processedWords);
+        
+        // No meaningful words found
+        if (processedWords.length === 0) {
+          setIsLoading(false);
+          setSuggestions([]);
+          return;
+        }
+        
+        // Perform a direct search with the full query
+        let results = fuse.search(searchQuery);
+        
+        // Search with individual processed words for better matching
+        if (processedWords.length > 0) {
+          // Create a combined search using processed words
+          const wordResults = processedWords.flatMap(word => {
+            return fuse.search(word);
+          });
+          
+          // Combine and deduplicate results
+          const combinedResults = [...results];
+          wordResults.forEach(result => {
+            if (!combinedResults.some(r => r.item.route === result.item.route)) {
+              combinedResults.push(result);
+            }
+          });
+          
+          // Sort by relevance score
+          results = combinedResults.sort((a, b) => (a.score || 1) - (b.score || 1));
+        }
+        
+        // Map the Fuse.js results to SearchSuggestion type
+        const filteredSuggestions = results
+          .map(result => ({
+            title: result.item.label, // Use label as title
+            route: result.item.route
+          }))
+          .slice(0, 6); // Limit to 6 suggestions
+        
+        console.log('Found suggestions:', filteredSuggestions.length);
+        
+        setSuggestions(filteredSuggestions);
+        setShowSuggestions(filteredSuggestions.length > 0);
+      } catch (err) {
+        console.error('Error in search:', err);
         setSuggestions([]);
-        return;
+      } finally {
+        setIsLoading(false);
       }
-      
-      // Perform a direct search with the full query
-      let results = fuse.search(searchQuery);
-      
-      // Search with individual processed words for better matching
-      if (processedWords.length > 0) {
-        // Create a combined search using processed words
-        const wordResults = processedWords.flatMap(word => {
-          return fuse.search(word);
-        });
-        
-        // Combine and deduplicate results
-        const combinedResults = [...results];
-        wordResults.forEach(result => {
-          if (!combinedResults.some(r => r.item.route === result.item.route)) {
-            combinedResults.push(result);
-          }
-        });
-        
-        // Sort by relevance score
-        results = combinedResults.sort((a, b) => (a.score || 1) - (b.score || 1));
-      }
-      
-      // Map the Fuse.js results to SearchSuggestion type
-      const filteredSuggestions = results
-        .map(result => ({
-          title: result.item.label, // Use label as title
-          route: result.item.route
-        }))
-        .slice(0, 6); // Limit to 6 suggestions
-      
-      console.log('Suggestions:', filteredSuggestions);
-      
-      setSuggestions(filteredSuggestions);
-      setShowSuggestions(filteredSuggestions.length > 0);
-      setIsLoading(false);
-    }, 150);
+    }, 150); // Small delay for typing
 
     return () => clearTimeout(timer);
   }, [query, fuse]);

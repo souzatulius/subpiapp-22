@@ -29,18 +29,20 @@ const GlobalProgressBar = ({
   autoIncrement = true,
   className
 }: GlobalProgressBarProps) => {
-  const [value, setValue] = useState(propValue || 0);
+  const [value, setValue] = useState(0); // Initialize to 0 instead of propValue
   const location = useLocation();
   
-  // Only show the progress bar on the ranking-subs page
-  const shouldShowProgressBar = location.pathname.includes('ranking-subs');
+  // Only show the progress bar on the ranking-subs page with exact path check
+  const shouldShowProgressBar = location.pathname.includes('/dashboard/zeladoria/ranking-subs');
   
   useEffect(() => {
+    // If not on the correct page, ensure progress is reset
     if (!shouldShowProgressBar) {
       setValue(0);
       return;
     }
     
+    // Only handle progress logic when on correct page
     if (propValue !== undefined) {
       setValue(propValue);
     } else if (isLoading && autoIncrement && value < 90) {
@@ -66,7 +68,7 @@ const GlobalProgressBar = ({
   }, [isLoading, autoIncrement, value, propValue, shouldShowProgressBar]);
 
   // Don't render anything if not on the ranking-subs page or if progress is 0
-  if ((!shouldShowProgressBar) || (!isLoading && value === 0)) {
+  if (!shouldShowProgressBar || (!isLoading && value === 0)) {
     return null;
   }
 
