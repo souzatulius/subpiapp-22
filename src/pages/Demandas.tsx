@@ -10,7 +10,6 @@ import MobileBottomNav from '@/components/layouts/MobileBottomNav';
 import { useScrollFade } from '@/hooks/useScrollFade';
 import { ErrorBoundary } from '@/components/shared/ErrorBoundary';
 import { useAnimatedFeedback } from '@/hooks/use-animated-feedback';
-import { BrowserRouter } from 'react-router-dom';
 
 const Demandas = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -28,48 +27,46 @@ const Demandas = () => {
   };
   
   return (
-    <BrowserRouter>
-      <div className="flex flex-col h-screen bg-[#FFFAFA]">
-        {/* Header */}
-        <div className="flex-shrink-0">
-          <Header showControls={true} toggleSidebar={toggleSidebar} />
+    <div className="flex flex-col h-screen bg-[#FFFAFA]">
+      {/* Header */}
+      <div className="flex-shrink-0">
+        <Header showControls={true} toggleSidebar={toggleSidebar} />
+        
+        {/* Mobile breadcrumb directly below header */}
+        {isMobile && (
+          <div className="bg-white">
+            <BreadcrumbBar />
+          </div>
+        )}
+      </div>
+
+      <div className="flex flex-1 overflow-hidden">
+        {/* Sidebar - desktop only */}
+        {!isMobile && (
+          <div className="h-full flex-shrink-0">
+            <DashboardSidebar isOpen={sidebarOpen} />
+          </div>
+        )}
+
+        {/* Main content */}
+        <div className="flex-1 flex flex-col overflow-auto">
+          {/* Desktop breadcrumb */}
+          {!isMobile && <BreadcrumbBar className="flex-shrink-0" />}
           
-          {/* Mobile breadcrumb directly below header */}
-          {isMobile && (
-            <div className="bg-white">
-              <BreadcrumbBar />
-            </div>
-          )}
-        </div>
-
-        <div className="flex flex-1 overflow-hidden">
-          {/* Sidebar - desktop only */}
-          {!isMobile && (
-            <div className="h-full flex-shrink-0">
-              <DashboardSidebar isOpen={sidebarOpen} />
-            </div>
-          )}
-
-          {/* Main content */}
-          <div className="flex-1 flex flex-col overflow-auto">
-            {/* Desktop breadcrumb */}
-            {!isMobile && <BreadcrumbBar className="flex-shrink-0" />}
-            
-            <div className="flex-1 max-w-7xl mx-auto w-full overflow-y-auto">
-              <Layout>
-                <div className={`${isMobile ? 'pb-32' : ''}`}>
-                  <ErrorBoundary onError={handleError}>
-                    <DemandasContent />
-                  </ErrorBoundary>
-                </div>
-              </Layout>
-            </div>
+          <div className="flex-1 max-w-7xl mx-auto w-full overflow-y-auto">
+            <Layout>
+              <div className={`${isMobile ? 'pb-32' : ''}`}>
+                <ErrorBoundary onError={handleError}>
+                  <DemandasContent />
+                </ErrorBoundary>
+              </div>
+            </Layout>
           </div>
         </div>
-        
-        {isMobile && <MobileBottomNav className="flex-shrink-0" />}
       </div>
-    </BrowserRouter>
+      
+      {isMobile && <MobileBottomNav className="flex-shrink-0" />}
+    </div>
   );
 };
 
