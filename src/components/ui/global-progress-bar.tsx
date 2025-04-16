@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { Progress } from '@/components/ui/progress';
 import { cn } from '@/lib/utils';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useLocation } from 'react-router-dom';
 
 interface GlobalProgressBarProps {
@@ -29,20 +29,49 @@ const GlobalProgressBar = ({
   autoIncrement = true,
   className
 }: GlobalProgressBarProps) => {
-  const [value, setValue] = useState(0); // Initialize to 0 instead of propValue
+  const [value, setValue] = useState(0);
+  const [visible, setVisible] = useState(false);
   const location = useLocation();
   
-  // Only show the progress bar on the ranking-subs page with exact path check
-  const shouldShowProgressBar = location.pathname.includes('/dashboard/zeladoria/ranking-subs');
+  // Use strict path matching for the ranking-subs page
+  const shouldShowProgressBar = location.pathname === '/dashboard/zeladoria/ranking-subs';
   
   useEffect(() => {
-    // If not on the correct page, ensure progress is reset
+    // Immediate check to prevent any mounting on irrelevant pages
     if (!shouldShowProgressBar) {
+      setVisible(false);
       setValue(0);
       return;
     }
     
-    // Only handle progress logic when on correct page
+    // Add a small delay before showing the progress bar to prevent flashing
+    let showTimer: NodeJS.Timeout;
+    if (isLoading && shouldShowProgressBar) {
+      showTimer = setTimeout(() => {
+        setVisible(true);
+      }, 100); // Small delay to prevent flashing
+    } else {
+      // When loading completes, trigger the exit animation
+      if (value > 0) {
+        setValue(100);
+        const completeTimer = setTimeout(() => {
+          setVisible(false);
+        }, 500);
+        return () => clearTimeout(completeTimer);
+      } else {
+        setVisible(false);
+      }
+    }
+    
+    return () => clearTimeout(showTimer);
+  }, [isLoading, shouldShowProgressBar]);
+  
+  useEffect(() => {
+    // Only handle progress logic when on correct page and visible
+    if (!shouldShowProgressBar || !visible) {
+      return;
+    }
+    
     if (propValue !== undefined) {
       setValue(propValue);
     } else if (isLoading && autoIncrement && value < 90) {
@@ -55,45 +84,40 @@ const GlobalProgressBar = ({
         });
       }, 300);
       return () => clearTimeout(timer);
-    } else if (!isLoading) {
-      // When loading completes, quickly go to 100% then reset
-      if (value > 0) {
-        setValue(100);
-        const timer = setTimeout(() => {
-          setValue(0);
-        }, 500);
-        return () => clearTimeout(timer);
-      }
     }
-  }, [isLoading, autoIncrement, value, propValue, shouldShowProgressBar]);
+  }, [isLoading, autoIncrement, value, propValue, shouldShowProgressBar, visible]);
 
-  // Don't render anything if not on the ranking-subs page or if progress is 0
-  if (!shouldShowProgressBar || (!isLoading && value === 0)) {
+  // Don't render anything if not visible
+  if (!visible) {
     return null;
   }
 
   return (
-    <motion.div 
-      className={cn(
-        "fixed top-0 left-0 right-0 z-50 px-4 py-2 bg-orange-100 shadow-md",
-        className
+    <AnimatePresence>
+      {visible && (
+        <motion.div 
+          className={cn(
+            "fixed top-0 left-0 right-0 z-50 px-4 py-2 bg-orange-100 shadow-md",
+            className
+          )}
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -10, transition: { duration: 0.2 } }}
+          transition={{ duration: 0.3 }}
+        >
+          <Progress 
+            value={value} 
+            className="h-1.5 bg-orange-200" 
+            indicatorClassName="bg-orange-500" 
+          />
+          {showLabel && (
+            <div className="mt-1 text-xs text-orange-700 text-center">
+              {value.toFixed(0)}%
+            </div>
+          )}
+        </motion.div>
       )}
-      initial={{ opacity: 0, y: -10 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -10 }}
-      transition={{ duration: 0.3 }}
-    >
-      <Progress 
-        value={value} 
-        className="h-1.5 bg-orange-200" 
-        indicatorClassName="bg-orange-500" 
-      />
-      {showLabel && (
-        <div className="mt-1 text-xs text-orange-700 text-center">
-          {value.toFixed(0)}%
-        </div>
-      )}
-    </motion.div>
+    </AnimatePresence>
   );
 };
 

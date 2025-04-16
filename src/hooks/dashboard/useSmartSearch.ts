@@ -90,7 +90,7 @@ export const useSmartSearch = () => {
   const fuse = useMemo(() => new Fuse(searchActions, {
     keys: ['label', 'keywords'],
     includeScore: true,
-    threshold: 0.4, // More strict matching for better results
+    threshold: 0.5, // Slightly more permissive matching for better results
     ignoreLocation: true,
     useExtendedSearch: true, // Enable extended search for better phrase matching
   }), []);
@@ -115,8 +115,7 @@ export const useSmartSearch = () => {
       return;
     }
 
-    // Only start search if we have at least 2 characters (easier for testing)
-    // Original logic expected 4+ chars
+    // Start search with just 2 characters (reduced from 4)
     if (query.trim().length < 2) {
       setSuggestions([]);
       setShowSuggestions(false);
@@ -137,7 +136,7 @@ export const useSmartSearch = () => {
         console.log('Processed words:', processedWords);
         
         // No meaningful words found
-        if (processedWords.length === 0) {
+        if (processedWords.length === 0 && searchQuery.length < 3) {
           setIsLoading(false);
           setSuggestions([]);
           return;
@@ -204,8 +203,8 @@ export const useSmartSearch = () => {
       // Navigate to the first suggestion
       handleSelectSuggestion(suggestions[0]);
     } else {
-      // Could handle a more general search here
-      console.log('No direct match found for:', searchQuery);
+      // Default search page with query parameter
+      navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
     }
   };
 

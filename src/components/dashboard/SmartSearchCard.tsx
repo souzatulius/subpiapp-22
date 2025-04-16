@@ -25,7 +25,7 @@ const SmartSearchCard: React.FC<SmartSearchCardProps> = ({
   onSearch,
   className = "",
   isEditMode = false,
-  disableNavigation = true // Changed default to true to prevent navigation
+  disableNavigation = false // Changed to false by default to enable navigation
 }) => {
   const { 
     query, 
@@ -79,7 +79,7 @@ const SmartSearchCard: React.FC<SmartSearchCardProps> = ({
   useEffect(() => {
     if (query.length >= 2 && suggestions.length > 0) {
       setShowSuggestions(true);
-    } else {
+    } else if (query.length === 0) {
       setShowSuggestions(false);
     }
   }, [query, suggestions]);
@@ -109,11 +109,18 @@ const SmartSearchCard: React.FC<SmartSearchCardProps> = ({
               placeholder={placeholder} 
               value={query} 
               onChange={handleInputChange}
-              onFocus={() => setShowSuggestions(suggestions.length > 0)}
+              onFocus={() => query.length >= 2 && suggestions.length > 0 && setShowSuggestions(true)}
               onKeyDown={handleKeyDown}
               className="pl-12 pr-4 rounded-2xl border border-gray-300 w-full bg-white text-lg font-medium text-gray-800 placeholder:text-gray-400 placeholder:font-normal py-[20px]" 
               disabled={isEditMode}
             />
+            
+            {/* Display loading indicator when searching */}
+            {isLoading && query.length >= 2 && (
+              <div className="absolute right-4 top-1/2 transform -translate-y-1/2">
+                <div className="animate-spin h-4 w-4 border-2 border-gray-500 border-t-transparent rounded-full"></div>
+              </div>
+            )}
             
             {/* Render suggestions directly attached to the input */}
             {showSuggestions && suggestions.length > 0 && (
@@ -129,12 +136,15 @@ const SmartSearchCard: React.FC<SmartSearchCardProps> = ({
                     </li>
                   ))}
                 </ul>
-                {isLoading && (
-                  <div className="p-3 text-center text-gray-500 border-t border-gray-200">
-                    <div className="inline-block animate-spin h-4 w-4 border-2 border-gray-500 border-t-transparent rounded-full mr-2"></div>
-                    Buscando sugestões...
-                  </div>
-                )}
+              </div>
+            )}
+            
+            {/* Show "no results" message when actively searching but no results */}
+            {query.length >= 2 && !isLoading && suggestions.length === 0 && (
+              <div className="absolute z-20 w-full bg-white mt-1 rounded-lg border border-gray-200 shadow-lg">
+                <div className="py-3 text-center text-gray-500">
+                  Nenhum resultado encontrado para "{query}"
+                </div>
               </div>
             )}
           </div>

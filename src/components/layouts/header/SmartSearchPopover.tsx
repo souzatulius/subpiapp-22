@@ -36,8 +36,8 @@ const SmartSearchPopover: React.FC = () => {
     setSearchQuery(value);
   };
 
-  // Only show suggestions when the user types 4 or more characters
-  const filteredSuggestions = searchQuery.length >= 4 
+  // Only show suggestions when the user types 2 or more characters (reduced from 4)
+  const filteredSuggestions = searchQuery.length >= 2 
     ? suggestions.filter(suggestion => 
         suggestion.title.toLowerCase().includes(searchQuery.toLowerCase())
       )
@@ -62,15 +62,15 @@ const SmartSearchPopover: React.FC = () => {
           />
         </div>
         
-        {isLoading && searchQuery.length >= 4 && (
+        {isLoading && searchQuery.length >= 2 && (
           <div className="p-3 text-sm text-gray-500 italic text-center bg-white border-t border-gray-200 rounded-b-xl">
             Buscando...
           </div>
         )}
         
-        {searchQuery.length > 0 && searchQuery.length < 4 && (
+        {searchQuery.length > 0 && searchQuery.length < 2 && (
           <div className="p-3 text-sm text-gray-500 italic text-center bg-white border-t border-gray-200 rounded-b-xl">
-            Digite pelo menos 4 caracteres para ver sugestões
+            Digite pelo menos 2 caracteres para ver sugestões
           </div>
         )}
       </PopoverContent>

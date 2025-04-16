@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useCallback } from 'react';
 import WelcomeCard from '@/components/shared/WelcomeCard';
 import CardGridContainer from '@/components/dashboard/CardGridContainer';
@@ -123,7 +124,7 @@ const DashboardPage: React.FC = () => {
     }
     if (cardId === 'busca-rapida') {
       return <div className="p-4 flex items-center justify-center w-full h-full">
-          <SmartSearchCard disableNavigation={true} placeholder="Pesquisar..." />
+          <SmartSearchCard disableNavigation={false} placeholder="Pesquisar..." />
         </div>;
     }
     return null;
