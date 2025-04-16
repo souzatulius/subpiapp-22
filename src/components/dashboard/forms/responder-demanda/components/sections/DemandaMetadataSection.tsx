@@ -5,9 +5,10 @@ import { MapPin, User, Calendar, Clock, BookOpen, MessageSquare, FileText } from
 import { renderIcon } from '@/components/settings/problems/renderIcon';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { Demanda } from '../../types';
 
 interface DemandaMetadataSectionProps {
-  selectedDemanda: any;
+  selectedDemanda: Demanda;
 }
 
 const DemandaMetadataSection: React.FC<DemandaMetadataSectionProps> = ({
