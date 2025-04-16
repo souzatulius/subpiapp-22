@@ -211,14 +211,11 @@ export const AnimatedDateTimePicker: React.FC<AnimatedDateTimePickerProps> = ({
     }
   };
 
-  // Generate clock face numbers
-  const clockNumbers = [12, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
+  // Define limited hour options (6-22)
+  const hourOptions = [6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22];
 
-  // Generate clickable hour options (0-23)
-  const hourOptions = Array.from({ length: 24 }, (_, i) => i);
-
-  // Generate clickable minute options (0-55, step 5)
-  const minuteOptions = Array.from({ length: 12 }, (_, i) => i * 5);
+  // Define limited minute options (00 and 30)
+  const minuteOptions = [0, 30];
 
   return (
     <div className={cn("space-y-2", className)}>
@@ -316,14 +313,14 @@ export const AnimatedDateTimePicker: React.FC<AnimatedDateTimePickerProps> = ({
               {/* Hours grid */}
               <div className="mb-4">
                 <div className="text-sm font-medium mb-2 text-center">Horas</div>
-                <div className="grid grid-cols-6 gap-2">
+                <div className="grid grid-cols-4 gap-2">
                   {hourOptions.map((hour) => (
                     <Button
                       key={`hour-${hour}`}
                       type="button"
                       variant={hours === String(hour).padStart(2, '0') ? "default" : "outline"}
                       className={cn(
-                        "h-10 w-10 p-0 rounded-md",
+                        "h-10 w-12 p-0 rounded-xl",
                         hours === String(hour).padStart(2, '0') && "bg-orange-500 text-white hover:bg-orange-600"
                       )}
                       onClick={() => handleTimeChange('hours', String(hour).padStart(2, '0'))}
@@ -337,14 +334,14 @@ export const AnimatedDateTimePicker: React.FC<AnimatedDateTimePickerProps> = ({
               {/* Minutes grid */}
               <div>
                 <div className="text-sm font-medium mb-2 text-center">Minutos</div>
-                <div className="grid grid-cols-6 gap-2">
+                <div className="flex justify-center gap-2">
                   {minuteOptions.map((minute) => (
                     <Button
                       key={`minute-${minute}`}
                       type="button"
                       variant={minutes === String(minute).padStart(2, '0') ? "default" : "outline"}
                       className={cn(
-                        "h-10 w-10 p-0 rounded-md",
+                        "h-10 w-12 p-0 rounded-xl",
                         minutes === String(minute).padStart(2, '0') && "bg-orange-500 text-white hover:bg-orange-600"
                       )}
                       onClick={() => handleTimeChange('minutes', String(minute).padStart(2, '0'))}

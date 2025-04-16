@@ -104,6 +104,13 @@ const ReviewStep: React.FC<ReviewStepProps> = ({
         { label: 'Origem da Demanda', value: getOrigemName(), field: 'origem_id' },
         { label: 'Prioridade', value: formatPrioridade(formData.prioridade), field: 'prioridade' },
         { label: 'Prazo de Resposta', value: formatDateTime(formData.prazo_resposta), field: 'prazo_resposta' },
+        { 
+          label: 'Protocolo 156', 
+          value: formData.tem_protocolo_156 
+            ? formData.numero_protocolo_156 || 'Não informado' 
+            : 'Não possui protocolo', 
+          field: 'numero_protocolo_156' 
+        },
       ]
     },
     {
@@ -197,7 +204,7 @@ const ReviewStep: React.FC<ReviewStepProps> = ({
             {section.fields.map((field, fieldIdx) => (
               <div 
                 key={`field-${fieldIdx}`}
-                className={`p-4 bg-gray-50 rounded-lg border ${hasError(field.field) ? 'border-orange-300 bg-orange-50' : 'border-gray-200'} ${field.isMultiline ? 'col-span-1 md:col-span-2' : ''}`}
+                className={`p-4 bg-gray-50 rounded-xl border ${hasError(field.field) ? 'border-orange-300 bg-orange-50' : 'border-gray-200'} ${field.isMultiline ? 'col-span-1 md:col-span-2' : ''}`}
               >
                 <div className="flex flex-col">
                   <span className="text-sm font-medium text-gray-500 mb-1">
