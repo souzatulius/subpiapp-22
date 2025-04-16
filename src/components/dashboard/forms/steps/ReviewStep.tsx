@@ -69,7 +69,7 @@ const ReviewStep: React.FC<ReviewStepProps> = ({
   }) => {
     const hasError = fieldName ? hasFieldError(fieldName, errors) : false;
     return (
-      <div className={`mb-4 ${showValidationErrors && hasError ? 'p-2 border border-orange-300 rounded-md bg-orange-50' : ''}`}>
+      <div className={`mb-4 ${showValidationErrors && hasError ? 'p-2 border border-orange-300 rounded-lg bg-orange-50' : ''}`}>
         <div className="flex justify-between items-center mb-1">
           <div className="text-sm text-gray-500 font-medium">{label}</div>
           {step !== undefined && (
@@ -100,6 +100,14 @@ const ReviewStep: React.FC<ReviewStepProps> = ({
               fieldName="origem_id" 
               step={0} 
             />
+            {formData.tem_protocolo_156 && (
+              <ReviewField
+                label="Protocolo 156"
+                value={formData.numero_protocolo_156}
+                fieldName="numero_protocolo_156"
+                step={0}
+              />
+            )}
             {tipoMidia && (
               <ReviewField 
                 label="Tipo de mídia" 
@@ -118,7 +126,10 @@ const ReviewStep: React.FC<ReviewStepProps> = ({
             )}
             <ReviewField 
               label="Prioridade" 
-              value={formData.prioridade} 
+              value={formData.prioridade === 'media' ? 'Média' : 
+                     formData.prioridade === 'alta' ? 'Alta' : 
+                     formData.prioridade === 'baixa' ? 'Baixa' : 
+                     formData.prioridade} 
               fieldName="prioridade" 
               step={0} 
             />
@@ -223,7 +234,7 @@ const ReviewStep: React.FC<ReviewStepProps> = ({
                   <Pencil className="h-4 w-4" />
                 </Button>
               </div>
-              <div>
+              <div className="bg-gray-50 p-4 rounded-lg border border-gray-100">
                 {formData.perguntas.filter(Boolean).map((pergunta: string, idx: number) => (
                   <div key={idx} className="mb-2 text-base">
                     {idx + 1}. {pergunta}
@@ -245,7 +256,7 @@ const ReviewStep: React.FC<ReviewStepProps> = ({
                   <Pencil className="h-4 w-4" />
                 </Button>
               </div>
-              <div>
+              <div className="bg-gray-50 p-4 rounded-lg border border-gray-100">
                 {formData.anexos && formData.anexos.length > 0 ? (
                   formData.anexos.map((anexo: string, idx: number) => (
                     <div key={idx} className="mb-1 text-base">{anexo}</div>

@@ -15,10 +15,10 @@ export function PrioridadeBadge({
   className,
   size = 'sm',
 }: PrioridadeBadgeProps) {
-  // Format priority to capitalize first letter
+  // Format priority to capitalize first letter and handle "média" with accent
   const formattedPrioridade = prioridade ? 
     prioridade.toLowerCase() === 'media' || prioridade.toLowerCase() === 'média' ? 'Média' :
-    prioridade.toLowerCase() === 'alta' ? 'Urgente' : // Renamed "Alta" to "Urgente"
+    prioridade.toLowerCase() === 'alta' ? 'Alta' :
     prioridade.charAt(0).toUpperCase() + prioridade.slice(1).toLowerCase() : 
     'Média'; // Default to "Média" if no priority provided
 

@@ -88,20 +88,18 @@ export function DatePicker({
       }
     }
 
-    // Only update the date if we have a valid date selected
+    // Only update the date if we have a valid date selected and valid input
     if (date && value !== '') {
-      let hours = parseInt(selectedHours || '0', 10);
-      let minutes = parseInt(selectedMinutes || '0', 10);
+      // Get current hours and minutes, will be updated based on type
+      let hours = parseInt(type === 'hours' ? value : selectedHours, 10);
+      let minutes = parseInt(type === 'minutes' ? value : selectedMinutes, 10);
       
-      if (type === 'hours' && value !== '') {
-        hours = parseInt(value, 10);
-      } else if (type === 'minutes' && value !== '') {
-        minutes = parseInt(value, 10);
+      // Validate to ensure we have valid numbers
+      if (!isNaN(hours) && !isNaN(minutes)) {
+        const newDate = new Date(date);
+        newDate.setHours(hours, minutes);
+        onSelect(newDate);
       }
-      
-      const newDate = new Date(date);
-      newDate.setHours(hours, minutes);
-      onSelect(newDate);
     }
   };
 
@@ -154,12 +152,15 @@ export function DatePicker({
 
     // Update date with formatted time
     if (date) {
-      const newDate = new Date(date);
-      newDate.setHours(
-        parseInt(selectedHours || '0', 10),
-        parseInt(selectedMinutes || '0', 10)
-      );
-      onSelect(newDate);
+      const hours = parseInt(selectedHours || '0', 10);
+      const minutes = parseInt(selectedMinutes || '0', 10);
+      
+      // Validate to ensure we have valid numbers
+      if (!isNaN(hours) && !isNaN(minutes)) {
+        const newDate = new Date(date);
+        newDate.setHours(hours, minutes);
+        onSelect(newDate);
+      }
     }
   };
 

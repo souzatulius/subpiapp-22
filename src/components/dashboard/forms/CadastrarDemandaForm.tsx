@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { Card } from '@/components/ui/card';
 import { useAuth } from '@/hooks/useSupabaseAuth';
@@ -126,7 +127,7 @@ const CadastrarDemandaForm: React.FC<CadastrarDemandaFormProps> = ({
         await submitForm(formData);
         
         showFeedback('success', 'Demanda cadastrada com sucesso!', { 
-          duration: 3000
+          duration: 5000
         });
       }
     } catch (error: any) {
