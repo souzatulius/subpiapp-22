@@ -41,14 +41,20 @@ export const useFetchDemandas = () => {
           // Process each demanda to normalize its structure
           const processedDemandas = data.map(demanda => {
             // Handle potential fields that may be null or not properly structured
-            let processedDemanda: Demanda = {
+            // Ensure perguntas is a Record<string, string> or empty object
+            const perguntas = demanda.perguntas ? 
+              (typeof demanda.perguntas === 'object' ? demanda.perguntas : {}) : 
+              {};
+            
+            // Create a new object with correct types
+            const processedDemanda: Demanda = {
               ...demanda,
-              perguntas: demanda.perguntas || {},
+              perguntas: perguntas as Record<string, string>,
               anexos: demanda.anexos || []
             };
             
-            // Make sure tema, problema, and coordenacao are correctly structured
-            if (demanda.tema) {
+            // Make sure tema has the correct structure
+            if (demanda.tema && typeof demanda.tema === 'object') {
               processedDemanda.tema = {
                 ...demanda.tema,
                 coordenacao: demanda.tema.coordenacao || null

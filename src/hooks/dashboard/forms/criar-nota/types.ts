@@ -1,6 +1,27 @@
 
 import { Note } from '@/types/demand';
 
+export interface DemandCoordination {
+  id?: string;
+  descricao?: string;
+  sigla?: string;
+  [key: string]: any;
+}
+
+export interface DemandTema {
+  id: string;
+  descricao?: string;
+  coordenacao?: DemandCoordination | null;
+  [key: string]: any;
+}
+
+export interface DemandProblema {
+  id?: string;
+  descricao?: string | null;
+  coordenacao?: DemandCoordination | null;
+  [key: string]: any;
+}
+
 export interface Demand {
   id: string;
   titulo: string;
@@ -45,12 +66,13 @@ export interface Demand {
   } | null;
   arquivo_url: string | null;
   anexos: string[] | null;
-  servico_id?: string;
-  problema: {
-    descricao: string | null;
-  } | null;
+  problema: DemandProblema | null;
+  tema?: DemandTema | null;
+  resumo_situacao: string;
+  comentarios: string;
   protocolo?: string | null;
   notas?: Note[] | null;
+  servico_id?: string;
 }
 
 export interface ResponseQA {

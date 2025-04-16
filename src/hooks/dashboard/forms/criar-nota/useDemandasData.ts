@@ -2,47 +2,9 @@
 import { useState, useEffect, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useFeedback } from '@/components/ui/feedback-provider';
+import { Demand } from './types';
 
 // Define simplified types to avoid complex unions
-export interface DemandCoordination {
-  id: string;
-  descricao?: string;
-  sigla?: string;
-  [key: string]: any;
-}
-
-export interface DemandTema {
-  id: string;
-  descricao?: string;
-  coordenacao?: DemandCoordination;
-  [key: string]: any;
-}
-
-export interface DemandProblema {
-  id: string;
-  descricao?: string;
-  coordenacao?: DemandCoordination;
-  [key: string]: any;
-}
-
-export interface Demand {
-  id: string;
-  titulo?: string;
-  detalhes_solicitacao?: string;
-  horario_publicacao?: string;
-  prioridade?: string;
-  status?: string;
-  coordenacao_id?: string;
-  tema_id?: string;
-  problema_id?: string;
-  problema?: DemandProblema;
-  tema?: DemandTema;
-  coordenacao?: DemandCoordination;
-  resumo_situacao?: string;
-  comentarios?: string;
-  [key: string]: any;
-}
-
 export const useDemandasData = () => {
   const [demandas, setDemandas] = useState<Demand[]>([]);
   const [filteredDemandas, setFilteredDemandas] = useState<Demand[]>([]);
@@ -90,37 +52,76 @@ export const useDemandasData = () => {
         // Filter out demandas that already have notas_oficiais
         const notaDemandaIds = notasData?.map(n => n.demanda_id) || [];
         
-        const filteredDemandas = demandasData.filter(d => !notaDemandaIds.includes(d.id))
-          .map(demanda => {
-            // Process each demanda to add any extra fields needed
-            return {
-              ...demanda,
-              resumo_situacao: demanda.resumo_situacao || '',
-              comentarios: '' // Initialize empty comentarios
-            };
-          });
+        const filteredDemandasData = demandasData.filter(d => !notaDemandaIds.includes(d.id));
+        
+        // Process each demanda safely
+        const processedDemandas: Demand[] = filteredDemandasData.map(demanda => {
+          // Create a properly typed Demand object
+          const processedDemanda: Demand = {
+            id: demanda.id,
+            titulo: demanda.titulo || '',
+            status: demanda.status || '',
+            prioridade: demanda.prioridade || '',
+            horario_publicacao: demanda.horario_publicacao || '',
+            prazo_resposta: demanda.prazo_resposta || '',
+            coordenacao_id: demanda.coordenacao_id || undefined,
+            problema_id: demanda.problema_id || undefined,
+            supervisao_tecnica_id: demanda.supervisao_tecnica_id || undefined,
+            resumo_situacao: '',
+            comentarios: '',
+            supervisao_tecnica: null,
+            area_coordenacao: demanda.coordenacao ? { 
+              descricao: demanda.coordenacao.descricao || '' 
+            } : null,
+            origem: null,
+            tipo_midia: null,
+            bairro: null,
+            autor: null,
+            endereco: demanda.endereco || null,
+            nome_solicitante: demanda.nome_solicitante || null,
+            email_solicitante: demanda.email_solicitante || null,
+            telefone_solicitante: demanda.telefone_solicitante || null,
+            veiculo_imprensa: demanda.veiculo_imprensa || null,
+            detalhes_solicitacao: demanda.detalhes_solicitacao || null,
+            perguntas: demanda.perguntas || null,
+            servico: null,
+            arquivo_url: demanda.arquivo_url || null,
+            anexos: demanda.anexos || null,
+            problema: demanda.problema ? {
+              descricao: demanda.problema.descricao || null,
+              id: demanda.problema.id
+            } : null,
+            tema: demanda.tema ? {
+              descricao: demanda.tema.descricao || '',
+              id: demanda.tema.id,
+              coordenacao: demanda.tema.coordenacao || null
+            } : null
+          };
+          
+          return processedDemanda;
+        });
         
         // For each demanda, fetch its latest response to get comments
-        for (const demanda of filteredDemandas) {
+        for (let i = 0; i < processedDemandas.length; i++) {
           try {
             const { data: responseData } = await supabase
               .from('respostas_demandas')
               .select('comentarios')
-              .eq('demanda_id', demanda.id)
+              .eq('demanda_id', processedDemandas[i].id)
               .order('created_at', { ascending: false })
               .limit(1);
             
             if (responseData && responseData.length > 0 && responseData[0].comentarios) {
               // Update comentarios field
-              demanda.comentarios = responseData[0].comentarios;
+              processedDemandas[i].comentarios = responseData[0].comentarios;
             }
           } catch (err) {
-            console.error(`Error fetching response for demanda ${demanda.id}:`, err);
+            console.error(`Error fetching response for demanda ${processedDemandas[i].id}:`, err);
           }
         }
         
-        setDemandas(filteredDemandas);
-        setFilteredDemandas(filteredDemandas);
+        setDemandas(processedDemandas);
+        setFilteredDemandas(processedDemandas);
         
       } catch (error: any) {
         console.error('Error fetching demandas:', error);
