@@ -21,20 +21,7 @@ export interface DatePickerProps {
 }
 
 /**
- * DatePicker component
- * 
- * A full-featured date picker component with optional time selection.
- * Allows users to select dates from a calendar and optionally set a specific time.
- * 
- * The component uses the date-fns library for date manipulation and formatting,
- * and displays dates in Brazilian Portuguese format.
- * 
- * @param date - The currently selected date (or undefined if no date selected)
- * @param onSelect - Callback fired when a date is selected
- * @param placeholder - Placeholder text shown when no date is selected
- * @param className - Additional CSS classes
- * @param showTimeSelect - Whether to show time selection controls (hours/minutes)
- * @param useDropdownTimeSelect - Whether to use dropdown selects for time selection instead of text inputs
+ * DatePicker component with time selection capability
  */
 export function DatePicker({
   date,
@@ -55,50 +42,41 @@ export function DatePicker({
   const [selectedHours, setSelectedHours] = React.useState<string>(date ? format(date, 'HH') : '12');
   const [selectedMinutes, setSelectedMinutes] = React.useState<string>(date ? format(date, 'mm') : '00');
 
-  // Update time states when date prop changes, but only when it's a completely different date
-  // or when the date was previously undefined
+  // Update time states when date prop changes
   React.useEffect(() => {
-    if (date && (!selectedHours || !selectedMinutes)) {
-      // Only initialize if hours/minutes are not set yet
+    if (date) {
       setSelectedHours(format(date, 'HH'));
       setSelectedMinutes(format(date, 'mm'));
     }
-  }, [date, selectedHours, selectedMinutes]);
+  }, [date]);
 
   /**
    * Handles date selection from the calendar
    * Preserves the currently selected time when changing dates
-   * 
-   * @param newDate - The newly selected date or undefined
    */
   const handleDateSelect = (newDate?: Date) => {
-    if (newDate) {
-      // When a new date is selected, preserve the current time
-      const hours = parseInt(selectedHours || '12', 10);
-      const minutes = parseInt(selectedMinutes || '00', 10);
-      
-      // Create new date with selected time values
-      const dateWithTime = new Date(newDate);
-      dateWithTime.setHours(hours, minutes);
-      
-      // Call the parent's onSelect with the new date that has the preserved time
-      onSelect(dateWithTime);
-    } else {
-      // If date is cleared, call parent's onSelect with undefined
+    if (!newDate) {
       onSelect(undefined);
+      return;
     }
+
+    // When a new date is selected, preserve the current time
+    const hours = parseInt(selectedHours || '12', 10);
+    const minutes = parseInt(selectedMinutes || '00', 10);
+    
+    // Create new date instance to avoid modifying the original date
+    const dateWithTime = new Date(newDate);
+    
+    // Set hours and minutes, preserving the date part
+    dateWithTime.setHours(hours);
+    dateWithTime.setMinutes(minutes);
+    
+    // Call the parent's onSelect with the new date that has the preserved time
+    onSelect(dateWithTime);
   };
 
   /**
    * Handles changes to the time inputs (hours or minutes)
-   * Validates that the input is a valid number within the appropriate range:
-   * - Hours: 0-23
-   * - Minutes: 0-59
-   * 
-   * Updates the date with the new time values when appropriate
-   * 
-   * @param type - Whether we're changing 'hours' or 'minutes'
-   * @param value - The new input value
    */
   const handleTimeChange = (type: 'hours' | 'minutes', value: string) => {
     // Handle the input changes
@@ -131,10 +109,6 @@ export function DatePicker({
 
   /**
    * Focus handler to clear the field for easier input
-   * When a time field gets focus, we clear it to let the user
-   * enter a new value from scratch more easily
-   * 
-   * @param type - Whether we're focusing on 'hours' or 'minutes'
    */
   const handleFocus = (type: 'hours' | 'minutes') => {
     if (type === 'hours') {
@@ -146,10 +120,6 @@ export function DatePicker({
 
   /**
    * Handle time input blur to format correctly
-   * When a time field loses focus, we ensure it has a valid
-   * format (padding with zeros as needed) and update the date
-   * 
-   * @param type - Whether we're handling 'hours' or 'minutes' blur
    */
   const handleTimeBlur = (type: 'hours' | 'minutes') => {
     if (type === 'hours') {
@@ -190,6 +160,11 @@ export function DatePicker({
     }
   };
 
+  // Format the date for display with proper locale
+  const formattedDate = date 
+    ? format(date, showTimeSelect ? "PPP 'às' HH:mm" : "PPP", { locale: ptBR })
+    : placeholder;
+
   return (
     <Popover>
       <PopoverTrigger asChild>
@@ -202,13 +177,7 @@ export function DatePicker({
           )}
         >
           <CalendarIcon className="mr-2 h-4 w-4" />
-          {date ? (
-            <span>
-              {format(date, showTimeSelect ? "PPP 'às' HH:mm" : "PPP", { locale: ptBR })}
-            </span>
-          ) : (
-            <span>{placeholder}</span>
-          )}
+          <span>{formattedDate}</span>
         </Button>
       </PopoverTrigger>
       <DateTimePickerContent

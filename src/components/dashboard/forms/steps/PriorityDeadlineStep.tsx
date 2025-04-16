@@ -47,11 +47,13 @@ const PriorityDeadlineStep: React.FC<PriorityDeadlineStepProps> = ({
     }
   };
 
-  // Handle date selection with proper timezone preservation
+  // Handle date selection with proper timezone handling
   const handleDateSelection = (date?: Date) => {
     if (date) {
-      // Ensure the date is in the correct format and preserves the timezone
-      handleSelectChange('prazo_resposta', date.toISOString());
+      // Create a consistent ISO string representation
+      const isoString = date.toISOString();
+      console.log("Selected date ISO string:", isoString);
+      handleSelectChange('prazo_resposta', isoString);
     } else {
       handleSelectChange('prazo_resposta', '');
     }
