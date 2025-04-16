@@ -1,8 +1,8 @@
 
 import React from 'react';
-import { Bar } from 'react-chartjs-2';
 import EnhancedChartCard from './EnhancedChartCard';
-import { barChartColors } from '../utils/chartColors';
+import { Bar } from 'react-chartjs-2';
+import { barChartColors, getColorWithOpacity } from '../utils/chartColors';
 
 interface ResolutionTimeChartProps {
   data: any;
@@ -22,124 +22,166 @@ const ResolutionTimeChart: React.FC<ResolutionTimeChartProps> = ({
   onToggleAnalysis
 }) => {
   const chartData = React.useMemo(() => {
-    if (!sgzData || sgzData.length === 0) {
+    // Make sure sgzData is an array before proceeding
+    if (!sgzData || !Array.isArray(sgzData) || sgzData.length === 0) return null;
+
+    // Process the data to calculate resolution time by service type
+    const serviceResolutionTimes: Record<string, { total: number, count: number }> = {};
+    
+    // Safely process the array
+    if (Array.isArray(sgzData)) {
+      sgzData.forEach(item => {
+        const serviceType = item.sgz_tipo_servico || item.classificacao_servico || 'Desconhecido';
+        const daysToResolve = item.sgz_dias_ate_status_atual || 0;
+        
+        if (!serviceResolutionTimes[serviceType]) {
+          serviceResolutionTimes[serviceType] = { total: 0, count: 0 };
+        }
+        
+        // Only count resolution times for items that have begun processing
+        if (daysToResolve > 0) {
+          serviceResolutionTimes[serviceType].total += daysToResolve;
+          serviceResolutionTimes[serviceType].count++;
+        }
+      });
+    }
+    
+    // Calculate average resolution time for each service type
+    const averageResolutionTimes: Record<string, number> = {};
+    Object.keys(serviceResolutionTimes).forEach(serviceType => {
+      const { total, count } = serviceResolutionTimes[serviceType];
+      if (count > 0) {
+        averageResolutionTimes[serviceType] = total / count;
+      }
+    });
+    
+    // Sort services by average resolution time (descending)
+    const sortedServices = Object.keys(averageResolutionTimes)
+      .sort((a, b) => averageResolutionTimes[b] - averageResolutionTimes[a])
+      .slice(0, 8); // Show top 8 service types
+    
+    if (sortedServices.length === 0) {
+      return null;
+    }
+    
+    // Create chart data
+    const labels = sortedServices;
+    const resolutionTimes = sortedServices.map(service => averageResolutionTimes[service]);
+    
+    // For simulation, replace with ideal data
+    if (isSimulationActive) {
       return {
-        labels: [],
-        datasets: [{
-          label: 'Tempo Médio (dias)',
-          data: [],
-          backgroundColor: barChartColors[1],
-          barPercentage: 0.7,
-        }],
-        statusWithMaxTime: 'N/A',
-        maxTime: 0
+        labels: [
+          'Tapa Buraco', 'Poda de Árvore', 'Limpeza', 'Sinalização', 
+          'Iluminação', 'Calçada', 'Bueiro', 'Manutenção'
+        ],
+        datasets: [
+          {
+            label: 'Dias para Resolução (Atual)',
+            data: [15, 12, 10, 8.5, 6, 9, 7, 5],
+            backgroundColor: barChartColors[2],
+            borderColor: getColorWithOpacity(barChartColors[2], 0.8),
+            borderWidth: 1
+          },
+          {
+            label: 'Meta (Dias)',
+            data: [7, 5, 3, 4, 2, 3, 3, 2],
+            backgroundColor: barChartColors[3],
+            borderColor: getColorWithOpacity(barChartColors[3], 0.8),
+            borderWidth: 1
+          }
+        ]
       };
     }
     
-    // Group by status and calculate average time
-    const statusData: Record<string, { totalTime: number; count: number }> = {};
-    
-    sgzData.forEach(order => {
-      const status = order.sgz_status || 'Não informado';
-      const timeInStatus = order.sgz_dias_ate_status_atual || order.sgz_dias_no_status || 0;
-      
-      if (!statusData[status]) {
-        statusData[status] = { totalTime: 0, count: 0 };
-      }
-      
-      statusData[status].totalTime += timeInStatus;
-      statusData[status].count += 1;
-    });
-    
-    // Calculate average time per status
-    const averageTimes = Object.entries(statusData).map(([status, { totalTime, count }]) => ({
-      status,
-      average: count > 0 ? Math.round(totalTime / count) : 0
-    }));
-    
-    // Sort by average time, descending
-    averageTimes.sort((a, b) => b.average - a.average);
-    
-    // Find status with max average time
-    const statusWithMaxTime = averageTimes.length > 0 ? averageTimes[0].status : 'N/A';
-    const maxTime = averageTimes.length > 0 ? averageTimes[0].average : 0;
-    
-    // Take top 7 for display
-    const topStatuses = averageTimes.slice(0, 7);
-    
-    const labels = topStatuses.map(item => item.status);
-    const values = topStatuses.map(item => item.average);
-    
-    // Apply simulation effect if active (show slightly better times)
-    const simulatedValues = isSimulationActive
-      ? values.map(v => Math.max(1, Math.round(v * 0.9)))
-      : values;
-    
     return {
       labels,
-      datasets: [{
-        label: 'Tempo Médio (dias)',
-        data: simulatedValues,
-        backgroundColor: barChartColors[1],
-        barPercentage: 0.7,
-      }],
-      statusWithMaxTime,
-      maxTime
+      datasets: [
+        {
+          label: 'Tempo Médio (Dias)',
+          data: resolutionTimes,
+          backgroundColor: barChartColors[0],
+          borderColor: getColorWithOpacity(barChartColors[0], 0.8),
+          borderWidth: 1
+        }
+      ]
     };
   }, [sgzData, isSimulationActive]);
-
+  
   const displayValue = React.useMemo(() => {
-    if (chartData.statusWithMaxTime === 'N/A') {
+    if (!sgzData || !Array.isArray(sgzData) || sgzData.length === 0) {
       return "Sem dados";
     }
-    return `${chartData.statusWithMaxTime}: ${chartData.maxTime} dias`;
-  }, [chartData]);
+    
+    // Calculate overall average resolution time
+    let totalDays = 0;
+    let countOrders = 0;
+    
+    if (Array.isArray(sgzData)) {
+      sgzData.forEach(item => {
+        const days = item.sgz_dias_ate_status_atual || 0;
+        if (days > 0) {
+          totalDays += days;
+          countOrders++;
+        }
+      });
+    }
+    
+    const averageDays = countOrders > 0 ? (totalDays / countOrders).toFixed(1) : "N/A";
+    return `${averageDays} dias`;
+  }, [sgzData]);
 
   return (
     <EnhancedChartCard
-      title="Tempo Médio por Status"
-      subtitle="Tempo médio em dias que cada OS permanece por status, destacando etapas críticas"
+      title="Tempo Médio de Resolução"
+      subtitle="Tempo médio para resolução de demandas por tipo de serviço"
       value={displayValue}
       isLoading={isLoading}
       onToggleVisibility={onToggleVisibility}
       onToggleAnalysis={onToggleAnalysis}
       dataSource="SGZ"
-      analysis="Avalie o status com maior permanência média e recomende intervenções específicas para reduzir atrasos."
+      analysis="Identifique os tipos de serviço com maior tempo de resolução e estude quais fatores podem estar causando os atrasos. Recomende estratégias para reduzir o tempo médio de resolução para cada categoria."
     >
-      {!isLoading && chartData.labels.length > 0 && (
+      {!isLoading && (!chartData ? (
+        <div className="flex items-center justify-center h-full flex-col">
+          <div className="text-sm text-gray-600 text-center mb-4">
+            Dados insuficientes para análise de tempo de resolução
+          </div>
+          <div className="text-xs text-gray-500">
+            É necessário ter dados de prazos ou datas de resolução para gerar este gráfico
+          </div>
+        </div>
+      ) : (
         <Bar
-          data={{
-            labels: chartData.labels,
-            datasets: chartData.datasets
-          }}
+          data={chartData}
           options={{
+            indexAxis: 'y',
             responsive: true,
             maintainAspectRatio: false,
-            indexAxis: 'y' as const,
+            scales: {
+              x: {
+                title: {
+                  display: true,
+                  text: 'Dias para Resolução'
+                }
+              }
+            },
             plugins: {
               legend: {
-                display: false
+                position: 'bottom'
               },
               tooltip: {
                 callbacks: {
                   label: function(context) {
-                    return `Tempo médio: ${context.parsed.x} dias`;
+                    const value = context.raw as number;
+                    return `${context.dataset.label}: ${value.toFixed(1)} dias`;
                   }
-                }
-              }
-            },
-            scales: {
-              x: {
-                beginAtZero: true,
-                title: {
-                  display: true,
-                  text: 'Dias'
                 }
               }
             }
           }}
         />
-      )}
+      ))}
     </EnhancedChartCard>
   );
 };

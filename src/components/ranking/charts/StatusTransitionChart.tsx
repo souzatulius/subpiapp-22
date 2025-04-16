@@ -24,7 +24,8 @@ const StatusTransitionChart: React.FC<StatusTransitionChartProps> = ({
 }) => {
   // Process the data to show status transitions over time
   const chartData = React.useMemo(() => {
-    if (!sgzData || sgzData.length === 0) return null;
+    // Make sure sgzData is an array before proceeding
+    if (!sgzData || !Array.isArray(sgzData) || sgzData.length === 0) return null;
     
     // Instead of a Sankey chart, we'll use a status flow visualization with a line chart
     // Create a time series of status counts
@@ -44,14 +45,18 @@ const StatusTransitionChart: React.FC<StatusTransitionChartProps> = ({
       statusCounts['Concluída'] = [5, 10, 15, 25, 40, 60, 85];
     } else {
       // Use distribution from actual data
-      const statusDistribution = {};
-      sgzData.forEach(item => {
-        const status = item.sgz_status || 'Desconhecido';
-        statusDistribution[status] = (statusDistribution[status] || 0) + 1;
-      });
+      const statusDistribution: Record<string, number> = {};
+      
+      // Safely process the array
+      if (Array.isArray(sgzData)) {
+        sgzData.forEach(item => {
+          const status = item.sgz_status || 'Desconhecido';
+          statusDistribution[status] = (statusDistribution[status] || 0) + 1;
+        });
+      }
       
       // Create a simulated flow based on the current distribution
-      const totalOrdens = sgzData.length;
+      const totalOrdens = Array.isArray(sgzData) ? sgzData.length : 0;
       const abertas = statusDistribution['Aberta'] || Math.floor(totalOrdens * 0.3);
       const emAnalise = statusDistribution['Em Análise'] || Math.floor(totalOrdens * 0.2);
       const emExecucao = statusDistribution['Em Execução'] || Math.floor(totalOrdens * 0.2);
@@ -103,7 +108,7 @@ const StatusTransitionChart: React.FC<StatusTransitionChartProps> = ({
   }, [sgzData, isSimulationActive]);
 
   const displayValue = React.useMemo(() => {
-    if (!sgzData || sgzData.length === 0) {
+    if (!sgzData || !Array.isArray(sgzData) || sgzData.length === 0) {
       return "Sem dados";
     }
     

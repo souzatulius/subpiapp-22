@@ -1,8 +1,8 @@
 
 import React from 'react';
-import { Radar } from 'react-chartjs-2';
 import EnhancedChartCard from './EnhancedChartCard';
-import { pieChartColors, getColorWithOpacity } from '../utils/chartColors';
+import { Radar } from 'react-chartjs-2';
+import { barChartColors, getColorWithOpacity } from '../utils/chartColors';
 
 interface DistrictEfficiencyRadarChartProps {
   data: any;
@@ -21,141 +21,225 @@ const DistrictEfficiencyRadarChart: React.FC<DistrictEfficiencyRadarChartProps> 
   onToggleVisibility,
   onToggleAnalysis
 }) => {
-  // Process data to show district efficiency on various metrics
   const chartData = React.useMemo(() => {
-    if (!sgzData || sgzData.length === 0) return null;
+    // Make sure sgzData is an array before proceeding
+    if (!sgzData || !Array.isArray(sgzData) || sgzData.length === 0) return null;
     
-    // Get unique districts
-    const districts = [...new Set(sgzData.map(item => item.sgz_distrito))].filter(Boolean);
+    // Group by districts and calculate metrics for each one
+    const districtMetrics: Record<string, { 
+      total: number, 
+      completed: number, 
+      inProgress: number, 
+      pending: number,
+      averageResponseTime: number
+    }> = {};
     
-    // For demonstration, we'll create a radar chart with 5 metrics for each district
-    // In a real implementation, these would be calculated from actual data
-    const datasets = districts.slice(0, 5).map((district, index) => {
-      // Generate simulated efficiency scores for each district
-      const volume = isSimulationActive ? 
-        Math.floor(Math.random() * 3) + 7 : // Simulation: 7-10
-        Math.floor(Math.random() * 5) + 4;  // Regular: 4-9
-      
-      const timeEfficiency = isSimulationActive ?
-        Math.floor(Math.random() * 3) + 7 :
-        Math.floor(Math.random() * 6) + 3;
+    // Process each record to group by district
+    if (Array.isArray(sgzData)) {
+      sgzData.map(item => {
+        const district = item.sgz_distrito || 'Desconhecido';
+        const status = item.sgz_status || 'Desconhecido';
         
-      const resolutionRate = isSimulationActive ?
-        Math.floor(Math.random() * 3) + 7 :
-        Math.floor(Math.random() * 7) + 2;
+        if (!districtMetrics[district]) {
+          districtMetrics[district] = { 
+            total: 0, 
+            completed: 0, 
+            inProgress: 0, 
+            pending: 0,
+            averageResponseTime: 0
+          };
+        }
         
-      const citizenSatisfaction = isSimulationActive ?
-        Math.floor(Math.random() * 2) + 8 :
-        Math.floor(Math.random() * 4) + 5;
+        districtMetrics[district].total += 1;
         
-      const resourceOptimization = isSimulationActive ?
-        Math.floor(Math.random() * 3) + 7 :
-        Math.floor(Math.random() * 5) + 4;
-      
-      return {
-        label: district,
-        data: [volume, timeEfficiency, resolutionRate, citizenSatisfaction, resourceOptimization],
-        backgroundColor: getColorWithOpacity(pieChartColors[index % pieChartColors.length], 0.2),
-        borderColor: pieChartColors[index % pieChartColors.length],
-        borderWidth: 2,
-        pointBackgroundColor: pieChartColors[index % pieChartColors.length],
-        pointBorderColor: '#fff',
-        pointHoverBackgroundColor: '#fff',
-        pointHoverBorderColor: pieChartColors[index % pieChartColors.length]
-      };
+        if (status.toLowerCase().includes('conclu')) {
+          districtMetrics[district].completed += 1;
+        } else if (status.toLowerCase().includes('andamento') || status.toLowerCase().includes('execu')) {
+          districtMetrics[district].inProgress += 1;
+        } else {
+          districtMetrics[district].pending += 1;
+        }
+        
+        // Use the days to current status as a proxy for response time
+        if (item.sgz_dias_ate_status_atual) {
+          districtMetrics[district].averageResponseTime += item.sgz_dias_ate_status_atual;
+        }
+      });
+    }
+    
+    // Calculate average response time and efficiency metrics
+    Object.keys(districtMetrics).forEach(district => {
+      const metrics = districtMetrics[district];
+      metrics.averageResponseTime = metrics.total > 0 ? 
+        metrics.averageResponseTime / metrics.total : 0;
     });
-
+    
+    // Select top 5 districts by total orders or all if less than 5
+    const topDistricts = Object.keys(districtMetrics)
+      .sort((a, b) => districtMetrics[b].total - districtMetrics[a].total)
+      .slice(0, 5);
+    
+    // If using simulated data, use these fixed districts instead
+    const simulatedDistricts = [
+      'Pinheiros', 'Lapa', 'Sé', 'Mooca', 'Vila Mariana'
+    ];
+    
+    // Generate radar chart data
+    const districtsToUse = isSimulationActive ? simulatedDistricts : topDistricts;
+    
+    if (districtsToUse.length === 0) {
+      return null;
+    }
+    
+    // Calculate metrics (normalized to 0-100 scale)
+    const completionRates = districtsToUse.map(district => {
+      const metrics = districtMetrics[district] || { total: 0, completed: 0 };
+      return metrics.total > 0 ? (metrics.completed / metrics.total) * 100 : 0;
+    });
+    
+    const responseTimeScores = districtsToUse.map(district => {
+      const metrics = districtMetrics[district] || { averageResponseTime: 0 };
+      // Lower is better, so we invert the scale (max 30 days)
+      return Math.max(0, 100 - (metrics.averageResponseTime * 3.33));
+    });
+    
+    const pendingRates = districtsToUse.map(district => {
+      const metrics = districtMetrics[district] || { total: 0, pending: 0 };
+      // Lower is better, so we invert the scale
+      return metrics.total > 0 ? 100 - ((metrics.pending / metrics.total) * 100) : 0;
+    });
+    
+    // If simulation is active, override with ideal scores
+    if (isSimulationActive) {
+      return {
+        labels: simulatedDistricts,
+        datasets: [
+          {
+            label: 'Taxa de Conclusão',
+            data: [85, 78, 90, 82, 88],
+            backgroundColor: getColorWithOpacity(barChartColors[0], 0.2),
+            borderColor: barChartColors[0],
+            borderWidth: 2,
+            pointBackgroundColor: barChartColors[0],
+            pointRadius: 4
+          },
+          {
+            label: 'Velocidade de Resposta',
+            data: [90, 80, 85, 75, 92],
+            backgroundColor: getColorWithOpacity(barChartColors[1], 0.2),
+            borderColor: barChartColors[1],
+            borderWidth: 2,
+            pointBackgroundColor: barChartColors[1],
+            pointRadius: 4
+          },
+          {
+            label: 'Gestão de Pendências',
+            data: [88, 75, 80, 85, 90],
+            backgroundColor: getColorWithOpacity(barChartColors[2], 0.2),
+            borderColor: barChartColors[2],
+            borderWidth: 2,
+            pointBackgroundColor: barChartColors[2],
+            pointRadius: 4
+          }
+        ]
+      };
+    }
+    
     return {
-      labels: [
-        'Volume de Atendimento', 
-        'Eficiência de Tempo', 
-        'Taxa de Resolução', 
-        'Satisfação Cidadão', 
-        'Otimização de Recursos'
-      ],
-      datasets: datasets
+      labels: districtsToUse,
+      datasets: [
+        {
+          label: 'Taxa de Conclusão',
+          data: completionRates,
+          backgroundColor: getColorWithOpacity(barChartColors[0], 0.2),
+          borderColor: barChartColors[0],
+          borderWidth: 2,
+          pointBackgroundColor: barChartColors[0],
+          pointRadius: 4
+        },
+        {
+          label: 'Velocidade de Resposta',
+          data: responseTimeScores,
+          backgroundColor: getColorWithOpacity(barChartColors[1], 0.2),
+          borderColor: barChartColors[1],
+          borderWidth: 2,
+          pointBackgroundColor: barChartColors[1],
+          pointRadius: 4
+        },
+        {
+          label: 'Gestão de Pendências',
+          data: pendingRates,
+          backgroundColor: getColorWithOpacity(barChartColors[2], 0.2),
+          borderColor: barChartColors[2],
+          borderWidth: 2,
+          pointBackgroundColor: barChartColors[2],
+          pointRadius: 4
+        }
+      ]
     };
   }, [sgzData, isSimulationActive]);
 
-  // Find the district with lowest average score
-  const lowestEfficiencyDistrict = React.useMemo(() => {
-    if (!chartData || !chartData.datasets || chartData.datasets.length === 0) {
-      return "Sem dados suficientes";
+  const displayValue = React.useMemo(() => {
+    if (!sgzData || !Array.isArray(sgzData) || sgzData.length === 0) {
+      return "Sem dados";
     }
-
-    let lowestAvg = Infinity;
-    let lowestDistrict = "";
     
-    chartData.datasets.forEach(dataset => {
-      const avg = dataset.data.reduce((sum: number, val: number) => sum + val, 0) / dataset.data.length;
-      if (avg < lowestAvg) {
-        lowestAvg = avg;
-        lowestDistrict = dataset.label;
-      }
-    });
-    
-    return lowestDistrict || "Sem dados";
-  }, [chartData]);
+    return "Eficiência por Distrito";
+  }, [sgzData]);
 
   return (
     <EnhancedChartCard
-      title="Radar de Eficiência por Distrito"
-      subtitle="Avalia distritos em volume, rapidez e conclusão das OS"
-      value={lowestEfficiencyDistrict}
+      title="Eficiência por Distrito (Radar)"
+      subtitle="Comparativo multidimensional de eficiência entre distritos"
+      value={displayValue}
       isLoading={isLoading}
       onToggleVisibility={onToggleVisibility}
       onToggleAnalysis={onToggleAnalysis}
       dataSource="SGZ"
-      analysis="Identifique o distrito com menor eficiência e recomende estratégias para melhorar desempenho."
+      analysis="Compare o desempenho entre distritos em diferentes métricas: velocidade de atendimento, taxa de conclusão e gestão de pendências. Identifique quais distritos podem se tornar referências de boas práticas."
     >
       {!isLoading && (!chartData ? (
-        <div className="flex items-center justify-center h-full">
-          <div className="text-sm text-gray-500">
-            Sem dados suficientes para gerar o radar de eficiência
+        <div className="flex items-center justify-center h-full flex-col">
+          <div className="text-sm text-gray-600 text-center mb-4">
+            Dados insuficientes para análise de eficiência por distrito
+          </div>
+          <div className="text-xs text-gray-500">
+            É necessário ter dados de múltiplos distritos para gerar este gráfico
           </div>
         </div>
       ) : (
-        <Radar
-          data={chartData}
-          options={{
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-              r: {
-                angleLines: {
-                  display: true
-                },
-                suggestedMin: 0,
-                suggestedMax: 10,
-                ticks: {
-                  stepSize: 2
-                }
-              }
-            },
-            plugins: {
-              legend: {
-                position: 'bottom',
-                labels: {
-                  boxWidth: 12,
-                  font: {
-                    size: 10
+        <div className="h-80">
+          <Radar
+            data={chartData}
+            options={{
+              responsive: true,
+              maintainAspectRatio: false,
+              scales: {
+                r: {
+                  min: 0,
+                  max: 100,
+                  beginAtZero: true,
+                  ticks: {
+                    stepSize: 20,
+                    showLabelBackdrop: false
                   }
                 }
               },
-              tooltip: {
-                callbacks: {
-                  label: function(context) {
-                    const label = context.dataset.label || '';
-                    const value = context.parsed.r;
-                    const index = context.dataIndex;
-                    const metric = context.chart.data.labels?.[index];
-                    return `${label}: ${metric} - ${value}`;
+              plugins: {
+                legend: {
+                  position: 'bottom'
+                },
+                tooltip: {
+                  callbacks: {
+                    label: function(context) {
+                      return `${context.dataset.label}: ${context.raw.toFixed(1)}%`;
+                    }
                   }
                 }
               }
-            }
-          }}
-        />
+            }}
+          />
+        </div>
       ))}
     </EnhancedChartCard>
   );
