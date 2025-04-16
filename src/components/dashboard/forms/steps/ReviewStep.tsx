@@ -95,6 +95,16 @@ const ReviewStep: React.FC<ReviewStepProps> = ({
     return errors.some(error => error.field === field);
   };
 
+  // Filter out empty questions
+  const getValidQuestions = () => {
+    return formData.perguntas
+      .map((pergunta: string, index: number) => ({ 
+        value: pergunta, 
+        index
+      }))
+      .filter((item: { value: string, index: number }) => item.value && item.value.trim() !== '');
+  };
+
   // Group related fields for better organization
   const reviewSections = [
     {
@@ -163,10 +173,10 @@ const ReviewStep: React.FC<ReviewStepProps> = ({
     {
       title: 'Perguntas',
       step: 3,
-      fields: formData.perguntas.map((pergunta: string, index: number) => ({
-        label: `Pergunta ${index + 1}`,
-        value: pergunta || 'Não informado',
-        field: `perguntas[${index}]`,
+      fields: getValidQuestions().map((item: { value: string, index: number }) => ({
+        label: `Pergunta ${item.index + 1}`,
+        value: item.value,
+        field: `perguntas[${item.index}]`,
         isMultiline: true
       }))
     }
@@ -190,12 +200,12 @@ const ReviewStep: React.FC<ReviewStepProps> = ({
             {onNavigateToStep && (
               <Button 
                 variant="ghost" 
-                size="sm" 
+                size="icon"
                 onClick={() => onNavigateToStep(section.step)}
-                className="text-blue-600 hover:text-blue-800 hover:bg-blue-50"
+                className="w-8 h-8 text-blue-600 hover:text-blue-800 hover:bg-blue-50 bg-white"
               >
-                <Edit2 className="h-4 w-4 mr-1" />
-                Editar
+                <Edit2 className="h-4 w-4" />
+                <span className="sr-only">Editar</span>
               </Button>
             )}
           </div>

@@ -121,7 +121,7 @@ export const useFetchDemandas = () => {
         
         // Filter out demands that already have responses
         const filteredData = (data || []).filter(
-          item => item && !respondedDemandIds.has(item.id)
+          item => item && !respondedDemandIds.has(item.id as string)
         );
         
         // Transform the data to match the Demanda type
@@ -168,7 +168,7 @@ export const useFetchDemandas = () => {
           const arquivoUrl = item.arquivo_url 
             ? (processFileUrls([item.arquivo_url])[0] || null) 
             : null;
-            
+          
           // Extract distrito data if it exists
           const bairro = item.bairros || null;
           const distritoData = bairro && bairro.distritos ? bairro.distritos : null;
