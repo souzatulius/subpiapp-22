@@ -178,19 +178,49 @@ const ProtocolStep: React.FC<ProtocolStepProps> = ({
         >
           Qual o prazo para resposta? {hasError('prazo_resposta') && <span className="text-orange-500">*</span>}
         </Label>
-        <DatePicker
-          date={formData.prazo_resposta ? new Date(formData.prazo_resposta) : undefined}
-          onSelect={(date) => {
-            if (date) {
-              const formattedDate = formatDate(date);
-              handleSelectChange('prazo_resposta', formattedDate);
-            }
-          }}
-          showTimeSelect={true}
-          useDropdownTimeSelect={true}
-          placeholder="Selecione a data e horário"
-          className={hasError('prazo_resposta') ? 'border-orange-500' : ''}
-        />
+        <div className="w-full">
+          <input
+            type="text"
+            id="prazo_resposta"
+            name="prazo_resposta"
+            placeholder="DD/MM/AAAA HH:MM"
+            value={formData.prazo_resposta ? formatDateTime(formData.prazo_resposta) : ''}
+            onChange={(e) => {
+              handleChange(e);
+              
+              // Try to parse the input to an ISO date string
+              try {
+                // Convert DD/MM/YYYY HH:MM to ISO
+                const value = e.target.value;
+                const dateTimeParts = value.split(' ');
+                if (dateTimeParts.length !== 2) return;
+                
+                const dateParts = dateTimeParts[0].split('/');
+                const timeParts = dateTimeParts[1].split(':');
+                
+                if (dateParts.length !== 3 || timeParts.length !== 2) return;
+                
+                const day = parseInt(dateParts[0], 10);
+                const month = parseInt(dateParts[1], 10) - 1; // Month is 0-indexed in JS Date
+                const year = parseInt(dateParts[2], 10);
+                const hours = parseInt(timeParts[0], 10);
+                const minutes = parseInt(timeParts[1], 10);
+                
+                if (isNaN(day) || isNaN(month) || isNaN(year) || 
+                    isNaN(hours) || isNaN(minutes)) return;
+                
+                const date = new Date(year, month, day, hours, minutes);
+                const isoString = date.toISOString();
+                
+                handleSelectChange('prazo_resposta', isoString);
+              } catch (error) {
+                console.error('Error parsing date input:', error);
+              }
+            }}
+            className={`w-full h-12 rounded-xl border ${hasError('prazo_resposta') ? 'border-orange-500' : 'border-gray-300'} bg-white px-4 py-3`}
+          />
+        </div>
+        <p className="text-gray-500 text-sm mt-1">Digite a data no formato DD/MM/AAAA HH:MM (Ex: 31/12/2023 14:30)</p>
         {hasError('prazo_resposta') && (
           <p className="text-orange-500 text-sm mt-1">{getErrorMessage('prazo_resposta')}</p>
         )}
@@ -202,14 +232,14 @@ const ProtocolStep: React.FC<ProtocolStepProps> = ({
           htmlFor="detalhes_solicitacao" 
           className={`form-question-title ${hasError('detalhes_solicitacao') ? 'text-orange-500 font-semibold' : ''}`}
         >
-          Descreva a demanda com detalhes: {hasError('detalhes_solicitacao') && <span className="text-orange-500">*</span>}
+          Descreva a demanda com detalhes... {hasError('detalhes_solicitacao') && <span className="text-orange-500">*</span>}
         </label>
         <textarea 
           id="detalhes_solicitacao" 
           name="detalhes_solicitacao" 
           rows={5} 
           className={`w-full border p-3 rounded-xl ${hasError('detalhes_solicitacao') ? 'border-orange-500' : 'border-gray-300'}`}
-          placeholder="Descreva a demanda com detalhes para facilitar o entendimento da área técnica..." 
+          placeholder="Digite aqui os detalhes ou cole o email recebido" 
           value={formData.detalhes_solicitacao || ''}
           onChange={handleChange}
         />

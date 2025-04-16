@@ -59,13 +59,26 @@ const PriorityDeadlineStep: React.FC<PriorityDeadlineStepProps> = ({
   const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { value } = e.target;
     
-    // Save the raw input in the text field
-    handleChange(e);
+    // Apply formatting to the input value
+    const formattedValue = formatDateInput(value);
+    
+    // Set the formatted value to the input field
+    const event = {
+      ...e,
+      target: {
+        ...e.target,
+        value: formattedValue,
+        name: e.target.name
+      }
+    };
+    
+    // Pass the formatted event to handleChange
+    handleChange(event);
     
     // Try to parse the input to an ISO date string
     try {
       // Extract date and time components
-      const dateTimeParts = value.split(' ');
+      const dateTimeParts = formattedValue.split(' ');
       if (dateTimeParts.length !== 2) return;
       
       const dateParts = dateTimeParts[0].split('/');
