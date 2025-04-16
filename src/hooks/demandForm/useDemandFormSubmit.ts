@@ -52,6 +52,27 @@ export const useDemandFormSubmit = (resetForm: () => void, onClose: () => void) 
         ? formData.prioridade
         : 'media'; // Default to 'media' if the value is not valid
       
+      // Get the coordenacao_id from the problem
+      let coordenacao_id = formData.coordenacao_id;
+      
+      // If problema_id is provided but coordenacao_id is not, fetch it from the problema
+      if (formData.problema_id && !coordenacao_id) {
+        try {
+          const { data: problemaData, error: problemaError } = await supabase
+            .from('problemas')
+            .select('coordenacao_id')
+            .eq('id', formData.problema_id)
+            .single();
+            
+          if (!problemaError && problemaData) {
+            coordenacao_id = problemaData.coordenacao_id;
+            console.log('Retrieved coordenacao_id from problema:', coordenacao_id);
+          }
+        } catch (error) {
+          console.error('Error fetching coordenacao_id from problema:', error);
+        }
+      }
+      
       // Prepare the payload
       const payload = {
         titulo: formData.titulo,
@@ -72,7 +93,11 @@ export const useDemandFormSubmit = (resetForm: () => void, onClose: () => void) 
         anexos: processedAnexos,
         servico_id: formData.servico_id ? formData.servico_id : null,
         autor_id: user.id,
-        status: 'pendente'
+        status: 'pendente',
+        // Add the missing fields
+        resumo_situacao: formData.resumo_situacao || null,
+        protocolo: formData.tem_protocolo_156 ? formData.numero_protocolo_156 : null,
+        coordenacao_id: coordenacao_id || null
       };
       
       console.log('Submitting demand with payload:', payload);

@@ -18,7 +18,7 @@ export const useDemandasData = () => {
         
         // First, check if the numero_protocolo_156 column exists to avoid errors
         let hasProtoColumn = true;
-        const { error: checkError } = await supabase
+        const { data: checkData, error: checkError } = await supabase
           .from('demandas')
           .select('numero_protocolo_156')
           .limit(1);
@@ -96,6 +96,8 @@ export const useDemandasData = () => {
         
         // Process each demand to ensure it has proper structure
         const processedDemandas = demandasSemNotas.map(demanda => {
+          if (!demanda) return null;
+          
           const processedDemanda: Demand = {
             id: demanda.id,
             titulo: demanda.titulo,
@@ -121,7 +123,7 @@ export const useDemandasData = () => {
           };
           
           return processedDemanda;
-        });
+        }).filter(Boolean) as Demand[];
         
         setDemandas(processedDemandas);
         setFilteredDemandas(processedDemandas);
