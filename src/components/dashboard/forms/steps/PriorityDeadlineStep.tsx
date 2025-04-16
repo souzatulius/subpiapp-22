@@ -33,6 +33,30 @@ const PriorityDeadlineStep: React.FC<PriorityDeadlineStepProps> = ({
     return error ? error.message : '';
   };
 
+  // Helper function to safely parse an ISO date string to a Date
+  const parseISODate = (dateString: string): Date | undefined => {
+    if (!dateString) return undefined;
+    try {
+      const date = new Date(dateString);
+      // Check if it's a valid date
+      if (isNaN(date.getTime())) return undefined;
+      return date;
+    } catch (e) {
+      console.error("Error parsing date:", e);
+      return undefined;
+    }
+  };
+
+  // Handle date selection with proper timezone preservation
+  const handleDateSelection = (date?: Date) => {
+    if (date) {
+      // Ensure the date is in the correct format and preserves the timezone
+      handleSelectChange('prazo_resposta', date.toISOString());
+    } else {
+      handleSelectChange('prazo_resposta', '');
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div>
@@ -90,8 +114,8 @@ const PriorityDeadlineStep: React.FC<PriorityDeadlineStepProps> = ({
         </label>
         <div className="w-full">
           <DatePicker
-            date={formData.prazo_resposta ? new Date(formData.prazo_resposta) : undefined}
-            onSelect={(date) => handleSelectChange('prazo_resposta', date ? date.toISOString() : '')}
+            date={parseISODate(formData.prazo_resposta)}
+            onSelect={handleDateSelection}
             showTimeSelect={true}
             useDropdownTimeSelect={true}
             placeholder="Selecione a data e horário"
