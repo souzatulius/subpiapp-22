@@ -85,6 +85,21 @@ export interface Demand {
       id?: string;
     } | null;
   } | null;
+  
+  // Related entities
+  tema?: {
+    descricao?: string;
+    id?: string;
+    coordenacao?: {
+      descricao?: string;
+      id?: string;
+      sigla?: string;
+    }
+  };
+  servico?: {
+    descricao?: string;
+    id?: string;
+  };
 }
 
 export interface ResponseQA {

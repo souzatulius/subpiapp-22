@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Demanda } from '../types';
@@ -100,8 +99,8 @@ export const useFetchDemandas = () => {
 
         if (respostasError) {
           console.error('Error fetching respostas:', respostasError);
-          // Fixed: use message instead of id in the error
-          console.error('Error message:', respostasError.message);
+          // Use message instead of id in the error
+          console.error('Error message:', respostasError.message || 'Unknown error');
           return;
         }
         
