@@ -232,7 +232,9 @@ const DistrictEfficiencyRadarChart: React.FC<DistrictEfficiencyRadarChartProps> 
                 tooltip: {
                   callbacks: {
                     label: function(context) {
-                      return `${context.dataset.label}: ${context.raw.toFixed(1)}%`;
+                      // Add type safety by casting context.raw to number
+                      const value = Number(context.raw);
+                      return `${context.dataset.label}: ${value.toFixed(1)}%`;
                     }
                   }
                 }
