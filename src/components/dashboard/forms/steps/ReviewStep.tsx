@@ -3,6 +3,7 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { ValidationError, hasFieldError } from '@/lib/formValidationUtils';
 import { Pencil } from 'lucide-react';
+import { format } from 'date-fns';
 
 interface ReviewStepProps {
   formData: any;
@@ -44,6 +45,16 @@ const ReviewStep: React.FC<ReviewStepProps> = ({
     }
   };
 
+  // Format date with specific format
+  const formatDate = (dateString: string) => {
+    if (!dateString) return '—';
+    try {
+      return format(new Date(dateString), 'dd/MM/yy HH:mm');
+    } catch (e) {
+      return dateString;
+    }
+  };
+
   // Helper to display review field with error highlight
   const ReviewField = ({ 
     label, 
@@ -65,11 +76,10 @@ const ReviewStep: React.FC<ReviewStepProps> = ({
             <Button 
               variant="ghost" 
               size="sm" 
-              className="h-8 text-blue-600 hover:text-blue-800 p-0"
+              className="h-8 text-orange-500 hover:text-orange-600 p-0"
               onClick={() => handleEditStep(step)}
             >
-              <Pencil className="h-3 w-3 mr-1" />
-              <span className="text-xs">Editar</span>
+              <Pencil className="h-4 w-4" />
             </Button>
           )}
         </div>
@@ -114,7 +124,7 @@ const ReviewStep: React.FC<ReviewStepProps> = ({
             />
             <ReviewField 
               label="Prazo para resposta" 
-              value={formData.prazo_resposta} 
+              value={formatDate(formData.prazo_resposta)} 
               fieldName="prazo_resposta" 
               step={0} 
             />
@@ -183,11 +193,12 @@ const ReviewStep: React.FC<ReviewStepProps> = ({
 
           <h3 className="font-medium text-gray-700 mb-3 mt-6">Detalhes da Demanda</h3>
           <div className="bg-white p-4 rounded-lg border border-gray-200 space-y-2">
+            {/* Removed Detalhes da Demanda and replaced with Resumo */}
             <ReviewField 
-              label="Descrição detalhada" 
-              value={formData.detalhes_solicitacao} 
-              fieldName="detalhes_solicitacao" 
-              step={0} 
+              label="Resumo da situação" 
+              value={formData.resumo_situacao} 
+              fieldName="resumo_situacao" 
+              step={3} 
             />
           </div>
 
@@ -200,25 +211,16 @@ const ReviewStep: React.FC<ReviewStepProps> = ({
               step={3} 
             />
             
-            {/* New field */}
-            <ReviewField 
-              label="Resumo da situação" 
-              value={formData.resumo_situacao} 
-              fieldName="resumo_situacao" 
-              step={3} 
-            />
-            
             <div>
               <div className="flex justify-between items-center mb-1">
                 <div className="text-sm text-gray-500 font-medium">Perguntas para a área técnica</div>
                 <Button 
                   variant="ghost" 
                   size="sm" 
-                  className="h-8 text-blue-600 hover:text-blue-800 p-0"
+                  className="h-8 text-orange-500 hover:text-orange-600 p-0"
                   onClick={() => handleEditStep(3)}
                 >
-                  <Pencil className="h-3 w-3 mr-1" />
-                  <span className="text-xs">Editar</span>
+                  <Pencil className="h-4 w-4" />
                 </Button>
               </div>
               <div>
@@ -237,11 +239,10 @@ const ReviewStep: React.FC<ReviewStepProps> = ({
                 <Button 
                   variant="ghost" 
                   size="sm" 
-                  className="h-8 text-blue-600 hover:text-blue-800 p-0"
+                  className="h-8 text-orange-500 hover:text-orange-600 p-0"
                   onClick={() => handleEditStep(3)}
                 >
-                  <Pencil className="h-3 w-3 mr-1" />
-                  <span className="text-xs">Editar</span>
+                  <Pencil className="h-4 w-4" />
                 </Button>
               </div>
               <div>

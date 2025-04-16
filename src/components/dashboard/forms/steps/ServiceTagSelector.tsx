@@ -35,9 +35,7 @@ const ServiceTagSelector: React.FC<ServiceTagSelectorProps> = ({
               'px-3 py-1 cursor-pointer hover:bg-orange-50 hover:text-orange-700 transition-colors rounded-xl',
               isSelected
                 ? 'bg-orange-500 hover:bg-orange-600 text-white'
-                : variant === 'theme'
-                  ? 'border-gray-200 text-gray-700'
-                  : 'border-orange-200 text-orange-700',
+                : 'bg-white border-gray-200 text-gray-700',
               className
             )}
             onClick={() => onServiceSelect(service.id)}

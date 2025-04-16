@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import TitleSection from './organize/TitleSection';
 import { ValidationError, hasFieldError, getFieldErrorMessage } from '@/lib/formValidationUtils';
@@ -44,12 +43,10 @@ const OrganizeStep: React.FC<OrganizeStepProps> = ({
   onGenerateAIContent,
   isGenerating = false
 }) => {
-  // Find the problem and service descriptions
   const selectedProblem = problemas.find(p => p.id === formData.problema_id);
   const selectedService = servicos.find(s => s.id === formData.servico_id);
   const selectedBairro = filteredBairros.find(b => b.id === formData.bairro_id);
   
-  // Auto-generate content when component mounts
   useEffect(() => {
     const generateContent = async () => {
       if (
@@ -80,21 +77,19 @@ const OrganizeStep: React.FC<OrganizeStepProps> = ({
         </div>
       )}
 
-      {/* AI Content generation button */}
       <div className="flex justify-end">
         <Button
           type="button"
           variant="outline"
-          className="flex items-center gap-2 text-blue-600 border-blue-300 hover:bg-blue-50"
+          className="flex items-center gap-2 text-blue-600 bg-white border-blue-300 hover:bg-blue-50"
           onClick={onGenerateAIContent}
           disabled={isGenerating || !formData.problema_id || !formData.detalhes_solicitacao}
         >
           <Sparkles className="h-4 w-4" />
-          {isGenerating ? "Gerando..." : "Gerar sugestões com IA"}
+          {isGenerating ? "Gerando..." : "Gerar Sugestões"}
         </Button>
       </div>
 
-      {/* Título da Demanda */}
       <TitleSection 
         titulo={formData.titulo} 
         handleChange={handleChange}
@@ -108,7 +103,6 @@ const OrganizeStep: React.FC<OrganizeStepProps> = ({
         filteredBairros={filteredBairros}
       />
 
-      {/* Resumo da situação */}
       <div>
         <label 
           htmlFor="resumo_situacao" 
@@ -129,14 +123,12 @@ const OrganizeStep: React.FC<OrganizeStepProps> = ({
         )}
       </div>
 
-      {/* Perguntas para Área Técnica */}
       <QuestionsSection 
         perguntas={formData.perguntas}
         onPerguntaChange={handlePerguntaChange}
         errors={errors}
       />
 
-      {/* Anexos */}
       <FileUploadSection 
         anexos={formData.anexos}
         onAnexosChange={handleAnexosChange}

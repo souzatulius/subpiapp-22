@@ -11,6 +11,7 @@ import { ValidationError, validateDemandForm, getErrorSummary } from '@/lib/form
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { AlertTriangle } from 'lucide-react';
 import { useLocation } from 'react-router-dom';
+import { useAnimatedFeedback } from '@/hooks/use-animated-feedback';
 
 interface CadastrarDemandaFormProps {
   onClose: () => void;
@@ -25,6 +26,7 @@ const CadastrarDemandaForm: React.FC<CadastrarDemandaFormProps> = ({
   const [isGeneratingAI, setIsGeneratingAI] = useState(false); 
   const location = useLocation();
   const formRef = useRef<HTMLDivElement>(null);
+  const { showFeedback } = useAnimatedFeedback();
   
   const {
     formData,
@@ -119,7 +121,13 @@ const CadastrarDemandaForm: React.FC<CadastrarDemandaFormProps> = ({
   const handleSubmit = async (formData: any) => {
     try {
       if (validateFormBeforeSubmit()) {
+        showFeedback('loading', 'Cadastrando demanda...', { progress: 50 });
+        
         await submitForm(formData);
+        
+        showFeedback('success', 'Demanda cadastrada com sucesso!', { 
+          duration: 3000
+        });
       }
     } catch (error: any) {
       console.error('Submission error:', error);
@@ -133,11 +141,7 @@ const CadastrarDemandaForm: React.FC<CadastrarDemandaFormProps> = ({
         errorMsg = error.message;
       }
       
-      toast({
-        title: "Erro ao cadastrar demanda",
-        description: errorMsg,
-        variant: "destructive"
-      });
+      showFeedback('error', errorMsg, { duration: 5000 });
     }
   };
 

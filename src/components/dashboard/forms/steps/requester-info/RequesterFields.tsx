@@ -31,7 +31,7 @@ const RequesterFields: React.FC<RequesterFieldsProps> = ({
           htmlFor="nome_solicitante" 
           className="block text-base font-medium mb-2"
         >
-          Nome do Solicitante (opcional)
+          Nome do Solicitante
         </Label>
         <Input
           id="nome_solicitante"
@@ -48,7 +48,7 @@ const RequesterFields: React.FC<RequesterFieldsProps> = ({
           htmlFor="telefone_solicitante" 
           className="block text-base font-medium mb-2"
         >
-          Telefone (opcional)
+          Telefone
         </Label>
         <Input
           id="telefone_solicitante"
@@ -65,7 +65,7 @@ const RequesterFields: React.FC<RequesterFieldsProps> = ({
           htmlFor="email_solicitante" 
           className="block text-base font-medium mb-2"
         >
-          E-mail (opcional)
+          E-mail
         </Label>
         <Input
           id="email_solicitante"
