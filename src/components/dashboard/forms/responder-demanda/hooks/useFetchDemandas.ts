@@ -14,64 +14,81 @@ export const useFetchDemandas = () => {
       try {
         setIsLoadingDemandas(true);
         
-        // First get demands - include resumo_situacao field if it exists
-        const { data, error } = await supabase
+        // Try to query with resumo_situacao first to check if column exists
+        const testQuery = await supabase
           .from('demandas')
-          .select(`
-            id,
-            titulo,
-            detalhes_solicitacao,
-            resumo_situacao,
-            prazo_resposta,
-            prioridade,
-            perguntas,
-            status,
-            horario_publicacao,
-            endereco,
-            nome_solicitante,
-            email_solicitante,
-            telefone_solicitante,
-            veiculo_imprensa,
-            arquivo_url,
-            anexos,
+          .select('resumo_situacao')
+          .limit(1);
+          
+        // Determine if resumo_situacao column exists
+        const hasResumoSituacao = !testQuery.error;
+        console.log('Has resumo_situacao column:', hasResumoSituacao);
+        
+        // Build the query dynamically based on column existence
+        let query = `
+          id,
+          titulo,
+          detalhes_solicitacao,
+          prazo_resposta,
+          prioridade,
+          perguntas,
+          status,
+          horario_publicacao,
+          endereco,
+          nome_solicitante,
+          email_solicitante,
+          telefone_solicitante,
+          veiculo_imprensa,
+          arquivo_url,
+          anexos,
+          coordenacao_id,
+          origem_id,
+          tipo_midia_id,
+          bairro_id,
+          autor_id,
+          problema_id,
+          servico_id,
+          protocolo,
+          problemas:problema_id (
+            id, 
+            descricao,
+            icone,
             coordenacao_id,
-            origem_id,
-            tipo_midia_id,
-            bairro_id,
-            autor_id,
-            problema_id,
-            servico_id,
-            protocolo,
-            problemas:problema_id (
-              id, 
-              descricao,
-              icone,
-              coordenacao_id,
-              coordenacao:coordenacao_id (
-                id,
-                descricao,
-                sigla
-              )
-            ),
-            coordenacoes:coordenacao_id (
+            coordenacao:coordenacao_id (
               id,
               descricao,
               sigla
-            ),
-            origens_demandas:origem_id (id, descricao),
-            tipos_midia:tipo_midia_id (id, descricao),
-            bairros:bairro_id (
-              id, 
-              nome, 
-              distrito_id,
-              distritos:distrito_id (
-                id,
-                nome
-              )
-            ),
-            autor:autor_id (id, nome_completo),
-            servico:servico_id (id, descricao)
-          `)
+            )
+          ),
+          coordenacoes:coordenacao_id (
+            id,
+            descricao,
+            sigla
+          ),
+          origens_demandas:origem_id (id, descricao),
+          tipos_midia:tipo_midia_id (id, descricao),
+          bairros:bairro_id (
+            id, 
+            nome, 
+            distrito_id,
+            distritos:distrito_id (
+              id,
+              nome
+            )
+          ),
+          autor:autor_id (id, nome_completo),
+          servico:servico_id (id, descricao)
+        `;
+        
+        // Add resumo_situacao if it exists
+        if (hasResumoSituacao) {
+          query = `resumo_situacao, ${query}`;
+        }
+        
+        // Now fetch the data with the appropriate columns
+        const { data, error } = await supabase
+          .from('demandas')
+          .select(query)
           .in('status', ['pendente', 'em_andamento'])
           .order('horario_publicacao', { ascending: false });
         
@@ -149,7 +166,7 @@ export const useFetchDemandas = () => {
             id: item.id,
             titulo: item.titulo,
             detalhes_solicitacao: item.detalhes_solicitacao,
-            resumo_situacao: item.resumo_situacao, // Use resumo_situacao field if available
+            resumo_situacao: hasResumoSituacao ? item.resumo_situacao : null,
             prazo_resposta: item.prazo_resposta,
             prioridade: item.prioridade,
             perguntas: perguntasObject,
