@@ -5,6 +5,14 @@ import { Demanda } from '../types';
 import { toast } from '@/components/ui/use-toast';
 import { normalizeQuestions, processFileUrls } from '@/utils/questionFormatUtils';
 
+// Helper function to safely access properties of potentially null/undefined objects
+const safe = <T, K extends keyof T>(obj: T | null | undefined, key: K): T[K] | undefined => {
+  if (obj && typeof obj === 'object' && key in obj) {
+    return obj[key];
+  }
+  return undefined;
+};
+
 export const useFetchDemandas = () => {
   const [demandas, setDemandas] = useState<Demanda[]>([]);
   const [isLoadingDemandas, setIsLoadingDemandas] = useState<boolean>(true);
@@ -122,10 +130,10 @@ export const useFetchDemandas = () => {
         }
         
         // Create a set of demand IDs that already have responses
-        const respondedDemandIds = new Set(respostasData.map(resposta => resposta.demanda_id));
+        const respondedDemandIds = new Set((respostasData || []).map(resposta => resposta.demanda_id));
         
         // Filter out demands that already have responses
-        const filteredData = data ? data.filter(demanda => !respondedDemandIds.has(demanda.id)) : [];
+        const filteredData = data ? data.filter(demanda => !respondedDemandIds.has(demanda?.id)) : [];
         
         // Transform the data to match the Demanda type
         const transformedData: Demanda[] = (filteredData || []).map(item => {
@@ -134,15 +142,15 @@ export const useFetchDemandas = () => {
           // Process perguntas from different formats - ensure it returns a Record<string, string>
           let perguntasObject: Record<string, string> = {};
           
-          if (item.perguntas) {
+          if (item && 'perguntas' in item && item.perguntas) {
             if (Array.isArray(item.perguntas)) {
               // Convert string array to Record<string, string>
-              item.perguntas.forEach((question: string, index: number) => {
+              (item.perguntas as string[]).forEach((question: string, index: number) => {
                 perguntasObject[index.toString()] = question;
               });
             } else if (typeof item.perguntas === 'object' && item.perguntas !== null) {
               // Convert any object to Record<string, string>, ensuring all values are strings
-              const entries = Object.entries(item.perguntas);
+              const entries = Object.entries(item.perguntas as Record<string, any>);
               entries.forEach(([key, value]) => {
                 // Ensure the value is a string
                 perguntasObject[key] = String(value || '');
@@ -151,64 +159,67 @@ export const useFetchDemandas = () => {
           }
           
           // Process anexos to ensure it's always a valid array of URLs
-          const processedAnexos = item.anexos ? processFileUrls(item.anexos) : [];
+          const anexosValue = 'anexos' in item ? item.anexos : null;
+          const processedAnexos = anexosValue ? processFileUrls(anexosValue) : [];
           
           // Process arquivo_url
-          const arquivo_url = item.arquivo_url ? 
-            processFileUrls([item.arquivo_url])[0] || null : 
+          const arquivoUrlValue = 'arquivo_url' in item ? item.arquivo_url : null;
+          const arquivo_url = arquivoUrlValue ? 
+            processFileUrls([arquivoUrlValue])[0] || null : 
             null;
             
-          console.log(`Processing demanda ${item.id || 'unknown'} for response:`, {
-            originalAnexos: item.anexos || null,
+          console.log(`Processing demanda ${safe(item, 'id') || 'unknown'} for response:`, {
+            originalAnexos: safe(item, 'anexos') || null,
             processedAnexos,
-            originalArquivoUrl: item.arquivo_url || null,
+            originalArquivoUrl: safe(item, 'arquivo_url') || null,
             processedArquivoUrl: arquivo_url
           });
           
           // Extract distrito data from the nested structure if it exists
-          const distritoData = item.bairros && item.bairros.distritos ? item.bairros.distritos : null;
+          const bairrosValue = 'bairros' in item ? item.bairros : null;
+          const distritoData = bairrosValue && bairrosValue && 'distritos' in bairrosValue ? bairrosValue.distritos : null;
           
           return {
-            id: item.id || '',
-            titulo: item.titulo || '',
-            detalhes_solicitacao: item.detalhes_solicitacao || null,
-            resumo_situacao: hasResumoSituacao ? item.resumo_situacao || null : null,
-            prazo_resposta: item.prazo_resposta || null,
-            prioridade: item.prioridade || '',
+            id: safe(item, 'id') || '',
+            titulo: safe(item, 'titulo') || '',
+            detalhes_solicitacao: safe(item, 'detalhes_solicitacao') || null,
+            resumo_situacao: hasResumoSituacao && 'resumo_situacao' in item ? item.resumo_situacao || null : null,
+            prazo_resposta: safe(item, 'prazo_resposta') || null,
+            prioridade: safe(item, 'prioridade') || '',
             perguntas: perguntasObject,
-            status: item.status || '',
-            horario_publicacao: item.horario_publicacao || new Date().toISOString(),
-            endereco: item.endereco || null,
-            nome_solicitante: item.nome_solicitante || null,
-            email_solicitante: item.email_solicitante || null,
-            telefone_solicitante: item.telefone_solicitante || null,
-            veiculo_imprensa: item.veiculo_imprensa || null,
+            status: safe(item, 'status') || '',
+            horario_publicacao: safe(item, 'horario_publicacao') || new Date().toISOString(),
+            endereco: safe(item, 'endereco') || null,
+            nome_solicitante: safe(item, 'nome_solicitante') || null,
+            email_solicitante: safe(item, 'email_solicitante') || null,
+            telefone_solicitante: safe(item, 'telefone_solicitante') || null,
+            veiculo_imprensa: safe(item, 'veiculo_imprensa') || null,
             arquivo_url,
             anexos: processedAnexos,
-            coordenacao_id: item.coordenacao_id || null,
-            coordenacao: item.coordenacoes || null,
+            coordenacao_id: safe(item, 'coordenacao_id') || null,
+            coordenacao: 'coordenacoes' in item ? item.coordenacoes || null : null,
             supervisao_tecnica_id: null, // Add this field with null value for backward compatibility
-            bairro_id: item.bairro_id || null,
-            autor_id: item.autor_id || null,
-            tipo_midia_id: item.tipo_midia_id || null,
-            origem_id: item.origem_id || null,
-            problema_id: item.problema_id || null,
-            servico_id: item.servico_id || null,
-            protocolo: item.protocolo || null,
-            tema: item.problemas ? {
-              id: item.problemas.id || '',
-              descricao: item.problemas.descricao || '',
-              icone: item.problemas.icone || null,
-              coordenacao: item.problemas.coordenacao || null
+            bairro_id: safe(item, 'bairro_id') || null,
+            autor_id: safe(item, 'autor_id') || null,
+            tipo_midia_id: safe(item, 'tipo_midia_id') || null,
+            origem_id: safe(item, 'origem_id') || null,
+            problema_id: safe(item, 'problema_id') || null,
+            servico_id: safe(item, 'servico_id') || null,
+            protocolo: safe(item, 'protocolo') || null,
+            tema: 'problemas' in item && item.problemas ? {
+              id: safe(item.problemas, 'id') || '',
+              descricao: safe(item.problemas, 'descricao') || '',
+              icone: safe(item.problemas, 'icone') || null,
+              coordenacao: safe(item.problemas, 'coordenacao') || null
             } : null,
             areas_coordenacao: null,
-            origens_demandas: item.origens_demandas || null,
-            tipos_midia: item.tipos_midia || null,
-            bairros: item.bairros || null,
+            origens_demandas: 'origens_demandas' in item ? item.origens_demandas || null : null,
+            tipos_midia: 'tipos_midia' in item ? item.tipos_midia || null : null,
+            bairros: 'bairros' in item ? item.bairros || null : null,
             distrito: distritoData,
-            autor: item.autor || null,
-            servico: item.servico || null,
-            problema: item.problemas || null
+            autor: 'autor' in item ? item.autor || null : null,
+            servico: 'servico' in item ? item.servico || null : null,
+            problema: 'problemas' in item ? item.problemas || null : null
           };
         });
         
