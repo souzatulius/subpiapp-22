@@ -100,7 +100,7 @@ export const useFetchDemandas = () => {
 
         if (respostasError) {
           console.error('Error fetching respostas:', respostasError);
-          // Corrigido: usar message em vez de id no erro
+          // Fixed: use message instead of id in the error
           console.error('Error message:', respostasError.message);
           return;
         }

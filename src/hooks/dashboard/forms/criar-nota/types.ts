@@ -87,16 +87,6 @@ export interface Demand {
   } | null;
 }
 
-export interface Note {
-  id: string;
-  titulo: string;
-  conteudo: string;
-  status: string;
-  data_criacao: string;
-  autor_id: string;
-  demanda_id?: string;
-}
-
 export interface ResponseQA {
   question: string;
   answer: string;
