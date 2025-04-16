@@ -55,13 +55,39 @@ export function DatePicker({
   const [selectedHours, setSelectedHours] = React.useState<string>(date ? format(date, 'HH') : '12');
   const [selectedMinutes, setSelectedMinutes] = React.useState<string>(date ? format(date, 'mm') : '00');
 
-  // Update time states when date prop changes
+  // Update time states when date prop changes, but only when it's a completely different date
+  // or when the date was previously undefined
   React.useEffect(() => {
-    if (date) {
+    if (date && (!selectedHours || !selectedMinutes)) {
+      // Only initialize if hours/minutes are not set yet
       setSelectedHours(format(date, 'HH'));
       setSelectedMinutes(format(date, 'mm'));
     }
-  }, [date]);
+  }, [date, selectedHours, selectedMinutes]);
+
+  /**
+   * Handles date selection from the calendar
+   * Preserves the currently selected time when changing dates
+   * 
+   * @param newDate - The newly selected date or undefined
+   */
+  const handleDateSelect = (newDate?: Date) => {
+    if (newDate) {
+      // When a new date is selected, preserve the current time
+      const hours = parseInt(selectedHours || '12', 10);
+      const minutes = parseInt(selectedMinutes || '00', 10);
+      
+      // Create new date with selected time values
+      const dateWithTime = new Date(newDate);
+      dateWithTime.setHours(hours, minutes);
+      
+      // Call the parent's onSelect with the new date that has the preserved time
+      onSelect(dateWithTime);
+    } else {
+      // If date is cleared, call parent's onSelect with undefined
+      onSelect(undefined);
+    }
+  };
 
   /**
    * Handles changes to the time inputs (hours or minutes)
@@ -187,7 +213,7 @@ export function DatePicker({
       </PopoverTrigger>
       <DateTimePickerContent
         date={date}
-        onSelect={onSelect}
+        onSelect={handleDateSelect}
         showTimeSelect={showTimeSelect}
         selectedHours={selectedHours}
         selectedMinutes={selectedMinutes}
