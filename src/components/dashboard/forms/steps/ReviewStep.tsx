@@ -39,6 +39,18 @@ const ReviewStep: React.FC<ReviewStepProps> = ({
   const bairro = filteredBairros.find(b => b.id === formData.bairro_id);
   const distrito = bairro ? distritos.find(d => d.id === bairro.distrito_id) : null;
 
+  // Map priorities to human-readable format
+  const getPriorityLabel = (prioridade: string): string => {
+    if (!prioridade) return '—';
+    
+    switch(prioridade.toLowerCase()) {
+      case 'alta': return 'Urgente';
+      case 'media': return 'Média';
+      case 'baixa': return 'Baixa';
+      default: return prioridade;
+    }
+  };
+
   const handleEditStep = (stepIndex: number) => {
     if (onNavigateToStep) {
       onNavigateToStep(stepIndex);
@@ -93,7 +105,7 @@ const ReviewStep: React.FC<ReviewStepProps> = ({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
           <h3 className="font-medium text-gray-700 mb-3">Origem e Classificação</h3>
-          <div className="bg-white p-4 rounded-lg border border-gray-200 space-y-2">
+          <div className="bg-white p-4 rounded-xl border border-gray-200 space-y-2">
             <ReviewField 
               label="Origem da demanda" 
               value={origem?.descricao} 
@@ -126,10 +138,7 @@ const ReviewStep: React.FC<ReviewStepProps> = ({
             )}
             <ReviewField 
               label="Prioridade" 
-              value={formData.prioridade === 'media' ? 'Média' : 
-                     formData.prioridade === 'alta' ? 'Alta' : 
-                     formData.prioridade === 'baixa' ? 'Baixa' : 
-                     formData.prioridade} 
+              value={getPriorityLabel(formData.prioridade)} 
               fieldName="prioridade" 
               step={0} 
             />
@@ -142,7 +151,7 @@ const ReviewStep: React.FC<ReviewStepProps> = ({
           </div>
 
           <h3 className="font-medium text-gray-700 mb-3 mt-6">Informações do Solicitante</h3>
-          <div className="bg-white p-4 rounded-lg border border-gray-200 space-y-2">
+          <div className="bg-white p-4 rounded-xl border border-gray-200 space-y-2">
             <ReviewField 
               label="Nome do solicitante" 
               value={formData.nome_solicitante} 
@@ -164,7 +173,7 @@ const ReviewStep: React.FC<ReviewStepProps> = ({
           </div>
 
           <h3 className="font-medium text-gray-700 mb-3 mt-6">Tema e Serviço</h3>
-          <div className="bg-white p-4 rounded-lg border border-gray-200 space-y-2">
+          <div className="bg-white p-4 rounded-xl border border-gray-200 space-y-2">
             <ReviewField 
               label="Problema/Tema" 
               value={problema?.descricao} 
@@ -182,7 +191,7 @@ const ReviewStep: React.FC<ReviewStepProps> = ({
 
         <div>
           <h3 className="font-medium text-gray-700 mb-3">Localização</h3>
-          <div className="bg-white p-4 rounded-lg border border-gray-200 space-y-2">
+          <div className="bg-white p-4 rounded-xl border border-gray-200 space-y-2">
             <ReviewField 
               label="Distrito" 
               value={distrito?.nome} 
@@ -203,7 +212,7 @@ const ReviewStep: React.FC<ReviewStepProps> = ({
           </div>
 
           <h3 className="font-medium text-gray-700 mb-3 mt-6">Detalhes da Demanda</h3>
-          <div className="bg-white p-4 rounded-lg border border-gray-200 space-y-2">
+          <div className="bg-white p-4 rounded-xl border border-gray-200 space-y-2">
             {/* Removed Detalhes da Demanda and replaced with Resumo */}
             <ReviewField 
               label="Resumo da situação" 
@@ -214,7 +223,7 @@ const ReviewStep: React.FC<ReviewStepProps> = ({
           </div>
 
           <h3 className="font-medium text-gray-700 mb-3 mt-6">Detalhes da Organização</h3>
-          <div className="bg-white p-4 rounded-lg border border-gray-200 space-y-2">
+          <div className="bg-white p-4 rounded-xl border border-gray-200 space-y-2">
             <ReviewField 
               label="Título da demanda" 
               value={formData.titulo} 
@@ -234,7 +243,7 @@ const ReviewStep: React.FC<ReviewStepProps> = ({
                   <Pencil className="h-4 w-4" />
                 </Button>
               </div>
-              <div className="bg-gray-50 p-4 rounded-lg border border-gray-100">
+              <div className="bg-gray-50 p-4 rounded-xl border border-gray-100">
                 {formData.perguntas.filter(Boolean).map((pergunta: string, idx: number) => (
                   <div key={idx} className="mb-2 text-base">
                     {idx + 1}. {pergunta}
@@ -256,7 +265,7 @@ const ReviewStep: React.FC<ReviewStepProps> = ({
                   <Pencil className="h-4 w-4" />
                 </Button>
               </div>
-              <div className="bg-gray-50 p-4 rounded-lg border border-gray-100">
+              <div className="bg-gray-50 p-4 rounded-xl border border-gray-100">
                 {formData.anexos && formData.anexos.length > 0 ? (
                   formData.anexos.map((anexo: string, idx: number) => (
                     <div key={idx} className="mb-1 text-base">{anexo}</div>

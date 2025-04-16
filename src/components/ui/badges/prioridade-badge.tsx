@@ -15,12 +15,20 @@ export function PrioridadeBadge({
   className,
   size = 'sm',
 }: PrioridadeBadgeProps) {
-  // Format priority to capitalize first letter and handle "média" with accent
-  const formattedPrioridade = prioridade ? 
-    prioridade.toLowerCase() === 'media' || prioridade.toLowerCase() === 'média' ? 'Média' :
-    prioridade.toLowerCase() === 'alta' ? 'Alta' :
-    prioridade.charAt(0).toUpperCase() + prioridade.slice(1).toLowerCase() : 
-    'Média'; // Default to "Média" if no priority provided
+  // Map internal priority values to display labels
+  const getPrioridadeLabel = (prioridade: string): string => {
+    const prioridadeLower = prioridade?.toLowerCase() || '';
+    
+    if (prioridadeLower === 'media' || prioridadeLower === 'média') {
+      return 'Média';
+    } else if (prioridadeLower === 'alta') {
+      return 'Urgente';
+    } else if (prioridadeLower === 'baixa') {
+      return 'Baixa';
+    }
+    
+    return 'Média'; // Default
+  };
 
   // Determine styling based on priority level
   const config = {
@@ -56,6 +64,7 @@ export function PrioridadeBadge({
   };
 
   const IconComponent = config.icon;
+  const formattedPrioridade = getPrioridadeLabel(prioridade);
 
   return (
     <span

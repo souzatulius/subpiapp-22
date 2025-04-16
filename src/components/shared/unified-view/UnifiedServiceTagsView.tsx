@@ -33,15 +33,15 @@ const UnifiedServiceTagsView: React.FC<UnifiedServiceTagsViewProps> = ({
             selectedServiceId === service.id ? 'ring-2 ring-blue-500 ring-offset-1' : ''
           }`}
         >
-          <LabelBadge 
-            label="Serviço"
-            value={service.descricao}
-            variant={variant}
-            size="md"
-            className={`${
-              selectedServiceId === service.id ? 'bg-blue-100 border-blue-300' : ''
+          <div
+            className={`px-3 py-2 rounded-xl text-base font-medium transition-colors ${
+              selectedServiceId === service.id
+                ? 'bg-orange-500 text-white border border-orange-500'
+                : 'bg-white text-gray-700 border border-gray-200'
             }`}
-          />
+          >
+            {service.descricao}
+          </div>
         </div>
       ))}
     </div>
