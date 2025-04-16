@@ -92,14 +92,14 @@ export interface Demand {
       id?: string;
       sigla?: string;
     }
-  } | string; // Allow both string and object
+  } | string | null; // Allow both string and object or null
   
   servico?: {
     descricao?: string;
     id?: string;
-  } | string; // Allow both string and object
+  } | string | null; // Allow both string and object or null
   
-  numero_protocolo_156?: string; // Added for protocol 156 access
+  numero_protocolo_156?: string | null; // Added for protocol 156 access
 }
 
 export interface ResponseQA {

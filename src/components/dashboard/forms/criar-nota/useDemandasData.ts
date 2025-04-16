@@ -16,39 +16,58 @@ export const useDemandasData = () => {
       try {
         setIsLoading(true);
         
-        // Primeiro buscamos as demandas que estão pendentes ou em andamento
-        const { data: allDemandas, error: demandasError } = await supabase
+        // First, check if the numero_protocolo_156 column exists to avoid errors
+        let hasProtoColumn = true;
+        const { error: checkError } = await supabase
           .from('demandas')
-          .select(`
+          .select('numero_protocolo_156')
+          .limit(1);
+          
+        if (checkError) {
+          console.log('Column numero_protocolo_156 does not exist:', checkError.message);
+          hasProtoColumn = false;
+        }
+        
+        // Build the select query based on available columns
+        let selectQuery = `
+          id,
+          titulo,
+          status,
+          detalhes_solicitacao,
+          resumo_situacao,
+          perguntas,
+          problema_id,
+          coordenacao_id,
+          servico_id,
+          horario_publicacao,
+          prazo_resposta,
+          prioridade,
+          arquivo_url,
+          anexos,
+          tema:temas(
             id,
-            titulo,
-            status,
-            detalhes_solicitacao,
-            resumo_situacao,
-            perguntas,
-            problema_id,
-            coordenacao_id,
-            servico_id,
-            horario_publicacao,
-            prazo_resposta,
-            prioridade,
-            arquivo_url,
-            anexos,
-            numero_protocolo_156,
-            tema:temas(
+            descricao,
+            coordenacao:coordenacoes(
               id,
               descricao,
-              coordenacao:coordenacoes(
-                id,
-                descricao,
-                sigla
-              )
-            ),
-            servico:servicos(
-              id,
-              descricao
+              sigla
             )
-          `)
+          ),
+          servico:servicos(
+            id,
+            descricao
+          )
+        `;
+        
+        // Add the protocol column if it exists
+        if (hasProtoColumn) {
+          selectQuery = `numero_protocolo_156, ${selectQuery}`;
+        }
+        
+        // Fetch the demandas data with the appropriate columns
+        const { data: allDemandas, error: demandasError } = await supabase
+          .from('demandas')
+          .select(selectQuery)
           .in('status', ['pendente', 'em_andamento', 'respondida'])
           .order('horario_publicacao', { ascending: false });
         
@@ -91,7 +110,7 @@ export const useDemandasData = () => {
             prioridade: demanda.prioridade,
             arquivo_url: demanda.arquivo_url,
             anexos: demanda.anexos,
-            numero_protocolo_156: demanda.numero_protocolo_156,
+            numero_protocolo_156: hasProtoColumn ? demanda.numero_protocolo_156 : null,
             tema: demanda.tema, 
             servico: demanda.servico,
             
