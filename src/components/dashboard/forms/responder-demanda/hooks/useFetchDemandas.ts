@@ -129,10 +129,12 @@ export const useFetchDemandas = () => {
         
         // Transform the data to match the Demanda type
         const transformedData: Demanda[] = (filteredData || []).map(item => {
+          if (!item) return {} as Demanda;
+          
           // Process perguntas from different formats - ensure it returns a Record<string, string>
           let perguntasObject: Record<string, string> = {};
           
-          if (item && item.perguntas) {
+          if (item.perguntas) {
             if (Array.isArray(item.perguntas)) {
               // Convert string array to Record<string, string>
               item.perguntas.forEach((question: string, index: number) => {
@@ -143,80 +145,70 @@ export const useFetchDemandas = () => {
               const entries = Object.entries(item.perguntas);
               entries.forEach(([key, value]) => {
                 // Ensure the value is a string
-                perguntasObject[key] = String(value);
+                perguntasObject[key] = String(value || '');
               });
             }
           }
           
           // Process anexos to ensure it's always a valid array of URLs
-          const processedAnexos = item && item.anexos ? processFileUrls(item.anexos) : [];
+          const processedAnexos = item.anexos ? processFileUrls(item.anexos) : [];
           
           // Process arquivo_url
-          const arquivo_url = item && item.arquivo_url ? 
+          const arquivo_url = item.arquivo_url ? 
             processFileUrls([item.arquivo_url])[0] || null : 
             null;
             
-          console.log(`Processing demanda ${item ? item.id : 'unknown'} for response:`, {
-            originalAnexos: item ? item.anexos : null,
+          console.log(`Processing demanda ${item.id || 'unknown'} for response:`, {
+            originalAnexos: item.anexos || null,
             processedAnexos,
-            originalArquivoUrl: item ? item.arquivo_url : null,
+            originalArquivoUrl: item.arquivo_url || null,
             processedArquivoUrl: arquivo_url
           });
           
           // Extract distrito data from the nested structure if it exists
-          const distritoData = item && item.bairros && item.bairros.distritos ? item.bairros.distritos : null;
-          
-          // Safe accessor function to handle potentially undefined properties
-          const safe = <T>(accessor: () => T, defaultValue: T): T => {
-            try {
-              const value = accessor();
-              return value !== undefined && value !== null ? value : defaultValue;
-            } catch {
-              return defaultValue;
-            }
-          };
+          const distritoData = item.bairros && item.bairros.distritos ? item.bairros.distritos : null;
           
           return {
-            id: safe(() => item.id, ''),
-            titulo: safe(() => item.titulo, ''),
-            detalhes_solicitacao: safe(() => item.detalhes_solicitacao, null),
-            resumo_situacao: hasResumoSituacao ? safe(() => item.resumo_situacao, null) : null,
-            prazo_resposta: safe(() => item.prazo_resposta, null),
-            prioridade: safe(() => item.prioridade, ''),
+            id: item.id || '',
+            titulo: item.titulo || '',
+            detalhes_solicitacao: item.detalhes_solicitacao || null,
+            resumo_situacao: hasResumoSituacao ? item.resumo_situacao || null : null,
+            prazo_resposta: item.prazo_resposta || null,
+            prioridade: item.prioridade || '',
             perguntas: perguntasObject,
-            status: safe(() => item.status, ''),
-            horario_publicacao: safe(() => item.horario_publicacao, new Date().toISOString()),
-            endereco: safe(() => item.endereco, null),
-            nome_solicitante: safe(() => item.nome_solicitante, null),
-            email_solicitante: safe(() => item.email_solicitante, null),
-            telefone_solicitante: safe(() => item.telefone_solicitante, null),
-            veiculo_imprensa: safe(() => item.veiculo_imprensa, null),
+            status: item.status || '',
+            horario_publicacao: item.horario_publicacao || new Date().toISOString(),
+            endereco: item.endereco || null,
+            nome_solicitante: item.nome_solicitante || null,
+            email_solicitante: item.email_solicitante || null,
+            telefone_solicitante: item.telefone_solicitante || null,
+            veiculo_imprensa: item.veiculo_imprensa || null,
             arquivo_url,
             anexos: processedAnexos,
-            coordenacao_id: safe(() => item.coordenacao_id, null),
-            coordenacao: safe(() => item.coordenacoes, null),
+            coordenacao_id: item.coordenacao_id || null,
+            coordenacao: item.coordenacoes || null,
             supervisao_tecnica_id: null, // Add this field with null value for backward compatibility
-            bairro_id: safe(() => item.bairro_id, null),
-            autor_id: safe(() => item.autor_id, null),
-            tipo_midia_id: safe(() => item.tipo_midia_id, null),
-            origem_id: safe(() => item.origem_id, null),
-            problema_id: safe(() => item.problema_id, null),
-            servico_id: safe(() => item.servico_id, null),
-            protocolo: safe(() => item.protocolo, null),
-            tema: safe(() => item.problemas, null) ? {
-              id: safe(() => item.problemas.id, ''),
-              descricao: safe(() => item.problemas.descricao, ''),
-              icone: safe(() => item.problemas.icone, null),
-              coordenacao: safe(() => item.problemas.coordenacao, null)
+            bairro_id: item.bairro_id || null,
+            autor_id: item.autor_id || null,
+            tipo_midia_id: item.tipo_midia_id || null,
+            origem_id: item.origem_id || null,
+            problema_id: item.problema_id || null,
+            servico_id: item.servico_id || null,
+            protocolo: item.protocolo || null,
+            tema: item.problemas ? {
+              id: item.problemas.id || '',
+              descricao: item.problemas.descricao || '',
+              icone: item.problemas.icone || null,
+              coordenacao: item.problemas.coordenacao || null
             } : null,
             areas_coordenacao: null,
-            origens_demandas: safe(() => item.origens_demandas, null),
-            tipos_midia: safe(() => item.tipos_midia, null),
-            bairros: safe(() => item.bairros, null),
+            origens_demandas: item.origens_demandas || null,
+            tipos_midia: item.tipos_midia || null,
+            bairros: item.bairros || null,
             distrito: distritoData,
-            autor: safe(() => item.autor, null),
-            servico: safe(() => item.servico, null),
-            problema: safe(() => item.problemas, null)
+            autor: item.autor || null,
+            servico: item.servico || null,
+            problema: item.problemas || null
           };
         });
         

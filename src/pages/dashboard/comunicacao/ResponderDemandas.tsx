@@ -12,7 +12,7 @@ const ResponderDemandas = () => {
     <div className="max-w-7xl mx-auto">
       <WelcomeCard
         title="Responder Demandas"
-        description={`Olá ${firstName}, atenda às solicitações pendentes de comunicação`}
+        description={`Olá ${firstName}, forneça respostas técnicas para solicitações de imprensa`}
         icon={<MessageCircle className="h-6 w-6 mr-2 text-white" />}
         color="bg-gradient-to-r from-blue-700 to-blue-800"
       />
