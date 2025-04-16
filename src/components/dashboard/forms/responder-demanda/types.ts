@@ -79,3 +79,12 @@ export interface Demanda {
     }
   };
 }
+
+// Adding missing types
+export type ViewMode = "list" | "cards";
+
+export interface Area {
+  id: string;
+  descricao: string;
+  sigla?: string;
+}
