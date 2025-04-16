@@ -19,10 +19,17 @@ export const FeedbackProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   
   const { sgzProgress, painelProgress } = useUploadState();
   const { isLoading } = useRankingCharts();
-  const location = useLocation();
   
-  // Check if we're on the ranking subs page
-  const isRankingSubsPage = location.pathname === '/dashboard/zeladoria/ranking-subs';
+  // Safely use location - wrap in try/catch to handle cases where Router is not available
+  let isRankingSubsPage = false;
+  try {
+    const location = useLocation();
+    isRankingSubsPage = location.pathname === '/dashboard/zeladoria/ranking-subs';
+  } catch (error) {
+    // Router not available, location cannot be used
+    console.log('Router not available, location cannot be determined');
+    isRankingSubsPage = false;
+  }
   
   // Monitor upload progress and show feedback
   useEffect(() => {
