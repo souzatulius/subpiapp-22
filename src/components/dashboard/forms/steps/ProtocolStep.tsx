@@ -12,6 +12,7 @@ import { DatePicker } from "@/components/ui/date-picker"
 import { ValidationError } from '@/lib/formValidationUtils';
 import { useOriginIcon } from '@/hooks/useOriginIcon';
 import Protocolo156 from './identification/Protocolo156';
+import { formatDateTime } from '@/lib/utils'; // Add this import for formatDateTime
 
 interface ProtocolStepProps {
   formData: {
