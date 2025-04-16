@@ -4,6 +4,7 @@ import AnimatedFeedback from './animated-feedback';
 import { useAnimatedFeedback } from '@/hooks/use-animated-feedback';
 import { useUploadState } from '@/hooks/ranking/useUploadState';
 import { useRankingCharts } from '@/hooks/ranking/useRankingCharts';
+import { useLocation } from 'react-router-dom';
 
 export const FeedbackProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { 
@@ -18,9 +19,15 @@ export const FeedbackProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   
   const { sgzProgress, painelProgress } = useUploadState();
   const { isLoading } = useRankingCharts();
+  const location = useLocation();
+  
+  // Check if we're on the ranking subs page
+  const isRankingSubsPage = location.pathname === '/dashboard/zeladoria/ranking-subs';
   
   // Monitor upload progress and show feedback
   useEffect(() => {
+    if (!isRankingSubsPage) return; // Only show automatic progress on ranking-subs page
+    
     if (sgzProgress?.stage === 'uploading' || sgzProgress?.stage === 'processing') {
       // Use either progress or calculate from totalRecords/processed
       const progress = sgzProgress.progress || 
@@ -53,7 +60,7 @@ export const FeedbackProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         stage: painelProgress.stage === 'uploading' ? 'Enviando' : 'Processando Painel',
         duration: 0
       });
-    } else if (isLoading && !isVisible) {
+    } else if (isRankingSubsPage && isLoading && !isVisible) {
       showFeedback('loading', 'Processando dados...', { 
         progress: 50,
         stage: 'Carregando gráficos',
@@ -65,15 +72,16 @@ export const FeedbackProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     painelProgress, 
     isLoading, 
     showFeedback,
-    isVisible
+    isVisible,
+    isRankingSubsPage
   ]);
   
   // Update progress when new data comes in
   useEffect(() => {
-    if (isVisible && isLoading) {
+    if (isVisible && isLoading && isRankingSubsPage) {
       updateFeedbackProgress(50, `Carregando visualizações (50%)`);
     }
-  }, [isVisible, isLoading, updateFeedbackProgress]);
+  }, [isVisible, isLoading, updateFeedbackProgress, isRankingSubsPage]);
   
   return (
     <>

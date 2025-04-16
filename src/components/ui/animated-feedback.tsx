@@ -18,6 +18,7 @@ interface AnimatedFeedbackProps {
     progress?: number;
     stage?: string;
     animate?: boolean;
+    duration?: number;
     [key: string]: any;
   };
 }
@@ -27,27 +28,31 @@ export const AnimatedFeedback: React.FC<AnimatedFeedbackProps> = ({
   message,
   visible,
   onClose,
-  duration = 2000,
+  duration = 3000, // Increased default duration for better visibility
   options = {}
 }) => {
   const [isVisible, setIsVisible] = useState(visible);
-  const { progress, stage, animate = true } = options;
+  const { progress, stage, animate = true, duration: optionsDuration } = options;
+  
+  // Use duration from options if provided, otherwise use the prop
+  const effectiveDuration = optionsDuration !== undefined ? optionsDuration : duration;
   
   useEffect(() => {
     setIsVisible(visible);
     
     let timer: NodeJS.Timeout;
-    if (visible && type !== 'loading' && duration) {
+    // Only auto-hide if duration is greater than 0 and not loading type
+    if (visible && type !== 'loading' && effectiveDuration > 0) {
       timer = setTimeout(() => {
         setIsVisible(false);
         if (onClose) onClose();
-      }, duration);
+      }, effectiveDuration);
     }
     
     return () => {
       if (timer) clearTimeout(timer);
     };
-  }, [visible, duration, onClose, type]);
+  }, [visible, effectiveDuration, onClose, type]);
   
   return (
     <AnimatePresence>
@@ -57,7 +62,7 @@ export const AnimatedFeedback: React.FC<AnimatedFeedbackProps> = ({
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: 10, scale: 0.95 }}
           transition={{ duration: 0.3 }}
-          className="fixed top-1/4 left-1/2 -translate-x-1/2 z-50 pointer-events-none max-w-md w-full px-4"
+          className="fixed top-1/4 left-1/2 -translate-x-1/2 z-50 pointer-events-auto max-w-md w-full px-4"
         >
           <div className={cn(
             "rounded-xl shadow-lg px-6 py-4 flex flex-col gap-3 mx-auto",
@@ -146,6 +151,20 @@ export const AnimatedFeedback: React.FC<AnimatedFeedbackProps> = ({
                   <span>{progress}%</span>
                 </div>
               </div>
+            )}
+            
+            {/* Add a close button for user to dismiss */}
+            {type !== 'loading' && (
+              <button 
+                onClick={() => {
+                  setIsVisible(false);
+                  if (onClose) onClose();
+                }}
+                className="absolute top-2 right-2 text-gray-500 hover:text-gray-700"
+                aria-label="Fechar"
+              >
+                <XCircle className="h-4 w-4" />
+              </button>
             )}
           </div>
         </motion.div>

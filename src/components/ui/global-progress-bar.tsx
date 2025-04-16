@@ -16,6 +16,8 @@ interface GlobalProgressBarProps {
   autoIncrement?: boolean;
   /** Custom className for styling */
   className?: string;
+  /** Specific routes where this should be shown */
+  routes?: string[];
 }
 
 /**
@@ -27,14 +29,15 @@ const GlobalProgressBar = ({
   value: propValue,
   showLabel = false,
   autoIncrement = true,
-  className
+  className,
+  routes = ['/dashboard/zeladoria/ranking-subs'] // Default routes where this should show
 }: GlobalProgressBarProps) => {
   const [value, setValue] = useState(0);
   const [visible, setVisible] = useState(false);
   const location = useLocation();
   
-  // Only show on the exact ranking-subs page
-  const shouldShowProgressBar = location.pathname === '/dashboard/zeladoria/ranking-subs';
+  // Check if current route is in the allowed routes list
+  const shouldShowProgressBar = routes.includes(location.pathname);
   
   useEffect(() => {
     // If not on the correct page, immediately ensure not visible

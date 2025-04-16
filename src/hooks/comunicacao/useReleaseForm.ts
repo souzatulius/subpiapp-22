@@ -30,6 +30,9 @@ export const useReleaseForm = () => {
     setIsSubmitting(true);
     
     try {
+      // Show processing feedback
+      showFeedback('loading', 'Salvando release...', { progress: 30 });
+      
       // Get the current authenticated user ID
       const { data: authData } = await supabase.auth.getUser();
       const userId = authData?.user?.id || 'sistema';
@@ -68,6 +71,9 @@ export const useReleaseForm = () => {
     setIsGenerating(true);
     
     try {
+      // Show generating feedback with progress
+      showFeedback('loading', 'Gerando notícia...', { progress: 40, stage: 'Processando texto' });
+      
       // Call the new unified edge function
       const { data, error } = await supabase.functions.invoke('generate-with-gpt', {
         body: { 
@@ -79,6 +85,9 @@ export const useReleaseForm = () => {
       if (error) throw error;
       
       if (data?.resultado) {
+        // Update progress
+        showFeedback('loading', 'Formatando notícia...', { progress: 80, stage: 'Finalizando' });
+        
         // Extract title and content from the generated text
         const lines = data.resultado.split('\n');
         const title = lines[0].trim();
@@ -92,6 +101,9 @@ export const useReleaseForm = () => {
         setGeneratedContent(generatedData);
         setEditedTitle(generatedData.titulo);
         setEditedContent(generatedData.conteudo);
+        
+        // Show success and display the generated content
+        showFeedback('success', 'Notícia gerada com sucesso!');
         setShowGeneratedContent(true);
       } else {
         throw new Error('Resposta inválida do servidor');
@@ -109,6 +121,9 @@ export const useReleaseForm = () => {
   const handleCreateNote = async () => {
     if (editedTitle && editedContent) {
       try {
+        // Show creating feedback
+        showFeedback('loading', 'Criando notícia...', { progress: 50 });
+        
         // Get the current authenticated user ID
         const { data: authData } = await supabase.auth.getUser();
         const userId = authData?.user?.id || 'sistema';

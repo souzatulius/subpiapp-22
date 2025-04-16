@@ -44,6 +44,10 @@ export const useRespostaSubmission = (options?: SubmissionOptions) => {
 
     try {
       setIsSubmitting(true);
+      
+      // Show loading feedback
+      showFeedback('loading', 'Enviando resposta...', { progress: 30, stage: 'Processando' });
+      
       console.log("Setting status to em_andamento");
 
       // First, save the response without changing the status
@@ -68,6 +72,9 @@ export const useRespostaSubmission = (options?: SubmissionOptions) => {
       }
 
       console.log("Response inserted successfully");
+      
+      // Update feedback progress
+      showFeedback('loading', 'Atualizando status da demanda...', { progress: 70, stage: 'Finalizando' });
       
       // Now try to update the status to "em_andamento"
       // This is safer since the response is already saved

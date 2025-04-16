@@ -6,18 +6,16 @@ import { toast } from '@/components/ui/use-toast';
 import { DemandFormData } from './types';
 import { formatQuestionsToObject, isValidPublicUrl, processFileUrls } from '@/utils/questionFormatUtils';
 import { validateDemandForm, getErrorSummary } from '@/lib/formValidationUtils';
+import { useAnimatedFeedback } from '@/hooks/use-animated-feedback';
 
 export const useDemandFormSubmit = (resetForm: () => void, onClose: () => void) => {
   const [isLoading, setIsLoading] = useState(false);
   const { user } = useAuth();
+  const { showFeedback } = useAnimatedFeedback();
 
   const submitForm = async (formData: DemandFormData) => {
     if (!user) {
-      toast({
-        title: "Erro de autenticação",
-        description: "Você precisa estar logado para submeter o formulário.",
-        variant: "destructive"
-      });
+      showFeedback('error', "Você precisa estar logado para submeter o formulário.");
       return;
     }
     
@@ -25,6 +23,7 @@ export const useDemandFormSubmit = (resetForm: () => void, onClose: () => void) 
     const validationErrors = validateDemandForm(formData, 4); // 4 is the index of the review step
     if (validationErrors.length > 0) {
       const errorSummary = getErrorSummary(validationErrors);
+      showFeedback('error', `Campos obrigatórios não preenchidos: ${errorSummary}`);
       throw new Error(`Campos obrigatórios não preenchidos: ${errorSummary}`);
     }
     
@@ -85,10 +84,8 @@ export const useDemandFormSubmit = (resetForm: () => void, onClose: () => void) 
         
       if (error) throw error;
       
-      toast({
-        title: "Demanda cadastrada com sucesso!",
-        description: "A demanda foi cadastrada e será analisada pela equipe.",
-      });
+      // Show animated feedback instead of just toast
+      showFeedback('success', "Demanda cadastrada com sucesso!");
       
       resetForm();
       onClose();
@@ -98,7 +95,9 @@ export const useDemandFormSubmit = (resetForm: () => void, onClose: () => void) 
       // Check for database constraint error
       if (error.code === '23502') { // not-null constraint violation
         const errorMessage = error.message || "Campos obrigatórios não preenchidos";
-        throw new Error(errorMessage);
+        showFeedback('error', errorMessage);
+      } else {
+        showFeedback('error', error.message || "Ocorreu um erro ao processar sua solicitação");
       }
       
       throw error;
