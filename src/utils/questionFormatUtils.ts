@@ -1,3 +1,4 @@
+
 // Utility functions for handling question formats and validations
 
 /**
@@ -48,7 +49,7 @@ export const isValidPublicUrl = (url: string): boolean => {
       url.includes('supabase.co/storage/v1/object/public/') ||
       url.startsWith('https://') ||
       url.startsWith('http://')
-    );
+    ) && !url.includes('blob:'); // Explicitly exclude blob URLs
   } catch (e) {
     return false;
   }
@@ -63,6 +64,12 @@ export const normalizeFileUrl = (url: string): string => {
   if (!url || typeof url !== 'string') return '';
   
   try {
+    // Remove blob URLs completely
+    if (url.includes('blob:')) {
+      console.warn('Blob URL detected, removing:', url);
+      return '';
+    }
+    
     // If it's already a complete Supabase URL
     if (url.includes('supabase.co/storage/v1/object/public/')) {
       // Ensure it uses HTTPS
@@ -87,7 +94,7 @@ export const normalizeFileUrl = (url: string): string => {
     return url;
   } catch (e) {
     console.error("Error normalizing URL:", e, url);
-    return url;
+    return '';
   }
 };
 
@@ -104,7 +111,7 @@ export const processFileUrls = (urls: any): string[] => {
     return urls
       .filter(url => url && typeof url === 'string')
       .map(normalizeFileUrl)
-      .filter(isValidPublicUrl);
+      .filter(url => url && isValidPublicUrl(url));
   }
   
   // If it's a JSON string representing an array
@@ -115,7 +122,7 @@ export const processFileUrls = (urls: any): string[] => {
         return parsed
           .filter(url => url && typeof url === 'string')
           .map(normalizeFileUrl)
-          .filter(isValidPublicUrl);
+          .filter(url => url && isValidPublicUrl(url));
       }
       
       // If it's a single URL string

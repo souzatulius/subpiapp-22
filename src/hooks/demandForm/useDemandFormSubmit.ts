@@ -36,7 +36,7 @@ export const useDemandFormSubmit = (resetForm: () => void, onClose: () => void) 
       // Process anexos to ensure they are all valid URLs
       const processedAnexos = processFileUrls(formData.anexos);
       
-      // Validate arquivo_url
+      // Validate arquivo_url - explicitly check if it's a valid Supabase URL
       const arquivo_url = formData.arquivo_url && isValidPublicUrl(formData.arquivo_url) 
         ? formData.arquivo_url 
         : null;

@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { toast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { v4 as uuidv4 } from 'uuid';
+import { normalizeFileUrl } from '@/utils/questionFormatUtils';
 
 interface FileUploadSectionProps {
   anexos: string[];
@@ -58,10 +59,32 @@ const FileUploadSection: React.FC<FileUploadSectionProps> = ({ anexos, onAnexosC
       setIsUploading(true);
 
       try {
-        // For now we'll use object URLs for demo/testing
-        // In production this would upload to Supabase storage
-        const fileUrl = URL.createObjectURL(file);
-        onAnexosChange([...anexos, fileUrl]);
+        // Upload to Supabase storage
+        const fileId = uuidv4();
+        const ext = file.name.split('.').pop();
+        const filePath = `uploads/${fileId}.${ext}`;
+
+        const { error } = await supabase.storage
+          .from('demandas')
+          .upload(filePath, file);
+
+        if (error) {
+          console.error('Error uploading file:', error);
+          toast({
+            title: "Erro ao fazer upload",
+            description: error.message,
+            variant: "destructive",
+          });
+          continue;
+        }
+
+        // Get the public URL
+        const { data } = supabase.storage
+          .from('demandas')
+          .getPublicUrl(filePath);
+        
+        // Add the URL to anexos
+        onAnexosChange([...anexos, data.publicUrl]);
         
         toast({
           title: "Arquivo adicionado",
@@ -82,16 +105,6 @@ const FileUploadSection: React.FC<FileUploadSectionProps> = ({ anexos, onAnexosC
 
   const removeFile = useCallback((index: number) => {
     const updatedFiles = [...anexos];
-    
-    // Revoke the object URL to avoid memory leaks if it's a blob URL
-    try {
-      if (updatedFiles[index].startsWith('blob:')) {
-        URL.revokeObjectURL(updatedFiles[index]);
-      }
-    } catch (error) {
-      console.error('Error revoking object URL:', error);
-    }
-    
     updatedFiles.splice(index, 1);
     onAnexosChange(updatedFiles);
     
@@ -136,7 +149,7 @@ const FileUploadSection: React.FC<FileUploadSectionProps> = ({ anexos, onAnexosC
     
     try {
       const extension = path.split('.').pop()?.toLowerCase();
-      return ['jpg', 'jpeg', 'png', 'gif', 'webp', 'heic'].includes(extension || '') || path.startsWith('blob:');
+      return ['jpg', 'jpeg', 'png', 'gif', 'webp', 'heic'].includes(extension || '');
     } catch (error) {
       console.error('Error checking file type:', error);
       return false;
@@ -146,49 +159,12 @@ const FileUploadSection: React.FC<FileUploadSectionProps> = ({ anexos, onAnexosC
   // Helper function to get shortened file name
   const getFileName = useCallback((path: string, index: number): string => {
     try {
-      // For object URLs or relative paths, use a generic name
-      if (path.startsWith('blob:') || !path.includes('/')) {
-        return `Arquivo ${index + 1}`;
-      }
       return path.split('/').pop() || `Arquivo ${index + 1}`;
     } catch (error) {
       console.error('Error getting file name:', error);
       return `Arquivo ${index + 1}`;
     }
   }, []);
-
-  // Render the file preview based on file type
-  const getFileIcon = useCallback((path: string) => {
-    if (isImageFile(path)) {
-      try {
-        return (
-          <div className="h-24 w-full bg-gray-100 rounded-xl flex items-center justify-center overflow-hidden">
-            <img 
-              src={path} 
-              alt="preview" 
-              className="h-full w-full object-contain"
-              onError={(e) => {
-                console.error('Error loading image preview');
-                e.currentTarget.src = '';
-                e.currentTarget.style.display = 'none';
-                e.currentTarget.parentElement?.appendChild(
-                  Object.assign(document.createElement('div'), {
-                    className: 'flex items-center justify-center w-full h-full',
-                    innerHTML: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-400"><rect x="2" y="2" width="20" height="20" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>'
-                  })
-                );
-              }}
-            />
-          </div>
-        );
-      } catch (error) {
-        console.error('Error creating image preview:', error);
-        return <ImageIcon className="h-10 w-10 text-blue-500" />;
-      }
-    } else {
-      return <FileText className="h-10 w-10 text-blue-500" />;
-    }
-  }, [isImageFile]);
 
   return (
     <div className="space-y-4">
@@ -224,8 +200,28 @@ const FileUploadSection: React.FC<FileUploadSectionProps> = ({ anexos, onAnexosC
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mt-4">
           {anexos.map((file, index) => (
             <div key={index} className="border rounded-xl overflow-hidden bg-white shadow-sm hover:shadow-md transition-shadow">
-              <div className="relative">
-                {getFileIcon(file)}
+              <div className="relative h-24 w-full bg-gray-100 rounded-t-xl flex items-center justify-center">
+                {isImageFile(file) ? (
+                  <img 
+                    src={file} 
+                    alt="preview" 
+                    className="h-full w-full object-contain"
+                    onError={(e) => {
+                      console.error('Error loading image preview');
+                      e.currentTarget.src = '';
+                      e.currentTarget.style.display = 'none';
+                      const parent = e.currentTarget.parentElement;
+                      if (parent) {
+                        const fallback = document.createElement('div');
+                        fallback.className = 'flex items-center justify-center w-full h-full';
+                        fallback.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-400"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>';
+                        parent.appendChild(fallback);
+                      }
+                    }}
+                  />
+                ) : (
+                  <FileText className="h-10 w-10 text-blue-500" />
+                )}
                 <Button 
                   type="button" 
                   variant="destructive" 
