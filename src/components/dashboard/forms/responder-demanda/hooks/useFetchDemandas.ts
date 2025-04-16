@@ -56,9 +56,13 @@ export const useFetchDemandas = () => {
             // Make sure tema has the correct structure
             if (demanda.tema && typeof demanda.tema === 'object') {
               processedDemanda.tema = {
-                ...demanda.tema,
+                id: demanda.tema.id || '',
+                descricao: demanda.tema.descricao || '',
                 coordenacao: demanda.tema.coordenacao || null
               };
+            } else {
+              // If tema is null or not an object, set it to null
+              processedDemanda.tema = null;
             }
             
             return processedDemanda;

@@ -91,9 +91,9 @@ export const useDemandasData = () => {
               descricao: demanda.problema.descricao || null,
               id: demanda.problema.id
             } : null,
-            tema: demanda.tema ? {
+            tema: demanda.tema && typeof demanda.tema === 'object' ? {
+              id: demanda.tema.id || '',
               descricao: demanda.tema.descricao || '',
-              id: demanda.tema.id,
               coordenacao: demanda.tema.coordenacao || null
             } : null
           };
