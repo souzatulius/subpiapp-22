@@ -50,6 +50,7 @@ export interface Demand {
   // Properties needed by criar-nota
   veiculo_imprensa?: string;
   detalhes_solicitacao?: string;
+  resumo_situacao?: string;
   perguntas?: any;
   arquivo_url?: string;
   tipo_veiculo?: string;
