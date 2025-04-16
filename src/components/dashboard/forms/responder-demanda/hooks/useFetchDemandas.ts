@@ -102,8 +102,6 @@ export const useFetchDemandas = () => {
           return;
         }
 
-        console.log('Demandas raw data:', data);
-
         // Now fetch all respostas_demandas to filter out answered demands
         const { data: respostasData, error: respostasError } = await supabase
           .from('respostas_demandas')
@@ -130,12 +128,12 @@ export const useFetchDemandas = () => {
           // Process perguntas from different formats - ensure it returns a Record<string, string>
           let perguntasObject: Record<string, string> = {};
           
-          if (Array.isArray(item.perguntas)) {
+          if (item.perguntas && Array.isArray(item.perguntas)) {
             // Convert string array to Record<string, string>
             item.perguntas.forEach((question: string, index: number) => {
               perguntasObject[index.toString()] = question;
             });
-          } else if (typeof item.perguntas === 'object' && item.perguntas !== null) {
+          } else if (item.perguntas && typeof item.perguntas === 'object' && item.perguntas !== null) {
             // Convert any object to Record<string, string>, ensuring all values are strings
             const entries = Object.entries(item.perguntas);
             entries.forEach(([key, value]) => {
@@ -145,7 +143,7 @@ export const useFetchDemandas = () => {
           }
           
           // Process anexos to ensure it's always a valid array of URLs
-          const processedAnexos = processFileUrls(item.anexos);
+          const processedAnexos = item.anexos ? processFileUrls(item.anexos) : [];
           
           // Process arquivo_url
           const arquivo_url = item.arquivo_url ? 
