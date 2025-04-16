@@ -25,33 +25,40 @@ const SmartSearchCard: React.FC<SmartSearchCardProps> = ({
   onSearch,
   className = "",
   isEditMode = false,
-  disableNavigation = false // Changed to false by default to enable navigation
+  disableNavigation = false
 }) => {
   const { 
-    query, 
-    setQuery, 
     suggestions, 
     isLoading,
+    setQuery,
     handleSelectSuggestion,
     handleSearch
   } = useSmartSearch();
+  
+  const [inputValue, setInputValue] = useState('');
   const [showSuggestions, setShowSuggestions] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   
+  // Filter suggestions based on input
+  const filteredSuggestions = inputValue.length >= 2 
+    ? suggestions
+    : [];
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
+    setInputValue(value);
     setQuery(value);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (query.trim()) {
+    if (inputValue.trim()) {
       if (onSearch) {
-        onSearch(query);
+        onSearch(inputValue);
       } else if (!disableNavigation) {
-        handleSearch(query);
+        handleSearch(inputValue);
       }
       setShowSuggestions(false);
     }
@@ -59,7 +66,7 @@ const SmartSearchCard: React.FC<SmartSearchCardProps> = ({
 
   const handleSelectItem = (suggestion: SearchSuggestion) => {
     if (disableNavigation) {
-      setQuery(suggestion.title);
+      setInputValue(suggestion.title);
     } else {
       handleSelectSuggestion(suggestion);
     }
@@ -67,7 +74,6 @@ const SmartSearchCard: React.FC<SmartSearchCardProps> = ({
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    // Allow space key to be pressed
     if (e.key === 'Enter') {
       handleSubmit(e);
     } else if (e.key === 'Escape') {
@@ -77,12 +83,12 @@ const SmartSearchCard: React.FC<SmartSearchCardProps> = ({
 
   // Show suggestions when typing with at least 2 characters
   useEffect(() => {
-    if (query.length >= 2 && suggestions.length > 0) {
+    if (inputValue.length >= 2 && filteredSuggestions.length > 0) {
       setShowSuggestions(true);
-    } else if (query.length === 0) {
+    } else if (inputValue.length === 0) {
       setShowSuggestions(false);
     }
-  }, [query, suggestions]);
+  }, [inputValue, filteredSuggestions]);
 
   // Close suggestions when clicking outside
   useEffect(() => {
@@ -97,6 +103,26 @@ const SmartSearchCard: React.FC<SmartSearchCardProps> = ({
     };
   }, []);
 
+  if (isEditMode) {
+    return (
+      <Card className={`w-full bg-transparent border-0 shadow-none ${className}`}>
+        <CardContent className="p-4 bg-transparent px-0 my-[22px] py-0">
+          <form className="relative">
+            <div className="relative">
+              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500 h-5 w-5" />
+              <Input 
+                type="text" 
+                placeholder={placeholder} 
+                className="pl-12 pr-4 rounded-2xl border border-gray-300 w-full bg-white text-lg font-medium text-gray-800 placeholder:text-gray-400 placeholder:font-normal py-[20px]" 
+                disabled={true}
+              />
+            </div>
+          </form>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <Card className={`w-full bg-transparent border-0 shadow-none ${className}`}>
       <CardContent className="p-4 bg-transparent px-0 my-[22px] py-0">
@@ -107,26 +133,26 @@ const SmartSearchCard: React.FC<SmartSearchCardProps> = ({
               ref={inputRef} 
               type="text" 
               placeholder={placeholder} 
-              value={query} 
+              value={inputValue} 
               onChange={handleInputChange}
-              onFocus={() => query.length >= 2 && suggestions.length > 0 && setShowSuggestions(true)}
+              onFocus={() => inputValue.length >= 2 && filteredSuggestions.length > 0 && setShowSuggestions(true)}
               onKeyDown={handleKeyDown}
               className="pl-12 pr-4 rounded-2xl border border-gray-300 w-full bg-white text-lg font-medium text-gray-800 placeholder:text-gray-400 placeholder:font-normal py-[20px]" 
               disabled={isEditMode}
             />
             
             {/* Display loading indicator when searching */}
-            {isLoading && query.length >= 2 && (
+            {isLoading && inputValue.length >= 2 && (
               <div className="absolute right-4 top-1/2 transform -translate-y-1/2">
                 <div className="animate-spin h-4 w-4 border-2 border-gray-500 border-t-transparent rounded-full"></div>
               </div>
             )}
             
             {/* Render suggestions directly attached to the input */}
-            {showSuggestions && suggestions.length > 0 && (
+            {showSuggestions && filteredSuggestions.length > 0 && (
               <div className="absolute z-20 w-full bg-white mt-1 rounded-lg border border-gray-200 shadow-lg">
                 <ul className="py-2 max-h-72 overflow-y-auto">
-                  {suggestions.map((suggestion, index) => (
+                  {filteredSuggestions.map((suggestion, index) => (
                     <li
                       key={index}
                       onClick={() => handleSelectItem(suggestion)}
@@ -140,10 +166,10 @@ const SmartSearchCard: React.FC<SmartSearchCardProps> = ({
             )}
             
             {/* Show "no results" message when actively searching but no results */}
-            {query.length >= 2 && !isLoading && suggestions.length === 0 && (
+            {inputValue.length >= 2 && !isLoading && filteredSuggestions.length === 0 && (
               <div className="absolute z-20 w-full bg-white mt-1 rounded-lg border border-gray-200 shadow-lg">
                 <div className="py-3 text-center text-gray-500">
-                  Nenhum resultado encontrado para "{query}"
+                  Nenhum resultado encontrado para "{inputValue}"
                 </div>
               </div>
             )}

@@ -90,7 +90,7 @@ export const useSmartSearch = () => {
   const fuse = useMemo(() => new Fuse(searchActions, {
     keys: ['label', 'keywords'],
     includeScore: true,
-    threshold: 0.5, // Slightly more permissive matching for better results
+    threshold: 0.3, // More permissive matching for better results (lowered from 0.5)
     ignoreLocation: true,
     useExtendedSearch: true, // Enable extended search for better phrase matching
   }), []);
@@ -115,7 +115,7 @@ export const useSmartSearch = () => {
       return;
     }
 
-    // Start search with just 2 characters (reduced from 4)
+    // Start search with just 2 characters
     if (query.trim().length < 2) {
       setSuggestions([]);
       setShowSuggestions(false);
@@ -135,15 +135,26 @@ export const useSmartSearch = () => {
         console.log('Search query:', searchQuery, 'Length:', searchQuery.length);
         console.log('Processed words:', processedWords);
         
-        // No meaningful words found
-        if (processedWords.length === 0 && searchQuery.length < 3) {
-          setIsLoading(false);
-          setSuggestions([]);
-          return;
-        }
-        
         // Perform a direct search with the full query
         let results = fuse.search(searchQuery);
+        
+        // Perform additional specific searches for common terms
+        // This helps match important keywords like "nota" directly
+        const directMatches = searchActions.filter(action => {
+          const lowerLabel = action.label.toLowerCase();
+          const lowerKeywords = action.keywords.map(k => k.toLowerCase());
+          
+          // Check if any keyword or the label contains the search term
+          return lowerLabel.includes(searchQuery.toLowerCase()) || 
+                 lowerKeywords.some(k => k.includes(searchQuery.toLowerCase()));
+        });
+        
+        // Add any direct matches that aren't already in results
+        directMatches.forEach(match => {
+          if (!results.some(r => r.item.route === match.route)) {
+            results.push({ item: match, refIndex: -1, score: 0.1 });
+          }
+        });
         
         // Search with individual processed words for better matching
         if (processedWords.length > 0) {
@@ -153,15 +164,14 @@ export const useSmartSearch = () => {
           });
           
           // Combine and deduplicate results
-          const combinedResults = [...results];
           wordResults.forEach(result => {
-            if (!combinedResults.some(r => r.item.route === result.item.route)) {
-              combinedResults.push(result);
+            if (!results.some(r => r.item.route === result.item.route)) {
+              results.push(result);
             }
           });
           
           // Sort by relevance score
-          results = combinedResults.sort((a, b) => (a.score || 1) - (b.score || 1));
+          results = results.sort((a, b) => (a.score || 1) - (b.score || 1));
         }
         
         // Map the Fuse.js results to SearchSuggestion type

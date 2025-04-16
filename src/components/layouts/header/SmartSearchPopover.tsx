@@ -16,7 +16,8 @@ const SmartSearchPopover: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const {
     suggestions,
-    isLoading
+    isLoading,
+    setQuery
   } = useSmartSearch();
   const navigate = useNavigate();
 
@@ -34,13 +35,12 @@ const SmartSearchPopover: React.FC = () => {
   
   const handleSearchInputChange = (value: string) => {
     setSearchQuery(value);
+    setQuery(value);
   };
 
-  // Only show suggestions when the user types 2 or more characters (reduced from 4)
+  // Only show suggestions when the user types 2 or more characters
   const filteredSuggestions = searchQuery.length >= 2 
-    ? suggestions.filter(suggestion => 
-        suggestion.title.toLowerCase().includes(searchQuery.toLowerCase())
-      )
+    ? suggestions
     : [];
 
   return (

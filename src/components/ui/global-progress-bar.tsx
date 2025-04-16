@@ -33,25 +33,27 @@ const GlobalProgressBar = ({
   const [visible, setVisible] = useState(false);
   const location = useLocation();
   
-  // Use strict path matching for the ranking-subs page
+  // Only show on the exact ranking-subs page
   const shouldShowProgressBar = location.pathname === '/dashboard/zeladoria/ranking-subs';
   
   useEffect(() => {
-    // Immediate check to prevent any mounting on irrelevant pages
+    // If not on the correct page, immediately ensure not visible
     if (!shouldShowProgressBar) {
       setVisible(false);
       setValue(0);
       return;
     }
     
-    // Add a small delay before showing the progress bar to prevent flashing
-    let showTimer: NodeJS.Timeout;
+    // On correct page, handle visibility based on loading state
+    let showTimer: NodeJS.Timeout | undefined;
+    
     if (isLoading && shouldShowProgressBar) {
+      // Add delay before showing to prevent flashing
       showTimer = setTimeout(() => {
         setVisible(true);
-      }, 100); // Small delay to prevent flashing
+      }, 100);
     } else {
-      // When loading completes, trigger the exit animation
+      // When loading completes, first complete the progress bar then hide
       if (value > 0) {
         setValue(100);
         const completeTimer = setTimeout(() => {
@@ -63,8 +65,10 @@ const GlobalProgressBar = ({
       }
     }
     
-    return () => clearTimeout(showTimer);
-  }, [isLoading, shouldShowProgressBar]);
+    return () => {
+      if (showTimer) clearTimeout(showTimer);
+    };
+  }, [isLoading, shouldShowProgressBar, value]);
   
   useEffect(() => {
     // Only handle progress logic when on correct page and visible
@@ -87,14 +91,9 @@ const GlobalProgressBar = ({
     }
   }, [isLoading, autoIncrement, value, propValue, shouldShowProgressBar, visible]);
 
-  // Don't render anything if not visible
-  if (!visible) {
-    return null;
-  }
-
   return (
     <AnimatePresence>
-      {visible && (
+      {visible && shouldShowProgressBar && (
         <motion.div 
           className={cn(
             "fixed top-0 left-0 right-0 z-50 px-4 py-2 bg-orange-100 shadow-md",
