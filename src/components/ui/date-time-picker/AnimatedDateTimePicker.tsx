@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { CalendarIcon, Clock } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { TimeSelector } from './TimeSelector';
 
 interface AnimatedDateTimePickerProps {
   value: string;
@@ -211,12 +212,6 @@ export const AnimatedDateTimePicker: React.FC<AnimatedDateTimePickerProps> = ({
     }
   };
 
-  // Define limited hour options (6-22)
-  const hourOptions = [6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22];
-
-  // Define limited minute options (00 and 30)
-  const minuteOptions = [0, 30];
-
   return (
     <div className={cn("space-y-2", className)}>
       {label && (
@@ -283,74 +278,13 @@ export const AnimatedDateTimePicker: React.FC<AnimatedDateTimePickerProps> = ({
                 <span className="text-sm font-medium">Horário</span>
               </div>
               
-              {/* Time display */}
-              <div className="flex items-center space-x-2 mb-6">
-                <div className="relative">
-                  <Input
-                    type="text"
-                    value={hours}
-                    onChange={(e) => handleTimeChange('hours', e.target.value)}
-                    onFocus={() => handleFocus('hours')}
-                    onBlur={() => handleTimeBlur('hours')}
-                    className="w-14 text-center text-lg font-semibold"
-                    maxLength={2}
-                  />
-                </div>
-                <span className="text-xl font-semibold">:</span>
-                <div className="relative">
-                  <Input
-                    type="text"
-                    value={minutes}
-                    onChange={(e) => handleTimeChange('minutes', e.target.value)}
-                    onFocus={() => handleFocus('minutes')}
-                    onBlur={() => handleTimeBlur('minutes')}
-                    className="w-14 text-center text-lg font-semibold"
-                    maxLength={2}
-                  />
-                </div>
-              </div>
-              
-              {/* Hours grid */}
-              <div className="mb-4">
-                <div className="text-sm font-medium mb-2 text-center">Horas</div>
-                <div className="grid grid-cols-4 gap-2">
-                  {hourOptions.map((hour) => (
-                    <Button
-                      key={`hour-${hour}`}
-                      type="button"
-                      variant={hours === String(hour).padStart(2, '0') ? "default" : "outline"}
-                      className={cn(
-                        "h-10 w-12 p-0 rounded-xl",
-                        hours === String(hour).padStart(2, '0') && "bg-orange-500 text-white hover:bg-orange-600"
-                      )}
-                      onClick={() => handleTimeChange('hours', String(hour).padStart(2, '0'))}
-                    >
-                      {String(hour).padStart(2, '0')}
-                    </Button>
-                  ))}
-                </div>
-              </div>
-              
-              {/* Minutes grid */}
-              <div>
-                <div className="text-sm font-medium mb-2 text-center">Minutos</div>
-                <div className="flex justify-center gap-2">
-                  {minuteOptions.map((minute) => (
-                    <Button
-                      key={`minute-${minute}`}
-                      type="button"
-                      variant={minutes === String(minute).padStart(2, '0') ? "default" : "outline"}
-                      className={cn(
-                        "h-10 w-12 p-0 rounded-xl",
-                        minutes === String(minute).padStart(2, '0') && "bg-orange-500 text-white hover:bg-orange-600"
-                      )}
-                      onClick={() => handleTimeChange('minutes', String(minute).padStart(2, '0'))}
-                    >
-                      {String(minute).padStart(2, '0')}
-                    </Button>
-                  ))}
-                </div>
-              </div>
+              <TimeSelector 
+                hours={hours}
+                minutes={minutes}
+                onTimeChange={handleTimeChange}
+                onTimeFocus={handleFocus}
+                onTimeBlur={handleTimeBlur}
+              />
             </div>
           </div>
           
