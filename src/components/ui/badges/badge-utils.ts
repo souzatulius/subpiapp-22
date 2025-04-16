@@ -1,4 +1,3 @@
-
 export type BadgeSize = 'xs' | 'sm' | 'md' | 'lg';
 
 export function getSizeClasses(size: BadgeSize): string {
@@ -30,3 +29,17 @@ export function getIconSize(size: BadgeSize): number {
       return 14;
   }
 }
+
+// Helper for formatting status labels with capitalization
+export const formatStatusLabel = (status: string): string => {
+  // If the status contains underscores, replace with spaces and format each word
+  if (status.includes('_')) {
+    return status
+      .split('_')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
+  }
+  
+  // Otherwise, just capitalize the first letter
+  return status.charAt(0).toUpperCase() + status.slice(1);
+};

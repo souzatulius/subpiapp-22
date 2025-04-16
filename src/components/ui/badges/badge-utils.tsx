@@ -51,16 +51,5 @@ export const getPriorityBadgeColors = (prioridade: string) => {
   }
 };
 
-// Helper for formatting status labels with capitalization
-export const formatStatusLabel = (status: string): string => {
-  // If the status contains underscores, replace with spaces and format each word
-  if (status.includes('_')) {
-    return status
-      .split('_')
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(' ');
-  }
-  
-  // Otherwise, just capitalize the first letter
-  return status.charAt(0).toUpperCase() + status.slice(1);
-};
+// Import formatStatusLabel from badge-utils.ts instead of redefining it here
+export { formatStatusLabel } from './badge-utils';
