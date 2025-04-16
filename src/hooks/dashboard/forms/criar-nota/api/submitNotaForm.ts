@@ -1,7 +1,7 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from '@/components/ui/use-toast';
 import { Demand } from '@/types/demand';
+import { useFeedback } from '@/components/ui/feedback-provider';
 
 interface SubmitNotaFormProps {
   titulo: string;
@@ -11,6 +11,13 @@ interface SubmitNotaFormProps {
   selectedDemanda: Demand | null;
 }
 
+// Create a function to get the feedback context for non-component use
+let showFeedbackFn: (type: any, message: string, options?: any) => void;
+
+export const setFeedbackFunction = (fn: (type: any, message: string, options?: any) => void) => {
+  showFeedbackFn = fn;
+};
+
 export const submitNotaForm = async ({
   titulo,
   texto,
@@ -19,24 +26,25 @@ export const submitNotaForm = async ({
   selectedDemanda
 }: SubmitNotaFormProps): Promise<boolean> => {
   if (!userId) {
-    toast({
-      title: "Erro de autenticação",
-      description: "Você precisa estar logado para criar uma nota.",
-      variant: "destructive"
-    });
+    if (showFeedbackFn) {
+      showFeedbackFn('error', 'Você precisa estar autenticado para criar uma nota.');
+    }
     return false;
   }
 
   try {
-    console.log("Starting submitNotaForm with:", { userId, selectedDemandaId });
+    if (showFeedbackFn) {
+      showFeedbackFn('loading', 'Iniciando criação da nota...', { progress: 10 });
+    }
     
     // First, try to get the problema_id from the selectedDemanda
     let problemaId = selectedDemanda?.problema_id;
-    console.log("Initial problema_id from selectedDemanda:", problemaId);
     
     // If there's no problem ID, we need to find or create one
     if (!problemaId) {
-      console.log("No problema_id found, looking for existing problems");
+      if (showFeedbackFn) {
+        showFeedbackFn('loading', 'Verificando problema associado...', { progress: 30 });
+      }
       
       // Look for a problem associated with the coordination
       let query = supabase.from('problemas').select('id');
@@ -50,15 +58,15 @@ export const submitNotaForm = async ({
       const { data: problemaData, error: problemaError } = await query.limit(1);
       
       if (problemaError) {
-        console.error('Error fetching problems:', problemaError);
         throw problemaError;
       }
       
       if (problemaData && problemaData.length > 0) {
         problemaId = problemaData[0].id;
-        console.log("Using existing problem:", problemaId);
       } else {
-        console.log("No existing problem found, creating a new one");
+        if (showFeedbackFn) {
+          showFeedbackFn('loading', 'Criando problema associado...', { progress: 40 });
+        }
         
         // Create a default problem
         const coordenacaoId = selectedDemanda?.coordenacao_id || null;
@@ -72,16 +80,16 @@ export const submitNotaForm = async ({
           .select();
           
         if (newProblemaError) {
-          console.error('Error creating problem:', newProblemaError);
           throw newProblemaError;
         }
         
         problemaId = newProblema[0].id;
-        console.log("Created new problem:", problemaId);
       }
     }
     
-    console.log("Final problema_id to use:", problemaId);
+    if (showFeedbackFn) {
+      showFeedbackFn('loading', 'Criando nota...', { progress: 60 });
+    }
     
     // Prepare the data for inserting the note
     const noteData = {
@@ -94,8 +102,6 @@ export const submitNotaForm = async ({
       problema_id: problemaId
     };
     
-    console.log("Inserting note with data:", noteData);
-    
     // Create the note
     const { data, error } = await supabase
       .from('notas_oficiais')
@@ -103,11 +109,12 @@ export const submitNotaForm = async ({
       .select();
     
     if (error) {
-      console.error('Error creating note:', error);
       throw error;
     }
     
-    console.log("Note created successfully:", data);
+    if (showFeedbackFn) {
+      showFeedbackFn('loading', 'Atualizando status da demanda...', { progress: 80 });
+    }
     
     // Update the demand status
     const { error: updateError } = await supabase
@@ -118,23 +125,17 @@ export const submitNotaForm = async ({
     if (updateError) {
       console.error('Error updating demand status:', updateError);
       // Don't throw here as the note was already created
-    } else {
-      console.log("Demand status updated to 'respondida'");
     }
     
-    toast({
-      title: "Nota oficial criada com sucesso!",
-      description: "A nota foi enviada para aprovação.",
-    });
+    if (showFeedbackFn) {
+      showFeedbackFn('success', 'Nota oficial criada com sucesso!');
+    }
     
     return true;
   } catch (error: any) {
-    console.error('Erro ao criar nota oficial:', error);
-    toast({
-      title: "Erro ao criar nota oficial",
-      description: error.message || "Ocorreu um erro ao processar sua solicitação.",
-      variant: "destructive"
-    });
+    if (showFeedbackFn) {
+      showFeedbackFn('error', `Erro ao criar nota oficial: ${error.message || 'Erro desconhecido'}`);
+    }
     return false;
   }
 };

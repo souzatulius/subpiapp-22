@@ -39,7 +39,7 @@ export function useAnimatedFeedback() {
     setIsVisible(true);
     
     // Auto-hide after duration if specified and not loading type
-    const duration = customOptions.duration ?? (type === 'loading' ? 0 : 3000);
+    const duration = customOptions.duration ?? (type === 'loading' ? 0 : 2000);
     if (duration > 0 && type !== 'loading') {
       timeoutRef.current = setTimeout(() => {
         setIsVisible(false);

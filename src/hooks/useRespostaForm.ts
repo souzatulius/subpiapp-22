@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useSupabaseAuth';
 import { Demanda } from '@/components/dashboard/forms/responder-demanda/types';
 import { useRespostaSubmission } from '@/components/dashboard/forms/responder-demanda/hooks/useRespostaSubmission';
+import { useFeedback } from '@/components/ui/feedback-provider';
 
 export const useRespostaForm = (
   selectedDemanda: Demanda | null,
@@ -16,6 +17,7 @@ export const useRespostaForm = (
   const { user } = useAuth();
   const [resposta, setResposta] = useState<Record<string, string>>({});
   const [comentarios, setComentarios] = useState<string>('');
+  const { showFeedback } = useFeedback();
   
   // Initialize useRespostaSubmission hook with showSuccessToast=false
   const { isSubmitting, submitResposta } = useRespostaSubmission({
@@ -31,16 +33,18 @@ export const useRespostaForm = (
 
   const handleSubmitResposta = async () => {
     if (!selectedDemanda || Object.keys(resposta).length === 0) {
-      console.error('Por favor, responda todas as perguntas da demanda');
+      showFeedback('error', 'Por favor, responda todas as perguntas da demanda');
       return;
     }
     
     try {
+      showFeedback('loading', 'Enviando resposta...', { progress: 30 });
+      
       // Use the submitResposta function from useRespostaSubmission
       const success = await submitResposta(selectedDemanda, resposta, comentarios);
       
       if (success) {
-        console.log('Demanda respondida com sucesso');
+        showFeedback('success', 'Demanda respondida com sucesso');
         
         // Update local state
         setDemandas(demandas.filter(d => d.id !== selectedDemanda.id));
@@ -48,9 +52,11 @@ export const useRespostaForm = (
         setSelectedDemanda(null);
         setResposta({});
         setComentarios('');
+      } else {
+        showFeedback('error', 'Não foi possível enviar a resposta. Tente novamente.');
       }
     } catch (error: any) {
-      console.error('Erro ao enviar resposta:', error);
+      showFeedback('error', `Erro ao enviar resposta: ${error.message || 'Erro desconhecido'}`);
     }
   };
 

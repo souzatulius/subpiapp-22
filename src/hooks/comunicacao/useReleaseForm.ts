@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
-import { useAnimatedFeedback } from '@/hooks/use-animated-feedback';
+import { useFeedback } from '@/components/ui/feedback-provider';
 
 interface NotaGerada {
   titulo: string;
@@ -19,7 +19,7 @@ export const useReleaseForm = () => {
   const [generatedContent, setGeneratedContent] = useState<NotaGerada | null>(null);
   const [editedTitle, setEditedTitle] = useState('');
   const [editedContent, setEditedContent] = useState('');
-  const { showFeedback } = useAnimatedFeedback();
+  const { showFeedback } = useFeedback();
   
   const handleSaveRelease = async () => {
     if (!releaseContent.trim()) {
@@ -55,8 +55,7 @@ export const useReleaseForm = () => {
       setShowConfirmDialog(true);
       
     } catch (error: any) {
-      console.error('Erro ao salvar release:', error);
-      showFeedback('error', 'Não foi possível salvar o release');
+      showFeedback('error', `Erro ao salvar release: ${error.message || 'Erro desconhecido'}`);
     } finally {
       setIsSubmitting(false);
     }
@@ -110,8 +109,7 @@ export const useReleaseForm = () => {
       }
       
     } catch (error: any) {
-      console.error('Erro ao gerar notícia:', error);
-      showFeedback('error', 'Não foi possível gerar a notícia');
+      showFeedback('error', `Erro ao gerar notícia: ${error.message || 'Erro desconhecido'}`);
     } finally {
       setIsGenerating(false);
       setShowConfirmDialog(false);
@@ -161,8 +159,7 @@ export const useReleaseForm = () => {
         // Redirect to releases list
         navigate('/dashboard/comunicacao/releases');
       } catch (error: any) {
-        console.error('Erro ao criar notícia:', error);
-        showFeedback('error', 'Não foi possível criar a notícia');
+        showFeedback('error', `Erro ao criar notícia: ${error.message || 'Erro desconhecido'}`);
       }
     }
     

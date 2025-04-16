@@ -1,16 +1,17 @@
 
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { User } from '../types';
+import { useFeedback } from '@/components/ui/feedback-provider';
 
 export const useUserApproval = (refreshUsers: () => Promise<void>) => {
   const [approving, setApproving] = useState(false);
+  const { showFeedback } = useFeedback();
 
   const approveUser = async (userId: string, userName: string, userEmail: string) => {
     setApproving(true);
     
     try {
-      console.log(`Iniciando aprovação do usuário: ${userName}, ID: ${userId}`);
+      showFeedback('loading', `Aprovando usuário: ${userName}...`, { progress: 20 });
       
       // Update both status and status_conta to "ativo" in the usuarios table
       const { error: updateError } = await supabase
@@ -22,11 +23,10 @@ export const useUserApproval = (refreshUsers: () => Promise<void>) => {
         .eq('id', userId);
       
       if (updateError) {
-        console.error('Erro ao atualizar status do usuário:', updateError);
         throw updateError;
       }
       
-      console.log('Status do usuário atualizado com sucesso');
+      showFeedback('loading', 'Atribuindo permissões...', { progress: 50 });
       
       // Admin permission ID (fixed value)
       const adminPermissionId = '213c5690-ed4a-4b77-b565-39465b0a4247';
@@ -40,15 +40,13 @@ export const useUserApproval = (refreshUsers: () => Promise<void>) => {
         });
       
       if (permissionAssignError) {
-        console.error('Erro ao atribuir permissão de admin:', permissionAssignError);
         throw permissionAssignError;
       }
       
-      console.log('Permissão de admin atribuída com sucesso');
+      showFeedback('loading', 'Enviando notificação...', { progress: 80 });
       
       // Try to send an approval email via the Edge Function if available
       try {
-        console.log('Tentando enviar notificação por email...');
         const response = await fetch(`${window.location.origin}/api/send-approval-email`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -59,19 +57,17 @@ export const useUserApproval = (refreshUsers: () => Promise<void>) => {
         
         if (notificationError) {
           console.warn('Error sending approval notification:', notificationError);
-        } else {
-          console.log('Email de notificação enviado com sucesso');
         }
       } catch (emailError) {
         console.warn('Could not send approval email notification:', emailError);
       }
       
-      console.log('Usuário aprovado com sucesso');
+      showFeedback('success', `Usuário ${userName} aprovado com sucesso!`);
       
       // Refresh the users list
       await refreshUsers();
-    } catch (error) {
-      console.error('Erro ao aprovar usuário:', error);
+    } catch (error: any) {
+      showFeedback('error', `Erro ao aprovar usuário: ${error.message || 'Erro desconhecido'}`);
     } finally {
       setApproving(false);
     }

@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { Demanda } from '../types';
 import { useRespostaSubmission } from './useRespostaSubmission';
+import { useFeedback } from '@/components/ui/feedback-provider';
 
 export const useRespostaForm = (
   selectedDemanda: Demanda | null,
@@ -13,6 +14,7 @@ export const useRespostaForm = (
 ) => {
   const [resposta, setResposta] = useState<Record<string, string>>({});
   const [comentarios, setComentarios] = useState<string>('');
+  const { showFeedback } = useFeedback();
   
   // Pass showSuccessToast: false to the useRespostaSubmission hook
   const { isSubmitting, submitResposta } = useRespostaSubmission({
@@ -20,7 +22,8 @@ export const useRespostaForm = (
     onSuccess: () => {
       // Update local state to remove the answered demand
       if (selectedDemanda) {
-        console.log("Resposta enviada com sucesso. Atualizando listas locais.");
+        showFeedback('success', 'Resposta enviada com sucesso!');
+        
         setDemandas(demandas.filter(d => d.id !== selectedDemanda.id));
         setFilteredDemandas(filteredDemandas.filter(d => d.id !== selectedDemanda.id));
         setSelectedDemanda(null);
@@ -29,7 +32,7 @@ export const useRespostaForm = (
       }
     },
     onError: (error) => {
-      console.error("Erro ao enviar resposta:", error);
+      showFeedback('error', `Erro ao enviar resposta: ${error.message || 'Erro desconhecido'}`);
     }
   });
 
@@ -41,28 +44,27 @@ export const useRespostaForm = (
   };
 
   const handleSubmitResposta = async (): Promise<void> => {
-    console.log("handleSubmitResposta chamado", { selectedDemanda, resposta, comentarios });
-    
     if (!selectedDemanda) {
-      console.error("Nenhuma demanda selecionada");
+      showFeedback('error', 'Nenhuma demanda selecionada');
       return;
     }
     
     if (Object.keys(resposta).length === 0) {
-      console.error("Nenhuma resposta fornecida");
+      showFeedback('error', 'Nenhuma resposta fornecida');
       return;
     }
     
     // Verificar se todas as perguntas foram respondidas
     const hasEmptyAnswers = Object.values(resposta).some(r => !r || r.trim() === '');
     if (hasEmptyAnswers) {
-      console.error("Algumas respostas estão vazias");
+      showFeedback('error', 'Algumas respostas estão vazias. Por favor, responda todas as perguntas.');
       return;
     }
     
+    showFeedback('loading', 'Enviando resposta...', { progress: 30 });
+    
     // Chamamos a função submitResposta do hook useRespostaSubmission
-    const result = await submitResposta(selectedDemanda, resposta, comentarios);
-    console.log("Resultado do submitResposta:", result);
+    await submitResposta(selectedDemanda, resposta, comentarios);
   };
 
   return {
