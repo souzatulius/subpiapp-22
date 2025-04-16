@@ -1,13 +1,13 @@
 
 import React from 'react';
+import { ValidationError } from '@/lib/formValidationUtils';
+import { formatDateToString } from '@/lib/inputFormatting';
+import { Edit2, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { ValidationError, hasFieldError } from '@/lib/formValidationUtils';
-import { Pencil } from 'lucide-react';
-import { format } from 'date-fns';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 interface ReviewStepProps {
   formData: any;
-  handleChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   problemas: any[];
   origens: any[];
   tiposMidia: any[];
@@ -17,6 +17,7 @@ interface ReviewStepProps {
   errors: ValidationError[];
   showValidationErrors?: boolean;
   onNavigateToStep?: (step: number) => void;
+  handleChange?: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
 }
 
 const ReviewStep: React.FC<ReviewStepProps> = ({
@@ -31,253 +32,187 @@ const ReviewStep: React.FC<ReviewStepProps> = ({
   showValidationErrors = false,
   onNavigateToStep
 }) => {
-  // Get lookups
-  const origem = origens.find(o => o.id === formData.origem_id);
-  const tipoMidia = tiposMidia.find(t => t.id === formData.tipo_midia_id);
-  const problema = problemas.find(p => p.id === formData.problema_id);
-  const servico = servicos.find(s => s.id === formData.servico_id);
-  const bairro = filteredBairros.find(b => b.id === formData.bairro_id);
-  const distrito = bairro ? distritos.find(d => d.id === bairro.distrito_id) : null;
+  // Helper function to find entity by ID
+  const findById = (collection: any[], id: string): any => {
+    return collection.find(item => item.id === id) || {};
+  };
 
-  // Map priorities to human-readable format
-  const getPriorityLabel = (prioridade: string): string => {
-    if (!prioridade) return '—';
+  // Get names for entities from their IDs
+  const getProblemaName = () => {
+    const problema = findById(problemas, formData.problema_id);
+    return problema?.descricao || 'Não especificado';
+  };
+
+  const getOrigemName = () => {
+    const origem = findById(origens, formData.origem_id);
+    return origem?.descricao || 'Não especificado';
+  };
+
+  const getTipoMidiaName = () => {
+    const tipoMidia = findById(tiposMidia, formData.tipo_midia_id);
+    return tipoMidia?.descricao || 'Não especificado';
+  };
+
+  const getBairroName = () => {
+    const bairro = findById(filteredBairros, formData.bairro_id);
+    return bairro?.nome || 'Não especificado';
+  };
+
+  const getServicoName = () => {
+    if (formData.nao_sabe_servico) return 'Não sabe o serviço específico';
+    const servico = findById(servicos, formData.servico_id);
+    return servico?.descricao || 'Não especificado';
+  };
+
+  const getDistritoName = () => {
+    const bairro = findById(filteredBairros, formData.bairro_id);
+    if (!bairro || !bairro.distrito_id) return 'Não especificado';
     
-    switch(prioridade.toLowerCase()) {
-      case 'alta': return 'Urgente';
-      case 'media': return 'Média';
-      case 'baixa': return 'Baixa';
-      default: return prioridade;
-    }
+    const distrito = findById(distritos, bairro.distrito_id);
+    return distrito?.nome || 'Não especificado';
   };
 
-  const handleEditStep = (stepIndex: number) => {
-    if (onNavigateToStep) {
-      onNavigateToStep(stepIndex);
-    }
+  const formatPrioridade = (prioridade: string) => {
+    if (prioridade === 'alta') return 'Urgente';
+    if (prioridade === 'media') return 'Normal';
+    if (prioridade === 'baixa') return 'Baixa';
+    return prioridade || 'Não especificado';
   };
 
-  // Format date with specific format
-  const formatDate = (dateString: string) => {
-    if (!dateString) return '—';
+  // Format date time from ISO to human readable
+  const formatDateTime = (isoString?: string) => {
+    if (!isoString) return 'Não especificado';
     try {
-      return format(new Date(dateString), 'dd/MM/yy HH:mm');
+      return formatDateToString(new Date(isoString));
     } catch (e) {
-      return dateString;
+      console.error('Error formatting date time:', e);
+      return 'Data inválida';
     }
   };
 
-  // Helper to display review field with error highlight
-  const ReviewField = ({ 
-    label, 
-    value, 
-    fieldName, 
-    step 
-  }: { 
-    label: string; 
-    value: any; 
-    fieldName?: string; 
-    step: number 
-  }) => {
-    const hasError = fieldName ? hasFieldError(fieldName, errors) : false;
-    return (
-      <div className={`mb-4 ${showValidationErrors && hasError ? 'p-2 border border-orange-300 rounded-lg bg-orange-50' : ''}`}>
-        <div className="flex justify-between items-center mb-1">
-          <div className="text-sm text-gray-500 font-medium">{label}</div>
-          {step !== undefined && (
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              className="h-8 text-orange-500 hover:text-orange-600 p-0"
-              onClick={() => handleEditStep(step)}
-            >
-              <Pencil className="h-4 w-4" />
-            </Button>
-          )}
-        </div>
-        <div className="text-base">{value || '—'}</div>
-      </div>
-    );
+  // Check if a field has a validation error
+  const hasError = (field: string) => {
+    return errors.some(error => error.field === field);
   };
+
+  // Group related fields for better organization
+  const reviewSections = [
+    {
+      title: 'Informações Básicas',
+      step: 0,
+      fields: [
+        { label: 'Origem da Demanda', value: getOrigemName(), field: 'origem_id' },
+        { label: 'Prioridade', value: formatPrioridade(formData.prioridade), field: 'prioridade' },
+        { label: 'Prazo de Resposta', value: formatDateTime(formData.prazo_resposta), field: 'prazo_resposta' },
+      ]
+    },
+    {
+      title: 'Dados do Solicitante',
+      step: 1,
+      fields: [
+        { label: 'Nome do Solicitante', value: formData.nome_solicitante || 'Não informado', field: 'nome_solicitante' },
+        { label: 'Telefone', value: formData.telefone_solicitante || 'Não informado', field: 'telefone_solicitante' },
+        { label: 'Email', value: formData.email_solicitante || 'Não informado', field: 'email_solicitante' },
+        { label: 'Tipo de Mídia', value: getTipoMidiaName(), field: 'tipo_midia_id' },
+        { label: 'Veículo de Imprensa', value: formData.veiculo_imprensa || 'Não informado', field: 'veiculo_imprensa' },
+      ]
+    },
+    {
+      title: 'Tema e Localização',
+      step: 2,
+      fields: [
+        { label: 'Tema', value: getProblemaName(), field: 'problema_id' },
+        { label: 'Serviço', value: getServicoName(), field: 'servico_id' },
+        { label: 'Distrito', value: getDistritoName(), field: '' },
+        { label: 'Bairro', value: getBairroName(), field: 'bairro_id' },
+        { label: 'Endereço', value: formData.endereco || 'Não informado', field: 'endereco' },
+      ]
+    },
+    {
+      title: 'Detalhes da Solicitação',
+      step: 2,
+      fields: [
+        { 
+          label: 'Detalhes', 
+          value: formData.detalhes_solicitacao || 'Não informado', 
+          field: 'detalhes_solicitacao',
+          isMultiline: true 
+        },
+      ]
+    },
+    {
+      title: 'Organização',
+      step: 3,
+      fields: [
+        { label: 'Título', value: formData.titulo || 'Não informado', field: 'titulo' },
+        { 
+          label: 'Resumo da Situação', 
+          value: formData.resumo_situacao || 'Não informado', 
+          field: 'resumo_situacao',
+          isMultiline: true 
+        },
+      ]
+    },
+    {
+      title: 'Perguntas',
+      step: 3,
+      fields: formData.perguntas.map((pergunta: string, index: number) => ({
+        label: `Pergunta ${index + 1}`,
+        value: pergunta || 'Não informado',
+        field: `perguntas[${index}]`,
+        isMultiline: true
+      }))
+    }
+  ];
 
   return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div>
-          <h3 className="font-medium text-gray-700 mb-3">Origem e Classificação</h3>
-          <div className="bg-white p-4 rounded-xl border border-gray-200 space-y-2">
-            <ReviewField 
-              label="Origem da demanda" 
-              value={origem?.descricao} 
-              fieldName="origem_id" 
-              step={0} 
-            />
-            {formData.tem_protocolo_156 && (
-              <ReviewField
-                label="Protocolo 156"
-                value={formData.numero_protocolo_156}
-                fieldName="numero_protocolo_156"
-                step={0}
-              />
+    <div className="space-y-8">
+      {showValidationErrors && errors.length > 0 && (
+        <Alert variant="destructive" className="bg-orange-50 border-orange-200 text-orange-800 rounded-xl">
+          <AlertTriangle className="h-4 w-4 text-orange-500" />
+          <AlertDescription>
+            Por favor, corrija os campos destacados antes de enviar.
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {reviewSections.map((section, idx) => (
+        <div key={`section-${idx}`} className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h4 className="text-lg font-medium text-gray-900">{section.title}</h4>
+            {onNavigateToStep && (
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={() => onNavigateToStep(section.step)}
+                className="text-blue-600 hover:text-blue-800 hover:bg-blue-50"
+              >
+                <Edit2 className="h-4 w-4 mr-1" />
+                Editar
+              </Button>
             )}
-            {tipoMidia && (
-              <ReviewField 
-                label="Tipo de mídia" 
-                value={tipoMidia.descricao} 
-                fieldName="tipo_midia_id" 
-                step={0} 
-              />
-            )}
-            {formData.veiculo_imprensa && (
-              <ReviewField 
-                label="Veículo de imprensa" 
-                value={formData.veiculo_imprensa} 
-                fieldName="veiculo_imprensa" 
-                step={0} 
-              />
-            )}
-            <ReviewField 
-              label="Prioridade" 
-              value={getPriorityLabel(formData.prioridade)} 
-              fieldName="prioridade" 
-              step={0} 
-            />
-            <ReviewField 
-              label="Prazo para resposta" 
-              value={formatDate(formData.prazo_resposta)} 
-              fieldName="prazo_resposta" 
-              step={0} 
-            />
           </div>
-
-          <h3 className="font-medium text-gray-700 mb-3 mt-6">Informações do Solicitante</h3>
-          <div className="bg-white p-4 rounded-xl border border-gray-200 space-y-2">
-            <ReviewField 
-              label="Nome do solicitante" 
-              value={formData.nome_solicitante} 
-              fieldName="nome_solicitante" 
-              step={1} 
-            />
-            <ReviewField 
-              label="Telefone" 
-              value={formData.telefone_solicitante} 
-              fieldName="telefone_solicitante" 
-              step={1} 
-            />
-            <ReviewField 
-              label="E-mail" 
-              value={formData.email_solicitante} 
-              fieldName="email_solicitante" 
-              step={1} 
-            />
-          </div>
-
-          <h3 className="font-medium text-gray-700 mb-3 mt-6">Tema e Serviço</h3>
-          <div className="bg-white p-4 rounded-xl border border-gray-200 space-y-2">
-            <ReviewField 
-              label="Problema/Tema" 
-              value={problema?.descricao} 
-              fieldName="problema_id" 
-              step={2} 
-            />
-            <ReviewField 
-              label="Serviço" 
-              value={servico?.descricao || (formData.nao_sabe_servico ? 'Não sabe informar' : '')} 
-              fieldName="servico_id" 
-              step={2} 
-            />
-          </div>
-        </div>
-
-        <div>
-          <h3 className="font-medium text-gray-700 mb-3">Localização</h3>
-          <div className="bg-white p-4 rounded-xl border border-gray-200 space-y-2">
-            <ReviewField 
-              label="Distrito" 
-              value={distrito?.nome} 
-              step={2} 
-            />
-            <ReviewField 
-              label="Bairro" 
-              value={bairro?.nome} 
-              fieldName="bairro_id" 
-              step={2} 
-            />
-            <ReviewField 
-              label="Endereço" 
-              value={formData.endereco} 
-              fieldName="endereco" 
-              step={2} 
-            />
-          </div>
-
-          <h3 className="font-medium text-gray-700 mb-3 mt-6">Detalhes da Demanda</h3>
-          <div className="bg-white p-4 rounded-xl border border-gray-200 space-y-2">
-            {/* Removed Detalhes da Demanda and replaced with Resumo */}
-            <ReviewField 
-              label="Resumo da situação" 
-              value={formData.resumo_situacao} 
-              fieldName="resumo_situacao" 
-              step={3} 
-            />
-          </div>
-
-          <h3 className="font-medium text-gray-700 mb-3 mt-6">Detalhes da Organização</h3>
-          <div className="bg-white p-4 rounded-xl border border-gray-200 space-y-2">
-            <ReviewField 
-              label="Título da demanda" 
-              value={formData.titulo} 
-              fieldName="titulo" 
-              step={3} 
-            />
-            
-            <div>
-              <div className="flex justify-between items-center mb-1">
-                <div className="text-sm text-gray-500 font-medium">Perguntas para a área técnica</div>
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  className="h-8 text-orange-500 hover:text-orange-600 p-0"
-                  onClick={() => handleEditStep(3)}
-                >
-                  <Pencil className="h-4 w-4" />
-                </Button>
-              </div>
-              <div className="bg-gray-50 p-4 rounded-xl border border-gray-100">
-                {formData.perguntas.filter(Boolean).map((pergunta: string, idx: number) => (
-                  <div key={idx} className="mb-2 text-base">
-                    {idx + 1}. {pergunta}
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {section.fields.map((field, fieldIdx) => (
+              <div 
+                key={`field-${fieldIdx}`}
+                className={`p-4 bg-gray-50 rounded-lg border ${hasError(field.field) ? 'border-orange-300 bg-orange-50' : 'border-gray-200'} ${field.isMultiline ? 'col-span-1 md:col-span-2' : ''}`}
+              >
+                <div className="flex flex-col">
+                  <span className="text-sm font-medium text-gray-500 mb-1">
+                    {field.label}
+                    {hasError(field.field) && <span className="text-orange-500 ml-1">*</span>}
+                  </span>
+                  <div className={`${field.isMultiline ? 'whitespace-pre-wrap' : ''} ${hasError(field.field) ? 'text-orange-700 font-medium' : 'text-gray-800'}`}>
+                    {field.value}
                   </div>
-                ))}
-                {!formData.perguntas.filter(Boolean).length && <div className="text-base">—</div>}
+                </div>
               </div>
-            </div>
-            
-            <div>
-              <div className="flex justify-between items-center mb-1">
-                <div className="text-sm text-gray-500 font-medium">Anexos</div>
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  className="h-8 text-orange-500 hover:text-orange-600 p-0"
-                  onClick={() => handleEditStep(3)}
-                >
-                  <Pencil className="h-4 w-4" />
-                </Button>
-              </div>
-              <div className="bg-gray-50 p-4 rounded-xl border border-gray-100">
-                {formData.anexos && formData.anexos.length > 0 ? (
-                  formData.anexos.map((anexo: string, idx: number) => (
-                    <div key={idx} className="mb-1 text-base">{anexo}</div>
-                  ))
-                ) : (
-                  <div className="text-base">Nenhum anexo</div>
-                )}
-              </div>
-            </div>
+            ))}
           </div>
         </div>
-      </div>
+      ))}
     </div>
   );
 };

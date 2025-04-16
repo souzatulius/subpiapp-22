@@ -1,8 +1,10 @@
+
 import { useState, useEffect, useMemo } from 'react';
 import { DemandFormData } from './types';
 import { supabase } from '@/integrations/supabase/client';
 import { generateTitleSuggestion } from '../../components/dashboard/forms/steps/organize/utils';
 import { toast } from '@/components/ui/use-toast';
+import { parseFormattedDate } from '@/lib/inputFormatting';
 
 const FORM_STORAGE_KEY = 'demandForm_state';
 
@@ -172,6 +174,23 @@ export const useDemandFormState = (
         ...prev,
         [name]: formattedValue
       }));
+    } else if (name === 'prazo_resposta') {
+      // This will just update the input field value
+      // The actual ISO date conversion is done in the PriorityDeadlineStep component
+      setFormData(prev => ({
+        ...prev,
+        [name]: value
+      }));
+      
+      // Try to parse date directly (used for review steps, etc.)
+      const parsedDate = parseFormattedDate(value);
+      if (parsedDate) {
+        console.log('Successfully parsed date:', parsedDate);
+        setFormData(prev => ({
+          ...prev,
+          [name]: parsedDate.toISOString()
+        }));
+      }
     } else {
       setFormData(prev => ({
         ...prev,

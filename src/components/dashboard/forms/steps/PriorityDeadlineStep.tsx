@@ -1,9 +1,9 @@
 
 import React from 'react';
-import { DatePicker } from '@/components/ui/date-picker';
-import { ValidationError } from '@/lib/formValidationUtils';
 import { BellRing, Flame } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { ValidationError } from '@/lib/formValidationUtils';
+import { formatDateInput } from '@/lib/inputFormatting';
 
 interface PriorityDeadlineStepProps {
   formData: {
@@ -11,12 +11,14 @@ interface PriorityDeadlineStepProps {
     prazo_resposta: string;
   };
   handleSelectChange: (name: string, value: string) => void;
+  handleChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
   errors?: ValidationError[];
 }
 
 const PriorityDeadlineStep: React.FC<PriorityDeadlineStepProps> = ({
   formData,
   handleSelectChange,
+  handleChange,
   errors = []
 }) => {
   // Updated priorities to match the new naming convention (Alta → Urgente)
@@ -32,47 +34,64 @@ const PriorityDeadlineStep: React.FC<PriorityDeadlineStepProps> = ({
     return error ? error.message : '';
   };
 
-  // Helper function to safely parse an ISO date string to a Date
-  const parseISODate = (dateString: string): Date | undefined => {
-    if (!dateString) return undefined;
+  // Convert ISO date string to DD/MM/YYYY HH:MM format for display
+  const formatDateTimeForDisplay = (isoString: string): string => {
+    if (!isoString) return '';
+    
     try {
-      // Create a new date directly from the ISO string
-      const date = new Date(dateString);
+      const date = new Date(isoString);
+      if (isNaN(date.getTime())) return '';
       
-      // Check if it's a valid date
-      if (isNaN(date.getTime())) {
-        console.error("PriorityDeadlineStep - Invalid date:", dateString);
-        return undefined;
-      }
+      const day = date.getDate().toString().padStart(2, '0');
+      const month = (date.getMonth() + 1).toString().padStart(2, '0');
+      const year = date.getFullYear();
+      const hours = date.getHours().toString().padStart(2, '0');
+      const minutes = date.getMinutes().toString().padStart(2, '0');
       
-      console.log("PriorityDeadlineStep - Parsed date:", date.toISOString());
-      return date;
+      return `${day}/${month}/${year} ${hours}:${minutes}`;
     } catch (e) {
-      console.error("PriorityDeadlineStep - Error parsing date:", e);
-      return undefined;
+      console.error('Error formatting date for display:', e);
+      return '';
     }
   };
 
-  // Handle date selection with proper timezone handling
-  const handleDateSelection = (date?: Date) => {
-    if (date) {
-      // Create a consistent ISO string representation
+  // Handle manual date input and convert to ISO
+  const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { value } = e.target;
+    
+    // Save the raw input in the text field
+    handleChange(e);
+    
+    // Try to parse the input to an ISO date string
+    try {
+      // Extract date and time components
+      const dateTimeParts = value.split(' ');
+      if (dateTimeParts.length !== 2) return;
+      
+      const dateParts = dateTimeParts[0].split('/');
+      const timeParts = dateTimeParts[1].split(':');
+      
+      if (dateParts.length !== 3 || timeParts.length !== 2) return;
+      
+      const day = parseInt(dateParts[0], 10);
+      const month = parseInt(dateParts[1], 10) - 1; // Month is 0-indexed in JS Date
+      const year = parseInt(dateParts[2], 10);
+      const hours = parseInt(timeParts[0], 10);
+      const minutes = parseInt(timeParts[1], 10);
+      
+      if (isNaN(day) || isNaN(month) || isNaN(year) || 
+          isNaN(hours) || isNaN(minutes)) return;
+      
+      // Create ISO string from the parsed components
+      const date = new Date(year, month, day, hours, minutes);
+      if (isNaN(date.getTime())) return;
+      
       const isoString = date.toISOString();
-      console.log("PriorityDeadlineStep - Selected date ISO string:", isoString);
-      console.log("PriorityDeadlineStep - Selected date local string:", date.toString());
-      
-      // Log the date's components to verify correctness
-      console.log("PriorityDeadlineStep - Date components:", {
-        year: date.getFullYear(),
-        month: date.getMonth() + 1,
-        day: date.getDate(),
-        hours: date.getHours(),
-        minutes: date.getMinutes()
-      });
-      
       handleSelectChange('prazo_resposta', isoString);
-    } else {
-      handleSelectChange('prazo_resposta', '');
+      
+      console.log('Successfully parsed date input to ISO:', isoString);
+    } catch (e) {
+      console.error('Error parsing date input:', e);
     }
   };
 
@@ -132,15 +151,17 @@ const PriorityDeadlineStep: React.FC<PriorityDeadlineStepProps> = ({
           Prazo para resposta {hasError('prazo_resposta') && <span className="text-orange-500">*</span>}
         </label>
         <div className="w-full">
-          <DatePicker
-            date={parseISODate(formData.prazo_resposta)}
-            onSelect={handleDateSelection}
-            showTimeSelect={true}
-            useDropdownTimeSelect={true}
-            placeholder="Selecione a data e horário"
-            className={hasError('prazo_resposta') ? 'border-orange-500' : ''}
+          <input
+            type="text"
+            id="prazo_resposta"
+            name="prazo_resposta"
+            placeholder="DD/MM/AAAA HH:MM"
+            value={formData.prazo_resposta ? formatDateTimeForDisplay(formData.prazo_resposta) : ''}
+            onChange={handleDateChange}
+            className={`w-full h-12 rounded-xl border border-gray-300 bg-white px-4 py-3 text-base shadow-sm transition-all duration-300 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 ${hasError('prazo_resposta') ? 'border-orange-500' : ''}`}
           />
         </div>
+        <p className="text-gray-500 text-sm mt-1">Digite a data no formato DD/MM/AAAA HH:MM (Ex: 31/12/2023 14:30)</p>
         {hasError('prazo_resposta') && (
           <p className="text-orange-500 text-sm mt-1">{getErrorMessage('prazo_resposta')}</p>
         )}
