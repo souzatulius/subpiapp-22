@@ -90,8 +90,10 @@ export const useRespostaSubmission = (options?: SubmissionOptions) => {
         // We continue anyway since the response is saved
       }
       
-      // Show animated feedback 
-      showFeedback('success', 'Resposta enviada com sucesso!');
+      // Always show animated feedback for success
+      showFeedback('success', 'Resposta enviada com sucesso!', {
+        duration: 3000 // Show for 3 seconds
+      });
 
       if (options?.onSuccess) {
         console.log("Calling onSuccess callback");

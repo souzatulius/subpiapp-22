@@ -21,6 +21,7 @@ export const useFetchDemandas = () => {
             id,
             titulo,
             detalhes_solicitacao,
+            resumo_situacao,
             prazo_resposta,
             prioridade,
             perguntas,
@@ -148,6 +149,7 @@ export const useFetchDemandas = () => {
             id: item.id,
             titulo: item.titulo,
             detalhes_solicitacao: item.detalhes_solicitacao,
+            resumo_situacao: item.resumo_situacao, // Include new resumo field
             prazo_resposta: item.prazo_resposta,
             prioridade: item.prioridade,
             perguntas: perguntasObject,
@@ -169,7 +171,7 @@ export const useFetchDemandas = () => {
             origem_id: item.origens_demandas?.id,
             problema_id: item.problema_id,
             servico_id: item.servico_id,
-            protocolo: item.protocolo,
+            protocolo: item.protocolo, // Include protocolo field
             tema: item.problemas ? {
               id: item.problemas.id,
               descricao: item.problemas.descricao,

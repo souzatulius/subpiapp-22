@@ -163,7 +163,7 @@ const RespostaForm: React.FC<RespostaFormProps> = ({
           </div>
         )}
         
-        {/* Seção de resumo (antes estava exibindo detalhes_solicitacao) */}
+        {/* Seção de resumo (anteriormente era exibido detalhes_solicitacao) */}
         {selectedDemanda.resumo_situacao ? (
           <div className="space-y-4">
             <h3 className="text-lg font-medium text-subpi-blue">Resumo</h3>
@@ -173,7 +173,7 @@ const RespostaForm: React.FC<RespostaFormProps> = ({
               </p>
             </div>
           </div>
-        ) : selectedDemanda.detalhes_solicitacao && (
+        ) : selectedDemanda.detalhes_solicitacao ? (
           <div className="space-y-4">
             <h3 className="text-lg font-medium text-subpi-blue">Detalhes da Solicitação</h3>
             <div className="bg-gray-50 p-4 rounded-xl border border-gray-200">
@@ -182,7 +182,7 @@ const RespostaForm: React.FC<RespostaFormProps> = ({
               </p>
             </div>
           </div>
-        )}
+        ) : null}
         
         <Separator />
         
