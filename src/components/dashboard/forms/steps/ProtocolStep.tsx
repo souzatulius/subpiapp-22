@@ -4,13 +4,14 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Calendar } from "lucide-react";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { BellRing, Flame, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button"
 import { format } from "date-fns"
 import { ptBR } from 'date-fns/locale';
 import { DatePicker } from "@/components/ui/date-picker"
 import { ValidationError } from '@/lib/formValidationUtils';
+import { useOriginIcon } from '@/hooks/useOriginIcon';
+import Protocolo156 from './identification/Protocolo156';
 
 interface ProtocolStepProps {
   formData: {
@@ -19,9 +20,11 @@ interface ProtocolStepProps {
     detalhes_solicitacao: string;
     prioridade: string;
     prazo_resposta: string;
+    tem_protocolo_156?: boolean;
+    numero_protocolo_156?: string;
   };
   handleChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
-  handleSelectChange: (name: string, value: string) => void;
+  handleSelectChange: (name: string, value: string | boolean) => void;
   origens: any[];
   tiposMidia: any[];
   errors: ValidationError[];
@@ -47,9 +50,18 @@ const ProtocolStep: React.FC<ProtocolStepProps> = ({
     return date ? format(date, 'yyyy-MM-dd', { locale: ptBR }) : '';
   };
 
+  // Allow deselection of origin
+  const handleOriginClick = (originId: string) => {
+    if (formData.origem_id === originId) {
+      handleSelectChange('origem_id', ''); // Deselect if clicking the same origin
+    } else {
+      handleSelectChange('origem_id', originId);
+    }
+  };
+
   return (
     <div className="space-y-6">
-      {/* Origem da demanda */}
+      {/* Origem da demanda - Updated with icons */}
       <div>
         <label 
           htmlFor="origem_id" 
@@ -59,14 +71,20 @@ const ProtocolStep: React.FC<ProtocolStepProps> = ({
         </label>
         <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
           {origens.map(origem => (
-            <button 
+            <Button 
               key={origem.id}
               type="button"
-              className={`h-auto py-4 px-2 flex flex-col items-center justify-center text-center border rounded-xl ${formData.origem_id === origem.id ? 'bg-orange-500 text-white border-orange-500' : 'bg-white text-gray-700 border-gray-200 hover:bg-orange-50'} ${hasError('origem_id') ? 'border-orange-500' : ''}`}
-              onClick={() => handleSelectChange('origem_id', origem.id)}
+              variant={formData.origem_id === origem.id ? "default" : "outline"}
+              className={`h-auto py-3 flex flex-col items-center justify-center gap-2 selection-button rounded-xl ${
+                formData.origem_id === origem.id ? "bg-orange-500 hover:bg-orange-600 text-white" : ""
+              } ${
+                hasError('origem_id') ? 'border-orange-500' : ''
+              }`}
+              onClick={() => handleOriginClick(origem.id)}
             >
-              <span className="text-sm font-medium">{origem.descricao}</span>
-            </button>
+              {useOriginIcon(origem, "h-8 w-8")}
+              <span className="text-sm font-semibold">{origem.descricao}</span>
+            </Button>
           ))}
         </div>
         {hasError('origem_id') && (
@@ -74,7 +92,16 @@ const ProtocolStep: React.FC<ProtocolStepProps> = ({
         )}
       </div>
 
-      {/* Prioridade */}
+      {/* Protocol 156 Field */}
+      <Protocolo156 
+        temProtocolo156={formData.tem_protocolo_156}
+        numeroProtocolo156={formData.numero_protocolo_156}
+        handleSelectChange={(value) => handleSelectChange('tem_protocolo_156', value)}
+        handleChange={handleChange}
+        errors={errors}
+      />
+
+      {/* Prioridade - Updated as buttons with icons */}
       <div>
         <Label 
           htmlFor="prioridade" 
@@ -82,22 +109,68 @@ const ProtocolStep: React.FC<ProtocolStepProps> = ({
         >
           Qual o nível de prioridade? {hasError('prioridade') && <span className="text-orange-500">*</span>}
         </Label>
-        <Select onValueChange={(value) => handleSelectChange('prioridade', value)}>
-          <SelectTrigger className={`rounded-xl ${hasError('prioridade') ? 'border-orange-500' : ''}`}>
-            <SelectValue placeholder="Selecione a prioridade" defaultValue={formData.prioridade} />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="baixa">Baixa</SelectItem>
-            <SelectItem value="media">Média</SelectItem>
-            <SelectItem value="alta">Alta</SelectItem>
-          </SelectContent>
-        </Select>
+        <div className="flex flex-wrap gap-3">
+          <Button 
+            type="button" 
+            variant="outline" 
+            className={`h-auto py-3 flex flex-col items-center justify-center gap-2 border-gray-300
+              ${formData.prioridade === 'alta' ? 
+                "bg-orange-500 text-white border-transparent hover:bg-orange-600" : 
+                "hover:bg-gray-100 hover:text-gray-800"}
+              ${hasError('prioridade') ? 'border-orange-500' : ''}
+              transition-all duration-300`}
+            onClick={() => handleSelectChange('prioridade', 'alta')}
+          >
+            <div className={formData.prioridade === 'alta' ? "text-white" : "text-red-500"}>
+              <Flame className="h-5 w-5" />
+            </div>
+            <span className="text-sm font-semibold">
+              Urgente
+            </span>
+          </Button>
+          <Button 
+            type="button" 
+            variant="outline" 
+            className={`h-auto py-3 flex flex-col items-center justify-center gap-2 border-gray-300
+              ${formData.prioridade === 'media' ? 
+                "bg-orange-500 text-white border-transparent hover:bg-orange-600" : 
+                "hover:bg-gray-100 hover:text-gray-800"}
+              ${hasError('prioridade') ? 'border-orange-500' : ''}
+              transition-all duration-300`}
+            onClick={() => handleSelectChange('prioridade', 'media')}
+          >
+            <div className={formData.prioridade === 'media' ? "text-white" : "text-blue-500"}>
+              <BellRing className="h-5 w-5" />
+            </div>
+            <span className="text-sm font-semibold">
+              Normal
+            </span>
+          </Button>
+          <Button 
+            type="button" 
+            variant="outline" 
+            className={`h-auto py-3 flex flex-col items-center justify-center gap-2 border-gray-300
+              ${formData.prioridade === 'baixa' ? 
+                "bg-orange-500 text-white border-transparent hover:bg-orange-600" : 
+                "hover:bg-gray-100 hover:text-gray-800"}
+              ${hasError('prioridade') ? 'border-orange-500' : ''}
+              transition-all duration-300`}
+            onClick={() => handleSelectChange('prioridade', 'baixa')}
+          >
+            <div className={formData.prioridade === 'baixa' ? "text-white" : "text-green-500"}>
+              <Clock className="h-5 w-5" />
+            </div>
+            <span className="text-sm font-semibold">
+              Baixa
+            </span>
+          </Button>
+        </div>
         {hasError('prioridade') && (
           <p className="text-orange-500 text-sm mt-1">{getErrorMessage('prioridade')}</p>
         )}
       </div>
 
-      {/* Prazo para resposta */}
+      {/* Prazo para resposta - with enhanced DatePicker */}
       <div>
         <Label 
           htmlFor="prazo_resposta" 
@@ -113,7 +186,9 @@ const ProtocolStep: React.FC<ProtocolStepProps> = ({
               handleSelectChange('prazo_resposta', formattedDate);
             }
           }}
-          placeholder="Selecione a data"
+          showTimeSelect={true}
+          useDropdownTimeSelect={true}
+          placeholder="Selecione a data e horário"
           className={hasError('prazo_resposta') ? 'border-orange-500' : ''}
         />
         {hasError('prazo_resposta') && (
@@ -121,7 +196,7 @@ const ProtocolStep: React.FC<ProtocolStepProps> = ({
         )}
       </div>
       
-      {/* Detalhes solicitação - update this section with rounded borders */}
+      {/* Detalhes solicitação */}
       <div className="space-y-2">
         <label 
           htmlFor="detalhes_solicitacao" 
@@ -141,11 +216,6 @@ const ProtocolStep: React.FC<ProtocolStepProps> = ({
         {hasError('detalhes_solicitacao') && (
           <p className="text-orange-500 text-sm mt-1">{getErrorMessage('detalhes_solicitacao')}</p>
         )}
-      </div>
-      
-      {/* Next Step Button */}
-      <div className="flex justify-end">
-        <Button onClick={nextStep}>Próximo</Button>
       </div>
     </div>
   );
