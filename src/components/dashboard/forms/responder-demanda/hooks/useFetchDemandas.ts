@@ -106,6 +106,7 @@ export const useFetchDemandas = () => {
 
         if (respostasError) {
           console.error('Error fetching respostas:', respostasError);
+          // Fix: Access message property instead of id on the error object
           toast({
             title: "Erro ao verificar respostas",
             description: respostasError.message,
