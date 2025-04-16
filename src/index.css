@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -58,7 +59,7 @@
 
 /* Define a imagem de fundo para a área de login */
 .login-bg-image {
-  background-image: url('/lovable-uploads/f6dc323d-03f9-4186-bb11-0d3ab5718b11.png');
+  background-image: url('/lovable-uploads/b1705741-1fad-4b79-94f1-2f26c66f0152.png');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;

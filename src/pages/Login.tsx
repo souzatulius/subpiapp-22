@@ -6,7 +6,9 @@ import LoginForm from '@/components/login/LoginForm';
 const Login = () => {
   return (
     <AuthLayout>
-      <LoginForm />
+      <div className="bg-white rounded-xl shadow-lg p-6 w-full max-w-md">
+        <LoginForm />
+      </div>
     </AuthLayout>
   );
 };
