@@ -123,7 +123,7 @@ const RespostaForm: React.FC<RespostaFormProps> = ({
         </div>
         
         <div className="text-sm text-gray-600">
-          Criado por <span className="font-medium">{selectedDemanda.autor?.nome_completo}</span> em {' '}
+          Criado em {' '}
           {format(new Date(selectedDemanda.horario_publicacao), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
         </div>
         
