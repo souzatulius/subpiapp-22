@@ -1,7 +1,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { Demand } from '@/types/demand';
+import { Demand, Note } from '@/types/demand';
 
 export const useDemandas = (filterStatus?: string) => {
   const [demandas, setDemandas] = useState<Demand[]>([]);
@@ -26,7 +26,7 @@ export const useDemandas = (filterStatus?: string) => {
           origem:origens_demandas(descricao),
           horario_publicacao,
           problema:problemas(descricao, coordenacao:coordenacoes(sigla)),
-          notas:notas_oficiais(id, titulo)
+          notas:notas_oficiais(id, titulo, conteudo, status, data_criacao, autor_id)
         `);
 
       if (filterStatus && filterStatus !== 'todos') {
@@ -43,13 +43,28 @@ export const useDemandas = (filterStatus?: string) => {
       }
 
       // Transform the data to match the Demand type
-      const formattedDemandas = data.map(demand => ({
-        ...demand,
-        title: demand.titulo,
-        origem: typeof demand.origem === 'object' ? demand.origem?.descricao : demand.origem_id,
-      }));
+      const formattedDemandas: Demand[] = data.map(demand => {
+        // Format notes to ensure they match the Note interface
+        const formattedNotas: Note[] = demand.notas ? demand.notas.map((nota: any) => ({
+          id: nota.id,
+          titulo: nota.titulo,
+          conteudo: nota.conteudo || '',
+          status: nota.status || 'pendente',
+          data_criacao: nota.data_criacao || new Date().toISOString(),
+          autor_id: nota.autor_id || '',
+          demanda_id: demand.id
+        })) : [];
+
+        return {
+          ...demand,
+          title: demand.titulo,
+          origem: typeof demand.origem === 'object' ? demand.origem?.descricao : demand.origem_id,
+          notas: formattedNotas
+        };
+      });
 
       setDemandas(formattedDemandas);
+      console.log('Formatted demandas:', formattedDemandas);
     } catch (err) {
       console.error('Error fetching demandas:', err);
       setError(err instanceof Error ? err : new Error('Failed to fetch demandas'));
