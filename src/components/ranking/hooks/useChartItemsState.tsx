@@ -6,7 +6,7 @@ import { ChartItem } from '../types';
 export { ChartItem };
 
 export const useChartItemsState = (initialItems: ChartItem[]) => {
-  const [items, setItems] = useState<ChartItem[]>(initialItems);
+  const [items, setItems] = useState<ChartItem[]>(Array.isArray(initialItems) ? initialItems : []);
   
   const [hiddenCharts, setHiddenCharts] = useState<string[]>([]);
   const [expandedAnalyses, setExpandedAnalyses] = useState<string[]>([]);
@@ -19,6 +19,8 @@ export const useChartItemsState = (initialItems: ChartItem[]) => {
     if (!over || active.id === over.id) return;
     
     setItems((items) => {
+      if (!Array.isArray(items)) return [];
+      
       const oldIndex = items.findIndex(item => item.id === active.id);
       const newIndex = items.findIndex(item => item.id === over.id);
       
@@ -94,6 +96,9 @@ export function generateFakeAnalysis(chartTitle: string): string {
     const randomIndex = Math.floor(Math.random() * insights.length);
     selectedInsights.push(insights[randomIndex]);
     insights.splice(randomIndex, 1);
+    
+    // Stop if we run out of insights
+    if (insights.length === 0) break;
   }
   
   // Create a custom intro based on chart title

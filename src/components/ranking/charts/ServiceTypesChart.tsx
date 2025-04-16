@@ -22,7 +22,10 @@ const ServiceTypesChart: React.FC<ServiceTypesChartProps> = ({
   onToggleAnalysis
 }) => {
   const chartData = React.useMemo(() => {
-    if (!sgzData || sgzData.length === 0) {
+    // Ensure sgzData is an array
+    const safeData = Array.isArray(sgzData) ? sgzData : [];
+    
+    if (safeData.length === 0) {
       return {
         labels: [],
         datasets: [{
@@ -39,7 +42,7 @@ const ServiceTypesChart: React.FC<ServiceTypesChartProps> = ({
     // Process service types data
     const serviceCounts: Record<string, number> = {};
     
-    sgzData.forEach(order => {
+    safeData.forEach(order => {
       // Use the service classification or type field
       const service = order.sgz_tipo_servico || order.sgz_classificacao_servico || 'Não informado';
       serviceCounts[service] = (serviceCounts[service] || 0) + 1;

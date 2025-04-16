@@ -28,7 +28,10 @@ const ChartsSection: React.FC<ChartsSectionProps> = ({
   disableCardContainers = false
 }) => {
   // Check if we have data to display
-  const hasData = Boolean((sgzData && sgzData.length > 0) || (painelData && painelData.length > 0));
+  const hasData = Boolean(
+    (sgzData && Array.isArray(sgzData) && sgzData.length > 0) || 
+    (painelData && Array.isArray(painelData) && painelData.length > 0)
+  );
   
   // Get chart items for the display
   const [chartItems, setChartItems] = React.useState<ChartItem[]>([]);
@@ -89,7 +92,7 @@ const ChartsSection: React.FC<ChartsSectionProps> = ({
       />
       
       <ChartGrid
-        chartItems={chartItems}
+        chartItems={chartItems || []}
         hiddenCharts={hiddenCharts}
         expandedAnalyses={expandedAnalyses}
         analysisOnlyCharts={analysisOnlyCharts}

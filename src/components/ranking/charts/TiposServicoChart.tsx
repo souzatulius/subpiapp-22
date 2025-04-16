@@ -32,7 +32,7 @@ const TiposServicoChart: React.FC<TiposServicoChartProps> = ({
   useEffect(() => {
     setIsDataLoading(true);
     
-    if (chartData && chartData.length > 0) {
+    if (chartData && Array.isArray(chartData) && chartData.length > 0) {
       try {
         // Count occurrences of each service type
         const serviceMap = new Map<string, number>();
@@ -73,6 +73,7 @@ const TiposServicoChart: React.FC<TiposServicoChartProps> = ({
       return {
         labels: [],
         datasets: [{
+          label: 'Quantidade de ordens',
           data: [],
           backgroundColor: [],
         }]
@@ -95,11 +96,11 @@ const TiposServicoChart: React.FC<TiposServicoChartProps> = ({
     };
   };
   
-  // Chart options
+  // Chart options 
   const chartOptions: ChartOptions<'bar'> = {
     responsive: true,
     maintainAspectRatio: false,
-    indexAxis: 'y', // Horizontal bar chart
+    indexAxis: 'y' as const,
     plugins: {
       legend: {
         display: false,
@@ -107,64 +108,65 @@ const TiposServicoChart: React.FC<TiposServicoChartProps> = ({
       tooltip: {
         callbacks: {
           label: (context) => {
+            const label = context.dataset.label || '';
             const value = context.raw as number;
-            const serviceIndex = context.dataIndex;
-            const service = serviceTypeCounts[serviceIndex];
-            return [
-              `Total: ${value} ordens`,
-              `${service?.percentage.toFixed(1)}% do total`
-            ];
+            const total = Array.isArray(chartData) ? chartData.length : 0;
+            const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : '0.0';
+            return `${label}: ${value} (${percentage}%)`;
           }
         }
       }
     },
     scales: {
+      y: {
+        ticks: {
+          callback: function(value, index) {
+            const label = this.getLabelForValue(index as number);
+            // Truncate long labels
+            return label.length > 25 ? label.substr(0, 22) + '...' : label;
+          },
+          font: {
+            size: 11
+          }
+        }
+      },
       x: {
         beginAtZero: true,
-        title: {
-          display: true,
-          text: 'Quantidade'
+        ticks: {
+          font: {
+            size: 11
+          }
         }
       }
     }
   };
   
-  // Get primary insight
-  const getPrimaryInsight = () => {
-    if (serviceTypeCounts.length === 0) {
-      return { value: '0', label: 'tipos de serviço', trend: 'neutral' as const };
-    }
-    
-    // Find the most common service type
-    const topService = serviceTypeCounts[0];
-    
-    return {
-      value: `${topService.percentage.toFixed(1)}%`,
-      label: `das ordens são ${topService.serviceType}`,
-      trend: 'neutral' as const
-    };
-  };
-  
-  const insight = getPrimaryInsight();
-  
   return (
     <ChartCard
       title="Tipos de Serviço"
-      subtitle="Categorias mais recorrentes nas ordens"
+      subtitle="Distribuição por categoria de atendimento"
       isLoading={isDataLoading}
       dataSource="SGZ"
-      analysis={`Análise dos tipos de serviço: ${serviceTypeCounts.length > 0 
-        ? `O tipo de serviço "${serviceTypeCounts[0].serviceType}" representa ${serviceTypeCounts[0].percentage.toFixed(1)}% do total.` 
-        : 'Sem dados suficientes para análise.'}`}
+      analysis={serviceTypeCounts.length > 0 
+        ? `O tipo de serviço mais frequente é "${serviceTypeCounts[0].serviceType}" (${serviceTypeCounts[0].percentage.toFixed(1)}% do total).` 
+        : 'Sem dados suficientes para análise.'}
     >
       <div className="h-72">
         <Bar data={prepareChartData()} options={chartOptions} />
       </div>
       
-      <div className="mt-4 text-center">
-        <p className="text-2xl font-semibold text-orange-600">{insight.value}</p>
-        <p className="text-sm text-gray-600">{insight.label}</p>
-      </div>
+      {serviceTypeCounts.length > 0 && (
+        <div className="mt-4 text-center">
+          <p className="text-2xl font-semibold text-blue-600">
+            {serviceTypeCounts[0].percentage.toFixed(1)}%
+          </p>
+          <p className="text-sm text-gray-600">
+            {serviceTypeCounts[0].serviceType.length > 30 
+              ? serviceTypeCounts[0].serviceType.substr(0, 27) + '...' 
+              : serviceTypeCounts[0].serviceType}
+          </p>
+        </div>
+      )}
     </ChartCard>
   );
 };

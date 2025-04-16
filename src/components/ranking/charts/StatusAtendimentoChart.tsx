@@ -33,7 +33,7 @@ const StatusAtendimentoChart: React.FC<StatusAtendimentoChartProps> = ({
   useEffect(() => {
     setIsDataLoading(true);
     
-    if (chartData && chartData.length > 0) {
+    if (chartData && Array.isArray(chartData) && chartData.length > 0) {
       try {
         // Count occurrences of each status
         const statusMap = new Map<string, number>();
@@ -108,7 +108,8 @@ const StatusAtendimentoChart: React.FC<StatusAtendimentoChartProps> = ({
           label: (context) => {
             const label = context.label || '';
             const value = context.raw as number;
-            const percentage = ((value / chartData?.length) * 100).toFixed(1);
+            const total = Array.isArray(chartData) ? chartData.length : 0;
+            const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : '0.0';
             return `${label}: ${value} (${percentage}%)`;
           }
         }
