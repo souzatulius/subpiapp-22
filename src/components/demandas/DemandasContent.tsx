@@ -16,11 +16,13 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { useAnimatedFeedback } from '@/hooks/use-animated-feedback';
 
 const DemandasContent: React.FC = () => {
   const [viewMode, setViewMode] = useState<'cards' | 'list'>('cards');
   const [filterStatus, setFilterStatus] = useState<string>('todos');
   const [searchTerm, setSearchTerm] = useState<string>('');
+  const { showFeedback } = useAnimatedFeedback();
   
   const {
     demandas: fetchedDemandas,
@@ -29,22 +31,37 @@ const DemandasContent: React.FC = () => {
     isDetailOpen,
     handleSelectDemand,
     handleCloseDetail,
-    refetch
+    refetch,
+    error
   } = useDemandas(filterStatus === 'todos' ? undefined : filterStatus);
 
-  // Filter demands by search term
-  const filteredDemandas = fetchedDemandas.filter(demand => {
-    if (!searchTerm.trim()) return true;
+  // Show error feedback if there's an error fetching demands
+  useEffect(() => {
+    if (error) {
+      console.error('Error fetching demands:', error);
+      showFeedback('error', 'Erro ao carregar demandas. Por favor, tente novamente.');
+    }
+  }, [error, showFeedback]);
+
+  // Filter demands by search term - with null checks
+  const filteredDemandas = React.useMemo(() => {
+    if (!fetchedDemandas || !Array.isArray(fetchedDemandas)) return [];
+    
+    if (!searchTerm.trim()) return fetchedDemandas;
     
     const term = searchTerm.toLowerCase();
-    return (
-      (demand.title?.toLowerCase().includes(term)) || 
-      (demand.titulo?.toLowerCase().includes(term)) ||
-      (demand.origem?.toLowerCase().includes(term)) ||
-      (demand.problema?.descricao?.toLowerCase().includes(term)) ||
-      (demand.status?.toLowerCase().includes(term))
-    );
-  });
+    return fetchedDemandas.filter(demand => {
+      if (!demand) return false;
+      
+      return (
+        (demand.title?.toLowerCase().includes(term)) || 
+        (demand.titulo?.toLowerCase().includes(term)) ||
+        (demand.origem?.toLowerCase().includes(term)) ||
+        (demand.problema?.descricao?.toLowerCase().includes(term)) ||
+        (demand.status?.toLowerCase().includes(term))
+      );
+    });
+  }, [fetchedDemandas, searchTerm]);
 
   useEffect(() => {
     console.log("Demandas atualizadas:", fetchedDemandas);
@@ -61,6 +78,7 @@ const DemandasContent: React.FC = () => {
   ];
 
   const handleViewDemand = (demand: Demand) => {
+    if (!demand) return;
     handleSelectDemand(demand);
   };
 
@@ -90,17 +108,19 @@ const DemandasContent: React.FC = () => {
   };
 
   const renderDemandCard = (demand: Demand) => {
+    if (!demand) return null;
+    
     const hasNotes = demand.notas && demand.notas.length > 0;
     
     return (
       <div className="border border-gray-200 rounded-xl p-4 hover:shadow-md transition-shadow">
         <div className="flex justify-between items-start mb-3">
           <div>
-            <h3 className="font-medium mb-1">{demand.title || demand.titulo}</h3>
+            <h3 className="font-medium mb-1">{demand.title || demand.titulo || 'Sem título'}</h3>
             <div className="flex flex-wrap gap-2 mt-2">
               <LabelBadge 
                 label="Status" 
-                value={demand.status} 
+                value={demand.status || 'Desconhecido'} 
                 variant="status" 
                 size="sm"
               />
@@ -179,6 +199,27 @@ const DemandasContent: React.FC = () => {
     );
   };
 
+  // If there's an error and no demands, show a simple message
+  if (error && (!filteredDemandas || filteredDemandas.length === 0)) {
+    return (
+      <Card className="bg-white shadow-sm rounded-xl">
+        <CardHeader className="pb-2 border-b">
+          <CardTitle className="text-2xl font-bold text-[#003570]">
+            Gerenciamento de Demandas
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="p-6">
+          <div className="py-10 text-center">
+            <p className="text-gray-600 mb-4">Ocorreu um erro ao carregar as demandas.</p>
+            <Button onClick={() => refetch()} variant="outline">
+              Tentar novamente
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <Card className="bg-white shadow-sm rounded-xl">
       <CardHeader className="pb-2 border-b">
@@ -188,11 +229,11 @@ const DemandasContent: React.FC = () => {
       </CardHeader>
       <CardContent className="p-6">
         <UnifiedViewContainer
-          items={filteredDemandas}
+          items={filteredDemandas || []}
           isLoading={isLoading}
           renderListItem={renderDemandCard}
           renderGridItem={renderDemandCard}
-          idExtractor={(demand) => demand.id || ''}
+          idExtractor={(demand) => demand?.id || ''}
           searchTerm={searchTerm}
           setSearchTerm={setSearchTerm}
           onItemClick={handleViewDemand}
@@ -210,7 +251,13 @@ const DemandasContent: React.FC = () => {
           defaultViewMode={viewMode}
         />
 
-        <DemandDetail demand={selectedDemand} isOpen={isDetailOpen} onClose={handleCloseDetail} />
+        {selectedDemand && (
+          <DemandDetail 
+            demand={selectedDemand} 
+            isOpen={isDetailOpen} 
+            onClose={handleCloseDetail} 
+          />
+        )}
       </CardContent>
     </Card>
   );

@@ -1,110 +1,88 @@
 
-import { useState, useEffect } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from '@/components/ui/use-toast';
 import { Demand } from '@/types/demand';
 
 export const useDemandas = (filterStatus?: string) => {
+  const [demandas, setDemandas] = useState<Demand[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
   const [selectedDemand, setSelectedDemand] = useState<Demand | null>(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
 
-  const { data: demandas = [], isLoading, error, refetch } = useQuery({
-    queryKey: ['demandas', filterStatus],
-    queryFn: async () => {
-      try {
-        console.log("Fetching demandas with status filter:", filterStatus);
-        
-        let query = supabase
-          .from('demandas')
-          .select(`
-            *,
-            problema:problema_id (
-              id, 
-              descricao,
-              coordenacao_id,
-              coordenacao:coordenacao_id (id, descricao)
-            ),
-            supervisao_tecnica:supervisao_tecnica_id (id, descricao),
-            coordenacao:coordenacao_id (id, descricao),
-            origem:origem_id (id, descricao),
-            tipo_midia:tipo_midia_id (id, descricao),
-            bairro:bairro_id (id, nome),
-            autor:autor_id (id, nome_completo),
-            servico:servico_id (id, descricao),
-            notas:notas_oficiais (id, titulo, status)
-          `);
+  const fetchDemandas = useCallback(async () => {
+    try {
+      setError(null);
+      setIsLoading(true);
 
-        if (filterStatus) {
-          query = query.eq('status', filterStatus);
-        }
+      let query = supabase
+        .from('demandas')
+        .select(`
+          id,
+          titulo,
+          status,
+          prioridade,
+          origem_id,
+          origem:origens_demandas(descricao),
+          horario_publicacao,
+          problema:problemas(descricao, coordenacao:coordenacoes(sigla)),
+          notas:notas_oficiais(id, titulo)
+        `);
 
-        const { data, error } = await query.order('created_at', { ascending: false });
-
-        if (error) {
-          console.error('Error fetching demandas:', error);
-          toast({
-            title: 'Erro ao carregar demandas',
-            description: error.message,
-            variant: 'destructive',
-          });
-          return [];
-        }
-
-        console.log(`Found ${data.length} demandas`);
-        
-        // Count demandas with and without notas for debugging
-        const demandasWithNotas = data.filter(d => d.notas && d.notas.length > 0);
-        const demandasWithoutNotas = data.filter(d => !d.notas || d.notas.length === 0);
-        console.log("All demandas:", data.length);
-        console.log("Demandas with notas:", demandasWithNotas.length);
-        console.log("Demandas without notas:", demandasWithoutNotas.length);
-
-        // Transform data to match the expected Demand type
-        return (data || []).map(item => {
-          return {
-            ...item,
-            // Ensure these fields are properly available for the UI
-            title: item.titulo || '', 
-            area_coordenacao: {
-              descricao: item.coordenacao?.descricao || ''
-            },
-            supervisao_tecnica: item.supervisao_tecnica || { id: undefined, descricao: '' },
-            servico: item.servico || { descricao: '' },
-            anexos: item.anexos || null,
-          } as unknown as Demand;
-        });
-      } catch (error: any) {
-        console.error('Exception fetching demandas:', error);
-        toast({
-          title: 'Erro ao carregar demandas',
-          description: error.message || 'Erro desconhecido',
-          variant: 'destructive',
-        });
-        return [];
+      if (filterStatus && filterStatus !== 'todos') {
+        query = query.eq('status', filterStatus);
       }
-    },
-  });
 
-  const handleSelectDemand = (demand: Demand) => {
+      const { data, error } = await query.order('horario_publicacao', { ascending: false });
+
+      if (error) throw new Error(error.message);
+      
+      if (!data) {
+        setDemandas([]);
+        return;
+      }
+
+      // Transform the data to match the Demand type
+      const formattedDemandas = data.map(demand => ({
+        ...demand,
+        title: demand.titulo,
+        origem: typeof demand.origem === 'object' ? demand.origem?.descricao : demand.origem_id,
+      }));
+
+      setDemandas(formattedDemandas);
+    } catch (err) {
+      console.error('Error fetching demandas:', err);
+      setError(err instanceof Error ? err : new Error('Failed to fetch demandas'));
+    } finally {
+      setIsLoading(false);
+    }
+  }, [filterStatus]);
+
+  useEffect(() => {
+    fetchDemandas();
+  }, [fetchDemandas]);
+
+  const handleSelectDemand = useCallback((demand: Demand) => {
     setSelectedDemand(demand);
     setIsDetailOpen(true);
-  };
+  }, []);
 
-  const handleCloseDetail = () => {
+  const handleCloseDetail = useCallback(() => {
     setIsDetailOpen(false);
-    setSelectedDemand(null);
-  };
+    // We don't clear the selected demand immediately to allow for exit animations
+    setTimeout(() => {
+      setSelectedDemand(null);
+    }, 300);
+  }, []);
 
   return {
     demandas,
     isLoading,
     error,
-    refetch,
     selectedDemand,
     isDetailOpen,
     handleSelectDemand,
     handleCloseDetail,
-    setSelectedDemand,
+    refetch: fetchDemandas
   };
 };

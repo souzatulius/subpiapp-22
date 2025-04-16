@@ -8,14 +8,22 @@ import BreadcrumbBar from '@/components/layouts/BreadcrumbBar';
 import { useIsMobile } from '@/hooks/use-mobile';
 import MobileBottomNav from '@/components/layouts/MobileBottomNav';
 import { useScrollFade } from '@/hooks/useScrollFade';
+import { ErrorBoundary } from '@/components/shared/ErrorBoundary';
+import { useAnimatedFeedback } from '@/hooks/use-animated-feedback';
 
 const Demandas = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const isMobile = useIsMobile();
   const scrollFadeStyles = useScrollFade({ threshold: 10, fadeDistance: 80 });
+  const { showFeedback } = useAnimatedFeedback();
   
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
+  };
+
+  const handleError = (error: Error) => {
+    console.error('Error in Demandas page:', error);
+    showFeedback('error', 'Ocorreu um erro ao carregar a página. Por favor, tente novamente.');
   };
   
   return (
@@ -48,7 +56,9 @@ const Demandas = () => {
           <div className="flex-1 max-w-7xl mx-auto w-full overflow-y-auto">
             <Layout>
               <div className={`${isMobile ? 'pb-32' : ''}`}>
-                <DemandasContent />
+                <ErrorBoundary onError={handleError}>
+                  <DemandasContent />
+                </ErrorBoundary>
               </div>
             </Layout>
           </div>
