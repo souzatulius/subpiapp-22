@@ -2,12 +2,10 @@
 import React from 'react';
 import { Demand, ResponseQA } from './types';
 import { Separator } from '@/components/ui/separator';
-import DemandaMetadataSection from '../responder-demanda/components/sections/DemandaMetadataSection';
 import { PrioridadeBadge } from '@/components/ui/badges/prioridade-badge';
 import { TemaBadge } from '@/components/ui/badges/tema-badge';
-import { CoordenacaoBadge } from '@/components/ui/badges/coordenacao-badge';
 import { formatDateWithTime } from '@/lib/dateUtils';
-import { Calendar, Clock, FileText, MapPin, Mail, Phone, User, FileSearch, Building, Tag } from 'lucide-react';
+import { Calendar, Clock, FileText, MapPin, Building, Newspaper } from 'lucide-react';
 
 interface DemandaInfoProps {
   selectedDemanda: Demand;
@@ -18,39 +16,26 @@ const DemandaInfo: React.FC<DemandaInfoProps> = ({
   selectedDemanda, 
   formattedResponses 
 }) => {
-  // Convert Demand to Demanda for compatibility with DemandaMetadataSection
-  const demandaForMetadata = {
-    ...selectedDemanda,
-    prioridade: selectedDemanda.prioridade || 'media', // Default value for required field
-  };
-
-  // Check for coordenacao in either format to support both data structures
-  const showCoordination = (
-    selectedDemanda.coordenacao?.sigla || 
-    selectedDemanda.coordenacao?.descricao || 
-    selectedDemanda.coordenacao_id
-  );
-
   return (
     <div className="bg-white rounded-xl p-6 border border-gray-200 mb-6">
-      <div className="flex justify-between items-start mb-4">
+      <div className="flex justify-between items-start mb-1">
         <h2 className="text-xl font-semibold">{selectedDemanda.titulo}</h2>
         <div className="flex gap-2">
           {selectedDemanda.problema?.descricao && (
             <TemaBadge texto={selectedDemanda.problema.descricao} />
           )}
-          {showCoordination && (
-            <CoordenacaoBadge texto={
-              selectedDemanda.coordenacao?.sigla || 
-              selectedDemanda.coordenacao?.descricao || 
-              'Coordenação'
-            } />
-          )}
           <PrioridadeBadge prioridade={selectedDemanda.prioridade || 'media'} />
         </div>
       </div>
       
-      {/* Custom metadata section since DemandaMetadataSection might not handle all fields correctly */}
+      {/* Coordenação como subtítulo */}
+      {selectedDemanda.coordenacao && (
+        <h3 className="text-md text-gray-600 mb-4">
+          {selectedDemanda.coordenacao.sigla || selectedDemanda.coordenacao.descricao || 'Coordenação não informada'}
+        </h3>
+      )}
+      
+      {/* Custom metadata section with only the requested fields */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 text-sm">
         {selectedDemanda.horario_publicacao && (
           <div className="flex items-center">
@@ -84,54 +69,6 @@ const DemandaInfo: React.FC<DemandaInfoProps> = ({
           </div>
         )}
         
-        {selectedDemanda.bairros?.distritos?.nome && (
-          <div className="flex items-center">
-            <MapPin className="h-4 w-4 mr-2 text-gray-500" />
-            <span className="text-gray-600 mr-2">Distrito:</span>
-            <span className="font-medium">{selectedDemanda.bairros.distritos.nome}</span>
-          </div>
-        )}
-        
-        {selectedDemanda.endereco && (
-          <div className="flex items-center">
-            <MapPin className="h-4 w-4 mr-2 text-gray-500" />
-            <span className="text-gray-600 mr-2">Endereço:</span>
-            <span className="font-medium">{selectedDemanda.endereco}</span>
-          </div>
-        )}
-        
-        {selectedDemanda.nome_solicitante && (
-          <div className="flex items-center">
-            <User className="h-4 w-4 mr-2 text-gray-500" />
-            <span className="text-gray-600 mr-2">Solicitante:</span>
-            <span className="font-medium">{selectedDemanda.nome_solicitante}</span>
-          </div>
-        )}
-        
-        {selectedDemanda.email_solicitante && (
-          <div className="flex items-center">
-            <Mail className="h-4 w-4 mr-2 text-gray-500" />
-            <span className="text-gray-600 mr-2">E-mail:</span>
-            <span className="font-medium">{selectedDemanda.email_solicitante}</span>
-          </div>
-        )}
-        
-        {selectedDemanda.telefone_solicitante && (
-          <div className="flex items-center">
-            <Phone className="h-4 w-4 mr-2 text-gray-500" />
-            <span className="text-gray-600 mr-2">Telefone:</span>
-            <span className="font-medium">{selectedDemanda.telefone_solicitante}</span>
-          </div>
-        )}
-        
-        {selectedDemanda.origem?.descricao && (
-          <div className="flex items-center">
-            <Tag className="h-4 w-4 mr-2 text-gray-500" />
-            <span className="text-gray-600 mr-2">Origem:</span>
-            <span className="font-medium">{selectedDemanda.origem.descricao}</span>
-          </div>
-        )}
-        
         {selectedDemanda.protocolo && (
           <div className="flex items-center">
             <Building className="h-4 w-4 mr-2 text-gray-500" />
@@ -140,11 +77,11 @@ const DemandaInfo: React.FC<DemandaInfoProps> = ({
           </div>
         )}
         
-        {selectedDemanda.tipo_midia?.descricao && (
+        {selectedDemanda.veiculo_imprensa && (
           <div className="flex items-center">
-            <FileSearch className="h-4 w-4 mr-2 text-gray-500" />
-            <span className="text-gray-600 mr-2">Tipo de Mídia:</span>
-            <span className="font-medium">{selectedDemanda.tipo_midia.descricao}</span>
+            <Newspaper className="h-4 w-4 mr-2 text-gray-500" />
+            <span className="text-gray-600 mr-2">Veículo de Comunicação:</span>
+            <span className="font-medium">{selectedDemanda.veiculo_imprensa}</span>
           </div>
         )}
       </div>

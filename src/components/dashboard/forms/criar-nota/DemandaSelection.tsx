@@ -2,11 +2,10 @@
 import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Demand } from './types';
-import { Loader2, Clock, Calendar, FileText, MapPin, Building, Tag } from 'lucide-react';
+import { Loader2, Clock, Calendar, FileText, Building } from 'lucide-react';
 import UnifiedFilterBar, { ViewMode } from '@/components/shared/unified-view/UnifiedFilterBar';
 import { PrioridadeBadge } from '@/components/ui/badges/prioridade-badge';
 import { TemaBadge } from '@/components/ui/badges/tema-badge';
-import { CoordenacaoBadge } from '@/components/ui/badges/coordenacao-badge';
 import { formatDateWithTime } from '@/lib/dateUtils';
 
 interface DemandaSelectionProps {
@@ -51,30 +50,24 @@ const DemandaSelection: React.FC<DemandaSelectionProps> = ({
                     className={`p-3 border rounded-xl hover:bg-gray-50 cursor-pointer ${viewMode === 'cards' ? 'h-full' : ''}`}
                     onClick={() => onDemandaSelect(demanda.id)}
                   >
-                    <div className="flex justify-between items-start">
+                    <div className="flex justify-between items-start mb-2">
                       <div className="font-medium">{demanda.titulo}</div>
-                      <div>
+                      <div className="flex gap-1">
+                        {demanda.problema?.descricao && (
+                          <TemaBadge texto={demanda.problema.descricao} size="xs" />
+                        )}
                         {demanda.prioridade && (
                           <PrioridadeBadge prioridade={demanda.prioridade} size="xs" />
                         )}
                       </div>
                     </div>
                     
-                    <div className="flex flex-wrap gap-1 mt-2">
-                      {demanda.problema?.descricao && (
-                        <TemaBadge texto={demanda.problema.descricao} size="xs" />
-                      )}
-                      {demanda.coordenacao && (demanda.coordenacao.sigla || demanda.coordenacao.descricao) && (
-                        <CoordenacaoBadge 
-                          texto={
-                            demanda.coordenacao.sigla || 
-                            demanda.coordenacao.descricao || 
-                            'Coordenação'
-                          } 
-                          size="xs" 
-                        />
-                      )}
-                    </div>
+                    {/* Coordenação como texto comum abaixo do título */}
+                    {demanda.coordenacao && (
+                      <div className="text-xs text-gray-600 mb-2">
+                        {demanda.coordenacao.sigla || demanda.coordenacao.descricao || 'Coordenação não informada'}
+                      </div>
+                    )}
                     
                     <div className="mt-2 text-xs text-gray-500 flex flex-col gap-1">
                       {demanda.horario_publicacao && (
@@ -95,20 +88,6 @@ const DemandaSelection: React.FC<DemandaSelectionProps> = ({
                         <div className="flex items-center">
                           <FileText className="h-3 w-3 mr-1" />
                           <span>Serviço: {demanda.servico.descricao}</span>
-                        </div>
-                      )}
-                      
-                      {demanda.bairros?.nome && (
-                        <div className="flex items-center">
-                          <MapPin className="h-3 w-3 mr-1" />
-                          <span>Bairro: {demanda.bairros.nome}</span>
-                        </div>
-                      )}
-                      
-                      {demanda.origem?.descricao && (
-                        <div className="flex items-center">
-                          <Tag className="h-3 w-3 mr-1" />
-                          <span>Origem: {demanda.origem.descricao}</span>
                         </div>
                       )}
                       
