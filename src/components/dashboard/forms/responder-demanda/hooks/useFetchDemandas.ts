@@ -102,49 +102,72 @@ export const useFetchDemandas = (coordenacaoId?: string) => {
         }
 
         // Format the data to match the Demanda interface
-        const formattedDemandas = data.map((demanda): Demanda => ({
-          id: demanda.id,
-          titulo: demanda.titulo,
-          status: demanda.status,
-          detalhes_solicitacao: demanda.detalhes_solicitacao,
-          horario_publicacao: demanda.horario_publicacao,
-          prazo_resposta: demanda.prazo_resposta,
-          prioridade: demanda.prioridade,
-          coordenacao_id: demanda.coordenacao_id,
-          origem_id: demanda.origem_id,
-          origens_demandas: demanda.origens_demandas,
-          tipo_midia_id: demanda.tipo_midia_id,
-          tipo_midia: demanda.tipo_midia,
-          tema: demanda.tema ? {
-            id: demanda.tema.id,
-            descricao: demanda.tema.descricao,
-            coordenacao: demanda.tema.coordenacao
-          } : null,
-          problema: demanda.problema ? {
-            id: demanda.problema.id,
-            descricao: demanda.problema.descricao,
-            coordenacao: demanda.problema.coordenacao
-          } : null,
-          coordenacao: demanda.coordenacao || {
-            id: undefined,
-            descricao: "Não definida",
-            sigla: undefined
-          },
-          bairro_id: demanda.bairro_id,
-          bairros: demanda.bairros,
-          distrito: demanda.distrito?.[0]?.distrito || null,
-          servico_id: demanda.servico_id,
-          servico: demanda.servico,
-          veiculo_imprensa: demanda.veiculo_imprensa,
-          nome_solicitante: demanda.nome_solicitante, 
-          email_solicitante: demanda.email_solicitante,
-          telefone_solicitante: demanda.telefone_solicitante,
-          protocolo: demanda.protocolo,
-          endereco: demanda.endereco,
-          perguntas: demanda.perguntas,
-          anexos: demanda.anexos,
-          arquivo_url: demanda.arquivo_url
-        }));
+        const formattedDemandas = data.map((demanda): Demanda => {
+          // Process perguntas to ensure it's a Record<string, string> or null
+          let processedPerguntas: Record<string, string> | null = null;
+          
+          if (demanda.perguntas) {
+            // Check if it's already an object
+            if (typeof demanda.perguntas === 'object' && !Array.isArray(demanda.perguntas)) {
+              processedPerguntas = demanda.perguntas as Record<string, string>;
+            } 
+            // If it's a string, try to parse it as JSON
+            else if (typeof demanda.perguntas === 'string') {
+              try {
+                const parsed = JSON.parse(demanda.perguntas);
+                if (typeof parsed === 'object' && !Array.isArray(parsed)) {
+                  processedPerguntas = parsed;
+                }
+              } catch (e) {
+                console.warn('Failed to parse perguntas string as JSON:', e);
+              }
+            }
+          }
+          
+          return {
+            id: demanda.id,
+            titulo: demanda.titulo,
+            status: demanda.status,
+            detalhes_solicitacao: demanda.detalhes_solicitacao,
+            horario_publicacao: demanda.horario_publicacao,
+            prazo_resposta: demanda.prazo_resposta,
+            prioridade: demanda.prioridade,
+            coordenacao_id: demanda.coordenacao_id,
+            origem_id: demanda.origem_id,
+            origens_demandas: demanda.origens_demandas,
+            tipo_midia_id: demanda.tipo_midia_id,
+            tipo_midia: demanda.tipo_midia,
+            tema: demanda.tema ? {
+              id: demanda.tema.id,
+              descricao: demanda.tema.descricao,
+              coordenacao: demanda.tema.coordenacao
+            } : null,
+            problema: demanda.problema ? {
+              id: demanda.problema.id,
+              descricao: demanda.problema.descricao,
+              coordenacao: demanda.problema.coordenacao
+            } : null,
+            coordenacao: demanda.coordenacao || {
+              id: undefined,
+              descricao: "Não definida",
+              sigla: undefined
+            },
+            bairro_id: demanda.bairro_id,
+            bairros: demanda.bairros,
+            distrito: demanda.distrito?.[0]?.distrito || null,
+            servico_id: demanda.servico_id,
+            servico: demanda.servico,
+            veiculo_imprensa: demanda.veiculo_imprensa,
+            nome_solicitante: demanda.nome_solicitante, 
+            email_solicitante: demanda.email_solicitante,
+            telefone_solicitante: demanda.telefone_solicitante,
+            protocolo: demanda.protocolo,
+            endereco: demanda.endereco,
+            perguntas: processedPerguntas,
+            anexos: demanda.anexos,
+            arquivo_url: demanda.arquivo_url
+          };
+        });
 
         console.log('Fetched and formatted demandas:', formattedDemandas);
         setDemandas(formattedDemandas);

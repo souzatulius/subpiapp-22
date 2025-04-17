@@ -6,7 +6,7 @@ export interface Demanda {
   resumo_situacao?: string | null;
   prazo_resposta?: string | null;
   prioridade: string;
-  perguntas?: Record<string, string>;
+  perguntas?: Record<string, string> | null;
   status: string;
   horario_publicacao: string;
   endereco?: string | null;
@@ -77,6 +77,10 @@ export interface Demanda {
       descricao?: string;
       sigla?: string;
     } | null;
+  } | null;
+  tipo_midia?: {
+    id: string;
+    descricao: string;
   } | null;
 }
 
