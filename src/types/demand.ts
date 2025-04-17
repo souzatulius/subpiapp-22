@@ -1,4 +1,3 @@
-
 export interface Demand {
   id: string;
   title?: string;
@@ -84,6 +83,14 @@ export interface Demand {
       id?: string;
     } | null;
   } | null;
+  
+  // Fix for coordenacao property - ensuring it has the required structure
+  coordenacao?: {
+    id?: string;
+    descricao: string;
+    sigla?: string;
+  } | null;
+  
   numero_protocolo_156?: string;
 }
 

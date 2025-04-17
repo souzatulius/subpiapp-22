@@ -2,30 +2,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
-
-export interface Demanda {
-  id: string;
-  titulo: string;
-  status: string;
-  detalhes_solicitacao?: string;
-  horario_publicacao: string;
-  prazo_resposta: string;
-  prioridade: string;
-  coordenacao_id?: string;
-  tema?: {
-    coordenacao?: {
-      sigla?: string;
-    };
-  };
-  problema?: {
-    coordenacao?: {
-      sigla?: string;
-    };
-  };
-  coordenacao?: {
-    sigla?: string;
-  };
-}
+import { Demanda } from '../types';
 
 export const useFetchDemandas = (coordenacaoId?: string) => {
   const [demandas, setDemandas] = useState<Demanda[]>([]);
@@ -52,16 +29,24 @@ export const useFetchDemandas = (coordenacaoId?: string) => {
             coordenacao_id,
             tema:problema_id(
               coordenacao:coordenacao_id(
-                sigla
+                sigla,
+                descricao,
+                id
               )
             ),
             problema:problema_id(
               coordenacao:coordenacao_id(
-                sigla
-              )
+                sigla,
+                descricao,
+                id
+              ),
+              descricao,
+              id
             ),
             coordenacao:coordenacao_id(
-              sigla
+              sigla,
+              descricao,
+              id
             )
           `)
           .eq('status', 'pendente');
@@ -98,7 +83,11 @@ export const useFetchDemandas = (coordenacaoId?: string) => {
           coordenacao_id: demanda.coordenacao_id,
           tema: demanda.tema,
           problema: demanda.problema,
-          coordenacao: demanda.coordenacao,
+          coordenacao: demanda.coordenacao || {
+            id: undefined,
+            descricao: "Não definida",
+            sigla: undefined
+          },
         }));
 
         setDemandas(formattedDemandas);
@@ -141,5 +130,6 @@ export const useFetchDemandas = (coordenacaoId?: string) => {
     isLoading,
     searchTerm,
     setSearchTerm,
+    setDemandas,  // Expose this for useDemandasData
   };
 };
