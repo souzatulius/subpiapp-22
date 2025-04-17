@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
-import { Demand } from '@/types/demand';
+import { Demand } from './types';
 import { Loader2, Clock, Calendar, FileText, MapPin } from 'lucide-react';
 import UnifiedFilterBar, { ViewMode } from '@/components/shared/unified-view/UnifiedFilterBar';
 import { PrioridadeBadge } from '@/components/ui/badges/prioridade-badge';
