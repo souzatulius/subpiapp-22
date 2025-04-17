@@ -25,6 +25,7 @@ const CadastrarDemandaForm: React.FC<CadastrarDemandaFormProps> = ({
   const [validationErrors, setValidationErrors] = useState<ValidationError[]>([]);
   const [showValidationAlert, setShowValidationAlert] = useState(false);
   const [isGeneratingAI, setIsGeneratingAI] = useState(false); 
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const location = useLocation();
   const formRef = useRef<HTMLDivElement>(null);
   const { showFeedback } = useAnimatedFeedback();
@@ -103,7 +104,7 @@ const CadastrarDemandaForm: React.FC<CadastrarDemandaFormProps> = ({
     if (FORM_STEPS && activeStep >= 0 && activeStep < FORM_STEPS.length) {
       if (activeStep === FORM_STEPS.length - 1) {
         if (validateFormBeforeSubmit()) {
-          handleSubmit(formData);
+          handleSubmit();
         } else {
           setShowValidationAlert(true);
           const missingFieldsMessage = getErrorSummary(validationErrors);
@@ -119,17 +120,32 @@ const CadastrarDemandaForm: React.FC<CadastrarDemandaFormProps> = ({
     }
   };
 
-  const handleSubmit = async (formData: any) => {
+  const handleSubmit = async () => {
+    if (isSubmitting) return; // Prevent multiple submissions
+    
     try {
-      if (validateFormBeforeSubmit()) {
-        showFeedback('loading', 'Cadastrando demanda...', { progress: 50 });
-        
-        await submitForm(formData);
-        
-        showFeedback('success', 'Demanda cadastrada com sucesso!', { 
-          duration: 5000
-        });
+      setIsSubmitting(true);
+      showFeedback('loading', 'Cadastrando demanda...', { progress: 50 });
+      
+      // First, validate the form
+      if (!validateFormBeforeSubmit()) {
+        setShowValidationAlert(true);
+        const missingFieldsMessage = getErrorSummary(validationErrors);
+        showFeedback('error', `Formulário incompleto: ${missingFieldsMessage}`);
+        return;
       }
+      
+      // Submit the form
+      await submitForm(formData);
+      
+      // If we reached here, it was successful
+      showFeedback('success', 'Demanda cadastrada com sucesso!', { 
+        duration: 5000
+      });
+      
+      // Reset the form and close the modal
+      resetForm();
+      onClose();
     } catch (error: any) {
       console.error('Submission error:', error);
       
@@ -143,6 +159,8 @@ const CadastrarDemandaForm: React.FC<CadastrarDemandaFormProps> = ({
       }
       
       showFeedback('error', errorMsg, { duration: 5000 });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -215,8 +233,8 @@ const CadastrarDemandaForm: React.FC<CadastrarDemandaFormProps> = ({
             onNextStep={handleNextStep}
             isLastStep={activeStep === FORM_STEPS.length - 1}
             isFirstStep={activeStep === 0}
-            isSubmitting={isLoading}
-            onSubmit={() => handleSubmit(formData)}
+            isSubmitting={isLoading || isSubmitting}
+            onSubmit={handleSubmit}
           />
         </div>
       </Card>

@@ -87,11 +87,13 @@ export const useDemandFormSubmit = (resetForm: () => void, onClose: () => void) 
         
       if (error) throw error;
       
-      // Show animated feedback instead of just toast
+      // Show animated feedback instead of toast
       showFeedback('success', "Demanda cadastrada com sucesso!");
       
       resetForm();
       onClose();
+      
+      return true; // Return true to indicate successful submission
     } catch (error: any) {
       console.error("Erro ao submeter formulário:", error);
       
@@ -109,10 +111,7 @@ export const useDemandFormSubmit = (resetForm: () => void, onClose: () => void) 
     }
   };
 
-  // Added handleSubmit method to match the expected interface
-  const handleSubmit = submitForm;
-
-  return { isLoading, submitForm, handleSubmit };
+  return { isLoading, submitForm, handleSubmit: submitForm };
 };
 
 export default useDemandFormSubmit;

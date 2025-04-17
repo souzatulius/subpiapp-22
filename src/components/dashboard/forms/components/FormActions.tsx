@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, Loader2 } from 'lucide-react';
 
 interface FormActionsProps {
   onPrevStep: () => void;
@@ -26,7 +26,7 @@ const FormActions: React.FC<FormActionsProps> = ({
         type="button"
         variant="outline"
         onClick={onPrevStep}
-        disabled={isFirstStep}
+        disabled={isFirstStep || isSubmitting}
         className="hover:bg-gray-100 hover:text-gray-800 rounded-2xl"
       >
         Voltar
@@ -40,13 +40,21 @@ const FormActions: React.FC<FormActionsProps> = ({
           disabled={isSubmitting}
           className="bg-orange-500 hover:bg-orange-600 rounded-2xl"
         >
-          {isSubmitting ? "Enviando..." : "Finalizar"}
+          {isSubmitting ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Enviando...
+            </>
+          ) : (
+            "Finalizar"
+          )}
         </Button>
       ) : (
         <Button
           type="button"
           variant="action"
           onClick={onNextStep}
+          disabled={isSubmitting}
           className="bg-orange-500 hover:bg-orange-600 rounded-2xl"
         >
           Próximo
