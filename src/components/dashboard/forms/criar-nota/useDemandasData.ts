@@ -65,10 +65,11 @@ export const useDemandasData = () => {
         }
         
         // Fetch the demandas data with the appropriate columns
+        // Important: only get demands with status 'respondida' for creating notes
         const { data: allDemandas, error: demandasError } = await supabase
           .from('demandas')
           .select(selectQuery)
-          .in('status', ['pendente', 'em_andamento', 'respondida'])
+          .eq('status', 'respondida') // Changed to only get 'respondida' status
           .order('horario_publicacao', { ascending: false });
         
         if (demandasError) throw demandasError;
@@ -90,7 +91,7 @@ export const useDemandasData = () => {
           allDemandas.filter(demanda => demanda && typeof demanda === 'object' && !demandasComNotas.has(demanda.id)) : 
           [];
         
-        console.log('All demandas:', allDemandas ? allDemandas.length : 0);
+        console.log('All demandas with respondida status:', allDemandas ? allDemandas.length : 0);
         console.log('Demandas with notas:', demandasComNotas.size);
         console.log('Demandas without notas:', demandasSemNotas.length);
         
@@ -103,22 +104,22 @@ export const useDemandasData = () => {
             }
             
             const processedDemanda: Demand = {
-              id: demanda.id || '',
-              titulo: demanda.titulo || '',
-              status: demanda.status || 'pendente',
-              detalhes_solicitacao: demanda.detalhes_solicitacao || null,
-              resumo_situacao: demanda.resumo_situacao || null,
-              problema_id: demanda.problema_id || null,
-              coordenacao_id: demanda.coordenacao_id || null,
-              servico_id: demanda.servico_id || null,
-              horario_publicacao: demanda.horario_publicacao || null,
-              prazo_resposta: demanda.prazo_resposta || null,
-              prioridade: demanda.prioridade || 'media',
-              arquivo_url: demanda.arquivo_url || null,
-              anexos: demanda.anexos || null,
-              numero_protocolo_156: hasProtoColumn && 'numero_protocolo_156' in demanda ? demanda.numero_protocolo_156 : null,
-              tema: demanda.tema || null, 
-              servico: demanda.servico || null,
+              id: demanda?.id || '',
+              titulo: demanda?.titulo || '',
+              status: demanda?.status || 'pendente',
+              detalhes_solicitacao: demanda?.detalhes_solicitacao || null,
+              resumo_situacao: demanda?.resumo_situacao || null,
+              problema_id: demanda?.problema_id || null,
+              coordenacao_id: demanda?.coordenacao_id || null,
+              servico_id: demanda?.servico_id || null,
+              horario_publicacao: demanda?.horario_publicacao || null,
+              prazo_resposta: demanda?.prazo_resposta || null,
+              prioridade: demanda?.prioridade || 'media',
+              arquivo_url: demanda?.arquivo_url || null,
+              anexos: demanda?.anexos || null,
+              numero_protocolo_156: hasProtoColumn && demanda?.numero_protocolo_156 ? demanda.numero_protocolo_156 : null,
+              tema: demanda?.tema || null, 
+              servico: demanda?.servico || null,
               
               // Add placeholder for required properties that might be missing
               supervisao_tecnica: null,
@@ -161,8 +162,9 @@ export const useDemandasData = () => {
       }
       
       // Check in coordination area
-      if (typeof demanda.tema === 'object' && 
-          demanda.tema?.coordenacao?.sigla?.toLowerCase().includes(lowercaseSearchTerm)) {
+      if (demanda.tema && 
+          typeof demanda.tema === 'object' && 
+          demanda.tema.coordenacao?.sigla?.toLowerCase().includes(lowercaseSearchTerm)) {
         return true;
       }
       

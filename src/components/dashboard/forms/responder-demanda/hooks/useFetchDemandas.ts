@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
-import { Demanda } from '@/components/dashboard/forms/responder-demanda/types';
+import { Demanda } from '../types';
 
 export const useFetchDemandas = () => {
   const [demandas, setDemandas] = useState<Demanda[]>([]);
@@ -64,9 +64,9 @@ export const useFetchDemandas = () => {
             let temaObject = null;
             if (demanda.tema && typeof demanda.tema === 'object') {
               temaObject = {
-                id: demanda.tema.id || '',
-                descricao: demanda.tema.descricao || '',
-                coordenacao: demanda.tema.coordenacao || null
+                id: demanda.tema?.id || '',
+                descricao: demanda.tema?.descricao || '',
+                coordenacao: demanda.tema?.coordenacao || null
               };
             }
             
@@ -89,7 +89,6 @@ export const useFetchDemandas = () => {
               servico: demanda.servico || null,
               
               // Add default values for required properties
-              supervisao_tecnica: null,
               supervisao_tecnica_id: null,
               autor_id: null,
               autor: null,
@@ -156,6 +155,7 @@ export const useFetchDemandas = () => {
     searchTerm,
     setSearchTerm,
     isLoading,
-    setDemandas
+    setDemandas,
+    setFilteredDemandas
   };
 };
