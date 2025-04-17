@@ -63,7 +63,16 @@ const DemandaSelection: React.FC<DemandaSelectionProps> = ({
                         <TemaBadge texto={demanda.problema.descricao} size="xs" />
                       )}
                       {(demanda.coordenacao?.sigla || demanda.coordenacao?.descricao) && (
-                        <CoordenacaoBadge texto={demanda.coordenacao.sigla || demanda.coordenacao.descricao} size="xs" />
+                        <CoordenacaoBadge 
+                          texto={
+                            typeof demanda.coordenacao.sigla === 'string' 
+                              ? demanda.coordenacao.sigla 
+                              : typeof demanda.coordenacao.descricao === 'string'
+                                ? demanda.coordenacao.descricao
+                                : 'Coordenação'
+                          } 
+                          size="xs" 
+                        />
                       )}
                     </div>
                     

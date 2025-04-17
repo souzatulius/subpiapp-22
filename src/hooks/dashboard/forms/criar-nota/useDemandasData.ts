@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
-import { Demand } from '@/types/demand';
+import { Demand } from '@/components/dashboard/forms/criar-nota/types';
 
 export const useDemandasData = () => {
   const [demandas, setDemandas] = useState<Demand[]>([]);
@@ -96,7 +96,7 @@ export const useDemandasData = () => {
         const { data: notasData, error: notasError } = await supabase
           .from('notas_oficiais')
           .select('demanda_id')
-          .is('demanda_id', 'not.null');
+          .not('demanda_id', 'is', null);
         
         if (notasError) {
           console.error('Error fetching notas:', notasError);
@@ -117,14 +117,13 @@ export const useDemandasData = () => {
           .filter(demanda => !demandasComNotas.has(demanda.id))
           // Map to ensure all required fields are present
           .map(demanda => {
-            return {
+            const processedDemanda = {
               ...demanda,
               // Ensure proper structure for all fields
               problema: demanda.problema || { descricao: null },
               coordenacao: demanda.coordenacao || { descricao: null, sigla: null },
               servico: demanda.servico || { descricao: null },
               bairros: demanda.bairros || { nome: null },
-              distrito: demanda.bairros?.distrito || { nome: null },
               origens_demandas: demanda.origens_demandas || { descricao: null },
               tipo_midia: demanda.tipo_midia || { descricao: null },
               horario_publicacao: demanda.horario_publicacao || null,
@@ -132,11 +131,15 @@ export const useDemandasData = () => {
               prioridade: demanda.prioridade || 'media',
               arquivo_url: demanda.arquivo_url || null,
               anexos: demanda.anexos || null
-            } as Demand;
+            };
+            
+            return processedDemanda as unknown as Demand;
           });
         
         console.log('Processed demandas ready for notes:', processedDemandas.length);
-        console.log('Sample processed demanda:', processedDemandas[0]);
+        if (processedDemandas.length > 0) {
+          console.log('Sample processed demanda:', processedDemandas[0]);
+        }
         
         setDemandas(processedDemandas);
         setFilteredDemandas(processedDemandas);

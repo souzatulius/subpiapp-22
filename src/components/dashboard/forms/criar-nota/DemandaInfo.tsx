@@ -22,7 +22,10 @@ const DemandaInfo: React.FC<DemandaInfoProps> = ({
     prioridade: selectedDemanda.prioridade || 'media', // Default value for required field
   };
 
-  const showCoordination = selectedDemanda.coordenacao?.sigla || selectedDemanda.coordenacao?.descricao;
+  // Check for coordenacao in either format to support both data structures
+  const showCoordination = (selectedDemanda.coordenacao?.sigla || 
+                          selectedDemanda.coordenacao?.descricao || 
+                          selectedDemanda.coordenacao_id);
 
   return (
     <div className="bg-white rounded-xl p-6 border border-gray-200 mb-6">

@@ -9,7 +9,10 @@ export interface Demand {
   dataResposta?: string;
   origem?: string;
   tema?: string;
-  servico?: string;
+  servico?: {
+    id?: string;
+    descricao: string | null;
+  } | null;
   area?: string;
   protocolo?: string;
   requesterName?: string;
@@ -61,12 +64,28 @@ export interface Demand {
   problema?: {
     descricao: string | null;
     id?: string;
-    coordenacao?: any;
+    coordenacao?: {
+      id?: string;
+      descricao: string;
+      sigla?: string;
+    } | null;
   } | null;
   
   // Additional properties from other interfaces
   origem_id?: string | any;
   tipo_midia_id?: any;
+  
+  // Fix for coordenacao property
+  coordenacao?: {
+    id?: string;
+    descricao: string;
+    sigla?: string;
+  } | null;
+  
+  bairros?: {
+    nome: string;
+    id?: string;
+  } | null;
 }
 
 export interface Note {
