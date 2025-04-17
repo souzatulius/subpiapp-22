@@ -1,14 +1,10 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from '@/components/ui/use-toast';
 import { useAuth } from '@/hooks/useSupabaseAuth';
-import { Demand } from '@/components/dashboard/forms/criar-nota/types';
-import { ResponseQA } from '@/components/dashboard/forms/criar-nota/types';
+import { Demand, ResponseQA } from '@/components/dashboard/forms/criar-nota/types';
 import { useNavigate } from 'react-router-dom';
-import { fetchDemandResponse } from './api/fetchDemandResponse';
-import { formatResponses } from './utils/formatResponses';
-import { submitNotaForm } from './api/submitNotaForm';
-import { validateNotaForm } from './validators/validateNotaForm';
-import { adaptDemandType } from './utils/typeAdapters';
 
 export const useNotaForm = (onClose: () => void) => {
   const { user } = useAuth();
@@ -16,11 +12,60 @@ export const useNotaForm = (onClose: () => void) => {
   const [selectedDemandaId, setSelectedDemandaId] = useState('');
   const [selectedDemanda, setSelectedDemanda] = useState<Demand | null>(null);
   const [demandaResponse, setDemandaResponse] = useState<string | null>(null);
-  const [demandaComments, setDemandaComments] = useState<string | null>(null);
+  const [comentarios, setComentarios] = useState<string | null>(null);
   const [titulo, setTitulo] = useState('');
   const [texto, setTexto] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [step, setStep] = useState<'select-demand' | 'create-note'>('select-demand');
+
+  const fetchDemandResponse = async (demandaId: string) => {
+    try {
+      console.log('Fetching response for demanda:', demandaId);
+      
+      const { data, error } = await supabase
+        .from('respostas_demandas')
+        .select('texto, comentarios, respostas')
+        .eq('demanda_id', demandaId)
+        .maybeSingle();
+      
+      if (error) {
+        console.error('Error fetching response:', error);
+        throw error;
+      }
+      
+      console.log('Response data:', data);
+      
+      if (data) {
+        setDemandaResponse(data.texto || null);
+        setComentarios(data.comentarios || null);
+        
+        // If we have a structured respostas object, convert it to text
+        if (data.respostas && typeof data.respostas === 'object') {
+          try {
+            let respostasText = '';
+            Object.entries(data.respostas).forEach(([key, value]) => {
+              // Get the question text from the selectedDemanda.perguntas object
+              const questionText = selectedDemanda?.perguntas?.[key] || `Pergunta ${Number(key) + 1}`;
+              respostasText += `Pergunta: ${questionText}\nResposta: ${value}\n\n`;
+            });
+            setDemandaResponse(respostasText);
+          } catch (parseError) {
+            console.error('Error parsing respostas:', parseError);
+          }
+        }
+      } else {
+        setDemandaResponse(null);
+        setComentarios(null);
+      }
+    } catch (error) {
+      console.error('Erro ao carregar respostas da demanda:', error);
+      toast({
+        title: "Erro ao carregar respostas",
+        description: "Não foi possível carregar as respostas da demanda.",
+        variant: "destructive"
+      });
+    }
+  };
 
   const handleDemandaSelect = async (demandaId: string, demandas: Demand[]) => {
     setSelectedDemandaId(demandaId);
@@ -35,17 +80,17 @@ export const useNotaForm = (onClose: () => void) => {
       setTitulo(selected.titulo || '');
       
       // Fetch responses for this demand
-      const { responseText, comments } = await fetchDemandResponse(demandaId);
-      setDemandaResponse(responseText);
-      setDemandaComments(comments);
+      await fetchDemandResponse(demandaId);
       
-      // Update the selected demand with comments
-      if (comments) {
+      // Update the selected demand with comments if we have them
+      if (comentarios) {
         setSelectedDemanda({
           ...selected,
-          comentarios: comments
+          comentarios
         });
       }
+    } else {
+      console.error('Selected demand not found in demandas array');
     }
     
     setStep('create-note');
@@ -55,62 +100,111 @@ export const useNotaForm = (onClose: () => void) => {
     setStep('select-demand');
     setSelectedDemanda(null);
     setDemandaResponse(null);
-    setDemandaComments(null);
+    setComentarios(null);
     setTitulo('');
     setTexto('');
   };
 
   const handleSubmit = async () => {
-    console.log("Submit button clicked with data:", {
-      titulo,
-      texto,
-      selectedDemanda: selectedDemanda ? { id: selectedDemanda.id, titulo: selectedDemanda.titulo } : null
-    });
-    
-    // Validation
-    const isValid = validateNotaForm({
-      titulo,
-      texto,
-      selectedDemanda
-    });
-    
-    if (!isValid) {
-      console.error('Por favor, preencha todos os campos obrigatórios.');
+    // Validação
+    if (!titulo.trim()) {
+      toast({
+        title: "Título obrigatório",
+        description: "Por favor, informe um título para a nota oficial.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (!texto.trim()) {
+      toast({
+        title: "Conteúdo obrigatório",
+        description: "Por favor, informe o conteúdo da nota oficial.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (!selectedDemanda) {
+      toast({
+        title: "Demanda inválida",
+        description: "Selecione uma demanda válida.",
+        variant: "destructive"
+      });
       return;
     }
 
     try {
       setIsSubmitting(true);
-      console.log("Validation passed, proceeding with submission");
       
-      // Use the adapter to convert the demand type if selectedDemanda exists
-      const adaptedDemanda = selectedDemanda ? adaptDemandType(selectedDemanda) : null;
+      // Use the problema_id from the selected demand if it has one
+      const problemaId = selectedDemanda.problema_id || selectedDemanda.problema?.id;
+      const coordenacaoId = selectedDemanda.coordenacao_id || selectedDemanda.coordenacao?.id;
       
-      console.log("Adapted demand:", adaptedDemanda);
+      // Create the note
+      const { data, error } = await supabase
+        .from('notas_oficiais')
+        .insert({
+          titulo,
+          texto,
+          coordenacao_id: coordenacaoId,
+          autor_id: user?.id,
+          status: 'pendente',
+          demanda_id: selectedDemandaId,
+          problema_id: problemaId
+        })
+        .select();
       
-      const success = await submitNotaForm({
-        titulo,
-        texto,
-        userId: user?.id,
-        selectedDemandaId,
-        selectedDemanda: adaptedDemanda
+      if (error) throw error;
+      
+      // Update the demand status after creating the note
+      const { error: updateError } = await supabase
+        .from('demandas')
+        .update({ status: 'respondida' })
+        .eq('id', selectedDemandaId);
+        
+      if (updateError) {
+        console.error('Error updating demand status:', updateError);
+        // We don't throw here to avoid canceling the whole operation
+      }
+      
+      toast({
+        title: "Nota oficial criada com sucesso!",
+        description: "A nota foi enviada para aprovação.",
       });
       
-      if (success) {
-        console.log("Note created successfully, navigating to dashboard");
-        // Redirect to dashboard
-        navigate('/dashboard/comunicacao');
-      } else {
-        console.error('Erro ao criar nota. Verifique os dados e tente novamente.');
-      }
+      // Redirect to the dashboard
+      navigate('/dashboard/comunicacao');
     } catch (error: any) {
-      console.error("Error in handleSubmit:", error);
+      console.error('Erro ao criar nota oficial:', error);
+      toast({
+        title: "Erro ao criar nota oficial",
+        description: error.message || "Ocorreu um erro ao processar sua solicitação.",
+        variant: "destructive"
+      });
     } finally {
       setIsSubmitting(false);
     }
   };
-  
-  // Format the responses
+
+  // Helper function to format the responses text
+  const formatResponses = (responseText: string | null): ResponseQA[] => {
+    if (!responseText) return [];
+    
+    // Split by double newlines to get question-answer pairs
+    const pairs = responseText.split('\n\n');
+    return pairs.map(pair => {
+      const lines = pair.split('\n');
+      if (lines.length >= 2) {
+        // Extract question and answer
+        const question = lines[0].replace('Pergunta: ', '');
+        const answer = lines[1].replace('Resposta: ', '');
+        return { question, answer };
+      }
+      return { question: '', answer: '' };
+    }).filter(qa => qa.question && qa.answer);
+  };
+
   const formattedResponses = formatResponses(demandaResponse);
 
   return {
@@ -123,7 +217,7 @@ export const useNotaForm = (onClose: () => void) => {
     isSubmitting,
     step,
     formattedResponses,
-    demandaComments,
+    comentarios,
     handleDemandaSelect,
     handleBackToSelection,
     handleSubmit

@@ -5,6 +5,7 @@ import { Separator } from '@/components/ui/separator';
 import DemandaMetadataSection from '../responder-demanda/components/sections/DemandaMetadataSection';
 import { PrioridadeBadge } from '@/components/ui/badges/prioridade-badge';
 import { TemaBadge } from '@/components/ui/badges/tema-badge';
+import { CoordenacaoBadge } from '@/components/ui/badges/coordenacao-badge';
 
 interface DemandaInfoProps {
   selectedDemanda: Demand;
@@ -21,6 +22,8 @@ const DemandaInfo: React.FC<DemandaInfoProps> = ({
     prioridade: selectedDemanda.prioridade || 'media', // Default value for required field
   };
 
+  const showCoordination = selectedDemanda.coordenacao?.sigla || selectedDemanda.coordenacao?.descricao;
+
   return (
     <div className="bg-white rounded-xl p-6 border border-gray-200 mb-6">
       <div className="flex justify-between items-start mb-4">
@@ -28,6 +31,13 @@ const DemandaInfo: React.FC<DemandaInfoProps> = ({
         <div className="flex gap-2">
           {selectedDemanda.problema?.descricao && (
             <TemaBadge texto={selectedDemanda.problema.descricao} />
+          )}
+          {showCoordination && (
+            <CoordenacaoBadge texto={
+              selectedDemanda.coordenacao?.sigla || 
+              selectedDemanda.coordenacao?.descricao || 
+              'Coordenação'
+            } />
           )}
           <PrioridadeBadge prioridade={selectedDemanda.prioridade || 'media'} />
         </div>

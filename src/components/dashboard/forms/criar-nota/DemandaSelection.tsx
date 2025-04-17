@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Demand } from '@/types/demand';
-import { Loader2, Clock, Calendar } from 'lucide-react';
+import { Loader2, Clock, Calendar, FileText, MapPin } from 'lucide-react';
 import UnifiedFilterBar, { ViewMode } from '@/components/shared/unified-view/UnifiedFilterBar';
 import { PrioridadeBadge } from '@/components/ui/badges/prioridade-badge';
 import { TemaBadge } from '@/components/ui/badges/tema-badge';
@@ -62,7 +62,7 @@ const DemandaSelection: React.FC<DemandaSelectionProps> = ({
                       {demanda.problema?.descricao && (
                         <TemaBadge texto={demanda.problema.descricao} size="xs" />
                       )}
-                      {demanda.coordenacao?.descricao && (
+                      {(demanda.coordenacao?.sigla || demanda.coordenacao?.descricao) && (
                         <CoordenacaoBadge texto={demanda.coordenacao.sigla || demanda.coordenacao.descricao} size="xs" />
                       )}
                     </div>
@@ -81,12 +81,26 @@ const DemandaSelection: React.FC<DemandaSelectionProps> = ({
                           <span>Prazo: {formatDateWithTime(demanda.prazo_resposta)}</span>
                         </div>
                       )}
+                      
+                      {demanda.servico?.descricao && (
+                        <div className="flex items-center">
+                          <FileText className="h-3 w-3 mr-1" />
+                          <span>Serviço: {demanda.servico.descricao}</span>
+                        </div>
+                      )}
+                      
+                      {demanda.bairros?.nome && (
+                        <div className="flex items-center">
+                          <MapPin className="h-3 w-3 mr-1" />
+                          <span>Bairro: {demanda.bairros.nome}</span>
+                        </div>
+                      )}
                     </div>
                   </div>
                 ))
               ) : (
                 <div className="text-center py-6 text-gray-500 rounded-xl border border-gray-200">
-                  Nenhuma demanda respondida encontrada
+                  Nenhuma demanda disponível para criar nota encontrada
                 </div>
               )}
             </div>
