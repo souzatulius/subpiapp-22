@@ -2,7 +2,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
-import { Demand } from '@/hooks/dashboard/forms/criar-nota/types';
 import { Demanda } from '@/components/dashboard/forms/responder-demanda/types';
 
 export const useFetchDemandas = () => {
@@ -54,32 +53,54 @@ export const useFetchDemandas = () => {
         if (error) throw error;
         
         // Process each demand to ensure it has proper structure
-        const processedDemandas = Array.isArray(allDemandas) ? allDemandas.map(demanda => {
-          if (!demanda) return null;
-          
-          return {
-            id: demanda.id,
-            titulo: demanda.titulo,
-            status: demanda.status,
-            detalhes_solicitacao: demanda.detalhes_solicitacao,
-            resumo_situacao: demanda.resumo_situacao,
-            problema_id: demanda.problema_id,
-            coordenacao_id: demanda.coordenacao_id,
-            servico_id: demanda.servico_id,
-            horario_publicacao: demanda.horario_publicacao,
-            prazo_resposta: demanda.prazo_resposta,
-            prioridade: demanda.prioridade || 'media', // Ensure prioridade is never undefined
-            arquivo_url: demanda.arquivo_url,
-            anexos: demanda.anexos,
-            tema: demanda.tema, 
-            servico: demanda.servico,
+        const processedDemandas = Array.isArray(allDemandas) ? allDemandas
+          .filter(demanda => demanda !== null && typeof demanda === 'object')
+          .map(demanda => {
+            if (!demanda || typeof demanda !== 'object') {
+              return null;
+            }
             
-            // Add placeholder for required properties that might be missing
-            supervisao_tecnica: null,
-            area_coordenacao: null,
-            problema: null
-          } as Demanda;
-        }).filter(Boolean) as Demanda[] : [];
+            // Ensure proper structure for tema object
+            let temaObject = null;
+            if (demanda.tema && typeof demanda.tema === 'object') {
+              temaObject = {
+                id: demanda.tema.id || '',
+                descricao: demanda.tema.descricao || '',
+                coordenacao: demanda.tema.coordenacao || null
+              };
+            }
+            
+            // Create a properly typed Demanda object
+            const processedDemanda: Demanda = {
+              id: demanda.id || '',
+              titulo: demanda.titulo || '',
+              status: demanda.status || '',
+              detalhes_solicitacao: demanda.detalhes_solicitacao || null,
+              resumo_situacao: demanda.resumo_situacao || null,
+              problema_id: demanda.problema_id || '',
+              coordenacao_id: demanda.coordenacao_id || null,
+              servico_id: demanda.servico_id || null,
+              horario_publicacao: demanda.horario_publicacao || '',
+              prazo_resposta: demanda.prazo_resposta || null,
+              prioridade: demanda.prioridade || 'media', // Ensure prioridade is never undefined
+              arquivo_url: demanda.arquivo_url || null,
+              anexos: demanda.anexos || null,
+              tema: temaObject,
+              servico: demanda.servico || null,
+              
+              // Add default values for required properties
+              supervisao_tecnica: null,
+              supervisao_tecnica_id: null,
+              autor_id: null,
+              autor: null,
+              bairro_id: null,
+              bairro: null,
+              tipo_midia_id: null,
+              origem_id: null
+            };
+            
+            return processedDemanda;
+          }).filter(Boolean) as Demanda[] : [];
         
         setDemandas(processedDemandas);
         setFilteredDemandas(processedDemandas);
@@ -111,9 +132,13 @@ export const useFetchDemandas = () => {
         return true;
       }
       
-      // Check in coordination area
-      if (typeof demanda.tema === 'object' && 
-          demanda.tema?.coordenacao?.sigla?.toLowerCase().includes(lowercaseSearchTerm)) {
+      // Check in coordination area - with safe type checking
+      if (demanda.tema && 
+          typeof demanda.tema === 'object' && 
+          demanda.tema.coordenacao && 
+          typeof demanda.tema.coordenacao === 'object' &&
+          demanda.tema.coordenacao.sigla &&
+          demanda.tema.coordenacao.sigla.toLowerCase().includes(lowercaseSearchTerm)) {
         return true;
       }
       

@@ -7,8 +7,16 @@ import { useSelectedDemanda } from './useSelectedDemanda';
 import { Demanda } from '../types';
 
 export const useDemandasData = () => {
-  const { demandas, setDemandas, isLoading: isLoadingDemandas } = useFetchDemandas();
+  const { 
+    demandas, 
+    setDemandas, 
+    isLoading: isLoadingDemandas,
+    filteredDemandas: fetchedFilteredDemandas,
+    setFilteredDemandas: setFetchedFilteredDemandas
+  } = useFetchDemandas();
+
   const { areas } = useFetchAreas();
+  
   const { 
     filteredDemandas, 
     setFilteredDemandas,
@@ -19,6 +27,7 @@ export const useDemandasData = () => {
     prioridadeFilter,
     setPrioridadeFilter
   } = useDemandasFilters(demandas);
+  
   const { 
     selectedDemanda, 
     setSelectedDemanda, 

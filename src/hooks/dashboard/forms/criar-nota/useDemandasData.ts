@@ -87,17 +87,21 @@ export const useDemandasData = () => {
         
         // Filtrar para incluir apenas demandas que não possuem notas associadas
         const demandasSemNotas = Array.isArray(allDemandas) ? 
-          allDemandas.filter(demanda => !demandasComNotas.has(demanda?.id)) : 
+          allDemandas.filter(demanda => demanda && typeof demanda === 'object' && !demandasComNotas.has(demanda.id)) : 
           [];
         
         console.log('All demandas:', allDemandas ? allDemandas.length : 0);
         console.log('Demandas with notas:', demandasComNotas.size);
         console.log('Demandas without notas:', demandasSemNotas.length);
         
-        // Process each demand to ensure it has proper structure
+        // Process each demand to ensure it has proper structure - with proper type checking
         const processedDemandas = demandasSemNotas
           .filter(demanda => demanda !== null && typeof demanda === 'object')
           .map(demanda => {
+            if (!demanda || typeof demanda !== 'object') {
+              return null;
+            }
+            
             const processedDemanda: Demand = {
               id: demanda.id || '',
               titulo: demanda.titulo || '',
@@ -112,7 +116,7 @@ export const useDemandasData = () => {
               prioridade: demanda.prioridade || 'media',
               arquivo_url: demanda.arquivo_url || null,
               anexos: demanda.anexos || null,
-              numero_protocolo_156: hasProtoColumn && demanda.numero_protocolo_156 ? demanda.numero_protocolo_156 : null,
+              numero_protocolo_156: hasProtoColumn && 'numero_protocolo_156' in demanda ? demanda.numero_protocolo_156 : null,
               tema: demanda.tema || null, 
               servico: demanda.servico || null,
               
@@ -123,7 +127,7 @@ export const useDemandasData = () => {
             };
             
             return processedDemanda;
-          });
+          }).filter(Boolean) as Demand[];
         
         setDemandas(processedDemandas);
         setFilteredDemandas(processedDemandas);
