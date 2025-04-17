@@ -1,124 +1,146 @@
 
 import React from 'react';
 import { Badge } from '@/components/ui/badge';
-import { MapPin, User, Calendar, Clock, BookOpen, MessageSquare, FileText, Briefcase, Building, Map } from 'lucide-react';
-import { renderIcon } from '@/components/settings/problems/renderIcon';
-import { format } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
+import { CalendarIcon, Clock } from 'lucide-react';
+import { formatDate, formatDateWithTime } from '@/lib/dateUtils';
+import classNames from 'classnames';
 import { Demanda } from '../../types';
 
 interface DemandaMetadataSectionProps {
   selectedDemanda: Demanda;
 }
 
-const DemandaMetadataSection: React.FC<DemandaMetadataSectionProps> = ({
-  selectedDemanda
-}) => {
-  // Format date for better display
-  const formatDateTime = (dateString: string) => {
-    if (!dateString) return 'Não definido';
-    return format(new Date(dateString), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR });
+const DemandaMetadataSection: React.FC<DemandaMetadataSectionProps> = ({ selectedDemanda }) => {
+  const isPastDeadline = selectedDemanda.prazo_resposta 
+    ? new Date(selectedDemanda.prazo_resposta) < new Date() 
+    : false;
+
+  const renderPrioridadeBadge = (prioridade: string) => {
+    const badgeClasses = classNames("text-xs py-1", {
+      "bg-red-100 text-red-800 hover:bg-red-200": prioridade === 'alta',
+      "bg-yellow-100 text-yellow-800 hover:bg-yellow-200": prioridade === 'media',
+      "bg-green-100 text-green-800 hover:bg-green-200": prioridade === 'baixa'
+    });
+
+    const badgeLabel = {
+      'alta': 'Urgente',
+      'media': 'Normal',
+      'baixa': 'Baixa'
+    }[prioridade] || prioridade;
+
+    return (
+      <Badge variant="outline" className={badgeClasses}>
+        {badgeLabel}
+      </Badge>
+    );
   };
 
   return (
-    <div className="space-y-4">      
-      {/* Campos de metadados em grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
-        {/* Protocolo 156 */}
-        <div className="flex items-start gap-2 text-gray-700">
-          <FileText className="h-5 w-5 text-subpi-blue flex-shrink-0 mt-0.5" />
-          <div>
-            <span className="text-sm text-gray-500">Protocolo 156:</span>
-            <p className="font-medium">{selectedDemanda.protocolo || 'Não há protocolo'}</p>
-          </div>
-        </div>
-        
-        {/* Origem */}
-        {selectedDemanda.origens_demandas && (
-          <div className="flex items-start gap-2 text-gray-700">
-            <BookOpen className="h-5 w-5 text-subpi-blue flex-shrink-0 mt-0.5" />
-            <div>
-              <span className="text-sm text-gray-500">Origem:</span>
-              <p className="font-medium">{selectedDemanda.origens_demandas.descricao || 'Não informado'}</p>
-            </div>
-          </div>
-        )}
-        
-        {/* Veículo de Imprensa */}
-        {selectedDemanda.veiculo_imprensa && (
-          <div className="flex items-start gap-2 text-gray-700">
-            <MessageSquare className="h-5 w-5 text-subpi-blue flex-shrink-0 mt-0.5" />
-            <div>
-              <span className="text-sm text-gray-500">Veículo:</span>
-              <p className="font-medium">{selectedDemanda.veiculo_imprensa}</p>
-            </div>
-          </div>
-        )}
-        
-        {/* Coordenação */}
-        {selectedDemanda.coordenacao && (
-          <div className="flex items-start gap-2 text-gray-700">
-            <Building className="h-5 w-5 text-subpi-blue flex-shrink-0 mt-0.5" />
-            <div>
-              <span className="text-sm text-gray-500">Coordenação:</span>
-              <p className="font-medium">{selectedDemanda.coordenacao.descricao || 'Não informada'}</p>
-            </div>
-          </div>
-        )}
-        
-        {/* Serviço */}
-        {selectedDemanda.servico && (
-          <div className="flex items-start gap-2 text-gray-700">
-            <Briefcase className="h-5 w-5 text-subpi-blue flex-shrink-0 mt-0.5" />
-            <div>
-              <span className="text-sm text-gray-500">Serviço:</span>
-              <p className="font-medium">{selectedDemanda.servico.descricao || 'Não informado'}</p>
-            </div>
-          </div>
-        )}
-        
-        {/* Endereço */}
-        {selectedDemanda.endereco && (
-          <div className="flex items-start gap-2 text-gray-700">
-            <MapPin className="h-5 w-5 text-subpi-blue flex-shrink-0 mt-0.5" />
-            <div>
-              <span className="text-sm text-gray-500">Endereço:</span>
-              <p className="font-medium">{selectedDemanda.endereco}</p>
-            </div>
-          </div>
-        )}
-        
-        {/* Bairro */}
-        {selectedDemanda.bairros && (
-          <div className="flex items-start gap-2 text-gray-700">
-            <MapPin className="h-5 w-5 text-subpi-blue flex-shrink-0 mt-0.5" />
-            <div>
-              <span className="text-sm text-gray-500">Bairro:</span>
-              <p className="font-medium">{selectedDemanda.bairros.nome || 'Não informado'}</p>
-            </div>
-          </div>
-        )}
-        
-        {/* Distrito */}
-        {selectedDemanda.distrito && (
-          <div className="flex items-start gap-2 text-gray-700">
-            <Map className="h-5 w-5 text-subpi-blue flex-shrink-0 mt-0.5" />
-            <div>
-              <span className="text-sm text-gray-500">Distrito:</span>
-              <p className="font-medium">{selectedDemanda.distrito.nome || 'Não informado'}</p>
-            </div>
-          </div>
-        )}
-        
-        {/* Prazo para Resposta */}
-        <div className="flex items-start gap-2 text-gray-700">
-          <Clock className="h-5 w-5 text-subpi-blue flex-shrink-0 mt-0.5" />
-          <div>
-            <span className="text-sm text-gray-500">Prazo para resposta:</span>
-            <p className="font-medium">{selectedDemanda.prazo_resposta ? formatDateTime(selectedDemanda.prazo_resposta) : 'Não definido'}</p>
-          </div>
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="bg-gray-50 p-3 rounded-md border border-gray-200">
+        <p className="text-sm text-gray-500 mb-1">Prioridade</p>
+        <div>{renderPrioridadeBadge(selectedDemanda.prioridade)}</div>
+      </div>
+
+      <div className="bg-gray-50 p-3 rounded-md border border-gray-200">
+        <p className="text-sm text-gray-500 mb-1">Origem</p>
+        <p className="font-medium">
+          {selectedDemanda.origens_demandas?.descricao || 'Não especificada'}
+        </p>
+      </div>
+
+      <div className="bg-gray-50 p-3 rounded-md border border-gray-200">
+        <p className="text-sm text-gray-500 mb-1">Publicado em</p>
+        <div className="flex items-center">
+          <CalendarIcon className="h-4 w-4 mr-2 text-gray-400" />
+          <p className="font-medium">
+            {selectedDemanda.horario_publicacao 
+              ? formatDateWithTime(selectedDemanda.horario_publicacao) 
+              : 'Não especificado'}
+          </p>
         </div>
       </div>
+
+      <div className={`bg-gray-50 p-3 rounded-md border ${isPastDeadline ? 'border-red-300 bg-red-50' : 'border-gray-200'}`}>
+        <p className={`text-sm ${isPastDeadline ? 'text-red-500 font-medium' : 'text-gray-500'} mb-1`}>
+          Prazo para resposta
+        </p>
+        <div className="flex items-center">
+          <Clock className={`h-4 w-4 mr-2 ${isPastDeadline ? 'text-red-500' : 'text-gray-400'}`} />
+          <p className={`font-medium ${isPastDeadline ? 'text-red-600' : ''}`}>
+            {selectedDemanda.prazo_resposta 
+              ? formatDateWithTime(selectedDemanda.prazo_resposta)
+              : 'Não especificado'}
+          </p>
+        </div>
+      </div>
+
+      <div className="bg-gray-50 p-3 rounded-md border border-gray-200">
+        <p className="text-sm text-gray-500 mb-1">Protocolo</p>
+        <p className="font-medium">
+          {selectedDemanda.protocolo || 'Não possui protocolo'}
+        </p>
+      </div>
+
+      <div className="bg-gray-50 p-3 rounded-md border border-gray-200">
+        <p className="text-sm text-gray-500 mb-1">Mídia</p>
+        <p className="font-medium">
+          {selectedDemanda.tipo_midia?.descricao || 'Não especificado'}
+        </p>
+      </div>
+
+      {selectedDemanda.veiculo_imprensa && (
+        <div className="bg-gray-50 p-3 rounded-md border border-gray-200">
+          <p className="text-sm text-gray-500 mb-1">Veículo</p>
+          <p className="font-medium">{selectedDemanda.veiculo_imprensa}</p>
+        </div>
+      )}
+
+      {selectedDemanda.nome_solicitante && (
+        <div className="bg-gray-50 p-3 rounded-md border border-gray-200">
+          <p className="text-sm text-gray-500 mb-1">Solicitante</p>
+          <p className="font-medium">{selectedDemanda.nome_solicitante}</p>
+        </div>
+      )}
+
+      {selectedDemanda.problema && (
+        <div className="bg-gray-50 p-3 rounded-md border border-gray-200 md:col-span-2">
+          <p className="text-sm text-gray-500 mb-1">Tema/Problema</p>
+          <p className="font-medium">{selectedDemanda.problema.descricao}</p>
+        </div>
+      )}
+
+      {selectedDemanda.coordenacao && (
+        <div className="bg-gray-50 p-3 rounded-md border border-gray-200">
+          <p className="text-sm text-gray-500 mb-1">Coordenação</p>
+          <p className="font-medium">
+            {selectedDemanda.coordenacao.sigla 
+              ? `${selectedDemanda.coordenacao.sigla} - ${selectedDemanda.coordenacao.descricao}`
+              : selectedDemanda.coordenacao.descricao}
+          </p>
+        </div>
+      )}
+
+      {selectedDemanda.bairros && (
+        <div className="bg-gray-50 p-3 rounded-md border border-gray-200">
+          <p className="text-sm text-gray-500 mb-1">Bairro</p>
+          <p className="font-medium">{selectedDemanda.bairros.nome}</p>
+        </div>
+      )}
+
+      {selectedDemanda.distrito && (
+        <div className="bg-gray-50 p-3 rounded-md border border-gray-200">
+          <p className="text-sm text-gray-500 mb-1">Distrito</p>
+          <p className="font-medium">{selectedDemanda.distrito.nome}</p>
+        </div>
+      )}
+
+      {selectedDemanda.endereco && (
+        <div className="bg-gray-50 p-3 rounded-md border border-gray-200 md:col-span-2">
+          <p className="text-sm text-gray-500 mb-1">Endereço</p>
+          <p className="font-medium">{selectedDemanda.endereco}</p>
+        </div>
+      )}
     </div>
   );
 };

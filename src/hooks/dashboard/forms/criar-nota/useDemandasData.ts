@@ -34,7 +34,20 @@ export const useDemandasData = () => {
             protocolo,
             horario_publicacao,
             prazo_resposta,
-            prioridade
+            prioridade,
+            origem_id,
+            origens_demandas:origem_id(id, descricao),
+            tipo_midia_id,
+            tipo_midia:tipo_midia_id(id, descricao),
+            bairro_id,
+            bairros:bairro_id(id, nome,
+              distrito:distrito_id(id, nome)
+            ),
+            nome_solicitante,
+            email_solicitante,
+            telefone_solicitante,
+            veiculo_imprensa,
+            endereco
           `)
           .in('status', ['pendente', 'em_andamento', 'respondida'])
           .order('horario_publicacao', { ascending: false });
@@ -87,34 +100,55 @@ export const useDemandasData = () => {
             if (demanda.problema_id) {
               const { data } = await supabase
                 .from('problemas')
-                .select('id, descricao, coordenacao_id')
+                .select('id, descricao, coordenacao_id, coordenacao:coordenacao_id(id, descricao, sigla)')
                 .eq('id', demanda.problema_id)
                 .single();
                 
               problemaData = data;
             }
             
+            // Buscar dados do serviço se existir
+            let servicoData = null;
+            if (demanda.servico_id) {
+              const { data } = await supabase
+                .from('servicos')
+                .select('id, descricao')
+                .eq('id', demanda.servico_id)
+                .single();
+                
+              servicoData = data;
+            }
+            
             // Criar objeto completo da demanda com todas as propriedades necessárias
-            // Use the type assertion to assure TypeScript that we're converting correctly
             return {
               ...demanda,
               supervisao_tecnica: null, 
-              area_coordenacao: problemaData ? { descricao: problemaData.descricao } : null,
+              area_coordenacao: problemaData?.coordenacao ? { 
+                descricao: problemaData.coordenacao.descricao,
+                id: problemaData.coordenacao.id,
+                sigla: problemaData.coordenacao.sigla
+              } : null,
               tema: problemaData ? { descricao: problemaData.descricao } : null,
-              servico: null,
-              endereco: null,
-              nome_solicitante: null,
-              email_solicitante: null,
-              telefone_solicitante: null,
-              veiculo_imprensa: null,
-              origem: null,
-              tipo_midia: null,
-              bairro: null,
+              servico: servicoData,
+              endereco: demanda.endereco || null,
+              nome_solicitante: demanda.nome_solicitante || null,
+              email_solicitante: demanda.email_solicitante || null,
+              telefone_solicitante: demanda.telefone_solicitante || null,
+              veiculo_imprensa: demanda.veiculo_imprensa || null,
+              origem: demanda.origens_demandas,
+              tipo_midia: demanda.tipo_midia,
+              bairro: demanda.bairros,
               autor: null,
-              problema: { descricao: problemaData?.descricao || null },
+              problema: { 
+                descricao: problemaData?.descricao || null,
+                id: problemaData?.id,
+                coordenacao: problemaData?.coordenacao
+              },
               arquivo_url: demanda.arquivo_url || null,
               anexos: demanda.anexos || null,
-              numero_protocolo_156: demanda.protocolo || null
+              coordenacao: problemaData?.coordenacao || null,
+              protocolo: demanda.protocolo || null,
+              distrito: demanda.bairros?.distrito || null
             } as unknown as Demand;  // Use unknown to bypass type checking temporarily
           })
         );
@@ -146,7 +180,8 @@ export const useDemandasData = () => {
     const lowercaseSearchTerm = searchTerm.toLowerCase();
     const filtered = demandas.filter(demanda => 
       demanda.titulo.toLowerCase().includes(lowercaseSearchTerm) ||
-      demanda.area_coordenacao?.descricao?.toLowerCase().includes(lowercaseSearchTerm)
+      demanda.area_coordenacao?.descricao?.toLowerCase().includes(lowercaseSearchTerm) ||
+      demanda.resumo_situacao?.toLowerCase().includes(lowercaseSearchTerm)
     );
     
     setFilteredDemandas(filtered);

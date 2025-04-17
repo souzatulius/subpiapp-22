@@ -50,9 +50,16 @@ const DemandaInfo: React.FC<DemandaInfoProps> = ({
       <div className="mb-6">
         <h3 className="text-lg font-medium mb-2">Resumo da Demanda</h3>
         <div className="bg-gray-50 p-4 rounded-md border">
-          {selectedDemanda.resumo_situacao 
-            ? selectedDemanda.resumo_situacao 
-            : selectedDemanda.detalhes_solicitacao || "Sem detalhes fornecidos"}
+          {selectedDemanda.resumo_situacao || 
+           (selectedDemanda.detalhes_solicitacao && 
+            <div>
+              <p className="text-amber-600 text-sm mb-2">
+                Aviso: O resumo não foi preenchido. Exibindo detalhes completos:
+              </p>
+              {selectedDemanda.detalhes_solicitacao}
+            </div>
+           ) || 
+           "Sem detalhes fornecidos"}
         </div>
       </div>
       
