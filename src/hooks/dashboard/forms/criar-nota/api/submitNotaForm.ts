@@ -109,17 +109,35 @@ export const submitNotaForm = async ({
     
     console.log("Note created successfully:", data);
     
-    // Update the demand status
-    const { error: updateError } = await supabase
+    // We no longer need to update the demand status to 'respondida'
+    // because it should already be in that state. However, we'll verify and
+    // log the current status for debugging purposes
+
+    const { data: demandaData, error: demandaError } = await supabase
       .from('demandas')
-      .update({ status: 'respondida' })
-      .eq('id', selectedDemandaId);
+      .select('status')
+      .eq('id', selectedDemandaId)
+      .single();
       
-    if (updateError) {
-      console.error('Error updating demand status:', updateError);
-      // Don't throw here as the note was already created
+    if (demandaError) {
+      console.error('Error checking demand status:', demandaError);
     } else {
-      console.log("Demand status updated to 'respondida'");
+      console.log("Current demand status:", demandaData.status);
+      
+      // If the status is not 'respondida', update it
+      if (demandaData.status !== 'respondida') {
+        console.log("Updating demand status to 'respondida'");
+        const { error: updateError } = await supabase
+          .from('demandas')
+          .update({ status: 'respondida' })
+          .eq('id', selectedDemandaId);
+          
+        if (updateError) {
+          console.error('Error updating demand status:', updateError);
+        } else {
+          console.log("Demand status updated to 'respondida'");
+        }
+      }
     }
     
     toast({

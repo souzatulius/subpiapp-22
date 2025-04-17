@@ -12,6 +12,7 @@ export const useFetchDemandas = () => {
     const fetchDemandas = async () => {
       try {
         setIsLoadingDemandas(true);
+        console.log("Fetching demandas for responding...");
         
         // Check if resumo_situacao column exists
         const { error: testError } = await supabase
@@ -93,6 +94,9 @@ export const useFetchDemandas = () => {
           return;
         }
 
+        console.log("Fetched demandas:", data ? data.length : 0);
+        console.log("Demandas status:", data?.map(d => d.status));
+
         // Fetch all respostas_demandas to filter out answered demands
         const { data: respostasData, error: respostasError } = await supabase
           .from('respostas_demandas')
@@ -110,10 +114,14 @@ export const useFetchDemandas = () => {
           (respostasData || []).map(resposta => resposta?.demanda_id).filter(Boolean)
         );
         
+        console.log("Demands with responses:", respondedDemandIds.size);
+        
         // Filter out demands that already have responses
         const filteredData = (data || []).filter(
           item => item && !respondedDemandIds.has(item.id as string)
         );
+        
+        console.log("Filtered demands for responding:", filteredData.length);
         
         // Transform the data to match the Demanda type
         const transformedData: Demanda[] = filteredData.map((item: any): Demanda => {

@@ -15,6 +15,7 @@ export const useDemandasData = () => {
     const fetchDemandas = async () => {
       try {
         setIsLoading(true);
+        console.log('Iniciando busca de demandas para criar nota...');
         
         // First, check if the numero_protocolo_156 column exists to avoid errors
         let hasProtoColumn = true;
@@ -73,6 +74,9 @@ export const useDemandasData = () => {
         
         if (demandasError) throw demandasError;
         
+        console.log('Demandas encontradas:', allDemandas ? allDemandas.length : 0);
+        console.log('Status das demandas:', allDemandas?.map(d => d.status));
+        
         // Buscar todas as notas oficiais para verificar quais demandas já possuem notas
         const { data: notasData, error: notasError } = await supabase
           .from('notas_oficiais')
@@ -112,7 +116,7 @@ export const useDemandasData = () => {
             prioridade: demanda.prioridade,
             arquivo_url: demanda.arquivo_url,
             anexos: demanda.anexos,
-            numero_protocolo_156: hasProtoColumn ? demanda.numero_protocolo_156 : null,
+            numero_protocolo_156: hasProtoColumn && demanda.numero_protocolo_156 ? demanda.numero_protocolo_156 : null,
             tema: demanda.tema, 
             servico: demanda.servico,
             
@@ -125,6 +129,7 @@ export const useDemandasData = () => {
           return processedDemanda;
         }).filter(Boolean) as Demand[];
         
+        console.log('Processed demandas for creating note:', processedDemandas);
         setDemandas(processedDemandas);
         setFilteredDemandas(processedDemandas);
       } catch (error) {
