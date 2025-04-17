@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Demand } from './types';
-import { Loader2, Clock, Calendar, FileText, MapPin } from 'lucide-react';
+import { Loader2, Clock, Calendar, FileText, MapPin, Building, Tag } from 'lucide-react';
 import UnifiedFilterBar, { ViewMode } from '@/components/shared/unified-view/UnifiedFilterBar';
 import { PrioridadeBadge } from '@/components/ui/badges/prioridade-badge';
 import { TemaBadge } from '@/components/ui/badges/tema-badge';
@@ -53,23 +53,23 @@ const DemandaSelection: React.FC<DemandaSelectionProps> = ({
                   >
                     <div className="flex justify-between items-start">
                       <div className="font-medium">{demanda.titulo}</div>
+                      <div>
+                        {demanda.prioridade && (
+                          <PrioridadeBadge prioridade={demanda.prioridade} size="xs" />
+                        )}
+                      </div>
                     </div>
                     
                     <div className="flex flex-wrap gap-1 mt-2">
-                      {demanda.prioridade && (
-                        <PrioridadeBadge prioridade={demanda.prioridade} size="xs" />
-                      )}
                       {demanda.problema?.descricao && (
                         <TemaBadge texto={demanda.problema.descricao} size="xs" />
                       )}
-                      {(demanda.coordenacao?.sigla || demanda.coordenacao?.descricao) && (
+                      {demanda.coordenacao && (demanda.coordenacao.sigla || demanda.coordenacao.descricao) && (
                         <CoordenacaoBadge 
                           texto={
-                            typeof demanda.coordenacao.sigla === 'string' 
-                              ? demanda.coordenacao.sigla 
-                              : typeof demanda.coordenacao.descricao === 'string'
-                                ? demanda.coordenacao.descricao
-                                : 'Coordenação'
+                            demanda.coordenacao.sigla || 
+                            demanda.coordenacao.descricao || 
+                            'Coordenação'
                           } 
                           size="xs" 
                         />
@@ -102,6 +102,20 @@ const DemandaSelection: React.FC<DemandaSelectionProps> = ({
                         <div className="flex items-center">
                           <MapPin className="h-3 w-3 mr-1" />
                           <span>Bairro: {demanda.bairros.nome}</span>
+                        </div>
+                      )}
+                      
+                      {demanda.origem?.descricao && (
+                        <div className="flex items-center">
+                          <Tag className="h-3 w-3 mr-1" />
+                          <span>Origem: {demanda.origem.descricao}</span>
+                        </div>
+                      )}
+                      
+                      {demanda.protocolo && (
+                        <div className="flex items-center">
+                          <Building className="h-3 w-3 mr-1" />
+                          <span>Protocolo: {demanda.protocolo}</span>
                         </div>
                       )}
                     </div>

@@ -7,7 +7,7 @@ export interface Demand {
   urgente?: boolean;
   dataCriacao?: string;
   dataResposta?: string;
-  origem?: string;
+  origem_id?: string;
   tema?: string;
   servico?: {
     id?: string;
@@ -25,6 +25,7 @@ export interface Demand {
   endereco?: string | null;
   nome_solicitante?: string | null;
   email_solicitante?: string | null;
+  telefone_solicitante?: string | null;
   cep?: string | null;
   numero?: string | null;
   referencia?: string | null;
@@ -40,10 +41,13 @@ export interface Demand {
   } | null;
   
   // Properties for useDemandasData
-  tipo_midia?: string | any;
+  tipo_midia_id?: string | any;
+  tipo_midia?: {
+    id?: string;
+    descricao: string | null;
+  } | null;
   bairro?: string | any;
   autor?: string | any;
-  telefone_solicitante?: string;
   foto?: string;
   regiao?: string;
   foto_url?: string;
@@ -53,27 +57,21 @@ export interface Demand {
   veiculo_imprensa?: string;
   detalhes_solicitacao?: string;
   resumo_situacao?: string;
-  perguntas?: any;
+  perguntas?: Record<string, string> | null | any;
   arquivo_url?: string;
-  tipo_veiculo?: string;
-  supervisao_tecnica?: any;
-  comentarios?: string;
-  
-  // Missing properties causing TypeScript errors
   anexos?: string[] | null;
+  comentarios?: string | null;
+  
+  // Fix for problema property
   problema?: {
-    descricao: string | null;
     id?: string;
+    descricao: string | null;
     coordenacao?: {
       id?: string;
       descricao: string;
       sigla?: string;
     } | null;
   } | null;
-  
-  // Additional properties from other interfaces
-  origem_id?: string | any;
-  tipo_midia_id?: any;
   
   // Fix for coordenacao property
   coordenacao?: {
@@ -83,8 +81,24 @@ export interface Demand {
   } | null;
   
   bairros?: {
-    nome: string;
     id?: string;
+    nome: string;
+    distritos?: {
+      id?: string;
+      nome: string;
+    } | null;
+  } | null;
+  
+  // Fix for origem property
+  origem?: {
+    id?: string;
+    descricao: string;
+  } | null;
+  
+  // Add resposta property
+  resposta?: {
+    respostas?: Record<string, string> | null;
+    texto?: string;
   } | null;
 }
 

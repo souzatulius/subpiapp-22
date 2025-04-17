@@ -6,6 +6,8 @@ import DemandaMetadataSection from '../responder-demanda/components/sections/Dem
 import { PrioridadeBadge } from '@/components/ui/badges/prioridade-badge';
 import { TemaBadge } from '@/components/ui/badges/tema-badge';
 import { CoordenacaoBadge } from '@/components/ui/badges/coordenacao-badge';
+import { formatDateWithTime } from '@/lib/dateUtils';
+import { Calendar, Clock, FileText, MapPin, Mail, Phone, User, FileSearch, Building, Tag } from 'lucide-react';
 
 interface DemandaInfoProps {
   selectedDemanda: Demand;
@@ -23,9 +25,11 @@ const DemandaInfo: React.FC<DemandaInfoProps> = ({
   };
 
   // Check for coordenacao in either format to support both data structures
-  const showCoordination = (selectedDemanda.coordenacao?.sigla || 
-                          selectedDemanda.coordenacao?.descricao || 
-                          selectedDemanda.coordenacao_id);
+  const showCoordination = (
+    selectedDemanda.coordenacao?.sigla || 
+    selectedDemanda.coordenacao?.descricao || 
+    selectedDemanda.coordenacao_id
+  );
 
   return (
     <div className="bg-white rounded-xl p-6 border border-gray-200 mb-6">
@@ -46,7 +50,104 @@ const DemandaInfo: React.FC<DemandaInfoProps> = ({
         </div>
       </div>
       
-      <DemandaMetadataSection selectedDemanda={demandaForMetadata as any} />
+      {/* Custom metadata section since DemandaMetadataSection might not handle all fields correctly */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 text-sm">
+        {selectedDemanda.horario_publicacao && (
+          <div className="flex items-center">
+            <Calendar className="h-4 w-4 mr-2 text-gray-500" />
+            <span className="text-gray-600 mr-2">Data de Criação:</span>
+            <span className="font-medium">{formatDateWithTime(selectedDemanda.horario_publicacao)}</span>
+          </div>
+        )}
+        
+        {selectedDemanda.prazo_resposta && (
+          <div className="flex items-center">
+            <Clock className="h-4 w-4 mr-2 text-orange-500" />
+            <span className="text-gray-600 mr-2">Prazo:</span>
+            <span className="font-medium text-orange-600">{formatDateWithTime(selectedDemanda.prazo_resposta)}</span>
+          </div>
+        )}
+        
+        {selectedDemanda.servico?.descricao && (
+          <div className="flex items-center">
+            <FileText className="h-4 w-4 mr-2 text-gray-500" />
+            <span className="text-gray-600 mr-2">Serviço:</span>
+            <span className="font-medium">{selectedDemanda.servico.descricao}</span>
+          </div>
+        )}
+        
+        {selectedDemanda.bairros?.nome && (
+          <div className="flex items-center">
+            <MapPin className="h-4 w-4 mr-2 text-gray-500" />
+            <span className="text-gray-600 mr-2">Bairro:</span>
+            <span className="font-medium">{selectedDemanda.bairros.nome}</span>
+          </div>
+        )}
+        
+        {selectedDemanda.bairros?.distritos?.nome && (
+          <div className="flex items-center">
+            <MapPin className="h-4 w-4 mr-2 text-gray-500" />
+            <span className="text-gray-600 mr-2">Distrito:</span>
+            <span className="font-medium">{selectedDemanda.bairros.distritos.nome}</span>
+          </div>
+        )}
+        
+        {selectedDemanda.endereco && (
+          <div className="flex items-center">
+            <MapPin className="h-4 w-4 mr-2 text-gray-500" />
+            <span className="text-gray-600 mr-2">Endereço:</span>
+            <span className="font-medium">{selectedDemanda.endereco}</span>
+          </div>
+        )}
+        
+        {selectedDemanda.nome_solicitante && (
+          <div className="flex items-center">
+            <User className="h-4 w-4 mr-2 text-gray-500" />
+            <span className="text-gray-600 mr-2">Solicitante:</span>
+            <span className="font-medium">{selectedDemanda.nome_solicitante}</span>
+          </div>
+        )}
+        
+        {selectedDemanda.email_solicitante && (
+          <div className="flex items-center">
+            <Mail className="h-4 w-4 mr-2 text-gray-500" />
+            <span className="text-gray-600 mr-2">E-mail:</span>
+            <span className="font-medium">{selectedDemanda.email_solicitante}</span>
+          </div>
+        )}
+        
+        {selectedDemanda.telefone_solicitante && (
+          <div className="flex items-center">
+            <Phone className="h-4 w-4 mr-2 text-gray-500" />
+            <span className="text-gray-600 mr-2">Telefone:</span>
+            <span className="font-medium">{selectedDemanda.telefone_solicitante}</span>
+          </div>
+        )}
+        
+        {selectedDemanda.origem?.descricao && (
+          <div className="flex items-center">
+            <Tag className="h-4 w-4 mr-2 text-gray-500" />
+            <span className="text-gray-600 mr-2">Origem:</span>
+            <span className="font-medium">{selectedDemanda.origem.descricao}</span>
+          </div>
+        )}
+        
+        {selectedDemanda.protocolo && (
+          <div className="flex items-center">
+            <Building className="h-4 w-4 mr-2 text-gray-500" />
+            <span className="text-gray-600 mr-2">Protocolo:</span>
+            <span className="font-medium">{selectedDemanda.protocolo}</span>
+          </div>
+        )}
+        
+        {selectedDemanda.tipo_midia?.descricao && (
+          <div className="flex items-center">
+            <FileSearch className="h-4 w-4 mr-2 text-gray-500" />
+            <span className="text-gray-600 mr-2">Tipo de Mídia:</span>
+            <span className="font-medium">{selectedDemanda.tipo_midia.descricao}</span>
+          </div>
+        )}
+      </div>
       
       <Separator className="my-4" />
       

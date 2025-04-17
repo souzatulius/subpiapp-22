@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
@@ -17,16 +16,38 @@ export const useNotaForm = (onClose: () => void) => {
 
   const fetchDemandResponse = async (demandaId: string) => {
     try {
+      console.log('Fetching response for demanda:', demandaId);
+      
       const { data, error } = await supabase
         .from('respostas_demandas')
-        .select('*')
+        .select('texto, comentarios, respostas')
         .eq('demanda_id', demandaId)
-        .limit(1);
+        .maybeSingle();
       
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching response:', error);
+        throw error;
+      }
       
-      if (data && data.length > 0) {
-        setDemandaResponse(data[0].texto);
+      console.log('Response data:', data);
+      
+      if (data) {
+        setDemandaResponse(data.texto || null);
+        
+        // If we have a structured respostas object, convert it to text
+        if (data.respostas && typeof data.respostas === 'object') {
+          try {
+            let respostasText = '';
+            Object.entries(data.respostas).forEach(([key, value]) => {
+              // Get the question text from the selectedDemanda.perguntas object
+              const questionText = selectedDemanda?.perguntas?.[key] || `Pergunta ${Number(key) + 1}`;
+              respostasText += `Pergunta: ${questionText}\nResposta: ${value}\n\n`;
+            });
+            setDemandaResponse(respostasText);
+          } catch (parseError) {
+            console.error('Error parsing respostas:', parseError);
+          }
+        }
       } else {
         setDemandaResponse(null);
       }
@@ -40,15 +61,28 @@ export const useNotaForm = (onClose: () => void) => {
     }
   };
 
-  const handleDemandaSelect = (demandaId: string, demandas: Demand[]) => {
+  const handleDemandaSelect = async (demandaId: string, demandas: Demand[]) => {
     setSelectedDemandaId(demandaId);
     
     // Find the selected demand
     const selected = demandas.find(d => d.id === demandaId);
     if (selected) {
+      console.log("Selected demand:", selected);
       setSelectedDemanda(selected);
-      // Fetch responses for this demand
-      fetchDemandResponse(demandaId);
+      
+      // Set a default title based on the demand title
+      setTitulo(selected.titulo || '');
+      
+      // If the demanda already has response data from the initial fetch (through useDemandasData),
+      // we can use that data directly
+      if (selected.resposta?.texto) {
+        setDemandaResponse(selected.resposta.texto);
+      } else {
+        // Otherwise fetch responses for this demand
+        await fetchDemandResponse(demandaId);
+      }
+    } else {
+      console.error('Selected demand not found in demandas array');
     }
     
     setStep('create-note');
@@ -58,6 +92,8 @@ export const useNotaForm = (onClose: () => void) => {
     setStep('select-demand');
     setSelectedDemanda(null);
     setDemandaResponse(null);
+    setTitulo('');
+    setTexto('');
   };
 
   const handleSubmit = async () => {
@@ -92,42 +128,17 @@ export const useNotaForm = (onClose: () => void) => {
     try {
       setIsSubmitting(true);
       
-      // Buscar o ID do problema associado à área da demanda
-      const { data: problemaData, error: problemaError } = await supabase
-        .from('problemas')
-        .select('id')
-        .limit(1);
+      // Use the problema_id from the selected demand if it has one
+      const problemaId = selectedDemanda.problema_id || selectedDemanda.problema?.id;
+      const coordenacaoId = selectedDemanda.coordenacao_id || selectedDemanda.coordenacao?.id;
       
-      if (problemaError) throw problemaError;
-      
-      let problemaId;
-      
-      if (!problemaData || problemaData.length === 0) {
-        // Se não houver problema cadastrado, criar um padrão
-        const coordenacaoId = selectedDemanda.coordenacao_id || null;
-        
-        const { data: newProblema, error: newProblemaError } = await supabase
-          .from('problemas')
-          .insert({ 
-            descricao: 'Problema Padrão',
-            coordenacao_id: coordenacaoId 
-          })
-          .select();
-          
-        if (newProblemaError) throw newProblemaError;
-        
-        problemaId = newProblema[0].id;
-      } else {
-        problemaId = problemaData[0].id;
-      }
-      
-      // Create the note with existing problema
+      // Create the note
       const { data, error } = await supabase
         .from('notas_oficiais')
         .insert({
           titulo,
           texto,
-          coordenacao_id: selectedDemanda.coordenacao_id || null,
+          coordenacao_id: coordenacaoId,
           autor_id: user?.id,
           status: 'pendente',
           demanda_id: selectedDemandaId,

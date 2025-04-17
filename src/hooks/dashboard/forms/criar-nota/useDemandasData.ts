@@ -23,13 +23,25 @@ export const useDemandasData = () => {
             id,
             titulo,
             status,
+            prioridade,
             detalhes_solicitacao,
             resumo_situacao,
             perguntas,
+            horario_publicacao,
+            prazo_resposta,
+            protocolo,
+            endereco,
+            nome_solicitante,
+            email_solicitante,
+            telefone_solicitante,
+            veiculo_imprensa,
+            arquivo_url,
+            anexos,
             problema_id,
             problema:problema_id (
               id, 
               descricao,
+              coordenacao_id,
               coordenacao:coordenacao_id (
                 id, 
                 descricao,
@@ -47,14 +59,8 @@ export const useDemandasData = () => {
               id, 
               descricao
             ),
-            arquivo_url,
-            anexos,
-            protocolo,
-            horario_publicacao,
-            prazo_resposta,
-            prioridade,
             origem_id,
-            origens_demandas:origem_id (
+            origem:origem_id (
               id, 
               descricao
             ),
@@ -67,16 +73,11 @@ export const useDemandasData = () => {
             bairros:bairro_id (
               id, 
               nome,
-              distrito:distrito_id (
+              distritos:distrito_id (
                 id, 
                 nome
               )
-            ),
-            nome_solicitante,
-            email_solicitante,
-            telefone_solicitante,
-            veiculo_imprensa,
-            endereco
+            )
           `)
           .in('status', ['pendente', 'em_andamento', 'respondida'])
           .order('horario_publicacao', { ascending: false });
@@ -111,29 +112,115 @@ export const useDemandasData = () => {
         console.log('All demandas:', allDemandas.length);
         console.log('Demandas with notas:', demandasComNotas.size);
         
+        // Fetch responses for all demandas to get comentarios
+        const { data: respostasData, error: respostasError } = await supabase
+          .from('respostas_demandas')
+          .select('demanda_id, comentarios, respostas, texto');
+        
+        if (respostasError) {
+          console.error('Error fetching respostas:', respostasError);
+        }
+        
+        // Create a map of demanda_id to resposta data
+        const respostasMap = new Map();
+        if (respostasData) {
+          respostasData.forEach(resposta => {
+            respostasMap.set(resposta.demanda_id, resposta);
+          });
+        }
+        
         // Process each demanda to ensure it has all necessary fields
         const processedDemandas = allDemandas
           // Filter to only include demandas without notas
           .filter(demanda => !demandasComNotas.has(demanda.id))
           // Map to ensure all required fields are present
           .map(demanda => {
-            const processedDemanda = {
-              ...demanda,
-              // Ensure proper structure for all fields
-              problema: demanda.problema || { descricao: null },
-              coordenacao: demanda.coordenacao || { descricao: null, sigla: null },
-              servico: demanda.servico || { descricao: null },
-              bairros: demanda.bairros || { nome: null },
-              origens_demandas: demanda.origens_demandas || { descricao: null },
-              tipo_midia: demanda.tipo_midia || { descricao: null },
+            // Get resposta data if available
+            const resposta = respostasMap.get(demanda.id);
+            
+            // Parse JSON resposta data if needed
+            let respostasObj = null;
+            if (resposta && resposta.respostas) {
+              if (typeof resposta.respostas === 'string') {
+                try {
+                  respostasObj = JSON.parse(resposta.respostas);
+                } catch (e) {
+                  console.error('Error parsing respostas:', e);
+                }
+              } else {
+                respostasObj = resposta.respostas;
+              }
+            }
+            
+            // Create a processed demanda with all required fields and proper defaults
+            const processedDemanda: Demand = {
+              id: demanda.id,
+              titulo: demanda.titulo || '',
+              status: demanda.status || 'pendente',
+              prioridade: demanda.prioridade || 'media',
+              detalhes_solicitacao: demanda.detalhes_solicitacao || '',
+              resumo_situacao: demanda.resumo_situacao || '',
+              perguntas: demanda.perguntas || null,
               horario_publicacao: demanda.horario_publicacao || null,
               prazo_resposta: demanda.prazo_resposta || null,
-              prioridade: demanda.prioridade || 'media',
+              protocolo: demanda.protocolo || '',
+              endereco: demanda.endereco || '',
+              nome_solicitante: demanda.nome_solicitante || '',
+              email_solicitante: demanda.email_solicitante || '',
+              telefone_solicitante: demanda.telefone_solicitante || '',
+              veiculo_imprensa: demanda.veiculo_imprensa || '',
               arquivo_url: demanda.arquivo_url || null,
-              anexos: demanda.anexos || null
+              anexos: demanda.anexos || null,
+              problema_id: demanda.problema_id || null,
+              problema: demanda.problema ? {
+                id: demanda.problema.id,
+                descricao: demanda.problema.descricao || '',
+                coordenacao: demanda.problema.coordenacao ? {
+                  id: demanda.problema.coordenacao.id,
+                  descricao: demanda.problema.coordenacao.descricao || '',
+                  sigla: demanda.problema.coordenacao.sigla || ''
+                } : null
+              } : { descricao: null },
+              coordenacao_id: demanda.coordenacao_id || null,
+              coordenacao: demanda.coordenacao ? {
+                id: demanda.coordenacao.id,
+                descricao: demanda.coordenacao.descricao || '',
+                sigla: demanda.coordenacao.sigla || ''
+              } : null,
+              servico_id: demanda.servico_id || null,
+              servico: demanda.servico ? {
+                id: demanda.servico.id,
+                descricao: demanda.servico.descricao || ''
+              } : null,
+              origem_id: demanda.origem_id || null,
+              origem: demanda.origem ? {
+                id: demanda.origem.id,
+                descricao: demanda.origem.descricao || ''
+              } : null,
+              tipo_midia_id: demanda.tipo_midia_id || null,
+              tipo_midia: demanda.tipo_midia ? {
+                id: demanda.tipo_midia.id,
+                descricao: demanda.tipo_midia.descricao || ''
+              } : null,
+              bairro_id: demanda.bairro_id || null,
+              bairros: demanda.bairros ? {
+                id: demanda.bairros.id,
+                nome: demanda.bairros.nome || '',
+                distritos: demanda.bairros.distritos ? {
+                  id: demanda.bairros.distritos.id,
+                  nome: demanda.bairros.distritos.nome || ''
+                } : null
+              } : null,
+              // Add comentarios from resposta if available
+              comentarios: resposta ? resposta.comentarios : null,
+              // Add the resposta data directly
+              resposta: resposta ? {
+                respostas: respostasObj,
+                texto: resposta.texto
+              } : null
             };
             
-            return processedDemanda as unknown as Demand;
+            return processedDemanda;
           });
         
         console.log('Processed demandas ready for notes:', processedDemandas.length);
@@ -170,8 +257,11 @@ export const useDemandasData = () => {
       demanda.titulo?.toLowerCase().includes(lowercaseSearchTerm) ||
       demanda.problema?.descricao?.toLowerCase().includes(lowercaseSearchTerm) ||
       demanda.coordenacao?.descricao?.toLowerCase().includes(lowercaseSearchTerm) ||
+      demanda.coordenacao?.sigla?.toLowerCase().includes(lowercaseSearchTerm) ||
       demanda.resumo_situacao?.toLowerCase().includes(lowercaseSearchTerm) ||
-      demanda.detalhes_solicitacao?.toLowerCase().includes(lowercaseSearchTerm)
+      demanda.detalhes_solicitacao?.toLowerCase().includes(lowercaseSearchTerm) ||
+      demanda.servico?.descricao?.toLowerCase().includes(lowercaseSearchTerm) ||
+      demanda.bairros?.nome?.toLowerCase().includes(lowercaseSearchTerm)
     );
     
     setFilteredDemandas(filtered);
