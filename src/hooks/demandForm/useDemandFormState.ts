@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useMemo } from 'react';
 import { DemandFormData } from './types';
 import { supabase } from '@/integrations/supabase/client';
@@ -34,7 +33,8 @@ export const useDemandFormState = (
     nao_sabe_servico: false,
     tem_protocolo_156: undefined,
     numero_protocolo_156: '',
-    coordenacao_id: ''
+    coordenacao_id: '',
+    protocolo: ''
   };
 
   const savedState = useMemo(() => {
@@ -175,14 +175,11 @@ export const useDemandFormState = (
         [name]: formattedValue
       }));
     } else if (name === 'prazo_resposta') {
-      // This will just update the input field value
-      // The actual ISO date conversion is done in the PriorityDeadlineStep component
       setFormData(prev => ({
         ...prev,
         [name]: value
       }));
       
-      // Try to parse date directly (used for review steps, etc.)
       const parsedDate = parseFormattedDate(value);
       if (parsedDate) {
         console.log('Successfully parsed date:', parsedDate);

@@ -23,6 +23,7 @@ interface ProtocolStepProps {
     prazo_resposta: string;
     tem_protocolo_156?: boolean;
     numero_protocolo_156?: string;
+    protocolo?: string; // Adicionado o campo protocolo
   };
   handleChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
   handleSelectChange: (name: string, value: string | boolean) => void;
@@ -95,6 +96,27 @@ const ProtocolStep: React.FC<ProtocolStepProps> = ({
         </div>
         {hasError('origem_id') && (
           <p className="text-orange-500 text-sm mt-1">{getErrorMessage('origem_id')}</p>
+        )}
+      </div>
+
+      {/* Campo de Protocolo (novo) */}
+      <div className="space-y-2">
+        <label 
+          htmlFor="protocolo" 
+          className={`form-question-title ${hasError('protocolo') ? 'text-orange-500 font-semibold' : ''}`}
+        >
+          Protocolo (se houver)
+        </label>
+        <input 
+          id="protocolo" 
+          name="protocolo" 
+          className={`w-full border p-3 rounded-xl ${hasError('protocolo') ? 'border-orange-500' : 'border-gray-300'}`}
+          placeholder="Digite o número do protocolo, se disponível" 
+          value={formData.protocolo || ''}
+          onChange={handleChange}
+        />
+        {hasError('protocolo') && (
+          <p className="text-orange-500 text-sm mt-1">{getErrorMessage('protocolo')}</p>
         )}
       </div>
 
