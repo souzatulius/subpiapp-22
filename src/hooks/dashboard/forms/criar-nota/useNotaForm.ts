@@ -9,7 +9,6 @@ import { formatResponses } from './utils/formatResponses';
 import { submitNotaForm } from './api/submitNotaForm';
 import { validateNotaForm } from './validators/validateNotaForm';
 import { adaptDemandType } from './utils/typeAdapters';
-import { toast } from '@/components/ui/use-toast';
 
 export const useNotaForm = (onClose: () => void) => {
   const { user } = useAuth();
@@ -24,7 +23,6 @@ export const useNotaForm = (onClose: () => void) => {
   const [step, setStep] = useState<'select-demand' | 'create-note'>('select-demand');
 
   const handleDemandaSelect = async (demandaId: string, demandas: Demand[]) => {
-    console.log("Selecting demand for creating note:", demandaId);
     setSelectedDemandaId(demandaId);
     
     // Find the selected demand
@@ -37,29 +35,17 @@ export const useNotaForm = (onClose: () => void) => {
       setTitulo(selected.titulo || '');
       
       // Fetch responses for this demand
-      try {
-        const { responseText, comments } = await fetchDemandResponse(demandaId);
-        console.log("Fetched response:", { responseText, comments });
-        setDemandaResponse(responseText);
-        setDemandaComments(comments);
-        
-        // Update the selected demand with comments
-        if (comments) {
-          setSelectedDemanda({
-            ...selected,
-            comentarios: comments
-          });
-        }
-      } catch (error) {
-        console.error("Error fetching demand response:", error);
-        toast({
-          title: "Erro ao carregar respostas",
-          description: "Não foi possível carregar as respostas da demanda selecionada.",
-          variant: "destructive"
+      const { responseText, comments } = await fetchDemandResponse(demandaId);
+      setDemandaResponse(responseText);
+      setDemandaComments(comments);
+      
+      // Update the selected demand with comments
+      if (comments) {
+        setSelectedDemanda({
+          ...selected,
+          comentarios: comments
         });
       }
-    } else {
-      console.error("Could not find selected demand in demandas array");
     }
     
     setStep('create-note');
@@ -90,11 +76,6 @@ export const useNotaForm = (onClose: () => void) => {
     
     if (!isValid) {
       console.error('Por favor, preencha todos os campos obrigatórios.');
-      toast({
-        title: "Erro de validação",
-        description: "Por favor, preencha todos os campos obrigatórios.",
-        variant: "destructive"
-      });
       return;
     }
 
@@ -124,11 +105,6 @@ export const useNotaForm = (onClose: () => void) => {
       }
     } catch (error: any) {
       console.error("Error in handleSubmit:", error);
-      toast({
-        title: "Erro ao criar nota",
-        description: error.message || "Ocorreu um erro ao criar a nota oficial.",
-        variant: "destructive"
-      });
     } finally {
       setIsSubmitting(false);
     }

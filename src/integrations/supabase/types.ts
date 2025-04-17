@@ -482,7 +482,6 @@ export type Database = {
           prioridade: string
           problema_id: string
           protocolo: string | null
-          resumo_situacao: string | null
           servico_id: string | null
           status: string
           telefone_solicitante: string | null
@@ -510,7 +509,6 @@ export type Database = {
           prioridade: string
           problema_id: string
           protocolo?: string | null
-          resumo_situacao?: string | null
           servico_id?: string | null
           status: string
           telefone_solicitante?: string | null
@@ -538,7 +536,6 @@ export type Database = {
           prioridade?: string
           problema_id?: string
           protocolo?: string | null
-          resumo_situacao?: string | null
           servico_id?: string | null
           status?: string
           telefone_solicitante?: string | null

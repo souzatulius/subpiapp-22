@@ -91,9 +91,6 @@ const AttachmentsSection: React.FC<AttachmentsSectionProps> = ({
               }}
             >
               {renderAttachmentIcon(filename)}
-              <span className="text-sm text-gray-600 mt-2 text-center max-w-[120px] truncate">
-                {decodeURIComponent(filename)}
-              </span>
             </a>
           );
         })}

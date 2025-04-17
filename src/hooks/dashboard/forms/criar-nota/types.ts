@@ -4,102 +4,53 @@ import { Note } from '@/types/demand';
 export interface Demand {
   id: string;
   titulo: string;
-  descricao?: string;
-  status: 'pendente' | 'respondida' | 'aprovada' | 'recusada' | string;
-  urgente?: boolean;
-  dataCriacao?: string;
-  dataResposta?: string;
-  origem?: string;
-  protocolo?: string;
-  requesterName?: string;
-  requesterOrg?: string;
-  
-  // Additional properties needed by criar-nota components
-  prioridade?: string;
-  horario_publicacao?: string;
-  prazo_resposta?: string;
-  endereco?: string | null;
-  nome_solicitante?: string | null;
-  email_solicitante?: string | null;
-  cep?: string | null;
-  numero?: string | null;
-  referencia?: string | null;
-  bairro_id?: string | null;
-  problema_id?: string | null;
-  coordenacao_id?: string | null;
-  supervisao_tecnica_id?: string | null;
-  tema_id?: string | null;
-  servico_id?: string | null;
-  area_coordenacao?: {
+  status: string;
+  prioridade: string;
+  horario_publicacao: string;
+  prazo_resposta: string;
+  coordenacao_id?: string;
+  problema_id?: string;
+  supervisao_tecnica_id?: string;
+  supervisao_tecnica?: {
+    id?: string;
     descricao: string;
-    id?: string;
   } | null;
-  
-  // Properties for useDemandasData
-  tipo_midia?: string | any;
-  bairro?: string | any;
-  autor?: string | any;
-  telefone_solicitante?: string;
-  foto?: string;
-  regiao?: string;
-  foto_url?: string;
-  notas?: Note[];
-  
-  // Properties needed by criar-nota
-  veiculo_imprensa?: string;
-  detalhes_solicitacao?: string;
-  resumo_situacao?: string;
-  perguntas?: any;
-  arquivo_url?: string;
-  tipo_veiculo?: string;
-  supervisao_tecnica?: any;
-  comentarios?: string;
-  
-  // Properties from other interfaces
-  anexos?: string[] | null;
-  problema?: {
-    descricao: string | null;
-    id?: string;
-    coordenacao?: any;
-  } | null;
-  
-  // Additional properties 
-  origem_id?: string | any;
-  tipo_midia_id?: any;
-  origens_demandas?: {
+  area_coordenacao: {
     descricao: string;
-    id?: string;
   } | null;
-  distrito?: {
-    nome: string;
-    id?: string;
+  origem: {
+    descricao: string;
   } | null;
-  bairros?: {
+  tipo_midia: {
+    descricao: string;
+  } | null;
+  bairro: {
     nome: string;
-    id?: string;
     distritos?: {
       nome: string;
-      id?: string;
-    } | null;
-  } | null;
-  
-  // Related entities as complex objects
-  tema?: {
-    descricao?: string;
-    id?: string;
-    coordenacao?: {
-      descricao?: string;
-      id?: string;
-      sigla?: string;
     }
-  } | string | null; // Allow both string and object or null
-  
-  servico?: {
-    descricao?: string;
-    id?: string;
-  } | string | null; // Allow both string and object or null
-  
-  numero_protocolo_156?: string | null; // Added for protocol 156 access
+  } | null;
+  autor: {
+    nome_completo: string;
+  } | null;
+  endereco: string | null;
+  nome_solicitante: string | null;
+  email_solicitante: string | null;
+  telefone_solicitante: string | null;
+  veiculo_imprensa: string | null;
+  detalhes_solicitacao: string | null;
+  perguntas: Record<string, string> | null | any;
+  servico: {
+    descricao: string;
+  } | null;
+  arquivo_url: string | null;
+  anexos: string[] | null;
+  servico_id?: string;
+  problema: {
+    descricao: string | null;
+  } | null;
+  protocolo?: string | null;
+  notas?: Note[] | null;
 }
 
 export interface ResponseQA {

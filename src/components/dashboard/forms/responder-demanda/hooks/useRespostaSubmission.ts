@@ -5,12 +5,11 @@ import { useAuth } from '@/hooks/useSupabaseAuth';
 import { Demanda } from '../types';
 import { useRespostaFormatter } from './useRespostaFormatter';
 import { useRespostaValidation } from './useRespostaValidation';
-import { toast } from '@/components/ui/use-toast';
 
 interface SubmissionOptions {
   onSuccess?: () => void;
   onError?: (error: any) => void;
-  showSuccessToast?: boolean;
+  showSuccessToast?: boolean; // Option is kept for backward compatibility
 }
 
 export const useRespostaSubmission = (options?: SubmissionOptions) => {
@@ -33,33 +32,20 @@ export const useRespostaSubmission = (options?: SubmissionOptions) => {
     const validation = validateResposta(selectedDemanda, resposta);
     if (!validation.isValid) {
       console.error(validation.message);
-      
-      toast({
-        title: "Erro de validação",
-        description: validation.message,
-        variant: "destructive"
-      });
-      
       return false;
     }
 
     if (!selectedDemanda || !user) {
       console.error("Missing selectedDemanda or user", { selectedDemanda, user });
-      
-      toast({
-        title: "Erro",
-        description: "Dados incompletos para enviar resposta.",
-        variant: "destructive"
-      });
-      
       return false;
     }
 
     try {
       setIsSubmitting(true);
       
-      console.log("Inserting response and setting status to 'respondida'");
+      console.log("Setting status to em_andamento");
 
+      // First, save the response without changing the status
       // Generate text summary of responses
       const respostasText = formatRespostaText(selectedDemanda, resposta);
       console.log("Generated respostasText", respostasText);
@@ -82,28 +68,20 @@ export const useRespostaSubmission = (options?: SubmissionOptions) => {
 
       console.log("Response inserted successfully");
       
-      // Now update the status to "respondida" (not "em_andamento")
-      const { error: statusError } = await supabase
-        .from('demandas')
-        .update({ status: 'respondida' })
-        .eq('id', selectedDemanda.id);
+      // Now try to update the status to "em_andamento"
+      // This is safer since the response is already saved
+      try {
+        await supabase
+          .from('demandas')
+          .update({ status: 'em_andamento' })
+          .eq('id', selectedDemanda.id);
           
-      if (statusError) {
-        console.error("Error updating status to 'respondida':", statusError);
+        console.log("Status updated to em_andamento");
+      } catch (statusError) {
+        console.warn("Could not update status to em_andamento, continuing anyway", statusError);
         // We continue anyway since the response is saved
-      } else {
-        console.log("Status updated to 'respondida'");
       }
 
-      // Show success toast if not explicitly disabled
-      if (options?.showSuccessToast !== false) {
-        toast({
-          title: "Resposta enviada com sucesso",
-          description: "A demanda foi respondida e agora está disponível para criação de nota oficial.",
-        });
-      }
-
-      // Call onSuccess callback if provided
       if (options?.onSuccess) {
         console.log("Calling onSuccess callback");
         options.onSuccess();
@@ -112,12 +90,6 @@ export const useRespostaSubmission = (options?: SubmissionOptions) => {
       return true;
     } catch (error: any) {
       console.error('Erro ao enviar resposta:', error);
-      
-      toast({
-        title: "Erro ao enviar resposta",
-        description: error.message || "Ocorreu um erro ao processar sua solicitação.",
-        variant: "destructive"
-      });
       
       if (options?.onError) {
         options.onError(error);
