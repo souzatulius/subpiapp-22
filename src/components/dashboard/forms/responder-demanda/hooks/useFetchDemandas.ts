@@ -28,6 +28,8 @@ export const useFetchDemandas = (coordenacaoId?: string) => {
             prioridade,
             coordenacao_id,
             tema:problema_id(
+              id,
+              descricao,
               coordenacao:coordenacao_id(
                 sigla,
                 descricao,
@@ -35,13 +37,13 @@ export const useFetchDemandas = (coordenacaoId?: string) => {
               )
             ),
             problema:problema_id(
+              id,
+              descricao,
               coordenacao:coordenacao_id(
                 sigla,
                 descricao,
                 id
-              ),
-              descricao,
-              id
+              )
             ),
             coordenacao:coordenacao_id(
               sigla,
@@ -81,8 +83,16 @@ export const useFetchDemandas = (coordenacaoId?: string) => {
           prazo_resposta: demanda.prazo_resposta,
           prioridade: demanda.prioridade,
           coordenacao_id: demanda.coordenacao_id,
-          tema: demanda.tema,
-          problema: demanda.problema,
+          tema: demanda.tema ? {
+            id: demanda.tema.id,
+            descricao: demanda.tema.descricao,
+            coordenacao: demanda.tema.coordenacao
+          } : null,
+          problema: demanda.problema ? {
+            id: demanda.problema.id,
+            descricao: demanda.problema.descricao,
+            coordenacao: demanda.problema.coordenacao
+          } : null,
           coordenacao: demanda.coordenacao || {
             id: undefined,
             descricao: "Não definida",
