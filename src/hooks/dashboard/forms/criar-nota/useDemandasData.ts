@@ -48,6 +48,7 @@ export const useDemandasData = () => {
             telefone_solicitante,
             veiculo_imprensa,
             endereco,
+            servico:servico_id(id, descricao),
             coordenacao:coordenacao_id(id, descricao, sigla)
           `)
           .in('status', ['pendente', 'em_andamento', 'respondida'])
@@ -108,18 +109,6 @@ export const useDemandasData = () => {
               problemaData = data;
             }
             
-            // Buscar dados do serviço se existir
-            let servicoData = null;
-            if (demanda.servico_id) {
-              const { data } = await supabase
-                .from('servicos')
-                .select('id, descricao')
-                .eq('id', demanda.servico_id)
-                .single();
-                
-              servicoData = data;
-            }
-            
             // Criar objeto completo da demanda com todas as propriedades necessárias
             return {
               ...demanda,
@@ -130,7 +119,7 @@ export const useDemandasData = () => {
                 sigla: problemaData.coordenacao.sigla
               } : null,
               tema: problemaData ? { descricao: problemaData.descricao } : null,
-              servico: servicoData,
+              servico: demanda.servico,
               endereco: demanda.endereco || null,
               nome_solicitante: demanda.nome_solicitante || null,
               email_solicitante: demanda.email_solicitante || null,

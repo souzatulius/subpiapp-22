@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Badge } from '@/components/ui/badge';
-import { CalendarIcon, Clock } from 'lucide-react';
+import { CalendarIcon, Clock, FileText } from 'lucide-react';
 import { formatDate, formatDateWithTime } from '@/lib/dateUtils';
 import { cn } from '@/utils/cn';
 import { Demanda } from '../../types';
@@ -51,6 +51,16 @@ const DemandaMetadataSection: React.FC<DemandaMetadataSectionProps> = ({ selecte
               ? `${selectedDemanda.coordenacao.sigla} - ${selectedDemanda.coordenacao.descricao}`
               : selectedDemanda.coordenacao.descricao}
           </p>
+        </div>
+      )}
+
+      {selectedDemanda.servico && (
+        <div className="bg-gray-50 p-3 rounded-xl border border-gray-200">
+          <p className="text-sm text-gray-500 mb-1">Serviço</p>
+          <div className="flex items-center">
+            <FileText className="h-4 w-4 mr-2 text-gray-400" />
+            <p className="font-medium">{selectedDemanda.servico.descricao}</p>
+          </div>
         </div>
       )}
 

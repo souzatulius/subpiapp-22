@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Demand } from '@/types/demand';
-import { Loader2, Clock } from 'lucide-react';
+import { Loader2, Clock, Calendar } from 'lucide-react';
 import UnifiedFilterBar, { ViewMode } from '@/components/shared/unified-view/UnifiedFilterBar';
 import { PrioridadeBadge } from '@/components/ui/badges/prioridade-badge';
 import { TemaBadge } from '@/components/ui/badges/tema-badge';
@@ -55,12 +55,6 @@ const DemandaSelection: React.FC<DemandaSelectionProps> = ({
                       <div className="font-medium">{demanda.titulo}</div>
                     </div>
                     
-                    {demanda.coordenacao && (
-                      <div className="text-xs text-gray-500 mt-1">
-                        {demanda.coordenacao.sigla || demanda.coordenacao.descricao || 'Coordenação não informada'}
-                      </div>
-                    )}
-                    
                     <div className="flex flex-wrap gap-1 mt-2">
                       {demanda.prioridade && (
                         <PrioridadeBadge prioridade={demanda.prioridade} size="xs" />
@@ -73,12 +67,21 @@ const DemandaSelection: React.FC<DemandaSelectionProps> = ({
                       )}
                     </div>
                     
-                    {demanda.prazo_resposta && (
-                      <div className="text-xs flex items-center text-orange-600 mt-2">
-                        <Clock className="h-3 w-3 mr-1" />
-                        <span>Prazo: {formatDateWithTime(demanda.prazo_resposta)}</span>
-                      </div>
-                    )}
+                    <div className="mt-2 text-xs text-gray-500 flex flex-col gap-1">
+                      {demanda.horario_publicacao && (
+                        <div className="flex items-center">
+                          <Calendar className="h-3 w-3 mr-1" />
+                          <span>Criado em: {formatDateWithTime(demanda.horario_publicacao)}</span>
+                        </div>
+                      )}
+                      
+                      {demanda.prazo_resposta && (
+                        <div className="flex items-center text-orange-600">
+                          <Clock className="h-3 w-3 mr-1" />
+                          <span>Prazo: {formatDateWithTime(demanda.prazo_resposta)}</span>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 ))
               ) : (
