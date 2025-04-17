@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { formatDistanceToNow, format, isToday } from 'date-fns';
+import { formatDistanceToNow, format, isToday, isYesterday } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Demanda } from '../types';
 import { DemandaStatusBadge, PrioridadeBadge } from '@/components/ui/status-badge';
@@ -18,17 +18,19 @@ const DemandaCard: React.FC<DemandaCardProps> = ({ demanda, isSelected, onClick 
     ? format(new Date(demanda.prazo_resposta), "dd/MM HH:mm", { locale: ptBR })
     : "";
     
-  // Format the creation date as relative time
+  // Format the creation date as relative time with more natural language
   const formatRelativeTime = () => {
     if (!demanda.horario_publicacao) return "";
     
     const date = new Date(demanda.horario_publicacao);
-    const isDateToday = isToday(date);
-    const relativeTime = formatDistanceToNow(date, { locale: ptBR, addSuffix: false });
     
-    if (isDateToday) {
-      return `Hoje, há ${relativeTime}`;
+    if (isToday(date)) {
+      const timeDistance = formatDistanceToNow(date, { locale: ptBR, addSuffix: false });
+      return `Hoje, há ${timeDistance}`;
+    } else if (isYesterday(date)) {
+      return `Ontem, às ${format(date, "HH:mm", { locale: ptBR })}`;
     } else {
+      // For older dates, show the full date
       return format(date, "dd/MM/yyyy", { locale: ptBR });
     }
   };
@@ -55,19 +57,21 @@ const DemandaCard: React.FC<DemandaCardProps> = ({ demanda, isSelected, onClick 
           </div>
         </div>
         
+        {/* Display coordenação sigla below the title in gray text */}
+        {coordenacaoSigla && (
+          <div className="mb-2 text-sm text-gray-400">
+            {coordenacaoSigla}
+          </div>
+        )}
+        
         <div className="text-sm text-gray-600 line-clamp-2 mb-3">
-          {demanda.detalhes_solicitacao || 'Sem detalhes'}
+          {demanda.resumo_situacao || demanda.detalhes_solicitacao || 'Sem detalhes'}
         </div>
         
         <div className="mt-auto flex justify-between items-center">
           <div className="flex flex-wrap gap-1.5">
             <PrioridadeBadge prioridade={demanda.prioridade} size="sm" />
             <DemandaStatusBadge status={demanda.status} showIcon={false} size="sm" />
-            {coordenacaoSigla && (
-              <span className="bg-gray-100 text-gray-800 px-2 py-0.5 rounded text-xs">
-                {coordenacaoSigla}
-              </span>
-            )}
           </div>
           
           {demanda.prazo_resposta && (

@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Badge } from '@/components/ui/badge';
-import { MapPin, User, Calendar, Clock, BookOpen, MessageSquare, FileText } from 'lucide-react';
+import { MapPin, User, Calendar, Clock, BookOpen, MessageSquare, FileText, Briefcase, Building, Map } from 'lucide-react';
 import { renderIcon } from '@/components/settings/problems/renderIcon';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -55,6 +55,28 @@ const DemandaMetadataSection: React.FC<DemandaMetadataSectionProps> = ({
           </div>
         )}
         
+        {/* Coordenação */}
+        {selectedDemanda.coordenacao && (
+          <div className="flex items-start gap-2 text-gray-700">
+            <Building className="h-5 w-5 text-subpi-blue flex-shrink-0 mt-0.5" />
+            <div>
+              <span className="text-sm text-gray-500">Coordenação:</span>
+              <p className="font-medium">{selectedDemanda.coordenacao.descricao || 'Não informada'}</p>
+            </div>
+          </div>
+        )}
+        
+        {/* Serviço */}
+        {selectedDemanda.servico && (
+          <div className="flex items-start gap-2 text-gray-700">
+            <Briefcase className="h-5 w-5 text-subpi-blue flex-shrink-0 mt-0.5" />
+            <div>
+              <span className="text-sm text-gray-500">Serviço:</span>
+              <p className="font-medium">{selectedDemanda.servico.descricao || 'Não informado'}</p>
+            </div>
+          </div>
+        )}
+        
         {/* Endereço */}
         {selectedDemanda.endereco && (
           <div className="flex items-start gap-2 text-gray-700">
@@ -80,7 +102,7 @@ const DemandaMetadataSection: React.FC<DemandaMetadataSectionProps> = ({
         {/* Distrito */}
         {selectedDemanda.distrito && (
           <div className="flex items-start gap-2 text-gray-700">
-            <MapPin className="h-5 w-5 text-subpi-blue flex-shrink-0 mt-0.5" />
+            <Map className="h-5 w-5 text-subpi-blue flex-shrink-0 mt-0.5" />
             <div>
               <span className="text-sm text-gray-500">Distrito:</span>
               <p className="font-medium">{selectedDemanda.distrito.nome || 'Não informado'}</p>
