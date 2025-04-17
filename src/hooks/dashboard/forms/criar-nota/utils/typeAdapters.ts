@@ -17,10 +17,9 @@ export const adaptDemandType = (selectedDemanda: Demand): any => {
     // Check if bairro has an id property before accessing it
     bairro_id: selectedDemanda.bairro && typeof selectedDemanda.bairro === 'object' && 'id' in selectedDemanda.bairro ? 
               (selectedDemanda.bairro.id || null) : 
-              (selectedDemanda.bairro || null),
+              (selectedDemanda.bairro_id || null),
     area_coordenacao: selectedDemanda.area_coordenacao || null,
-    supervisao_tecnica: selectedDemanda.supervisao_tecnica || null,
-    bairro: selectedDemanda.bairro || null,
+    // Fix: Using supervisao_tecnica_id instead of supervisao_tecnica
     status: selectedDemanda.status || 'pendente'
   };
 };
