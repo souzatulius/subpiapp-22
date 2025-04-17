@@ -18,6 +18,7 @@ interface NotaFormProps {
   isSubmitting: boolean;
   selectedDemanda?: Demand | null;
   formattedResponses?: ResponseQA[];
+  comentarios?: string | null;
 }
 
 const NotaForm: React.FC<NotaFormProps> = ({
@@ -28,7 +29,8 @@ const NotaForm: React.FC<NotaFormProps> = ({
   handleSubmit,
   isSubmitting,
   selectedDemanda,
-  formattedResponses = []
+  formattedResponses = [],
+  comentarios
 }) => {
   const { isGenerating, generateSuggestion } = useGptNotaSuggestion();
 
@@ -75,6 +77,25 @@ const NotaForm: React.FC<NotaFormProps> = ({
   const onSubmitClick = (e: React.MouseEvent) => {
     e.preventDefault();
     console.log("Submit button clicked - calling handleSubmit");
+    
+    if (!titulo.trim()) {
+      toast({
+        title: "Título obrigatório",
+        description: "Por favor, informe um título para a nota oficial.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (!texto.trim()) {
+      toast({
+        title: "Conteúdo obrigatório",
+        description: "Por favor, informe o conteúdo da nota oficial.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
     handleSubmit();
   };
 
@@ -101,6 +122,7 @@ const NotaForm: React.FC<NotaFormProps> = ({
           value={titulo} 
           onChange={(e) => setTitulo(e.target.value)} 
           className="rounded-xl"
+          required
         />
       </div>
       
@@ -112,6 +134,7 @@ const NotaForm: React.FC<NotaFormProps> = ({
           onChange={(e) => setTexto(e.target.value)} 
           rows={10}
           className="rounded-xl"
+          required
         />
       </div>
       

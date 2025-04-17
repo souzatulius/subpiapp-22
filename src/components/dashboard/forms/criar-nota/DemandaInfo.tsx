@@ -5,16 +5,18 @@ import { Separator } from '@/components/ui/separator';
 import { PrioridadeBadge } from '@/components/ui/badges/prioridade-badge';
 import { TemaBadge } from '@/components/ui/badges/tema-badge';
 import { formatDateWithTime } from '@/lib/dateUtils';
-import { Clock, FileText, MapPin, Building, Newspaper } from 'lucide-react';
+import { Clock, FileText, MapPin, Building, Newspaper, MessageSquare } from 'lucide-react';
 
 interface DemandaInfoProps {
   selectedDemanda: Demand;
   formattedResponses: ResponseQA[];
+  comentarios?: string | null;
 }
 
 const DemandaInfo: React.FC<DemandaInfoProps> = ({ 
   selectedDemanda, 
-  formattedResponses 
+  formattedResponses,
+  comentarios 
 }) => {
   return (
     <div className="bg-white rounded-xl p-6 border border-gray-200 mb-6">
@@ -118,7 +120,22 @@ const DemandaInfo: React.FC<DemandaInfoProps> = ({
         </div>
       )}
       
-      {/* Comentários adicionais */}
+      {/* Comentários adicionais da resposta técnica */}
+      {comentarios && (
+        <div className="mb-6">
+          <h3 className="text-lg font-medium mb-2">
+            <div className="flex items-center">
+              <MessageSquare className="h-5 w-5 mr-2 text-blue-600" />
+              Comentários Técnicos
+            </div>
+          </h3>
+          <div className="bg-blue-50 p-4 rounded-xl border border-blue-100">
+            {comentarios}
+          </div>
+        </div>
+      )}
+      
+      {/* Comentários adicionais da demanda */}
       {selectedDemanda.comentarios && (
         <div className="mb-6">
           <h3 className="text-lg font-medium mb-2">Comentários Adicionais</h3>

@@ -2,7 +2,7 @@
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { useDemandasData } from '@/hooks/dashboard/forms/criar-nota/useDemandasData';
-import { useNotaForm } from '@/components/dashboard/forms/criar-nota/useNotaForm';
+import { useNotaForm } from '@/hooks/dashboard/forms/criar-nota/useNotaForm';
 import DemandaSelection from './criar-nota/DemandaSelection';
 import DemandaInfo from './criar-nota/DemandaInfo';
 import NotaForm from './criar-nota/NotaForm';
@@ -27,6 +27,7 @@ const CriarNotaForm: React.FC<CriarNotaFormProps> = ({
     isSubmitting,
     step,
     formattedResponses,
+    comentarios,
     handleDemandaSelect,
     handleSubmit
   } = useNotaForm(onClose);
@@ -46,7 +47,8 @@ const CriarNotaForm: React.FC<CriarNotaFormProps> = ({
           {selectedDemanda && (
             <DemandaInfo 
               selectedDemanda={selectedDemanda} 
-              formattedResponses={formattedResponses} 
+              formattedResponses={formattedResponses}
+              comentarios={comentarios}
             />
           )}
           
@@ -59,6 +61,7 @@ const CriarNotaForm: React.FC<CriarNotaFormProps> = ({
             isSubmitting={isSubmitting} 
             selectedDemanda={selectedDemanda}
             formattedResponses={formattedResponses} 
+            comentarios={comentarios}
           />
         </>
       )}

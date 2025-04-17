@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
@@ -41,8 +42,11 @@ export const useNotaForm = (onClose: () => void) => {
       console.log('Response data:', data);
       
       if (data) {
-        setDemandaResponse(data.texto || null);
+        // Store comentarios separately
         setComentarios(data.comentarios || null);
+        
+        // Process the response text
+        setDemandaResponse(data.texto || null);
         
         // If we have a structured respostas object, convert it to text
         if (data.respostas && typeof data.respostas === 'object') {
@@ -166,41 +170,100 @@ export const useNotaForm = (onClose: () => void) => {
         userId: user.id
       });
       
-      // Use the problema_id from the selected demand if it has one
-      const problemaId = selectedDemanda.problema_id || selectedDemanda.problema?.id;
-      const coordenacaoId = selectedDemanda.coordenacao_id || selectedDemanda.coordenacao?.id;
+      // First, ensure we have a valid problema_id - use the existing one or get/create one if needed
+      let problemaId = selectedDemanda.problema_id || selectedDemanda.problema?.id;
       
-      // Create the note
-      const { data, error } = await supabase
-        .from('notas_oficiais')
-        .insert({
-          titulo,
-          texto,
-          coordenacao_id: coordenacaoId,
-          autor_id: user.id,
-          status: 'pendente',
-          demanda_id: selectedDemandaId,
-          problema_id: problemaId
-        })
-        .select();
-      
-      if (error) {
-        console.error("Error inserting nota:", error);
-        throw error;
+      // If no problema_id exists, we need to find or create one
+      if (!problemaId) {
+        console.log("No problema_id found, looking for or creating one");
+        
+        // First try to find a problema for the coordenacao
+        if (selectedDemanda.coordenacao_id) {
+          const { data: existingProblema, error: findError } = await supabase
+            .from('problemas')
+            .select('id')
+            .eq('coordenacao_id', selectedDemanda.coordenacao_id)
+            .limit(1)
+            .maybeSingle();
+          
+          if (findError) {
+            console.error("Error finding problema:", findError);
+          } else if (existingProblema) {
+            problemaId = existingProblema.id;
+            console.log("Found existing problema:", problemaId);
+          } else {
+            // Create a new problema for this coordenacao
+            const { data: newProblema, error: createError } = await supabase
+              .from('problemas')
+              .insert({
+                descricao: 'Problema Padrão',
+                coordenacao_id: selectedDemanda.coordenacao_id
+              })
+              .select()
+              .single();
+              
+            if (createError) {
+              console.error("Error creating problema:", createError);
+              throw new Error("Não foi possível criar problema para a coordenação: " + createError.message);
+            } else {
+              problemaId = newProblema.id;
+              console.log("Created new problema:", problemaId);
+            }
+          }
+        } else {
+          throw new Error("A demanda não possui coordenação associada, necessária para criar um problema.");
+        }
       }
       
-      console.log("Nota created successfully:", data);
+      console.log("Using problema_id:", problemaId);
       
-      // Update the demand status after creating the note
+      // Create the nota with validations
+      const notaData = {
+        titulo,
+        texto,
+        coordenacao_id: selectedDemanda.coordenacao_id,
+        autor_id: user.id,
+        status: 'pendente',
+        demanda_id: selectedDemandaId,
+        problema_id: problemaId
+      };
+      
+      // Validate that all required fields are present
+      if (!notaData.titulo || !notaData.texto || !notaData.problema_id || !notaData.autor_id) {
+        throw new Error("Campos obrigatórios não preenchidos corretamente.");
+      }
+      
+      console.log("Creating nota with data:", notaData);
+      
+      const { data: notaResult, error: notaError } = await supabase
+        .from('notas_oficiais')
+        .insert(notaData)
+        .select();
+      
+      if (notaError) {
+        console.error("Error inserting nota:", notaError);
+        throw notaError;
+      }
+      
+      console.log("Nota created successfully:", notaResult);
+      
+      // Now update demanda status to indicate a note has been created
+      // Important: Use correct status from the allowed values for demandas table
       const { error: updateError } = await supabase
         .from('demandas')
-        .update({ status: 'respondida' })
+        .update({ status: 'aguardando_aprovacao' })
         .eq('id', selectedDemandaId);
         
       if (updateError) {
         console.error('Error updating demand status:', updateError);
-        // We don't throw here to avoid canceling the whole operation
-        // The note was already created successfully
+        // Don't throw here - the note was already created successfully
+        toast({
+          title: "Aviso",
+          description: "Nota criada com sucesso, mas não foi possível atualizar o status da demanda automaticamente.",
+          variant: "warning"
+        });
+      } else {
+        console.log("Demand status updated to 'aguardando_aprovacao'");
       }
       
       toast({
