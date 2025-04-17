@@ -49,7 +49,9 @@ const NotaForm: React.FC<NotaFormProps> = ({
       );
       
       if (generatedTitle) {
-        setTitulo(generatedTitle);
+        // Remove any markdown formatting from the title
+        const cleanTitle = generatedTitle.replace(/\*\*/g, '').replace(/\*/g, '');
+        setTitulo(cleanTitle);
       }
       
       if (generatedContent) {
@@ -62,6 +64,11 @@ const NotaForm: React.FC<NotaFormProps> = ({
       }
     } catch (error: any) {
       console.error('Erro ao processar sugestão gerada:', error);
+      toast({
+        title: "Erro ao gerar sugestão",
+        description: error.message || "Ocorreu um erro ao tentar gerar a sugestão.",
+        variant: "destructive"
+      });
     }
   };
 

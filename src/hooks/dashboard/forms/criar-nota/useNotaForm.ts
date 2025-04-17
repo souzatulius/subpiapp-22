@@ -1,10 +1,10 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
 import { useAuth } from '@/hooks/useSupabaseAuth';
 import { Demand, ResponseQA } from '@/components/dashboard/forms/criar-nota/types';
 import { useNavigate } from 'react-router-dom';
+import { formatResponses } from './utils/formatResponses';
 
 export const useNotaForm = (onClose: () => void) => {
   const { user } = useAuth();
@@ -19,6 +19,11 @@ export const useNotaForm = (onClose: () => void) => {
   const [step, setStep] = useState<'select-demand' | 'create-note'>('select-demand');
 
   const fetchDemandResponse = async (demandaId: string) => {
+    if (!demandaId) {
+      console.error('Missing demandaId in fetchDemandResponse');
+      return;
+    }
+    
     try {
       console.log('Fetching response for demanda:', demandaId);
       
@@ -44,11 +49,10 @@ export const useNotaForm = (onClose: () => void) => {
           try {
             let respostasText = '';
             Object.entries(data.respostas).forEach(([key, value]) => {
-              // Get the question text from the selectedDemanda.perguntas object
               const questionText = selectedDemanda?.perguntas?.[key] || `Pergunta ${Number(key) + 1}`;
               respostasText += `Pergunta: ${questionText}\nResposta: ${value}\n\n`;
             });
-            setDemandaResponse(respostasText);
+            setDemandaResponse(prev => prev || respostasText);
           } catch (parseError) {
             console.error('Error parsing respostas:', parseError);
           }
@@ -68,6 +72,11 @@ export const useNotaForm = (onClose: () => void) => {
   };
 
   const handleDemandaSelect = async (demandaId: string, demandas: Demand[]) => {
+    if (!demandaId || !demandas || !demandas.length) {
+      console.error('Invalid parameters in handleDemandaSelect', { demandaId, demandasLength: demandas?.length });
+      return;
+    }
+    
     setSelectedDemandaId(demandaId);
     
     // Find the selected demand
@@ -79,18 +88,23 @@ export const useNotaForm = (onClose: () => void) => {
       // Set a default title based on the demand title
       setTitulo(selected.titulo || '');
       
-      // Fetch responses for this demand
-      await fetchDemandResponse(demandaId);
-      
-      // Update the selected demand with comments if we have them
-      if (comentarios) {
-        setSelectedDemanda({
-          ...selected,
-          comentarios
-        });
+      // If the demand has response data, use it directly
+      if (selected.resposta?.texto) {
+        console.log("Using response text from selected demand:", selected.resposta.texto.substring(0, 100));
+        setDemandaResponse(selected.resposta.texto);
+        setComentarios(selected.comentarios || null);
+      } else {
+        // Otherwise fetch responses for this demand
+        await fetchDemandResponse(demandaId);
       }
     } else {
       console.error('Selected demand not found in demandas array');
+      toast({
+        title: "Erro",
+        description: "Demanda selecionada não encontrada. Por favor, tente novamente.",
+        variant: "destructive"
+      });
+      return;
     }
     
     setStep('create-note');
@@ -107,7 +121,7 @@ export const useNotaForm = (onClose: () => void) => {
 
   const handleSubmit = async () => {
     // Validação
-    if (!titulo.trim()) {
+    if (!titulo || !titulo.trim()) {
       toast({
         title: "Título obrigatório",
         description: "Por favor, informe um título para a nota oficial.",
@@ -116,7 +130,7 @@ export const useNotaForm = (onClose: () => void) => {
       return;
     }
 
-    if (!texto.trim()) {
+    if (!texto || !texto.trim()) {
       toast({
         title: "Conteúdo obrigatório",
         description: "Por favor, informe o conteúdo da nota oficial.",
@@ -125,10 +139,19 @@ export const useNotaForm = (onClose: () => void) => {
       return;
     }
 
-    if (!selectedDemanda) {
+    if (!selectedDemanda || !selectedDemandaId) {
       toast({
         title: "Demanda inválida",
-        description: "Selecione uma demanda válida.",
+        description: "Selecione uma demanda válida para criar a nota.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (!user || !user.id) {
+      toast({
+        title: "Erro de autenticação",
+        description: "Você precisa estar logado para criar uma nota oficial.",
         variant: "destructive"
       });
       return;
@@ -136,6 +159,12 @@ export const useNotaForm = (onClose: () => void) => {
 
     try {
       setIsSubmitting(true);
+      console.log("Submitting nota form with data:", {
+        titulo,
+        texto,
+        demandaId: selectedDemandaId,
+        userId: user.id
+      });
       
       // Use the problema_id from the selected demand if it has one
       const problemaId = selectedDemanda.problema_id || selectedDemanda.problema?.id;
@@ -148,14 +177,19 @@ export const useNotaForm = (onClose: () => void) => {
           titulo,
           texto,
           coordenacao_id: coordenacaoId,
-          autor_id: user?.id,
+          autor_id: user.id,
           status: 'pendente',
           demanda_id: selectedDemandaId,
           problema_id: problemaId
         })
         .select();
       
-      if (error) throw error;
+      if (error) {
+        console.error("Error inserting nota:", error);
+        throw error;
+      }
+      
+      console.log("Nota created successfully:", data);
       
       // Update the demand status after creating the note
       const { error: updateError } = await supabase
@@ -166,6 +200,7 @@ export const useNotaForm = (onClose: () => void) => {
       if (updateError) {
         console.error('Error updating demand status:', updateError);
         // We don't throw here to avoid canceling the whole operation
+        // The note was already created successfully
       }
       
       toast({
@@ -187,24 +222,7 @@ export const useNotaForm = (onClose: () => void) => {
     }
   };
 
-  // Helper function to format the responses text
-  const formatResponses = (responseText: string | null): ResponseQA[] => {
-    if (!responseText) return [];
-    
-    // Split by double newlines to get question-answer pairs
-    const pairs = responseText.split('\n\n');
-    return pairs.map(pair => {
-      const lines = pair.split('\n');
-      if (lines.length >= 2) {
-        // Extract question and answer
-        const question = lines[0].replace('Pergunta: ', '');
-        const answer = lines[1].replace('Resposta: ', '');
-        return { question, answer };
-      }
-      return { question: '', answer: '' };
-    }).filter(qa => qa.question && qa.answer);
-  };
-
+  // Get formatted responses from the formatted responses utility
   const formattedResponses = formatResponses(demandaResponse);
 
   return {

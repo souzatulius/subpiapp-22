@@ -14,8 +14,8 @@ export const formatResponses = (responseText: string | null): ResponseQA[] => {
       const lines = pair.split('\n');
       if (lines.length >= 2) {
         // Extract question and answer
-        const question = lines[0].replace('Pergunta: ', '');
-        const answer = lines[1].replace('Resposta: ', '');
+        const question = lines[0].replace(/^Pergunta:?\s*/i, '');
+        const answer = lines[1].replace(/^Resposta:?\s*/i, '');
         return { question, answer };
       }
       return { question: '', answer: '' };

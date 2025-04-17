@@ -55,10 +55,13 @@ export const useGptNotaSuggestion = () => {
       
       // Extract title and content from the generated text
       const titleMatch = resultado.match(/^(.+?)(?:\r?\n|\r)/);
-      const title = titleMatch ? titleMatch[1].trim() : selectedDemanda.titulo || '';
+      let title = titleMatch ? titleMatch[1].trim() : selectedDemanda.titulo || '';
       const content = titleMatch 
         ? resultado.substring(titleMatch[0].length).trim()
         : resultado;
+        
+      // Remove any markdown formatting from the title (asterisks, etc.)
+      title = title.replace(/\*\*/g, '').replace(/\*/g, '');
 
       return { titulo: title, nota: content };
       

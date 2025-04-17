@@ -57,7 +57,7 @@ const CriarNotaForm: React.FC<CriarNotaFormProps> = ({
             setTexto={setTexto} 
             handleSubmit={handleSubmit} 
             isSubmitting={isSubmitting} 
-            selectedDemanda={selectedDemanda} 
+            selectedDemanda={selectedDemanda}
             formattedResponses={formattedResponses} 
           />
         </>
