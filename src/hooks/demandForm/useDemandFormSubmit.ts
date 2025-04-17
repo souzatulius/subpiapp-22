@@ -68,9 +68,12 @@ export const useDemandFormSubmit = (resetForm: () => void, onClose: () => void) 
         bairro_id: formData.bairro_id || null,
         perguntas: formattedPerguntas,
         detalhes_solicitacao: formData.detalhes_solicitacao,
+        resumo_situacao: formData.resumo_situacao || null,
         arquivo_url,
         anexos: processedAnexos,
         servico_id: formData.servico_id ? formData.servico_id : null,
+        coordenacao_id: formData.coordenacao_id || null,
+        numero_protocolo_156: formData.tem_protocolo_156 ? formData.numero_protocolo_156 : null,
         autor_id: user.id,
         status: 'pendente'
       };

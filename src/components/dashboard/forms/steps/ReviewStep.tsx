@@ -83,7 +83,8 @@ const ReviewStep: React.FC<ReviewStepProps> = ({
   const formatDateTime = (isoString?: string) => {
     if (!isoString) return 'Não especificado';
     try {
-      return formatDateToString(new Date(isoString));
+      // Fix: Ensure we're passing a string to formatDateToString
+      return formatDateToString(isoString);
     } catch (e) {
       console.error('Error formatting date time:', e);
       return 'Data inválida';

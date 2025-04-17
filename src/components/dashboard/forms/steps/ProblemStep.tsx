@@ -21,6 +21,8 @@ interface ProblemStepProps {
   handleChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
   handleSelectChange: (name: string, value: string | boolean) => void;
   handleServiceSearch?: (value: string) => void;
+  serviceSearch?: string;
+  areasCoord?: any[];
   errors?: ValidationError[];
 }
 
@@ -32,9 +34,10 @@ const ProblemStep: React.FC<ProblemStepProps> = ({
   handleChange,
   handleSelectChange,
   handleServiceSearch,
+  serviceSearch = '',
+  areasCoord = [],
   errors = []
 }) => {
-  const [serviceSearch, setServiceSearch] = useState('');
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const hasError = (field: string) => errors.some(err => err.field === field);
@@ -44,7 +47,6 @@ const ProblemStep: React.FC<ProblemStepProps> = ({
   };
 
   const handleLocalServiceSearch = (value: string) => {
-    setServiceSearch(value);
     if (handleServiceSearch) {
       handleServiceSearch(value);
     }
@@ -52,7 +54,6 @@ const ProblemStep: React.FC<ProblemStepProps> = ({
 
   const handleServiceSelect = (serviceId: string) => {
     handleSelectChange('servico_id', serviceId);
-    setServiceSearch(''); // Clear search after selection
     setIsPopoverOpen(false);
   };
 

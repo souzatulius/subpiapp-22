@@ -27,6 +27,7 @@ interface LocationStepProps {
   handleSelectChange: (name: string, value: string | boolean) => void;
   serviceSearch?: string;
   handleServiceSearch?: (value: string) => void;
+  areasCoord?: any[];
   errors?: ValidationError[];
 }
 
@@ -43,6 +44,7 @@ const LocationStep: React.FC<LocationStepProps> = ({
   handleSelectChange,
   serviceSearch = '',
   handleServiceSearch,
+  areasCoord = [],
   errors = []
 }) => {
   // Show address field only if bairro is selected
@@ -67,6 +69,8 @@ const LocationStep: React.FC<LocationStepProps> = ({
         handleChange={handleChange}
         handleSelectChange={handleSelectChange}
         handleServiceSearch={handleServiceSearch}
+        serviceSearch={serviceSearch}
+        areasCoord={areasCoord}
         errors={errors}
       />
 

@@ -1,12 +1,12 @@
+
 import React, { useState, useEffect } from 'react';
 import TitleSection from './organize/TitleSection';
 import { ValidationError, hasFieldError, getFieldErrorMessage } from '@/lib/formValidationUtils';
 import QuestionsSection from './questions/QuestionsSection';
 import FileUploadSection from './questions/FileUploadSection';
 import { Textarea } from '@/components/ui/textarea';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Sparkles } from 'lucide-react';
 
 interface OrganizeStepProps {
   formData: {
