@@ -52,7 +52,7 @@ export const useDemandFormSubmit = (resetForm: () => void, onClose: () => void) 
         ? formData.prioridade
         : 'media'; // Default to 'media' if the value is not valid
       
-      // Prepare the payload
+      // Prepare the payload with exact field names that match the database schema
       const payload = {
         titulo: formData.titulo,
         problema_id: formData.problema_id || null,
@@ -73,21 +73,29 @@ export const useDemandFormSubmit = (resetForm: () => void, onClose: () => void) 
         anexos: processedAnexos,
         servico_id: formData.servico_id ? formData.servico_id : null,
         coordenacao_id: formData.coordenacao_id || null,
-        numero_protocolo_156: formData.tem_protocolo_156 ? formData.numero_protocolo_156 : null,
+        // Map tem_protocolo_156 and numero_protocolo_156 to the correct field in the database
+        protocolo: formData.tem_protocolo_156 ? formData.numero_protocolo_156 : null,
         autor_id: user.id,
-        status: 'pendente'
+        status: 'pendente',
+        horario_publicacao: new Date().toISOString()
       };
       
       console.log('Submitting demand with payload:', payload);
       
-      // Submit to Supabase
-      const { error } = await supabase
+      // Submit to Supabase with more detailed error handling
+      const { data, error } = await supabase
         .from('demandas')
-        .insert(payload);
+        .insert(payload)
+        .select();
         
-      if (error) throw error;
+      if (error) {
+        console.error("Database error:", error);
+        throw error;
+      }
       
-      // Show animated feedback instead of toast
+      console.log("Demand created successfully:", data);
+      
+      // Show animated feedback
       showFeedback('success', "Demanda cadastrada com sucesso!");
       
       resetForm();
@@ -97,10 +105,14 @@ export const useDemandFormSubmit = (resetForm: () => void, onClose: () => void) 
     } catch (error: any) {
       console.error("Erro ao submeter formulário:", error);
       
-      // Check for database constraint error
+      // Detailed error handling
       if (error.code === '23502') { // not-null constraint violation
         const errorMessage = error.message || "Campos obrigatórios não preenchidos";
         showFeedback('error', errorMessage);
+      } else if (error.code === '23503') { // foreign key violation
+        showFeedback('error', "Referência inválida em um dos campos. Verifique se todos os campos selecionados são válidos.");
+      } else if (error.code === '23505') { // unique violation
+        showFeedback('error', "Já existe uma demanda com estas informações.");
       } else {
         showFeedback('error', error.message || "Ocorreu um erro ao processar sua solicitação");
       }
