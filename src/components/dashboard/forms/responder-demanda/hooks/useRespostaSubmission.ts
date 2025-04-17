@@ -44,7 +44,7 @@ export const useRespostaSubmission = (options?: SubmissionOptions) => {
     try {
       setIsSubmitting(true);
       
-      console.log("Setting status to respondida"); // Changed from 'em_andamento' to 'respondida'
+      console.log("Setting status to respondida");
 
       // First, save the response without changing the status
       // Generate text summary of responses

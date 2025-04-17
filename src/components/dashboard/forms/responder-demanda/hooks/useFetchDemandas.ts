@@ -52,6 +52,8 @@ export const useFetchDemandas = () => {
         
         if (error) throw error;
         
+        console.log("Fetched demands:", allDemandas?.length || 0, "with status 'pendente' or 'em_andamento'");
+        
         // Process each demand to ensure it has proper structure
         const processedDemandas = Array.isArray(allDemandas) ? allDemandas
           .filter(demanda => demanda !== null && typeof demanda === 'object')
@@ -100,6 +102,8 @@ export const useFetchDemandas = () => {
             
             return processedDemanda;
           }).filter(Boolean) as Demanda[] : [];
+        
+        console.log("Processed demands:", processedDemandas.length);
         
         setDemandas(processedDemandas);
         setFilteredDemandas(processedDemandas);

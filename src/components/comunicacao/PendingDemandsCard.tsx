@@ -49,22 +49,22 @@ const PendingDemandsCard: React.FC<PendingDemandsCardProps> = ({
         if (isComunicacao) {
           // For communication team, show all pending demands
           baseQuery = baseQuery
-            .eq('status', 'pendente_resposta')
+            .in('status', ['pendente'])
             .order('horario_publicacao', { ascending: false });
         } else {
           // For other areas, show only demands for their coordination
           baseQuery = baseQuery
             .eq('coordenacao_id', coordenacaoId)
-            .eq('status', 'pendente_resposta')
+            .in('status', ['pendente'])
             .order('horario_publicacao', { ascending: false });
         }
         
         // Get count using separate query with head: true
         const countQuery = isComunicacao 
-          ? supabase.from('demandas').select('*', { count: 'exact', head: true }).eq('status', 'pendente_resposta')
+          ? supabase.from('demandas').select('*', { count: 'exact', head: true }).in('status', ['pendente'])
           : supabase.from('demandas').select('*', { count: 'exact', head: true })
               .eq('coordenacao_id', coordenacaoId)
-              .eq('status', 'pendente_resposta');
+              .in('status', ['pendente']);
         
         const { count, error: countError } = await countQuery;
         
@@ -82,6 +82,8 @@ const PendingDemandsCard: React.FC<PendingDemandsCardProps> = ({
           console.error('Error fetching demandas:', error);
           return;
         }
+        
+        console.log("Fetched pending demands:", data?.length || 0);
         
         if (data) {
           // Format data to match the Demanda interface

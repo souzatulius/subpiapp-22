@@ -74,6 +74,8 @@ export const useDemandasData = () => {
         
         if (demandasError) throw demandasError;
         
+        console.log('Fetched demandas with respondida status:', allDemandas ? allDemandas.length : 0);
+        
         // Buscar todas as notas oficiais para verificar quais demandas já possuem notas
         const { data: notasData, error: notasError } = await supabase
           .from('notas_oficiais')
