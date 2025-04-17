@@ -56,7 +56,7 @@ export interface Demand {
   supervisao_tecnica?: any;
   comentarios?: string;
   
-  // Properties from other interfaces
+  // Missing properties causing TypeScript errors
   anexos?: string[] | null;
   problema?: {
     descricao: string | null;
@@ -64,25 +64,9 @@ export interface Demand {
     coordenacao?: any;
   } | null;
   
-  // Additional properties 
+  // Additional properties from other interfaces
   origem_id?: string | any;
   tipo_midia_id?: any;
-  origens_demandas?: {
-    descricao: string;
-    id?: string;
-  } | null;
-  distrito?: {
-    nome: string;
-    id?: string;
-  } | null;
-  bairros?: {
-    nome: string;
-    id?: string;
-    distritos?: {
-      nome: string;
-      id?: string;
-    } | null;
-  } | null;
 }
 
 export interface Note {

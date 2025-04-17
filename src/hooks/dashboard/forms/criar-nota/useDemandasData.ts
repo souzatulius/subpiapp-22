@@ -1,7 +1,8 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { Demand } from './types';
+import { toast } from '@/components/ui/use-toast';
+import { Demand } from '@/types/demand';
 
 export const useDemandasData = () => {
   const [demandas, setDemandas] = useState<Demand[]>([]);
@@ -15,40 +16,38 @@ export const useDemandasData = () => {
       try {
         setIsLoading(true);
         
-        // Check if resumo_situacao column exists
-        const { error: testError } = await supabase
-          .from('demandas')
-          .select('resumo_situacao')
-          .limit(1);
-          
-        const hasResumoSituacao = !testError;
-        
-        // Primeiro buscamos as demandas que estão pendentes ou em andamento
-        const baseQuery = `
-          id,
-          titulo,
-          status,
-          detalhes_solicitacao,
-          perguntas,
-          problema_id,
-          coordenacao_id,
-          servico_id,
-          arquivo_url,
-          anexos
-        `;
-        
-        // Add resumo_situacao if it exists
-        const finalQuery = hasResumoSituacao ? `resumo_situacao, ${baseQuery}` : baseQuery;
-        
+        // Primeiro buscamos as demandas que estão pendentes ou em andamento ou respondidas
         const { data: allDemandas, error: demandasError } = await supabase
           .from('demandas')
-          .select(finalQuery)
+          .select(`
+            id,
+            titulo,
+            status,
+            detalhes_solicitacao,
+            resumo_situacao,
+            perguntas,
+            problema_id,
+            coordenacao_id,
+            servico_id,
+            arquivo_url,
+            anexos,
+            protocolo,
+            horario_publicacao,
+            prazo_resposta,
+            prioridade
+          `)
           .in('status', ['pendente', 'em_andamento', 'respondida'])
           .order('horario_publicacao', { ascending: false });
         
         if (demandasError) {
-          console.error('Erro ao buscar demandas:', demandasError);
-          return;
+          console.error('Error fetching demandas:', demandasError);
+          throw demandasError;
+        }
+        
+        // Verify that allDemandas is an array before continuing
+        if (!allDemandas || !Array.isArray(allDemandas)) {
+          console.error('Demandas data is not an array:', allDemandas);
+          throw new Error('Failed to fetch demandas: Invalid data format');
         }
         
         // Buscar todas as notas oficiais para verificar quais demandas já possuem notas
@@ -57,107 +56,66 @@ export const useDemandasData = () => {
           .select('demanda_id');
         
         if (notasError) {
-          console.error('Erro ao buscar notas:', notasError);
-          return;
+          console.error('Error fetching notas:', notasError);
+          throw notasError;
+        }
+        
+        // Verify that notasData is an array before continuing
+        if (!notasData || !Array.isArray(notasData)) {
+          console.error('Notas data is not an array:', notasData);
+          throw new Error('Failed to fetch notas: Invalid data format');
         }
         
         // Criar um conjunto de IDs de demandas que já possuem notas
-        const demandasComNotas = new Set(notasData?.map(nota => nota.demanda_id).filter(Boolean) || []);
+        const demandasComNotas = new Set(notasData.map(nota => nota.demanda_id).filter(Boolean));
         
-        // Filtrar para incluir apenas demandas que não possuem notas associadas
-        const demandasSemNotas = allDemandas ? allDemandas.filter(demanda => !demandasComNotas.has(demanda.id)) : [];
+        // Filtrar para incluir APENAS demandas RESPONDIDAS que NÃO possuem notas associadas
+        const demandasParaProcessar = allDemandas.filter(demanda => 
+          demanda.status === 'respondida' && !demandasComNotas.has(demanda.id)
+        );
         
-        console.log('All demandas:', allDemandas ? allDemandas.length : 0);
+        console.log('All demandas:', allDemandas.length);
+        console.log('Demandas with status "respondida":', allDemandas.filter(d => d.status === 'respondida').length);
         console.log('Demandas with notas:', demandasComNotas.size);
-        console.log('Demandas without notas:', demandasSemNotas.length);
+        console.log('Demandas respondidas without notas:', demandasParaProcessar.length);
         
         // Buscar informações do problema para cada demanda
         const demandasProcessadas = await Promise.all(
-          demandasSemNotas.map(async (demanda) => {
-            try {
-              // Usando cast explícito para evitar tipos complexos
-              const demandaItem = demanda as any;
-              
-              if (demandaItem.problema_id) {
-                const { data: problemaData } = await supabase
-                  .from('problemas')
-                  .select('id, descricao, coordenacao_id')
-                  .eq('id', demandaItem.problema_id)
-                  .single();
+          demandasParaProcessar.map(async (demanda) => {
+            let problemaData = null;
+            
+            if (demanda.problema_id) {
+              const { data } = await supabase
+                .from('problemas')
+                .select('id, descricao, coordenacao_id')
+                .eq('id', demanda.problema_id)
+                .single();
                 
-                // Criar objeto completo da demanda com todas as propriedades necessárias
-                const demandaCompleta: Demand = {
-                  id: demandaItem.id || '',
-                  titulo: demandaItem.titulo || '',
-                  status: demandaItem.status || '',
-                  detalhes_solicitacao: demandaItem.detalhes_solicitacao || null,
-                  perguntas: demandaItem.perguntas || null,
-                  supervisao_tecnica: null, // Mantemos esse campo para compatibilidade, mas como null
-                  area_coordenacao: problemaData ? { descricao: problemaData.descricao } : null,
-                  prioridade: "",
-                  horario_publicacao: "",
-                  prazo_resposta: "",
-                  endereco: null,
-                  nome_solicitante: null,
-                  email_solicitante: null,
-                  telefone_solicitante: null,
-                  veiculo_imprensa: null,
-                  origem: null,
-                  tipo_midia: null,
-                  bairro: null,
-                  autor: null,
-                  servico: null,
-                  problema: { descricao: problemaData?.descricao || null },
-                  resumo_situacao: hasResumoSituacao ? demandaItem.resumo_situacao : null,
-                  arquivo_url: demandaItem.arquivo_url || null,
-                  anexos: demandaItem.anexos || null
-                };
-                
-                return demandaCompleta;
-              }
-              
-              // Se não tiver problema, criar objeto com valores padrão
-              const demandaSimples: Demand = {
-                id: demandaItem.id || '',
-                titulo: demandaItem.titulo || '',
-                status: demandaItem.status || '',
-                detalhes_solicitacao: demandaItem.detalhes_solicitacao || null,
-                perguntas: demandaItem.perguntas || null,
-                supervisao_tecnica: null,
-                area_coordenacao: null,
-                prioridade: "",
-                horario_publicacao: "",
-                prazo_resposta: "",
-                endereco: null,
-                nome_solicitante: null,
-                email_solicitante: null,
-                telefone_solicitante: null,
-                veiculo_imprensa: null,
-                origem: null,
-                tipo_midia: null,
-                bairro: null,
-                autor: null,
-                servico: null,
-                problema: { descricao: null },
-                resumo_situacao: hasResumoSituacao ? demandaItem.resumo_situacao : null,
-                arquivo_url: demandaItem.arquivo_url || null,
-                anexos: demandaItem.anexos || null
-              };
-              
-              return demandaSimples;
-            } catch (error) {
-              console.error('Error processing demand:', error);
-              // Return a minimal valid demand object
-              const demandaItem = demanda as any;
-              return {
-                id: demandaItem.id || '',
-                titulo: demandaItem.titulo || '',
-                status: demandaItem.status || '',
-                area_coordenacao: null,
-                problema: { descricao: null },
-                detalhes_solicitacao: demandaItem.detalhes_solicitacao || null
-              } as Demand;
+              problemaData = data;
             }
+            
+            // Criar objeto completo da demanda com todas as propriedades necessárias
+            return {
+              ...demanda,
+              supervisao_tecnica: null, // Mantemos esse campo para compatibilidade, mas como null
+              area_coordenacao: problemaData ? { descricao: problemaData.descricao } : null,
+              tema: problemaData ? { descricao: problemaData.descricao } : null,
+              servico: null,
+              endereco: null,
+              nome_solicitante: null,
+              email_solicitante: null,
+              telefone_solicitante: null,
+              veiculo_imprensa: null,
+              origem: null,
+              tipo_midia: null,
+              bairro: null,
+              autor: null,
+              problema: { descricao: problemaData?.descricao || null },
+              // Make sure these properties exist and are set properly
+              arquivo_url: demanda.arquivo_url || null,
+              anexos: demanda.anexos || null,
+              numero_protocolo_156: demanda.protocolo || null
+            } as Demand;
           })
         );
         
@@ -165,6 +123,11 @@ export const useDemandasData = () => {
         setFilteredDemandas(demandasProcessadas);
       } catch (error) {
         console.error('Erro ao carregar demandas:', error);
+        toast({
+          title: "Erro ao carregar demandas",
+          description: "Não foi possível carregar as demandas disponíveis.",
+          variant: "destructive"
+        });
       } finally {
         setIsLoading(false);
       }
@@ -183,7 +146,7 @@ export const useDemandasData = () => {
     const lowercaseSearchTerm = searchTerm.toLowerCase();
     const filtered = demandas.filter(demanda => 
       demanda.titulo.toLowerCase().includes(lowercaseSearchTerm) ||
-      (demanda.area_coordenacao?.descricao?.toLowerCase() || '').includes(lowercaseSearchTerm)
+      demanda.area_coordenacao?.descricao?.toLowerCase().includes(lowercaseSearchTerm)
     );
     
     setFilteredDemandas(filtered);

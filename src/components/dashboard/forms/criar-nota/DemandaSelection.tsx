@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
-import { Demand } from './types';
+import { Demand } from '@/types/demand';
 import { Loader2 } from 'lucide-react';
 import UnifiedFilterBar, { ViewMode } from '@/components/shared/unified-view/UnifiedFilterBar';
 

@@ -50,12 +50,14 @@ export interface Demand {
   // Properties needed by criar-nota
   veiculo_imprensa?: string;
   detalhes_solicitacao?: string;
+  resumo_situacao?: string;
   perguntas?: any;
   arquivo_url?: string;
   tipo_veiculo?: string;
   supervisao_tecnica?: any;
+  comentarios?: string;
   
-  // Missing properties causing TypeScript errors
+  // Properties from other interfaces
   anexos?: string[] | null;
   problema?: {
     descricao: string | null;
@@ -63,9 +65,26 @@ export interface Demand {
     coordenacao?: any;
   } | null;
   
-  // Additional properties from other interfaces
+  // Additional properties 
   origem_id?: string | any;
   tipo_midia_id?: any;
+  origens_demandas?: {
+    descricao: string;
+    id?: string;
+  } | null;
+  distrito?: {
+    nome: string;
+    id?: string;
+  } | null;
+  bairros?: {
+    nome: string;
+    id?: string;
+    distritos?: {
+      nome: string;
+      id?: string;
+    } | null;
+  } | null;
+  numero_protocolo_156?: string;
 }
 
 export interface Note {
