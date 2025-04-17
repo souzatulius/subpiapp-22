@@ -15,42 +15,10 @@ const DemandaMetadataSection: React.FC<DemandaMetadataSectionProps> = ({ selecte
     ? new Date(selectedDemanda.prazo_resposta) < new Date() 
     : false;
 
-  const renderPrioridadeBadge = (prioridade: string) => {
-    const badgeClasses = cn("text-xs py-1", {
-      "bg-red-100 text-red-800 hover:bg-red-200": prioridade === 'alta',
-      "bg-yellow-100 text-yellow-800 hover:bg-yellow-200": prioridade === 'media',
-      "bg-green-100 text-green-800 hover:bg-green-200": prioridade === 'baixa'
-    });
-
-    const badgeLabel = {
-      'alta': 'Urgente',
-      'media': 'Normal',
-      'baixa': 'Baixa'
-    }[prioridade] || prioridade;
-
-    return (
-      <Badge variant="outline" className={badgeClasses}>
-        {badgeLabel}
-      </Badge>
-    );
-  };
-
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       <div className="bg-gray-50 p-3 rounded-md border border-gray-200">
-        <p className="text-sm text-gray-500 mb-1">Prioridade</p>
-        <div>{renderPrioridadeBadge(selectedDemanda.prioridade)}</div>
-      </div>
-
-      <div className="bg-gray-50 p-3 rounded-md border border-gray-200">
-        <p className="text-sm text-gray-500 mb-1">Origem</p>
-        <p className="font-medium">
-          {selectedDemanda.origens_demandas?.descricao || 'Não especificada'}
-        </p>
-      </div>
-
-      <div className="bg-gray-50 p-3 rounded-md border border-gray-200">
-        <p className="text-sm text-gray-500 mb-1">Publicado em</p>
+        <p className="text-sm text-gray-500 mb-1">Data de Criação</p>
         <div className="flex items-center">
           <CalendarIcon className="h-4 w-4 mr-2 text-gray-400" />
           <p className="font-medium">
@@ -74,41 +42,6 @@ const DemandaMetadataSection: React.FC<DemandaMetadataSectionProps> = ({ selecte
           </p>
         </div>
       </div>
-
-      <div className="bg-gray-50 p-3 rounded-md border border-gray-200">
-        <p className="text-sm text-gray-500 mb-1">Protocolo</p>
-        <p className="font-medium">
-          {selectedDemanda.protocolo || 'Não possui protocolo'}
-        </p>
-      </div>
-
-      <div className="bg-gray-50 p-3 rounded-md border border-gray-200">
-        <p className="text-sm text-gray-500 mb-1">Mídia</p>
-        <p className="font-medium">
-          {selectedDemanda.tipo_midia?.descricao || 'Não especificado'}
-        </p>
-      </div>
-
-      {selectedDemanda.veiculo_imprensa && (
-        <div className="bg-gray-50 p-3 rounded-md border border-gray-200">
-          <p className="text-sm text-gray-500 mb-1">Veículo</p>
-          <p className="font-medium">{selectedDemanda.veiculo_imprensa}</p>
-        </div>
-      )}
-
-      {selectedDemanda.nome_solicitante && (
-        <div className="bg-gray-50 p-3 rounded-md border border-gray-200">
-          <p className="text-sm text-gray-500 mb-1">Solicitante</p>
-          <p className="font-medium">{selectedDemanda.nome_solicitante}</p>
-        </div>
-      )}
-
-      {selectedDemanda.problema && (
-        <div className="bg-gray-50 p-3 rounded-md border border-gray-200 md:col-span-2">
-          <p className="text-sm text-gray-500 mb-1">Tema/Problema</p>
-          <p className="font-medium">{selectedDemanda.problema.descricao}</p>
-        </div>
-      )}
 
       {selectedDemanda.coordenacao && (
         <div className="bg-gray-50 p-3 rounded-md border border-gray-200">

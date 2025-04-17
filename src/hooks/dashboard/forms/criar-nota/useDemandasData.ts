@@ -47,7 +47,8 @@ export const useDemandasData = () => {
             email_solicitante,
             telefone_solicitante,
             veiculo_imprensa,
-            endereco
+            endereco,
+            coordenacao:coordenacao_id(id, descricao, sigla)
           `)
           .in('status', ['pendente', 'em_andamento', 'respondida'])
           .order('horario_publicacao', { ascending: false });
@@ -146,8 +147,6 @@ export const useDemandasData = () => {
               },
               arquivo_url: demanda.arquivo_url || null,
               anexos: demanda.anexos || null,
-              coordenacao: problemaData?.coordenacao || null,
-              protocolo: demanda.protocolo || null,
               distrito: demanda.bairros?.distrito || null
             } as unknown as Demand;  // Use unknown to bypass type checking temporarily
           })
@@ -180,7 +179,8 @@ export const useDemandasData = () => {
     const lowercaseSearchTerm = searchTerm.toLowerCase();
     const filtered = demandas.filter(demanda => 
       demanda.titulo.toLowerCase().includes(lowercaseSearchTerm) ||
-      demanda.area_coordenacao?.descricao?.toLowerCase().includes(lowercaseSearchTerm) ||
+      demanda.problema?.descricao?.toLowerCase().includes(lowercaseSearchTerm) ||
+      demanda.coordenacao?.descricao?.toLowerCase().includes(lowercaseSearchTerm) ||
       demanda.resumo_situacao?.toLowerCase().includes(lowercaseSearchTerm)
     );
     

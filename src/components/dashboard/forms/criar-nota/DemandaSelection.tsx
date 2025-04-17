@@ -4,6 +4,8 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Demand } from '@/types/demand';
 import { Loader2 } from 'lucide-react';
 import UnifiedFilterBar, { ViewMode } from '@/components/shared/unified-view/UnifiedFilterBar';
+import { PrioridadeBadge } from '@/components/ui/badges/prioridade-badge';
+import { DemandaStatusBadge } from '@/components/ui/status-badge';
 
 interface DemandaSelectionProps {
   filteredDemandas: Demand[];
@@ -49,13 +51,22 @@ const DemandaSelection: React.FC<DemandaSelectionProps> = ({
                     className={`p-3 border rounded-md hover:bg-gray-50 cursor-pointer ${viewMode === 'cards' ? 'h-full' : ''}`}
                     onClick={() => onDemandaSelect(demanda.id)}
                   >
-                    <div className="font-medium">{demanda.titulo}</div>
-                    <div className="text-sm text-gray-500 mt-1">
-                      {demanda.area_coordenacao?.descricao || 'Área não informada'}
+                    <div className="flex justify-between items-start">
+                      <div className="font-medium">{demanda.titulo}</div>
+                      <div className="flex flex-wrap gap-1 ml-2">
+                        {demanda.prioridade && (
+                          <PrioridadeBadge prioridade={demanda.prioridade} size="xs" />
+                        )}
+                        {demanda.status && (
+                          <DemandaStatusBadge status={demanda.status} size="xs" />
+                        )}
+                      </div>
                     </div>
-                    <div className="text-xs text-gray-400 mt-1">
-                      Status: {demanda.status === 'respondida' ? 'Respondida' : 'Aguardando nota'}
-                    </div>
+                    {demanda.coordenacao && (
+                      <div className="text-xs text-gray-500 mt-1">
+                        {demanda.coordenacao.sigla || demanda.coordenacao.descricao || 'Coordenação não informada'}
+                      </div>
+                    )}
                   </div>
                 ))
               ) : (
