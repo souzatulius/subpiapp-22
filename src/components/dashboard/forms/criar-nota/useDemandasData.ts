@@ -86,7 +86,7 @@ export const useDemandasData = () => {
         );
         
         // Filtrar para incluir apenas demandas que não possuem notas associadas
-        const demandasSemNotas = allDemandas ? 
+        const demandasSemNotas = Array.isArray(allDemandas) ? 
           allDemandas.filter(demanda => !demandasComNotas.has(demanda.id)) : 
           [];
         
