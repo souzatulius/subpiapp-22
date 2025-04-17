@@ -163,22 +163,13 @@ const RespostaForm: React.FC<RespostaFormProps> = ({
           </div>
         )}
         
-        {/* Primeiro exibir o resumo da situação se existir, caso contrário exibir detalhes_solicitacao */}
+        {/* Exibir resumo da situação */}
         {selectedDemanda.resumo_situacao ? (
           <div className="space-y-4">
-            <h3 className="text-lg font-medium text-subpi-blue">Resumo</h3>
+            <h3 className="text-lg font-medium text-subpi-blue">Resumo da Situação</h3>
             <div className="bg-gray-50 p-4 rounded-xl border border-gray-200">
               <p className="text-sm text-gray-700 whitespace-pre-line">
                 {selectedDemanda.resumo_situacao}
-              </p>
-            </div>
-          </div>
-        ) : selectedDemanda.detalhes_solicitacao ? (
-          <div className="space-y-4">
-            <h3 className="text-lg font-medium text-subpi-blue">Detalhes da Solicitação</h3>
-            <div className="bg-gray-50 p-4 rounded-xl border border-gray-200">
-              <p className="text-sm text-gray-700 whitespace-pre-line">
-                {selectedDemanda.detalhes_solicitacao}
               </p>
             </div>
           </div>

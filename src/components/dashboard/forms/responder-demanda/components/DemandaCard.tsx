@@ -48,26 +48,27 @@ const DemandaCard: React.FC<DemandaCardProps> = ({ demanda, isSelected, onClick 
       onClick={onClick}
     >
       <div className="flex flex-col h-full">
-        <div className="flex justify-between items-start mb-2">
+        <div className="flex justify-between items-start mb-1">
           <h3 className="font-medium text-gray-800 line-clamp-2">{demanda.titulo || 'Sem título'}</h3>
           <div className="text-xs text-gray-500">
             {formatRelativeTime()}
           </div>
         </div>
         
+        {coordenacaoSigla && (
+          <div className="text-xs font-medium text-gray-500 mb-2">
+            {coordenacaoSigla}
+          </div>
+        )}
+        
         <div className="text-sm text-gray-600 line-clamp-2 mb-3">
-          {demanda.detalhes_solicitacao || 'Sem detalhes'}
+          {demanda.resumo_situacao || demanda.detalhes_solicitacao || 'Sem detalhes'}
         </div>
         
         <div className="mt-auto flex justify-between items-center">
           <div className="flex flex-wrap gap-1.5">
             <PrioridadeBadge prioridade={demanda.prioridade} size="sm" />
             <DemandaStatusBadge status={demanda.status} showIcon={false} size="sm" />
-            {coordenacaoSigla && (
-              <span className="bg-gray-100 text-gray-800 px-2 py-0.5 rounded text-xs">
-                {coordenacaoSigla}
-              </span>
-            )}
           </div>
           
           {demanda.prazo_resposta && (

@@ -1,8 +1,11 @@
 
 import React, { useEffect, useState } from 'react';
-import { Demand, ResponseQA } from './types';
+import { Demand, ResponseQA } from '@/hooks/dashboard/forms/criar-nota/types';
 import { Separator } from '@/components/ui/separator';
-import DemandaMetadataSection from '../responder-demanda/components/sections/DemandaMetadataSection';
+import { format } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
+import { Calendar, Clock, FileText, MapPin, MessageSquare, Tag } from 'lucide-react';
+import { DemandaStatusBadge, PrioridadeBadge, TemaBadge } from '@/components/ui/status-badge';
 import { fetchDemandResponse } from '@/hooks/dashboard/forms/criar-nota/api/fetchDemandResponse';
 
 interface DemandaInfoProps {
@@ -28,10 +31,53 @@ const DemandaInfo: React.FC<DemandaInfoProps> = ({
     getResponseComments();
   }, [selectedDemanda?.id]);
 
-  // Convert Demand to Demanda for compatibility with DemandaMetadataSection
-  const demandaForMetadata = {
-    ...selectedDemanda,
-    prioridade: selectedDemanda.prioridade || 'media', // Default value for required field
+  // Format date
+  const formatDate = (dateString?: string) => {
+    if (!dateString) return 'Não definida';
+    return format(new Date(dateString), 'dd/MM/yyyy', { locale: ptBR });
+  };
+  
+  // Get coordenação sigla
+  const getCoordSigla = () => {
+    if (typeof selectedDemanda.tema === 'object' && selectedDemanda.tema?.coordenacao?.sigla) {
+      return selectedDemanda.tema.coordenacao.sigla;
+    }
+    
+    if (selectedDemanda.problema?.coordenacao?.sigla) {
+      return selectedDemanda.problema.coordenacao.sigla;
+    }
+    
+    if (selectedDemanda.area_coordenacao?.descricao) {
+      return selectedDemanda.area_coordenacao.descricao;
+    }
+    
+    return 'Não informada';
+  };
+  
+  // Get tema description
+  const getTema = () => {
+    if (typeof selectedDemanda.tema === 'object' && selectedDemanda.tema?.descricao) {
+      return selectedDemanda.tema.descricao;
+    }
+    
+    if (typeof selectedDemanda.tema === 'string') {
+      return selectedDemanda.tema;
+    }
+    
+    return 'Não informado';
+  };
+  
+  // Get serviço description
+  const getServico = () => {
+    if (typeof selectedDemanda.servico === 'object' && selectedDemanda.servico?.descricao) {
+      return selectedDemanda.servico.descricao;
+    }
+    
+    if (typeof selectedDemanda.servico === 'string') {
+      return selectedDemanda.servico;
+    }
+    
+    return 'Não informado';
   };
 
   return (
@@ -41,7 +87,69 @@ const DemandaInfo: React.FC<DemandaInfoProps> = ({
       <div className="mb-6">
         <h3 className="text-lg font-medium mb-3">{selectedDemanda.titulo}</h3>
         
-        <DemandaMetadataSection selectedDemanda={demandaForMetadata as any} />
+        <div className="text-sm font-medium text-gray-500 mb-3">
+          {getCoordSigla()}
+        </div>
+        
+        <div className="flex flex-wrap gap-2 mb-4">
+          {getTema() !== 'Não informado' && <TemaBadge texto={getTema()} />}
+          <PrioridadeBadge prioridade={selectedDemanda.prioridade || 'media'} />
+          <DemandaStatusBadge status={selectedDemanda.status} />
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
+          <div className="flex flex-col space-y-1">
+            <div className="flex items-center text-gray-600">
+              <Calendar className="w-4 h-4 mr-1" />
+              <span className="text-xs">Data de Criação</span>
+            </div>
+            <span className="text-sm font-medium">
+              {formatDate(selectedDemanda.horario_publicacao)}
+            </span>
+          </div>
+          
+          {getServico() !== 'Não informado' && (
+            <div className="flex flex-col space-y-1">
+              <div className="flex items-center text-gray-600">
+                <Tag className="w-4 h-4 mr-1" />
+                <span className="text-xs">Serviço</span>
+              </div>
+              <span className="text-sm font-medium">{getServico()}</span>
+            </div>
+          )}
+          
+          {(selectedDemanda.protocolo || selectedDemanda.numero_protocolo_156) && (
+            <div className="flex flex-col space-y-1">
+              <div className="flex items-center text-gray-600">
+                <FileText className="w-4 h-4 mr-1" />
+                <span className="text-xs">Protocolo 156</span>
+              </div>
+              <span className="text-sm font-medium">{selectedDemanda.numero_protocolo_156 || selectedDemanda.protocolo}</span>
+            </div>
+          )}
+          
+          {selectedDemanda.prazo_resposta && (
+            <div className="flex flex-col space-y-1">
+              <div className="flex items-center text-gray-600">
+                <Clock className="w-4 h-4 mr-1" />
+                <span className="text-xs">Prazo para Resposta</span>
+              </div>
+              <span className="text-sm font-medium">
+                {formatDate(selectedDemanda.prazo_resposta)}
+              </span>
+            </div>
+          )}
+          
+          {selectedDemanda.endereco && (
+            <div className="flex flex-col space-y-1">
+              <div className="flex items-center text-gray-600">
+                <MapPin className="w-4 h-4 mr-1" />
+                <span className="text-xs">Endereço</span>
+              </div>
+              <span className="text-sm font-medium">{selectedDemanda.endereco}</span>
+            </div>
+          )}
+        </div>
       </div>
       
       <Separator className="my-4" />
@@ -81,10 +189,13 @@ const DemandaInfo: React.FC<DemandaInfoProps> = ({
         </div>
       )}
       
-      {/* Comentários adicionais */}
+      {/* Comentários adicionais - mostrar apenas um campo */}
       {selectedDemanda.comentarios && (
         <div className="mb-6">
-          <h3 className="text-lg font-medium mb-2">Comentários Adicionais</h3>
+          <h3 className="text-lg font-medium mb-2">
+            <MessageSquare className="w-4 h-4 inline mr-1" />
+            Comentários Adicionais
+          </h3>
           <div className="bg-gray-50 p-4 rounded-md border">
             {selectedDemanda.comentarios}
           </div>
