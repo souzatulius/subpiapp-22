@@ -3,7 +3,7 @@ import React from 'react';
 import { Badge } from '@/components/ui/badge';
 import { CalendarIcon, Clock } from 'lucide-react';
 import { formatDate, formatDateWithTime } from '@/lib/dateUtils';
-import classNames from 'classnames';
+import { cn } from '@/utils/cn';
 import { Demanda } from '../../types';
 
 interface DemandaMetadataSectionProps {
@@ -16,7 +16,7 @@ const DemandaMetadataSection: React.FC<DemandaMetadataSectionProps> = ({ selecte
     : false;
 
   const renderPrioridadeBadge = (prioridade: string) => {
-    const badgeClasses = classNames("text-xs py-1", {
+    const badgeClasses = cn("text-xs py-1", {
       "bg-red-100 text-red-800 hover:bg-red-200": prioridade === 'alta',
       "bg-yellow-100 text-yellow-800 hover:bg-yellow-200": prioridade === 'media',
       "bg-green-100 text-green-800 hover:bg-green-200": prioridade === 'baixa'
