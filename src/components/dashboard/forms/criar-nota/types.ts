@@ -47,7 +47,6 @@ export interface Demand {
     descricao: string | null;
   } | null;
   bairro?: string | any;
-  autor?: string | any;
   foto?: string;
   regiao?: string;
   foto_url?: string;
@@ -93,6 +92,13 @@ export interface Demand {
   origem?: {
     id?: string;
     descricao: string;
+  } | null;
+  
+  // Add autor property
+  autor_id?: string | null;
+  autor?: {
+    id?: string;
+    nome_completo: string;
   } | null;
   
   // Add resposta property

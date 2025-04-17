@@ -5,7 +5,7 @@ import { Separator } from '@/components/ui/separator';
 import { PrioridadeBadge } from '@/components/ui/badges/prioridade-badge';
 import { TemaBadge } from '@/components/ui/badges/tema-badge';
 import { formatDateWithTime } from '@/lib/dateUtils';
-import { Calendar, Clock, FileText, MapPin, Building, Newspaper } from 'lucide-react';
+import { Clock, FileText, MapPin, Building, Newspaper } from 'lucide-react';
 
 interface DemandaInfoProps {
   selectedDemanda: Demand;
@@ -28,23 +28,20 @@ const DemandaInfo: React.FC<DemandaInfoProps> = ({
         </div>
       </div>
       
+      {/* Data de criação com autor */}
+      <div className="text-sm text-gray-500 mb-1">
+        Criado por {selectedDemanda.autor?.nome_completo || 'Usuário'} em {formatDateWithTime(selectedDemanda.horario_publicacao)}
+      </div>
+      
       {/* Coordenação como subtítulo */}
       {selectedDemanda.coordenacao && (
-        <h3 className="text-md text-gray-600 mb-4">
+        <h3 className="text-sm font-medium text-gray-600 mb-4">
           {selectedDemanda.coordenacao.sigla || selectedDemanda.coordenacao.descricao || 'Coordenação não informada'}
         </h3>
       )}
       
       {/* Custom metadata section with only the requested fields */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 text-sm">
-        {selectedDemanda.horario_publicacao && (
-          <div className="flex items-center">
-            <Calendar className="h-4 w-4 mr-2 text-gray-500" />
-            <span className="text-gray-600 mr-2">Data de Criação:</span>
-            <span className="font-medium">{formatDateWithTime(selectedDemanda.horario_publicacao)}</span>
-          </div>
-        )}
-        
         {selectedDemanda.prazo_resposta && (
           <div className="flex items-center">
             <Clock className="h-4 w-4 mr-2 text-orange-500" />
@@ -61,6 +58,14 @@ const DemandaInfo: React.FC<DemandaInfoProps> = ({
           </div>
         )}
         
+        {selectedDemanda.endereco && (
+          <div className="flex items-center">
+            <MapPin className="h-4 w-4 mr-2 text-gray-500" />
+            <span className="text-gray-600 mr-2">Endereço:</span>
+            <span className="font-medium">{selectedDemanda.endereco}</span>
+          </div>
+        )}
+        
         {selectedDemanda.bairros?.nome && (
           <div className="flex items-center">
             <MapPin className="h-4 w-4 mr-2 text-gray-500" />
@@ -69,11 +74,11 @@ const DemandaInfo: React.FC<DemandaInfoProps> = ({
           </div>
         )}
         
-        {selectedDemanda.protocolo && (
+        {selectedDemanda.bairros?.distritos?.nome && (
           <div className="flex items-center">
-            <Building className="h-4 w-4 mr-2 text-gray-500" />
-            <span className="text-gray-600 mr-2">Protocolo:</span>
-            <span className="font-medium">{selectedDemanda.protocolo}</span>
+            <MapPin className="h-4 w-4 mr-2 text-gray-500" />
+            <span className="text-gray-600 mr-2">Distrito:</span>
+            <span className="font-medium">{selectedDemanda.bairros.distritos.nome}</span>
           </div>
         )}
         

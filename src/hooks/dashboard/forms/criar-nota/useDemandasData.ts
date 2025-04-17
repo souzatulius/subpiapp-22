@@ -29,11 +29,7 @@ export const useDemandasData = () => {
             perguntas,
             horario_publicacao,
             prazo_resposta,
-            protocolo,
             endereco,
-            nome_solicitante,
-            email_solicitante,
-            telefone_solicitante,
             veiculo_imprensa,
             arquivo_url,
             anexos,
@@ -59,16 +55,6 @@ export const useDemandasData = () => {
               id, 
               descricao
             ),
-            origem_id,
-            origem:origem_id (
-              id, 
-              descricao
-            ),
-            tipo_midia_id,
-            tipo_midia:tipo_midia_id (
-              id, 
-              descricao
-            ),
             bairro_id,
             bairros:bairro_id (
               id, 
@@ -77,6 +63,11 @@ export const useDemandasData = () => {
                 id, 
                 nome
               )
+            ),
+            autor_id,
+            autor:autor_id (
+              id,
+              nome_completo
             )
           `)
           .in('status', ['pendente', 'em_andamento', 'respondida'])
@@ -163,11 +154,7 @@ export const useDemandasData = () => {
               perguntas: demanda.perguntas || null,
               horario_publicacao: demanda.horario_publicacao || null,
               prazo_resposta: demanda.prazo_resposta || null,
-              protocolo: demanda.protocolo || '',
               endereco: demanda.endereco || '',
-              nome_solicitante: demanda.nome_solicitante || '',
-              email_solicitante: demanda.email_solicitante || '',
-              telefone_solicitante: demanda.telefone_solicitante || '',
               veiculo_imprensa: demanda.veiculo_imprensa || '',
               arquivo_url: demanda.arquivo_url || null,
               anexos: demanda.anexos || null,
@@ -192,16 +179,6 @@ export const useDemandasData = () => {
                 id: demanda.servico.id,
                 descricao: demanda.servico.descricao || ''
               } : null,
-              origem_id: demanda.origem_id || null,
-              origem: demanda.origem ? {
-                id: demanda.origem.id,
-                descricao: demanda.origem.descricao || ''
-              } : null,
-              tipo_midia_id: demanda.tipo_midia_id || null,
-              tipo_midia: demanda.tipo_midia ? {
-                id: demanda.tipo_midia.id,
-                descricao: demanda.tipo_midia.descricao || ''
-              } : null,
               bairro_id: demanda.bairro_id || null,
               bairros: demanda.bairros ? {
                 id: demanda.bairros.id,
@@ -210,6 +187,11 @@ export const useDemandasData = () => {
                   id: demanda.bairros.distritos.id,
                   nome: demanda.bairros.distritos.nome || ''
                 } : null
+              } : null,
+              autor_id: demanda.autor_id || null,
+              autor: demanda.autor ? {
+                id: demanda.autor.id,
+                nome_completo: demanda.autor.nome_completo || 'Usuário'
               } : null,
               // Add comentarios from resposta if available
               comentarios: resposta ? resposta.comentarios : null,

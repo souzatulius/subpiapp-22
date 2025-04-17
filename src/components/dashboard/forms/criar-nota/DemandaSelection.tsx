@@ -50,7 +50,7 @@ const DemandaSelection: React.FC<DemandaSelectionProps> = ({
                     className={`p-3 border rounded-xl hover:bg-gray-50 cursor-pointer ${viewMode === 'cards' ? 'h-full' : ''}`}
                     onClick={() => onDemandaSelect(demanda.id)}
                   >
-                    <div className="flex justify-between items-start mb-2">
+                    <div className="flex justify-between items-start mb-1">
                       <div className="font-medium">{demanda.titulo}</div>
                       <div className="flex gap-1">
                         {demanda.problema?.descricao && (
@@ -62,21 +62,19 @@ const DemandaSelection: React.FC<DemandaSelectionProps> = ({
                       </div>
                     </div>
                     
+                    {/* Data de criação com nome do autor */}
+                    <div className="text-xs text-gray-500 mb-1">
+                      Criado por {demanda.autor?.nome_completo || 'Usuário'} em {formatDateWithTime(demanda.horario_publicacao)}
+                    </div>
+                    
                     {/* Coordenação como texto comum abaixo do título */}
                     {demanda.coordenacao && (
-                      <div className="text-xs text-gray-600 mb-2">
+                      <div className="text-xs font-medium text-gray-600 mb-2">
                         {demanda.coordenacao.sigla || demanda.coordenacao.descricao || 'Coordenação não informada'}
                       </div>
                     )}
                     
                     <div className="mt-2 text-xs text-gray-500 flex flex-col gap-1">
-                      {demanda.horario_publicacao && (
-                        <div className="flex items-center">
-                          <Calendar className="h-3 w-3 mr-1" />
-                          <span>Criado em: {formatDateWithTime(demanda.horario_publicacao)}</span>
-                        </div>
-                      )}
-                      
                       {demanda.prazo_resposta && (
                         <div className="flex items-center text-orange-600">
                           <Clock className="h-3 w-3 mr-1" />
@@ -88,13 +86,6 @@ const DemandaSelection: React.FC<DemandaSelectionProps> = ({
                         <div className="flex items-center">
                           <FileText className="h-3 w-3 mr-1" />
                           <span>Serviço: {demanda.servico.descricao}</span>
-                        </div>
-                      )}
-                      
-                      {demanda.protocolo && (
-                        <div className="flex items-center">
-                          <Building className="h-3 w-3 mr-1" />
-                          <span>Protocolo: {demanda.protocolo}</span>
                         </div>
                       )}
                     </div>
