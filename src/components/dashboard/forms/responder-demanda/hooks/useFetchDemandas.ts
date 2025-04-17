@@ -23,6 +23,7 @@ export const useFetchDemandas = (coordenacaoId?: string) => {
             titulo,
             status,
             detalhes_solicitacao,
+            resumo_situacao,
             horario_publicacao,
             prazo_resposta,
             prioridade,
@@ -129,6 +130,7 @@ export const useFetchDemandas = (coordenacaoId?: string) => {
             titulo: demanda.titulo,
             status: demanda.status,
             detalhes_solicitacao: demanda.detalhes_solicitacao,
+            resumo_situacao: demanda.resumo_situacao,
             horario_publicacao: demanda.horario_publicacao,
             prazo_resposta: demanda.prazo_resposta,
             prioridade: demanda.prioridade,
@@ -198,7 +200,8 @@ export const useFetchDemandas = (coordenacaoId?: string) => {
     const filtered = demandas.filter(
       (demanda) =>
         demanda.titulo.toLowerCase().includes(lowercaseSearchTerm) ||
-        demanda.detalhes_solicitacao?.toLowerCase().includes(lowercaseSearchTerm)
+        demanda.detalhes_solicitacao?.toLowerCase().includes(lowercaseSearchTerm) ||
+        demanda.resumo_situacao?.toLowerCase().includes(lowercaseSearchTerm)
     );
 
     setFilteredDemandas(filtered);
