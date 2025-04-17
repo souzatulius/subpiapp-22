@@ -34,7 +34,7 @@ const CriarNotaForm: React.FC<CriarNotaFormProps> = ({
   } = useNotaForm(onClose);
   
   return (
-    <div className="animate-fade-in">
+    <div className="animate-fade-in space-y-6">
       {step === 'select-demand' ? (
         <DemandaSelection 
           filteredDemandas={filteredDemandas} 
@@ -44,29 +44,25 @@ const CriarNotaForm: React.FC<CriarNotaFormProps> = ({
           isLoading={isLoading} 
         />
       ) : (
-        <Card className="border border-gray-200 rounded-xl shadow-sm">
-          <CardContent className="p-6">
-            <div className="space-y-6">
-              {selectedDemanda && (
-                <DemandaInfo 
-                  selectedDemanda={selectedDemanda as Demand} 
-                  formattedResponses={formattedResponses} 
-                />
-              )}
-              
-              <NotaForm 
-                titulo={titulo} 
-                setTitulo={setTitulo} 
-                texto={texto} 
-                setTexto={setTexto} 
-                handleSubmit={handleSubmit} 
-                isSubmitting={isSubmitting} 
-                selectedDemanda={selectedDemanda as Demand} 
-                formattedResponses={formattedResponses} 
-              />
-            </div>
-          </CardContent>
-        </Card>
+        <>
+          {selectedDemanda && (
+            <DemandaInfo 
+              selectedDemanda={selectedDemanda as Demand} 
+              formattedResponses={formattedResponses} 
+            />
+          )}
+          
+          <NotaForm 
+            titulo={titulo} 
+            setTitulo={setTitulo} 
+            texto={texto} 
+            setTexto={setTexto} 
+            handleSubmit={handleSubmit} 
+            isSubmitting={isSubmitting} 
+            selectedDemanda={selectedDemanda as Demand} 
+            formattedResponses={formattedResponses} 
+          />
+        </>
       )}
     </div>
   );

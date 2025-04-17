@@ -72,8 +72,8 @@ const NotaForm: React.FC<NotaFormProps> = ({
   };
 
   return (
-    <>      
-      <div className="flex justify-between items-center mt-6">
+    <div className="bg-white rounded-xl p-6 border border-gray-200">      
+      <div className="flex justify-between items-center mb-4">
         <div className="flex-1">
           <Label htmlFor="titulo">Título da Nota Oficial</Label>
         </div>
@@ -88,7 +88,7 @@ const NotaForm: React.FC<NotaFormProps> = ({
         </Button>
       </div>
       
-      <div className="mt-2">
+      <div className="mb-4">
         <Input 
           id="titulo" 
           value={titulo} 
@@ -97,8 +97,8 @@ const NotaForm: React.FC<NotaFormProps> = ({
         />
       </div>
       
-      <div className="mt-4">
-        <Label htmlFor="texto">Texto da Nota Oficial</Label>
+      <div className="mb-4">
+        <Label htmlFor="texto" className="mb-2 block">Texto da Nota Oficial</Label>
         <Textarea 
           id="texto" 
           value={texto} 
@@ -108,7 +108,7 @@ const NotaForm: React.FC<NotaFormProps> = ({
         />
       </div>
       
-      <div className="flex justify-end pt-4 mt-4">
+      <div className="flex justify-end pt-4">
         <Button 
           onClick={onSubmitClick}
           disabled={isSubmitting}
@@ -117,7 +117,7 @@ const NotaForm: React.FC<NotaFormProps> = ({
           {isSubmitting ? "Enviando..." : "Enviar para Aprovação"}
         </Button>
       </div>
-    </>
+    </div>
   );
 };
 
