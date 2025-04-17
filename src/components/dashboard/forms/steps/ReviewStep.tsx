@@ -72,6 +72,20 @@ const ReviewStep: React.FC<ReviewStepProps> = ({
     return distrito?.nome || 'Não especificado';
   };
 
+  // Get coordination name associated with the selected problem
+  const getCoordenacaoName = () => {
+    const problema = findById(problemas, formData.problema_id);
+    if (!problema || !problema.coordenacao_id) return 'Não especificado';
+    
+    // If problema has a coordenacao object
+    if (problema.coordenacao?.descricao) {
+      return problema.coordenacao.descricao;
+    }
+    
+    // If coordenacao_id is available but no coordenacao object
+    return formData.coordenacao_id ? 'Coordenação associada' : 'Não especificado';
+  };
+
   const formatPrioridade = (prioridade: string) => {
     if (prioridade === 'alta') return 'Urgente';
     if (prioridade === 'media') return 'Normal';
@@ -140,6 +154,7 @@ const ReviewStep: React.FC<ReviewStepProps> = ({
       step: 2,
       fields: [
         { label: 'Tema', value: getProblemaName(), field: 'problema_id' },
+        { label: 'Coordenação', value: getCoordenacaoName(), field: 'coordenacao_id' },
         { label: 'Serviço', value: getServicoName(), field: 'servico_id' },
         { label: 'Distrito', value: getDistritoName(), field: '' },
         { label: 'Bairro', value: getBairroName(), field: 'bairro_id' },
