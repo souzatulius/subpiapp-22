@@ -68,14 +68,11 @@ export const useDemandFormSubmit = (resetForm: () => void, onClose: () => void) 
         bairro_id: formData.bairro_id || null,
         perguntas: formattedPerguntas,
         detalhes_solicitacao: formData.detalhes_solicitacao,
-        resumo_situacao: formData.resumo_situacao || null, // Novo campo
         arquivo_url,
         anexos: processedAnexos,
         servico_id: formData.servico_id ? formData.servico_id : null,
         autor_id: user.id,
-        status: 'pendente',
-        coordenacao_id: formData.coordenacao_id || null, // Novo campo
-        protocolo: formData.protocolo || null // Novo campo
+        status: 'pendente'
       };
       
       console.log('Submitting demand with payload:', payload);

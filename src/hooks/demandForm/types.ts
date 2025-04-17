@@ -13,7 +13,7 @@ export interface DemandFormData {
   bairro_id: string;
   perguntas: string[];
   detalhes_solicitacao: string;
-  resumo_situacao: string;
+  resumo_situacao?: string;
   arquivo_url: string;
   anexos: string[];
   servico_id: string;
@@ -22,5 +22,4 @@ export interface DemandFormData {
   nao_sabe_servico?: boolean;
   tem_protocolo_156?: boolean;
   numero_protocolo_156?: string;
-  protocolo?: string; // Novo campo para protocolo
 }
