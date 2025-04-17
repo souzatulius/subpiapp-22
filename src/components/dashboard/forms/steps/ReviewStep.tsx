@@ -78,12 +78,11 @@ const ReviewStep: React.FC<ReviewStepProps> = ({
     if (!problema || !problema.coordenacao_id) return 'Não especificado';
     
     // If problema has a coordenacao object
-    if (problema.coordenacao?.descricao) {
-      return problema.coordenacao.descricao;
+    if (problema.coordenacao) {
+      return problema.coordenacao.descricao || 'Não especificado';
     }
     
-    // If coordenacao_id is available but no coordenacao object
-    return formData.coordenacao_id ? 'Coordenação associada' : 'Não especificado';
+    return 'Não especificado';
   };
 
   const formatPrioridade = (prioridade: string) => {

@@ -47,7 +47,7 @@ export const useDemandFormData = () => {
         
         const { data: problemasData, error: problemasError } = await supabase
           .from('problemas')
-          .select('*, supervisao_tecnica:supervisao_tecnica_id(id, descricao)');
+          .select('*, coordenacao:coordenacao_id(id, descricao, sigla)');
         if (problemasError) throw problemasError;
         setProblemas(problemasData || []);
       } catch (error) {
