@@ -1,12 +1,9 @@
 
 import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
-import { Demand } from '@/hooks/dashboard/forms/criar-nota/types';
-import { Loader2, Clock } from 'lucide-react';
+import { Demand } from './types';
+import { Loader2 } from 'lucide-react';
 import UnifiedFilterBar, { ViewMode } from '@/components/shared/unified-view/UnifiedFilterBar';
-import { formatDistanceToNow, format, isToday } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
-import { DemandaStatusBadge, PrioridadeBadge } from '@/components/ui/status-badge';
 
 interface DemandaSelectionProps {
   filteredDemandas: Demand[];
@@ -24,44 +21,6 @@ const DemandaSelection: React.FC<DemandaSelectionProps> = ({
   isLoading
 }) => {
   const [viewMode, setViewMode] = useState<ViewMode>('list');
-  
-  // Format relative time (like "Hoje, há 5 horas")
-  const formatRelativeTime = (dateString?: string) => {
-    if (!dateString) return "";
-    
-    const date = new Date(dateString);
-    const isDateToday = isToday(date);
-    const relativeTime = formatDistanceToNow(date, { locale: ptBR, addSuffix: false });
-    
-    if (isDateToday) {
-      return `Hoje, há ${relativeTime}`;
-    } else {
-      return format(date, "dd/MM/yyyy", { locale: ptBR });
-    }
-  };
-  
-  // Format deadline date
-  const formatDeadline = (dateString?: string) => {
-    if (!dateString) return "";
-    return format(new Date(dateString), "dd/MM HH:mm", { locale: ptBR });
-  };
-  
-  // Get coordenação sigla
-  const getCoordSigla = (demanda: Demand) => {
-    if (typeof demanda.tema === 'object' && demanda.tema?.coordenacao?.sigla) {
-      return demanda.tema.coordenacao.sigla;
-    } 
-    
-    if (demanda.problema?.coordenacao?.sigla) {
-      return demanda.problema.coordenacao.sigla;
-    }
-    
-    if (demanda.area_coordenacao?.descricao) {
-      return demanda.area_coordenacao.descricao;
-    }
-    
-    return '';
-  };
   
   return (
     <Card className="border border-gray-200 rounded-lg shadow-sm">
@@ -87,36 +46,15 @@ const DemandaSelection: React.FC<DemandaSelectionProps> = ({
                 filteredDemandas.map((demanda) => (
                   <div 
                     key={demanda.id}
-                    className="p-4 border rounded-md hover:bg-gray-50 cursor-pointer"
+                    className={`p-3 border rounded-md hover:bg-gray-50 cursor-pointer ${viewMode === 'cards' ? 'h-full' : ''}`}
                     onClick={() => onDemandaSelect(demanda.id)}
                   >
-                    <div className="flex justify-between items-start mb-1">
-                      <h4 className="font-medium text-gray-800">{demanda.titulo}</h4>
-                      <span className="text-xs text-gray-500">
-                        {formatRelativeTime(demanda.horario_publicacao)}
-                      </span>
+                    <div className="font-medium">{demanda.titulo}</div>
+                    <div className="text-sm text-gray-500 mt-1">
+                      {demanda.area_coordenacao?.descricao || 'Área não informada'}
                     </div>
-                    
-                    <div className="text-xs font-medium text-gray-500 mb-2">
-                      {getCoordSigla(demanda)}
-                    </div>
-                    
-                    <div className="text-sm text-gray-600 line-clamp-2 mb-3">
-                      {demanda.resumo_situacao || demanda.detalhes_solicitacao || 'Sem detalhes'}
-                    </div>
-                    
-                    <div className="mt-auto flex justify-between items-center">
-                      <div className="flex flex-wrap gap-1.5">
-                        <PrioridadeBadge prioridade={demanda.prioridade || 'media'} size="sm" />
-                        <DemandaStatusBadge status={demanda.status} showIcon={false} size="sm" />
-                      </div>
-                      
-                      {demanda.prazo_resposta && (
-                        <div className="text-xs font-medium flex items-center text-orange-600">
-                          <Clock className="h-3 w-3 mr-1" />
-                          <span>Prazo: {formatDeadline(demanda.prazo_resposta)}</span>
-                        </div>
-                      )}
+                    <div className="text-xs text-gray-400 mt-1">
+                      Status: {demanda.status === 'respondida' ? 'Respondida' : 'Aguardando nota'}
                     </div>
                   </div>
                 ))

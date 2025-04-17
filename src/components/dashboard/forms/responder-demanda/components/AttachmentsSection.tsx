@@ -1,8 +1,7 @@
 
-import React, { useMemo, useState } from 'react';
-import { FileIcon, FileText, FileImage, FileArchive, FileAudio, FileVideo, AlertTriangle } from 'lucide-react';
+import React, { useMemo } from 'react';
+import { FileIcon, FileText, FileImage, FileArchive, FileAudio, FileVideo } from 'lucide-react';
 import { isValidPublicUrl, processFileUrls } from '@/utils/questionFormatUtils';
-import { toast } from '@/components/ui/use-toast';
 
 interface AttachmentsSectionProps {
   arquivo_url: string | null;
@@ -18,7 +17,6 @@ const AttachmentsSection: React.FC<AttachmentsSectionProps> = ({
   onDownloadAttachment
 }) => {
   console.log('AttachmentsSection input:', { arquivo_url, anexos });
-  const [errorUrls, setErrorUrls] = useState<Set<string>>(new Set());
   
   // Use useMemo to normalize attachments for better performance
   const normalizedAttachments = useMemo(() => {
@@ -50,28 +48,10 @@ const AttachmentsSection: React.FC<AttachmentsSectionProps> = ({
     );
   }
 
-  const handleAttachmentError = (url: string) => {
-    setErrorUrls(prev => {
-      const newSet = new Set(prev);
-      newSet.add(url);
-      return newSet;
-    });
-    console.error(`Error loading attachment: ${url}`);
-    
-    // Only show toast for the first error to avoid spamming
-    if (!errorUrls.has(url)) {
-      toast({
-        title: "Erro ao carregar anexo",
-        description: "Não foi possível acessar o arquivo. Verifique se o bucket 'demandas' existe no Supabase.",
-        variant: "destructive"
-      });
-    }
-  };
-
   const renderAttachmentIcon = (filename: string) => {
     const extension = filename.split('.').pop()?.toLowerCase();
     
-    if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'jfif'].includes(extension || '')) {
+    if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'].includes(extension || '')) {
       return <FileImage className="h-12 w-12 text-orange-500" />;
     } else if (['mp3', 'wav', 'ogg'].includes(extension || '')) {
       return <FileAudio className="h-12 w-12 text-orange-500" />;
@@ -95,7 +75,6 @@ const AttachmentsSection: React.FC<AttachmentsSectionProps> = ({
       <div className="flex flex-wrap gap-6">
         {normalizedAttachments.map((url: string, index: number) => {
           const filename = url.split('/').pop() || `Anexo ${index + 1}`;
-          const hasError = errorUrls.has(url);
           
           return (
             <a 
@@ -103,51 +82,15 @@ const AttachmentsSection: React.FC<AttachmentsSectionProps> = ({
               href={url}
               target="_blank" 
               rel="noopener noreferrer"
-              className={`flex flex-col items-center transition-transform ${hasError ? 'opacity-60' : 'hover:scale-105'}`}
+              className="flex flex-col items-center transition-transform hover:scale-105"
               onClick={(e) => {
-                if (hasError) {
-                  e.preventDefault();
-                  toast({
-                    title: "Anexo indisponível",
-                    description: "Não foi possível acessar este anexo. Verifique se o bucket 'demandas' existe no Supabase.",
-                    variant: "destructive"
-                  });
-                  return;
-                }
-                
                 if (onViewAttachment) {
                   e.preventDefault();
                   onViewAttachment(url);
                 }
               }}
             >
-              {hasError ? (
-                <div className="h-12 w-12 flex items-center justify-center bg-red-100 rounded-full">
-                  <AlertTriangle className="h-8 w-8 text-red-500" />
-                </div>
-              ) : (
-                renderAttachmentIcon(filename)
-              )}
-              
-              <span className="text-sm text-gray-600 mt-2 text-center max-w-[120px] truncate">
-                {decodeURIComponent(filename)}
-              </span>
-              
-              {hasError && (
-                <span className="text-xs text-red-500 mt-1">
-                  Anexo indisponível
-                </span>
-              )}
-              
-              {/* Add invisible image to check if URL is valid */}
-              {!hasError && (
-                <img 
-                  src={url} 
-                  alt="" 
-                  className="hidden"
-                  onError={() => handleAttachmentError(url)}
-                />
-              )}
+              {renderAttachmentIcon(filename)}
             </a>
           );
         })}

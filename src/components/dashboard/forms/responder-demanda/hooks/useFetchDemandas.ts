@@ -1,165 +1,231 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from '@/components/ui/use-toast';
 import { Demanda } from '../types';
+import { normalizeQuestions, processFileUrls } from '@/utils/questionFormatUtils';
 
 export const useFetchDemandas = () => {
   const [demandas, setDemandas] = useState<Demanda[]>([]);
-  const [filteredDemandas, setFilteredDemandas] = useState<Demanda[]>([]);
-  const [selectedDemanda, setSelectedDemanda] = useState<Demanda | null>(null);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingDemandas, setIsLoadingDemandas] = useState<boolean>(true);
 
   useEffect(() => {
     const fetchDemandas = async () => {
       try {
-        setIsLoading(true);
+        setIsLoadingDemandas(true);
         
-        const { data: allDemandas, error } = await supabase
+        // Check if resumo_situacao column exists
+        const { error: testError } = await supabase
           .from('demandas')
-          .select(`
-            id,
-            titulo,
-            status,
-            detalhes_solicitacao,
-            resumo_situacao,
-            perguntas,
-            problema_id,
+          .select('resumo_situacao')
+          .limit(1);
+          
+        const hasResumoSituacao = !testError;
+        console.log('Has resumo_situacao column:', hasResumoSituacao);
+        
+        // Base query without resumo_situacao
+        let baseQuery = `
+          id,
+          titulo,
+          detalhes_solicitacao,
+          prazo_resposta,
+          prioridade,
+          perguntas,
+          status,
+          horario_publicacao,
+          endereco,
+          nome_solicitante,
+          email_solicitante,
+          telefone_solicitante,
+          veiculo_imprensa,
+          arquivo_url,
+          anexos,
+          coordenacao_id,
+          origem_id,
+          tipo_midia_id,
+          bairro_id,
+          autor_id,
+          problema_id,
+          servico_id,
+          protocolo,
+          problemas:problema_id (
+            id, 
+            descricao,
+            icone,
             coordenacao_id,
-            servico_id,
-            horario_publicacao,
-            prazo_resposta,
-            prioridade,
-            arquivo_url,
-            anexos,
-            tema:temas(
+            coordenacao:coordenacao_id (
               id,
               descricao,
-              coordenacao:coordenacoes(
-                id,
-                descricao,
-                sigla
-              )
-            ),
-            servico:servicos(
-              id,
-              descricao
+              sigla
             )
-          `)
+          ),
+          coordenacoes:coordenacao_id (
+            id,
+            descricao,
+            sigla
+          ),
+          origens_demandas:origem_id (id, descricao),
+          tipos_midia:tipo_midia_id (id, descricao),
+          bairros:bairro_id (
+            id, 
+            nome, 
+            distrito_id,
+            distritos:distrito_id (
+              id,
+              nome
+            )
+          ),
+          autor:autor_id (id, nome_completo),
+          servico:servico_id (id, descricao)
+        `;
+        
+        // Add resumo_situacao if it exists
+        const finalQuery = hasResumoSituacao ? `resumo_situacao, ${baseQuery}` : baseQuery;
+        
+        // Fetch data with appropriate columns
+        const { data, error } = await supabase
+          .from('demandas')
+          .select(finalQuery)
           .in('status', ['pendente', 'em_andamento'])
           .order('horario_publicacao', { ascending: false });
         
-        if (error) throw error;
+        if (error) {
+          console.error('Error fetching demandas:', error);
+          return;
+        }
+
+        // Fetch all respostas_demandas to filter out answered demands
+        const { data: respostasData, error: respostasError } = await supabase
+          .from('respostas_demandas')
+          .select('demanda_id');
+
+        if (respostasError) {
+          console.error('Error fetching respostas:', respostasError);
+          // Corrigido: usar message em vez de id no erro
+          console.error('Error message:', respostasError.message);
+          return;
+        }
         
-        console.log("Fetched demands:", allDemandas?.length || 0, "with status 'pendente' or 'em_andamento'");
+        // Set of demand IDs that already have responses
+        const respondedDemandIds = new Set(
+          (respostasData || []).map(resposta => resposta?.demanda_id).filter(Boolean)
+        );
         
-        // Process each demand to ensure it has proper structure
-        const processedDemandas = Array.isArray(allDemandas) ? allDemandas
-          .filter(demanda => demanda !== null && typeof demanda === 'object')
-          .map(demanda => {
-            if (!demanda || typeof demanda !== 'object') {
-              return null;
-            }
-            
-            // Ensure proper structure for tema object
-            let temaObject = null;
-            if (demanda.tema && typeof demanda.tema === 'object') {
-              temaObject = {
-                id: demanda.tema?.id || '',
-                descricao: demanda.tema?.descricao || '',
-                coordenacao: demanda.tema?.coordenacao || null
-              };
-            }
-            
-            // Create a properly typed Demanda object
-            const processedDemanda: Demanda = {
-              id: demanda.id || '',
-              titulo: demanda.titulo || '',
-              status: demanda.status || '',
-              detalhes_solicitacao: demanda.detalhes_solicitacao || null,
-              resumo_situacao: demanda.resumo_situacao || null,
-              problema_id: demanda.problema_id || '',
-              coordenacao_id: demanda.coordenacao_id || null,
-              servico_id: demanda.servico_id || null,
-              horario_publicacao: demanda.horario_publicacao || '',
-              prazo_resposta: demanda.prazo_resposta || null,
-              prioridade: demanda.prioridade || 'media', // Ensure prioridade is never undefined
-              arquivo_url: demanda.arquivo_url || null,
-              anexos: demanda.anexos || null,
-              tema: temaObject,
-              servico: demanda.servico || null,
-              
-              // Add default values for required properties
-              supervisao_tecnica_id: null,
-              autor_id: null,
-              autor: null,
-              bairro_id: null,
-              bairro: null,
-              tipo_midia_id: null,
-              origem_id: null
+        // Filter out demands that already have responses
+        const filteredData = (data || []).filter(
+          item => item && !respondedDemandIds.has(item.id as string)
+        );
+        
+        // Transform the data to match the Demanda type
+        const transformedData: Demanda[] = filteredData.map((item: any): Demanda => {
+          if (!item) {
+            // Return default empty Demanda if item is null or undefined
+            return {
+              id: '',
+              titulo: '',
+              prioridade: '',
+              status: '',
+              horario_publicacao: new Date().toISOString(),
             };
-            
-            return processedDemanda;
-          }).filter(Boolean) as Demanda[] : [];
-        
-        console.log("Processed demands:", processedDemandas.length);
-        
-        setDemandas(processedDemandas);
-        setFilteredDemandas(processedDemandas);
-      } catch (error) {
-        console.error('Erro ao carregar demandas:', error);
-        toast({
-          title: "Erro ao carregar demandas",
-          description: "Não foi possível carregar as demandas disponíveis.",
-          variant: "destructive"
+          }
+          
+          // Process perguntas to ensure it returns Record<string, string>
+          let perguntasObject: Record<string, string> = {};
+          
+          if (item.perguntas) {
+            try {
+              if (Array.isArray(item.perguntas)) {
+                // Convert array to object
+                item.perguntas.forEach((question: string, index: number) => {
+                  perguntasObject[index.toString()] = question || '';
+                });
+              } else if (typeof item.perguntas === 'object' && item.perguntas !== null) {
+                // Convert object to Record<string, string>
+                Object.entries(item.perguntas).forEach(([key, value]) => {
+                  perguntasObject[key] = String(value || '');
+                });
+              }
+            } catch (e) {
+              console.error('Error processing perguntas:', e);
+            }
+          }
+          
+          // Process anexos to ensure it's a valid array of URLs
+          const anexosArray = Array.isArray(item.anexos) ? item.anexos : [];
+          const processedAnexos = anexosArray.length > 0 
+            ? processFileUrls(anexosArray) 
+            : [];
+          
+          // Process arquivo_url
+          const arquivoUrl = item.arquivo_url 
+            ? (processFileUrls([item.arquivo_url])[0] || null) 
+            : null;
+          
+          // Extract distrito data if it exists
+          const bairro = item.bairros || null;
+          const distritoData = bairro && bairro.distritos ? bairro.distritos : null;
+          
+          // Create tema object if problema exists
+          const tema = item.problemas ? {
+            id: item.problemas.id || '',
+            descricao: item.problemas.descricao || '',
+            icone: item.problemas.icone || null,
+            coordenacao: item.problemas.coordenacao || null
+          } : null;
+          
+          return {
+            id: item.id || '',
+            titulo: item.titulo || '',
+            detalhes_solicitacao: item.detalhes_solicitacao || null,
+            resumo_situacao: hasResumoSituacao ? (item.resumo_situacao || null) : null,
+            prazo_resposta: item.prazo_resposta || null,
+            prioridade: item.prioridade || '',
+            perguntas: perguntasObject,
+            status: item.status || '',
+            horario_publicacao: item.horario_publicacao || new Date().toISOString(),
+            endereco: item.endereco || null,
+            nome_solicitante: item.nome_solicitante || null,
+            email_solicitante: item.email_solicitante || null,
+            telefone_solicitante: item.telefone_solicitante || null,
+            veiculo_imprensa: item.veiculo_imprensa || null,
+            arquivo_url: arquivoUrl,
+            anexos: processedAnexos,
+            coordenacao_id: item.coordenacao_id || null,
+            coordenacao: item.coordenacoes || null,
+            supervisao_tecnica_id: null, // Add for backward compatibility
+            bairro_id: item.bairro_id || null,
+            autor_id: item.autor_id || null,
+            tipo_midia_id: item.tipo_midia_id || null,
+            origem_id: item.origem_id || null,
+            problema_id: item.problema_id || null,
+            servico_id: item.servico_id || null,
+            protocolo: item.protocolo || null,
+            tema,
+            areas_coordenacao: null,
+            origens_demandas: item.origens_demandas || null,
+            tipos_midia: item.tipos_midia || null,
+            bairros: item.bairros || null,
+            distrito: distritoData,
+            autor: item.autor || null,
+            servico: item.servico || null,
+            problema: item.problemas || null
+          };
         });
+        
+        console.log('Transformed demandas for responding:', transformedData);
+        setDemandas(transformedData);
+      } catch (error: any) {
+        console.error('Error in fetchDemandas:', error);
       } finally {
-        setIsLoading(false);
+        setIsLoadingDemandas(false);
       }
     };
-
+    
     fetchDemandas();
   }, []);
 
-  useEffect(() => {
-    if (!searchTerm.trim()) {
-      setFilteredDemandas(demandas);
-      return;
-    }
-    
-    const lowercaseSearchTerm = searchTerm.toLowerCase();
-    const filtered = demandas.filter(demanda => {
-      // Check in title
-      if (demanda.titulo.toLowerCase().includes(lowercaseSearchTerm)) {
-        return true;
-      }
-      
-      // Check in coordination area - with safe type checking
-      if (demanda.tema && 
-          typeof demanda.tema === 'object' && 
-          demanda.tema.coordenacao && 
-          typeof demanda.tema.coordenacao === 'object' &&
-          demanda.tema.coordenacao.sigla &&
-          demanda.tema.coordenacao.sigla.toLowerCase().includes(lowercaseSearchTerm)) {
-        return true;
-      }
-      
-      return false;
-    });
-    
-    setFilteredDemandas(filtered);
-  }, [searchTerm, demandas]);
-
   return {
     demandas,
-    filteredDemandas,
-    selectedDemanda,
-    setSelectedDemanda,
-    searchTerm,
-    setSearchTerm,
-    isLoading,
     setDemandas,
-    setFilteredDemandas
+    isLoadingDemandas
   };
 };

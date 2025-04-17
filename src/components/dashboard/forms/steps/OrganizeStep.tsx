@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import TitleSection from './organize/TitleSection';
 import { ValidationError, hasFieldError, getFieldErrorMessage } from '@/lib/formValidationUtils';

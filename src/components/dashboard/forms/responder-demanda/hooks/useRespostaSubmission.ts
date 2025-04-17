@@ -5,12 +5,11 @@ import { useAuth } from '@/hooks/useSupabaseAuth';
 import { Demanda } from '../types';
 import { useRespostaFormatter } from './useRespostaFormatter';
 import { useRespostaValidation } from './useRespostaValidation';
-import { toast } from '@/components/ui/use-toast';
 
 interface SubmissionOptions {
   onSuccess?: () => void;
   onError?: (error: any) => void;
-  showSuccessToast?: boolean;
+  showSuccessToast?: boolean; // Option is kept for backward compatibility
 }
 
 export const useRespostaSubmission = (options?: SubmissionOptions) => {
@@ -44,7 +43,7 @@ export const useRespostaSubmission = (options?: SubmissionOptions) => {
     try {
       setIsSubmitting(true);
       
-      console.log("Setting status to respondida");
+      console.log("Setting status to em_andamento");
 
       // First, save the response without changing the status
       // Generate text summary of responses
@@ -69,30 +68,17 @@ export const useRespostaSubmission = (options?: SubmissionOptions) => {
 
       console.log("Response inserted successfully");
       
-      // Now update the status to "respondida" instead of "em_andamento"
+      // Now try to update the status to "em_andamento"
+      // This is safer since the response is already saved
       try {
-        const { error: updateError } = await supabase
+        await supabase
           .from('demandas')
-          .update({ status: 'respondida' })
+          .update({ status: 'em_andamento' })
           .eq('id', selectedDemanda.id);
           
-        if (updateError) {
-          console.error("Error updating status to respondida:", updateError);
-          throw updateError;
-        }
-          
-        console.log("Status updated to respondida");
-        
-        // Show success toast if enabled
-        if (options?.showSuccessToast !== false) {
-          toast({
-            title: "Resposta enviada com sucesso",
-            description: "A demanda foi respondida e está disponível para criação de nota.",
-            variant: "default"
-          });
-        }
+        console.log("Status updated to em_andamento");
       } catch (statusError) {
-        console.error("Could not update status to respondida:", statusError);
+        console.warn("Could not update status to em_andamento, continuing anyway", statusError);
         // We continue anyway since the response is saved
       }
 

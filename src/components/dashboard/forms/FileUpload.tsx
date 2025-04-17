@@ -1,3 +1,4 @@
+
 import React, { useCallback, useRef, useState, useEffect } from 'react';
 import { Label } from '@/components/ui/label';
 import { Upload, X, FileText } from 'lucide-react';
@@ -82,7 +83,7 @@ const FileUpload: React.FC<FileUploadProps> = ({ onChange, value }) => {
     const ext = file.name.split('.').pop();
     const filePath = `uploads/${fileId}.${ext}`;
 
-    const { error } = await supabase.storage.from('demandas').upload(filePath, file);
+    const { error, data: uploadData } = await supabase.storage.from('demandas').upload(filePath, file);
 
     if (error) {
       console.error('Erro ao fazer upload:', error);
@@ -96,15 +97,15 @@ const FileUpload: React.FC<FileUploadProps> = ({ onChange, value }) => {
     }
 
     const { data } = supabase.storage.from('demandas').getPublicUrl(filePath);
-    // Store the direct Supabase URL instead of a blob URL
-    const fileUrl = data.publicUrl;
+    const normalizedUrl = normalizeFileUrl(data.publicUrl);
     
     console.log('File uploaded successfully:', {
-      fileUrl,
+      originalUrl: data.publicUrl,
+      normalizedUrl,
       filePath
     });
     
-    onChange(fileUrl);
+    onChange(normalizedUrl);
     toast({ title: 'Arquivo anexado com sucesso!' });
     setIsUploading(false);
   };
