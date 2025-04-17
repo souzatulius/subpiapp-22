@@ -15,7 +15,7 @@ export const useFetchDemandas = (coordenacaoId?: string) => {
       try {
         setIsLoading(true);
 
-        // Build query to fetch demands
+        // Build query to fetch demands with all necessary relationships
         const query = supabase
           .from('demandas')
           .select(`
@@ -27,6 +27,10 @@ export const useFetchDemandas = (coordenacaoId?: string) => {
             prazo_resposta,
             prioridade,
             coordenacao_id,
+            origem_id,
+            origens_demandas:origem_id(id, descricao),
+            tipo_midia_id,
+            tipo_midia:tipo_midia_id(id, descricao),
             tema:problema_id(
               id,
               descricao,
@@ -49,7 +53,30 @@ export const useFetchDemandas = (coordenacaoId?: string) => {
               sigla,
               descricao,
               id
-            )
+            ),
+            bairro_id,
+            bairros:bairro_id(
+              id, 
+              nome, 
+              distrito_id
+            ),
+            distrito:bairros(
+              distrito:distrito_id(
+                id,
+                nome
+              )
+            ),
+            servico_id,
+            servico:servico_id(id, descricao),
+            veiculo_imprensa,
+            nome_solicitante,
+            email_solicitante,
+            telefone_solicitante,
+            protocolo,
+            endereco,
+            perguntas,
+            anexos,
+            arquivo_url
           `)
           .eq('status', 'pendente');
 
@@ -74,6 +101,7 @@ export const useFetchDemandas = (coordenacaoId?: string) => {
           throw new Error('Failed to fetch demandas: Invalid data format');
         }
 
+        // Format the data to match the Demanda interface
         const formattedDemandas = data.map((demanda): Demanda => ({
           id: demanda.id,
           titulo: demanda.titulo,
@@ -83,6 +111,10 @@ export const useFetchDemandas = (coordenacaoId?: string) => {
           prazo_resposta: demanda.prazo_resposta,
           prioridade: demanda.prioridade,
           coordenacao_id: demanda.coordenacao_id,
+          origem_id: demanda.origem_id,
+          origens_demandas: demanda.origens_demandas,
+          tipo_midia_id: demanda.tipo_midia_id,
+          tipo_midia: demanda.tipo_midia,
           tema: demanda.tema ? {
             id: demanda.tema.id,
             descricao: demanda.tema.descricao,
@@ -98,8 +130,23 @@ export const useFetchDemandas = (coordenacaoId?: string) => {
             descricao: "Não definida",
             sigla: undefined
           },
+          bairro_id: demanda.bairro_id,
+          bairros: demanda.bairros,
+          distrito: demanda.distrito?.[0]?.distrito || null,
+          servico_id: demanda.servico_id,
+          servico: demanda.servico,
+          veiculo_imprensa: demanda.veiculo_imprensa,
+          nome_solicitante: demanda.nome_solicitante, 
+          email_solicitante: demanda.email_solicitante,
+          telefone_solicitante: demanda.telefone_solicitante,
+          protocolo: demanda.protocolo,
+          endereco: demanda.endereco,
+          perguntas: demanda.perguntas,
+          anexos: demanda.anexos,
+          arquivo_url: demanda.arquivo_url
         }));
 
+        console.log('Fetched and formatted demandas:', formattedDemandas);
         setDemandas(formattedDemandas);
         setFilteredDemandas(formattedDemandas);
       } catch (error) {
