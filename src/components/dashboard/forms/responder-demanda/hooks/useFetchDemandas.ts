@@ -3,11 +3,12 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
 import { Demand } from '@/hooks/dashboard/forms/criar-nota/types';
+import { Demanda } from '@/components/dashboard/forms/responder-demanda/types';
 
 export const useFetchDemandas = () => {
-  const [demandas, setDemandas] = useState<Demand[]>([]);
-  const [filteredDemandas, setFilteredDemandas] = useState<Demand[]>([]);
-  const [selectedDemanda, setSelectedDemanda] = useState<Demand | null>(null);
+  const [demandas, setDemandas] = useState<Demanda[]>([]);
+  const [filteredDemandas, setFilteredDemandas] = useState<Demanda[]>([]);
+  const [selectedDemanda, setSelectedDemanda] = useState<Demanda | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
@@ -67,7 +68,7 @@ export const useFetchDemandas = () => {
             servico_id: demanda.servico_id,
             horario_publicacao: demanda.horario_publicacao,
             prazo_resposta: demanda.prazo_resposta,
-            prioridade: demanda.prioridade,
+            prioridade: demanda.prioridade || 'media', // Ensure prioridade is never undefined
             arquivo_url: demanda.arquivo_url,
             anexos: demanda.anexos,
             tema: demanda.tema, 
@@ -77,8 +78,8 @@ export const useFetchDemandas = () => {
             supervisao_tecnica: null,
             area_coordenacao: null,
             problema: null
-          } as Demand;
-        }).filter(Boolean) : [];
+          } as Demanda;
+        }).filter(Boolean) as Demanda[] : [];
         
         setDemandas(processedDemandas);
         setFilteredDemandas(processedDemandas);
@@ -129,6 +130,7 @@ export const useFetchDemandas = () => {
     setSelectedDemanda,
     searchTerm,
     setSearchTerm,
-    isLoading
+    isLoading,
+    setDemandas
   };
 };

@@ -71,7 +71,7 @@ const AttachmentsSection: React.FC<AttachmentsSectionProps> = ({
   const renderAttachmentIcon = (filename: string) => {
     const extension = filename.split('.').pop()?.toLowerCase();
     
-    if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'].includes(extension || '')) {
+    if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'jfif'].includes(extension || '')) {
       return <FileImage className="h-12 w-12 text-orange-500" />;
     } else if (['mp3', 'wav', 'ogg'].includes(extension || '')) {
       return <FileAudio className="h-12 w-12 text-orange-500" />;

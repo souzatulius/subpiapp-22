@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { useDemandasData } from './hooks/useDemandasData';
 import { useRespostaForm } from './hooks/useRespostaForm';
-import { ViewMode } from './types';
+import { ViewMode, Demanda } from './types';
 import RespostaForm from './components/RespostaForm';
 import DemandaCard from './components/DemandaCard';
 import UnifiedViewContainer from '@/components/shared/unified-view/UnifiedViewContainer';

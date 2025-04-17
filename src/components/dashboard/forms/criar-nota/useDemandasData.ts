@@ -87,7 +87,7 @@ export const useDemandasData = () => {
         
         // Filtrar para incluir apenas demandas que não possuem notas associadas
         const demandasSemNotas = Array.isArray(allDemandas) ? 
-          allDemandas.filter(demanda => !demandasComNotas.has(demanda.id)) : 
+          allDemandas.filter(demanda => !demandasComNotas.has(demanda?.id)) : 
           [];
         
         console.log('All demandas:', allDemandas ? allDemandas.length : 0);
@@ -95,35 +95,35 @@ export const useDemandasData = () => {
         console.log('Demandas without notas:', demandasSemNotas.length);
         
         // Process each demand to ensure it has proper structure
-        const processedDemandas = demandasSemNotas.map(demanda => {
-          if (!demanda) return null;
-          
-          const processedDemanda: Demand = {
-            id: demanda.id,
-            titulo: demanda.titulo,
-            status: demanda.status,
-            detalhes_solicitacao: demanda.detalhes_solicitacao,
-            resumo_situacao: demanda.resumo_situacao,
-            problema_id: demanda.problema_id,
-            coordenacao_id: demanda.coordenacao_id,
-            servico_id: demanda.servico_id,
-            horario_publicacao: demanda.horario_publicacao,
-            prazo_resposta: demanda.prazo_resposta,
-            prioridade: demanda.prioridade,
-            arquivo_url: demanda.arquivo_url,
-            anexos: demanda.anexos,
-            numero_protocolo_156: hasProtoColumn ? demanda.numero_protocolo_156 : null,
-            tema: demanda.tema, 
-            servico: demanda.servico,
+        const processedDemandas = demandasSemNotas
+          .filter(demanda => demanda !== null && typeof demanda === 'object')
+          .map(demanda => {
+            const processedDemanda: Demand = {
+              id: demanda.id || '',
+              titulo: demanda.titulo || '',
+              status: demanda.status || 'pendente',
+              detalhes_solicitacao: demanda.detalhes_solicitacao || null,
+              resumo_situacao: demanda.resumo_situacao || null,
+              problema_id: demanda.problema_id || null,
+              coordenacao_id: demanda.coordenacao_id || null,
+              servico_id: demanda.servico_id || null,
+              horario_publicacao: demanda.horario_publicacao || null,
+              prazo_resposta: demanda.prazo_resposta || null,
+              prioridade: demanda.prioridade || 'media',
+              arquivo_url: demanda.arquivo_url || null,
+              anexos: demanda.anexos || null,
+              numero_protocolo_156: hasProtoColumn && demanda.numero_protocolo_156 ? demanda.numero_protocolo_156 : null,
+              tema: demanda.tema || null, 
+              servico: demanda.servico || null,
+              
+              // Add placeholder for required properties that might be missing
+              supervisao_tecnica: null,
+              area_coordenacao: null,
+              problema: null
+            };
             
-            // Add placeholder for required properties that might be missing
-            supervisao_tecnica: null,
-            area_coordenacao: null,
-            problema: null
-          };
-          
-          return processedDemanda;
-        }).filter(Boolean) as Demand[];
+            return processedDemanda;
+          });
         
         setDemandas(processedDemandas);
         setFilteredDemandas(processedDemandas);

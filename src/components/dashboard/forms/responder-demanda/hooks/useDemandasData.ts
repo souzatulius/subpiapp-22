@@ -1,11 +1,13 @@
 
+import { useState } from 'react';
 import { useFetchDemandas } from './useFetchDemandas';
 import { useFetchAreas } from './useFetchAreas';
 import { useDemandasFilters } from './useDemandasFilters';
 import { useSelectedDemanda } from './useSelectedDemanda';
+import { Demanda } from '../types';
 
 export const useDemandasData = () => {
-  const { demandas, setDemandas, isLoadingDemandas } = useFetchDemandas();
+  const { demandas, setDemandas, isLoading: isLoadingDemandas } = useFetchDemandas();
   const { areas } = useFetchAreas();
   const { 
     filteredDemandas, 
